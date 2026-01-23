@@ -285,7 +285,18 @@
 }
     
     
-    
+    .header {
+  flex: 0 0 auto; /* tamanho fixo, não cresce */
+}
+
+.footer {
+  flex: 0 0 auto; /* tamanho fixo, não cresce */
+}
+
+.main-content {
+  flex: 1 1 auto; /* ocupa todo o espaço restante */
+  overflow-y: auto; /* permite scroll interno */
+}
     
     
     
@@ -2021,6 +2032,7 @@ inputEl.onkeydown = e => {
   </script>
 </body>
 </html> 
+
 
 
 
