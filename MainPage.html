@@ -135,7 +135,18 @@
     .menu-btn span {position: relative; z-index: 2;}
     .menu-btn .badge {position: absolute; top: 2px; right: 2px; background: red; color: white; border-radius: 50%; min-width: 18px; height: 18px; padding: 0 5px; font-size: 12px; display: flex;
                       align-items: center; justify-content: center; font-weight: bold; box-sizing: border-box; line-height: 1.5;}
-    .bottom-switch {margin-top: auto; margin-bottom: auto; transform: translateY(5px);}
+    .switch-wrapper {
+    display: flex;             /* ativa flexbox */
+    justify-content: center;   /* centro horizontal */
+    align-items: center;       /* centro vertical */
+    height: 15%;              /* ocupa altura do container pai */
+}
+    .bottom-switch {
+    display: flex;             /* flex interno para botões */
+    justify-content: center;   /* centro horizontal interno */
+    align-items: center;       /* centro vertical interno */
+    transform: translateY(5px); /* teu offset */
+}
     .switch-track {position: relative; display: flex; background: rgba(0, 0, 0, 0.25); border-radius: 30px; overflow: hidden; height: 60px; width: 250px;}
     .switch-btn {flex: 1; border: none; background: transparent; z-index: 2; font-weight: bold; font-size: 10px; cursor: pointer; color: #555;}
     .switch-btn.active {color: white;}
@@ -347,17 +358,19 @@
       </div>
     </div>
     <div id="toast" class="toast"></div>
-    <div class="bottom-switch">
-      <div class="switch-track">
-        <div class="switch-indicator"></div>
-        <button class="switch-btn active" onclick="switchTab('inicio')">
-          <span class="material-icons" style="font-size:25px; vertical-align: middle; margin-right:5px;">local_fire_department</span>
-          INÍCIO
-        </button>
-        <button class="switch-btn" onclick="switchTab('config')">
-          <span class="material-icons" style="font-size:25px; vertical-align: middle; margin-right:5px;">settings</span>
-          CONFIGURAÇÕES
-        </button>
+    <div class="switch-wrapper">
+      <div class="bottom-switch">
+        <div class="switch-track">
+          <div class="switch-indicator"></div>
+          <button class="switch-btn active" onclick="switchTab('inicio')">
+            <span class="material-icons" style="font-size:25px; vertical-align: middle; margin-right:5px;">local_fire_department</span>
+            INÍCIO
+          </button>
+          <button class="switch-btn" onclick="switchTab('config')">
+            <span class="material-icons" style="font-size:25px; vertical-align: middle; margin-right:5px;">settings</span>
+            CONFIGURAÇÕES
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1241,9 +1254,4 @@ window.addEventListener('pageshow', ajustarMainContent);
     document.addEventListener('contextmenu', e => e.preventDefault());
   </script>
 </body>
-
 </html>
-
-
-
-
