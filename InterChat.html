@@ -611,13 +611,13 @@ window.addEventListener('touchend', stopAudioLogic);
 
     try {
         const { data, error } = await supabaseClient.storage
-            .from('chat-audios')
+            .from('cb_files')
             .upload(filePath, blob);
 
         if (error) throw error;
 
         const { data: { publicUrl } } = supabaseClient.storage
-            .from('chat-audios')
+            .from('cb_files')
             .getPublicUrl(filePath);
 
         // Chamamos o envio indicando que o conteúdo é um áudio
