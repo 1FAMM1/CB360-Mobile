@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360 Mobile 1681</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d32f2f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Service Worker registado com sucesso!', reg))
+        .catch(err => console.log('Falha ao registar o Service Worker:', err));
+    });
+  }
+</script>
+  <style>
+    /* ================ RESET & BODY ================ */
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ================= DARK MODE ================== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .welcome-box {color: #f1f1f1;}
+    .dark-mode .welcome-name {color: #f1f1f1;}
+    .dark-mode .welcome-bell {background: rgba(255, 255, 255, 0.08);}
+    .dark-mode .welcome-bell:hover {background: rgba(255, 255, 255, 0.15);}
+    .dark-mode .welcome-bell .material-icons {color: #f1f1f1;}
+    .dark-mode .welcome-avatar {box-shadow: 0 2px 6px rgba(255, 255, 255, 0.2);}
+    .dark-mode .next-service-text {color: #ddd;}
+    .dark-mode .next-service-container {background: rgba(112, 112, 112, 0.5);}
+    .dark-mode .menu-container {border: 1px solid #444; background: rgba(45, 45, 45, 0.95); color: #fff;}
+    .dark-mode .menu-title {color: #d42020; text-shadow: 0 0 0px #fff, 0 0 2px #fff, 0 0 4px #fff;}
+    .dark-mode .menu-subtitle {color: #e0e0e0;}
+    .dark-mode .menu-header {border-bottom: 1px solid rgba(255, 255, 255, 0.1);}
+    .dark-mode .menu-buttons-container {border-bottom: 1px solid rgba(255, 255, 255, 0.1);}.dark-mode .theme-toggle {background: rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.2);}
+    .dark-mode .theme-toggle::before {left: 27px; background: #2c2c2c;}
+    .dark-mode .theme-toggle .sun-icon {opacity: 0.5;}
+    .dark-mode .theme-toggle .moon-icon {opacity: 1;}
+    .dark-mode .menu-dots {background: rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.2);}
+    .dark-mode .menu-dropdown {background: #2c2c2c; color: white;}
+    .dark-mode .menu-item {color: white;}
+    .dark-mode .menu-item:hover {background: rgba(255, 255, 255, 0.1);}
+    .dark-mode .menu-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+    .dark-mode .menu-btn:hover {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
+    .dark-mode .menu-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
+    .dark-mode .modal-content { background: #2c2c2c; border: 1px solid #444; }
+    .dark-mode .modal-body {color: #eee;}
+    .dark-mode .modal-footer {border-top-color: #444;}
+    .dark-mode .notif-item {background: #383838; color: #eee;}
+    .dark-mode .notif-item span { color: #bbb !important; }
+    .dark-mode .switch-track {background: rgba(255, 255, 255, 0.25);}
+    .dark-mode .switch-btn {color: #ddd;}
+    /* ================= LIGHT MODE ================= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  border-bottom: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: all 0.3s ease; z-index: 1001;}
+    .menu-dots {position: fixed; top: 14px; right: 15px; width: 50px; height: 25px; background: rgba(255, 255, 255, 0.2); border-radius: 6px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border: 2px solid rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; z-index: 1002; font-size: 16px; color: white;}
+    .menu-dots:hover {background: rgba(255, 255, 255, 0.3); transform: scale(1.1);}
+    .menu-dropdown {position: fixed; top: 70px; right: 15px; background: white; border-radius: 8px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); padding: 10px 0; min-width: 200px; opacity: 0; visibility: hidden;
+                    transform: translateY(-10px); transition: all 0.3s ease; z-index: 1001;}
+    .menu-dropdown.show {opacity: 1; visibility: visible; transform: translateY(0);}
+    .menu-item {padding: 12px 20px; cursor: pointer; transition: background 0.2s ease; font-size: 14px; color: #2c3e50;}
+    .menu-item:hover {background: #f8f9fa;}
+    .modal {display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);align-items: center; justify-content: center;}
+    .modal.show { display: flex; }
+    .modal-content {background: #fff; width: 90%; max-width: 450px; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; animation: fadeIn 0.3s ease;}
+    .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: center;}
+    .modal-header h3 {font-size: 1.2rem; margin: 0;}
+    .modal-close {background: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s ease;}
+    .modal-close:hover {background: #b71c1c;}
+    .modal-body {padding: 20px; max-height: 60vh; overflow-y: auto; color: #333;}
+    .modal-footer {padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center;}
+    .notif-item {background: #f9f9f9; border-left: 4px solid #d32f2f; padding: 12px; margin-bottom: 10px; border-radius: 4px;}
+    .theme-toggle {position: fixed; top: 40px; right: 15px; width: 50px; height: 25px; background: rgba(255, 255, 255, 0.2); border-radius: 25px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                   border: 2px solid rgba(255, 255, 255, 0.3); overflow: hidden; z-index: 1002;}
+    .theme-toggle::before {content: ''; position: absolute; top: 1px; left: 1px; width: 19px; height: 19px; background: white; border-radius: 50%; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);}
+    .theme-toggle .sun-icon, .theme-toggle .moon-icon {position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; transition: all 0.3s ease;}
+    .theme-toggle .sun-icon {left: 4px; opacity: 1;}
+    .theme-toggle .moon-icon {right: 4px; opacity: 0.5;}
+    .main-content {flex: 1; overflow-y: auto; padding-top: 130px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center;
+                   justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none;}
+    .main-content::-webkit-scrollbar {display: none;}
+    .welcome-box {width: 100%; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin: -65px 0 0 -30px;}
+    .welcome-text {text-align: left;}
+    .welcome-line {font-size: 14px; margin-bottom: 5px; font-weight: 500; color: #555;}
+    .welcome-name {font-size: 20px; font-weight: 700; color: #555;}
+    .welcome-actions {display: flex; align-items: center; gap: 10px;}
+    .welcome-bell {position: relative; width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: center; cursor: pointer;
+                   transition: all 0.2s ease;}
+    .welcome-bell:hover {background: rgba(0, 0, 0, 0.12); transform: scale(1.05);}
+    .welcome-bell .material-icons {font-size: 20px; color: #555;}
+    .bell-badge {position: absolute; top: -4px; right: -4px; background: #d32f2f; color: white; border-radius: 50%; min-width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center;
+                 justify-content: center; font-weight: bold; padding: 0 4px;}
+    .welcome-avatar {width: 48px; height: 48px; border-radius: 50%; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); background: #eee; margin: 0 -30px 0 0;}
+    .welcome-avatar img {width: 100%; height: 100%; object-fit: cover;}
+    .next-service-container {display: flex; align-items: center; gap: 5px; background: rgba(173, 185, 240, 0.45); padding: 2px 5px; border-radius: 3px; max-width: 300px; margin: 0 0 5px 0; font-weight: bold;
+                             font-size: 12px; justify-content: flex-start; align-self: flex-start;}
+    .next-service-emoji {font-size: 12px;}
+    .next-service-text {color: #2c3e50;}
+    .menu-container {background: rgba(240, 240, 240, 0.95); border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); width: 100%; transition: all 0.3s ease; text-align: center;
+                     display: flex; flex-direction: column; height: calc(100vh - 250px);}
+    .menu-header {flex-shrink: 0; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(0, 0, 0, 0.1);}
+    .menu-buttons-container {margin-top: -25px; height: 100%; overflow: hidden; border-bottom: 1px solid rgba(0, 0, 0, 0.1);}
+    .menu-title {font-size: 2.5em; margin-bottom: 10px; color: #d32f2f; font-weight: bold; transition: color 0.3s ease;}
+    .menu-subtitle {font-size: 1.3em; margin-bottom: 0; color: #2c3e50; transition: color 0.3s ease;}
+    .menu-buttons {display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); justify-content: center; padding: 14px;}
+    .menu-btn {padding: 18px 12px; border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; text-align: center; transition: all 0.2s ease; position: relative; overflow: hidden; height: 100%;
+               width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; color: #2c3e50; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); cursor: pointer;}
+    .menu-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                       transition: left 0.4s ease; z-index: 1;}
+    .menu-btn:hover::before {left: 100%;}
+    .menu-btn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
+                      transition: width 0.3s ease, height 0.3s ease;z-index: 1;}
+    .menu-btn:active::after {width: 150px; height: 150px;}
+    .menu-btn:hover {transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
+    .menu-btn:active {transform: scale(0.98); transition: all 0.1s ease;}
+    .menu-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
+    .menu-btn div {position: relative; z-index: 2; line-height: 1.2;}
+    .menu-btn span {position: relative; z-index: 2;}
+    .menu-btn .badge {position: absolute; top: 2px; right: 2px; background: red; color: white; border-radius: 50%; min-width: 18px; height: 18px; padding: 0 5px; font-size: 12px; display: flex;
+                      align-items: center; justify-content: center; font-weight: bold; box-sizing: border-box; line-height: 1.5;}
+    .bottom-switch {margin-top: auto; margin-bottom: auto; transform: translateY(5px);}
+    .switch-track {position: relative; display: flex; background: rgba(0, 0, 0, 0.25); border-radius: 30px; overflow: hidden; height: 60px; width: 250px;}
+    .switch-btn {flex: 1; border: none; background: transparent; z-index: 2; font-weight: bold; font-size: 10px; cursor: pointer; color: #555;}
+    .switch-btn.active {color: white;}
+    .switch-indicator {position: absolute; top: 3px; left: 3px; width: calc(50% - 3px); height: calc(100% - 6px); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-radius: 30px;
+                       transition: transform 0.3s ease; z-index: 1;}
+    .switch-content {overflow: hidden; position: relative;}
+    .tab-content {opacity: 0; transform: translateX(30px); transition: all 0.3s ease; position: absolute; width: 100%;}
+    .tab-content.active {opacity: 1; transform: translateX(0); position: relative;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .toast {position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0, 0, 0, 0.85); color: white; padding: 10px 18px; border-radius: 20px; font-size: 13px;
+            opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 3000;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+    @keyframes fadeIn {from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);}}
+    @keyframes slideIn {from {transform: translateX(-100%);} to {transform: translateX(0);}}
+    #configModal .modal-body {display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;}
+    #configModal .menu-btn {margin-top: 5px; padding: 10px 20px; border-radius: 8px; font-weight: bold; background: #1976d2; color: white; cursor: pointer; transition: background 0.2s ease;}
+    #configModal .menu-btn:hover {background: #1565c0;}
+    #passwordChangeContainer {display: flex; flex-direction: column; align-items: center; gap: 10px;}
+    #passwordChangeContainer input {width: 100%;}
+    #passwordChangeContainer button.menu-btn {width: auto; align-self: center;}    
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ===== RESPONSIVENESS FROM 361px TO 479px ===== */
+    @media (min-width: 361px) and (max-width: 479px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em; margin: 0;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .menu-dots {width: 45px; height: 22px; top: 7px; right: 10px; font-size: 14px;}
+      .menu-dropdown {right: 10px; min-width: 180px;}
+      .theme-toggle { width: 45px; height: 22px; top: 32px; right: 10px;}
+      .theme-toggle::before {width: 16px; height: 16px; top: 1px; left: 0;}
+      .dark-mode .theme-toggle::before {left: 25px;}
+      .theme-toggle .sun-icon, .theme-toggle .moon-icon {font-size: 9px;}
+      .theme-toggle .sun-icon {left: 3px;}
+      .theme-toggle .moon-icon {right: 3px;}
+      .main-content {padding-top: 130px; padding-left: 10px; padding-right: 10px;}
+      .menu-container {padding: 10px; min-height: 450px; max-height: 490px;}
+      .menu-header {flex-shrink: 0; padding-bottom: 5px;}
+      .menu-title {font-size: 1.6em; margin: 0;}
+      .menu-subtitle {font-size: 0.9em; margin: 0;}
+      .menu-buttons-container {min-height: 400px; max-height: 418px;}
+      .menu-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}
+      .menu-btn {min-height: 60px; max-height: 62px; min-width: 100px; max-width: 170px; font-size: 11px; padding: 15px 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: clamp(10px, 2.5vw, 12px);}
+      .footer-year {font-size: clamp(9px, 2.5vw, 10px);}}
+    /* ============ RESPONSIVENESS 360px ============ */
+    @media (max-width: 360px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1em;}
+      .header-logo {height: 40px; top: 30px; left: 8px;}
+      .menu-container {padding: 8px; min-height: 450px; max-height: 480px;}
+      .menu-dots {width: 45px; height: 22px; top: 7px; right: 10px; font-size: 14px;}
+      .theme-toggle { width: 45px; height: 22px; top: 30px; right: 10px;}
+      .menu-title {font-size: 1.4em;}
+      .menu-subtitle {font-size: 0.8em;}
+      .menu-buttons-container {max-height: 405px;}
+      .menu-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}      
+      .menu-btn {height: 55px; min-width: 80px; max-width: 180px; font-size: 10px; padding: 10px 8px;}}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: clamp(8px, 2.5vw, 12px);}
+      .footer-year {font-size: clamp(9px, 2.5vw, 10px);}}
+     /* ==== RESPONSIVENESS FROM 769px TO 1024px ===== */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .menu-container {max-width: 900px;}
+      .menu-buttons {grid-template-columns: repeat(4, 1fr); gap: 20px;}
+      .menu-btn {font-size: 12px;}}
+    /* ======== RESPONSIVENESS ABOVE 1025px ========= */
+    @media (min-width: 1025px) {
+      .menu-container {max-width: 1200px;}
+      .menu-buttons {grid-template-columns: repeat(5, 1fr); gap: 25px;}
+      .menu-btn {font-size: 13px; padding: 25px 15px;}}    
+    /* ===== RESPONSIVENESS FROM 480px TO 768px ===== */
+    @media (min-width: 480px) and (max-width: 768px) {      
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.6em;}
+      .header-logo {height: 70px;}
+      .menu-container {min-height: 350px; max-height: 500px; max-width: 600px;}
+      .menu-title {font-size: 1.8em; margin: 0;}
+      .menu-subtitle {font-size: 1em; margin: 0;}
+      .menu-buttons-container {min-height: 400px; max-height: 425px;}
+      .menu-buttons {grid-template-columns: repeat(3, 1fr); gap: 6px;}
+      .menu-btn {min-height: 60px; max-height: 62px; min-width: 90px; max-width: 160px; font-size: 11px; padding: 15px 10px;}  
+  </style>
+</head>
+<body>
+  <div class="theme-toggle" onclick="toggleTheme()">
+    <span class="sun-icon">☀️</span>
+    <span class="moon-icon">🌙</span>
+  </div>
+  <div class="menu-dots" onclick="toggleMenu()">⋮</div>
+  <div class="menu-dropdown" id="menuDropdown">
+    <div class="menu-item" onclick="showPolicies()">📋 Políticas de Privacidade</div>
+    <div class="menu-item" onclick="showTerms()">📄 Termos de Uso</div>
+    <div class="menu-item" onclick="showAbout()">ℹ️ Sobre o Sistema</div>
+    <div class="menu-item" onclick="showContact()">📞 Contacto</div>
+  </div>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>CB360</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">MOBILE</div>
+  </div>
+  <div class="main-content">
+    <div class="welcome-box">
+      <div class="welcome-text">👋 Bem-Vindo(a),<br><span class="welcome-name">Utilizador</span></div>
+      <div class="welcome-actions">
+        <div class="welcome-bell" onclick="openNotifications()">
+          <span class="material-icons">notifications</span>
+          <span class="bell-badge" id="notifBadge">0</span>
+        </div>
+        <div class="welcome-avatar">
+          <img id="userAvatar" src="https://www.gravatar.com/avatar/?d=mp" alt="Avatar do utilizador">
+        </div>
+      </div>
+    </div>
+    <div class="next-service-container">
+      <span class="next-service-emoji">📅</span>
+      <span class="next-service-text">Próximo Serviço: </span>
+    </div>
+    <div class="menu-container">
+      <div class="menu-header">
+        <h1 class="menu-title">Title CB</h1>
+        <p class="menu-subtitle">SISTEMA DE GESTÃO OPERACIONAL</p>
+      </div>
+      <div class="menu-buttons-container">
+        <div class="menu-buttons">
+          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='ScalesView.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">calendar_month</span>
+            <div>Escalas</div>
+          </button>
+          <button id="changes" class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='Swaps.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">multiple_stop</span>
+            <div>Trocas de Serviço</div>
+            <span class="badge">0</span>
+          </button>
+          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='MainPageEl.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">free_cancellation</span>
+            <div>Disponibilidades</div>
+          </button>
+          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='SolVacat.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">beach_access</span>
+            <div>Pedido Férias</div>
+          </button>
+          <button class="menu-btn" onclick="showEmDesenvolvimento()">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">checkroom</span>
+            <div>Pedido Fardamento</div>
+          </button>
+          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='Attendance.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">fingerprint</span>
+            <div>Assíduidade</div>
+          </button>
+          <button id="ongoingBtn" class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='OnGoingOcr.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">crisis_alert</span>
+            <div>Ocorrências em Curso</div>
+            <span class="badge">0</span>
+          </button>
+          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='FomioPage.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">diversity_3</span>
+            <div>Equipa de Serviço</div>
+          </button>
+          <button id="events" class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='Events.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">today</span>
+            <div>Eventos</div>
+            <span class="badge">0</span>
+          </button>
+          <button id="reports" class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='MissReport.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">insert_chart</span>
+            <div>Relatórios de Ocorrência</div>
+            <span class="badge">0</span>
+          </button>
+          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='Documents.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">description</span>
+            <div>Documentos</div>
+          </button>
+          <button id="comunicates" class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='Comunic.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">assignment_add</span>
+            <div>Comunicados</div>
+            <span class="badge">0</span>
+          </button>
+          <button id="meteoadv" class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='MeteoAdv.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">storm</span>
+            <div>Avisos METEO</div>
+            <span class="badge">0</span>
+          </button>
+          <button id="hospadv" class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='NoHospital.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">local_hospital</span>
+            <div>Constrangimentos Hospitalares</div>
+            <span class="badge">0</span>
+          </button>
+          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='MainPageVe.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">fire_truck</span>
+            <div>Veículos</div>
+          </button>
+          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='Tools.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">construction</span>
+            <div>Ferramentas Úteis</div>
+          </button>
+          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='InterChat.html', 300);">
+            <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">chat</span>
+            <div>Chat Interno</div>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="toast" class="toast"></div>
+    <div class="bottom-switch">
+      <div class="switch-track">
+        <div class="switch-indicator"></div>
+        <button class="switch-btn active" onclick="switchTab('inicio')">
+          <span class="material-icons" style="font-size:25px; vertical-align: middle; margin-right:5px;">local_fire_department</span>
+          INÍCIO
+        </button>
+        <button class="switch-btn" onclick="switchTab('config')">
+          <span class="material-icons" style="font-size:25px; vertical-align: middle; margin-right:5px;">settings</span>
+          CONFIGURAÇÕES
+        </button>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by"><strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360</div>
+      <div class="footer-year">© 2023-2025 - Sistema CB360 Mobile</div>
+    </div>
+  </footer>
+  <div id="policiesModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">📋 Políticas de Privacidade</div>
+      <div class="modal-body">
+        <h3>Política de Privacidade - CB360</h3>
+        <p><strong>Última atualização:</strong> Dezembro 2025</p>
+        <h4>1. Informações que Coletamos</h4>
+        <p>• Dados de localização para funcionalidades de GPS<br>• Informações de uso do sistema<br>• Dados operacionais dos bombeiros</p>
+        <h4>2. Como Usamos as Informações</h4>
+        <p>• Melhorar a eficiência operacional<br>• Garantir a segurança das equipas<br>• Análise estatística de ocorrências</p>
+        <h4>3. Proteção de Dados</h4>
+        <p>Todos os dados são criptografados e armazenados de forma segura, seguindo as melhores práticas de segurança.</p>
+        <h4>4. Contacto</h4>
+        <p>Para questões sobre privacidade, contacte: privacy@cb360.pt</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeModal('policiesModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <div id="termsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">📄 Termos de Uso</div>
+      <div class="modal-body">
+        <h3>Termos de Uso - CB360</h3>
+        <p><strong>Vigência:</strong> Dezembro 2025</p>
+        <h4>1. Aceitação dos Termos</h4>
+        <p>Ao usar o sistema CB360, você concorda com estes termos de uso.</p>
+        <h4>2. Uso Autorizado</h4>
+        <p>• Sistema destinado exclusivamente a bombeiros autorizados<br>• Uso apenas para fins operacionais<br>• Proibido compartilhar credenciais de acesso</p>
+        <h4>3. Responsabilidades</h4>
+        <p>• Manter informações atualizadas<br>• Usar o sistema de forma responsável<br>• Reportar problemas técnicos</p>
+        <h4>4. Limitações</h4>
+        <p>O sistema é fornecido "como está" e pode ter interrupções para manutenção.</p>
+        <h4>5. Modificações</h4>
+        <p>Estes termos podem ser atualizados sem aviso prévio.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeModal('termsModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <div id="aboutModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">ℹ️ Sobre o Sistema</div>
+      <div class="modal-body">
+        <h3>CB360 - Sistema de Gestão Operacional</h3>
+        <p><strong>Versão:</strong> 2.1.0</p>
+        <p><strong>Build:</strong> 2025.01.15</p>
+        <h4>📋 Funcionalidades</h4>
+        <p>• Gestão de Status Operacional<br>• Controlo de Veículos<br>• Sistema FOMIO<br>• Relatórios e Estatísticas<br>• Gestão de Ocorrências</p>
+        <h4>🛠️ Tecnologias</h4>
+        <p>• Interface Web Responsiva<br>• Integração GPS<br>• Base de Dados em Tempo Real<br>• Sincronização Multi-dispositivo</p>
+        <h4>🏢 Desenvolvido para</h4>
+        <p><strong>CB's Algarve</strong><br>Corpo de Bombeiros Voluntários</p>
+        <h4>👨‍💻 Desenvolvimento</h4>
+        <p><strong>Fábio Martins</strong><br>Grupo CB360<br>Email: dev@cb360.pt</p>
+        <h4>📅 Histórico de Versões</h4>
+        <p>• v2.1.0 - Interface mobile otimizada<br>• v2.0.0 - Novo design e funcionalidades<br>• v1.5.0 - Sistema FOMIO integrado<br>• v1.0.0 - Versão inicial</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeModal('aboutModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <div id="contactModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">📞 Contacto</div>
+      <div class="modal-body">
+        <h3>Informações de Contacto</h3>
+        <h4>🏢 CB Faro Cruz Lusa</h4>
+        <p><strong>Morada:</strong><br>Rua dos Bombeiros, nº 123<br>8000-000 Faro</p>
+        <p><strong>Telefone:</strong> +351 289 123 456<br><strong>Email:</strong> geral@cbfarocruzlusa.pt<br><strong>Website:</strong> www.cbfarocruzlusa.pt</p>
+        <h4>💻 Suporte Técnico</h4>
+        <p><strong>Desenvolvedor:</strong> Fábio Martins<br><strong>Email:</strong> suporte@cb360.pt<br><strong>Telefone:</strong> +351 912 345 678</p>
+        <h4>🚨 Emergências</h4>
+        <p><strong>Número Nacional de Emergência:</strong><br><span style="font-size: 24px; color: #d32f2f; font-weight: bold;">112</span></p>
+        <h4>⏰ Horários</h4>
+        <p><strong>Quartel:</strong> 24h/dia, 7 dias/semana<br><strong>Suporte Técnico:</strong> Segunda a Sexta, 9h-18h</p>
+        <h4>🌐 Redes Sociais</h4>
+        <p>Facebook: @CBFaroCruzLusa<br>Instagram: @cb_faro_cruzlusa<br>Twitter: @CBFaroCruzLusa</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeModal('contactModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <div id="notificationsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔔 Notificações</h3>
+      </div>
+      <div id="notificationsList" class="modal-body">
+        <p style="text-align:center; color: #888;">A carregar mensagens...</p>
+      </div>
+      <div class="modal-footer">
+        <button class="menu-btn selected" style="width: 100%;" onclick="markAllAsRead()">Limpar Tudo</button>
+      </div>
+    </div>
+  </div>
+  <div id="emDesenvolvimentoModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">🚧 Em Desenvolvimento</div>
+      <div class="modal-body" style="text-align:center; font-size:16px;">
+        Esta funcionalidade ainda está em desenvolvimento.<br>
+        Por favor, verifique mais tarde.
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeModal('emDesenvolvimentoModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <div id="configModal" class="modal">
+    <div class="modal-content" style="max-width:400px; text-align:center;">
+      <div class="modal-header">⚙️ Configurações</div>
+      <div class="modal-body">
+        <div style="margin-bottom:10px;">
+          <img id="configUserAvatar" src="https://www.gravatar.com/avatar/?d=mp" alt="Avatar" style="width:80px;height:80px;border-radius:50%;margin:auto;display:block;object-fit:cover;">
+        </div>
+        <h3 id="configUserName">A Carregar...</h3>
+        <p id="configUserRank"></p>
+        <button id="changePasswordBtn" class="menu-btn" style="margin-top:5px;" onclick="showPasswordChange()">Alterar Password</button>
+        <div id="passwordChangeContainer" style="display:none; margin-top: 5px; width:100%; flex-direction:column; align-items:center; gap:10px;">
+          <div style="width:100%; max-width:300px;">
+            <label for="currentPassword" style="display:block; text-align:left; margin-bottom:5px; font-weight:500;">Password Atual:</label>
+            <div style="position:relative; margin-bottom:15px;">
+              <input type="password" id="currentPassword" style="width:100%; padding:8px; padding-right:40px; border-radius:5px; border:1px solid #ccc;">
+              <span class="material-icons" onclick="togglePasswordVisibility('currentPassword')" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:#666; font-size:20px; user-select:none;">visibility_off</span>
+            </div>
+            <label for="newPassword" style="display:block; text-align:left; margin-bottom:5px; font-weight:500;">Nova Password:</label>
+            <div style="position:relative; margin-bottom:15px;">
+              <input type="password" id="newPassword" style="width:100%; padding:8px; padding-right:40px; border-radius:5px; border:1px solid #ccc;">
+              <span class="material-icons" onclick="togglePasswordVisibility('newPassword')" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:#666; font-size:20px; user-select:none;">visibility_off</span>
+            </div>
+            <label for="repeatPassword" style="display:block; text-align:left; font-weight:500;">Repita a Password:</label>
+            <div style="position:relative; margin-bottom:10px;">
+              <input type="password" id="repeatPassword" style="width:100%; padding:8px; padding-right:40px; border-radius:5px; border:1px solid #ccc;">
+              <span class="material-icons" onclick="togglePasswordVisibility('repeatPassword')" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:#666; font-size:20px; user-select:none;">visibility_off</span>
+            </div>
+          </div>
+          <button id="saveNewPass" class="menu-btn" style="width:100%; margin-top: 0; max-width:170px;" onclick="changePassword()">Guardar</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeConfigModal('configModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || "0805" || sessionStorage.getItem("currentCorpOperNr")  || "0805"; 
+      const nint = localStorage.getItem("currentCorpNint") || "205" || sessionStorage.getItem("currentNInt")  || "205";
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp, 
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ============================== TOAST ============================== */
+    let toastTimeout;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+    /* =========================== SWITCH TAB ============================ */
+    function switchTab(tab) {
+      const indicator = document.querySelector('.switch-indicator');
+      const buttons = document.querySelectorAll('.switch-btn');
+      const contents = document.querySelectorAll('.tab-content');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      let targetBtn;
+      if (tab === 'config') {
+        targetBtn = buttons[1];
+        showConfigModal();
+      } else {
+        targetBtn = buttons[0];
+        const inicioContent = document.getElementById('inicio');
+        if (inicioContent) inicioContent.classList.add('active');
+      }
+      if (targetBtn && indicator) {
+        targetBtn.classList.add('active');
+        setTimeout(() => {
+          if (tab === 'config') {
+            indicator.style.transform = 'translateX(100%)';
+          } else {
+            indicator.style.transform = 'translateX(0)';
+          }
+        }, 10);
+      }
+    }
+    async function showConfigModal() {
+      const nInt = localStorage.getItem('currentCorpNint')  || "205";
+      if (!nInt) {
+        console.error("nInt não encontrado no localStorage");
+        return;
+      }
+      showModal('configModal');
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_elems?select=full_name,photo_url,patent&n_int=eq.${nInt}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) {
+          throw new Error(`Erro na resposta: ${response.statusText}`);
+        }
+        const data = await response.json();
+        const user = data[0];
+        if (user) {
+          document.getElementById('configUserAvatar').src = user.photo_url || "https://www.gravatar.com/avatar/?d=mp";
+          document.getElementById('configUserName').textContent = user.full_name || "Utilizador";
+          document.getElementById('configUserRank').textContent = user.patent || "-";
+        } else {
+          console.warn("Nenhum utilizador encontrado com nInt:", nInt);
+          document.getElementById('configUserName').textContent = "Utilizador não encontrado";
+          document.getElementById('configUserRank').textContent = "-";
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados do utilizador:", err);
+        document.getElementById('configUserName').textContent = "Erro de ligação";
+        document.getElementById('configUserRank').textContent = "-";
+      }
+    }
+    function togglePasswordVisibility(inputId) {
+      const input = document.getElementById(inputId);
+      const icon = input.nextElementSibling;
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility_off';
+      }
+      if (navigator.vibrate) navigator.vibrate(30);
+    }
+    function closeConfigModal(modalId) {
+      const container = document.getElementById('passwordChangeContainer');
+      const btn = document.getElementById('changePasswordBtn');
+      const modal = document.getElementById(modalId);
+      if (container) container.style.display = 'none';
+      if (btn) btn.style.display = 'flex';
+      if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+      }
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('repeatPassword').value = '';
+      const indicator = document.querySelector('.switch-indicator');
+      const buttons = document.querySelectorAll('.switch-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      if (buttons[0]) buttons[0].classList.add('active');
+      if (indicator) indicator.style.transform = 'translateX(0)';
+    }
+    function showPasswordChange() {
+      const container = document.getElementById('passwordChangeContainer');
+      const btn = document.getElementById('changePasswordBtn');
+      if (container) container.style.display = 'flex';
+      if (btn) btn.style.display = 'none';
+    }
+    async function changePassword() {
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const repeatPassword = document.getElementById('repeatPassword').value;
+      const corpOperNr = localStorage.getItem('currentCorpOperNr');
+      const nIntCorp = localStorage.getItem('currentCorpNint');
+      if (!currentPassword || !newPassword || !repeatPassword) {
+        showToast('❌ Preencha todos os campos');
+        return;
+      }
+      if (newPassword !== repeatPassword) {
+        showToast('❌ As passwords não coincidem');
+        return;
+      }
+      if (newPassword.length < 6) {
+        showToast('❌ A nova password deve ter pelo menos 6 caracteres');
+        return;
+      }
+      if (!corpOperNr || !nIntCorp) {
+        showToast('❌ Erro: dados de sessão não encontrados');
+        return;
+      }
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/users_mobile?select=password&corp_oper_nr=eq.${corpOperNr}&nint_corp=eq.${nIntCorp}`;
+        const response = await fetch(url, {
+          headers: getSupabaseHeaders()
+        });
+        if (!response.ok) {
+          throw new Error(`Erro na resposta: ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (data.length === 0) {
+          showToast('❌ Utilizador não encontrado');
+          return;
+        }
+        const user = data[0];
+        if (user.password !== currentPassword) {
+          showToast('❌ Password atual incorreta');
+          return;
+        }
+        const updateUrl = `${SUPABASE_URL}/rest/v1/users_mobile?corp_oper_nr=eq.${corpOperNr}&nint_corp=eq.${nIntCorp}`;
+        const updateResponse = await fetch(updateUrl, {
+          method: 'PATCH',
+          headers: getSupabaseHeaders({ returnRepresentation: true }),
+          body: JSON.stringify({password: newPassword})
+        });
+        if (!updateResponse.ok) {
+          throw new Error(`Erro ao atualizar: ${updateResponse.statusText}`);
+        }
+        showToast('✅ Password alterada com sucesso!');
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('repeatPassword').value = '';
+        document.getElementById('passwordChangeContainer').style.display = 'none';
+        document.getElementById('changePasswordBtn').style.display = 'flex';
+      } catch (error) {
+        console.error('❌ Erro ao alterar password:', error);
+        showToast('❌ Erro ao alterar password. Tente novamente.');
+      }
+    }
+    /* ======================== DEVELOPMENT MODAL ======================== */    
+    function showEmDesenvolvimento() {
+      showModal('emDesenvolvimentoModal');
+    }
+    /* ======================= NOTIFICATIONS LOGIC ======================= */
+    async function openNotifications() {
+      if (navigator.vibrate) navigator.vibrate(30);      
+      showModal('notificationsModal');      
+      const nInt = localStorage.getItem('currentCorpNint');
+      const listContainer = document.getElementById('notificationsList');      
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&is_read=eq.false&order=created_at.desc`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();    
+        if (data.length === 0) {
+          listContainer.innerHTML = '<p style="text-align:center; padding: 20px; color: #888;">Não tens notificações novas.</p>';
+          return;
+        }    
+        listContainer.innerHTML = data.map(notif => `
+          <div class="notif-item" style="padding: 12px; border-bottom: 1px solid #eee; margin-bottom: 8px;">
+            <strong style="display:block; color: var(--primary-color);">${notif.title}</strong>
+            <span style="font-size: 0.9em; color: #555;">${notif.message}</span>
+            <small style="display:block; font-size: 0.7em; color: #aaa; margin-top: 5px;">
+              ${new Date(notif.created_at).toLocaleString('pt-PT')}
+            </small>
+          </div>
+        `).join('');    
+      } catch (err) {
+        listContainer.innerHTML = '<p style="color: red;">Erro ao carregar notificações.</p>';
+      }
+    }
+    function closeNotificationsModal() {
+      closeModal('notificationsModal');
+    }
+    async function markAllAsRead() {
+      const nInt = localStorage.getItem('currentCorpNint');  
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&is_read=eq.false`, {
+          method: 'PATCH',
+          headers: getSupabaseHeaders(),
+          body: JSON.stringify({ is_read: true })
+        });
+        if (res.ok) {
+          updateNotifBadge(0);
+          closeNotificationsModal();
+          showToast('Notificações limpas');
+        }
+      } catch (err) {
+        console.error('Erro ao limpar notificações:', err);
+      }
+    }
+    function updateNotifBadge(count) {
+      const badge = document.getElementById('notifBadge');
+      if (!badge) return;
+      badge.textContent = count;
+      badge.style.display = 'flex';
+      if (count === 0) {
+        badge.style.opacity = '1'; 
+        badge.style.background = 'red';
+      } else {
+        badge.style.opacity = '1';
+        badge.style.background = 'red';
+      }
+    }
+    /* =================== FORMATTING CORPORATION NAME =================== */
+    function formatCorpName(rawName) {
+      if (!rawName) return "";
+      let name = rawName.trim();
+      if (name.startsWith("Associação Humanitária dos Bombeiros")) {
+        name = name.replace("Associação Humanitária dos Bombeiros", "")
+          .replace("Voluntários", "")
+          .trim()
+          .replace(/^\s*de\s*/i, "");
+        return `C.B. de ${name}`;
+      }
+      if (name.startsWith("Companhia Sapadores")) {
+        return name.replace("Companhia", "CB");
+      }
+      if (name.startsWith("Centro Municipal de Operações de Socorro")) {
+        let zona = name.replace("Centro Municipal de Operações de Socorro", "").trim()
+          .replace(/^de\s*/i, "");
+        return `CMOS ${zona}`;
+      }
+      return name;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const titleEl = document.querySelector(".menu-title");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        if (h2) {h2.textContent = "Não definido";}
+        return;
+      }
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) {h2.textContent = corp.corp_oper_nr || "N/D";}
+          if (logoEl && corp.logo_url) {logoEl.src = corp.logo_url.trim();}
+          if (titleEl && corp.corporation) {titleEl.textContent = formatCorpName(corp.corporation);}
+        } else {
+          if (h2) {h2.textContent = "Não encontrado";}
+        }
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+        if (h2) {h2.textContent = corpOperNr;}
+      }
+    }
+    /* ======================== USERNAME LOADING ========================= */
+    async function loadUserName() {
+      const nInt = localStorage.getItem('currentCorpNint');
+      const welcomeNameEl = document.querySelector('.welcome-name');
+      const avatarEl = document.getElementById('userAvatar');
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,photo_url&n_int=eq.${nInt}`;
+        const response = await fetch(url, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await response.json();
+        welcomeNameEl.textContent = data[0]?.abv_name || 'Utilizador';
+        if (data[0]?.photo_url) {
+          avatarEl.src = data[0].photo_url;
+        } else {
+          avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
+        }
+      } catch (error) {
+        welcomeNameEl.textContent = 'Utilizador';
+        avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
+      }
+    }
+    /* ====================== NEXT SERVICE LOADING ====================== */
+    async function loadNextService() {
+      const nintCorpStr = localStorage.getItem("currentCorpNint");
+      if (!nintCorpStr) return;
+      const nintCorp = parseInt(nintCorpStr, 10);
+      const container = document.querySelector(".next-service-container");
+      const textSpan = container.querySelector(".next-service-text");
+      textSpan.textContent = "A carregar...";
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_serv?select=day,month,year,value&n_int=eq.${nintCorp}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) {
+          textSpan.textContent = "Erro ao carregar dados";
+          return;
+        }
+        const data = await response.json();
+        const servicesByDate = {};
+        data.forEach(d => {
+          if (d.day && d.month && d.year && d.value) {
+            const key = `${d.year}-${String(d.month).padStart(2,'0')}-${String(d.day).padStart(2,'0')}`;
+            if (!servicesByDate[key]) servicesByDate[key] = [];
+            servicesByDate[key].push(d.value);
+          }
+        });
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const futureDates = Object.keys(servicesByDate)
+        .map(dateStr => ({ dateObj: new Date(dateStr), values: servicesByDate[dateStr] }))
+        .filter(d => d.dateObj >= today)
+        .sort((a, b) => a.dateObj - b.dateObj);
+        if (futureDates.length === 0) {
+          textSpan.textContent = "Próximo Serviço: Não existem registos";
+          return;
+        }
+        const nextService = futureDates[0];
+        const day = String(nextService.dateObj.getDate()).padStart(2,'0');
+        const month = String(nextService.dateObj.getMonth() + 1).padStart(2,'0');
+        const year = nextService.dateObj.getFullYear();
+        const values = nextService.values;
+        let serviceType = '';
+        const hasPN = values.includes('PN');
+        const hasECIN = values.some(v => ['ED','EN','ET'].includes(v));
+        if (hasPN && hasECIN) serviceType = 'ECIN/PIQUETE';
+        else if (hasPN) serviceType = 'PIQUETE';
+        else if (hasECIN) serviceType = 'ECIN';
+        textSpan.textContent = `Próximo Serviço: ${day}/${month}/${year} - ${serviceType}`;
+      } catch (err) {
+        console.error("Erro ao carregar próximo serviço:", err);
+        textSpan.textContent = "Erro de ligação ao servidor";
+      }
+    }
+    /* ======================= FETCH NOTIFICATIONS ======================= */
+    async function checkRealNotifications() {
+      const nInt = localStorage.getItem('currentCorpNint');
+      const corpOperNr = localStorage.getItem('currentCorpOperNr');      
+      if (!nInt || !corpOperNr) return;    
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&corp_oper_nr=eq.${corpOperNr}&is_read=eq.false&select=*`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        updateNotifBadge(data.length);
+      } catch (err) {
+        console.error('Erro ao verificar notificações:', err);
+      }
+    }
+    /* ================= TOOGLE THEME AND MENU DROP DAWN ================= */
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.contains('dark-mode');
+      if (isDark) {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('sgo-theme', 'light');
+      } else {
+        body.classList.add('dark-mode');
+        localStorage.setItem('sgo-theme', 'dark');
+      }
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) {
+        toggle.style.transform = 'scale(0.9)';
+        setTimeout(() => toggle.style.transform = 'scale(1)', 150);
+      }
+      if (navigator.vibrate) navigator.vibrate(30);
+    }
+
+    function loadTheme() {
+      if (localStorage.getItem('sgo-theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+    }
+
+    function toggleMenu() {
+      const dropdown = document.getElementById('menuDropdown');
+      if (!dropdown) return;
+      dropdown.classList.toggle('show');
+      if (navigator.vibrate) navigator.vibrate(30);
+    }
+    document.addEventListener('click', function(event) {
+      const menuDots = document.querySelector('.menu-dots');
+      const dropdown = document.getElementById('menuDropdown');
+      if (menuDots && dropdown &&
+        !menuDots.contains(event.target) &&
+        !dropdown.contains(event.target)) {
+        dropdown.classList.remove('show');
+      }
+    });
+    /* ============================== MODALS ============================= */
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        if (navigator.vibrate) navigator.vibrate(50);
+      }
+    }
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+      }
+    }
+    function showPolicies() {
+      showModal('policiesModal');
+      toggleMenu();
+    }
+    function showTerms() {
+      showModal('termsModal');
+      toggleMenu();
+    }
+    function showAbout() {
+      showModal('aboutModal');
+      toggleMenu();
+    }
+    function showContact() {
+      showModal('contactModal');
+      toggleMenu();
+    }
+    document.addEventListener('click', function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('show');
+        document.body.style.overflow = 'auto';
+      }
+    });
+    /* ============================= BUTTONS ============================= */
+    function toggleButton(button) {
+      const allButtons = document.querySelectorAll('.menu-btn');
+      allButtons.forEach(btn => {
+        if (btn !== button) btn.classList.remove('selected');
+      });
+      button.classList.add('selected');
+      if (navigator.vibrate) navigator.vibrate(100);
+      setTimeout(() => button.classList.remove('selected'), 2000);
+    }
+    function clearAllSelections() {
+      document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('selected'));
+    }
+    /* ========================== SWAPS LOADING ========================== */
+    async function updateSwapsBadge() {
+      const corpOperNr = localStorage.getItem('currentCorpOperNr');
+      const myNInt = localStorage.getItem('currentCorpNint');
+      const badge = document.querySelector('#changes .badge');
+      if (!badge) return;
+      if (!corpOperNr || !myNInt) {
+        badge.textContent = '0';
+        return;
+      }
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_swaps?select=*&corp_oper_nr=eq.${corpOperNr}&n_int_end=eq.${myNInt}&element_approval=is.null`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        const data = await response.json();
+        badge.textContent = `${data.length}`;
+      } catch (err) {
+        console.error('Erro ao buscar trocas pendentes:', err);
+        badge.textContent = '!';
+      }
+    }
+    /* ======================= OCCURRENCE LOADING ======================== */
+    async function updateOccurrencesBadge() {
+      const corpOperNr = localStorage.getItem('currentCorpOperNr')
+      const badge = document.querySelector('#ongoingBtn .badge');
+      if (!badge) return;
+      if (!corpOperNr) {
+        badge.textContent = '0';
+        return;
+      }
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/occurrences_control?select=*&corp_oper_nr=eq.${corpOperNr}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await response.json();
+        badge.textContent = `${data.length}`;
+      } catch (err) {
+        console.error('Erro ao buscar ocorrências:', err);
+        badge.textContent = '!';
+      }
+    }
+    /* ========================= EVENTS LOADING ========================== */
+    async function updateEventsBadge() {
+      const corpOperNr = localStorage.getItem('currentCorpOperNr')
+      const badge = document.querySelector('#events .badge');
+      if (!badge) return;
+      if (!corpOperNr) {
+        badge.textContent = '0';
+        return;
+      }
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=*&corp_oper_nr=eq.${corpOperNr}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await response.json();
+        badge.textContent = `${data.length}`;
+      } catch (err) {
+        console.error('Erro ao buscar ocorrências:', err);
+        badge.textContent = '!';
+      }
+    }
+    /* ========================= REPORTS LOADING ========================= */
+    async function updateOccurrenceReportsBadge() {
+      const corpOperNr = localStorage.getItem('currentCorpOperNr');
+      const nInt = localStorage.getItem('currentCorpNint');
+      const badge = document.querySelector('#reports .badge'); 
+      if (!badge) return;
+      if (!corpOperNr || !nInt) {
+        badge.textContent = '0';
+        return;
+      }
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reports_control?select=id&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nInt}&report_state=is.true`;
+        const response = await fetch(url, {
+          headers: getSupabaseHeaders()
+        });
+        if (!response.ok) throw new Error(`Erro API: ${response.status}`);
+        const data = await response.json();
+        const count = data.length;
+        badge.textContent = count;
+        badge.style.display = 'flex';
+        if (count > 0) {
+          badge.classList.add('has-reports'); 
+        } else {
+          badge.classList.remove('has-reports'); 
+        }
+      } catch (err) {
+        console.error('Erro ao atualizar badge de relatórios:', err);
+        badge.textContent = '!';
+      }
+    }
+    /* ======================= COMUNICATES LOADING ======================= */
+    async function updateComunicatesBadge() {
+      const corpOperNr = localStorage.getItem('currentCorpOperNr');
+      const badge = document.querySelector('#comunicates .badge'); 
+      if (!badge) return;
+      if (!corpOperNr) {
+        badge.textContent = '0';
+        return;
+      }
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/serv_comun?select=comun_url&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        const comunicados = await response.json();
+        const viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]");
+        let unreadCount = 0;
+        comunicados.forEach(comun => {
+          if (comun.comun_url) {
+            const publicUrl = comun.comun_url.startsWith('http') ?
+                  comun.comun_url :
+            `${SUPABASE_URL}/storage/v1/object/public/comunicados/${comun.comun_url}`;
+            if (!viewedDocs.includes(publicUrl)) {
+              unreadCount++;
+            }
+          }
+        });
+        badge.textContent = `${unreadCount}`;
+      } catch (err) {
+        console.error('Erro ao buscar comunicados:', err);
+        badge.textContent = '!';
+      }
+    }
+    /* ====================== NO HOSPITAL LOADING ======================== */
+    async function updateNohospitalBadge() {
+      const corpOperNr = localStorage.getItem('currentCorpOperNr')
+      const badge = document.querySelector('#hospadv .badge');
+      if (!badge) return;
+      if (!corpOperNr) {
+        badge.textContent = '0';
+        return;
+      }
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/hospital_restrictions?select=*&corp_oper_nr=eq.${corpOperNr}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await response.json();
+        badge.textContent = `${data.length}`;
+      } catch (err) {
+        console.error('Erro ao buscar ocorrências:', err);
+        badge.textContent = '!';
+      }
+    }
+    /* ====================== IPMA WARNINGS LOADING ====================== */
+    function updateMeteoBadge(count) {
+      const badge = document.querySelector("#meteoadv .badge");
+      if (badge) {
+        badge.style.display = "inline-block";
+        badge.textContent = count;
+      }
+    }
+    async function countIPMAWarningsFromSite() {
+      try {
+        const response = await fetch("https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json");
+        const data = await response.json();
+        const warnings = data.filter(a => a.idAreaAviso === "FAR" && a.awarenessLevelID !== "green");
+        updateMeteoBadge(warnings.length);
+      } catch (err) {
+        console.error("Erro ao buscar e contar avisos IPMA:", err);
+      }
+    }
+    /* ============================= EVENTS ============================== */
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('sgo-theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+      loadTheme();
+      loadCorpInfo();
+      loadUserName();
+      loadNextService();
+      updateSwapsBadge();
+      updateOccurrencesBadge();
+      updateEventsBadge();
+      updateOccurrenceReportsBadge();
+      updateComunicatesBadge();
+      countIPMAWarningsFromSite();
+      updateNohospitalBadge();
+      checkRealNotifications();
+      setInterval(updateSwapsBadge, 10000);
+      setInterval(updateOccurrencesBadge, 10000);
+      setInterval(updateEventsBadge, 10000);
+      setInterval(updateOccurrenceReportsBadge, 10000);
+      setInterval(updateComunicatesBadge, 10000);
+      setInterval(countIPMAWarningsFromSite, 10 * 60 * 1000);
+      setInterval(updateNohospitalBadge, 10000);
+      setInterval(checkRealNotifications, 10000);
+      const buttons = document.querySelectorAll('.menu-btn');
+      buttons.forEach((button, index) => {
+        button.style.opacity = '0';
+        button.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          button.style.transition = 'all 0.5s ease';
+          button.style.opacity = '1';
+          button.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
+      document.addEventListener('touchstart', e => {
+        if (e.touches.length > 1) e.preventDefault();
+      });
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', e => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) e.preventDefault();
+        lastTouchEnd = now;
+      }, false);
+    });
+    window.addEventListener('click', event => {
+      const isButtonClick = event.target.closest('.menu-btn');
+      const isThemeToggle = event.target.closest('.theme-toggle');
+      const isMenuClick = event.target.closest('.menu-dots');
+      const isModalClick = event.target.closest('.modal-content');
+      if (!isButtonClick && !isThemeToggle && !isMenuClick && !isModalClick) clearAllSelections();
+    });
+    document.addEventListener('selectstart', e => e.preventDefault());
+    document.addEventListener('contextmenu', e => e.preventDefault());
+  </script>
+</body>
+</html>
