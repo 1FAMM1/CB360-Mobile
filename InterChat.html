@@ -524,13 +524,21 @@
     
     // --- LOGICA DE GRAVAÇÃO ---
 
+// SUBSTITUI a função startAudioLogic() por esta versão melhorada:
 async function startAudioLogic(e) {
-    if (iconBtn.textContent !== 'mic') return; // Se for o avião, não grava
+    if (iconBtn.textContent !== 'mic') return;
     if (currentChat === 'null') return;
 
-    // 1. Espera 250ms para ter a certeza que o utilizador quer gravar
     recordTimeout = setTimeout(async () => {
         try {
+            // ✅ NOVO: Verificar permissão antes de pedir acesso
+            const permission = await navigator.permissions.query({ name: 'microphone' });
+            
+            if (permission.state === 'denied') {
+                alert('⚠️ Acesso ao microfone bloqueado!\n\nPor favor, ativa nas definições do browser.');
+                return;
+            }
+
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
             audioChunks = [];
@@ -539,22 +547,29 @@ async function startAudioLogic(e) {
             
             mediaRecorder.onstop = async () => {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                if (audioBlob.size > 2000) { // Evita micro-gravações vazias
+                if (audioBlob.size > 2000) {
                     await uploadAudioToSupabase(audioBlob);
                 }
-                stream.getTracks().forEach(t => t.stop()); // Desliga o hardware do mic
+                stream.getTracks().forEach(t => t.stop());
             };
 
             mediaRecorder.start();
             isRecording = true;
             
-            // Feedback Visual
             iconBtn.classList.add("recording-pulse");
-            inputMessage.placeholder = "A gravar... solte para enviar";
-            if (barraDeInput) barraDeInput.style.backgroundColor = "#fff5f5"; // Alerta visual
+            inputMensage.placeholder = "🔴 A gravar... solte para enviar";
+            if (barraDeInput) barraDeInput.style.backgroundColor = "#fff5f5";
+            
         } catch (err) {
             console.error("Erro ao aceder ao microfone:", err);
-            alert("Acesso ao microfone negado!");
+            
+            if (err.name === 'NotAllowedError') {
+                alert('⚠️ Permissão negada!\n\nClica no cadeado ao lado do URL e permite o acesso ao microfone.');
+            } else if (err.name === 'NotFoundError') {
+                alert('⚠️ Microfone não encontrado!\n\nVerifica se tens um microfone ligado.');
+            } else {
+                alert('❌ Erro ao aceder ao microfone: ' + err.message);
+            }
         }
     }, 250);
 }
@@ -1694,8 +1709,13 @@ function resetAudioIcon(id) {
           typingChannel.send({type: 'broadcast', event: 'typing', payload: {nint: String(currentUserNint), isTyping: false}});
         }, 2000);
       });    
-      document.getElementById("chat-send-btn").onclick = sendMessage;
-      inputEl.onkeydown = e => {if (e.key === 'Enter') sendMessage();};
+      document.getElementById("chat-send-btn").onclick = () => sendMessage(); // ✅ Chama sem passar evento
+inputEl.onkeydown = e => {
+  if (e.key === 'Enter') {
+    e.preventDefault(); // ✅ Previne quebra de linha
+    sendMessage(); // ✅ Chama sem passar evento
+  }
+};
       inputEl.addEventListener('focus', () => {
         if (currentChat !== 'geral') sendReadReceipt(currentChat);
       });
@@ -1957,338 +1977,3 @@ function resetAudioIcon(id) {
   </script>
 </body>
 </html> 
-        if (hasPN && hasECIN) serviceType = 'ECIN/PIQUETE';
-        else if (hasPN) serviceType = 'PIQUETE';
-        else if (hasECIN) serviceType = 'ECIN';
-        textSpan.textContent = `Próximo Serviço: ${day}/${month}/${year} - ${serviceType}`;
-      } catch (err) {
-        console.error("Erro ao carregar próximo serviço:", err);
-        textSpan.textContent = "Erro de ligação ao servidor";
-      }
-    }
-    /* ======================= FETCH NOTIFICATIONS ======================= */
-    async function checkRealNotifications() {
-      const nInt = localStorage.getItem('currentCorpNint');
-      const corpOperNr = localStorage.getItem('currentCorpOperNr');      
-      if (!nInt || !corpOperNr) return;    
-      try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&corp_oper_nr=eq.${corpOperNr}&is_read=eq.false&select=*`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        const data = await response.json();
-        updateNotifBadge(data.length);
-      } catch (err) {
-        console.error('Erro ao verificar notificações:', err);
-      }
-    }
-    /* ================= TOOGLE THEME AND MENU DROP DAWN ================= */
-    function toggleTheme() {
-      const body = document.body;
-      const isDark = body.classList.contains('dark-mode');
-      if (isDark) {
-        body.classList.remove('dark-mode');
-        localStorage.setItem('sgo-theme', 'light');
-      } else {
-        body.classList.add('dark-mode');
-        localStorage.setItem('sgo-theme', 'dark');
-      }
-      const toggle = document.querySelector('.theme-toggle');
-      if (toggle) {
-        toggle.style.transform = 'scale(0.9)';
-        setTimeout(() => toggle.style.transform = 'scale(1)', 150);
-      }
-      if (navigator.vibrate) navigator.vibrate(30);
-    }
-
-    function loadTheme() {
-      if (localStorage.getItem('sgo-theme') === 'dark') {
-        document.body.classList.add('dark-mode');
-      }
-    }
-
-    function toggleMenu() {
-      const dropdown = document.getElementById('menuDropdown');
-      if (!dropdown) return;
-      dropdown.classList.toggle('show');
-      if (navigator.vibrate) navigator.vibrate(30);
-    }
-    document.addEventListener('click', function(event) {
-      const menuDots = document.querySelector('.menu-dots');
-      const dropdown = document.getElementById('menuDropdown');
-      if (menuDots && dropdown &&
-        !menuDots.contains(event.target) &&
-        !dropdown.contains(event.target)) {
-        dropdown.classList.remove('show');
-      }
-    });
-    /* ============================== MODALS ============================= */
-    function showModal(modalId) {
-      const modal = document.getElementById(modalId);
-      if (modal) {
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-        if (navigator.vibrate) navigator.vibrate(50);
-      }
-    }
-    function closeModal(modalId) {
-      const modal = document.getElementById(modalId);
-      if (modal) {
-        modal.classList.remove('show');
-        document.body.style.overflow = 'auto';
-      }
-    }
-    function showPolicies() {
-      showModal('policiesModal');
-      toggleMenu();
-    }
-    function showTerms() {
-      showModal('termsModal');
-      toggleMenu();
-    }
-    function showAbout() {
-      showModal('aboutModal');
-      toggleMenu();
-    }
-    function showContact() {
-      showModal('contactModal');
-      toggleMenu();
-    }
-    document.addEventListener('click', function(event) {
-      if (event.target.classList.contains('modal')) {
-        event.target.classList.remove('show');
-        document.body.style.overflow = 'auto';
-      }
-    });
-    /* ============================= BUTTONS ============================= */
-    function toggleButton(button) {
-      const allButtons = document.querySelectorAll('.menu-btn');
-      allButtons.forEach(btn => {
-        if (btn !== button) btn.classList.remove('selected');
-      });
-      button.classList.add('selected');
-      if (navigator.vibrate) navigator.vibrate(100);
-      setTimeout(() => button.classList.remove('selected'), 2000);
-    }
-    function clearAllSelections() {
-      document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('selected'));
-    }
-    /* ========================== SWAPS LOADING ========================== */
-    async function updateSwapsBadge() {
-      const corpOperNr = localStorage.getItem('currentCorpOperNr');
-      const myNInt = localStorage.getItem('currentCorpNint');
-      const badge = document.querySelector('#changes .badge');
-      if (!badge) return;
-      if (!corpOperNr || !myNInt) {
-        badge.textContent = '0';
-        return;
-      }
-      try {
-        const url = `${SUPABASE_URL}/rest/v1/reg_swaps?select=*&corp_oper_nr=eq.${corpOperNr}&n_int_end=eq.${myNInt}&element_approval=is.null`;
-        const response = await fetch(url, { headers: getSupabaseHeaders() });
-        const data = await response.json();
-        badge.textContent = `${data.length}`;
-      } catch (err) {
-        console.error('Erro ao buscar trocas pendentes:', err);
-        badge.textContent = '!';
-      }
-    }
-    /* ======================= OCCURRENCE LOADING ======================== */
-    async function updateOccurrencesBadge() {
-      const corpOperNr = localStorage.getItem('currentCorpOperNr')
-      const badge = document.querySelector('#ongoingBtn .badge');
-      if (!badge) return;
-      if (!corpOperNr) {
-        badge.textContent = '0';
-        return;
-      }
-      try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/occurrences_control?select=*&corp_oper_nr=eq.${corpOperNr}`, {
-          headers: getSupabaseHeaders()
-        });
-        const data = await response.json();
-        badge.textContent = `${data.length}`;
-      } catch (err) {
-        console.error('Erro ao buscar ocorrências:', err);
-        badge.textContent = '!';
-      }
-    }
-    /* ========================= EVENTS LOADING ========================== */
-    async function updateEventsBadge() {
-      const corpOperNr = localStorage.getItem('currentCorpOperNr')
-      const badge = document.querySelector('#events .badge');
-      if (!badge) return;
-      if (!corpOperNr) {
-        badge.textContent = '0';
-        return;
-      }
-      try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=*&corp_oper_nr=eq.${corpOperNr}`, {
-          headers: getSupabaseHeaders()
-        });
-        const data = await response.json();
-        badge.textContent = `${data.length}`;
-      } catch (err) {
-        console.error('Erro ao buscar ocorrências:', err);
-        badge.textContent = '!';
-      }
-    }
-    /* ========================= REPORTS LOADING ========================= */
-    async function updateOccurrenceReportsBadge() {
-      const corpOperNr = localStorage.getItem('currentCorpOperNr');
-      const nInt = localStorage.getItem('currentCorpNint');
-      const badge = document.querySelector('#reports .badge'); 
-      if (!badge) return;
-      if (!corpOperNr || !nInt) {
-        badge.textContent = '0';
-        return;
-      }
-      try {
-        const url = `${SUPABASE_URL}/rest/v1/reports_control?select=id&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nInt}&report_state=is.true`;
-        const response = await fetch(url, {
-          headers: getSupabaseHeaders()
-        });
-        if (!response.ok) throw new Error(`Erro API: ${response.status}`);
-        const data = await response.json();
-        const count = data.length;
-        badge.textContent = count;
-        badge.style.display = 'flex';
-        if (count > 0) {
-          badge.classList.add('has-reports'); 
-        } else {
-          badge.classList.remove('has-reports'); 
-        }
-      } catch (err) {
-        console.error('Erro ao atualizar badge de relatórios:', err);
-        badge.textContent = '!';
-      }
-    }
-    /* ======================= COMUNICATES LOADING ======================= */
-    async function updateComunicatesBadge() {
-      const corpOperNr = localStorage.getItem('currentCorpOperNr');
-      const badge = document.querySelector('#comunicates .badge'); 
-      if (!badge) return;
-      if (!corpOperNr) {
-        badge.textContent = '0';
-        return;
-      }
-      try {
-        const url = `${SUPABASE_URL}/rest/v1/serv_comun?select=comun_url&corp_oper_nr=eq.${corpOperNr}`;
-        const response = await fetch(url, { headers: getSupabaseHeaders() });
-        const comunicados = await response.json();
-        const viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]");
-        let unreadCount = 0;
-        comunicados.forEach(comun => {
-          if (comun.comun_url) {
-            const publicUrl = comun.comun_url.startsWith('http') ?
-                  comun.comun_url :
-            `${SUPABASE_URL}/storage/v1/object/public/comunicados/${comun.comun_url}`;
-            if (!viewedDocs.includes(publicUrl)) {
-              unreadCount++;
-            }
-          }
-        });
-        badge.textContent = `${unreadCount}`;
-      } catch (err) {
-        console.error('Erro ao buscar comunicados:', err);
-        badge.textContent = '!';
-      }
-    }
-    /* ====================== NO HOSPITAL LOADING ======================== */
-    async function updateNohospitalBadge() {
-      const corpOperNr = localStorage.getItem('currentCorpOperNr')
-      const badge = document.querySelector('#hospadv .badge');
-      if (!badge) return;
-      if (!corpOperNr) {
-        badge.textContent = '0';
-        return;
-      }
-      try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/hospital_restrictions?select=*&corp_oper_nr=eq.${corpOperNr}`, {
-          headers: getSupabaseHeaders()
-        });
-        const data = await response.json();
-        badge.textContent = `${data.length}`;
-      } catch (err) {
-        console.error('Erro ao buscar ocorrências:', err);
-        badge.textContent = '!';
-      }
-    }
-    /* ====================== IPMA WARNINGS LOADING ====================== */
-    function updateMeteoBadge(count) {
-      const badge = document.querySelector("#meteoadv .badge");
-      if (badge) {
-        badge.style.display = "inline-block";
-        badge.textContent = count;
-      }
-    }
-    async function countIPMAWarningsFromSite() {
-      try {
-        const response = await fetch("https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json");
-        const data = await response.json();
-        const warnings = data.filter(a => a.idAreaAviso === "FAR" && a.awarenessLevelID !== "green");
-        updateMeteoBadge(warnings.length);
-      } catch (err) {
-        console.error("Erro ao buscar e contar avisos IPMA:", err);
-      }
-    }
-    /* ============================= EVENTS ============================== */
-    window.addEventListener('load', () => {
-      if (localStorage.getItem('sgo-theme') === 'dark') {
-        document.body.classList.add('dark-mode');
-      }
-    });
-    document.addEventListener('DOMContentLoaded', () => {
-      loadTheme();
-      loadCorpInfo();
-      loadUserName();
-      loadNextService();
-      updateSwapsBadge();
-      updateOccurrencesBadge();
-      updateEventsBadge();
-      updateOccurrenceReportsBadge();
-      updateComunicatesBadge();
-      countIPMAWarningsFromSite();
-      updateNohospitalBadge();
-      checkRealNotifications();
-      setInterval(updateSwapsBadge, 10000);
-      setInterval(updateOccurrencesBadge, 10000);
-      setInterval(updateEventsBadge, 10000);
-      setInterval(updateOccurrenceReportsBadge, 10000);
-      setInterval(updateComunicatesBadge, 10000);
-      setInterval(countIPMAWarningsFromSite, 10 * 60 * 1000);
-      setInterval(updateNohospitalBadge, 10000);
-      setInterval(checkRealNotifications, 10000);
-      const buttons = document.querySelectorAll('.menu-btn');
-      buttons.forEach((button, index) => {
-        button.style.opacity = '0';
-        button.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-          button.style.transition = 'all 0.5s ease';
-          button.style.opacity = '1';
-          button.style.transform = 'translateY(0)';
-        }, index * 100);
-      });
-      document.addEventListener('touchstart', e => {
-        if (e.touches.length > 1) e.preventDefault();
-      });
-      let lastTouchEnd = 0;
-      document.addEventListener('touchend', e => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) e.preventDefault();
-        lastTouchEnd = now;
-      }, false);
-    });
-    window.addEventListener('click', event => {
-      const isButtonClick = event.target.closest('.menu-btn');
-      const isThemeToggle = event.target.closest('.theme-toggle');
-      const isMenuClick = event.target.closest('.menu-dots');
-      const isModalClick = event.target.closest('.modal-content');
-      if (!isButtonClick && !isThemeToggle && !isMenuClick && !isModalClick) clearAllSelections();
-    });
-    document.addEventListener('selectstart', e => e.preventDefault());
-    document.addEventListener('contextmenu', e => e.preventDefault());
-  </script>
-</body>
-</html>
