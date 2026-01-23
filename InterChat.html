@@ -12,11 +12,13 @@
     body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-    min-height: 100vh;
-    min-height: 100dvh; /* Dynamic Viewport Height */
+    height: 100vh;
+    height: 100dvh; 
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Impede o scroll da página inteira */
+    overflow: hidden; 
+    position: fixed; /* Evita que o teclado mobile empurre o site para fora */
+    width: 100%;
 }
     /* ============= DARK MODE OPTIONS ============== */
     .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
@@ -91,10 +93,11 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding-top: 100px; /* Altura do header */
-    padding-bottom: 80px; /* Altura do footer + margem de segurança */
-    overflow: hidden; /* O scroll será controlado pelos containers internos */
-    height: 100%;
+    position: relative;
+    margin-top: 100px;    /* Espaço fixo para o Header */
+    margin-bottom: 60px;  /* Espaço fixo para o Footer */
+    overflow: hidden; 
+    height: auto;
 }
     .contact-id-info {padding: 10px 20px 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
     #contact-list {display: flex; flex-direction: column; padding: 0 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px;}
@@ -120,9 +123,16 @@
     .chat-id-info {padding: 5px 20px; font-size: 15px; font-weight: bold; color: #d32f2f; background: rgba(0, 0, 0, 0.10); border-left: 4px solid #d32f2f;}    
     #contact-list, .message-container {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 100px !important; /* Margem extra para nunca ficar atrás do footer */
+    display: flex;
+    flex-direction: column;
+    padding: 10px 20px 120px 20px; /* Padding bottom grande para não bater no footer */
+}
+
+/* Remove margens antigas que podem estar a dar conflito */
+#contact-list {
+    margin-bottom: 0 !important;
 }
     .pinned-banner {background: rgba(255, 248, 225, 0.95); border-bottom: 1px solid #ffe082; padding: 10px 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #856404;
                     position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); max-height: 100px; overflow-y: auto;}
@@ -2014,6 +2024,7 @@ inputEl.onkeydown = e => {
   </script>
 </body>
 </html> 
+
 
 
 
