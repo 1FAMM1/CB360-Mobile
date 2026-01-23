@@ -468,29 +468,22 @@
       return headers;
     }
 
-// Função para ajustar a altura do main-content
-function fixMainHeight() {
-  const header = document.querySelector('.header');
-  const footer = document.querySelector('.footer');
-  const main = document.querySelector('.main-content');
-
-  if (!header || !footer || !main) return; // evita erros se algum elemento não existir
-
-  const headerH = header.offsetHeight;
-  const footerH = footer.offsetHeight;
-
-  // Ajusta a altura do main-content para ocupar o restante da tela
-  main.style.height = `${window.innerHeight - headerH - footerH}px`;
-}
-
-// Rodar quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', fixMainHeight);
-
-// Rodar sempre que o usuário voltar para a página (PWA ou navegador)
-window.addEventListener('pageshow', fixMainHeight);
-
-// Rodar ao redimensionar a tela ou rotacionar
-window.addEventListener('resize', fixMainHeight);
+function ajustarMainContent() {
+      const main = document.querySelector('.main-content');
+      const header = document.querySelector('.header');
+      const footer = document.querySelector('.footer');
+      if (!main) return;
+      const alturaViewport = window.innerHeight;
+      const headerHeight = header?.offsetHeight || 0;
+      const footerHeight = footer?.offsetHeight || 0;
+      const extra = 100;
+      const alturaMain = alturaViewport - headerHeight - footerHeight + extra;
+      main.style.height = alturaMain + 'px';
+      main.style.maxHeight = alturaMain + 'px';
+    }    
+    window.addEventListener('load', ajustarMainContent);
+    window.addEventListener('resize', ajustarMainContent);
+    window.addEventListener('pageshow', ajustarMainContent);
 
     
     /* ================== TYPING BAR & EMOJI CONTROLER =================== */
@@ -2051,6 +2044,7 @@ inputEl.onkeydown = e => {
   </script>
 </body>
 </html> 
+
 
 
 
