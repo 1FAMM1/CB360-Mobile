@@ -1581,63 +1581,32 @@ function resetAudioIcon(id) {
     }
     /* =================== INITIALIZATION AND REALTIME =================== */
     document.addEventListener('DOMContentLoaded', async () => {
-      function resetPageState() {
-    const mainContent = document.querySelector('.main-content');
-    const messagesEl = document.getElementById("messages");
-    const contactListEl = document.getElementById("contact-list");
-    const inputBar = document.querySelector(".chat-input-bar");
-    
-    // Garantir que está na vista de contactos
-    if (contactListEl) contactListEl.style.display = 'flex';
-    if (messagesEl) {
-      messagesEl.style.display = 'none';
-      messagesEl.classList.remove('messages-with-action-bar');
-      messagesEl.style.marginTop = '';
-      messagesEl.style.marginBottom = '80px';
-    }
-    
-    // Reset do main-content
-    if (mainContent) {
-      mainContent.style.paddingTop = '100px';
-      mainContent.style.paddingBottom = '60px';
-      mainContent.style.overflow = 'hidden';
-      mainContent.classList.remove('messages-with-action-bar');
-    }
-    
-    // Esconder barra de input
-    if (inputBar) inputBar.style.display = 'none';
-    
-    // Reset variáveis globais
-    currentChat = 'null';
-    selectedMessages = [];
-    messagesToForward = [];
-    
-    // Fechar menus
-    const reactionMenu = document.getElementById('reaction-menu');
-    if (reactionMenu) reactionMenu.style.display = 'none';
-    
-    const actionBar = document.getElementById('action-bar');
-    if (actionBar) actionBar.classList.remove('show');
-  }
-  
-  // Executar reset imediatamente ao carregar
-  resetPageState();
-  
-  // ✅ NOVO: Detectar quando volta pelo navegador (pageshow)
-  window.addEventListener('pageshow', function(event) {
-    // Se a página foi carregada do cache (back/forward)
-    if (event.persisted) {
-      resetPageState();
-    }
-  });
-  
-  // ✅ NOVO: Detectar visibilitychange (quando volta para a aba)
-  document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible') {
-      // Pequeno delay para garantir que tudo está renderizado
-      setTimeout(resetPageState, 100);
-    }
-  });
+      function ajustarMainContent() {
+    const main = document.querySelector('.main-content');
+    const header = document.querySelector('.header');
+    const footer = document.querySelector('.footer');
+
+    if (!main) return;
+
+    // altura real do viewport
+    const alturaViewport = window.innerHeight;
+
+    // alturas do header e footer
+    const headerHeight = header?.offsetHeight || 0;
+    const footerHeight = footer?.offsetHeight || 0;
+
+    // altura do main-content
+    const alturaMain = alturaViewport - headerHeight - footerHeight;
+
+    main.style.height = alturaMain + 'px';   // fixa altura
+    main.style.maxHeight = alturaMain + 'px'; // garante que não cresce
+}
+
+// eventos para garantir correção
+window.addEventListener('load', ajustarMainContent);
+window.addEventListener('resize', ajustarMainContent);
+window.addEventListener('pageshow', ajustarMainContent);
+
       loadCorpInfo();
       loadTheme();
       await loadContacts();
@@ -2084,6 +2053,7 @@ inputEl.onkeydown = e => {
   </script>
 </body>
 </html> 
+
 
 
 
