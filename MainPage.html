@@ -86,8 +86,15 @@
     .theme-toggle .sun-icon, .theme-toggle .moon-icon {position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; transition: all 0.3s ease;}
     .theme-toggle .sun-icon {left: 4px; opacity: 1;}
     .theme-toggle .moon-icon {right: 4px; opacity: 0.5;}
-    .main-content {flex: 1; overflow-y: auto; padding-top: 130px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center;
-                   justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none;}
+    .main-content {
+  flex: 1 1 auto;                       /* permite encolher */
+  max-height: calc(100dvh - 150px - 0px); /* header + footer */
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-top: 100px;   /* reserva espaço do header */
+  padding-bottom: 0px; /* reserva espaço do footer */
+}
     .main-content::-webkit-scrollbar {display: none;}
     .welcome-box {width: 100%; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin: -65px 0 0 -30px;}
     .welcome-text {text-align: left;}
@@ -1214,3 +1221,4 @@
 </body>
 
 </html>
+
