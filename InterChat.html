@@ -23,9 +23,11 @@ body {
   background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
-  overflow: hidden;
+  min-height: 100vh;      /* ✅ NÃO usar dvh aqui */
+  overflow-x: hidden;
+  overflow-y: auto;       /* ✅ deixa o browser recalcular */
 }
+
     /* ============= DARK MODE OPTIONS ============== */
     .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
     .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
@@ -85,32 +87,33 @@ body {
     .dark-mode .draft-preview {color: #aaa !important;}
     /* ============= LIGHT MODE OPTIONS ============= */
     .header {
-  background: linear-gradient(45deg, #d32f2f, #b71c1c);
-  color: white;
-  padding: 15px;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  border-bottom: 2px solid #c62828;
-  flex-shrink: 0;
+    background: linear-gradient(45deg, #d32f2f, #b71c1c);
+    color: white;
+    padding: 15px;
+    text-align: center;
+    flex-shrink: 0; /* Impede o header de ser esmagado */
+    z-index: 10;
+}
+
+.footer {
+    background: linear-gradient(45deg, #d32f2f, #b71c1c);
+    color: white;
+    padding: 8px;
+    flex-shrink: 0; /* Impede o footer de ser esmagado */
+    z-index: 10;
 }
     .header h1 {margin: 0; font-size: 1.5em; font-weight: bold;}
     .header-subtitle {margin-top: 5px; font-size: 12px; opacity: 0.9;}
     .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
-    .main-content {
-  flex: 1;
+   .main-content {
+  flex: 1 1 auto;      /* flex grow, shrink e base */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 0;        /* muito importante! permite o scroll interno */
+  overflow-y: auto;     /* scroll interno, não escondido */
+  overflow-x: hidden;
 }
-    .footer {
-  background: linear-gradient(45deg, #d32f2f, #b71c1c);
-  color: white;
-  padding: 8px 15px;
-  text-align: center;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-  border-top: 2px solid #c62828;
-  flex-shrink: 0;
-}
+    
     .footer-content {max-width: 400px; margin: 0 auto;}
     .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px;}
     .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
@@ -2030,6 +2033,7 @@ inputEl.onkeydown = e => {
   </script>
 </body>
 </html> 
+
 
 
 
