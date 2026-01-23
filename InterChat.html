@@ -1588,24 +1588,22 @@ function resetAudioIcon(id) {
 
     if (!main) return;
 
-    // altura real do viewport
     const alturaViewport = window.innerHeight;
-
-    // alturas do header e footer
     const headerHeight = header?.offsetHeight || 0;
     const footerHeight = footer?.offsetHeight || 0;
 
-    // altura do main-content
-    const alturaMain = alturaViewport - headerHeight - footerHeight;
+    const extra = 50; // aumenta o main-content em 50px
 
-    main.style.height = alturaMain + 'px';   // fixa altura
-    main.style.maxHeight = alturaMain + 'px'; // garante que não cresce
+    const alturaMain = alturaViewport - headerHeight - footerHeight + extra;
+
+    main.style.height = alturaMain + 'px';
+    main.style.maxHeight = alturaMain + 'px';
 }
 
-// eventos para garantir correção
 window.addEventListener('load', ajustarMainContent);
 window.addEventListener('resize', ajustarMainContent);
 window.addEventListener('pageshow', ajustarMainContent);
+
 
       loadCorpInfo();
       loadTheme();
@@ -2053,6 +2051,7 @@ inputEl.onkeydown = e => {
   </script>
 </body>
 </html> 
+
 
 
 
