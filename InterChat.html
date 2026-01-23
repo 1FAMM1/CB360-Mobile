@@ -575,13 +575,17 @@ async function startAudioLogic(e) {
 }
 
 function stopAudioLogic() {
-    clearTimeout(recordTimeout); // Cancela se soltou rápido demais
+    clearTimeout(recordTimeout);
     
     if (isRecording) {
         mediaRecorder.stop();
         isRecording = false;
         iconBtn.classList.remove("recording-pulse");
-        inputMessage.placeholder = "Escreva uma mensagem...";
+        inputMensage.placeholder = "Mensagem"; // ✅ Nome correto da variável
+        if (barraDeInput) barraDeInput.style.backgroundColor = "";
+    } else {
+        // ✅ NOVO: Mesmo que não tenha gravado, reseta o placeholder
+        inputMensage.placeholder = "Mensagem";
         if (barraDeInput) barraDeInput.style.backgroundColor = "";
     }
 }
