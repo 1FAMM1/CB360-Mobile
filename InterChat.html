@@ -462,18 +462,30 @@
       return headers;
     }
 
+// Função para ajustar a altura do main-content
 function fixMainHeight() {
-  const headerH = document.querySelector('.header').offsetHeight;
-  const footerH = document.querySelector('.footer').offsetHeight;
+  const header = document.querySelector('.header');
+  const footer = document.querySelector('.footer');
   const main = document.querySelector('.main-content');
+
+  if (!header || !footer || !main) return; // evita erros se algum elemento não existir
+
+  const headerH = header.offsetHeight;
+  const footerH = footer.offsetHeight;
+
+  // Ajusta a altura do main-content para ocupar o restante da tela
   main.style.height = `${window.innerHeight - headerH - footerH}px`;
 }
 
-// Chama quando entra na página
+// Rodar quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', fixMainHeight);
-// Se PWA usa navegação SPA, chama sempre que mudar de rota
+
+// Rodar sempre que o usuário voltar para a página (PWA ou navegador)
+window.addEventListener('pageshow', fixMainHeight);
+
+// Rodar ao redimensionar a tela ou rotacionar
 window.addEventListener('resize', fixMainHeight);
-document.addEventListener('DOMContentLoaded', fixMainHeight);
+
     
     /* ================== TYPING BAR & EMOJI CONTROLER =================== */
     const inputMensage = document.getElementById('chat-input');
@@ -2009,6 +2021,7 @@ inputEl.onkeydown = e => {
   </script>
 </body>
 </html> 
+
 
 
 
