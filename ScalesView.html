@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360 Mobile - Piquetes</title>
+ <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('App pronta: ', reg.scope))
+        .catch(err => console.log('Erro no motor da App: ', err));
+    });
+  }
+</script>
+  <style>
+    /* ==================== BODY ==================== */
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .scales-subtitle {color: #e0e0e0;}
+    .dark-mode .scales-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+    .dark-mode .scales-btn:hover:not(.selected) {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
+    .dark-mode .scales-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
+    .dark-mode .scales-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.7);}
+    .dark-mode .scales-card {background: rgba(0, 0, 0, 0.45); border: 1px solid red; border-left: 5px solid red; border-right: 5px solid red;}
+    .dark-mode .nextserv-info-title {background: #5c5c5c; border: 1px solid #444; color: #ddd; font-weight: bold;}
+    .dark-mode .nextserv-card {background: #5c5c5c; border: 1px solid #444;}
+    .dark-mode .nextserv-type .nextserv-type-value{color: #ccc;}
+    .dark-mode .nextserv-dates .nextserv-dates-value {color: #aad3f2;}
+    .dark-mode .nextserv-prevention {background: rgba(0, 0, 0, 0.25); color: #fff;}
+    .dark-mode .service-modal {background: rgba(0, 0, 0, 0.7);}
+    .dark-mode .service-modal-content {background: #2d2d2d; border: 1px solid #444;}
+    .dark-mode .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); border-bottom: 1px solid rgba(255, 255, 255, 0.1);}
+    .dark-mode .modal-footer {background: #1a1a1a; border-top: 1px solid #444;}
+    .dark-mode .modal-footer-btn {background: #d32f2f; color: #fff;}
+    .dark-mode .modal-footer-btn:hover {background: #b71c1c;}
+    .dark-mode .element-card {background: rgba(0, 0, 0, 0.3); border: 1px solid #555;}
+    .dark-mode .loading-spinner {color: #fff;}
+    .dark-mode .element-info .element-name {color: #fff;}
+    .dark-mode .element-info span {color: #ddd;}
+    .dark-mode .element-avatar {border: 2px solid #555;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;} 
+    .main-content {flex: 1; overflow-y: auto; padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;}
+    .scales-header {flex-shrink: 0; text-align: center; width: 100%;} 
+    .scales-subtitle {font-size: 1.3em; color: #2c3e50; transition: color 0.3s ease;}
+    .scales-buttons {display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 22vw, 220px), 1fr)); justify-content: center; align-items: stretch; margin-bottom: 10px;}
+    .scales-btn {padding: clamp(10px, 1.5vw, 16px) clamp(12px, 2vw, 20px); min-height: clamp(42px, 6vh, 60px); min-width: clamp(80px, 28vw, 250px); max-width: clamp(190px, 18vw, 240px);
+                 font-size: clamp(11px, 1.2vw, 14px); border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; flex-direction: column;
+                 justify-content: center; align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
+    .scales-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                         transition: left 0.4s ease; z-index: 1;}
+    .scales-btn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
+                        transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
+    .scales-btn:active::after {width: 150px; height: 150px;}
+    .scales-btn:hover:not(.selected) {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
+    .scales-btn:active:not(.selected) {transform: scale(0.98); transition:0.1s ease;}
+    .scales-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
+    .scales-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.6);}
+    .scales-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
+    .scales-btn span {position: relative; z-index: 2;} 
+    .scales-card {display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; border-radius: 15px; margin-bottom: 5px; background: #d0e2f5;
+                  border: 1px solid #bbb; border-left: 5px solid #bbb; border-right: 5px solid #bbb; width: 100%; max-width: 100%;}
+    .scales-card span.card-title {font-weight: bold; margin-bottom: 10px; font-size: 14px;}
+    .scales-card span.values {display: block; font-size: 13px;}
+    .loading-spinner {display: inline-block; width: 14px; height: 14px; border: 2px solid #d32f2f; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px;
+                      vertical-align: middle;}
+    .error-message {color: #e74c3c; font-weight: 600;}
+    .nextserv-info-title {font-size: 12px; font-weight: 500; text-align: left; color: #444; margin: 0 0 5px 0; background: #d0e2f5; padding: 4px 4px; border: 1px solid #bdc3c7; border-radius: 4px; width: 100%; 
+                          max-width: 100%;}
+    .nextserv-card {background: #d0e2f5; border-radius: 5px; border: 1px solid #bbb; padding: 10px 10px; margin-bottom: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease; animation: slideDown 0.3s ease forwards;}
+    .nextserv-type {text-align: left; margin-bottom: -3px;}
+    .nextserv-type .label {font-size: 13px; font-weight: 700;}
+    .nextserv-type .nextserv-type-value {font-size: 14px; color: #0282fa; font-weight: 700;}
+    .nextserv-dates {display: flex; align-items: center; gap: 8px; margin-bottom: -3px;}
+    .nextserv-dates .label {font-size: 13px; font-weight: 700;}
+    .nextserv-dates .nextserv-dates-value {font-size: 13px; color: #0282fa;}
+    .nextserv-location {text-align: left;}
+    .nextserv-location .label {font-size: 13px; font-weight: 700; text-align: left}
+    .nextserv-location .location-value {font-size: 13px;}
+    .nextserv-prevention {margin-left: auto; background-color: #9dbee0; color: #444; font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 15px; white-space: nowrap; font-size: 11px;}
+    .service-modal {position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 15px;}
+    .service-modal-content {background: #fff; border-radius: 8px; width: 100%; max-width: 500px; max-height: 80%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; display: flex;
+                            flex-direction: column; overflow: hidden;}
+    .modal-header {background: #d32f2f; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px; flex-shrink: 0;}
+    .modal-close {position: absolute; top: 10px; right: 12px; font-size: 22px; cursor: pointer; color: #fff;}
+    .modal-elements-container {padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; scrollbar-width: none; -ms-overflow-style: none;}
+    .modal-elements-container::-webkit-scrollbar {display: none;}
+    .modal-footer {background: #d5d5d5; padding: 12px; border-top: 1px solid #ddd; text-align: center; flex-shrink: 0; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;}
+    .modal-footer-btn {background: #d32f2f; color: white; border: none; padding: 10px 30px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s ease;}
+    .modal-footer-btn:hover {background: #b71c1c;}
+    .modal-footer-btn:active {transform: scale(0.98);}
+    .element-card {display: flex; justify-content: flex-start; align-items: center; border: 1px solid #ddd; border-radius: 6px; padding: 10px; background: #f5f5f5; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+    .element-info .element-name {font-size: 16px; font-weight: bold;}
+    .element-info {display: flex; flex-direction: column; gap: 2px;}
+    .element-info span {font-size: 14px; color: #333;}
+    .element-avatar {width: 50px; height: 50px; border-radius: 50%; background: #ccc; object-fit: cover; margin-right: 5px;}
+    #nextServicesCard {flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; scrollbar-width: none; -ms-overflow-style: none; width: 100%; max-width: 100%;}
+    #nextServicesCard::-webkit-scrollbar {display: none;}
+    @keyframes spin {to { transform: rotate(360deg);}}
+    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .scales-header {flex-shrink: 0; padding-bottom: 10px;}
+      .scales-subtitle {font-size: 0.9em; font-weight: bold; margin-top: 10px;}
+      .scales-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}
+      .scales-btn {height: 50px; min-height: 30px; max-height:75px; font-size: 12px; padding: 15px 10px;}
+      .main-content {padding-left: 20px; padding-right: 20px; justify-content: center; align-items: center;}}
+    .main-content {transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    body.mobile-month-active .main-content {padding-top: 70px; justify-content: flex-start !important; align-items: stretch !important;}
+    .main-content.slide-out, .main-content.slide-in {transform: none;}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>ESCALAS</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">PIQUETES | DECIR | EXTRAS</div>
+  </div>  
+  <div class="main-content">
+      <div class="scales-header">
+        <p class="scales-subtitle">Selecione o mês:</p>
+      </div>
+        <div class="scales-buttons">
+          <button class="scales-btn" data-month="0">Janeiro</button>
+          <button class="scales-btn" data-month="1">Fevereiro</button>
+          <button class="scales-btn" data-month="2">Março</button>
+          <button class="scales-btn" data-month="3">Abril</button>
+          <button class="scales-btn" data-month="4">Maio</button>
+          <button class="scales-btn" data-month="5">Junho</button>
+          <button class="scales-btn" data-month="6">Julho</button>
+          <button class="scales-btn" data-month="7">Agosto</button>
+          <button class="scales-btn" data-month="8">Setembro</button>
+          <button class="scales-btn" data-month="9">Outubro</button>
+          <button class="scales-btn" data-month="10">Novembro</button>
+          <button class="scales-btn" data-month="11">Dezembro</button>
+        </div>
+      <div id="picketsCard" class="scales-card" style="display:none;"></div>
+      <div id="decirCard" class="scales-card" style="display:none;"></div>
+      <div id="extrasCard" class="scales-card" style="display:none;"></div>
+      <div id="nextserv-info-title" class="nextserv-info-title" style="display:none;">📅 Próximos(s) Serviços(s)</div>
+      <div id="nextServicesCard" style="display:none;"></div>
+  </div>  
+  <div id="serviceModal" class="service-modal" style="display:none;">
+    <div class="service-modal-content">
+      <div class="modal-header">
+        <span id="modalTitle">ELEMENTOS DE SERVIÇO</span>
+      </div>
+      <div id="modalElementsContainer" class="modal-elements-container">
+      </div>
+      <div class="modal-footer">
+        <button class="modal-footer-btn" id="modalFooterClose">FECHAR</button>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>  
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+     function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ===================== UTILITY FUNCTIONS ===================== */
+    function showLoading(cardId, message) {
+      const card = document.getElementById(cardId);
+      card.style.display = "block";
+      card.innerHTML = `
+        <div style="display: flex; align-items: center;">
+          <div class="loading-spinner"></div>
+          <span>${message}</span>
+        </div>
+      `;
+    }    
+    function showError(cardId, message) {
+      const card = document.getElementById(cardId);
+      card.style.display = "block";
+      card.innerHTML = `<span class="error-message">⚠️ ${message}</span>`;
+    }    
+    function validateCorpData() {
+      const nintCorpStr = localStorage.getItem("currentCorpNint");
+      if (!nintCorpStr || isNaN(parseInt(nintCorpStr, 10))) {
+        return null;
+      }
+      return parseInt(nintCorpStr, 10);
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");      
+      if (!corpOperNr) {
+        if (h2) h2.textContent = "Não definido";
+        return;
+      }      
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`,
+          { headers: getSupabaseHeaders() }
+        );        
+        const data = await response.json();        
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        } else {
+          if (h2) h2.textContent = "Não encontrado";
+        }
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+        if (h2) h2.textContent = corpOperNr;
+      }
+    }
+    /* ========================== THEME LOADING ========================== */
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+    }    
+    function getWorkYear(targetMonthIndex) {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const currentDay = now.getDate();
+      if (currentMonth === 11 && currentDay >= 27 && targetMonthIndex === 0) {
+        return currentYear + 1;
+      }
+      return currentYear;
+    }
+    /* ===================== GENERIC DATA LOADER ===================== */
+    async function loadMonthData(config, monthIndex) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const nintCorp = validateCorpData() || "205";      
+      if (!nintCorp) {
+        showError(config.cardId, "Elemento e Corporação não definidos.");
+        return;
+      }      
+      const month = monthIndex + 1;
+      const yearToFetch = getWorkYear(monthIndex);
+      const card = document.getElementById(config.cardId);
+      card.style.display = "none";      
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/${config.table}?select=${config.select}&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&${config.filter}&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });        
+        if (!response.ok) {
+          showError(config.cardId, "Erro ao carregar dados");
+          return;
+        }        
+        const data = await response.json();
+        const formattedData = config.formatData(data);
+         if (config.hideIfEmpty && (!formattedData || formattedData.length === 0)) {
+      card.style.display = "none";
+      return;
+    }
+        card.innerHTML = formattedData.length
+          ? `<span class="card-title">${config.label}</span><span class="values">${formattedData}</span>`
+          : `<span class="card-title">${config.label}</span><span class="values"> Nenhum Registado</span>`;
+        card.style.display = "block";
+      } catch (err) {
+        console.error(`Erro ao carregar ${config.label}`, err);
+        showError(config.cardId, "Erro de ligação ao servidor");
+      }
+    }
+    /* ========================= PICKETS LOADING ========================= */
+    async function loadPicketsMonth(monthIndex) {
+      const yearToFetch = getWorkYear(monthIndex);
+      const currentYear = new Date().getFullYear();
+      const dynamicLabel = yearToFetch > currentYear 
+        ? `PIQUETES ATRIBUÍDOS - ${yearToFetch}`
+        : "PIQUETES ATRIBUÍDOS";      
+      await loadMonthData({cardId: "picketsCard", table: "reg_serv", select: "day", filter: "value=eq.PN", label: dynamicLabel, formatData: (data) => {
+          return data
+            .map(d => d.day)
+            .filter(Boolean)
+            .sort((a, b) => a - b)
+            .map(d => d + "N")
+            .join(", ");
+        }
+      }, monthIndex);
+    }
+    /* ========================== DECIR LOADING ========================== */
+    async function loadDecirMonth(monthIndex) {
+      await loadMonthData({cardId: "decirCard", table: "reg_serv", select: "day,value", filter: "value=in.(ED,EN,ET,EP)", label: "ECINS ATRIBUÍDOS", formatData: (data) => {
+          return data
+            .filter(d => d.day && d.value)
+            .sort((a, b) => a.day - b.day)
+            .map(d => `${d.day}${d.value}`)
+            .join(", ");
+        }
+      }, monthIndex);
+    }
+    /* ========================= EXTRAS LOADING ========================== */
+    async function loadExtrasMonth(monthIndex) {
+      await loadMonthData({cardId: "extrasCard", table: "reg_extras", select: "day,value", filter: "value=eq.EX", hideIfEmpty: true, label: "EXTRAS ATRIBUÍDOS", formatData: (data) => {
+          return data
+            .filter(d => d.day && d.value)
+            .sort((a, b) => a.day - b.day)
+            .map(d => `${d.day}${d.value === "EX" ? "D" : d.value}`)
+            .join(", ");
+        }
+      }, monthIndex);
+    }
+    /* ===================== CREATE NEXT SERVICE CARD ==================== */
+    function createServiceCard(service, index = 0) {
+      const card = document.createElement("div");
+      card.className = "nextserv-card";
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(-10px)';      
+      const year = service.year || new Date().getFullYear();
+      const dateText = formatDateWithWeekday(service.day, service.month, year);
+      const info = getServiceInfo(service.value.toUpperCase());      
+      card.innerHTML = `
+        <div>
+          <div class="nextserv-type">
+            <span class="label">Tipo:</span>
+            <span class="nextserv-type-value">${info.tipo}</span>
+          </div>
+          <div class="nextserv-dates" style="display:flex; justify-content: space-between; align-items: center;">
+            <div class="nextserv-left">
+              <span class="label">Data:</span>
+              <span class="nextserv-dates-value">${dateText}</span>
+            </div>
+            <div class="nextserv-prevention">👨‍🚒 ${service.totalElements || '0'}</div>
+          </div>
+          <div class="nextserv-location">
+            <span class="label">Turno:</span>
+            <span class="location-value">${info.turno}</span>
+          </div>
+        </div>
+      `;      
+      card.addEventListener('click', async () => {
+        openServiceModal(`${info.tipo} - ${dateText}`, null);
+        const elements = await fetchServiceElements(service.day, service.month, service.value);
+        openServiceModal(`${info.tipo} - ${dateText}`, elements);
+      });      
+      setTimeout(() => {
+        card.style.transition = 'all 0.3s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 150);      
+      return card;
+    }
+    function getServiceInfo(code) {
+      const map = {PN: {tipo: "PIQUETE", turno: "20:00-08:00"}, ED: {tipo: "ECIN Dia", turno: "08:00-20:00"}, EN: {tipo: "ECIN Noite", turno: "20:00-08:00"}, ET: {tipo: "ECIN Dia/Noite", turno: "08:00-08:00"},
+                   EX: {tipo: "EXTRA", turno: "08:00-20:00"}};
+      return map[code] || { tipo: code, turno: "-" };
+    }
+    function formatDateWithWeekday(day, month, year) {
+      const date = new Date(year, month - 1, day);
+      const weekdays = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+      const dd = String(day).padStart(2, "0");
+      const mm = String(month).padStart(2, "0");
+      return `${dd}-${mm}-${year} (${weekdays[date.getDay()]})`;
+    }
+    async function fetchServiceElements(day, month, value) {
+      try {
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const nintCorp = validateCorpData();
+        if (!nintCorp || !corpOperNr) return [];        
+        const regServUrl = `${SUPABASE_URL}/rest/v1/reg_serv?select=n_int&corp_oper_nr=eq.${corpOperNr}&day=eq.${day}&month=eq.${month}&value=eq.${value}`;
+        const servResponse = await fetch(regServUrl, { headers: getSupabaseHeaders() });
+        const servData = await servResponse.json();        
+        if (!Array.isArray(servData) || servData.length === 0) return [];        
+        const nInts = [...new Set(servData.map(s => parseInt(s.n_int)).filter(n => !isNaN(n)))];
+        if (nInts.length === 0) return [];        
+        const nIntsPadded = nInts.map(n => String(n).padStart(3, '0'));
+        const elemUrl = `${SUPABASE_URL}/rest/v1/reg_elems?select=n_int,full_name,patent,photo_url&n_int=in.(${nIntsPadded.join(',')})&corp_oper_nr=eq.${corpOperNr}`;
+        const elemResponse = await fetch(elemUrl, { headers: getSupabaseHeaders() });
+        const allElements = await elemResponse.json();        
+        if (!Array.isArray(allElements)) return [];        
+        allElements.sort((a, b) => parseInt(a.n_int) - parseInt(b.n_int));
+        return allElements;
+      } catch (err) {
+        console.error('Erro ao buscar elementos:', err);
+        return [];
+      }
+    }
+    const patenteLogos = {"Comandante": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Comandante.png",
+                          "2º Comandante": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/2%20Comandante.png",
+                          "Adj. de Comando": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Adj.%20Comando.png",
+                          "Oficial Bº Superior": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Of.%20Sup..png",
+                          "Oficial Bº Principal": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Of.%20Prc..png",
+                          "Oficial Bº 1ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Of.%201.png",
+                          "Oficial Bº 2ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Of.%202.png",
+                          "Chefe": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Chefe.png",
+                          "Subchefe": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Subchefe.png",
+                          "Bombeiro(a) 1ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/B1C.png",
+                          "Bombeiro(a) 2ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/B2C.png",
+                          "Bombeiro(a) 3ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/B3C.png",
+                          "Estagiário(a)": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Est..png",
+                          "Bº Especialista": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Esp.png",};
+    function openServiceModal(title, elements) {
+      const modal = document.getElementById('serviceModal');
+      const container = document.getElementById('modalElementsContainer');
+      const modalTitle = document.getElementById('modalTitle');      
+      modalTitle.textContent = title;
+      modal.style.display = 'flex';
+      container.innerHTML = '';      
+      if (elements === null) {
+        container.innerHTML = `
+          <div style="display: flex; justify-content: center; align-items: center; padding: 40px;">
+            <div class="loading-spinner"></div>
+            <span style="margin-left: 10px;">A carregar elementos...</span>
+          </div>
+        `;
+        return;
+      }      
+      if (!elements || elements.length === 0) {
+        const p = document.createElement('p');
+        p.textContent = 'Nenhum elemento encontrado';
+        p.style.color = '#000';
+        p.style.textAlign = 'center';
+        p.style.padding = '40px';
+        container.appendChild(p);
+      } else {
+        elements.forEach(e => {
+          const card = document.createElement('div');
+          card.className = 'element-card';          
+          const avatar = document.createElement('img');
+          avatar.className = 'element-avatar';
+          avatar.src = e.photo_url || 'https://www.gravatar.com/avatar/?d=mp';
+          avatar.alt = e.full_name || 'Avatar';          
+          const info = document.createElement('div');
+          info.className = 'element-info';
+          info.innerHTML = `
+            <span class="element-name">${e.full_name || 'N/D'}</span>
+            <span>${e.patent || 'N/D'}</span>
+          `;          
+          const patenteImg = document.createElement('img');
+          patenteImg.src = patenteLogos[e.patent] || '';
+          patenteImg.alt = e.patent || '';
+          patenteImg.style.width = '30px';
+          patenteImg.style.height = '30px';
+          patenteImg.style.objectFit = 'contain';
+          patenteImg.style.marginLeft = 'auto';          
+          card.appendChild(avatar);
+          card.appendChild(info);
+          card.appendChild(patenteImg);
+          container.appendChild(card);
+        });
+      }
+    }
+    document.getElementById('modalFooterClose').addEventListener('click', () => {
+      document.getElementById('serviceModal').style.display = 'none';
+    });
+    async function loadNextServicesUnified(selectedMonth) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const container = document.getElementById("nextServicesCard");
+      const title = document.getElementById("nextserv-info-title");
+      container.innerHTML = "";
+      container.style.display = "none";
+      title.style.display = "none";
+      const nintCorp = validateCorpData();
+      if (!nintCorp) return;
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      const yearToFetch = getWorkYear(selectedMonth);
+      try {
+        const urlServ = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,month,value&n_int=eq.${nintCorp}&value=in.(PN,ED,EN,ET)&month=eq.${selectedMonth + 1}&year=eq.${yearToFetch}&order=day.asc`;
+        const responseServ = await fetch(urlServ, {headers: getSupabaseHeaders()});
+        const dataServ = await responseServ.json();
+        const urlExtras = `${SUPABASE_URL}/rest/v1/reg_extras?select=day,month,value&n_int=eq.${nintCorp}&value=eq.EX&month=eq.${selectedMonth + 1}&year=eq.${yearToFetch}&order=day.asc`;
+        const responseExtras = await fetch(urlExtras, {headers: getSupabaseHeaders()});
+        const dataExtras = await responseExtras.json();
+        const services = [...dataServ, ...dataExtras].filter(d => {
+          if (yearToFetch > currentYear) return true;
+          if (selectedMonth > currentMonth) return true;
+          if (selectedMonth < currentMonth) return false;
+          const serviceDate = new Date(currentYear, selectedMonth, d.day);
+          const type = d.value.toUpperCase();
+          const limitHour = type === "ED" ? 8 : 20;
+          serviceDate.setHours(limitHour, 0, 0, 0);
+          return serviceDate > now;
+        });
+        if (!services.length) return;
+        title.style.display = "block";
+        container.style.display = "block";
+        let index = 0;
+        for (const service of services) {
+          const countUrl = service.value === "EX"
+          ? `${SUPABASE_URL}/rest/v1/reg_extras?select=id&month=eq.${service.month}&year=eq.${yearToFetch}&day=eq.${service.day}&value=eq.${service.value}&corp_oper_nr=eq.${corpOperNr}`
+          : `${SUPABASE_URL}/rest/v1/reg_serv?select=id&month=eq.${service.month}&year=eq.${yearToFetch}&day=eq.${service.day}&value=eq.${service.value}&corp_oper_nr=eq.${corpOperNr}`;
+          const countResponse = await fetch(countUrl, { headers: getSupabaseHeaders() });
+          const countData = await countResponse.json();
+          const totalElements = Array.isArray(countData) ? countData.length : 0;
+          const card = createServiceCard({ day: service.day, month: service.month, value: service.value, totalElements, year: yearToFetch }, index);
+          container.appendChild(card);
+          index++;
+        }
+      } catch (err) {
+        console.error("Erro ao carregar próximos serviços:", err);
+      }
+    }
+    function toggleMobileMonthLayout(active) {
+      if (window.innerWidth > 480) return Promise.resolve();
+      const body = document.body;
+      const main = document.querySelector('.main-content');
+      if (!main) return Promise.resolve();
+      return new Promise(resolve => {
+        const topOffset = 70;
+        const currentScroll = main.scrollTop;
+        main.classList.remove('slide-in');
+        main.classList.add('slide-out');
+        setTimeout(() => {
+          if (active) {
+            body.classList.add('mobile-month-active');
+          } else {
+            body.classList.remove('mobile-month-active');
+          }
+          main.classList.remove('slide-out');
+          main.classList.add('slide-in');
+          const targetScroll = currentScroll;
+          main.scrollTo({top: targetScroll, behavior: 'smooth'});
+          setTimeout(() => {
+            main.classList.remove('slide-in');
+            resolve();
+          }, 350);
+        }, 50);
+      });
+    }
+    /* ========================== INITIALIZATION ========================== */
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCorpInfo();
+      loadTheme();      
+      let selectedMonth = null;
+      const mesesSemDecir = [0, 1, 2, 3, 10, 11];      
+      document.querySelectorAll(".scales-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const month = parseInt(btn.dataset.month, 10);          
+          if (selectedMonth === month) {
+            btn.classList.remove("selected");
+            selectedMonth = null;
+            toggleMobileMonthLayout(false);
+            document.getElementById("picketsCard").style.display = "none";
+            document.getElementById("decirCard").style.display = "none";
+            document.getElementById("extrasCard").style.display = "none";
+            document.getElementById("nextServicesCard").style.display = "none";
+            document.getElementById("nextserv-info-title").style.display = "none";
+            return;
+          }      
+          document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          selectedMonth = month;
+          await toggleMobileMonthLayout(true);
+          document.getElementById("picketsCard").style.display = "none";
+          document.getElementById("decirCard").style.display = "none";
+          document.getElementById("extrasCard").style.display = "none";
+          document.getElementById("nextServicesCard").style.display = "none";
+          document.getElementById("nextserv-info-title").style.display = "none";          
+          const today = new Date();          
+          await loadPicketsMonth(month);          
+          if (!mesesSemDecir.includes(month)) {
+            await loadDecirMonth(month);
+          }
+          await loadExtrasMonth(month);
+          if (month >= today.getMonth()) {
+            document.getElementById("nextserv-info-title").style.display = "block";
+            await loadNextServicesUnified(month);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
