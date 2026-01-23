@@ -90,14 +90,14 @@
     .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
     .footer strong {color: #ffebee;}
     .main-content {
-    flex: 1;
+    position: absolute;
+    top: 100px;    /* Exatamente a altura do teu Header */
+    bottom: 60px;  /* Exatamente a altura do teu Footer */
+    left: 0;
+    right: 0;
     display: flex;
     flex-direction: column;
-    position: relative;
-    margin-top: 0px;    /* Espaço fixo para o Header */
-    margin-bottom: 0px;  /* Espaço fixo para o Footer */
-    overflow: hidden; 
-    height: 100%;
+    overflow: hidden; /* O scroll será feito pelos filhos */
 }
     .contact-id-info {padding: 10px 20px 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
     #contact-list {display: flex; flex-direction: column; padding: 0 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px;}
@@ -327,7 +327,10 @@
       .header {padding: 8px 15px;}
       .header h1 {font-size: 1.2em !important; margin: 0 !important;}
       .header-logo {height: 50px; top: 32px; left: 10px;}
-      
+      .main-content {
+        top: 60px; /* Nova altura do header em mobile */
+        bottom: 50px; /* Nova altura do footer em mobile */
+    }
       .footer {padding: 5px 15px;}
       .powered-by {font-size: 11px;}
       .footer-year {font-size: 9px;}  
@@ -2024,6 +2027,7 @@ inputEl.onkeydown = e => {
   </script>
 </body>
 </html> 
+
 
 
 
