@@ -1581,7 +1581,28 @@ function resetAudioIcon(id) {
     }
     /* =================== INITIALIZATION AND REALTIME =================== */
     document.addEventListener('DOMContentLoaded', async () => {
-      
+      function ajustarMainContent() {
+    const main = document.querySelector('.main-content');
+    const header = document.querySelector('.header');
+    const footer = document.querySelector('.footer');
+
+    if (!main) return;
+
+    const alturaViewport = window.innerHeight;
+    const headerHeight = header?.offsetHeight || 0;
+    const footerHeight = footer?.offsetHeight || 0;
+
+    const extra = 100; // aumenta o main-content em 50px
+
+    const alturaMain = alturaViewport - headerHeight - footerHeight + extra;
+
+    main.style.height = alturaMain + 'px';
+    main.style.maxHeight = alturaMain + 'px';
+}
+
+window.addEventListener('load', ajustarMainContent);
+window.addEventListener('resize', ajustarMainContent);
+window.addEventListener('pageshow', ajustarMainContent);
 
 
       loadCorpInfo();
@@ -2030,6 +2051,7 @@ inputEl.onkeydown = e => {
   </script>
 </body>
 </html> 
+
 
 
 
