@@ -670,11 +670,11 @@
     
     
     
-   /* ======================== CAMERA COM LEGENDA (SISTEMA INTEGRADO) ========================= */
+   /* ======================== CAMERA COM MODAL (VERSÃO ULTRA-RÁPIDA) ========================= */
 const cameraBtn = document.getElementById("camera-btn");
 const cameraInput = document.getElementById("camera-file-input");
 
-// Referências diretas aos teus IDs do HTML
+// Elementos do Modal
 const attachModal = document.getElementById("attach-modal");
 const attachImg = document.getElementById("attach-preview-img");
 const attachCaption = document.getElementById("attach-caption");
@@ -682,46 +682,47 @@ const attachSend = document.getElementById("attach-send");
 const attachCancel = document.getElementById("attach-cancel");
 const attachLoading = document.getElementById("attach-loading");
 
-let fotoGlobal = null;
+let fotoParaEnviar = null;
 
-// 1. DISPARAR A CÂMARA
 cameraBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    if (currentChat === "null" || !currentChat) return;
-    cameraInput.value = ""; // Limpa cache do input
+    if (!currentChat || currentChat === "null") return;
+    cameraInput.value = ""; // Reset crucial
     cameraInput.click();
 });
 
-// 2. INTERCEPTAR A FOTO (AQUI É ONDE O MODAL ABRE)
+// EVENTO DE CAPTURA - Otimizado para não falhar no Mobile
 cameraInput.addEventListener("change", function() {
-    const file = this.files?.[0];
+    const file = this.files[0];
     if (!file) return;
 
-    fotoGlobal = file; // Guarda o ficheiro para usar depois
+    fotoParaEnviar = file;
 
-    // Criar o URL da imagem (é mais rápido que FileReader para mobile)
-    const imageUrl = URL.createObjectURL(file);
+    // Criar um link temporário para a imagem (muito mais rápido que FileReader)
+    const tempUrl = URL.createObjectURL(file);
+    attachImg.src = tempUrl;
     
-    // Configurar o Modal
-    attachImg.src = imageUrl;
-    attachCaption.value = ""; 
-    
-    // FORÇAR EXIBIÇÃO (Usa style.cssText para garantir prioridade)
-    attachModal.style.cssText = "display: flex !important; visibility: visible !important; z-index: 9999999 !important;";
-    
-    console.log("Modal deve estar visível agora");
+    // Limpar legenda
+    attachCaption.value = "";
+
+    // FORÇAR ABERTURA IMEDIATA
+    // Usamos um pequeno atraso de 100ms para dar tempo ao sistema de fechar a câmara
+    setTimeout(() => {
+        attachModal.style.cssText = "display: flex !important; visibility: visible !important; opacity: 1 !important; z-index: 9999999 !important;";
+    }, 100);
 });
 
-// 3. BOTÃO CANCELAR
+// BOTÃO CANCELAR
 attachCancel.onclick = () => {
     attachModal.style.setProperty("display", "none", "important");
-    fotoGlobal = null;
+    if(attachImg.src.startsWith('blob:')) URL.revokeObjectURL(attachImg.src);
+    fotoParaEnviar = null;
     cameraInput.value = "";
 };
 
-// 4. BOTÃO ENVIAR (LÓGICA ORIGINAL DO TEU CAHAT-19)
+// BOTÃO ENVIAR (Lógica que já tinhas no cahat-19)
 attachSend.onclick = async () => {
-    if (!fotoGlobal) return;
+    if (!fotoParaEnviar) return;
 
     const caption = attachCaption.value.trim();
 
@@ -729,54 +730,27 @@ attachSend.onclick = async () => {
         attachSend.disabled = true;
         attachLoading.style.display = "flex";
 
-        // Teu código original de Upload
-        const publicUrl = await uploadImageToSupabase(fotoGlobal);
+        // Teu código de Upload
+        const publicUrl = await uploadImageToSupabase(fotoParaEnviar);
         
-        // Teu código original de Mensagem (Agora com a Legenda)
-        await sendImageMessage(publicUrl, fotoGlobal.name || `foto_${Date.now()}.jpg`, caption);
+        // Teu código de Mensagem com Legenda
+        await sendImageMessage(publicUrl, fotoParaEnviar.name || `foto_${Date.now()}.jpg`, caption);
 
-        // Limpar e Fechar
+        // Fechar e limpar
         attachModal.style.setProperty("display", "none", "important");
-        fotoGlobal = null;
+        URL.revokeObjectURL(attachImg.src);
+        fotoParaEnviar = null;
         cameraInput.value = "";
         if (typeof scrollToBottom === "function") scrollToBottom();
 
     } catch (err) {
-        console.error("Erro no envio:", err);
-        alert("Erro ao enviar a foto.");
+        console.error("Erro:", err);
+        alert("Erro ao enviar.");
     } finally {
         attachSend.disabled = false;
         attachLoading.style.display = "none";
     }
 };
-
-/* --- AS TUAS FUNÇÕES ORIGINAIS (NÃO MEXAS NELAS, APENAS ADICIONEI A LEGENDA) --- */
-async function uploadImageToSupabase(file) {
-    const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
-    const fileName = `photo_${Date.now()}.${ext}`;
-    const filePath = `${currentChat}/${fileName}`;
-    const { error } = await supabaseClient.storage.from("cb_files").upload(filePath, file);
-    if (error) throw error;
-    const { data: { publicUrl } } = supabaseClient.storage.from("cb_files").getPublicUrl(filePath);
-    return publicUrl;
-}
-
-async function sendImageMessage(imageUrl, fileName, caption = "") {
-    const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-    const senderName = await fetchUserName();
-    const payload = {
-        n_int: currentUserNint, 
-        recipient_nint: String(currentChat), 
-        corp_oper_nr: currentCorp, 
-        abv_name: senderName, 
-        message_type: "image", 
-        file_url: imageUrl, 
-        file_name: fileName, 
-        message: caption // A legenda entra aqui
-    };
-    const { error } = await supabaseClient.from("chat_messages").insert([payload]);
-    if (error) throw error;
-}
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -2094,6 +2068,7 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
   </script>
 </body>
 </html>
+
 
 
 
