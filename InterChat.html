@@ -1582,6 +1582,7 @@ async function sendImageMessage(imageUrl, fileName) {
   function onKeyboardOpen(kbHeight) {
     if (!isChatVisible()) return;
     keyboardOpen = true;
+
     body.classList.add("keyboard-open");
     messages?.classList.add("keyboard-active");
     inputBar?.classList.add("keyboard-active");
@@ -1589,21 +1590,24 @@ async function sendImageMessage(imageUrl, fileName) {
 
     setKb(kbHeight);
 
+    // fecha emoji picker se estiver aberto
     if (emojiContainer && emojiContainer.style.display === "block") {
       emojiContainer.style.display = "none";
     }
 
-    setTimeout(() => {
-      if (messages && isChatVisible()) messages.scrollTop = messages.scrollHeight;
-    }, 50);
+    // garante última mensagem visível
+    scrollToBottom();
+    setTimeout(scrollToBottom, 120); // iOS/layout em 2 fases
   }
 
   function onKeyboardClose() {
     keyboardOpen = false;
+
     body.classList.remove("keyboard-open");
     messages?.classList.remove("keyboard-active");
     inputBar?.classList.remove("keyboard-active");
     mainContent?.classList.remove("keyboard-active");
+
     setKb(0);
   }
 
@@ -1611,9 +1615,16 @@ async function sendImageMessage(imageUrl, fileName) {
     if (!keyboardOpen) baseInnerHeight = window.innerHeight;
     const kb = getKeyboardHeight();
 
-    if (!keyboardOpen && kb > THRESH_OPEN) onKeyboardOpen(kb);
-    else if (keyboardOpen && kb < THRESH_CLOSE) onKeyboardClose();
-    else if (keyboardOpen) setKb(kb);
+    if (!keyboardOpen && kb > THRESH_OPEN) {
+      onKeyboardOpen(kb);
+    } else if (keyboardOpen && kb < THRESH_CLOSE) {
+      onKeyboardClose();
+    } else if (keyboardOpen) {
+      // teclado já aberto: atualiza altura e mantém scroll no fundo
+      setKb(kb);
+      scrollToBottom();
+      setTimeout(scrollToBottom, 120);
+    }
   }
 
   if (window.visualViewport) {
@@ -1623,12 +1634,13 @@ async function sendImageMessage(imageUrl, fileName) {
     window.addEventListener("resize", detectKeyboard);
   }
 
+  // foco no input: manter no fundo
   inputEl?.addEventListener("focus", () => {
-    setTimeout(() => {
-      if (messages && isChatVisible()) messages.scrollTop = messages.scrollHeight;
-    }, 100);
+    scrollToBottom();
+    setTimeout(scrollToBottom, 120);
   });
 
+  // blur: dá tempo para fechar teclado e re-detectar
   inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));
 
   window.addEventListener("orientationchange", () => {
@@ -1638,6 +1650,7 @@ async function sendImageMessage(imageUrl, fileName) {
     }, 300);
   });
 
+  // ao sair do chat (voltar à lista), garante reset do estado do teclado
   const messagesEl = document.getElementById("messages");
   if (messagesEl) {
     const obs = new MutationObserver(() => {
@@ -1646,8 +1659,10 @@ async function sendImageMessage(imageUrl, fileName) {
     obs.observe(messagesEl, { attributes: true, attributeFilter: ["style"] });
   }
 
+  // helper global (se precisares de forçar)
   window.forceRestoreKeyboard = onKeyboardClose;
 })();
+
 
 
 
@@ -2105,6 +2120,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
