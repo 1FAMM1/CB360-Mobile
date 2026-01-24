@@ -1343,23 +1343,28 @@
     }
     /* ========================= ACTION FORWARD ========================== */
     function actionForward() {
-      if (selectedMessages.length === 0) return;
-      messagesToForward = selectedMessages.map(msg => ({
-        message: msg.message
-      }));
-      clearSelection();
-      const messagesEl = document.getElementById("messages");
-      const contactListEl = document.getElementById("contact-list");
-      const contactTitle = document.getElementById("contact-title");
-      const backBtn = document.getElementById("back-header");
-      if (window.innerWidth <= 768) {
-        messagesEl.style.display = 'none';
-        contactListEl.style.display = 'block';
-        contactTitle.style.display = 'block';
-        backBtn.style.display = 'none';
-      }
-      console.log("Modo encaminhar: Selecione o contacto de destino na lista.");
-    }
+  if (selectedMessages.length === 0) return;
+  messagesToForward = selectedMessages.map(msg => ({
+    message: msg.message
+  }));
+  clearSelection();
+  const messagesEl = document.getElementById("messages");
+  const contactListEl = document.getElementById("contact-list");
+  const contactTitle = document.getElementById("contact-title");
+  const backBtn = document.getElementById("back-header");
+  const inputBar = document.querySelector(".chat-input-bar");
+  const chatIdInfo = document.getElementById("chat-id-info");
+  
+  if (window.innerWidth <= 768) {
+    messagesEl.style.display = 'none';
+    contactListEl.style.display = 'block';
+    contactTitle.style.display = 'block';
+    backBtn.style.display = 'none';
+    inputBar.style.display = 'none';  // OCULTA A BARRA DE ESCRITA
+    chatIdInfo.style.display = 'none';  // OCULTA O NOME DO CHAT
+  }
+  console.log("Modo encaminhar: Selecione o contacto de destino na lista.");
+}
     /* ========================== ACTION DELETE ========================== */
     let confirmResolver = null;
     async function actionDelete() {
@@ -1971,3 +1976,4 @@
   </script>
 </body>
 </html>
+
