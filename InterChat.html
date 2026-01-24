@@ -1994,94 +1994,158 @@
 
 
 <script>
-(function initCameraCaptionModal(){
-  // espera pelo DOM (seguro em PWA)
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initCameraCaptionModal);
+/* ======================== CAMERA RECORDING ========================= */
+let selectedPhotoFile = null;
+
+const cameraBtn = document.getElementById("camera-btn");
+const cameraInput = document.getElementById("camera-file-input");
+
+cameraBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (currentChat === "null") return;
+  cameraInput.click();
+});
+
+cameraInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Validar se é imagem
+  if (!file.type.startsWith('image/')) {
+    alert('❌ Ficheiro inválido! Seleciona uma imagem.');
+    e.target.value = '';
     return;
   }
 
+  // Validar tamanho (10MB)
+  const MAX_SIZE = 10 * 1024 * 1024;
+  if (file.size > MAX_SIZE) {
+    alert('❌ Imagem muito grande!\n\nTamanho máximo: 10MB');
+    e.target.value = '';
+    return;
+  }
+
+  selectedPhotoFile = file;
+  
+  // IMPORTANTE: Pequeno delay para o preview nativo fechar primeiro
+  setTimeout(() => {
+    showPhotoPreview(file);
+  }, 100);
+});
+
+// Mostrar preview da foto
+function showPhotoPreview(file) {
+  const preview = document.getElementById('photo-preview');
+  const img = document.getElementById('preview-image');
+  const captionInput = document.getElementById('photo-caption-input');
+
+  const imageUrl = URL.createObjectURL(file);
+  img.src = imageUrl;
+  captionInput.value = '';
+  preview.classList.add('show');
+  
+  setTimeout(() => captionInput.focus(), 300);
+}
+
+// Fechar preview
+function closePhotoPreview() {
+  const preview = document.getElementById('photo-preview');
+  const fileInput = document.getElementById('camera-file-input');
+  const img = document.getElementById('preview-image');
+
+  preview.classList.remove('show');
+  fileInput.value = '';
+  selectedPhotoFile = null;
+  URL.revokeObjectURL(img.src);
+  img.src = '';
+}
+
+// Enviar foto com legenda
+async function sendPhotoWithCaption() {
+  if (!selectedPhotoFile) return;
+
+  const caption = document.getElementById('photo-caption-input').value.trim();
+  const sendingOverlay = document.getElementById('sending-overlay');
+  const sendBtn = document.querySelector('.send-photo-btn');
+
+  sendBtn.disabled = true;
+  sendingOverlay.classList.add('show');
+
   try {
-    const cameraBtn   = document.getElementById("camera-btn");
-    const cameraInput = document.getElementById("camera-file-input");
+    const publicUrl = await uploadImageToSupabase(selectedPhotoFile);
+    await sendImageMessage(publicUrl, selectedPhotoFile.name, caption);
+    closePhotoPreview();
+  } catch (err) {
+    console.error('Erro ao enviar foto:', err);
+    alert('❌ Erro ao enviar foto!\n\n' + err.message);
+  } finally {
+    sendBtn.disabled = false;
+    sendingOverlay.classList.remove('show');
+  }
+}
 
-    const attachModal   = document.getElementById("attach-modal");
-    const attachImg     = document.getElementById("attach-preview-img");
-    const attachCaption = document.getElementById("attach-caption");
-    const attachSend    = document.getElementById("attach-send");
-    const attachCancel  = document.getElementById("attach-cancel");
-    const attachLoading = document.getElementById("attach-loading");
+// Upload para Supabase
+async function uploadImageToSupabase(file) {
+  if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
+  
+  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
+  const fileName = `photo_${Date.now()}.${ext}`;
+  const filePath = `${currentChat}/${fileName}`;
+  
+  const { error } = await supabaseClient
+    .storage
+    .from("cb_files")
+    .upload(filePath, file);
+  
+  if (error) throw error;
+  
+  const { data: { publicUrl } } = supabaseClient
+    .storage
+    .from("cb_files")
+    .getPublicUrl(filePath);
+  
+  if (!publicUrl) throw new Error("Sem URL público.");
+  return publicUrl;
+}
 
-    if (!cameraBtn || !cameraInput || !attachModal || !attachImg || !attachCaption || !attachSend || !attachCancel || !attachLoading) {
-      alert("ERRO: faltam elementos do modal/camera no DOM");
-      return;
-    }
+// Inserir mensagem com legenda
+async function sendImageMessage(imageUrl, fileName, caption = "") {
+  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+  const senderName = await fetchUserName();
+  
+  const payload = {
+    n_int: currentUserNint, 
+    recipient_nint: String(currentChat), 
+    corp_oper_nr: currentCorp, 
+    abv_name: senderName, 
+    message_type: "image", 
+    file_url: imageUrl, 
+    file_name: fileName, 
+    message: caption
+  };
+  
+  const { error } = await supabaseClient
+    .from("chat_messages")
+    .insert([payload]);
+  
+  if (error) throw error;
+}
 
-    let pendingFile = null;
-    let previewUrl = null;
-
-    cameraBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      // evita ReferenceError se currentChat não existir por algum motivo
-      if (typeof currentChat !== "undefined" && currentChat === "null") return;
-
-      cameraInput.value = "";
-      cameraInput.click();
-    });
-
-    cameraInput.addEventListener("change", (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      pendingFile = file;
-
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      previewUrl = URL.createObjectURL(file);
-      attachImg.src = previewUrl;
-
-      attachModal.style.setProperty("display", "flex", "important");
-      attachCaption.value = "";
-      setTimeout(() => attachCaption.focus(), 250);
-    });
-
-    function fecharModalFoto() {
-      attachModal.style.setProperty("display", "none", "important");
-      attachLoading.style.display = "none";
-      attachSend.disabled = false;
-
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      previewUrl = null;
-      pendingFile = null;
-      cameraInput.value = "";
-    }
-
-    attachCancel.addEventListener("click", fecharModalFoto);
-
-    attachSend.addEventListener("click", async () => {
-      if (!pendingFile) return;
-
-      const caption = (attachCaption.value || "").trim();
-
-      try {
-        attachLoading.style.display = "flex";
-        attachSend.disabled = true;
-
-        const publicUrl = await uploadImageToSupabase(pendingFile);
-        await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
-
-        fecharModalFoto();
-      } catch (err) {
-        console.error(err);
-        alert("Não foi possível enviar a foto.");
-        attachLoading.style.display = "none";
-        attachSend.disabled = false;
+// Atalho Enter
+document.addEventListener('DOMContentLoaded', () => {
+  const captionInput = document.getElementById('photo-caption-input');
+  if (captionInput) {
+    captionInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendPhotoWithCaption();
+      }
+      if (e.key === 'Escape') {
+        closePhotoPreview();
       }
     });
-
-  } catch (err) {
-    alert("ERRO ao iniciar modal camera: " + (err?.message || err));
   }
-})();
+});
 </script>
 
 
@@ -2089,4 +2153,5 @@
   
 </body>
 </html>
+
 
