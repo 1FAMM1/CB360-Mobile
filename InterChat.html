@@ -2,7 +2,7 @@
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
@@ -70,72 +70,6 @@
     .dark-mode .confirm-text {color: #eee;}
     .dark-mode .btn-confirm-action:active {background-color: rgba(255, 255, 255, 0.05);}
     .dark-mode .draft-preview {color: #aaa !important;}
-
-
-
-
-
-
-
-/* ==================== PWA KEYBOARD FIX ==================== */
-:root {
-  --kb: 0px;
-  --footer-h: 60px; /* ajusta se o teu footer for diferente */
-  --gap: 10px;
-  --safe: env(safe-area-inset-bottom, 0px);
-}
-
-/* mensagens: espaço extra quando teclado abre */
-.message-container{
-  overflow-y:auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(var(--footer-h) + 80px + var(--kb) + var(--safe));
-}
-
-.message-container.keyboard-active{
-  scroll-behavior: auto;
-}
-
-/* input bar sobe com teclado */
-.chat-input-bar{
-  position: fixed;
-  left:0; right:0;
-  bottom: calc(var(--footer-h) + var(--kb) + var(--gap) + var(--safe));
-  z-index: 10001;
-  transition: bottom 0.12s ease;
-}
-
-.chat-input-bar.keyboard-active{
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.98);
-}
-.dark-mode .chat-input-bar.keyboard-active{
-  background: rgba(0,0,0,0.15);
-}
-
-/* teclado aberto: bloqueia scroll do body */
-body.keyboard-open{
-  overflow:hidden;
-  touch-action:none;
-}
-
-/* iOS: fixa body só durante teclado (não permanente!) */
-@supports (-webkit-touch-callout: none) {
-  body.keyboard-open {
-    position: fixed;
-    width: 100%;
-  }
-}
-
-/* se o teclado abrir, emojis escondem */
-body.keyboard-open #full-emoji-picker-container{
-  display:none !important;
-}
-
-
-
-
-    
     /* ============= LIGHT MODE OPTIONS ============= */
     .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828; position: fixed;
              top: 0; left: 0; right: 0; z-index: 1000;}
@@ -171,25 +105,8 @@ body.keyboard-open #full-emoji-picker-container{
     .back-arrow {font-size: 25px !important; margin: 4px 0 0 0px; font-weight: bold !important;} 
     .back-header:hover {opacity: 0.75;}
     .chat-id-info {padding: 5px 20px; font-size: 15px; font-weight: bold; color: #d32f2f; background: rgba(0, 0, 0, 0.10); border-left: 4px solid #d32f2f;}    
-    .message-container {
-  display: none; 
-  flex-direction: column; 
-  gap: 0; 
-  padding: 15px; 
-  flex: 1; 
-  overflow-y: auto; 
-  -webkit-overflow-scrolling: touch; 
-  margin-bottom: 80px;
-  transition: margin-bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  /* ← ADICIONA ESTAS LINHAS */
-  max-height: calc(100dvh - 220px); /* Ajusta conforme necessário */
-  transition: max-height 0.3s ease, margin-bottom 0.3s ease;
-}
-
-/* Quando teclado está ativo, usa altura reduzida */
-.message-container.keyboard-active {
-  /* Será definido via JS inline */
-}
+    .message-container {display: none; flex-direction: column; gap: 0; padding: 15px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 80px; 
+                        transition: margin-bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);}
     .pinned-banner {background: rgba(255, 248, 225, 0.95); border-bottom: 1px solid #ffe082; padding: 10px 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #856404;
                     position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); max-height: 100px; overflow-y: auto;}
     .pinned-text {white-space: normal; word-wrap: break-word; flex: 1; font-weight: 500; line-height: 1.4;}
@@ -338,6 +255,103 @@ body.keyboard-open #full-emoji-picker-container{
     .audio-bubble.dark:hover {background: rgba(25, 25, 30, 0.9);}
     .audio-bubble.dark .audio-progress-bar {background: rgba(255, 255, 255, 0.08);}
     .audio-bubble.dark .audio-time {color: rgba(255, 255, 255, 0.9);}
+    
+    
+    /* ==================== PWA KEYBOARD FIX ==================== */
+:root {
+  --kb: 0px;
+  --footer-h: 60px; /* ajusta se o teu footer for diferente */
+  --gap: 10px;
+  --safe: env(safe-area-inset-bottom, 0px);
+}
+
+/* mensagens: espaço extra quando teclado abre */
+.message-container{
+  overflow-y:auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--footer-h) + 80px + var(--kb) + var(--safe));
+}
+
+.message-container.keyboard-active{
+  scroll-behavior: auto;
+}
+
+/* input bar sobe com teclado */
+.chat-input-bar{
+  position: fixed;
+  left:0; right:0;
+  bottom: calc(var(--footer-h) + var(--kb) + var(--gap) + var(--safe));
+  z-index: 10001;
+  transition: bottom 0.12s ease;
+}
+
+.chat-input-bar.keyboard-active{
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.98);
+}
+.dark-mode .chat-input-bar.keyboard-active{
+  background: rgba(0,0,0,0.15);
+}
+
+/* teclado aberto: bloqueia scroll do body */
+body.keyboard-open{
+  overflow:hidden;
+  touch-action:none;
+}
+
+/* iOS: fixa body só durante teclado (não permanente!) */
+@supports (-webkit-touch-callout: none) {
+  body.keyboard-open {
+    position: fixed;
+    width: 100%;
+  }
+}
+
+/* se o teclado abrir, emojis escondem */
+body.keyboard-open #full-emoji-picker-container{
+  display:none !important;
+}
+    
+    
+   /* wrapper ocupa a largura toda e não deixa estourar */
+.message-wrapper{
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;  /* corta qualquer overflow horizontal */
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+/* alinhamento: outros à esquerda, eu à direita */
+.message-wrapper.other{
+  justify-content: flex-start;
+}
+
+.message-wrapper.self{
+  justify-content: flex-end;
+}
+
+/* garante que a bubble não força overflow */
+.message-wrapper .message{
+  max-width: calc(100% - 28px); /* reserva espaço para o ícone + gap */
+  box-sizing: border-box;
+}
+
+/* ícone encaminhada */
+.forwarded-icon{
+  font-size: 16px;
+  opacity: 0.6;
+  user-select: none;
+  cursor: default;
+  flex: 0 0 auto;
+}
+
+
+    
+    
+    
     @keyframes slideUp {from {transform: translateY(100%); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     @keyframes popScale {0% {transform: scale(0.85); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}    
     @keyframes pulse-green {0% {transform: scale(1); box-shadow: 0 0 5px #00ff00;} 50% {transform: scale(1.15); box-shadow: 0 0 12px #00ff00;} 100% {transform: scale(1); box-shadow: 0 0 5px #00ff00;}}
@@ -468,13 +482,7 @@ body.keyboard-open #full-emoji-picker-container{
   <div id="full-emoji-picker-container">
     <emoji-picker locale="pt" class="light"></emoji-picker
   </div>
-      <input
-  type="file"
-  id="camera-file-input"
-  accept="image/*"
-  capture="environment"
-  style="display:none"
-/>
+  <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none"/>
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -1106,10 +1114,30 @@ async function sendImageMessage(imageUrl, fileName) {
         }
       }
       setupMessageInteraction(div, msg);
-      messagesEl.appendChild(div);
-      if (messagesEl.style.display !== 'none') {
-        scrollToBottom();
-      }
+
+// 🔁 wrapper para o ícone de encaminhada ao lado da bubble
+const wrapper = document.createElement("div");
+wrapper.className = "message-wrapper " + (isMe ? "self" : "other");
+
+// se for encaminhada, adiciona ícone
+if (msg.is_forwarded) {
+  const fwdIcon = document.createElement("span");
+  fwdIcon.className = "material-icons forwarded-icon";
+  fwdIcon.textContent = "forward";
+  fwdIcon.title = "Encaminhada";
+  wrapper.appendChild(fwdIcon);
+}
+
+// adiciona a bubble
+wrapper.appendChild(div);
+
+// mete no DOM
+messagesEl.appendChild(wrapper);
+
+if (messagesEl.style.display !== 'none') {
+  scrollToBottom();
+}
+
     }
     /* ======================== GET MESSAGE DATE  ======================== */
     function getDateLabel(date) {
@@ -1195,7 +1223,7 @@ async function sendImageMessage(imageUrl, fileName) {
       typingStatusEl.style.display = 'none';
       inputBar.style.display = 'flex';
       chatIdInfo.textContent = `A conversar com: ${name}`;
-      if (currentChat === 'geral') {
+      if (currentChat === 'geral') {Ain
         pinnedEl.style.display = 'flex';
         document.getElementById("pinned-text-content").textContent = "ATENÇÃO! Este chat é supervisionado por IA. Qualquer mensagem que viole normas éticas será imediatamente bloqueada.";
       } else { 
@@ -1540,12 +1568,7 @@ async function sendImageMessage(imageUrl, fileName) {
       document.getElementById('edit-bar').style.display = 'none';
       document.getElementById('chat-input').value = '';
     }
-
-
-
-
-
-/* ==================== KEYBOARD HANDLER (PWA FIX) ==================== */
+    /* ==================== KEYBOARD HANDLER (PWA FIX) ==================== */
 (function () {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const THRESH_OPEN  = isIOS ? 80  : 120;
@@ -1663,14 +1686,20 @@ async function sendImageMessage(imageUrl, fileName) {
   window.forceRestoreKeyboard = onKeyboardClose;
 })();
 
-
-
-
-
     
-
-
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     /* =================== INITIALIZATION AND REALTIME =================== */
     document.addEventListener('DOMContentLoaded', async () => {
@@ -2120,5 +2149,3 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
-
-
