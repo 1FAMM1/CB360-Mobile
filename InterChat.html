@@ -267,7 +267,17 @@
     .audio-bubble.dark {background: rgba(20, 20, 25, 0.85); border-color: rgba(255, 255, 255, 0.08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);}
     .audio-bubble.dark:hover {background: rgba(25, 25, 30, 0.9);}
     .audio-bubble.dark .audio-progress-bar {background: rgba(255, 255, 255, 0.08);}
-    .audio-bubble.dark .audio-time {color: rgba(255, 255, 255, 0.9);}   
+    .audio-bubble.dark .audio-time {color: rgba(255, 255, 255, 0.9);}
+    .attach-modal{position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 999999; display: none; align-items: center; justify-content: center;}
+    .attach-card{background:#fff; width:min(500px,95vw); border-radius:16px; overflow:hidden;}
+    .attach-header{display:flex;justify-content:space-between;align-items:center; padding:10px 12px;font-weight:700;}
+    .attach-x{border:none;background:transparent;font-size:18px;padding:8px 10px;}
+    .attach-preview{position:relative;background:#000;min-height:240px;display:flex;align-items:center;justify-content:center;}
+    .attach-preview img{max-width:100%;max-height:65vh;object-fit:contain;}
+    .attach-footer{display:flex;gap:8px;padding:12px;}
+    #attach-caption{flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;}
+    #attach-send{background:#00a884;color:#fff;border:none;border-radius:8px;padding:0 15px;font-weight:700;}
+    .attach-loading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);color:#fff;font-weight:700;}
     @keyframes slideUp {from {transform: translateY(100%); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     @keyframes popScale {0% {transform: scale(0.85); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}    
     @keyframes pulse-green {0% {transform: scale(1); box-shadow: 0 0 5px #00ff00;} 50% {transform: scale(1.15); box-shadow: 0 0 12px #00ff00;} 100% {transform: scale(1); box-shadow: 0 0 5px #00ff00;}}
@@ -276,38 +286,6 @@
     @keyframes highlight-fade {0% {background: rgba(211, 47, 47, 0.3);} 100% {background: inherit;}}
     @keyframes gentle-pulse {0%, 100% {box-shadow: 0 4px 12px rgba(52, 183, 241, 0.5), 0 2px 6px rgba(52, 183, 241, 0.3);} 50% {box-shadow: 0 6px 16px rgba(52, 183, 241, 0.7), 0 3px 8px rgba(52, 183, 241, 0.5);}}
     @keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
-
-
-.attach-modal{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.9);
-  z-index: 999999;
-  display: none;              /* JS controla */
-  align-items: center;
-  justify-content: center;
-}
-.attach-card{
-  background:#fff;
-  width:min(500px,95vw);
-  border-radius:16px;
-  overflow:hidden;
-}
-.attach-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:10px 12px;font-weight:700;
-}
-.attach-x{border:none;background:transparent;font-size:18px;padding:8px 10px;}
-.attach-preview{position:relative;background:#000;min-height:240px;display:flex;align-items:center;justify-content:center;}
-.attach-preview img{max-width:100%;max-height:65vh;object-fit:contain;}
-.attach-footer{display:flex;gap:8px;padding:12px;}
-#attach-caption{flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;}
-#attach-send{background:#00a884;color:#fff;border:none;border-radius:8px;padding:0 15px;font-weight:700;}
-.attach-loading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);color:#fff;font-weight:700;}
-
-
-
-    
     /* =================================================
     MEDIA QUERIES - FULL RESPONSIVENESS
     ================================================= */
@@ -428,40 +406,25 @@
     </div>
   </div>
   <div id="full-emoji-picker-container">
-    <emoji-picker locale="pt" class="light"></emoji-picker>
+    <emoji-picker locale="pt" class="light"></emoji-picker
   </div>
-  
-  
-  
-  <!-- INPUT PWA-SAFE: NÃO usar display:none -->
-<input
-  type="file"
-  id="camera-file-input"
-  accept="image/*"
-  capture="environment"
-  style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;"
-/>
-
-<!-- MODAL: preview + legenda -->
-<div id="attach-modal" class="attach-modal">
-  <div class="attach-card">
-    <div class="attach-header">
-      <span>Enviar Foto</span>
-      <button id="attach-cancel" class="attach-x" type="button">✕</button>
-    </div>
-
-    <div class="attach-preview">
-      <img id="attach-preview-img" src="" alt="preview" />
-      <div id="attach-loading" class="attach-loading">A enviar...</div>
-    </div>
-
-    <div class="attach-footer">
-      <input id="attach-caption" type="text" placeholder="Adicione uma legenda..." autocomplete="off" />
-      <button id="attach-send" type="button">Enviar</button>
+  <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;"/>
+  <div id="attach-modal" class="attach-modal">
+    <div class="attach-card">
+      <div class="attach-header">
+        <span>Enviar Foto</span>
+        <button id="attach-cancel" class="attach-x" type="button">✕</button>
+      </div>
+      <div class="attach-preview">
+        <img id="attach-preview-img" src="" alt="preview" />
+        <div id="attach-loading" class="attach-loading">A enviar...</div>
+      </div>
+      <div class="attach-footer">
+        <input id="attach-caption" type="text" placeholder="Adicione uma legenda..." autocomplete="off" />
+        <button id="attach-send" type="button">Enviar</button>
+      </div>
     </div>
   </div>
-</div>
-
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -672,129 +635,87 @@
         console.error("Erro:", err.message);
       }
     }
-    /* ======================== CAMERA + LEGENDA (baseado no original) ========================= */
-const cameraBtn = document.getElementById("camera-btn");
-const cameraInput = document.getElementById("camera-file-input");
-
-// modal
-const attachModal   = document.getElementById("attach-modal");
-const attachImg     = document.getElementById("attach-preview-img");
-const attachCaption = document.getElementById("attach-caption");
-const attachSend    = document.getElementById("attach-send");
-const attachCancel  = document.getElementById("attach-cancel");
-const attachLoading = document.getElementById("attach-loading");
-
-let pendingFile = null;
-let previewUrl = null;
-
-cameraBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  if (currentChat === "null") return;
-  cameraInput.value = "";      // importante para permitir repetir
-  cameraInput.click();
-});
-
-// ✅ AQUI: antes enviava logo. Agora abre modal.
-cameraInput.addEventListener("change", () => {
-  const file = cameraInput.files?.[0];
-  if (!file) return;
-
-  pendingFile = file;
-
-  if (previewUrl) URL.revokeObjectURL(previewUrl);
-  previewUrl = URL.createObjectURL(file);
-  attachImg.src = previewUrl;
-
-  attachCaption.value = "";
-  attachModal.style.display = "flex";
-  setTimeout(() => attachCaption.focus(), 150);
-});
-
-function fecharModalFoto() {
-  attachModal.style.display = "none";
-  attachLoading.style.display = "none";
-  attachSend.disabled = false;
-
-  if (previewUrl) URL.revokeObjectURL(previewUrl);
-  previewUrl = null;
-
-  pendingFile = null;
-  cameraInput.value = "";
-}
-
-attachCancel.addEventListener("click", fecharModalFoto);
-
-// ✅ Só aqui é que faz upload + envia (igual ao original)
-attachSend.addEventListener("click", async () => {
-  if (!pendingFile) return;
-
-  const caption = (attachCaption.value || "").trim();
-
-  try {
-    attachLoading.style.display = "block";
-    attachSend.disabled = true;
-
-    const publicUrl = await uploadImageToSupabase(pendingFile);
-    await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
-
-    fecharModalFoto();
-  } catch (err) {
-    console.error("Erro ao enviar foto:", err);
-    alert("Não foi possível enviar a foto.");
-    attachLoading.style.display = "none";
-    attachSend.disabled = false;
-  }
-});
-
-/* ======================== FUNÇÕES ORIGINAIS (mínima alteração) ========================= */
-async function uploadImageToSupabase(file) {
-  // 👇 mantive a tua validação, mas esta versão é mais robusta em Android/PWA
-  if (file.type && !file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
-
-  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
-  const fileName = `photo_${Date.now()}.${ext}`;
-  const filePath = `${currentChat}/${fileName}`;
-
-  const { error } = await supabaseClient
-    .storage
-    .from("cb_files")
-    .upload(filePath, file, { contentType: file.type || "image/jpeg" });
-
-  if (error) throw error;
-
-  const { data: { publicUrl } } = supabaseClient
-    .storage
-    .from("cb_files")
-    .getPublicUrl(filePath);
-
-  if (!publicUrl) throw new Error("Sem URL público.");
-  return publicUrl;
-}
-
-// 👇 única mudança: recebe caption e manda no "message"
-async function sendImageMessage(imageUrl, fileName, caption = "") {
-  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-  const senderName = await fetchUserName();
-
-  const payload = {
-    n_int: currentUserNint,
-    recipient_nint: String(currentChat),
-    corp_oper_nr: currentCorp,
-    abv_name: senderName,
-    message_type: "image",
-    file_url: imageUrl,
-    file_name: fileName,
-    message: caption
-  };
-
-  const { error } = await supabaseClient
-    .from("chat_messages")
-    .insert([payload]);
-
-  if (error) throw error;
-}
-   
-
+    /* ======================== CAMERA RECORDING ========================= */
+    const cameraBtn = document.getElementById("camera-btn");
+    const cameraInput = document.getElementById("camera-file-input");
+    const attachModal   = document.getElementById("attach-modal");
+    const attachImg     = document.getElementById("attach-preview-img");
+    const attachCaption = document.getElementById("attach-caption");
+    const attachSend    = document.getElementById("attach-send");
+    const attachCancel  = document.getElementById("attach-cancel");
+    const attachLoading = document.getElementById("attach-loading");
+    let pendingFile = null;
+    let previewUrl = null;
+    cameraBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentChat === "null") return;
+      cameraInput.value = "";
+      cameraInput.click();
+    });
+    cameraInput.addEventListener("change", () => {
+      const file = cameraInput.files?.[0];
+      if (!file) return;
+      pendingFile = file;
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(file);
+      attachImg.src = previewUrl;
+      attachCaption.value = "";
+      attachModal.style.display = "flex";
+      setTimeout(() => attachCaption.focus(), 150);
+    });
+    function fecharModalFoto() {
+      attachModal.style.display = "none";
+      attachLoading.style.display = "none";
+      attachSend.disabled = false;
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+      pendingFile = null;
+      cameraInput.value = "";
+    }
+    attachCancel.addEventListener("click", fecharModalFoto);
+    attachSend.addEventListener("click", async () => {
+      if (!pendingFile) return;
+      const caption = (attachCaption.value || "").trim();
+      try {
+        attachLoading.style.display = "block";
+        attachSend.disabled = true;
+        const publicUrl = await uploadImageToSupabase(pendingFile);
+        await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
+        fecharModalFoto();
+      } catch (err) {
+        console.error("Erro ao enviar foto:", err);
+        alert("Não foi possível enviar a foto.");
+        attachLoading.style.display = "none";
+        attachSend.disabled = false;
+      }
+    });
+    async function uploadImageToSupabase(file) {
+      if (file.type && !file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
+      const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
+      const fileName = `photo_${Date.now()}.${ext}`;
+      const filePath = `${currentChat}/${fileName}`;
+      const { error } = await supabaseClient
+      .storage
+      .from("cb_files")
+      .upload(filePath, file, { contentType: file.type || "image/jpeg" });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabaseClient
+      .storage
+      .from("cb_files")
+      .getPublicUrl(filePath);
+      if (!publicUrl) throw new Error("Sem URL público.");
+      return publicUrl;
+    }
+    async function sendImageMessage(imageUrl, fileName, caption = "") {
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const senderName = await fetchUserName();
+      const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl,
+                       file_name: fileName, message: caption};
+      const { error } = await supabaseClient
+      .from("chat_messages")
+      .insert([payload]);
+      if (error) throw error;
+    }
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -2110,20 +2031,5 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
       }
     }
   </script>
-
-
-
-<script>
-
-
-</script>
-
-
-
-  
 </body>
 </html>
-
-
-
-
