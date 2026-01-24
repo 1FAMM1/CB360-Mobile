@@ -555,7 +555,7 @@
     </button>
   </div>
 </div>
-  <input type="file" id="camera-file-input" accept="image/*" style="display:none"/>
+  <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none"/>
   
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -773,24 +773,49 @@ let selectedPhotoFile = null;
 const cameraBtn = document.getElementById("camera-btn");
 const cameraInput = document.getElementById("camera-file-input");
 
-cameraBtn.addEventListener("click", (e) => {
+cameraBtn.addEventListener("click", async (e) => {
   e.preventDefault();
   if (currentChat === "null") return;
-  cameraInput.click();
+  
+  // SOLUÇÃO: Usar MediaDevices API diretamente
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      // Abrir câmara nativa
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment" }
+      });
+      
+      // Criar preview temporário
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.playsInline = true;
+      
+      // Mostrar preview customizado
+      showCameraPreview(stream, video);
+      
+    } catch (err) {
+      console.error("Erro ao aceder à câmara:", err);
+      // Fallback para input file
+      cameraInput.click();
+    }
+  } else {
+    // Browser não suporta getUserMedia
+    cameraInput.click();
+  }
 });
 
+// Fallback: se user escolher do input file
 cameraInput.addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  // Validar se é imagem
   if (!file.type.startsWith('image/')) {
     alert('❌ Ficheiro inválido! Seleciona uma imagem.');
     e.target.value = '';
     return;
   }
 
-  // Validar tamanho (10MB)
   const MAX_SIZE = 10 * 1024 * 1024;
   if (file.size > MAX_SIZE) {
     alert('❌ Imagem muito grande!\n\nTamanho máximo: 10MB');
@@ -802,16 +827,85 @@ cameraInput.addEventListener("change", (e) => {
   showPhotoPreview(file);
 });
 
-// Mostrar preview da foto
+// Preview da câmara ao vivo
+function showCameraPreview(stream, video) {
+  const preview = document.getElementById('photo-preview');
+  const img = document.getElementById('preview-image');
+  const captionInput = document.getElementById('photo-caption-input');
+  const sendBtn = document.querySelector('.send-photo-btn');
+  
+  // Esconder imagem, mostrar vídeo
+  img.style.display = 'none';
+  
+  const previewArea = document.querySelector('.preview-image-area');
+  video.style.maxWidth = '100%';
+  video.style.maxHeight = '100%';
+  video.style.objectFit = 'contain';
+  previewArea.insertBefore(video, previewArea.firstChild);
+  
+  captionInput.value = '';
+  preview.classList.add('show');
+  
+  // Mudar botão para "Capturar"
+  sendBtn.innerHTML = '<span class="material-icons">camera</span>';
+  sendBtn.onclick = () => capturePhoto(stream, video);
+  
+  // Botão fechar para a câmara
+  const closeBtn = document.querySelector('.close-preview');
+  closeBtn.onclick = () => {
+    stream.getTracks().forEach(track => track.stop());
+    video.remove();
+    preview.classList.remove('show');
+    img.style.display = 'block';
+    sendBtn.innerHTML = '<span class="material-icons">send</span>';
+    sendBtn.onclick = sendPhotoWithCaption;
+  };
+}
+
+// Capturar foto da câmara
+function capturePhoto(stream, video) {
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  
+  // Converter para blob
+  canvas.toBlob((blob) => {
+    const file = new File([blob], `foto_${Date.now()}.jpg`, { type: 'image/jpeg' });
+    
+    // Parar câmara
+    stream.getTracks().forEach(track => track.stop());
+    video.remove();
+    
+    // Mostrar preview da foto capturada
+    selectedPhotoFile = file;
+    showPhotoPreview(file);
+    
+  }, 'image/jpeg', 0.95);
+}
+
+// Mostrar preview da foto (já tirada)
 function showPhotoPreview(file) {
   const preview = document.getElementById('photo-preview');
   const img = document.getElementById('preview-image');
   const captionInput = document.getElementById('photo-caption-input');
+  const sendBtn = document.querySelector('.send-photo-btn');
 
   const imageUrl = URL.createObjectURL(file);
   img.src = imageUrl;
+  img.style.display = 'block';
   captionInput.value = '';
   preview.classList.add('show');
+  
+  // Restaurar botão enviar
+  sendBtn.innerHTML = '<span class="material-icons">send</span>';
+  sendBtn.onclick = sendPhotoWithCaption;
+  
+  // Restaurar botão fechar
+  const closeBtn = document.querySelector('.close-preview');
+  closeBtn.onclick = closePhotoPreview;
   
   setTimeout(() => captionInput.focus(), 300);
 }
@@ -890,7 +984,7 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
     message_type: "image", 
     file_url: imageUrl, 
     file_name: fileName, 
-    message: caption  // ✅ LEGENDA ADICIONADA
+    message: caption
   };
   
   const { error } = await supabaseClient
@@ -900,17 +994,19 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
   if (error) throw error;
 }
 
-// Atalho de teclado (Enter para enviar)
+// Atalho Enter
 document.addEventListener('DOMContentLoaded', () => {
   const captionInput = document.getElementById('photo-caption-input');
   if (captionInput) {
     captionInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        sendPhotoWithCaption();
+        const sendBtn = document.querySelector('.send-photo-btn');
+        if (sendBtn.onclick) sendBtn.onclick();
       }
       if (e.key === 'Escape') {
-        closePhotoPreview();
+        const closeBtn = document.querySelector('.close-preview');
+        if (closeBtn.onclick) closeBtn.onclick();
       }
     });
   }
@@ -2234,6 +2330,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
 </body>
 </html>
+
 
 
 
