@@ -211,7 +211,7 @@ body.keyboard-open #full-emoji-picker-container{
     .date-divider span {background: rgba(0, 0, 0, 0.05); color: #555; padding: 5px 15px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;}
     .message.other .status-checks {display: none;}    
     .status-checks.read {color: #07e5f5 !important;}    
-    .chat-input-bar {position: fixed; bottom: 60px; left:0px; right: 0px; background: transparent; display: none; padding: 8px 10px; gap: 8px;  z-index: 1001; align-items: center; border-radius: 0px;
+    .chat-input-bar {position: fixed; bottom: 40px; left:0px; right: 0px; background: transparent; display: none; padding: 8px 10px; gap: 8px;  z-index: 1001; align-items: center; border-radius: 0px;
                      transition: bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);}    
     .input-wrapper {flex: 1; background: #ccc; border-radius: 25px; display: flex; align-items: center; padding: 0 8px; gap: 2px; transition: all 0.3s ease;}
     .chat-input-bar input {flex: 1; padding: 8px 10px; background: transparent; border: 0px; font-size: 14px; outline: none;}
@@ -567,14 +567,7 @@ body.keyboard-open #full-emoji-picker-container{
     const emojiContainer = document.getElementById('full-emoji-picker-container');
     const picker = document.querySelector('emoji-picker');
     const messageContainer = document.querySelector('.message-container');
-    function resetLayout() {
-      emojiContainer.style.display = 'none';
-      barraDeInput.style.bottom = '60px'; 
-      messageContainer.style.marginBottom = '80px';
-      setTimeout(() => {
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-      }, 100);
-    }
+   
     inputMensage.addEventListener('input', function() {
       const hasText = this.value.trim().length > 0;
       const novoIcone = hasText ? 'send' : 'mic';
@@ -2140,6 +2133,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
