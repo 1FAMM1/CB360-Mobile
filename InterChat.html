@@ -284,31 +284,26 @@
   width: 100vw !important;
   height: 100vh !important;
   background: rgba(0,0,0,0.9) !important;
-  z-index: 9999999 !important; /* Força máxima */
-  display: none; /* Alterado via JS */
+  z-index: 999999 !important;
+  display: none; 
   align-items: center;
   justify-content: center;
 }
-
 .attach-card {
   background: #fff;
-  width: min(500px, 92vw);
+  width: min(500px, 95vw);
   border-radius: 16px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
-
 .dark-mode .attach-card { background: #1f1f1f; color: #fff; }
-
-.attach-preview { background: #000; display: flex; align-items: center; justify-content: center; min-height: 250px; }
+.attach-preview { background: #000; min-height: 250px; display: flex; align-items: center; justify-content: center; }
 .attach-preview img { max-width: 100%; max-height: 65vh; object-fit: contain; }
-
-.attach-footer { padding: 12px; display: flex; gap: 8px; background: #f9f9f9; }
-.dark-mode .attach-footer { background: #2a2a2a; }
-
-#attach-caption { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
-#attach-send { background: #00a884; color: #fff; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; }
+.attach-footer { padding: 12px; display: flex; gap: 8px; border-top: 1px solid rgba(0,0,0,0.1); }
+#attach-caption { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; background: transparent; color: inherit; }
+#attach-send { background: #00a884; color: #fff; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.attach-loading { position: absolute; inset: 0; background: rgba(0,0,0,0.5); color: #fff; display: flex; align-items: center; justify-content: center; }
 
 
     
@@ -438,18 +433,20 @@
   <div class="attach-card">
     <div class="attach-header">
       <span>Enviar Foto</span>
-      <button id="attach-cancel" class="attach-x" type="button" onclick="fecharModalAnexo()">✕</button>
+      <button id="attach-cancel" class="attach-x" type="button">✕</button>
     </div>
     <div class="attach-preview">
       <img id="attach-preview-img" src="" alt="preview" />
-      <div id="attach-loading" class="attach-loading" style="display:none;">A enviar...</div>
+      <div id="attach-loading" class="attach-loading" style="display:none;">A processar...</div>
     </div>
     <div class="attach-footer">
-      <input id="attach-caption" type="text" placeholder="Escreva uma legenda..." autocomplete="off">
+      <input id="attach-caption" type="text" placeholder="Adicione uma legenda..." autocomplete="off">
       <button id="attach-send" type="button">Enviar</button>
     </div>
   </div>
 </div>
+
+<input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none !important;">
 
 <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="position:fixed; top:-100px; left:-100px; opacity:0;">
   <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none"/>
@@ -663,197 +660,115 @@
         console.error("Erro:", err.message);
       }
     }
-    /* ==========================================================================
-   SISTEMA DE CAPTURA DE IMAGEM E MODAL DE PRÉ-VISUALIZAÇÃO (COMPLETO)
-   ========================================================================== */
+    (function() {
+    let pendingCameraFile = null;
 
-// 1. Variáveis de estado global para o anexo
-let pendingCameraFile = null;
-let pendingObjectUrl = null;
+    const camInput = document.getElementById("camera-file-input");
+    const modal = document.getElementById("attach-modal");
+    const previewImg = document.getElementById("attach-preview-img");
+    const btnSend = document.getElementById("attach-send");
+    const captionInput = document.getElementById("attach-caption");
 
-// Referências aos elementos do DOM
-const cameraInput = document.getElementById("camera-file-input");
-const attachModal = document.getElementById("attach-modal");
-const attachImg = document.getElementById("attach-preview-img");
-const attachCaption = document.getElementById("attach-caption");
-const attachSend = document.getElementById("attach-send");
-const attachCancel = document.getElementById("attach-cancel");
-const attachLoading = document.getElementById("attach-loading");
+    // 1. DISPARAR CÂMARA
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#camera-btn')) {
+            e.preventDefault();
+            
+            // Tenta pegar o chat ativo de qualquer forma possível
+            const chatAtivo = window.currentChat || (typeof currentChat !== 'undefined' ? currentChat : null);
 
-/* --- AÇÃO: DISPARAR CÂMARA --- */
-document.addEventListener('click', function(e) {
-  // Captura o clique no botão de câmara (delegado para evitar falhas)
-  if (e.target.closest('#camera-btn')) {
-    e.preventDefault();
-    
-    // Verificação de segurança: chat ativo
-    if (!window.currentChat || window.currentChat === "null") {
-      alert("Por favor, selecione um contacto ou grupo primeiro.");
-      return;
-    }
-    
-    if (cameraInput) {
-      cameraInput.value = ""; // Limpeza crítica para permitir repetir fotos
-      cameraInput.click();
-    }
-  }
-});
+            if (!chatAtivo || chatAtivo === "null") {
+                alert("Por favor, abra uma conversa primeiro.");
+                return;
+            }
 
-/* --- AÇÃO: DETETAR FICHEIRO RECEBIDO --- */
-cameraInput?.addEventListener("change", function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+            camInput.value = ""; // Limpa cache
+            camInput.click();
+        }
+    });
 
-  // Validar se é imagem
-  if (!file.type.startsWith("image/")) {
-    alert("O ficheiro selecionado não é uma imagem válida.");
-    return;
-  }
+    // 2. RECEBER FOTO E ABRIR MODAL
+    camInput?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
 
-  pendingCameraFile = file;
+        pendingCameraFile = file;
 
-  // Usamos FileReader para converter em Base64 (mais estável para mobile que ObjectURL)
-  const reader = new FileReader();
-  
-  reader.onloadstart = function() {
-    // Se quiseres mostrar um mini-loading antes do modal abrir
-    console.log("A processar imagem...");
-  };
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            previewImg.src = event.target.result;
+            modal.style.setProperty("display", "flex", "important");
+            
+            setTimeout(() => captionInput?.focus(), 500);
+        };
+        reader.readAsDataURL(file);
+    });
 
-  reader.onload = function(event) {
-    if (attachImg && attachModal) {
-      // 1. Inserir a imagem no preview
-      attachImg.src = event.target.result;
-
-      // 2. Limpar legenda anterior
-      if (attachCaption) attachCaption.value = "";
-
-      // 3. Reset do estado dos botões
-      if (attachSend) attachSend.disabled = false;
-      if (attachLoading) attachLoading.style.display = "none";
-
-      // 4. FORÇAR ABERTURA DO MODAL (com display flex)
-      attachModal.style.setProperty("display", "flex", "important");
-
-      // 5. Focar no campo de legenda (com delay para o teclado mobile)
-      setTimeout(() => {
-        attachCaption?.focus();
-      }, 500);
-    }
-  };
-
-  reader.onerror = function() {
-    alert("Erro ao ler a imagem capturada.");
-  };
-
-  reader.readAsDataURL(file);
-});
-
-/* --- AÇÃO: FECHAR MODAL --- */
-function closeAttachPreviewModal() {
-  pendingCameraFile = null;
-  if (attachImg) attachImg.src = "";
-  if (attachModal) {
-    attachModal.style.setProperty("display", "none", "important");
-  }
-  // Limpar o input file para estar pronto para a próxima
-  if (cameraInput) cameraInput.value = "";
-}
-
-// Eventos de fecho
-attachCancel?.addEventListener("click", closeAttachPreviewModal);
-
-attachModal?.addEventListener("click", function(e) {
-  // Fechar se clicar na parte escura (fora do card)
-  if (e.target === attachModal) {
-    closeAttachPreviewModal();
-  }
-});
-
-/* --- AÇÃO: ENVIAR PARA SUPABASE --- */
-attachSend?.addEventListener("click", async function() {
-  if (!pendingCameraFile) return;
-
-  const caption = (attachCaption?.value || "").trim();
-
-  try {
-    // Bloquear UI para evitar múltiplos cliques
-    if (attachLoading) attachLoading.style.display = "flex";
-    if (attachSend) attachSend.disabled = true;
-
-    // 1. Upload do Ficheiro (Storage)
-    const publicUrl = await uploadImageToSupabase(pendingCameraFile);
-    
-    // 2. Gravar Mensagem (Database)
-    await sendImageMessage(
-      publicUrl,
-      pendingCameraFile.name || `foto_${Date.now()}.jpg`,
-      caption
-    );
-
-    // 3. Sucesso: Fechar e fazer scroll
-    closeAttachPreviewModal();
-    
-    if (typeof scrollToBottom === 'function') {
-      scrollToBottom();
+    // 3. FECHAR MODAL
+    function fecharModal() {
+        modal.style.setProperty("display", "none", "important");
+        previewImg.src = "";
+        pendingCameraFile = null;
     }
 
-  } catch (err) {
-    console.error("Erro crítico no envio:", err);
-    alert("Não foi possível enviar a foto. Verifique a sua ligação.");
-  } finally {
-    if (attachLoading) attachLoading.style.display = "none";
-    if (attachSend) attachSend.disabled = false;
-  }
-});
+    document.getElementById("attach-cancel")?.addEventListener("click", fecharModal);
+    modal.addEventListener("click", (e) => { if(e.target === modal) fecharModal(); });
 
-/* --- FUNÇÕES AUXILIARES --- */
+    // 4. ENVIAR PARA SUPABASE
+    btnSend?.addEventListener("click", async function() {
+        if (!pendingCameraFile) return;
 
-async function uploadImageToSupabase(file) {
-  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
-  const fileName = `photo_${Date.now()}.${ext}`;
-  // Caminho da pasta no Storage (ex: ID_DO_CHAT/nome_ficheiro.jpg)
-  const filePath = `${window.currentChat}/${fileName}`;
+        const loading = document.getElementById("attach-loading");
+        const caption = captionInput.value.trim();
+        const chatAtivo = window.currentChat || currentChat;
 
-  const { error } = await supabaseClient.storage
-    .from("cb_files")
-    .upload(filePath, file, { upsert: true });
+        try {
+            btnSend.disabled = true;
+            loading.style.display = "flex";
 
-  if (error) throw error;
+            // Upload Storage
+            const ext = pendingCameraFile.name.split('.').pop() || 'jpg';
+            const path = `${chatAtivo}/photo_${Date.now()}.${ext}`;
 
-  const { data: { publicUrl } } = supabaseClient.storage
-    .from("cb_files")
-    .getPublicUrl(filePath);
+            const { error: upError } = await supabaseClient.storage
+                .from("cb_files")
+                .upload(path, pendingCameraFile);
 
-  if (!publicUrl) throw new Error("Erro ao obter URL pública.");
-  
-  return publicUrl;
-}
+            if (upError) throw upError;
 
-async function sendImageMessage(imageUrl, fileName, caption = "") {
-  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-  
-  // Tenta obter o nome do remetente (abv_name)
-  let senderName = "Utilizador";
-  if (typeof fetchUserName === 'function') {
-    senderName = await fetchUserName();
-  }
+            const { data: { publicUrl } } = supabaseClient.storage
+                .from("cb_files")
+                .getPublicUrl(path);
 
-  const payload = {
-    n_int: window.currentUserNint,
-    recipient_nint: String(window.currentChat),
-    corp_oper_nr: currentCorp,
-    abv_name: senderName,
-    message_type: "image",
-    file_url: imageUrl,
-    file_name: fileName,
-    message: caption || "" // A legenda vai aqui
-  };
+            // Inserir Mensagem
+            const senderName = (typeof fetchUserName === 'function') ? await fetchUserName() : "Utilizador";
+            const corp = localStorage.getItem("currentCorpOperNr") || "0805";
 
-  const { error } = await supabaseClient.from("chat_messages").insert([payload]);
-  
-  if (error) throw error;
-}
+            const { error: insError } = await supabaseClient.from("chat_messages").insert([{
+                n_int: currentUserNint,
+                recipient_nint: String(chatAtivo),
+                corp_oper_nr: corp,
+                abv_name: senderName,
+                message_type: "image",
+                file_url: publicUrl,
+                file_name: pendingCameraFile.name,
+                message: caption
+            }]);
+
+            if (insError) throw insError;
+
+            fecharModal();
+            if (window.scrollToBottom) window.scrollToBottom();
+
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao enviar foto.");
+        } finally {
+            btnSend.disabled = false;
+            loading.style.display = "none";
+        }
+    });
+})();
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -2171,3 +2086,4 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
   </script>
 </body>
 </html>
+
