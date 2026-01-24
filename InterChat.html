@@ -604,7 +604,26 @@
     }
     
     
-    
+    function setupKeyboardResize() {
+  if (!window.visualViewport) return;
+
+  const updateForKeyboard = () => {
+    const vv = window.visualViewport;
+
+    // quanto o viewport foi "comido" (normalmente pelo teclado)
+    const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+
+    // só atualiza se não estiver emoji aberto
+    if (emojiContainer.style.display !== 'block') {
+      document.documentElement.style.setProperty('--panel-h', keyboardHeight + 'px');
+    }
+  };
+
+  visualViewport.addEventListener('resize', updateForKeyboard);
+  visualViewport.addEventListener('scroll', updateForKeyboard);
+}
+
+window.addEventListener('load', setupKeyboardResize);
     
     
     
@@ -1905,3 +1924,4 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
