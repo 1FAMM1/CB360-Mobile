@@ -1543,6 +1543,7 @@ async function sendImageMessage(imageUrl, fileName) {
 (function() {
   let originalViewportHeight = window.innerHeight;
   let isKeyboardOpen = false;
+  let restoreTimeout = null;
   
   /**
    * Deteta quando o teclado abre/fecha
@@ -1554,6 +1555,7 @@ async function sendImageMessage(imageUrl, fileName) {
     // Teclado abriu (perdeu mais de 150px de altura)
     if (heightDiff > 150 && !isKeyboardOpen) {
       isKeyboardOpen = true;
+      clearTimeout(restoreTimeout);
       handleKeyboardOpen(heightDiff);
     } 
     // Teclado fechou
@@ -1629,7 +1631,7 @@ async function sendImageMessage(imageUrl, fileName) {
     const messageContainer = document.querySelector('.message-container');
     const inputBar = document.querySelector('.chat-input-bar');
     
-    // ← IMPORTANTE: Limpa TODOS os estilos inline
+    // Limpa TODOS os estilos inline
     if (mainContent) {
       mainContent.classList.remove('keyboard-active');
       mainContent.style.overflow = '';
@@ -1639,16 +1641,24 @@ async function sendImageMessage(imageUrl, fileName) {
     
     if (messageContainer) {
       messageContainer.classList.remove('keyboard-active');
-      // ← REMOVE estilos inline aplicados
       messageContainer.style.maxHeight = '';
       messageContainer.style.marginBottom = '';
       
-      console.log('📐 Teclado fechado - Estilos removidos');
+      console.log('✅ Teclado fechado - Estilos limpos');
     }
     
     if (inputBar) {
       inputBar.classList.remove('keyboard-active');
     }
+  }
+  
+  /**
+   * ← NOVO: Força restauração (fallback)
+   */
+  function forceRestore() {
+    console.log('🔄 Forçando restauração...');
+    isKeyboardOpen = false;
+    handleKeyboardClose();
   }
   
   /**
@@ -1671,9 +1681,7 @@ async function sendImageMessage(imageUrl, fileName) {
   window.addEventListener('orientationchange', () => {
     setTimeout(() => {
       originalViewportHeight = window.innerHeight;
-      if (isKeyboardOpen) {
-        handleKeyboardClose();
-      }
+      forceRestore();
     }, 300);
   });
   
@@ -1688,7 +1696,7 @@ async function sendImageMessage(imageUrl, fileName) {
   }, { passive: false });
   
   /**
-   * Input focus
+   * Input handlers
    */
   const inputEl = document.getElementById('chat-input');
   if (inputEl) {
@@ -1705,15 +1713,77 @@ async function sendImageMessage(imageUrl, fileName) {
       e.stopPropagation();
     });
     
-    // ← NOVO: Força limpeza ao perder foco
+    // ← IMPORTANTE: Restaura ao perder foco
     inputEl.addEventListener('blur', () => {
+      console.log('🎯 Input perdeu foco');
+      // Delay para garantir que o teclado fechou
+      restoreTimeout = setTimeout(() => {
+        const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        const heightDiff = originalViewportHeight - currentHeight;
+        
+        // Se a altura voltou ao normal, restaura
+        if (heightDiff < 100) {
+          forceRestore();
+        }
+      }, 300);
+    });
+  }
+  
+  /**
+   * ← NOVO: Observa mudanças no input (quando limpa após enviar)
+   */
+  const sendBtn = document.getElementById('chat-send-btn');
+  if (sendBtn) {
+    sendBtn.addEventListener('click', () => {
+      console.log('📤 Mensagem enviada');
+      // Restaura após enviar
       setTimeout(() => {
-        if (!isKeyboardOpen) {
-          handleKeyboardClose();
+        if (inputEl && inputEl.value.trim() === '') {
+          inputEl.blur(); // Força fechar teclado
+          setTimeout(forceRestore, 200);
         }
       }, 100);
     });
   }
+  
+  /**
+   * ← NOVO: Deteta quando volta à lista de contactos
+   */
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.target.id === 'messages' && mutation.attributeName === 'style') {
+        const messagesEl = document.getElementById('messages');
+        // Se escondeu as mensagens (voltou à lista)
+        if (messagesEl && messagesEl.style.display === 'none') {
+          forceRestore();
+        }
+      }
+    });
+  });
+  
+  const messagesEl = document.getElementById('messages');
+  if (messagesEl) {
+    observer.observe(messagesEl, { attributes: true, attributeFilter: ['style'] });
+  }
+  
+  /**
+   * ← NOVO: Backup - verifica periodicamente se precisa restaurar
+   */
+  setInterval(() => {
+    if (isKeyboardOpen) {
+      const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      const heightDiff = originalViewportHeight - currentHeight;
+      
+      // Se altura normalizou mas ainda marcado como aberto
+      if (heightDiff < 100) {
+        console.log('⚠️ Teclado fechou mas não foi detetado - corrigindo...');
+        forceRestore();
+      }
+    }
+  }, 1000); // Verifica a cada segundo
+  
+  // ← NOVO: Expõe função global para chamar manualmente se necessário
+  window.forceRestoreKeyboard = forceRestore;
   
 })();
 
@@ -2172,6 +2242,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
