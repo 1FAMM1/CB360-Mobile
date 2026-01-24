@@ -71,72 +71,16 @@
     .dark-mode .confirm-text {color: #eee;}
     .dark-mode .btn-confirm-action:active {background-color: rgba(255, 255, 255, 0.05);}
     .dark-mode .draft-preview {color: #aaa !important;}
-
-
-
-
-
-
-
-/* ==================== PWA KEYBOARD FIX ==================== */
-:root {
-  --kb: 0px;
-  --footer-h: 60px; /* ajusta se o teu footer for diferente */
-  --gap: 10px;
-  --safe: env(safe-area-inset-bottom, 0px);
-}
-
-/* mensagens: espaço extra quando teclado abre */
-.message-container{
-  overflow-y:auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(var(--footer-h) + 80px + var(--kb) + var(--safe));
-}
-
-.message-container.keyboard-active{
-  scroll-behavior: auto;
-}
-
-/* input bar sobe com teclado */
-.chat-input-bar{
-  position: fixed;
-  left:0; right:0;
-  bottom: calc(var(--footer-h) + var(--kb) + var(--gap) + var(--safe));
-  z-index: 10001;
-  transition: bottom 0.12s ease;
-}
-
-.chat-input-bar.keyboard-active{
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.98);
-}
-.dark-mode .chat-input-bar.keyboard-active{
-  background: rgba(0,0,0,0.15);
-}
-
-/* teclado aberto: bloqueia scroll do body */
-body.keyboard-open{
-  overflow:hidden;
-  touch-action:none;
-}
-
-/* iOS: fixa body só durante teclado (não permanente!) */
-@supports (-webkit-touch-callout: none) {
-  body.keyboard-open {
-    position: fixed;
-    width: 100%;
-  }
-}
-
-/* se o teclado abrir, emojis escondem */
-body.keyboard-open #full-emoji-picker-container{
-  display:none !important;
-}
-
-
-
-
-    
+    /* ==================== PWA KEYBOARD FIX ==================== */
+    :root {--kb: 0px; --footer-h: 60px; --gap: 10px; --safe: env(safe-area-inset-bottom, 0px);}
+    .message-container{overflow-y:auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--footer-h) + 80px + var(--kb) + var(--safe));}
+    .message-container.keyboard-active{scroll-behavior: auto;}
+    .chat-input-bar{position: fixed; left:0; right:0; bottom: calc(var(--footer-h) + var(--kb) + var(--gap) + var(--safe)); z-index: 10001; transition: bottom 0.12s ease;}
+    .chat-input-bar.keyboard-active{box-shadow: 0 -4px 12px rgba(0,0,0,0.12); background: rgba(255,255,255,0.98);}
+    .dark-mode .chat-input-bar.keyboard-active{background: rgba(0,0,0,0.15);}
+    body.keyboard-open{overflow:hidden; touch-action:none;}
+    @supports (-webkit-touch-callout: none) {body.keyboard-open {position: fixed; width: 100%;}}
+    body.keyboard-open #full-emoji-picker-container{display:none !important;}
     /* ============= LIGHT MODE OPTIONS ============= */
     .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828; position: fixed;
              top: 0; left: 0; right: 0; z-index: 1000;}
@@ -172,25 +116,8 @@ body.keyboard-open #full-emoji-picker-container{
     .back-arrow {font-size: 25px !important; margin: 4px 0 0 0px; font-weight: bold !important;} 
     .back-header:hover {opacity: 0.75;}
     .chat-id-info {padding: 5px 20px; font-size: 15px; font-weight: bold; color: #d32f2f; background: rgba(0, 0, 0, 0.10); border-left: 4px solid #d32f2f;}    
-    .message-container {
-  display: none; 
-  flex-direction: column; 
-  gap: 0; 
-  padding: 15px; 
-  flex: 1; 
-  overflow-y: auto; 
-  -webkit-overflow-scrolling: touch; 
-  margin-bottom: 80px;
-  transition: margin-bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  /* ← ADICIONA ESTAS LINHAS */
-  max-height: calc(100dvh - 220px); /* Ajusta conforme necessário */
-  transition: max-height 0.3s ease, margin-bottom 0.3s ease;
-}
-
-/* Quando teclado está ativo, usa altura reduzida */
-.message-container.keyboard-active {
-  /* Será definido via JS inline */
-}
+    .message-container {display: none; flex-direction: column; gap: 0; padding: 15px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 80px; max-height: calc(100dvh - 220px);
+                        transition: margin-bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1); transition: max-height 0.3s ease, margin-bottom 0.3s ease;}
     .pinned-banner {background: rgba(255, 248, 225, 0.95); border-bottom: 1px solid #ffe082; padding: 10px 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #856404;
                     position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); max-height: 100px; overflow-y: auto;}
     .pinned-text {white-space: normal; word-wrap: break-word; flex: 1; font-weight: 500; line-height: 1.4;}
@@ -252,6 +179,8 @@ body.keyboard-open #full-emoji-picker-container{
     .message.deleted .msg-text-content {color: #888 !important; display: flex; align-items: center; gap: 6px;}
     .deleted-icon {font-size: 16px; opacity: 0.7;}
     .message.deleted .msg-meta {opacity: 0.5;}
+    .message.is-forwarded::before{content: "forward"; font-family: "Material Symbols Outlined"; font-size: 16px; opacity: 0.6; position: absolute; left: -22px; top: 50%; pointer-events: none;
+                                  transform: translateY(-50%); user-select: none; line-height: 1; direction: ltr;}
     .edit-bar {position: fixed; bottom: 100px; left: 0; right: 0; background: rgba(255, 235, 59, 0.95); border-top: 2px solid #f9a825; padding: 10px 15px; z-index: 1002; display: none;
                box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px);}
     .edit-bar-content {display: flex; align-items: center; gap: 10px;}
@@ -338,7 +267,7 @@ body.keyboard-open #full-emoji-picker-container{
     .audio-bubble.dark {background: rgba(20, 20, 25, 0.85); border-color: rgba(255, 255, 255, 0.08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);}
     .audio-bubble.dark:hover {background: rgba(25, 25, 30, 0.9);}
     .audio-bubble.dark .audio-progress-bar {background: rgba(255, 255, 255, 0.08);}
-    .audio-bubble.dark .audio-time {color: rgba(255, 255, 255, 0.9);}
+    .audio-bubble.dark .audio-time {color: rgba(255, 255, 255, 0.9);}   
     @keyframes slideUp {from {transform: translateY(100%); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     @keyframes popScale {0% {transform: scale(0.85); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}    
     @keyframes pulse-green {0% {transform: scale(1); box-shadow: 0 0 5px #00ff00;} 50% {transform: scale(1.15); box-shadow: 0 0 12px #00ff00;} 100% {transform: scale(1); box-shadow: 0 0 5px #00ff00;}}
@@ -347,24 +276,6 @@ body.keyboard-open #full-emoji-picker-container{
     @keyframes highlight-fade {0% {background: rgba(211, 47, 47, 0.3);} 100% {background: inherit;}}
     @keyframes gentle-pulse {0%, 100% {box-shadow: 0 4px 12px rgba(52, 183, 241, 0.5), 0 2px 6px rgba(52, 183, 241, 0.3);} 50% {box-shadow: 0 6px 16px rgba(52, 183, 241, 0.7), 0 3px 8px rgba(52, 183, 241, 0.5);}}
     @keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
-    
-    
-    .message.is-forwarded::before{
-  content: "forward";
-  font-family: "Material Symbols Outlined";
-  font-size: 16px;
-  opacity: 0.6;
-  position: absolute;
-  left: -22px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  user-select: none;
-  line-height: 1;
-  direction: ltr;
-}
-    
-    
     /* =================================================
     MEDIA QUERIES - FULL RESPONSIVENESS
     ================================================= */
@@ -383,7 +294,8 @@ body.keyboard-open #full-emoji-picker-container{
     /* ============ RESPONSIVENESS 385px ============ */
     @media (max-width: 385px) {
       .powered-by {font-size: 10px !important; white-space: nowrap;}
-      .footer-year {font-size: 8px !important;}}
+      .footer-year {font-size: 8px !important;}
+      .chat-input-bar {bottom: 38px;}}
   </style>
 </head>
 <body>
@@ -486,28 +398,22 @@ body.keyboard-open #full-emoji-picker-container{
   <div id="full-emoji-picker-container">
     <emoji-picker locale="pt" class="light"></emoji-picker
   </div>
-      <input
-  type="file"
-  id="camera-file-input"
-  accept="image/*"
-  capture="environment"
-  style="display:none"
-/>
+  <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none"/>
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-(function () {
-  function setVH() {
-    document.documentElement.style.setProperty(
-      '--vh',
-      (window.innerHeight * 0.01) + 'px'
-    );
-  }
-  window.addEventListener('resize', setVH);
-  window.addEventListener('orientationchange', setVH);
-  setVH();
-})();
-</script>
+    (function () {
+      function setVH() {
+        document.documentElement.style.setProperty(
+          '--vh',
+          (window.innerHeight * 0.01) + 'px'
+        );
+      }
+      window.addEventListener('resize', setVH);
+      window.addEventListener('orientationchange', setVH);
+      setVH();
+    })();
+  </script>
   <script> 
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
@@ -561,26 +467,20 @@ body.keyboard-open #full-emoji-picker-container{
     window.addEventListener('pageshow', adjustMainContent);
     /* ================== TYPING BAR & EMOJI CONTROLER =================== */
     const inputMensage = document.getElementById('chat-input');
-    const barraDeInput = document.querySelector('.chat-input-bar');
+    const inputBar = document.querySelector('.chat-input-bar');
     const iconBtn = document.getElementById('send-icon'); 
     const emojiBtn = document.getElementById('emoji-open-btn');
     const emojiContainer = document.getElementById('full-emoji-picker-container');
     const picker = document.querySelector('emoji-picker');
     const messageContainer = document.querySelector('.message-container');
     function resetLayout() {
-  emojiContainer.style.display = 'none';
-
-  // NÃO forçar bottom por JS — deixa o CSS/vars controlar
-  barraDeInput.style.removeProperty('bottom');
-
-  // idem para marginBottom se já usas padding + kb vars
-  messageContainer.style.removeProperty('margin-bottom');
-
-  setTimeout(() => {
-    scrollToBottom();
-  }, 100);
-}
-
+      emojiContainer.style.display = 'none';
+      inputBar.style.removeProperty('bottom');
+      messageContainer.style.removeProperty('margin-bottom');
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
     inputMensage.addEventListener('input', function() {
       const hasText = this.value.trim().length > 0;
       const novoIcone = hasText ? 'send' : 'mic';
@@ -592,9 +492,9 @@ body.keyboard-open #full-emoji-picker-container{
           iconBtn.style.transform = 'rotate(0deg) scale(1)';
           iconBtn.style.opacity = '1';
           if (hasText) {
-            barraDeInput.classList.add('typing');
+            inputBar.classList.add('typing');
           } else {
-            barraDeInput.classList.remove('typing');
+            inputBar.classList.remove('typing');
           }
         }, 150);
       }
@@ -608,7 +508,7 @@ body.keyboard-open #full-emoji-picker-container{
         inputMensage.blur(); 
         setTimeout(() => {
           emojiContainer.style.display = 'block';
-          barraDeInput.style.bottom = '305px'; 
+          inputBar.style.bottom = '305px'; 
           messageContainer.style.marginBottom = '325px'; 
           let scrollAcompanha = setInterval(() => {
             messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -660,7 +560,7 @@ body.keyboard-open #full-emoji-picker-container{
           isRecording = true;
           iconBtn.classList.add("recording-pulse");
           inputMensage.placeholder = "🔴 A gravar... solte para enviar";
-          if (barraDeInput) barraDeInput.style.backgroundColor = "#fff5f5";
+          if (inputBar) inputBar.style.backgroundColor = "#fff5f5";
         } catch (err) {
           console.error("Erro ao aceder ao microfone:", err);
           if (err.name === 'NotAllowedError') {
@@ -680,10 +580,10 @@ body.keyboard-open #full-emoji-picker-container{
         isRecording = false;
         iconBtn.classList.remove("recording-pulse");
         inputMensage.placeholder = "Mensagem";
-        if (barraDeInput) barraDeInput.style.backgroundColor = "";
+        if (inputBar) inputBar.style.backgroundColor = "";
       } else {
         inputMensage.placeholder = "Mensagem";
-        if (barraDeInput) barraDeInput.style.backgroundColor = "";
+        if (inputBar) inputBar.style.backgroundColor = "";
       }
     }
     iconBtn.addEventListener('mousedown', startAudioLogic);
@@ -709,86 +609,54 @@ body.keyboard-open #full-emoji-picker-container{
         console.error("Erro:", err.message);
       }
     }
-    
-    
-    
-    
-    
-    
+    /* ======================== CAMERA RECORDING ========================= */
     const cameraBtn = document.getElementById("camera-btn");
-const cameraInput = document.getElementById("camera-file-input");
-
-cameraBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  if (currentChat === "null") return; // só dentro de um chat
-  cameraInput.click();               // abre a câmara (ou seletor)
-});
-
-cameraInput.addEventListener("change", async () => {
-  const file = cameraInput.files?.[0];
-  if (!file) return;
-
-  try {
-    // upload + obter URL
-    const publicUrl = await uploadImageToSupabase(file);
-
-    // inserir mensagem tipo image
-    await sendImageMessage(publicUrl, file.name || `foto_${Date.now()}.jpg`);
-
-  } catch (err) {
-    console.error("Erro ao enviar foto:", err);
-    alert("Não foi possível enviar a foto.");
-  } finally {
-    // permite escolher a mesma foto novamente
-    cameraInput.value = "";
-  }
-});
-
-async function uploadImageToSupabase(file) {
-  if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
-
-  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
-  const fileName = `photo_${Date.now()}.${ext}`;
-  const filePath = `${currentChat}/${fileName}`;
-
-  const { error } = await supabaseClient
-    .storage
-    .from("cb_files")
-    .upload(filePath, file);
-
-  if (error) throw error;
-
-  const { data: { publicUrl } } = supabaseClient
-    .storage
-    .from("cb_files")
-    .getPublicUrl(filePath);
-
-  if (!publicUrl) throw new Error("Sem URL público.");
-  return publicUrl;
-}
-
-async function sendImageMessage(imageUrl, fileName) {
-  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-  const senderName = await fetchUserName();
-
-  const payload = {
-    n_int: currentUserNint,
-    recipient_nint: String(currentChat),
-    corp_oper_nr: currentCorp,
-    abv_name: senderName,
-    message_type: "image",
-    file_url: imageUrl,
-    file_name: fileName,
-    message: "" // opcional legenda
-  };
-
-  const { error } = await supabaseClient
-    .from("chat_messages")
-    .insert([payload]);
-
-  if (error) throw error;
-}
-
+    const cameraInput = document.getElementById("camera-file-input");
+    cameraBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentChat === "null") return;
+      cameraInput.click();
+    });
+    cameraInput.addEventListener("change", async () => {
+      const file = cameraInput.files?.[0];
+      if (!file) return;
+      try {
+        const publicUrl = await uploadImageToSupabase(file);
+        await sendImageMessage(publicUrl, file.name || `foto_${Date.now()}.jpg`);
+      } catch (err) {
+        console.error("Erro ao enviar foto:", err);
+        alert("Não foi possível enviar a foto.");
+      } finally {
+        cameraInput.value = "";
+      }
+    });
+    async function uploadImageToSupabase(file) {
+      if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
+      const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
+      const fileName = `photo_${Date.now()}.${ext}`;
+      const filePath = `${currentChat}/${fileName}`;
+      const { error } = await supabaseClient
+      .storage
+      .from("cb_files")
+      .upload(filePath, file);
+      if (error) throw error;
+      const { data: { publicUrl } } = supabaseClient
+      .storage
+      .from("cb_files")
+      .getPublicUrl(filePath);
+      if (!publicUrl) throw new Error("Sem URL público.");
+      return publicUrl;
+    }
+    async function sendImageMessage(imageUrl, fileName) {
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const senderName = await fetchUserName();
+      const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl, 
+                       file_name: fileName, message: ""};
+      const { error } = await supabaseClient
+      .from("chat_messages")
+      .insert([payload]);
+      if (error) throw error;
+    }
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -1566,138 +1434,95 @@ async function sendImageMessage(imageUrl, fileName) {
       document.getElementById('edit-bar').style.display = 'none';
       document.getElementById('chat-input').value = '';
     }
-
-
-
-
-
-/* ==================== KEYBOARD HANDLER (PWA FIX) ==================== */
-(function () {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const THRESH_OPEN  = isIOS ? 80  : 120;
-  const THRESH_CLOSE = isIOS ? 40  : 60;
-
-  let keyboardOpen = false;
-  let baseInnerHeight = window.innerHeight;
-
-  const body = document.body;
-  const mainContent = document.querySelector(".main-content");
-  const messages = document.querySelector(".message-container");
-  const inputBar = document.querySelector(".chat-input-bar");
-  const inputEl = document.getElementById("chat-input");
-  const emojiContainer = document.getElementById("full-emoji-picker-container");
-
-  function setKb(px) {
-    document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
-  }
-
-  function isChatVisible() {
-    const el = document.getElementById("messages");
-    return el && el.style.display !== "none";
-  }
-
-  function getKeyboardHeight() {
-    if (!window.visualViewport) return 0;
-    const vv = window.visualViewport;
-    const a = window.innerHeight - vv.height;
-    const b = window.innerHeight - vv.height - vv.offsetTop;
-    const c = window.innerHeight - vv.height + vv.offsetTop;
-    return Math.max(0, a, b, c);
-  }
-
-  function onKeyboardOpen(kbHeight) {
-    if (!isChatVisible()) return;
-    keyboardOpen = true;
-
-    body.classList.add("keyboard-open");
-    messages?.classList.add("keyboard-active");
-    inputBar?.classList.add("keyboard-active");
-    mainContent?.classList.add("keyboard-active");
-
-    setKb(kbHeight);
-
-    // fecha emoji picker se estiver aberto
-    if (emojiContainer && emojiContainer.style.display === "block") {
-      emojiContainer.style.display = "none";
-    }
-
-    // garante última mensagem visível
-    scrollToBottom();
-    setTimeout(scrollToBottom, 120); // iOS/layout em 2 fases
-  }
-
-  function onKeyboardClose() {
-    keyboardOpen = false;
-
-    body.classList.remove("keyboard-open");
-    messages?.classList.remove("keyboard-active");
-    inputBar?.classList.remove("keyboard-active");
-    mainContent?.classList.remove("keyboard-active");
-
-    setKb(0);
-  }
-
-  function detectKeyboard() {
-    if (!keyboardOpen) baseInnerHeight = window.innerHeight;
-    const kb = getKeyboardHeight();
-
-    if (!keyboardOpen && kb > THRESH_OPEN) {
-      onKeyboardOpen(kb);
-    } else if (keyboardOpen && kb < THRESH_CLOSE) {
-      onKeyboardClose();
-    } else if (keyboardOpen) {
-      // teclado já aberto: atualiza altura e mantém scroll no fundo
-      setKb(kb);
-      scrollToBottom();
-      setTimeout(scrollToBottom, 120);
-    }
-  }
-
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", detectKeyboard);
-    window.visualViewport.addEventListener("scroll", detectKeyboard);
-  } else {
-    window.addEventListener("resize", detectKeyboard);
-  }
-
-  // foco no input: manter no fundo
-  inputEl?.addEventListener("focus", () => {
-    scrollToBottom();
-    setTimeout(scrollToBottom, 120);
-  });
-
-  // blur: dá tempo para fechar teclado e re-detectar
-  inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));
-
-  window.addEventListener("orientationchange", () => {
-    setTimeout(() => {
-      baseInnerHeight = window.innerHeight;
-      detectKeyboard();
-    }, 300);
-  });
-
-  // ao sair do chat (voltar à lista), garante reset do estado do teclado
-  const messagesEl = document.getElementById("messages");
-  if (messagesEl) {
-    const obs = new MutationObserver(() => {
-      if (!isChatVisible()) onKeyboardClose();
-    });
-    obs.observe(messagesEl, { attributes: true, attributeFilter: ["style"] });
-  }
-
-  // helper global (se precisares de forçar)
-  window.forceRestoreKeyboard = onKeyboardClose;
-})();
-
-
-
-
-
-    
-
-
-
-    
+    /* ==================== KEYBOARD HANDLER (PWA FIX) ==================== */
+    (function () {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const THRESH_OPEN  = isIOS ? 80  : 120;
+      const THRESH_CLOSE = isIOS ? 40  : 60;
+      let keyboardOpen = false;
+      let baseInnerHeight = window.innerHeight;
+      const body = document.body;
+      const mainContent = document.querySelector(".main-content");
+      const messages = document.querySelector(".message-container");
+      const inputBar = document.querySelector(".chat-input-bar");
+      const inputEl = document.getElementById("chat-input");
+      const emojiContainer = document.getElementById("full-emoji-picker-container");
+      function setKb(px) {
+        document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
+      }
+      function isChatVisible() {
+        const el = document.getElementById("messages");
+        return el && el.style.display !== "none";
+      }
+      function getKeyboardHeight() {
+        if (!window.visualViewport) return 0;
+        const vv = window.visualViewport;
+        const a = window.innerHeight - vv.height;
+        const b = window.innerHeight - vv.height - vv.offsetTop;
+        const c = window.innerHeight - vv.height + vv.offsetTop;
+        return Math.max(0, a, b, c);
+      }
+      function onKeyboardOpen(kbHeight) {
+        if (!isChatVisible()) return;
+        keyboardOpen = true;
+        body.classList.add("keyboard-open");
+        messages?.classList.add("keyboard-active");
+        inputBar?.classList.add("keyboard-active");
+        mainContent?.classList.add("keyboard-active");
+        setKb(kbHeight);
+        if (emojiContainer && emojiContainer.style.display === "block") {
+          emojiContainer.style.display = "none";
+        }
+        scrollToBottom();
+        setTimeout(scrollToBottom, 120);
+      }
+      function onKeyboardClose() {
+        keyboardOpen = false;
+        body.classList.remove("keyboard-open");
+        messages?.classList.remove("keyboard-active");
+        inputBar?.classList.remove("keyboard-active");
+        mainContent?.classList.remove("keyboard-active");
+        setKb(0);
+      }
+      function detectKeyboard() {
+        if (!keyboardOpen) baseInnerHeight = window.innerHeight;
+        const kb = getKeyboardHeight();
+        if (!keyboardOpen && kb > THRESH_OPEN) {
+          onKeyboardOpen(kb);
+        } else if (keyboardOpen && kb < THRESH_CLOSE) {
+          onKeyboardClose();
+        } else if (keyboardOpen) {
+          setKb(kb);
+          scrollToBottom();
+          setTimeout(scrollToBottom, 120);
+        }
+      }
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", detectKeyboard);
+        window.visualViewport.addEventListener("scroll", detectKeyboard);
+      } else {
+        window.addEventListener("resize", detectKeyboard);
+      }
+      inputEl?.addEventListener("focus", () => {
+        scrollToBottom();
+        setTimeout(scrollToBottom, 120);
+      });
+      inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));
+      window.addEventListener("orientationchange", () => {
+        setTimeout(() => {
+          baseInnerHeight = window.innerHeight;
+          detectKeyboard();
+        }, 300);
+      });
+      const messagesEl = document.getElementById("messages");
+      if (messagesEl) {
+        const obs = new MutationObserver(() => {
+          if (!isChatVisible()) onKeyboardClose();
+        });
+        obs.observe(messagesEl, {attributes: true, attributeFilter: ["style"]});
+      }
+      window.forceRestoreKeyboard = onKeyboardClose;
+    })();
     /* =================== INITIALIZATION AND REALTIME =================== */
     document.addEventListener('DOMContentLoaded', async () => {
       loadCorpInfo();
@@ -2146,22 +1971,3 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
