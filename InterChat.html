@@ -181,8 +181,25 @@ body.keyboard-open {
     .back-arrow {font-size: 25px !important; margin: 4px 0 0 0px; font-weight: bold !important;} 
     .back-header:hover {opacity: 0.75;}
     .chat-id-info {padding: 5px 20px; font-size: 15px; font-weight: bold; color: #d32f2f; background: rgba(0, 0, 0, 0.10); border-left: 4px solid #d32f2f;}    
-    .message-container {display: none; flex-direction: column; gap: 0; padding: 15px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 80px; 
-                        transition: margin-bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);}
+    .message-container {
+  display: none; 
+  flex-direction: column; 
+  gap: 0; 
+  padding: 15px; 
+  flex: 1; 
+  overflow-y: auto; 
+  -webkit-overflow-scrolling: touch; 
+  margin-bottom: 80px;
+  transition: margin-bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  /* ← ADICIONA ESTAS LINHAS */
+  max-height: calc(100dvh - 220px); /* Ajusta conforme necessário */
+  transition: max-height 0.3s ease, margin-bottom 0.3s ease;
+}
+
+/* Quando teclado está ativo, usa altura reduzida */
+.message-container.keyboard-active {
+  /* Será definido via JS inline */
+}
     .pinned-banner {background: rgba(255, 248, 225, 0.95); border-bottom: 1px solid #ffe082; padding: 10px 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #856404;
                     position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); max-height: 100px; overflow-y: auto;}
     .pinned-text {white-space: normal; word-wrap: break-word; flex: 1; font-weight: 500; line-height: 1.4;}
@@ -1633,36 +1650,15 @@ async function sendImageMessage(imageUrl, fileName) {
   if (mainContent) {
     mainContent.classList.remove('keyboard-active');
     mainContent.style.overflow = '';
-    mainContent.style.maxHeight = '';
-    mainContent.style.height = '';
   }
   
   if (messageContainer) {
     messageContainer.classList.remove('keyboard-active');
+    // Remove inline para voltar ao CSS
+    messageContainer.style.removeProperty('max-height');
+    messageContainer.style.removeProperty('margin-bottom');
     
-    // ← NOVO: Calcula altura NORMAL (sem teclado)
-    const headerHeight = document.querySelector('.header')?.offsetHeight || 100;
-    const footerHeight = document.querySelector('.footer')?.offsetHeight || 60;
-    const inputHeight = inputBar?.offsetHeight || 60;
-    const backHeaderHeight = document.getElementById('back-header')?.offsetHeight || 0;
-    const chatIdHeight = document.getElementById('chat-id-info')?.offsetHeight || 0;
-    const pinnedHeight = document.getElementById('pinned-message')?.offsetHeight || 0;
-    
-    // Altura total ocupada pelos elementos fixos
-    const occupiedSpace = headerHeight + footerHeight + inputHeight + backHeaderHeight + chatIdHeight + pinnedHeight + 20;
-    
-    // Altura disponível TOTAL (viewport completo)
-    const normalHeight = window.innerHeight - occupiedSpace;
-    
-    // ← APLICA a altura normal
-    messageContainer.style.maxHeight = `${normalHeight}px`;
-    messageContainer.style.marginBottom = '80px'; // Margem original
-    
-    console.log('✅ Teclado fechado - Altura restaurada:', {
-      viewport: window.innerHeight,
-      occupied: occupiedSpace,
-      normalHeight: normalHeight
-    });
+    console.log('✅ Restaurado ao CSS original');
   }
   
   if (inputBar) {
@@ -2260,6 +2256,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
