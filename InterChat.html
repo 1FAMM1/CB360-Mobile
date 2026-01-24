@@ -670,108 +670,83 @@
     
     
     
-    /* ======================== CAMERA COM LEGENDA (CORRIGIDO) ========================= */
-    const cameraBtn = document.getElementById("camera-btn");
-    const cameraInput = document.getElementById("camera-file-input");
-    const attachModal = document.getElementById("attach-modal");
-    const attachImg = document.getElementById("attach-preview-img");
-    const attachCaption = document.getElementById("attach-caption");
-    const attachSend = document.getElementById("attach-send");
-    const attachCancel = document.getElementById("attach-cancel");
-    const attachLoading = document.getElementById("attach-loading");
+    /* ======================== CAMERA COM LEGENDA (FIX MOBILE) ========================= */
+const cameraBtn = document.getElementById("camera-btn");
+const cameraInput = document.getElementById("camera-file-input");
+const attachModal = document.getElementById("attach-modal");
+const attachImg = document.getElementById("attach-preview-img");
+const attachCaption = document.getElementById("attach-caption");
+const attachSend = document.getElementById("attach-send");
+const attachCancel = document.getElementById("attach-cancel");
+const attachLoading = document.getElementById("attach-loading");
 
-    let pendingCameraFile = null;
+let pendingCameraFile = null;
 
-    cameraBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      if (currentChat === "null") return;
-      cameraInput.value = ""; // Limpa para permitir repetir a mesma foto
-      cameraInput.click();
-    });
+cameraBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (currentChat === "null" || !currentChat) return;
+    cameraInput.value = ""; 
+    cameraInput.click();
+});
 
-    cameraInput.addEventListener("change", async () => {
-      const file = cameraInput.files?.[0];
-      if (!file) return;
+// AQUI É ONDE O MODAL DEVE APARECER
+cameraInput.addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
 
-      pendingCameraFile = file;
+    pendingCameraFile = file;
 
-      // Abrir o modal com a foto
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        attachImg.src = e.target.result;
-        attachCaption.value = ""; // Limpa legenda anterior
-        attachModal.style.setProperty("display", "flex", "important"); // Mostra o modal
-        setTimeout(() => attachCaption.focus(), 500);
-      };
-      reader.readAsDataURL(file);
-    });
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        // 1. Carregar a imagem primeiro
+        attachImg.src = event.target.result;
+        attachCaption.value = "";
+        
+        // 2. FORÇAR ABERTURA (CSS Text é mais forte que .style.display)
+        // Isso garante que o z-index e o display são aplicados acima de qualquer outra regra
+        attachModal.style.cssText = "display: flex !important; visibility: visible !important; opacity: 1 !important; z-index: 9999999 !important;";
+        
+        // 3. Pequeno delay para o teclado mobile não bugar o foco
+        setTimeout(() => {
+            attachCaption.focus();
+        }, 500);
+    };
+    reader.readAsDataURL(file);
+});
 
-    // Botão Cancelar no Modal
-    attachCancel.addEventListener("click", () => {
-      attachModal.style.setProperty("display", "none", "important");
-      pendingCameraFile = null;
-      cameraInput.value = "";
-    });
+// Fechar Modal
+const fecharModal = () => {
+    attachModal.style.cssText = "display: none !important;";
+    pendingCameraFile = null;
+    cameraInput.value = "";
+};
 
-    // Botão Enviar no Modal (Aqui é que faz o upload real)
-    attachSend.addEventListener("click", async () => {
-      if (!pendingCameraFile) return;
-      
-      const caption = attachCaption.value.trim();
+attachCancel.addEventListener("click", fecharModal);
 
-      try {
+// Enviar
+attachSend.addEventListener("click", async () => {
+    if (!pendingCameraFile) return;
+    
+    const caption = attachCaption.value.trim();
+
+    try {
         attachLoading.style.display = "flex";
         attachSend.disabled = true;
 
-        // 1. Upload para o Supabase
         const publicUrl = await uploadImageToSupabase(pendingCameraFile);
-        
-        // 2. Enviar mensagem com a legenda (Passamos o caption aqui)
         await sendImageMessage(publicUrl, pendingCameraFile.name || `foto_${Date.now()}.jpg`, caption);
 
-        // 3. Fechar tudo
-        attachModal.style.setProperty("display", "none", "important");
-        pendingCameraFile = null;
-        cameraInput.value = "";
+        fecharModal();
         if (typeof scrollToBottom === "function") scrollToBottom();
 
-      } catch (err) {
-        console.error("Erro ao enviar foto:", err);
-        alert("Não foi possível enviar a foto.");
-      } finally {
+    } catch (err) {
+        console.error("Erro:", err);
+        alert("Falha no envio.");
+    } finally {
         attachLoading.style.display = "none";
         attachSend.disabled = false;
-      }
-    });
-
-    /* Funções de Suporte (Ajustadas) */
-    async function uploadImageToSupabase(file) {
-      if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
-      const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
-      const fileName = `photo_${Date.now()}.${ext}`;
-      const filePath = `${currentChat}/${fileName}`;
-      const { error } = await supabaseClient.storage.from("cb_files").upload(filePath, file);
-      if (error) throw error;
-      const { data: { publicUrl } } = supabaseClient.storage.from("cb_files").getPublicUrl(filePath);
-      return publicUrl;
     }
-
-    async function sendImageMessage(imageUrl, fileName, caption = "") {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      const senderName = await fetchUserName();
-      const payload = {
-        n_int: currentUserNint, 
-        recipient_nint: String(currentChat), 
-        corp_oper_nr: currentCorp, 
-        abv_name: senderName, 
-        message_type: "image", 
-        file_url: imageUrl, 
-        file_name: fileName, 
-        message: caption // A legenda é guardada aqui
-      };
-      const { error } = await supabaseClient.from("chat_messages").insert([payload]);
-      if (error) throw error;
-    }
+});
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -2089,6 +2064,7 @@
   </script>
 </body>
 </html>
+
 
 
 
