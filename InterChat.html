@@ -673,137 +673,7 @@
       }
     }
     
-    
-    
-    
-   /* ==========================================================
-       ISTO ASSUME QUE NO TEU PROJETO JÁ EXISTEM:
-       - currentChat (string)
-       - currentUserNint
-       - supabaseClient (supabase-js v2)
-       - fetchUserName()
-       Se não existirem aqui, o envio vai falhar (normal).
-       ========================================================== */
-
-   /* ======================== CAMERA + MODAL (LEGENDA) ========================= */
-const cameraBtn = document.getElementById("camera-btn");
-const cameraInput = document.getElementById("camera-file-input");
-
-const attachModal   = document.getElementById("attach-modal");
-const attachImg     = document.getElementById("attach-preview-img");
-const attachCaption = document.getElementById("attach-caption");
-const attachSend    = document.getElementById("attach-send");
-const attachCancel  = document.getElementById("attach-cancel");
-const attachLoading = document.getElementById("attach-loading");
-
-let pendingFile = null;
-let previewUrl = null;
-
-cameraBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  if (currentChat === "null") return;
-
-  cameraInput.value = "";      // permite repetir a mesma foto
-  cameraInput.click();         // abre câmara (gesto do utilizador)
-});
-
-cameraInput.addEventListener("change", (e) => {
-  // PWA/iOS: usar e.target é mais confiável
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  pendingFile = file;
-
-  // preview instantâneo
-  if (previewUrl) URL.revokeObjectURL(previewUrl);
-  previewUrl = URL.createObjectURL(file);
-  attachImg.src = previewUrl;
-
-  // abrir modal
-  attachModal.style.setProperty("display", "flex", "important");
-  attachCaption.value = "";
-  setTimeout(() => attachCaption.focus(), 250);
-});
-
-function fecharModalFoto() {
-  attachModal.style.setProperty("display", "none", "important");
-  attachLoading.style.display = "none";
-  attachSend.disabled = false;
-
-  if (previewUrl) URL.revokeObjectURL(previewUrl);
-  previewUrl = null;
-
-  pendingFile = null;
-  cameraInput.value = "";
-}
-
-attachCancel.addEventListener("click", fecharModalFoto);
-
-attachSend.addEventListener("click", async () => {
-  if (!pendingFile) return;
-
-  const caption = (attachCaption.value || "").trim();
-
-  try {
-    attachLoading.style.display = "flex";
-    attachSend.disabled = true;
-
-    const publicUrl = await uploadImageToSupabase(pendingFile);
-    await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
-
-    fecharModalFoto();
-  } catch (err) {
-    console.error("Erro ao enviar foto:", err);
-    alert("Não foi possível enviar a foto.");
-    attachLoading.style.display = "none";
-    attachSend.disabled = false;
-  }
-});
-
-/* ============== AS TUAS FUNÇÕES ORIGINAIS (com caption) ============== */
-async function uploadImageToSupabase(file) {
-  if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
-  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
-  const fileName = `photo_${Date.now()}.${ext}`;
-  const filePath = `${currentChat}/${fileName}`;
-
-  const { error } = await supabaseClient
-    .storage
-    .from("cb_files")
-    .upload(filePath, file);
-
-  if (error) throw error;
-
-  const { data: { publicUrl } } = supabaseClient
-    .storage
-    .from("cb_files")
-    .getPublicUrl(filePath);
-
-  if (!publicUrl) throw new Error("Sem URL público.");
-  return publicUrl;
-}
-
-async function sendImageMessage(imageUrl, fileName, caption = "") {
-  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-  const senderName = await fetchUserName();
-
-  const payload = {
-    n_int: currentUserNint,
-    recipient_nint: String(currentChat),
-    corp_oper_nr: currentCorp,
-    abv_name: senderName,
-    message_type: "image",
-    file_url: imageUrl,
-    file_name: fileName,
-    message: caption
-  };
-
-  const { error } = await supabaseClient
-    .from("chat_messages")
-    .insert([payload]);
-
-  if (error) throw error;
-}
+   
 
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
@@ -2120,20 +1990,102 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
       }
     }
   </script>
+
+
+
+<script>
+(function initCameraCaptionModal(){
+  // espera pelo DOM (seguro em PWA)
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initCameraCaptionModal);
+    return;
+  }
+
+  try {
+    const cameraBtn   = document.getElementById("camera-btn");
+    const cameraInput = document.getElementById("camera-file-input");
+
+    const attachModal   = document.getElementById("attach-modal");
+    const attachImg     = document.getElementById("attach-preview-img");
+    const attachCaption = document.getElementById("attach-caption");
+    const attachSend    = document.getElementById("attach-send");
+    const attachCancel  = document.getElementById("attach-cancel");
+    const attachLoading = document.getElementById("attach-loading");
+
+    if (!cameraBtn || !cameraInput || !attachModal || !attachImg || !attachCaption || !attachSend || !attachCancel || !attachLoading) {
+      alert("ERRO: faltam elementos do modal/camera no DOM");
+      return;
+    }
+
+    let pendingFile = null;
+    let previewUrl = null;
+
+    cameraBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      // evita ReferenceError se currentChat não existir por algum motivo
+      if (typeof currentChat !== "undefined" && currentChat === "null") return;
+
+      cameraInput.value = "";
+      cameraInput.click();
+    });
+
+    cameraInput.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      pendingFile = file;
+
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(file);
+      attachImg.src = previewUrl;
+
+      attachModal.style.setProperty("display", "flex", "important");
+      attachCaption.value = "";
+      setTimeout(() => attachCaption.focus(), 250);
+    });
+
+    function fecharModalFoto() {
+      attachModal.style.setProperty("display", "none", "important");
+      attachLoading.style.display = "none";
+      attachSend.disabled = false;
+
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+      pendingFile = null;
+      cameraInput.value = "";
+    }
+
+    attachCancel.addEventListener("click", fecharModalFoto);
+
+    attachSend.addEventListener("click", async () => {
+      if (!pendingFile) return;
+
+      const caption = (attachCaption.value || "").trim();
+
+      try {
+        attachLoading.style.display = "flex";
+        attachSend.disabled = true;
+
+        const publicUrl = await uploadImageToSupabase(pendingFile);
+        await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
+
+        fecharModalFoto();
+      } catch (err) {
+        console.error(err);
+        alert("Não foi possível enviar a foto.");
+        attachLoading.style.display = "none";
+        attachSend.disabled = false;
+      }
+    });
+
+  } catch (err) {
+    alert("ERRO ao iniciar modal camera: " + (err?.message || err));
+  }
+})();
+</script>
+
+
+
+  
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
