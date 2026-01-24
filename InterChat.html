@@ -670,80 +670,115 @@
     
     
     
-    /* ======================== MOTOR DE CÂMARA FORCE-START ========================= */
+    /* ======================== CAMERA COM PREVIEW E LEGENDA ========================= */
+const cameraBtn = document.getElementById("camera-btn");
+const cameraInput = document.getElementById("camera-file-input");
 
-// 1. Abrir a câmara (Função Global)
-window.abrirCamera = function() {
-  if (!currentChat || currentChat === "null") return alert("Selecione um chat.");
-  const input = document.getElementById("camera-file-input");
-  input.value = ""; // Limpa para permitir repetir
-  input.click();
-};
+// Referências do Modal (Assegure-se que o CSS que enviou está ativo)
+const attachModal = document.getElementById("attach-modal");
+const attachImg = document.getElementById("attach-preview-img");
+const attachCaption = document.getElementById("attach-caption");
+const attachSend = document.getElementById("attach-send");
+const attachCancel = document.getElementById("attach-cancel");
+const attachLoading = document.getElementById("attach-loading");
 
-// Substitua o listener do seu botão de câmara por este:
-document.getElementById("camera-btn")?.addEventListener("click", (e) => {
+let tempFile = null; // Guardará o arquivo enquanto você escreve a legenda
+
+cameraBtn.addEventListener("click", (e) => {
   e.preventDefault();
-  window.abrirCamera();
+  if (currentChat === "null") return;
+  cameraInput.click();
 });
 
-// 2. Processar a Foto (Chamada via onchange inline)
-window.processarFotoCapturada = function(input) {
-  const file = input.files[0];
+// AQUI ESTÁ A MUDANÇA: Em vez de enviar, abrimos o modal
+cameraInput.addEventListener("change", () => {
+  const file = cameraInput.files?.[0];
   if (!file) return;
 
-  window.pendingFile = file; // Guarda globalmente
+  tempFile = file; // Salva o arquivo
 
+  // Criar o preview para ver no modal
   const reader = new FileReader();
-  reader.onload = function(e) {
-    const modal = document.getElementById("attach-modal");
-    const img = document.getElementById("attach-preview-img");
+  reader.onload = (e) => {
+    attachImg.src = e.target.result;
+    attachCaption.value = ""; // Limpa legenda anterior
     
-    img.src = e.target.result;
+    // MOSTRAR MODAL
+    attachModal.style.display = "flex"; 
     
-    // FORÇAR ABERTURA (CSS Text ignora qualquer bloqueio anterior)
-    modal.style.cssText = "display: flex !important; z-index: 9999999 !important;";
-    
-    setTimeout(() => document.getElementById("attach-caption").focus(), 500);
+    // Focar no campo de legenda
+    setTimeout(() => attachCaption.focus(), 300);
   };
   reader.readAsDataURL(file);
+});
+
+// AÇÃO DO BOTÃO CANCELAR NO MODAL
+attachCancel.onclick = () => {
+  attachModal.style.display = "none";
+  cameraInput.value = "";
+  tempFile = null;
 };
 
-// 3. Fechar Modal
-window.fecharModalAnexo = function() {
-  const modal = document.getElementById("attach-modal");
-  modal.style.setProperty("display", "none", "important");
-  window.pendingFile = null;
-};
-
-// 4. Upload Final (Chamado pelo botão Enviar)
-window.executarUploadFinal = async function() {
-  if (!window.pendingFile) return;
-
-  const btn = document.getElementById("attach-send");
-  const loading = document.getElementById("attach-loading");
-  const caption = document.getElementById("attach-caption").value.trim();
+// AÇÃO DO BOTÃO ENVIAR NO MODAL (O seu código original de envio vem para aqui)
+attachSend.onclick = async () => {
+  if (!tempFile) return;
+  
+  const caption = attachCaption.value.trim();
 
   try {
-    btn.disabled = true;
-    loading.style.display = "flex";
+    attachLoading.style.display = "flex";
+    attachSend.disabled = true;
 
-    // Upload Storage
-    const publicUrl = await uploadImageToSupabase(window.pendingFile);
+    // 1. Upload (Sua função original)
+    const publicUrl = await uploadImageToSupabase(tempFile);
     
-    // Enviar DB
-    await sendImageMessage(publicUrl, window.pendingFile.name || "foto.jpg", caption);
+    // 2. Enviar Mensagem (Sua função original AGORA COM LEGENDA)
+    await sendImageMessage(publicUrl, tempFile.name || `foto_${Date.now()}.jpg`, caption);
 
-    window.fecharModalAnexo();
-    if (typeof scrollToBottom === 'function') scrollToBottom();
+    // 3. Fechar e limpar
+    attachModal.style.display = "none";
+    tempFile = null;
+    cameraInput.value = "";
 
   } catch (err) {
-    console.error(err);
-    alert("Erro ao enviar imagem.");
+    console.error("Erro ao enviar foto:", err);
+    alert("Não foi possível enviar a foto.");
   } finally {
-    btn.disabled = false;
-    loading.style.display = "none";
+    attachLoading.style.display = "none";
+    attachSend.disabled = false;
   }
 };
+
+/* --- AS SUAS FUNÇÕES ORIGINAIS COM O AJUSTE DA LEGENDA --- */
+
+async function uploadImageToSupabase(file) {
+  if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
+  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
+  const fileName = `photo_${Date.now()}.${ext}`;
+  const filePath = `${currentChat}/${fileName}`;
+  const { error } = await supabaseClient.storage.from("cb_files").upload(filePath, file);
+  if (error) throw error;
+  const { data: { publicUrl } } = supabaseClient.storage.from("cb_files").getPublicUrl(filePath);
+  if (!publicUrl) throw new Error("Sem URL público.");
+  return publicUrl;
+}
+
+async function sendImageMessage(imageUrl, fileName, caption = "") {
+  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+  const senderName = await fetchUserName();
+  const payload = {
+    n_int: currentUserNint, 
+    recipient_nint: String(currentChat), 
+    corp_oper_nr: currentCorp, 
+    abv_name: senderName, 
+    message_type: "image", 
+    file_url: imageUrl, 
+    file_name: fileName, 
+    message: caption // <-- AQUI É ONDE A LEGENDA É SALVA
+  };
+  const { error } = await supabaseClient.from("chat_messages").insert([payload]);
+  if (error) throw error;
+}
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -2061,6 +2096,7 @@ window.executarUploadFinal = async function() {
   </script>
 </body>
 </html>
+
 
 
 
