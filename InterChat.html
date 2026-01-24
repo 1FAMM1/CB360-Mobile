@@ -517,6 +517,38 @@ inputMensage.addEventListener('blur', () => {
         resetLayout();
     }, 100);
 });
+
+    if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const offset = window.innerHeight - window.visualViewport.height;
+    
+    if (offset > 150) { 
+      // O TECLADO ABRIU
+      // 1. Esconde os emojis para não haver sobreposição
+      emojiContainer.style.display = 'none'; 
+      
+      // 2. Ajusta a barra de input e a margem das mensagens
+      // Usamos o 'offset' que é a altura real do teclado
+      barraDeInput.style.bottom = offset + 'px';
+      messageContainer.style.marginBottom = (offset + 60) + 'px'; 
+      
+      // 3. Força o scroll para o fim
+      setTimeout(() => {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }, 50);
+    } else {
+      // O TECLADO FECHOU
+      resetLayout();
+    }
+  });
+}
+
+// Garante que ao clicar no input, o layout reseta antes do teclado subir
+inputMensage.addEventListener('focus', () => {
+   if (emojiContainer.style.display === 'block') {
+      resetLayout();
+   }
+});
     emojiBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (emojiContainer.style.display === 'block') {
@@ -1930,3 +1962,4 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
