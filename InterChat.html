@@ -263,6 +263,23 @@
     @keyframes highlight-fade {0% {background: rgba(211, 47, 47, 0.3);} 100% {background: inherit;}}
     @keyframes gentle-pulse {0%, 100% {box-shadow: 0 4px 12px rgba(52, 183, 241, 0.5), 0 2px 6px rgba(52, 183, 241, 0.3);} 50% {box-shadow: 0 6px 16px rgba(52, 183, 241, 0.7), 0 3px 8px rgba(52, 183, 241, 0.5);}}
     @keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
+
+    :root {
+  --panel-h: 0px;
+}
+
+.message-container {
+  padding-bottom: calc(140px + var(--panel-h));
+}
+
+.chat-input-bar {
+  bottom: calc(60px + var(--panel-h));
+}
+
+#full-emoji-picker-container {
+  bottom: 60px;
+  height: var(--panel-h);
+}
     /* =================================================
     MEDIA QUERIES - FULL RESPONSIVENESS
     ================================================= */
@@ -1924,4 +1941,5 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
