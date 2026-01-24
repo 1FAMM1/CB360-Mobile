@@ -87,7 +87,7 @@
     width: 100%;
     height: 100vh;
     height: 100dvh;
-    overflow: hidden; /* ← IMPORTANTE */
+    overflow: hidden;
   }
   
   .main-content {
@@ -96,7 +96,7 @@
     bottom: 100px;
     left: 0;
     right: 0;
-    overflow: hidden; /* ← SEM SCROLL */
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
   }
   
@@ -115,31 +115,34 @@
 /* Android - comportamento alternativo */
 @supports not (-webkit-touch-callout: none) {
   body.keyboard-open {
-    overflow: hidden; /* ← IMPORTANTE */
+    overflow: hidden;
   }
   
   body.keyboard-open .main-content {
-    overflow: hidden; /* ← SEM SCROLL */
-    padding-bottom: 0; /* Remove padding que foi adicionado */
+    overflow: hidden;
+    padding-bottom: 0;
   }
 }
 
 /* Ajuste universal quando teclado está ativo */
 .main-content.keyboard-active {
-  overflow: hidden !important; /* ← FORÇA SEM SCROLL */
-  max-height: calc(100dvh - 100px) !important;
+  overflow: hidden !important;
+  /* ← REMOVIDO: max-height que estava a reduzir demais */
 }
 
 .message-container.keyboard-active {
-  max-height: calc(100dvh - 250px) !important; /* Ajusta para teclado */
+  /* ← AJUSTADO: Calcula espaço disponível considerando header + footer + input */
+  max-height: calc(100dvh - 100px - 60px - 60px) !important; 
+  /* 100px header + 60px footer + 60px input = 220px total ocupado */
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
-  transition: max-height 0.3s ease;
+  margin-bottom: 60px !important; /* Espaço para o input */
+  transition: max-height 0.3s ease, margin-bottom 0.3s ease;
 }
 
 .chat-input-bar.keyboard-active {
   position: fixed !important;
-  bottom: 0 !important;
+  bottom: 60px !important; /* ← Fica em cima do footer */
   z-index: 10000 !important;
   background: #fff;
   box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
@@ -163,6 +166,28 @@ body.keyboard-open #full-emoji-picker-container {
 body.keyboard-open {
   position: fixed;
   width: 100%;
+}
+
+/* ← NOVO: Ajuste dinâmico baseado na altura real do teclado */
+@media (max-height: 700px) {
+  /* Telas pequenas - ajusta ainda mais */
+  .message-container.keyboard-active {
+    max-height: calc(100dvh - 180px) !important;
+  }
+}
+
+@media (min-height: 701px) and (max-height: 900px) {
+  /* Telas médias */
+  .message-container.keyboard-active {
+    max-height: calc(100dvh - 220px) !important;
+  }
+}
+
+@media (min-height: 901px) {
+  /* Telas grandes */
+  .message-container.keyboard-active {
+    max-height: calc(100dvh - 250px) !important;
+  }
 }
 
 
@@ -1576,7 +1601,7 @@ async function sendImageMessage(imageUrl, fileName) {
     // Teclado abriu (perdeu mais de 150px de altura)
     if (heightDiff > 150 && !isKeyboardOpen) {
       isKeyboardOpen = true;
-      handleKeyboardOpen();
+      handleKeyboardOpen(heightDiff);
     } 
     // Teclado fechou
     else if (heightDiff < 100 && isKeyboardOpen) {
@@ -1588,21 +1613,44 @@ async function sendImageMessage(imageUrl, fileName) {
   /**
    * Quando o teclado abre
    */
-  function handleKeyboardOpen() {
+  function handleKeyboardOpen(keyboardHeight) {
     document.body.classList.add('keyboard-open');
     
     const mainContent = document.querySelector('.main-content');
     const messageContainer = document.querySelector('.message-container');
     const inputBar = document.querySelector('.chat-input-bar');
     
-    // ← NOVO: Bloqueia scroll do main-content
+    // Bloqueia scroll do main-content
     if (mainContent) {
       mainContent.classList.add('keyboard-active');
       mainContent.style.overflow = 'hidden';
+      // ← NOVO: Mantém altura original, não reduz
+      mainContent.style.maxHeight = '';
+      mainContent.style.height = '';
     }
     
     if (messageContainer) {
       messageContainer.classList.add('keyboard-active');
+      
+      // ← NOVO: Calcula altura disponível dinamicamente
+      const headerHeight = document.querySelector('.header')?.offsetHeight || 100;
+      const footerHeight = document.querySelector('.footer')?.offsetHeight || 60;
+      const inputHeight = inputBar?.offsetHeight || 60;
+      const backHeaderHeight = document.getElementById('back-header')?.offsetHeight || 40;
+      const chatIdHeight = document.getElementById('chat-id-info')?.offsetHeight || 30;
+      
+      const occupiedSpace = headerHeight + footerHeight + inputHeight + backHeaderHeight + chatIdHeight + 20; // +20px margem
+      const availableHeight = window.innerHeight - occupiedSpace;
+      
+      messageContainer.style.maxHeight = `${availableHeight}px`;
+      messageContainer.style.marginBottom = `${inputHeight + 20}px`;
+      
+      console.log('📐 Alturas:', {
+        viewport: window.innerHeight,
+        keyboard: keyboardHeight,
+        occupied: occupiedSpace,
+        available: availableHeight
+      });
       
       // Scroll para baixo depois de ajustar
       setTimeout(() => {
@@ -1634,14 +1682,17 @@ async function sendImageMessage(imageUrl, fileName) {
     const messageContainer = document.querySelector('.message-container');
     const inputBar = document.querySelector('.chat-input-bar');
     
-    // ← NOVO: Restaura scroll do main-content
+    // Restaura scroll do main-content
     if (mainContent) {
       mainContent.classList.remove('keyboard-active');
       mainContent.style.overflow = '';
+      mainContent.style.maxHeight = '';
+      mainContent.style.height = '';
     }
     
     if (messageContainer) {
       messageContainer.classList.remove('keyboard-active');
+      messageContainer.style.maxHeight = '';
       messageContainer.style.marginBottom = '80px';
     }
     
@@ -1674,6 +1725,9 @@ async function sendImageMessage(imageUrl, fileName) {
   window.addEventListener('orientationchange', () => {
     setTimeout(() => {
       originalViewportHeight = window.innerHeight;
+      if (isKeyboardOpen) {
+        handleKeyboardClose();
+      }
     }, 300);
   });
   
@@ -1701,7 +1755,7 @@ async function sendImageMessage(imageUrl, fileName) {
       }, 300);
     });
     
-    // ← NOVO: Previne scroll ao tocar no input
+    // Previne scroll ao tocar no input
     inputEl.addEventListener('touchstart', (e) => {
       e.stopPropagation();
     });
@@ -2164,6 +2218,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
