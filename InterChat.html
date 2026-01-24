@@ -660,115 +660,118 @@
         console.error("Erro:", err.message);
       }
     }
-    (function() {
-    let pendingCameraFile = null;
+    
+    
+    
+    
+    /* ======================== CAMERA COM MODAL E LEGENDA ========================= */
+const cameraBtn = document.getElementById("camera-btn");
+const cameraInput = document.getElementById("camera-file-input");
 
-    const camInput = document.getElementById("camera-file-input");
-    const modal = document.getElementById("attach-modal");
-    const previewImg = document.getElementById("attach-preview-img");
-    const btnSend = document.getElementById("attach-send");
-    const captionInput = document.getElementById("attach-caption");
+// Elementos do Modal (Certifica-te que estes IDs existem no teu HTML)
+const attachModal = document.getElementById("attach-modal");
+const attachImg = document.getElementById("attach-preview-img");
+const attachCaption = document.getElementById("attach-caption");
+const attachSend = document.getElementById("attach-send");
+const attachCancel = document.getElementById("attach-cancel");
+const attachLoading = document.getElementById("attach-loading");
 
-    // 1. DISPARAR CÂMARA
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('#camera-btn')) {
-            e.preventDefault();
-            
-            // Tenta pegar o chat ativo de qualquer forma possível
-            const chatAtivo = window.currentChat || (typeof currentChat !== 'undefined' ? currentChat : null);
+let pendingFile = null; // Variável para guardar o ficheiro enquanto escreves a legenda
 
-            if (!chatAtivo || chatAtivo === "null") {
-                alert("Por favor, abra uma conversa primeiro.");
-                return;
-            }
+// 1. Clicar no botão para abrir a câmara
+cameraBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (!currentChat || currentChat === "null") return;
+    cameraInput.click();
+});
 
-            camInput.value = ""; // Limpa cache
-            camInput.click();
-        }
-    });
+// 2. Quando tiras a foto -> ABRE O MODAL (Não faz upload ainda)
+cameraInput.addEventListener("change", () => {
+    const file = cameraInput.files?.[0];
+    if (!file) return;
 
-    // 2. RECEBER FOTO E ABRIR MODAL
-    camInput?.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+    pendingFile = file;
 
-        pendingCameraFile = file;
+    // Criar preview da imagem para o modal
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        attachImg.src = e.target.result;
+        attachCaption.value = ""; // Limpa legenda anterior
+        attachModal.style.setProperty("display", "flex", "important"); // Mostra o modal
+    };
+    reader.readAsDataURL(file);
+});
 
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            previewImg.src = event.target.result;
-            modal.style.setProperty("display", "flex", "important");
-            
-            setTimeout(() => captionInput?.focus(), 500);
-        };
-        reader.readAsDataURL(file);
-    });
+// 3. Fechar modal se cancelar
+attachCancel.addEventListener("click", () => {
+    attachModal.style.setProperty("display", "none", "important");
+    pendingFile = null;
+    cameraInput.value = "";
+});
 
-    // 3. FECHAR MODAL
-    function fecharModal() {
-        modal.style.setProperty("display", "none", "important");
-        previewImg.src = "";
-        pendingCameraFile = null;
+// 4. Botão ENVIAR dentro do Modal -> FAZ O UPLOAD REAL
+attachSend.addEventListener("click", async () => {
+    if (!pendingFile) return;
+
+    const caption = attachCaption.value.trim();
+
+    try {
+        attachLoading.style.display = "flex";
+        attachSend.disabled = true;
+
+        // Faz o upload para o Supabase
+        const publicUrl = await uploadImageToSupabase(pendingFile);
+        
+        // Envia a mensagem com a LEGENDA
+        await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
+
+        // Limpa e fecha
+        attachModal.style.setProperty("display", "none", "important");
+        pendingFile = null;
+        cameraInput.value = "";
+        if (typeof scrollToBottom === "function") scrollToBottom();
+
+    } catch (err) {
+        console.error("Erro ao enviar foto:", err);
+        alert("Não foi possível enviar a foto.");
+    } finally {
+        attachLoading.style.display = "none";
+        attachSend.disabled = false;
     }
+});
 
-    document.getElementById("attach-cancel")?.addEventListener("click", fecharModal);
-    modal.addEventListener("click", (e) => { if(e.target === modal) fecharModal(); });
+/* Funções de Apoio (Ajustadas para legenda) */
+async function uploadImageToSupabase(file) {
+    if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
+    const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
+    const fileName = `photo_${Date.now()}.${ext}`;
+    const filePath = `${currentChat}/${fileName}`;
 
-    // 4. ENVIAR PARA SUPABASE
-    btnSend?.addEventListener("click", async function() {
-        if (!pendingCameraFile) return;
+    const { error } = await supabaseClient.storage.from("cb_files").upload(filePath, file);
+    if (error) throw error;
 
-        const loading = document.getElementById("attach-loading");
-        const caption = captionInput.value.trim();
-        const chatAtivo = window.currentChat || currentChat;
+    const { data: { publicUrl } } = supabaseClient.storage.from("cb_files").getPublicUrl(filePath);
+    return publicUrl;
+}
 
-        try {
-            btnSend.disabled = true;
-            loading.style.display = "flex";
+async function sendImageMessage(imageUrl, fileName, caption = "") {
+    const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+    const senderName = await fetchUserName();
+    
+    const payload = {
+        n_int: currentUserNint,
+        recipient_nint: String(currentChat),
+        corp_oper_nr: currentCorp,
+        abv_name: senderName,
+        message_type: "image",
+        file_url: imageUrl,
+        file_name: fileName,
+        message: caption // <-- AQUI ENTRA A LEGENDA
+    };
 
-            // Upload Storage
-            const ext = pendingCameraFile.name.split('.').pop() || 'jpg';
-            const path = `${chatAtivo}/photo_${Date.now()}.${ext}`;
-
-            const { error: upError } = await supabaseClient.storage
-                .from("cb_files")
-                .upload(path, pendingCameraFile);
-
-            if (upError) throw upError;
-
-            const { data: { publicUrl } } = supabaseClient.storage
-                .from("cb_files")
-                .getPublicUrl(path);
-
-            // Inserir Mensagem
-            const senderName = (typeof fetchUserName === 'function') ? await fetchUserName() : "Utilizador";
-            const corp = localStorage.getItem("currentCorpOperNr") || "0805";
-
-            const { error: insError } = await supabaseClient.from("chat_messages").insert([{
-                n_int: currentUserNint,
-                recipient_nint: String(chatAtivo),
-                corp_oper_nr: corp,
-                abv_name: senderName,
-                message_type: "image",
-                file_url: publicUrl,
-                file_name: pendingCameraFile.name,
-                message: caption
-            }]);
-
-            if (insError) throw insError;
-
-            fecharModal();
-            if (window.scrollToBottom) window.scrollToBottom();
-
-        } catch (err) {
-            console.error(err);
-            alert("Erro ao enviar foto.");
-        } finally {
-            btnSend.disabled = false;
-            loading.style.display = "none";
-        }
-    });
-})();
+    const { error } = await supabaseClient.from("chat_messages").insert([payload]);
+    if (error) throw error;
+}
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -2086,4 +2089,5 @@
   </script>
 </body>
 </html>
+
 
