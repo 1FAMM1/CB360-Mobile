@@ -278,32 +278,95 @@
     @keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
 
 
-.attach-modal {
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  background: rgba(0,0,0,0.9) !important;
-  z-index: 999999 !important;
-  display: none; 
-  align-items: center;
-  justify-content: center;
-}
-.attach-card {
-  background: #fff;
-  width: min(500px, 95vw);
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.dark-mode .attach-card { background: #1f1f1f; color: #fff; }
-.attach-preview { background: #000; min-height: 250px; display: flex; align-items: center; justify-content: center; }
-.attach-preview img { max-width: 100%; max-height: 65vh; object-fit: contain; }
-.attach-footer { padding: 12px; display: flex; gap: 8px; border-top: 1px solid rgba(0,0,0,0.1); }
-#attach-caption { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; background: transparent; color: inherit; }
-#attach-send { background: #00a884; color: #fff; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-.attach-loading { position: absolute; inset: 0; background: rgba(0,0,0,0.5); color: #fff; display: flex; align-items: center; justify-content: center; }
+.attach-modal{
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0,0,0,0.9) !important;
+      z-index: 999999 !important;
+      display: none;            /* controlado via JS */
+      align-items: center;
+      justify-content: center;
+    }
+    .attach-card{
+      background: #fff;
+      width: min(500px, 95vw);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    }
+    .attach-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      font-weight: 700;
+    }
+    .attach-x{
+      border: none;
+      background: transparent;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 6px 10px;
+      line-height: 1;
+    }
+    .attach-preview{
+      position: relative;       /* IMPORTANTE para o overlay */
+      background:#000;
+      min-height:240px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .attach-preview img{
+      max-width:100%;
+      max-height:65vh;
+      object-fit:contain;
+    }
+    .attach-footer{
+      display:flex;
+      gap:8px;
+      padding:12px;
+      border-top:1px solid rgba(0,0,0,0.1);
+    }
+    #attach-caption{
+      flex:1;
+      padding:10px;
+      border:1px solid #ddd;
+      border-radius:8px;
+      outline:none;
+      background: transparent;
+      color: inherit;
+    }
+    #attach-send{
+      background:#00a884;
+      color:#fff;
+      border:none;
+      padding:0 15px;
+      border-radius:8px;
+      font-weight:700;
+      cursor:pointer;
+      min-width: 90px;
+    }
+    #attach-send:disabled{
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .attach-loading{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+      color:#fff;
+      display:none;             /* flex quando a enviar */
+      align-items:center;
+      justify-content:center;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
 
 
     
@@ -429,26 +492,41 @@
   <div id="full-emoji-picker-container">
     <emoji-picker locale="pt" class="light"></emoji-picker
   </div>
-  <input type="file" id="camera-file-input" accept="image/*" capture="environment" 
-       style="display:none !important;" 
-       onchange="processarFotoCapturada(this)">
+  
+  
+  
+  <input
+    type="file"
+    id="camera-file-input"
+    accept="image/*"
+    capture="environment"
+    style="display:none !important;"
+  />
 
-<div id="attach-modal" class="attach-modal" style="display:none !important;">
-  <div class="attach-card">
-    <div class="attach-header">
-      <span>Enviar Foto</span>
-      <button class="attach-x" type="button" onclick="fecharModalAnexo()">✕</button>
-    </div>
-    <div class="attach-preview">
-      <img id="attach-preview-img" src="" alt="preview">
-      <div id="attach-loading" class="attach-loading" style="display:none;">A enviar...</div>
-    </div>
-    <div class="attach-footer">
-      <input id="attach-caption" type="text" placeholder="Adicione uma legenda..." autocomplete="off">
-      <button id="attach-send" type="button" onclick="executarUploadFinal()">Enviar</button>
+  <!-- MODAL: preview + legenda -->
+  <div id="attach-modal" class="attach-modal">
+    <div class="attach-card">
+      <div class="attach-header">
+        <span>Enviar Foto</span>
+        <button id="attach-cancel" class="attach-x" type="button">✕</button>
+      </div>
+
+      <div class="attach-preview">
+        <img id="attach-preview-img" src="" alt="preview" />
+        <div id="attach-loading" class="attach-loading">A enviar...</div>
+      </div>
+
+      <div class="attach-footer">
+        <input
+          id="attach-caption"
+          type="text"
+          placeholder="Adicione uma legenda..."
+          autocomplete="off"
+        />
+        <button id="attach-send" type="button">Enviar</button>
+      </div>
     </div>
   </div>
-</div>
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -663,122 +741,124 @@
     
     
     
-   /* ======================== SISTEMA DE CÂMARA E MODAL (COMPLETO) ========================= */
+   /* ==========================================================
+       ISTO ASSUME QUE NO TEU PROJETO JÁ EXISTEM:
+       - currentChat (string)
+       - currentUserNint
+       - supabaseClient (supabase-js v2)
+       - fetchUserName()
+       Se não existirem aqui, o envio vai falhar (normal).
+       ========================================================== */
 
-// 1. Variável Global para segurar o ficheiro enquanto escreve a legenda
-window.fotoPendenteParaUpload = null;
+    // ======= Camera + Modal =======
+    const cameraBtn   = document.getElementById("camera-btn");
+    const cameraInput = document.getElementById("camera-file-input");
 
-// 2. Função para abrir a câmara (Chamada pelo botão original)
-const cameraBtn = document.getElementById("camera-btn");
-if (cameraBtn) {
+    const attachModal   = document.getElementById("attach-modal");
+    const attachImg     = document.getElementById("attach-preview-img");
+    const attachCaption = document.getElementById("attach-caption");
+    const attachSend    = document.getElementById("attach-send");
+    const attachCancel  = document.getElementById("attach-cancel");
+    const attachLoading = document.getElementById("attach-loading");
+
+    let pendingFile = null;
+    let previewUrl = null;
+
+    // (Opcional) se no teu projeto currentChat existir:
+    // let currentChat = "123"; // EXEMPLO
+    // let currentUserNint = "205"; // EXEMPLO
+
     cameraBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (!currentChat || currentChat === "null") return;
-        const input = document.getElementById("camera-file-input");
-        if (input) {
-            input.value = ""; // Limpa para permitir repetir a foto
-            input.click();
-        }
+      e.preventDefault();
+      if (typeof currentChat !== "undefined" && currentChat === "null") return;
+
+      cameraInput.value = ""; // permite escolher a mesma foto 2x
+      cameraInput.click();
     });
-}
 
-// 3. Função que dispara assim que confirma a foto (onchange)
-window.processarFotoCapturada = function(input) {
-    const file = input.files[0];
-    if (!file) return;
+    cameraInput.addEventListener("change", () => {
+      const file = cameraInput.files?.[0];
+      if (!file) return;
 
-    window.fotoPendenteParaUpload = file;
+      pendingFile = file;
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const modal = document.getElementById("attach-modal");
-        const img = document.getElementById("attach-preview-img");
-        const caption = document.getElementById("attach-caption");
-        
-        if (img) img.src = e.target.result;
-        if (caption) caption.value = ""; // Limpa legenda anterior
-        
-        // FORÇA ABERTURA DO MODAL
-        if (modal) {
-            modal.style.setProperty("display", "flex", "important");
-            modal.style.zIndex = "9999999";
-        }
-        
-        // Foca no campo de texto após abrir
-        setTimeout(() => { if(caption) caption.focus(); }, 500);
-    };
-    reader.readAsDataURL(file);
-};
+      // preview instantâneo
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(file);
+      attachImg.src = previewUrl;
 
-// 4. Função para fechar o modal
-window.fecharModalAnexo = function() {
-    const modal = document.getElementById("attach-modal");
-    if (modal) modal.style.setProperty("display", "none", "important");
-    window.fotoPendenteParaUpload = null;
-    const input = document.getElementById("camera-file-input");
-    if (input) input.value = "";
-};
+      // abrir modal
+      attachModal.style.display = "flex";
+      attachCaption.value = "";
+      setTimeout(() => attachCaption.focus(), 250);
+    });
 
-// 5. Função de Envio Final (Upload + Supabase)
-window.executarUploadFinal = async function() {
-    const file = window.fotoPendenteParaUpload;
-    if (!file) return;
+    function fecharModalFoto() {
+      attachModal.style.display = "none";
+      attachLoading.style.display = "none";
+      attachSend.disabled = false;
 
-    const btn = document.getElementById("attach-send");
-    const loading = document.getElementById("attach-loading");
-    const captionInput = document.getElementById("attach-caption");
-    const caption = captionInput ? captionInput.value.trim() : "";
-
-    try {
-        if (btn) btn.disabled = true;
-        if (loading) loading.style.display = "flex";
-
-        // Faz o Upload real para o Storage
-        const publicUrl = await uploadImageToSupabase(file);
-        
-        // Envia a mensagem com a legenda
-        await sendImageMessage(publicUrl, file.name || `foto_${Date.now()}.jpg`, caption);
-
-        // Sucesso: fecha tudo
-        window.fecharModalAnexo();
-        if (typeof scrollToBottom === 'function') scrollToBottom();
-
-    } catch (err) {
-        console.error("Erro total no envio:", err);
-        alert("Erro ao enviar imagem. Verifique a ligação.");
-    } finally {
-        if (btn) btn.disabled = false;
-        if (loading) loading.style.display = "none";
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
+      }
+      pendingFile = null;
+      cameraInput.value = "";
     }
-};
 
-/* ======================== FUNÇÕES DE SUPORTE (SUPABASE) ========================= */
+    attachCancel.addEventListener("click", fecharModalFoto);
 
-async function uploadImageToSupabase(file) {
-    const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
-    const fileName = `photo_${Date.now()}.${ext}`;
-    const filePath = `${currentChat}/${fileName}`;
+    // Enviar com legenda
+    attachSend.addEventListener("click", async () => {
+      if (!pendingFile) return;
 
-    const { error } = await supabaseClient
+      const caption = (attachCaption.value || "").trim();
+
+      try {
+        attachLoading.style.display = "flex";
+        attachSend.disabled = true;
+
+        const publicUrl = await uploadImageToSupabase(pendingFile);
+        await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
+
+        fecharModalFoto();
+      } catch (err) {
+        console.error("Erro ao enviar foto:", err);
+        alert("Não foi possível enviar a foto.");
+        attachLoading.style.display = "none";
+        attachSend.disabled = false;
+      }
+    });
+
+    // ======= Upload + Send (iguais ao teu, com caption) =======
+    async function uploadImageToSupabase(file) {
+      if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
+
+      const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
+      const fileName = `photo_${Date.now()}.${ext}`;
+      const filePath = `${currentChat}/${fileName}`;
+
+      const { error } = await supabaseClient
         .storage
         .from("cb_files")
         .upload(filePath, file);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    const { data: { publicUrl } } = supabaseClient
+      const { data: { publicUrl } } = supabaseClient
         .storage
         .from("cb_files")
         .getPublicUrl(filePath);
 
-    return publicUrl;
-}
+      if (!publicUrl) throw new Error("Sem URL público.");
+      return publicUrl;
+    }
 
-async function sendImageMessage(imageUrl, fileName, caption = "") {
-    const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-    const senderName = await fetchUserName();
-    
-    const payload = {
+    async function sendImageMessage(imageUrl, fileName, caption = "") {
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const senderName = await fetchUserName();
+
+      const payload = {
         n_int: currentUserNint,
         recipient_nint: String(currentChat),
         corp_oper_nr: currentCorp,
@@ -786,15 +866,15 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
         message_type: "image",
         file_url: imageUrl,
         file_name: fileName,
-        message: caption // Aqui a legenda é guardada na base de dados
-    };
+        message: caption
+      };
 
-    const { error } = await supabaseClient
+      const { error } = await supabaseClient
         .from("chat_messages")
         .insert([payload]);
 
-    if (error) throw error;
-}
+      if (error) throw error;
+    }
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -2112,6 +2192,7 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
   </script>
 </body>
 </html>
+
 
 
 
