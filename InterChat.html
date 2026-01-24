@@ -79,56 +79,61 @@
 
 /* ==================== PWA KEYBOARD FIX ==================== */
 /* Previne que o teclado empurre todo o conteúdo */
+
+/* iOS Safari específico */
 @supports (-webkit-touch-callout: none) {
-  /* iOS Safari específico */
   body {
     position: fixed;
     width: 100%;
     height: 100vh;
     height: 100dvh;
+    overflow: hidden; /* ← IMPORTANTE */
   }
   
   .main-content {
     position: fixed;
-    top: 60px;
+    top: 100px;
     bottom: 100px;
     left: 0;
     right: 0;
-    overflow-y: auto;
+    overflow: hidden; /* ← SEM SCROLL */
     -webkit-overflow-scrolling: touch;
   }
   
-  .chat-input-bar {
-    position: fixed;
-    bottom: 60px;
-    left: 0;
-    right: 0;
+  /* Só o container de mensagens tem scroll */
+  .message-container {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
   
-  .footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+  #contact-list {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
 /* Android - comportamento alternativo */
 @supports not (-webkit-touch-callout: none) {
-  body.keyboard-open .main-content {
-    padding-bottom: 350px; /* Espaço para o teclado */
+  body.keyboard-open {
+    overflow: hidden; /* ← IMPORTANTE */
   }
   
-  body.keyboard-open .chat-input-bar {
-    position: absolute;
-    bottom: auto;
-    top: auto;
+  body.keyboard-open .main-content {
+    overflow: hidden; /* ← SEM SCROLL */
+    padding-bottom: 0; /* Remove padding que foi adicionado */
   }
 }
 
-/* Fallback universal - melhora em todos os browsers */
+/* Ajuste universal quando teclado está ativo */
+.main-content.keyboard-active {
+  overflow: hidden !important; /* ← FORÇA SEM SCROLL */
+  max-height: calc(100dvh - 100px) !important;
+}
+
 .message-container.keyboard-active {
-  max-height: calc(100dvh - 450px) !important;
+  max-height: calc(100dvh - 250px) !important; /* Ajusta para teclado */
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
   transition: max-height 0.3s ease;
 }
 
@@ -144,11 +149,21 @@
   background: #1a1a1a;
 }
 
-/* Ajuste para quando teclado + emoji picker estão abertos */
+/* Quando teclado fecha, restaura estado normal */
+.main-content:not(.keyboard-active) {
+  overflow-y: auto;
+}
+
+/* Esconde emoji picker quando teclado abre */
 body.keyboard-open #full-emoji-picker-container {
   display: none !important;
 }
 
+/* Previne scroll duplo */
+body.keyboard-open {
+  position: fixed;
+  width: 100%;
+}
 
 
 
@@ -1576,8 +1591,15 @@ async function sendImageMessage(imageUrl, fileName) {
   function handleKeyboardOpen() {
     document.body.classList.add('keyboard-open');
     
+    const mainContent = document.querySelector('.main-content');
     const messageContainer = document.querySelector('.message-container');
     const inputBar = document.querySelector('.chat-input-bar');
+    
+    // ← NOVO: Bloqueia scroll do main-content
+    if (mainContent) {
+      mainContent.classList.add('keyboard-active');
+      mainContent.style.overflow = 'hidden';
+    }
     
     if (messageContainer) {
       messageContainer.classList.add('keyboard-active');
@@ -1608,8 +1630,15 @@ async function sendImageMessage(imageUrl, fileName) {
   function handleKeyboardClose() {
     document.body.classList.remove('keyboard-open');
     
+    const mainContent = document.querySelector('.main-content');
     const messageContainer = document.querySelector('.message-container');
     const inputBar = document.querySelector('.chat-input-bar');
+    
+    // ← NOVO: Restaura scroll do main-content
+    if (mainContent) {
+      mainContent.classList.remove('keyboard-active');
+      mainContent.style.overflow = '';
+    }
     
     if (messageContainer) {
       messageContainer.classList.remove('keyboard-active');
@@ -1629,9 +1658,9 @@ async function sendImageMessage(imageUrl, fileName) {
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', detectKeyboard);
     window.visualViewport.addEventListener('scroll', () => {
-      // Previne scroll indesejado
+      // Previne scroll indesejado do viewport
       if (isKeyboardOpen) {
-        window.visualViewport.scrollTop = 0;
+        window.scrollTo(0, 0);
       }
     });
   } else {
@@ -1649,14 +1678,14 @@ async function sendImageMessage(imageUrl, fileName) {
   });
   
   /**
-   * Força fechar teclado ao clicar fora do input
+   * Previne scroll do body quando teclado está aberto
    */
-  document.addEventListener('click', (e) => {
-    const inputEl = document.getElementById('chat-input');
-    if (inputEl && !inputEl.contains(e.target) && isKeyboardOpen) {
-      inputEl.blur();
+  window.addEventListener('scroll', (e) => {
+    if (isKeyboardOpen) {
+      window.scrollTo(0, 0);
+      e.preventDefault();
     }
-  });
+  }, { passive: false });
   
   /**
    * Scroll suave quando input recebe foco
@@ -1670,6 +1699,11 @@ async function sendImageMessage(imageUrl, fileName) {
           messageContainer.scrollTop = messageContainer.scrollHeight;
         }
       }, 300);
+    });
+    
+    // ← NOVO: Previne scroll ao tocar no input
+    inputEl.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
     });
   }
   
@@ -2130,6 +2164,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
