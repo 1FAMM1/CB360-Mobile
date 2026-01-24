@@ -257,33 +257,41 @@
     .audio-bubble.dark .audio-time {color: rgba(255, 255, 255, 0.9);}
     
     
-    /* container da mensagem com forwarded */
-.message-wrapper {
+   /* wrapper ocupa a largura toda e não deixa estourar */
+.message-wrapper{
   display: flex;
-  align-items: center;   /* centra verticalmente com a bubble */
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;  /* corta qualquer overflow horizontal */
   gap: 6px;
+  box-sizing: border-box;
 }
 
-/* quando é minha mensagem, inverte ordem */
-.message-wrapper.self {
-  flex-direction: row-reverse;
+/* alinhamento: outros à esquerda, eu à direita */
+.message-wrapper.other{
+  justify-content: flex-start;
 }
 
-/* ícone de encaminhada */
-.forwarded-icon {
+.message-wrapper.self{
+  justify-content: flex-end;
+}
+
+/* garante que a bubble não força overflow */
+.message-wrapper .message{
+  max-width: calc(100% - 28px); /* reserva espaço para o ícone + gap */
+  box-sizing: border-box;
+}
+
+/* ícone encaminhada */
+.forwarded-icon{
   font-size: 16px;
   opacity: 0.6;
-  cursor: default;
   user-select: none;
+  cursor: default;
+  flex: 0 0 auto;
 }
 
-/* opcional: hover tooltip feeling */
-.forwarded-icon::after {
-  content: 'Encaminhada';
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
 
     
     
@@ -1958,3 +1966,4 @@ if (messagesEl.style.display !== 'none') {
   </script>
 </body>
 </html>
+
