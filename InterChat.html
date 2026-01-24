@@ -81,7 +81,7 @@
 /* ==================== PWA KEYBOARD FIX ==================== */
 :root {
   --kb: 0px;
-  --footer-h: 0px; /* ajusta se o teu footer for diferente */
+  --footer-h: 40px; /* ajusta se o teu footer for diferente */
   --gap: 0px;
   --safe: env(safe-area-inset-bottom, 0px);
 }
@@ -180,7 +180,7 @@ body.keyboard-open #full-emoji-picker-container{
   flex: 1; 
   overflow-y: auto; 
   -webkit-overflow-scrolling: touch; 
-  margin-bottom: 80px;
+  margin-bottom: 60px;
   transition: margin-bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   /* ← ADICIONA ESTAS LINHAS */
   max-height: calc(100dvh - 220px); /* Ajusta conforme necessário */
@@ -2140,6 +2140,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
