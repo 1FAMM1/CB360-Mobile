@@ -734,11 +734,10 @@
         console.error("Erro:", err.message);
       }
     }
-    /* ======================== CAMERA (com modal + legenda) ========================= */
+    /* ======================== LÓGICA DE FOTO E MODAL ========================= */
 
 const cameraBtn = document.getElementById("camera-btn");
 const cameraInput = document.getElementById("camera-file-input");
-
 const attachModal = document.getElementById("attach-modal");
 const attachImg = document.getElementById("attach-preview-img");
 const attachCaption = document.getElementById("attach-caption");
@@ -749,66 +748,70 @@ const attachLoading = document.getElementById("attach-loading");
 let pendingCameraFile = null;
 let pendingObjectUrl = null;
 
-function openAttachPreviewModal(file) {
-  if (!attachModal || !attachImg || !attachCaption) {
-    console.error("Modal de anexo não existe no DOM (IDs errados ou HTML não foi inserido).");
+// 1. Abrir seletor de ficheiros (Câmara)
+cameraBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  // Verifica se há um chat ativo antes de abrir a câmara
+  if (!currentChat || currentChat === "null") {
+    alert("Selecione um contacto primeiro.");
+    return;
+  }
+  cameraInput.click();
+});
+
+// 2. Detetar quando a foto foi tirada/escolhida
+cameraInput?.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    alert("Por favor, selecione uma imagem.");
     return;
   }
 
-  // limpa
+  pendingCameraFile = file;
+  openAttachPreviewModal(file);
+  
+  // Limpa o input para permitir tirar outra foto caso cancele
+  cameraInput.value = ""; 
+});
+
+// 3. Função para abrir o Modal e gerar Preview
+function openAttachPreviewModal(file) {
+  if (!attachModal || !attachImg) return;
+
+  // Reset de UI
   attachCaption.value = "";
   attachLoading.style.display = "none";
+  attachSend.disabled = false;
 
-  // preview rápido (sem upload)
+  // Gerar URL temporária para visualização
   if (pendingObjectUrl) URL.revokeObjectURL(pendingObjectUrl);
   pendingObjectUrl = URL.createObjectURL(file);
+  
   attachImg.src = pendingObjectUrl;
 
+  // Mostrar modal (Importante: Forçar display flex)
   attachModal.style.display = "flex";
 
-  // opcional: foco na legenda
-  setTimeout(() => attachCaption.focus(), 50);
+  // Foco no campo de legenda após abrir
+  setTimeout(() => attachCaption.focus(), 300);
 }
 
+// 4. Fechar Modal
 function closeAttachPreviewModal() {
   pendingCameraFile = null;
-
   if (pendingObjectUrl) {
     URL.revokeObjectURL(pendingObjectUrl);
     pendingObjectUrl = null;
   }
-
-  attachImg.removeAttribute("src");
-  attachCaption.value = "";
+  attachImg.src = "";
   attachModal.style.display = "none";
 }
 
-cameraBtn?.addEventListener("click", (e) => {
-  e.preventDefault();
-  if (!currentChat || currentChat === "null") return;
-
-  // iOS/Android: o picker/câmara nativo vai sempre aparecer
-  cameraInput.click();
-});
-
-cameraInput?.addEventListener("change", () => {
-  const file = cameraInput.files?.[0];
-  cameraInput.value = ""; // para permitir repetir a mesma foto
-
-  if (!file) return;
-  if (!file.type.startsWith("image/")) return;
-
-  pendingCameraFile = file;
-  openAttachPreviewModal(file);
-});
-
 attachCancel?.addEventListener("click", closeAttachPreviewModal);
 
-// fechar ao clicar fora do card
-attachModal?.addEventListener("click", (e) => {
-  if (e.target === attachModal) closeAttachPreviewModal();
-});
-
+// 5. Enviar foto com legenda
 attachSend?.addEventListener("click", async () => {
   if (!pendingCameraFile) return;
 
@@ -818,7 +821,10 @@ attachSend?.addEventListener("click", async () => {
     attachLoading.style.display = "flex";
     attachSend.disabled = true;
 
+    // Fazer upload para o Storage do Supabase
     const publicUrl = await uploadImageToSupabase(pendingCameraFile);
+    
+    // Gravar mensagem na tabela chat_messages
     await sendImageMessage(
       publicUrl,
       pendingCameraFile.name || `foto_${Date.now()}.jpg`,
@@ -826,21 +832,22 @@ attachSend?.addEventListener("click", async () => {
     );
 
     closeAttachPreviewModal();
-    scrollToBottom?.();
+    
+    // Se existir a função de scroll, executa
+    if (typeof scrollToBottom === 'function') scrollToBottom();
 
   } catch (err) {
     console.error("Erro ao enviar foto:", err);
-    alert("Não foi possível enviar a foto.");
+    alert("Erro ao enviar imagem. Tente novamente.");
   } finally {
     attachLoading.style.display = "none";
     attachSend.disabled = false;
   }
 });
 
-/* mantém as tuas funções (só ajustei para aceitar legenda) */
-async function uploadImageToSupabase(file) {
-  if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
+/* --- Funções de Apoio --- */
 
+async function uploadImageToSupabase(file) {
   const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
   const fileName = `photo_${Date.now()}.${ext}`;
   const filePath = `${currentChat}/${fileName}`;
@@ -855,16 +862,15 @@ async function uploadImageToSupabase(file) {
     .from("cb_files")
     .getPublicUrl(filePath);
 
-  if (!publicUrl) throw new Error("Sem URL público.");
   return publicUrl;
 }
 
 async function sendImageMessage(imageUrl, fileName, caption = "") {
   const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-  const senderName = await fetchUserName();
+  const senderName = (typeof fetchUserName === 'function') ? await fetchUserName() : "Utilizador";
 
   const payload = {
-    n_int: currentUserNint,
+    n_int: currentUserNint, // n_int do remetente (global)
     recipient_nint: String(currentChat),
     corp_oper_nr: currentCorp,
     abv_name: senderName,
@@ -877,6 +883,11 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
   const { error } = await supabaseClient.from("chat_messages").insert([payload]);
   if (error) throw error;
 }
+
+// Fechar modal ao clicar fora do card branco
+attachModal?.addEventListener("click", (e) => {
+  if (e.target === attachModal) closeAttachPreviewModal();
+});
 
 
     /* ==================== LOADING CORPORATION DATA ===================== */
@@ -2198,6 +2209,7 @@ async function sendImageMessage(imageUrl, fileName, caption = "") {
   </script>
 </body>
 </html>
+
 
 
 
