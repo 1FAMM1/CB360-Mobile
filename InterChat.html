@@ -2,7 +2,7 @@
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
@@ -70,6 +70,90 @@
     .dark-mode .confirm-text {color: #eee;}
     .dark-mode .btn-confirm-action:active {background-color: rgba(255, 255, 255, 0.05);}
     .dark-mode .draft-preview {color: #aaa !important;}
+
+
+
+
+
+
+
+/* ==================== PWA KEYBOARD FIX ==================== */
+/* Previne que o teclado empurre todo o conteúdo */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari específico */
+  body {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+  }
+  
+  .main-content {
+    position: fixed;
+    top: 100px;
+    bottom: 100px;
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .chat-input-bar {
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+  }
+  
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
+
+/* Android - comportamento alternativo */
+@supports not (-webkit-touch-callout: none) {
+  body.keyboard-open .main-content {
+    padding-bottom: 350px; /* Espaço para o teclado */
+  }
+  
+  body.keyboard-open .chat-input-bar {
+    position: absolute;
+    bottom: auto;
+    top: auto;
+  }
+}
+
+/* Fallback universal - melhora em todos os browsers */
+.message-container.keyboard-active {
+  max-height: calc(100dvh - 450px) !important;
+  transition: max-height 0.3s ease;
+}
+
+.chat-input-bar.keyboard-active {
+  position: fixed !important;
+  bottom: 0 !important;
+  z-index: 10000 !important;
+  background: #fff;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+}
+
+.dark-mode .chat-input-bar.keyboard-active {
+  background: #1a1a1a;
+}
+
+/* Ajuste para quando teclado + emoji picker estão abertos */
+body.keyboard-open #full-emoji-picker-container {
+  display: none !important;
+}
+
+
+
+
+
+    
     /* ============= LIGHT MODE OPTIONS ============= */
     .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828; position: fixed;
              top: 0; left: 0; right: 0; z-index: 1000;}
@@ -1457,6 +1541,147 @@ async function sendImageMessage(imageUrl, fileName) {
       document.getElementById('edit-bar').style.display = 'none';
       document.getElementById('chat-input').value = '';
     }
+
+
+
+
+
+/* ==================== KEYBOARD HANDLER (PWA FIX) ==================== */
+(function() {
+  let originalViewportHeight = window.innerHeight;
+  let isKeyboardOpen = false;
+  
+  /**
+   * Deteta quando o teclado abre/fecha
+   */
+  function detectKeyboard() {
+    const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    const heightDiff = originalViewportHeight - currentHeight;
+    
+    // Teclado abriu (perdeu mais de 150px de altura)
+    if (heightDiff > 150 && !isKeyboardOpen) {
+      isKeyboardOpen = true;
+      handleKeyboardOpen();
+    } 
+    // Teclado fechou
+    else if (heightDiff < 100 && isKeyboardOpen) {
+      isKeyboardOpen = false;
+      handleKeyboardClose();
+    }
+  }
+  
+  /**
+   * Quando o teclado abre
+   */
+  function handleKeyboardOpen() {
+    document.body.classList.add('keyboard-open');
+    
+    const messageContainer = document.querySelector('.message-container');
+    const inputBar = document.querySelector('.chat-input-bar');
+    
+    if (messageContainer) {
+      messageContainer.classList.add('keyboard-active');
+      
+      // Scroll para baixo depois de ajustar
+      setTimeout(() => {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }, 100);
+    }
+    
+    if (inputBar) {
+      inputBar.classList.add('keyboard-active');
+    }
+    
+    // Fecha emoji picker se estiver aberto
+    const emojiContainer = document.getElementById('full-emoji-picker-container');
+    if (emojiContainer && emojiContainer.style.display === 'block') {
+      emojiContainer.style.display = 'none';
+      inputBar.style.bottom = '60px';
+    }
+    
+    console.log('⌨️ Teclado aberto');
+  }
+  
+  /**
+   * Quando o teclado fecha
+   */
+  function handleKeyboardClose() {
+    document.body.classList.remove('keyboard-open');
+    
+    const messageContainer = document.querySelector('.message-container');
+    const inputBar = document.querySelector('.chat-input-bar');
+    
+    if (messageContainer) {
+      messageContainer.classList.remove('keyboard-active');
+      messageContainer.style.marginBottom = '80px';
+    }
+    
+    if (inputBar) {
+      inputBar.classList.remove('keyboard-active');
+    }
+    
+    console.log('⌨️ Teclado fechado');
+  }
+  
+  /**
+   * Listener do Visual Viewport (iOS 13+, Android Chrome 61+)
+   */
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', detectKeyboard);
+    window.visualViewport.addEventListener('scroll', () => {
+      // Previne scroll indesejado
+      if (isKeyboardOpen) {
+        window.visualViewport.scrollTop = 0;
+      }
+    });
+  } else {
+    // Fallback para browsers antigos
+    window.addEventListener('resize', detectKeyboard);
+  }
+  
+  /**
+   * Atualiza altura original quando orientação muda
+   */
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      originalViewportHeight = window.innerHeight;
+    }, 300);
+  });
+  
+  /**
+   * Força fechar teclado ao clicar fora do input
+   */
+  document.addEventListener('click', (e) => {
+    const inputEl = document.getElementById('chat-input');
+    if (inputEl && !inputEl.contains(e.target) && isKeyboardOpen) {
+      inputEl.blur();
+    }
+  });
+  
+  /**
+   * Scroll suave quando input recebe foco
+   */
+  const inputEl = document.getElementById('chat-input');
+  if (inputEl) {
+    inputEl.addEventListener('focus', () => {
+      setTimeout(() => {
+        const messageContainer = document.querySelector('.message-container');
+        if (messageContainer) {
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+      }, 300);
+    });
+  }
+  
+})();
+
+
+
+    
+
+
+
+    
     /* =================== INITIALIZATION AND REALTIME =================== */
     document.addEventListener('DOMContentLoaded', async () => {
       loadCorpInfo();
@@ -1905,4 +2130,5 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
