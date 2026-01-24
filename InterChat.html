@@ -123,7 +123,7 @@
 
 .chat-input-bar.keyboard-active {
   position: fixed !important;
-  bottom: 20px !important;
+  bottom: 40px !important;
   z-index: 10000 !important;
   background: #fff;
   box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
@@ -1624,32 +1624,51 @@ async function sendImageMessage(imageUrl, fileName) {
    * Quando o teclado fecha
    */
   function handleKeyboardClose() {
-    document.body.classList.remove('keyboard-open');
-    
-    const mainContent = document.querySelector('.main-content');
-    const messageContainer = document.querySelector('.message-container');
-    const inputBar = document.querySelector('.chat-input-bar');
-    
-    // Limpa TODOS os estilos inline
-    if (mainContent) {
-      mainContent.classList.remove('keyboard-active');
-      mainContent.style.overflow = '';
-      mainContent.style.maxHeight = '';
-      mainContent.style.height = '';
-    }
-    
-    if (messageContainer) {
-      messageContainer.classList.remove('keyboard-active');
-      messageContainer.style.maxHeight = '';
-      messageContainer.style.marginBottom = '';
-      
-      console.log('✅ Teclado fechado - Estilos limpos');
-    }
-    
-    if (inputBar) {
-      inputBar.classList.remove('keyboard-active');
-    }
+  document.body.classList.remove('keyboard-open');
+  
+  const mainContent = document.querySelector('.main-content');
+  const messageContainer = document.querySelector('.message-container');
+  const inputBar = document.querySelector('.chat-input-bar');
+  
+  if (mainContent) {
+    mainContent.classList.remove('keyboard-active');
+    mainContent.style.overflow = '';
+    mainContent.style.maxHeight = '';
+    mainContent.style.height = '';
   }
+  
+  if (messageContainer) {
+    messageContainer.classList.remove('keyboard-active');
+    
+    // ← NOVO: Calcula altura NORMAL (sem teclado)
+    const headerHeight = document.querySelector('.header')?.offsetHeight || 100;
+    const footerHeight = document.querySelector('.footer')?.offsetHeight || 60;
+    const inputHeight = inputBar?.offsetHeight || 60;
+    const backHeaderHeight = document.getElementById('back-header')?.offsetHeight || 0;
+    const chatIdHeight = document.getElementById('chat-id-info')?.offsetHeight || 0;
+    const pinnedHeight = document.getElementById('pinned-message')?.offsetHeight || 0;
+    
+    // Altura total ocupada pelos elementos fixos
+    const occupiedSpace = headerHeight + footerHeight + inputHeight + backHeaderHeight + chatIdHeight + pinnedHeight + 20;
+    
+    // Altura disponível TOTAL (viewport completo)
+    const normalHeight = window.innerHeight - occupiedSpace;
+    
+    // ← APLICA a altura normal
+    messageContainer.style.maxHeight = `${normalHeight}px`;
+    messageContainer.style.marginBottom = '80px'; // Margem original
+    
+    console.log('✅ Teclado fechado - Altura restaurada:', {
+      viewport: window.innerHeight,
+      occupied: occupiedSpace,
+      normalHeight: normalHeight
+    });
+  }
+  
+  if (inputBar) {
+    inputBar.classList.remove('keyboard-active');
+  }
+}
   
   /**
    * ← NOVO: Força restauração (fallback)
@@ -2241,6 +2260,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
