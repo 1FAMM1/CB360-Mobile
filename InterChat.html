@@ -278,102 +278,30 @@
     @keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
 
 
-.attach-modal{
-  position: fixed;
-  inset: 0;
-  z-index: 20000;
-  background: rgba(0,0,0,0.55);
-  display: flex;
+.attach-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0,0,0,0.9) !important;
+  z-index: 999999 !important; /* Valor máximo */
+  display: none; /* JS muda para flex */
   align-items: center;
   justify-content: center;
-  padding: 14px;
 }
 
-.attach-card{
-  width: min(520px, 96vw);
-  max-height: 92vh;
+.attach-card {
   background: #fff;
-  border-radius: 14px;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 15px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-.dark-mode .attach-card{ background: #1f1f1f; color: #fff; }
-
-.attach-header{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-}
-
-.dark-mode .attach-header{ border-bottom-color: rgba(255,255,255,0.12); }
-
-.attach-x{
-  border: none;
-  background: transparent;
-  font-size: 18px;
-  cursor: pointer;
-  color: inherit;
-}
-
-.attach-preview{
-  position: relative;
-  padding: 10px;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  flex: 1;
-}
-
-.attach-preview img{
-  width: 100%;
-  height: auto;
-  display:block;
-  border-radius: 10px;
-}
-
-.attach-loading{
-  position:absolute;
-  inset: 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius: 10px;
-  background: rgba(0,0,0,0.35);
-  color: #fff;
-  font-weight: 600;
-}
-
-.attach-footer{
-  display:flex;
-  gap: 10px;
-  padding: 10px 12px;
-  border-top: 1px solid rgba(0,0,0,0.08);
-}
-
-.dark-mode .attach-footer{ border-top-color: rgba(255,255,255,0.12); }
-
-#attach-caption{
-  flex: 1;
-  border: 1px solid rgba(0,0,0,0.2);
-  border-radius: 10px;
-  padding: 10px 12px;
-  outline: none;
-  background: transparent;
-  color: inherit;
-}
-
-#attach-send{
-  border: none;
-  background: #00a884;
-  color: #fff;
-  padding: 0 14px;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-}
+.attach-preview { background: #000; text-align: center; min-height: 200px; }
+.attach-preview img { max-width: 100%; max-height: 70vh; object-fit: contain; }
 
 
 
@@ -501,28 +429,24 @@
     <emoji-picker locale="pt" class="light"></emoji-picker
   </div>
   
-<!-- ===== MODAL PREVIEW ANEXO (FOTO) ===== -->
-<div id="attach-modal" class="attach-modal" style="display:none;">
+<div id="attach-modal" class="attach-modal" style="display:none !important;">
   <div class="attach-card">
     <div class="attach-header">
-      <span>Pré-visualizar</span>
+      <span>Enviar Foto</span>
       <button id="attach-cancel" class="attach-x" type="button">✕</button>
     </div>
-
     <div class="attach-preview">
-      <img id="attach-preview-img" alt="preview" />
-      <div id="attach-loading" class="attach-loading" style="display:none;">
-        A preparar…
-      </div>
+      <img id="attach-preview-img" src="" alt="preview" />
+      <div id="attach-loading" class="attach-loading" style="display:none;">A processar...</div>
     </div>
-
     <div class="attach-footer">
-      <input id="attach-caption" type="text" placeholder="Adicionar legenda…" />
+      <input id="attach-caption" type="text" placeholder="Legenda..." autocomplete="off">
       <button id="attach-send" type="button">Enviar</button>
     </div>
   </div>
 </div>
-  <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none"/>
+
+<input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none !important;" />
   
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -734,159 +658,80 @@
         console.error("Erro:", err.message);
       }
     }
-    /* ======================== LÓGICA DE FOTO E MODAL ========================= */
-
-const cameraBtn = document.getElementById("camera-btn");
-const cameraInput = document.getElementById("camera-file-input");
-const attachModal = document.getElementById("attach-modal");
-const attachImg = document.getElementById("attach-preview-img");
-const attachCaption = document.getElementById("attach-caption");
-const attachSend = document.getElementById("attach-send");
-const attachCancel = document.getElementById("attach-cancel");
-const attachLoading = document.getElementById("attach-loading");
-
+    /* VARIÁVEIS GLOBAIS DE CONTROLO */
 let pendingCameraFile = null;
-let pendingObjectUrl = null;
 
-// 1. Abrir seletor de ficheiros (Câmara)
-cameraBtn?.addEventListener("click", (e) => {
+const camInput = document.getElementById("camera-file-input");
+const attModal = document.getElementById("attach-modal");
+const attImg = document.getElementById("attach-preview-img");
+
+// 1. DISPARAR CÂMARA
+document.getElementById("camera-btn")?.addEventListener("click", (e) => {
   e.preventDefault();
-  // Verifica se há um chat ativo antes de abrir a câmara
-  if (!currentChat || currentChat === "null") {
-    alert("Selecione um contacto primeiro.");
-    return;
-  }
-  cameraInput.click();
+  if (!currentChat || currentChat === "null") return alert("Selecione um chat.");
+  
+  camInput.value = ""; // RESET CRÍTICO
+  camInput.click();
 });
 
-// 2. Detetar quando a foto foi tirada/escolhida
-cameraInput?.addEventListener("change", (e) => {
+// 2. CAPTURAR FOTO (Ouvinte de Mudança)
+camInput?.addEventListener("change", function(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  if (!file.type.startsWith("image/")) {
-    alert("Por favor, selecione uma imagem.");
-    return;
-  }
-
   pendingCameraFile = file;
-  openAttachPreviewModal(file);
-  
-  // Limpa o input para permitir tirar outra foto caso cancele
-  cameraInput.value = ""; 
+
+  // Criar leitura do ficheiro
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    // Definir a imagem ANTES de mostrar o modal
+    attImg.src = event.target.result;
+    
+    // FORÇAR ABERTURA
+    attModal.style.setProperty("display", "flex", "important");
+    
+    // Focar na legenda
+    setTimeout(() => document.getElementById("attach-caption")?.focus(), 400);
+  };
+  reader.readAsDataURL(file);
 });
 
-// 3. Função para abrir o Modal e gerar Preview
-function openAttachPreviewModal(file) {
-  if (!attachModal || !attachImg) return;
-
-  // Reset de UI
-  attachCaption.value = "";
-  attachLoading.style.display = "none";
-  attachSend.disabled = false;
-
-  // Gerar URL temporária para visualização
-  if (pendingObjectUrl) URL.revokeObjectURL(pendingObjectUrl);
-  pendingObjectUrl = URL.createObjectURL(file);
-  
-  attachImg.src = pendingObjectUrl;
-
-  // Mostrar modal (Importante: Forçar display flex)
-  attachModal.style.display = "flex";
-
-  // Foco no campo de legenda após abrir
-  setTimeout(() => attachCaption.focus(), 300);
-}
-
-// 4. Fechar Modal
-function closeAttachPreviewModal() {
+// 3. FECHAR MODAL
+function fecharModalAnexo() {
+  attModal.style.setProperty("display", "none", "important");
+  attImg.src = "";
   pendingCameraFile = null;
-  if (pendingObjectUrl) {
-    URL.revokeObjectURL(pendingObjectUrl);
-    pendingObjectUrl = null;
-  }
-  attachImg.src = "";
-  attachModal.style.display = "none";
 }
 
-attachCancel?.addEventListener("click", closeAttachPreviewModal);
+document.getElementById("attach-cancel")?.addEventListener("click", fecharModalAnexo);
 
-// 5. Enviar foto com legenda
-attachSend?.addEventListener("click", async () => {
+// 4. ENVIAR (Upload e Mensagem)
+document.getElementById("attach-send")?.addEventListener("click", async () => {
   if (!pendingCameraFile) return;
-
-  const caption = (attachCaption.value || "").trim();
+  
+  const btnSend = document.getElementById("attach-send");
+  const loading = document.getElementById("attach-loading");
+  const caption = document.getElementById("attach-caption").value;
 
   try {
-    attachLoading.style.display = "flex";
-    attachSend.disabled = true;
+    btnSend.disabled = true;
+    loading.style.display = "flex";
 
-    // Fazer upload para o Storage do Supabase
+    // Upload
     const publicUrl = await uploadImageToSupabase(pendingCameraFile);
     
-    // Gravar mensagem na tabela chat_messages
-    await sendImageMessage(
-      publicUrl,
-      pendingCameraFile.name || `foto_${Date.now()}.jpg`,
-      caption
-    );
+    // Enviar mensagem
+    await sendImageMessage(publicUrl, pendingCameraFile.name, caption);
 
-    closeAttachPreviewModal();
-    
-    // Se existir a função de scroll, executa
-    if (typeof scrollToBottom === 'function') scrollToBottom();
-
+    fecharModalAnexo();
+    if (window.scrollToBottom) scrollToBottom();
   } catch (err) {
-    console.error("Erro ao enviar foto:", err);
-    alert("Erro ao enviar imagem. Tente novamente.");
+    console.error(err);
+    alert("Erro ao enviar.");
   } finally {
-    attachLoading.style.display = "none";
-    attachSend.disabled = false;
+    btnSend.disabled = false;
+    loading.style.display = "none";
   }
-});
-
-/* --- Funções de Apoio --- */
-
-async function uploadImageToSupabase(file) {
-  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
-  const fileName = `photo_${Date.now()}.${ext}`;
-  const filePath = `${currentChat}/${fileName}`;
-
-  const { error } = await supabaseClient.storage
-    .from("cb_files")
-    .upload(filePath, file, { upsert: true });
-
-  if (error) throw error;
-
-  const { data: { publicUrl } } = supabaseClient.storage
-    .from("cb_files")
-    .getPublicUrl(filePath);
-
-  return publicUrl;
-}
-
-async function sendImageMessage(imageUrl, fileName, caption = "") {
-  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-  const senderName = (typeof fetchUserName === 'function') ? await fetchUserName() : "Utilizador";
-
-  const payload = {
-    n_int: currentUserNint, // n_int do remetente (global)
-    recipient_nint: String(currentChat),
-    corp_oper_nr: currentCorp,
-    abv_name: senderName,
-    message_type: "image",
-    file_url: imageUrl,
-    file_name: fileName,
-    message: caption || ""
-  };
-
-  const { error } = await supabaseClient.from("chat_messages").insert([payload]);
-  if (error) throw error;
-}
-
-// Fechar modal ao clicar fora do card branco
-attachModal?.addEventListener("click", (e) => {
-  if (e.target === attachModal) closeAttachPreviewModal();
 });
 
 
@@ -2209,6 +2054,7 @@ attachModal?.addEventListener("click", (e) => {
   </script>
 </body>
 </html>
+
 
 
 
