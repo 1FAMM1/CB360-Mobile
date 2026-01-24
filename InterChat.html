@@ -384,7 +384,14 @@
   </div>
   <div id="full-emoji-picker-container">
     <emoji-picker locale="pt" class="light"></emoji-picker
-  </div> 
+  </div>
+      <input
+  type="file"
+  id="camera-file-input"
+  accept="image/*"
+  capture="environment"
+  style="display:none"
+/>
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -594,7 +601,87 @@
       } catch (err) {
         console.error("Erro:", err.message);
       }
-    }    
+    }
+    
+    
+    
+    
+    
+    
+    const cameraBtn = document.getElementById("camera-btn");
+const cameraInput = document.getElementById("camera-file-input");
+
+cameraBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (currentChat === "null") return; // só dentro de um chat
+  cameraInput.click();               // abre a câmara (ou seletor)
+});
+
+cameraInput.addEventListener("change", async () => {
+  const file = cameraInput.files?.[0];
+  if (!file) return;
+
+  try {
+    // upload + obter URL
+    const publicUrl = await uploadImageToSupabase(file);
+
+    // inserir mensagem tipo image
+    await sendImageMessage(publicUrl, file.name || `foto_${Date.now()}.jpg`);
+
+  } catch (err) {
+    console.error("Erro ao enviar foto:", err);
+    alert("Não foi possível enviar a foto.");
+  } finally {
+    // permite escolher a mesma foto novamente
+    cameraInput.value = "";
+  }
+});
+
+async function uploadImageToSupabase(file) {
+  if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
+
+  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
+  const fileName = `photo_${Date.now()}.${ext}`;
+  const filePath = `${currentChat}/${fileName}`;
+
+  const { error } = await supabaseClient
+    .storage
+    .from("cb_files")
+    .upload(filePath, file);
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabaseClient
+    .storage
+    .from("cb_files")
+    .getPublicUrl(filePath);
+
+  if (!publicUrl) throw new Error("Sem URL público.");
+  return publicUrl;
+}
+
+async function sendImageMessage(imageUrl, fileName) {
+  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+  const senderName = await fetchUserName();
+
+  const payload = {
+    n_int: currentUserNint,
+    recipient_nint: String(currentChat),
+    corp_oper_nr: currentCorp,
+    abv_name: senderName,
+    message_type: "image",
+    file_url: imageUrl,
+    file_name: fileName,
+    message: "" // opcional legenda
+  };
+
+  const { error } = await supabaseClient
+    .from("chat_messages")
+    .insert([payload]);
+
+  if (error) throw error;
+}
+
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
