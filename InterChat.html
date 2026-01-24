@@ -492,6 +492,31 @@
         }, 150);
       }
     });
+    inputMensage.addEventListener('focus', () => {
+    // Fecha o container de emojis se estiver aberto para não haver conflito
+    if (emojiContainer.style.display === 'block') {
+        resetLayout();
+    }
+
+    setTimeout(() => {
+        // Ajusta a margem para o teclado (valor aproximado de um teclado padrão)
+        // No mobile, o teclado empurra a viewport, mas o container precisa de espaço
+        messageContainer.style.marginBottom = '300px'; 
+        
+        let scrollAcompanha = setInterval(() => {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }, 10);
+        
+        setTimeout(() => clearInterval(scrollAcompanha), 400);
+    }, 200); // Um pouco mais de delay para o iOS processar a subida
+});
+
+inputMensage.addEventListener('blur', () => {
+    // Quando o utilizador clica fora ou esconde o teclado, volta ao normal
+    setTimeout(() => {
+        resetLayout();
+    }, 100);
+});
     emojiBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (emojiContainer.style.display === 'block') {
