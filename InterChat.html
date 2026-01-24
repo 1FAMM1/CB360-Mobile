@@ -284,25 +284,31 @@
   width: 100vw !important;
   height: 100vh !important;
   background: rgba(0,0,0,0.9) !important;
-  z-index: 999999 !important; /* Valor máximo */
-  display: none; /* JS muda para flex */
+  z-index: 9999999 !important; /* Força máxima */
+  display: none; /* Alterado via JS */
   align-items: center;
   justify-content: center;
 }
 
 .attach-card {
   background: #fff;
-  width: 90%;
-  max-width: 500px;
-  border-radius: 15px;
+  width: min(500px, 92vw);
+  border-radius: 16px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-.attach-preview { background: #000; text-align: center; min-height: 200px; }
-.attach-preview img { max-width: 100%; max-height: 70vh; object-fit: contain; }
+.dark-mode .attach-card { background: #1f1f1f; color: #fff; }
 
+.attach-preview { background: #000; display: flex; align-items: center; justify-content: center; min-height: 250px; }
+.attach-preview img { max-width: 100%; max-height: 65vh; object-fit: contain; }
+
+.attach-footer { padding: 12px; display: flex; gap: 8px; background: #f9f9f9; }
+.dark-mode .attach-footer { background: #2a2a2a; }
+
+#attach-caption { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
+#attach-send { background: #00a884; color: #fff; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; }
 
 
     
@@ -428,26 +434,25 @@
   <div id="full-emoji-picker-container">
     <emoji-picker locale="pt" class="light"></emoji-picker
   </div>
-  
-<div id="attach-modal" class="attach-modal" style="display:none !important;">
+  <div id="attach-modal" class="attach-modal" style="display:none !important;">
   <div class="attach-card">
     <div class="attach-header">
       <span>Enviar Foto</span>
-      <button id="attach-cancel" class="attach-x" type="button">✕</button>
+      <button id="attach-cancel" class="attach-x" type="button" onclick="fecharModalAnexo()">✕</button>
     </div>
     <div class="attach-preview">
       <img id="attach-preview-img" src="" alt="preview" />
-      <div id="attach-loading" class="attach-loading" style="display:none;">A processar...</div>
+      <div id="attach-loading" class="attach-loading" style="display:none;">A enviar...</div>
     </div>
     <div class="attach-footer">
-      <input id="attach-caption" type="text" placeholder="Legenda..." autocomplete="off">
+      <input id="attach-caption" type="text" placeholder="Escreva uma legenda..." autocomplete="off">
       <button id="attach-send" type="button">Enviar</button>
     </div>
   </div>
 </div>
 
-<input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none !important;" />
-  
+<input type="file" id="camera-file-input" accept="image/*" capture="environment" style="position:fixed; top:-100px; left:-100px; opacity:0;">
+  <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none"/>
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -658,83 +663,197 @@
         console.error("Erro:", err.message);
       }
     }
-    /* VARIÁVEIS GLOBAIS DE CONTROLO */
+    /* ==========================================================================
+   SISTEMA DE CAPTURA DE IMAGEM E MODAL DE PRÉ-VISUALIZAÇÃO (COMPLETO)
+   ========================================================================== */
+
+// 1. Variáveis de estado global para o anexo
 let pendingCameraFile = null;
+let pendingObjectUrl = null;
 
-const camInput = document.getElementById("camera-file-input");
-const attModal = document.getElementById("attach-modal");
-const attImg = document.getElementById("attach-preview-img");
+// Referências aos elementos do DOM
+const cameraInput = document.getElementById("camera-file-input");
+const attachModal = document.getElementById("attach-modal");
+const attachImg = document.getElementById("attach-preview-img");
+const attachCaption = document.getElementById("attach-caption");
+const attachSend = document.getElementById("attach-send");
+const attachCancel = document.getElementById("attach-cancel");
+const attachLoading = document.getElementById("attach-loading");
 
-// 1. DISPARAR CÂMARA
-document.getElementById("camera-btn")?.addEventListener("click", (e) => {
-  e.preventDefault();
-  if (!currentChat || currentChat === "null") return alert("Selecione um chat.");
-  
-  camInput.value = ""; // RESET CRÍTICO
-  camInput.click();
-});
-
-// 2. CAPTURAR FOTO (Ouvinte de Mudança)
-camInput?.addEventListener("change", function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  pendingCameraFile = file;
-
-  // Criar leitura do ficheiro
-  const reader = new FileReader();
-  reader.onload = function(event) {
-    // Definir a imagem ANTES de mostrar o modal
-    attImg.src = event.target.result;
+/* --- AÇÃO: DISPARAR CÂMARA --- */
+document.addEventListener('click', function(e) {
+  // Captura o clique no botão de câmara (delegado para evitar falhas)
+  if (e.target.closest('#camera-btn')) {
+    e.preventDefault();
     
-    // FORÇAR ABERTURA
-    attModal.style.setProperty("display", "flex", "important");
+    // Verificação de segurança: chat ativo
+    if (!window.currentChat || window.currentChat === "null") {
+      alert("Por favor, selecione um contacto ou grupo primeiro.");
+      return;
+    }
     
-    // Focar na legenda
-    setTimeout(() => document.getElementById("attach-caption")?.focus(), 400);
-  };
-  reader.readAsDataURL(file);
-});
-
-// 3. FECHAR MODAL
-function fecharModalAnexo() {
-  attModal.style.setProperty("display", "none", "important");
-  attImg.src = "";
-  pendingCameraFile = null;
-}
-
-document.getElementById("attach-cancel")?.addEventListener("click", fecharModalAnexo);
-
-// 4. ENVIAR (Upload e Mensagem)
-document.getElementById("attach-send")?.addEventListener("click", async () => {
-  if (!pendingCameraFile) return;
-  
-  const btnSend = document.getElementById("attach-send");
-  const loading = document.getElementById("attach-loading");
-  const caption = document.getElementById("attach-caption").value;
-
-  try {
-    btnSend.disabled = true;
-    loading.style.display = "flex";
-
-    // Upload
-    const publicUrl = await uploadImageToSupabase(pendingCameraFile);
-    
-    // Enviar mensagem
-    await sendImageMessage(publicUrl, pendingCameraFile.name, caption);
-
-    fecharModalAnexo();
-    if (window.scrollToBottom) scrollToBottom();
-  } catch (err) {
-    console.error(err);
-    alert("Erro ao enviar.");
-  } finally {
-    btnSend.disabled = false;
-    loading.style.display = "none";
+    if (cameraInput) {
+      cameraInput.value = ""; // Limpeza crítica para permitir repetir fotos
+      cameraInput.click();
+    }
   }
 });
 
+/* --- AÇÃO: DETETAR FICHEIRO RECEBIDO --- */
+cameraInput?.addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
 
+  // Validar se é imagem
+  if (!file.type.startsWith("image/")) {
+    alert("O ficheiro selecionado não é uma imagem válida.");
+    return;
+  }
+
+  pendingCameraFile = file;
+
+  // Usamos FileReader para converter em Base64 (mais estável para mobile que ObjectURL)
+  const reader = new FileReader();
+  
+  reader.onloadstart = function() {
+    // Se quiseres mostrar um mini-loading antes do modal abrir
+    console.log("A processar imagem...");
+  };
+
+  reader.onload = function(event) {
+    if (attachImg && attachModal) {
+      // 1. Inserir a imagem no preview
+      attachImg.src = event.target.result;
+
+      // 2. Limpar legenda anterior
+      if (attachCaption) attachCaption.value = "";
+
+      // 3. Reset do estado dos botões
+      if (attachSend) attachSend.disabled = false;
+      if (attachLoading) attachLoading.style.display = "none";
+
+      // 4. FORÇAR ABERTURA DO MODAL (com display flex)
+      attachModal.style.setProperty("display", "flex", "important");
+
+      // 5. Focar no campo de legenda (com delay para o teclado mobile)
+      setTimeout(() => {
+        attachCaption?.focus();
+      }, 500);
+    }
+  };
+
+  reader.onerror = function() {
+    alert("Erro ao ler a imagem capturada.");
+  };
+
+  reader.readAsDataURL(file);
+});
+
+/* --- AÇÃO: FECHAR MODAL --- */
+function closeAttachPreviewModal() {
+  pendingCameraFile = null;
+  if (attachImg) attachImg.src = "";
+  if (attachModal) {
+    attachModal.style.setProperty("display", "none", "important");
+  }
+  // Limpar o input file para estar pronto para a próxima
+  if (cameraInput) cameraInput.value = "";
+}
+
+// Eventos de fecho
+attachCancel?.addEventListener("click", closeAttachPreviewModal);
+
+attachModal?.addEventListener("click", function(e) {
+  // Fechar se clicar na parte escura (fora do card)
+  if (e.target === attachModal) {
+    closeAttachPreviewModal();
+  }
+});
+
+/* --- AÇÃO: ENVIAR PARA SUPABASE --- */
+attachSend?.addEventListener("click", async function() {
+  if (!pendingCameraFile) return;
+
+  const caption = (attachCaption?.value || "").trim();
+
+  try {
+    // Bloquear UI para evitar múltiplos cliques
+    if (attachLoading) attachLoading.style.display = "flex";
+    if (attachSend) attachSend.disabled = true;
+
+    // 1. Upload do Ficheiro (Storage)
+    const publicUrl = await uploadImageToSupabase(pendingCameraFile);
+    
+    // 2. Gravar Mensagem (Database)
+    await sendImageMessage(
+      publicUrl,
+      pendingCameraFile.name || `foto_${Date.now()}.jpg`,
+      caption
+    );
+
+    // 3. Sucesso: Fechar e fazer scroll
+    closeAttachPreviewModal();
+    
+    if (typeof scrollToBottom === 'function') {
+      scrollToBottom();
+    }
+
+  } catch (err) {
+    console.error("Erro crítico no envio:", err);
+    alert("Não foi possível enviar a foto. Verifique a sua ligação.");
+  } finally {
+    if (attachLoading) attachLoading.style.display = "none";
+    if (attachSend) attachSend.disabled = false;
+  }
+});
+
+/* --- FUNÇÕES AUXILIARES --- */
+
+async function uploadImageToSupabase(file) {
+  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
+  const fileName = `photo_${Date.now()}.${ext}`;
+  // Caminho da pasta no Storage (ex: ID_DO_CHAT/nome_ficheiro.jpg)
+  const filePath = `${window.currentChat}/${fileName}`;
+
+  const { error } = await supabaseClient.storage
+    .from("cb_files")
+    .upload(filePath, file, { upsert: true });
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabaseClient.storage
+    .from("cb_files")
+    .getPublicUrl(filePath);
+
+  if (!publicUrl) throw new Error("Erro ao obter URL pública.");
+  
+  return publicUrl;
+}
+
+async function sendImageMessage(imageUrl, fileName, caption = "") {
+  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+  
+  // Tenta obter o nome do remetente (abv_name)
+  let senderName = "Utilizador";
+  if (typeof fetchUserName === 'function') {
+    senderName = await fetchUserName();
+  }
+
+  const payload = {
+    n_int: window.currentUserNint,
+    recipient_nint: String(window.currentChat),
+    corp_oper_nr: currentCorp,
+    abv_name: senderName,
+    message_type: "image",
+    file_url: imageUrl,
+    file_name: fileName,
+    message: caption || "" // A legenda vai aqui
+  };
+
+  const { error } = await supabaseClient.from("chat_messages").insert([payload]);
+  
+  if (error) throw error;
+}
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -1421,28 +1540,26 @@ document.getElementById("attach-send")?.addEventListener("click", async () => {
     }
     /* ========================= ACTION FORWARD ========================== */
     function actionForward() {
-  if (selectedMessages.length === 0) return;
-  messagesToForward = selectedMessages.map(msg => ({
-    message: msg.message
-  }));
-  clearSelection();
-  const messagesEl = document.getElementById("messages");
-  const contactListEl = document.getElementById("contact-list");
-  const contactTitle = document.getElementById("contact-title");
-  const backBtn = document.getElementById("back-header");
-  const inputBar = document.querySelector(".chat-input-bar");
-  const chatIdInfo = document.getElementById("chat-id-info");
-  
-  if (window.innerWidth <= 768) {
-    messagesEl.style.display = 'none';
-    contactListEl.style.display = 'block';
-    contactTitle.style.display = 'block';
-    backBtn.style.display = 'none';
-    inputBar.style.display = 'none';  // OCULTA A BARRA DE ESCRITA
-    chatIdInfo.style.display = 'none';  // OCULTA O NOME DO CHAT
-  }
-  console.log("Modo encaminhar: Selecione o contacto de destino na lista.");
-}
+      if (selectedMessages.length === 0) return;
+      messagesToForward = selectedMessages.map(msg => ({
+        message: msg.message
+      }));
+      clearSelection();
+      const messagesEl = document.getElementById("messages");
+      const contactListEl = document.getElementById("contact-list");
+      const contactTitle = document.getElementById("contact-title");
+      const backBtn = document.getElementById("back-header");
+      const inputBar = document.querySelector(".chat-input-bar");
+      const chatIdInfo = document.getElementById("chat-id-info");
+      if (window.innerWidth <= 768) {
+        messagesEl.style.display = 'none';
+        contactListEl.style.display = 'block';
+        contactTitle.style.display = 'block';
+        backBtn.style.display = 'none';
+        inputBar.style.display = 'none';
+        chatIdInfo.style.display = 'none';
+      }
+    }
     /* ========================== ACTION DELETE ========================== */
     let confirmResolver = null;
     async function actionDelete() {
@@ -2054,13 +2171,3 @@ document.getElementById("attach-send")?.addEventListener("click", async () => {
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
