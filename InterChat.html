@@ -101,7 +101,7 @@
 .chat-input-bar{
   position: fixed;
   left:0; right:0;
- 
+  bottom: calc(var(--footer-h) + var(--kb) + var(--gap) + var(--safe));
   z-index: 10001;
   transition: bottom 0.12s ease;
 }
@@ -383,8 +383,7 @@ body.keyboard-open #full-emoji-picker-container{
     /* ============ RESPONSIVENESS 385px ============ */
     @media (max-width: 385px) {
       .powered-by {font-size: 10px !important; white-space: nowrap;}
-      .footer-year {font-size: 8px !important;}
-      .chat-input-bar {bottom: 38px;}}
+      .footer-year {font-size: 8px !important;}}
   </style>
 </head>
 <body>
@@ -2140,6 +2139,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
