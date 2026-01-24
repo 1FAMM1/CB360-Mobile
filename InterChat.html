@@ -263,28 +263,6 @@
     @keyframes highlight-fade {0% {background: rgba(211, 47, 47, 0.3);} 100% {background: inherit;}}
     @keyframes gentle-pulse {0%, 100% {box-shadow: 0 4px 12px rgba(52, 183, 241, 0.5), 0 2px 6px rgba(52, 183, 241, 0.3);} 50% {box-shadow: 0 6px 16px rgba(52, 183, 241, 0.7), 0 3px 8px rgba(52, 183, 241, 0.5);}}
     @keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
-
-    :root { --panel-h: 0px; }
-
-/* espaço para footer + input + painel */
-.message-container {
-  margin-bottom: 80px; /* mantém o teu se quiseres */
-  padding-bottom: var(--panel-h);
-}
-
-/* a barra sobe com o painel */
-.chat-input-bar {
-  bottom: calc(60px + var(--panel-h));
-}
-
-/* o painel de emojis ocupa o “panel-h” */
-#full-emoji-picker-container {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 60px;
-  height: var(--panel-h);
-}
     /* =================================================
     MEDIA QUERIES - FULL RESPONSIVENESS
     ================================================= */
@@ -488,16 +466,14 @@
     const emojiContainer = document.getElementById('full-emoji-picker-container');
     const picker = document.querySelector('emoji-picker');
     const messageContainer = document.querySelector('.message-container');
-    function setPanelHeight(px) {
-  document.documentElement.style.setProperty('--panel-h', Math.max(0, px) + 'px');
-}
     function resetLayout() {
-  emojiContainer.style.display = 'none';
-  setPanelHeight(0);
-  setTimeout(() => {
-    messageContainer.scrollTop = messageContainer.scrollHeight;
-  }, 50);
-}
+      emojiContainer.style.display = 'none';
+      barraDeInput.style.bottom = '60px'; 
+      messageContainer.style.marginBottom = '80px';
+      setTimeout(() => {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }, 100);
+    }
     inputMensage.addEventListener('input', function() {
       const hasText = this.value.trim().length > 0;
       const novoIcone = hasText ? 'send' : 'mic';
@@ -517,23 +493,23 @@
       }
     });
     emojiBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-
-  const isOpen = emojiContainer.style.display === 'block';
-
-  if (isOpen) {
-    resetLayout();
-    inputMensage.focus();
-  } else {
-    inputMensage.blur();
-    emojiContainer.style.display = 'block';
-    setPanelHeight(300); // mesma altura que usavas antes
-    setTimeout(() => {
-      messageContainer.scrollTop = messageContainer.scrollHeight;
-    }, 50);
-  }
-});
-
+      e.preventDefault();
+      if (emojiContainer.style.display === 'block') {
+        resetLayout();
+        inputMensage.focus();
+      } else {
+        inputMensage.blur(); 
+        setTimeout(() => {
+          emojiContainer.style.display = 'block';
+          barraDeInput.style.bottom = '305px'; 
+          messageContainer.style.marginBottom = '325px'; 
+          let scrollAcompanha = setInterval(() => {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+          }, 10);
+          setTimeout(() => clearInterval(scrollAcompanha), 400);
+        }, 50);
+      }
+    });
     picker.addEventListener('emoji-click', event => {
       const emoji = event.detail.unicode;
       const inicio = inputMensage.selectionStart;
@@ -628,25 +604,7 @@
     }
     
     
-    function setupKeyboardResize() {
-  if (!window.visualViewport) return;
-
-  const updateForKeyboard = () => {
-    const vv = window.visualViewport;
-    const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-
-    // só mexe no painel quando emojis não estão abertos
-    if (emojiContainer.style.display !== 'block') {
-      setPanelHeight(keyboardHeight);
-    }
-  };
-
-  visualViewport.addEventListener('resize', updateForKeyboard);
-  visualViewport.addEventListener('scroll', updateForKeyboard);
-}
-
-window.addEventListener('load', setupKeyboardResize);
-
+    
     
     
     
@@ -1947,6 +1905,3 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
-
-
-
