@@ -278,126 +278,71 @@
     @keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
 
 
-/* ============ PREVIEW FOTO COM LEGENDA ============ */
-.photo-preview-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000;
-  display: none;
-  flex-direction: column;
-  z-index: 10000;
-  animation: fadeIn 0.3s ease;
+#attach-preview-modal{
+  position: fixed; inset: 0;
+  z-index: 99999;
 }
-.photo-preview-overlay.show { display: flex; }
-
-.preview-header {
-  background: rgba(32, 44, 51, 0.95);
-  padding: 15px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  backdrop-filter: blur(10px);
+#attach-preview-modal .apm-backdrop{
+  position:absolute; inset:0;
+  background: rgba(0,0,0,0.75);
 }
-.preview-header h3 {
-  color: #e9edef;
-  font-size: 18px;
-  font-weight: 500;
-}
-.close-preview {
-  background: none;
-  border: none;
-  color: #e9edef;
-  cursor: pointer;
-  padding: 5px;
-  display: flex;
-  transition: opacity 0.2s;
-}
-.close-preview:hover { opacity: 0.7; }
-
-.preview-image-area {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-}
-.preview-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.caption-bar {
-  background: rgba(32, 44, 51, 0.95);
-  padding: 15px 20px;
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.caption-icon {
-  color: #8696a0;
-  flex-shrink: 0;
-}
-.caption-input {
-  flex: 1;
-  background: #2a3942;
-  border: none;
-  color: #e9edef;
-  padding: 12px 15px;
-  border-radius: 25px;
-  font-size: 14px;
-  outline: none;
-}
-.caption-input::placeholder {
-  color: #8696a0;
-}
-.send-photo-btn {
-  background: #00a884;
-  color: white;
-  border: none;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 168, 132, 0.4);
-}
-.send-photo-btn:hover {
-  background: #029678;
-  transform: scale(1.05);
-}
-.send-photo-btn:active {
-  transform: scale(0.95);
-}
-
-.sending-overlay {
+#attach-preview-modal .apm-card{
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: none;
-  align-items: center;
-  justify-content: center;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 420px);
+  background: #111;
+  border-radius: 16px;
+  padding: 12px;
+  display:flex;
   flex-direction: column;
-  gap: 15px;
-  z-index: 10;
+  gap: 10px;
 }
-.sending-overlay.show { display: flex; }
-.sending-text {
-  color: #e9edef;
-  font-size: 14px;
+#attach-preview-modal .apm-preview{
+  width:100%;
+  border-radius: 14px;
+  overflow:hidden;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height: 260px;
 }
+#attach-preview-modal img{
+  max-width: 100%;
+  max-height: 55vh;
+  display:block;
+}
+#attach-preview-modal .apm-caption-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+#attach-caption{
+  flex:1;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 0;
+  outline:none;
+}
+.apm-send-btn{
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  border: 0;
+  background:#00a884;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.apm-cancel-btn{
+  border:0;
+  background: transparent;
+  color:#fff;
+  opacity:0.85;
+  padding: 6px 0;
+}
+
 
     
     /* =================================================
@@ -523,36 +468,19 @@
     <emoji-picker locale="pt" class="light"></emoji-picker
   </div>
   
-<!-- MODAL PREVIEW FOTO -->
-<div class="photo-preview-overlay" id="photo-preview">
-  <div class="preview-header">
-    <h3>Preview da Foto</h3>
-    <button class="close-preview" onclick="closePhotoPreview()">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
+<div id="attach-preview-modal" style="display:none;">
+  <div class="apm-backdrop"></div>
+  <div class="apm-card">
+    <div class="apm-preview"></div>
 
-  <div class="preview-image-area">
-    <img id="preview-image" class="preview-image" alt="Preview">
-    
-    <div class="sending-overlay" id="sending-overlay">
-      <div class="spinner"></div>
-      <div class="sending-text">A enviar foto...</div>
+    <div class="apm-caption-row">
+      <input id="attach-caption" type="text" placeholder="Adicionar legenda..." />
+      <button id="attach-send" class="apm-send-btn">
+        <span class="material-icons">send</span>
+      </button>
     </div>
-  </div>
 
-  <div class="caption-bar">
-    <span class="material-icons caption-icon">edit</span>
-    <input 
-      type="text" 
-      id="photo-caption-input" 
-      class="caption-input" 
-      placeholder="Adicionar legenda..."
-      maxlength="200"
-    />
-    <button class="send-photo-btn" onclick="sendPhotoWithCaption()">
-      <span class="material-icons">send</span>
-    </button>
+    <button id="attach-cancel" class="apm-cancel-btn">Cancelar</button>
   </div>
 </div>
   <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none"/>
@@ -768,249 +696,90 @@
       }
     }
     /* ======================== CAMERA RECORDING ========================= */
-let selectedPhotoFile = null;
-
 const cameraBtn = document.getElementById("camera-btn");
 const cameraInput = document.getElementById("camera-file-input");
 
-cameraBtn.addEventListener("click", async (e) => {
+let pendingCameraFile = null;
+
+cameraBtn.addEventListener("click", (e) => {
   e.preventDefault();
-  if (currentChat === "null") return;
-  
-  // SOLUÇÃO: Usar MediaDevices API diretamente
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    try {
-      // Abrir câmara nativa
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" }
-      });
-      
-      // Criar preview temporário
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.autoplay = true;
-      video.playsInline = true;
-      
-      // Mostrar preview customizado
-      showCameraPreview(stream, video);
-      
-    } catch (err) {
-      console.error("Erro ao aceder à câmara:", err);
-      // Fallback para input file
-      cameraInput.click();
-    }
-  } else {
-    // Browser não suporta getUserMedia
-    cameraInput.click();
-  }
+  if (!currentChat || currentChat === "null") return;
+  cameraInput.click(); // ✅ nativo abre sempre
 });
 
-// Fallback: se user escolher do input file
-cameraInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
+cameraInput.addEventListener("change", () => {
+  const file = cameraInput.files?.[0];
   if (!file) return;
 
-  if (!file.type.startsWith('image/')) {
-    alert('❌ Ficheiro inválido! Seleciona uma imagem.');
-    e.target.value = '';
+  if (!file.type.startsWith("image/")) {
+    cameraInput.value = "";
     return;
   }
 
-  const MAX_SIZE = 10 * 1024 * 1024;
-  if (file.size > MAX_SIZE) {
-    alert('❌ Imagem muito grande!\n\nTamanho máximo: 10MB');
-    e.target.value = '';
-    return;
-  }
+  // ✅ em vez de enviar já, abre modal para legenda
+  pendingCameraFile = file;
+  openAttachPreviewModal(file);
 
-  selectedPhotoFile = file;
-  showPhotoPreview(file);
+  cameraInput.value = "";
 });
 
-// Preview da câmara ao vivo
-function showCameraPreview(stream, video) {
-  const preview = document.getElementById('photo-preview');
-  const img = document.getElementById('preview-image');
-  const captionInput = document.getElementById('photo-caption-input');
-  const sendBtn = document.querySelector('.send-photo-btn');
-  
-  // Esconder imagem, mostrar vídeo
-  img.style.display = 'none';
-  
-  const previewArea = document.querySelector('.preview-image-area');
-  video.style.maxWidth = '100%';
-  video.style.maxHeight = '100%';
-  video.style.objectFit = 'contain';
-  previewArea.insertBefore(video, previewArea.firstChild);
-  
-  captionInput.value = '';
-  preview.classList.add('show');
-  
-  // Mudar botão para "Capturar"
-  sendBtn.innerHTML = '<span class="material-icons">camera</span>';
-  sendBtn.onclick = () => capturePhoto(stream, video);
-  
-  // Botão fechar para a câmara
-  const closeBtn = document.querySelector('.close-preview');
-  closeBtn.onclick = () => {
-    stream.getTracks().forEach(track => track.stop());
-    video.remove();
-    preview.classList.remove('show');
-    img.style.display = 'block';
-    sendBtn.innerHTML = '<span class="material-icons">send</span>';
-    sendBtn.onclick = sendPhotoWithCaption;
-  };
-}
-
-// Capturar foto da câmara
-function capturePhoto(stream, video) {
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0);
-  
-  // Converter para blob
-  canvas.toBlob((blob) => {
-    const file = new File([blob], `foto_${Date.now()}.jpg`, { type: 'image/jpeg' });
-    
-    // Parar câmara
-    stream.getTracks().forEach(track => track.stop());
-    video.remove();
-    
-    // Mostrar preview da foto capturada
-    selectedPhotoFile = file;
-    showPhotoPreview(file);
-    
-  }, 'image/jpeg', 0.95);
-}
-
-// Mostrar preview da foto (já tirada)
-function showPhotoPreview(file) {
-  const preview = document.getElementById('photo-preview');
-  const img = document.getElementById('preview-image');
-  const captionInput = document.getElementById('photo-caption-input');
-  const sendBtn = document.querySelector('.send-photo-btn');
-
-  const imageUrl = URL.createObjectURL(file);
-  img.src = imageUrl;
-  img.style.display = 'block';
-  captionInput.value = '';
-  preview.classList.add('show');
-  
-  // Restaurar botão enviar
-  sendBtn.innerHTML = '<span class="material-icons">send</span>';
-  sendBtn.onclick = sendPhotoWithCaption;
-  
-  // Restaurar botão fechar
-  const closeBtn = document.querySelector('.close-preview');
-  closeBtn.onclick = closePhotoPreview;
-  
-  setTimeout(() => captionInput.focus(), 300);
-}
-
-// Fechar preview
-function closePhotoPreview() {
-  const preview = document.getElementById('photo-preview');
-  const fileInput = document.getElementById('camera-file-input');
-  const img = document.getElementById('preview-image');
-
-  preview.classList.remove('show');
-  fileInput.value = '';
-  selectedPhotoFile = null;
-  URL.revokeObjectURL(img.src);
-  img.src = '';
-}
-
-// Enviar foto com legenda
-async function sendPhotoWithCaption() {
-  if (!selectedPhotoFile) return;
-
-  const caption = document.getElementById('photo-caption-input').value.trim();
-  const sendingOverlay = document.getElementById('sending-overlay');
-  const sendBtn = document.querySelector('.send-photo-btn');
-
-  sendBtn.disabled = true;
-  sendingOverlay.classList.add('show');
-
-  try {
-    const publicUrl = await uploadImageToSupabase(selectedPhotoFile);
-    await sendImageMessage(publicUrl, selectedPhotoFile.name, caption);
-    closePhotoPreview();
-  } catch (err) {
-    console.error('Erro ao enviar foto:', err);
-    alert('❌ Erro ao enviar foto!\n\n' + err.message);
-  } finally {
-    sendBtn.disabled = false;
-    sendingOverlay.classList.remove('show');
-  }
-}
-
-// Upload para Supabase
 async function uploadImageToSupabase(file) {
   if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
-  
   const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
   const fileName = `photo_${Date.now()}.${ext}`;
   const filePath = `${currentChat}/${fileName}`;
-  
+
   const { error } = await supabaseClient
     .storage
     .from("cb_files")
-    .upload(filePath, file);
-  
+    .upload(filePath, file, { upsert: true });
+
   if (error) throw error;
-  
+
   const { data: { publicUrl } } = supabaseClient
     .storage
     .from("cb_files")
     .getPublicUrl(filePath);
-  
+
   if (!publicUrl) throw new Error("Sem URL público.");
   return publicUrl;
 }
 
-// Inserir mensagem com legenda
 async function sendImageMessage(imageUrl, fileName, caption = "") {
   const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
   const senderName = await fetchUserName();
-  
+
   const payload = {
-    n_int: currentUserNint, 
-    recipient_nint: String(currentChat), 
-    corp_oper_nr: currentCorp, 
-    abv_name: senderName, 
-    message_type: "image", 
-    file_url: imageUrl, 
-    file_name: fileName, 
-    message: caption
+    n_int: currentUserNint,
+    recipient_nint: String(currentChat),
+    corp_oper_nr: currentCorp,
+    abv_name: senderName,
+    message_type: "image",
+    file_url: imageUrl,
+    file_name: fileName,
+    message: caption || ""
   };
-  
-  const { error } = await supabaseClient
-    .from("chat_messages")
-    .insert([payload]);
-  
+
+  const { error } = await supabaseClient.from("chat_messages").insert([payload]);
   if (error) throw error;
 }
 
-// Atalho Enter
-document.addEventListener('DOMContentLoaded', () => {
-  const captionInput = document.getElementById('photo-caption-input');
-  if (captionInput) {
-    captionInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        const sendBtn = document.querySelector('.send-photo-btn');
-        if (sendBtn.onclick) sendBtn.onclick();
-      }
-      if (e.key === 'Escape') {
-        const closeBtn = document.querySelector('.close-preview');
-        if (closeBtn.onclick) closeBtn.onclick();
-      }
-    });
+/* ============ MODAL: envia depois da legenda ============ */
+document.getElementById("attach-send").addEventListener("click", async () => {
+  if (!pendingCameraFile) return;
+
+  const caption = (document.getElementById("attach-caption").value || "").trim();
+
+  try {
+    const publicUrl = await uploadImageToSupabase(pendingCameraFile);
+    await sendImageMessage(publicUrl, pendingCameraFile.name || `foto_${Date.now()}.jpg`, caption);
+    closeAttachPreviewModal();
+  } catch (err) {
+    console.error("Erro ao enviar foto:", err);
+    alert("Não foi possível enviar a foto.");
   }
 });
+
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -2330,6 +2099,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
 </body>
 </html>
+
 
 
 
