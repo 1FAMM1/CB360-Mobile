@@ -346,44 +346,6 @@ body.keyboard-open #full-emoji-picker-container{
     @keyframes highlight-fade {0% {background: rgba(211, 47, 47, 0.3);} 100% {background: inherit;}}
     @keyframes gentle-pulse {0%, 100% {box-shadow: 0 4px 12px rgba(52, 183, 241, 0.5), 0 2px 6px rgba(52, 183, 241, 0.3);} 50% {box-shadow: 0 6px 16px rgba(52, 183, 241, 0.7), 0 3px 8px rgba(52, 183, 241, 0.5);}}
     @keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
-
-
-
-    /* wrapper ocupa a largura toda e não deixa estourar */
-.message-wrapper{
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;  /* corta qualquer overflow horizontal */
-  gap: 6px;
-  box-sizing: border-box;
-}
-
-/* alinhamento: outros à esquerda, eu à direita */
-.message-wrapper.other{
-  justify-content: flex-start;
-}
-
-.message-wrapper.self{
-  justify-content: flex-end;
-}
-
-/* garante que a bubble não força overflow */
-.message-wrapper .message{
-  max-width: calc(100% - 28px); /* reserva espaço para o ícone + gap */
-  box-sizing: border-box;
-}
-
-/* ícone encaminhada */
-.forwarded-icon{
-  font-size: 16px;
-  opacity: 0.6;
-  user-select: none;
-  cursor: default;
-  flex: 0 0 auto;
-}
-
     /* =================================================
     MEDIA QUERIES - FULL RESPONSIVENESS
     ================================================= */
@@ -1144,30 +1106,10 @@ async function sendImageMessage(imageUrl, fileName) {
         }
       }
       setupMessageInteraction(div, msg);
-
-// 🔁 wrapper para o ícone de encaminhada ao lado da bubble
-const wrapper = document.createElement("div");
-wrapper.className = "message-wrapper " + (isMe ? "self" : "other");
-
-// se for encaminhada, adiciona ícone
-if (msg.is_forwarded) {
-  const fwdIcon = document.createElement("span");
-  fwdIcon.className = "material-icons forwarded-icon";
-  fwdIcon.textContent = "forward";
-  fwdIcon.title = "Encaminhada";
-  wrapper.appendChild(fwdIcon);
-}
-
-// adiciona a bubble
-wrapper.appendChild(div);
-
-// mete no DOM
-messagesEl.appendChild(wrapper);
-
-if (messagesEl.style.display !== 'none') {
-  scrollToBottom();
-}
-
+      messagesEl.appendChild(div);
+      if (messagesEl.style.display !== 'none') {
+        scrollToBottom();
+      }
     }
     /* ======================== GET MESSAGE DATE  ======================== */
     function getDateLabel(date) {
@@ -2178,4 +2120,3 @@ if (messagesEl.style.display !== 'none') {
   </script>
 </body>
 </html>
-
