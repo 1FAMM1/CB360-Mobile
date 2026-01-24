@@ -90,7 +90,7 @@
 .message-container{
   overflow-y:auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(var(--footer-h) + 100px + var(--kb) + var(--safe));
+  padding-bottom: calc(var(--footer-h) + 80px + var(--kb) + var(--safe));
 }
 
 .message-container.keyboard-active{
@@ -180,7 +180,7 @@ body.keyboard-open #full-emoji-picker-container{
   flex: 1; 
   overflow-y: auto; 
   -webkit-overflow-scrolling: touch; 
-  margin-bottom: 60px;
+  margin-bottom: 80px;
   transition: margin-bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   /* ← ADICIONA ESTAS LINHAS */
   max-height: calc(100dvh - 220px); /* Ajusta conforme necessário */
@@ -263,7 +263,7 @@ body.keyboard-open #full-emoji-picker-container{
     .edit-cancel:active {transform: scale(0.9);}   
     .message-edited-tag {font-size: 10px; color: rgba(255, 255, 255, 0.5); font-style: italic; margin-left: 5px;}
     .message.other .message-edited-tag {color: rgba(0, 0, 0, 0.4);}    
-    .reply-bar {position: fixed; bottom: 110px; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); border-top: 1px solid #ddd; padding: 10px 15px; z-index: 5000; display: none;
+    .reply-bar {position: fixed; bottom: 100px; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); border-top: 1px solid #ddd; padding: 10px 15px; z-index: 5000; display: none;
                 box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); backdrop-filter: blur(10px);}
     .reply-bar-content {display: flex; align-items: center; gap: 10px;}
     .reply-icon {font-size: 20px; color: #d32f2f;}
@@ -567,7 +567,20 @@ body.keyboard-open #full-emoji-picker-container{
     const emojiContainer = document.getElementById('full-emoji-picker-container');
     const picker = document.querySelector('emoji-picker');
     const messageContainer = document.querySelector('.message-container');
-   
+    function resetLayout() {
+  emojiContainer.style.display = 'none';
+
+  // NÃO forçar bottom por JS — deixa o CSS/vars controlar
+  barraDeInput.style.removeProperty('bottom');
+
+  // idem para marginBottom se já usas padding + kb vars
+  messageContainer.style.removeProperty('margin-bottom');
+
+  setTimeout(() => {
+    scrollToBottom();
+  }, 100);
+}
+
     inputMensage.addEventListener('input', function() {
       const hasText = this.value.trim().length > 0;
       const novoIcone = hasText ? 'send' : 'mic';
@@ -2133,6 +2146,7 @@ async function sendImageMessage(imageUrl, fileName) {
   </script>
 </body>
 </html>
+
 
 
 
