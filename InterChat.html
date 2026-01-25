@@ -1152,11 +1152,22 @@
         const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
         const senderName = await fetchUserName();
         for (const msg of messagesToForward) {
-          const { error } = await supabaseClient.from('chat_messages').insert([{n_int: currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName,
-                                                                                message: msg.message, is_forwarded: true}]);
-          if (error) console.error("Erro ao encaminhar mensagem:", error);
-        }
-        messagesToForward = [];
+  const payload = {
+    n_int: currentUserNint,
+    recipient_nint: String(n_int),
+    corp_oper_nr: currentCorp,
+    abv_name: senderName,
+    message: msg.message || "",
+    message_type: msg.message_type || "text",
+    file_url: msg.file_url || null,
+    file_name: msg.file_name || null,
+    is_forwarded: true
+  };
+
+  const { error } = await supabaseClient.from('chat_messages').insert([payload]);
+  if (error) console.error("Erro ao encaminhar mensagem:", error);
+}
+messagesToForward = []
         await new Promise(resolve => setTimeout(resolve, 150));
       }
       currentChat = String(n_int);
@@ -2071,4 +2082,5 @@
   </script>
 </body>
 </html>
+
 
