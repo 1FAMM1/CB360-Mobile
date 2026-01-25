@@ -2250,134 +2250,120 @@ const AudioPlayer = {
 };
 
 /* =====================================================================
-   KEYBOARD HANDLER (PWA FIX)
+   KEYBOARD HANDLER (PWA FIX) - VERSÃO ORIGINAL COMPLETA
    ===================================================================== */
 const KeyboardHandler = {
-  keyboardOpen: false,
-  baseInnerHeight: window.innerHeight,
-  
   init() {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const THRESH_OPEN = isIOS ? 80 : 120;
-    const THRESH_CLOSE = isIOS ? 40 : 60;
-    
-    const body = document.body;
-    const inputEl = DOM.chatInput();
-    
-    const setKb = (px) => {
-      document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
-    };
-    
-    const isChatVisible = () => {
-      const el = DOM.messages();
-      return el && el.style.display !== "none";
-    };
-    
-    const getKeyboardHeight = () => {
-      if (!window.visualViewport) return 0;
-      const vv = window.visualViewport;
-      const a = window.innerHeight - vv.height;
-      const b = window.innerHeight - vv.height - vv.offsetTop;
-      const c = window.innerHeight - vv.height + vv.offsetTop;
-      return Math.max(0, a, b, c);
-    };
-    
-    const onKeyboardOpen = (kbHeight) => {
-      if (!isChatVisible()) return;
-      
-      this.keyboardOpen = true;
-      body.classList.add("keyboard-open");
-      
-      const messages = DOM.messages();
-      const inputBar = DOM.inputBar();
+    (function () {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const THRESH_OPEN  = isIOS ? 80  : 120;
+      const THRESH_CLOSE = isIOS ? 40  : 60;
+      let keyboardOpen = false;
+      let baseInnerHeight = window.innerHeight;
+      const body = document.body;
       const mainContent = document.querySelector(".main-content");
+      const messages = document.querySelector(".message-container");
+      const inputBar = document.querySelector(".chat-input-bar");
+      const inputEl = document.getElementById("chat-input");
+      const emojiContainer = document.getElementById("full-emoji-picker-container");
       
-      messages?.classList.add("keyboard-active");
-      inputBar?.classList.add("keyboard-active");
-      mainContent?.classList.add("keyboard-active");
-      
-      setKb(kbHeight);
-      
-      const emojiContainer = DOM.emojiContainer();
-      if (emojiContainer && emojiContainer.style.display === "block") {
-        emojiContainer.style.display = "none";
+      function setKb(px) {
+        document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
       }
       
-      ScrollManager.toBottom();
-      setTimeout(() => ScrollManager.toBottom(), 120);
-    };
-    
-    const onKeyboardClose = () => {
-      this.keyboardOpen = false;
-      body.classList.remove("keyboard-open");
-      
-      const messages = DOM.messages();
-      const inputBar = DOM.inputBar();
-      const mainContent = document.querySelector(".main-content");
-      
-      messages?.classList.remove("keyboard-active");
-      inputBar?.classList.remove("keyboard-active");
-      mainContent?.classList.remove("keyboard-active");
-      
-      setKb(0);
-    };
-    
-    const detectKeyboard = () => {
-      if (!this.keyboardOpen) this.baseInnerHeight = window.innerHeight;
-      const kb = getKeyboardHeight();
-      
-      if (!this.keyboardOpen && kb > THRESH_OPEN) {
-        onKeyboardOpen(kb);
-      } else if (this.keyboardOpen && kb < THRESH_CLOSE) {
-        onKeyboardClose();
-      } else if (this.keyboardOpen) {
-        setKb(kb);
-        ScrollManager.toBottom();
-        setTimeout(() => ScrollManager.toBottom(), 120);
+      function isChatVisible() {
+        const el = document.getElementById("messages");
+        return el && el.style.display !== "none";
       }
-    };
-    
-    // Event listeners
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", detectKeyboard);
-      window.visualViewport.addEventListener("scroll", detectKeyboard);
-    } else {
-      window.addEventListener("resize", detectKeyboard);
-    }
-    
-    if (inputEl) {
-      inputEl.addEventListener("focus", () => {
-        setTimeout(() => {
-          ScrollManager.toBottom();
-          setTimeout(() => ScrollManager.toBottom(), 120);
-        }, 100);
-      });
       
-      inputEl.addEventListener("blur", () => {
-        setTimeout(detectKeyboard, 150);
-      });
-    }
-    
-    window.addEventListener("orientationchange", () => {
-      setTimeout(() => {
-        this.baseInnerHeight = window.innerHeight;
-        detectKeyboard();
-      }, 300);
-    });
-    
-    // Observer para detectar quando o chat fecha
-    const messagesEl = DOM.messages();
-    if (messagesEl) {
-      const obs = new MutationObserver(() => {
-        if (!isChatVisible() && this.keyboardOpen) {
-          onKeyboardClose();
+      function getKeyboardHeight() {
+        if (!window.visualViewport) return 0;
+        const vv = window.visualViewport;
+        const a = window.innerHeight - vv.height;
+        const b = window.innerHeight - vv.height - vv.offsetTop;
+        const c = window.innerHeight - vv.height + vv.offsetTop;
+        return Math.max(0, a, b, c);
+      }
+      
+      function onKeyboardOpen(kbHeight) {
+        if (!isChatVisible()) return;
+        keyboardOpen = true;
+        body.classList.add("keyboard-open");
+        messages?.classList.add("keyboard-active");
+        inputBar?.classList.add("keyboard-active");
+        mainContent?.classList.add("keyboard-active");
+        setKb(kbHeight);
+        if (emojiContainer && emojiContainer.style.display === "block") {
+          emojiContainer.style.display = "none";
         }
+        scrollToBottom();
+        setTimeout(scrollToBottom, 120);
+      }
+      
+      function onKeyboardClose() {
+        keyboardOpen = false;
+        body.classList.remove("keyboard-open");
+        messages?.classList.remove("keyboard-active");
+        inputBar?.classList.remove("keyboard-active");
+        mainContent?.classList.remove("keyboard-active");
+        setKb(0);
+      }
+      
+      function detectKeyboard() {
+        if (!keyboardOpen) baseInnerHeight = window.innerHeight;
+        const kb = getKeyboardHeight();
+        if (!keyboardOpen && kb > THRESH_OPEN) {
+          onKeyboardOpen(kb);
+        } else if (keyboardOpen && kb < THRESH_CLOSE) {
+          onKeyboardClose();
+        } else if (keyboardOpen) {
+          setKb(kb);
+          scrollToBottom();
+          setTimeout(scrollToBottom, 120);
+        }
+      }
+      
+      function scrollToBottom() {
+        const messagesEl = document.getElementById("messages");
+        if (messagesEl && messagesEl.style.display !== 'none') {
+          setTimeout(() => {
+            messagesEl.scrollTo({
+              top: messagesEl.scrollHeight,
+              behavior: 'smooth'
+            });
+          }, 50);
+        }
+      }
+      
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", detectKeyboard);
+        window.visualViewport.addEventListener("scroll", detectKeyboard);
+      } else {
+        window.addEventListener("resize", detectKeyboard);
+      }
+      
+      inputEl?.addEventListener("focus", () => {
+        scrollToBottom();
+        setTimeout(scrollToBottom, 120);
       });
-      obs.observe(messagesEl, {attributes: true, attributeFilter: ["style"]});
-    }
-    
-    // Força detecção inicial
-    setTimeout(detectKeyboard, 100);
+      
+      inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));
+      
+      window.addEventListener("orientationchange", () => {
+        setTimeout(() => {
+          baseInnerHeight = window.innerHeight;
+          detectKeyboard();
+        }, 300);
+      });
+      
+      const messagesEl = document.getElementById("messages");
+      if (messagesEl) {
+        const obs = new MutationObserver(() => {
+          if (!isChatVisible()) onKeyboardClose();
+        });
+        obs.observe(messagesEl, {attributes: true, attributeFilter: ["style"]});
+      }
+    })();
   }
 };
 
@@ -2765,5 +2751,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   </script>
 </body>
 </html>
+
 
 
