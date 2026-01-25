@@ -557,23 +557,23 @@
         });
       }
     };
-   const ChatInputHandler = {
+   /* ======================= CHAT INPUT HANDLER ======================== */
+const ChatInputHandler = {
   init() {
     const chatInput = DOM.chatInput();
     if (!chatInput) return;
 
     chatInput.addEventListener('input', () => {
-      this.autoResize();
+      // 1. Ajuste de altura (o que já tinha)
+      chatInput.style.height = 'auto';
+      chatInput.style.height = (chatInput.scrollHeight) + 'px';
+      
+      // 2. Scroll para acompanhar o crescimento do input
+      DOM.messages()?.scrollTo(0, DOM.messages().scrollHeight);
+
+      // 3. AGORA: Troca instantânea do botão (Câmara vs Enviar)
       this.toggleSendButton();
     });
-  },
-
-  autoResize() {
-    const chatInput = DOM.chatInput();
-    if (!chatInput) return;
-    chatInput.style.height = 'auto';
-    chatInput.style.height = (chatInput.scrollHeight) + 'px';
-    DOM.messages()?.scrollTo(0, DOM.messages().scrollHeight);
   },
 
   toggleSendButton() {
@@ -583,7 +583,7 @@
     
     if (!chatInput || !cameraBtn || !sendBtn) return;
 
-    // trim() garante que espaços vazios contam como campo vazio (mostra câmara)
+    // Se o input tiver qualquer texto (removendo espaços vazios)
     if (chatInput.value.trim().length > 0) {
       cameraBtn.style.display = 'none';
       sendBtn.style.display = 'flex';
@@ -1805,7 +1805,7 @@
         document.getElementById('reply-bar').style.display = 'none';
       }
     };
-     /* ========================== EDIT MANAGER =========================== */
+    /* ========================== EDIT MANAGER =========================== */
     const EditManager = {
   editingMessageId: null,
 
@@ -2443,22 +2443,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
