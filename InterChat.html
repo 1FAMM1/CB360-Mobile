@@ -445,7 +445,7 @@
     })();
   </script>
   <script> 
-   /* =====================================================================
+  /* =====================================================================
    CONSTANTES E CONFIGURAÇÃO
    ===================================================================== */
 const CONFIG = {
@@ -2363,6 +2363,13 @@ const KeyboardHandler = {
         });
         obs.observe(messagesEl, {attributes: true, attributeFilter: ["style"]});
       }
+      
+      body.addEventListener('touchmove', function(e) {
+        if (keyboardOpen && body.classList.contains('keyboard-open')) {
+          e.preventDefault();
+        }
+      }, {passive: false});
+      
     })();
   }
 };
@@ -2751,6 +2758,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   </script>
 </body>
 </html>
+
 
 
 
