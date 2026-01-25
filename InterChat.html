@@ -557,23 +557,23 @@
         });
       }
     };
-   /* ======================= CHAT INPUT HANDLER ======================== */
-const ChatInputHandler = {
+   const ChatInputHandler = {
   init() {
     const chatInput = DOM.chatInput();
     if (!chatInput) return;
 
     chatInput.addEventListener('input', () => {
-      // 1. Ajuste de altura (o que já tinha)
-      chatInput.style.height = 'auto';
-      chatInput.style.height = (chatInput.scrollHeight) + 'px';
-      
-      // 2. Scroll para acompanhar o crescimento do input
-      DOM.messages()?.scrollTo(0, DOM.messages().scrollHeight);
-
-      // 3. AGORA: Troca instantânea do botão (Câmara vs Enviar)
+      this.autoResize();
       this.toggleSendButton();
     });
+  },
+
+  autoResize() {
+    const chatInput = DOM.chatInput();
+    if (!chatInput) return;
+    chatInput.style.height = 'auto';
+    chatInput.style.height = (chatInput.scrollHeight) + 'px';
+    DOM.messages()?.scrollTo(0, DOM.messages().scrollHeight);
   },
 
   toggleSendButton() {
@@ -583,7 +583,7 @@ const ChatInputHandler = {
     
     if (!chatInput || !cameraBtn || !sendBtn) return;
 
-    // Se o input tiver qualquer texto (removendo espaços vazios)
+    // trim() garante que espaços vazios contam como campo vazio (mostra câmara)
     if (chatInput.value.trim().length > 0) {
       cameraBtn.style.display = 'none';
       sendBtn.style.display = 'flex';
@@ -1806,7 +1806,8 @@ const ChatInputHandler = {
       }
     };
     /* ========================== EDIT MANAGER =========================== */
-    const EditManager = {
+    /* ======================== EDIT MANAGER ======================== */
+const EditManager = {
   editingMessageId: null,
 
   start(messageId) {
@@ -1814,68 +1815,52 @@ const ChatInputHandler = {
     if (!msgElement) return;
     
     this.editingMessageId = messageId;
-    
-    // Captura o texto atual da bolha de mensagem
     const textContent = msgElement.querySelector('.msg-text-content').innerText;
     const chatInput = document.getElementById('chat-input');
     
-    // Coloca o texto no input e foca
     chatInput.value = textContent;
     chatInput.focus();
     
-    // Ajusta a altura do input para caber o texto da edição
-    chatInput.style.height = 'auto';
-    chatInput.style.height = (chatInput.scrollHeight) + 'px';
-    
-    // Mostra a barra superior de edição
     const editBar = document.querySelector('.edit-bar');
     if (editBar) {
       editBar.querySelector('.edit-text-preview').textContent = textContent;
       editBar.style.display = 'block';
     }
     
-    // Fecha o menu de contexto (copiar, editar, etc)
     if (typeof ActionBarManager !== 'undefined') ActionBarManager.close();
     
-    // Atualiza botões (Esconde câmara, mostra enviar)
+    // Força a UI a mostrar o botão de enviar e ajustar altura
     ChatInputHandler.toggleSendButton();
+    ChatInputHandler.autoResize();
   },
 
   cancel() {
-    this.editingMessageId = null;
-    
-    // Esconde a barra de edição
-    const editBar = document.querySelector('.edit-bar');
-    if (editBar) editBar.style.display = 'none';
-    
-    // Limpa o input
-    const chatInput = document.getElementById('chat-input');
-    chatInput.value = '';
-    chatInput.style.height = 'auto'; // Reset da altura
-    
-    // LIMPEZA DE ESTADOS
-    SelectionManager.clear(); // Remove o azul/presslong
-    
-    // FORÇAR VOLTA DA CÂMARA
-    ChatInputHandler.toggleSendButton();
+    this.cleanup();
   },
 
   finish() { 
+    this.cleanup();
+  },
+
+  // Função crucial para garantir que nada fica "preso"
+  cleanup() {
     this.editingMessageId = null;
     
-    // Esconde a barra de edição
+    // 1. Esconde a barra de edição
     const editBar = document.querySelector('.edit-bar');
     if (editBar) editBar.style.display = 'none';
     
-    // Limpa o input
+    // 2. Limpa o input e reseta a altura
     const chatInput = document.getElementById('chat-input');
-    chatInput.value = '';
-    chatInput.style.height = 'auto'; // Reset da altura
+    if (chatInput) {
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+    }
     
-    // LIMPEZA DE ESTADOS
-    SelectionManager.clear(); // Limpa seleção e estados de "preso"
+    // 3. Limpa seleções (remove o azul/presslong)
+    SelectionManager.clear();
     
-    // FORÇAR VOLTA DA CÂMARA
+    // 4. FORÇA a volta da câmara (essencial para quando o envio é via código)
     ChatInputHandler.toggleSendButton();
   }
 };
@@ -2471,6 +2456,7 @@ const ChatInputHandler = {
   </script>
 </body>
 </html>
+
 
 
 
