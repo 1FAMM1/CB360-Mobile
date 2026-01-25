@@ -1960,115 +1960,114 @@ const ChatInputHandler = {
         if (fill) fill.style.width = "0%";
       }
     };
-   /* =================== KEYBOARD HANDLER (PWA FIX) ==================== */
-const KeyboardHandler = {
-  init() {
-    (function () {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-      const THRESH_OPEN  = isIOS ? 80  : 120;
-      const THRESH_CLOSE = isIOS ? 40  : 60;
-      let keyboardOpen = false;
-      let baseInnerHeight = window.innerHeight;
-      const body = document.body;
-      const mainContent = document.querySelector(".main-content");
-      const messages = document.querySelector(".message-container");
-      const inputBar = document.querySelector(".chat-input-bar");
-      const inputEl = document.getElementById("chat-input");
-      const emojiContainer = document.getElementById("full-emoji-picker-container");      
-      
-      function setKb(px) {
-        document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
-      }      
-      
-      function isChatVisible() {
-        const el = document.getElementById("messages");
-        return el && el.style.display !== "none";
-      }      
-      
-      function getKeyboardHeight() {
-        if (!window.visualViewport) return 0;
-        const vv = window.visualViewport;
-        const a = window.innerHeight - vv.height;
-        const b = window.innerHeight - vv.height - vv.offsetTop;
-        const c = window.innerHeight - vv.height + vv.offsetTop;
-        return Math.max(0, a, b, c);
-      }      
-      
-      function onKeyboardOpen(kbHeight) {
-        if (!isChatVisible()) return;
-        keyboardOpen = true;
-        body.classList.add("keyboard-open");
-        messages?.classList.add("keyboard-active");
-        inputBar?.classList.add("keyboard-active");
-        mainContent?.classList.add("keyboard-active");
-        setKb(kbHeight);
-        if (emojiContainer && emojiContainer.style.display === "block") {
-          emojiContainer.style.display = "none";
-        }
-        ScrollManager.toBottom(); // ✅ CORRIGIDO
-        setTimeout(() => ScrollManager.toBottom(), 120); // ✅ CORRIGIDO
-      }      
-      
-      function onKeyboardClose() {
-        keyboardOpen = false;
-        body.classList.remove("keyboard-open");
-        messages?.classList.remove("keyboard-active");
-        inputBar?.classList.remove("keyboard-active");
-        mainContent?.classList.remove("keyboard-active");
-        setKb(0);
-      }      
-      
-      function detectKeyboard() {
-        if (!keyboardOpen) baseInnerHeight = window.innerHeight;
-        const kb = getKeyboardHeight();
-        if (!keyboardOpen && kb > THRESH_OPEN) {
-          onKeyboardOpen(kb);
-        } else if (keyboardOpen && kb < THRESH_CLOSE) {
-          onKeyboardClose();
-        } else if (keyboardOpen) {
-          setKb(kb);
-          ScrollManager.toBottom(); // ✅ CORRIGIDO
-          setTimeout(() => ScrollManager.toBottom(), 120); // ✅ CORRIGIDO
-        }
-      }      
-      
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", detectKeyboard);
-        window.visualViewport.addEventListener("scroll", detectKeyboard);
-      } else {
-        window.addEventListener("resize", detectKeyboard);
-      }      
-      
-      inputEl?.addEventListener("focus", () => {
-        ScrollManager.toBottom(); // ✅ CORRIGIDO
-        setTimeout(() => ScrollManager.toBottom(), 120); // ✅ CORRIGIDO
-      });      
-      
-      inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));      
-      
-      window.addEventListener("orientationchange", () => {
-        setTimeout(() => {
-          baseInnerHeight = window.innerHeight;
-          detectKeyboard();
-        }, 300);
-      });      
-      
-      const messagesEl = document.getElementById("messages");
-      if (messagesEl) {
-        const obs = new MutationObserver(() => {
-          if (!isChatVisible()) onKeyboardClose();
-        });
-        obs.observe(messagesEl, {attributes: true, attributeFilter: ["style"]});
-      }      
-      
-      body.addEventListener('touchmove', function(e) {
-        if (keyboardOpen && body.classList.contains('keyboard-open')) {
-          e.preventDefault();
-        }
-      }, {passive: false});      
-    })();
-  }
-};
+    /* =================== KEYBOARD HANDLER (PWA FIX) ==================== */
+    const KeyboardHandler = {
+      init() {
+        (function () {
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+          const THRESH_OPEN  = isIOS ? 80  : 120;
+          const THRESH_CLOSE = isIOS ? 40  : 60;
+          let keyboardOpen = false;
+          let baseInnerHeight = window.innerHeight;
+          const body = document.body;
+          const mainContent = document.querySelector(".main-content");
+          const messages = document.querySelector(".message-container");
+          const inputBar = document.querySelector(".chat-input-bar");
+          const inputEl = document.getElementById("chat-input");
+          const emojiContainer = document.getElementById("full-emoji-picker-container");      
+          function setKb(px) {
+            document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
+          }      
+          function isChatVisible() {
+            const el = document.getElementById("messages");
+            return el && el.style.display !== "none";
+          }      
+          function getKeyboardHeight() {
+            if (!window.visualViewport) return 0;
+            const vv = window.visualViewport;
+            const a = window.innerHeight - vv.height;
+            const b = window.innerHeight - vv.height - vv.offsetTop;
+            const c = window.innerHeight - vv.height + vv.offsetTop;
+            return Math.max(0, a, b, c);
+          }      
+          function onKeyboardOpen(kbHeight) {
+            if (!isChatVisible()) return;
+            keyboardOpen = true;
+            body.classList.add("keyboard-open");
+            messages?.classList.add("keyboard-active");
+            inputBar?.classList.add("keyboard-active");
+            mainContent?.classList.add("keyboard-active");
+            setKb(kbHeight);
+            if (emojiContainer && emojiContainer.style.display === "block") {
+              emojiContainer.style.display = "none";
+            }
+            scrollToBottom();
+            setTimeout(scrollToBottom, 120);
+          }      
+          function onKeyboardClose() {
+            keyboardOpen = false;
+            body.classList.remove("keyboard-open");
+            messages?.classList.remove("keyboard-active");
+            inputBar?.classList.remove("keyboard-active");
+            mainContent?.classList.remove("keyboard-active");
+            setKb(0);
+          }      
+          function detectKeyboard() {
+            if (!keyboardOpen) baseInnerHeight = window.innerHeight;
+            const kb = getKeyboardHeight();
+            if (!keyboardOpen && kb > THRESH_OPEN) {
+              onKeyboardOpen(kb);
+            } else if (keyboardOpen && kb < THRESH_CLOSE) {
+              onKeyboardClose();
+            } else if (keyboardOpen) {
+              setKb(kb);
+              scrollToBottom();
+              setTimeout(scrollToBottom, 120);
+            }
+          }      
+          function scrollToBottom() {
+            const messagesEl = document.getElementById("messages");
+            if (messagesEl && messagesEl.style.display !== 'none') {
+              setTimeout(() => {
+                messagesEl.scrollTo({
+                  top: messagesEl.scrollHeight,
+                  behavior: 'smooth'
+                });
+              }, 50);
+            }
+          }      
+          if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", detectKeyboard);
+            window.visualViewport.addEventListener("scroll", detectKeyboard);
+          } else {
+            window.addEventListener("resize", detectKeyboard);
+          }      
+          inputEl?.addEventListener("focus", () => {
+            scrollToBottom();
+            setTimeout(scrollToBottom, 120);
+          });      
+          inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));      
+          window.addEventListener("orientationchange", () => {
+            setTimeout(() => {
+              baseInnerHeight = window.innerHeight;
+              detectKeyboard();
+            }, 300);
+          });      
+          const messagesEl = document.getElementById("messages");
+          if (messagesEl) {
+            const obs = new MutationObserver(() => {
+              if (!isChatVisible()) onKeyboardClose();
+            });
+            obs.observe(messagesEl, {attributes: true, attributeFilter: ["style"]});
+          }      
+          body.addEventListener('touchmove', function(e) {
+            if (keyboardOpen && body.classList.contains('keyboard-open')) {
+              e.preventDefault();
+            }
+          }, {passive: false});      
+        })();
+      }
+    };
     /* ======================== REALTIME MANAGER ========================= */
     const RealtimeManager = {
       init() {
@@ -2476,6 +2475,11 @@ const KeyboardHandler = {
   </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
