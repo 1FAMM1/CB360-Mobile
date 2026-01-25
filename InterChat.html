@@ -1315,7 +1315,14 @@ const ChatInputHandler = {
 
         if (error) throw error;
 
-        EditManager.finish(); // Função para limpar o estado e fechar a barra
+        // Limpa o input ANTES de chamar finish()
+        inputEl.value = '';
+        
+        // Dispara o evento input para atualizar os botões
+        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // Agora sim, fecha a barra de edição
+        EditManager.finish();
       } catch (err) {
         console.error("Erro ao editar:", err);
       } finally {
@@ -2454,4 +2461,5 @@ const ChatInputHandler = {
   </script>
 </body>
 </html>
+
 
