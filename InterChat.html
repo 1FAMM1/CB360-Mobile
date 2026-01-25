@@ -107,7 +107,7 @@
     .footer strong {color: #ffebee;}
     .main-content {flex: 1 1 auto; max-height: calc(100dvh - 0px - 0px); display: flex; flex-direction: column; overflow-y: auto; padding-top: 100px; padding-bottom: 0px;}
     .contact-id-info {padding: 10px 20px 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
-    #contact-list {display: flex; flex-direction: column; padding: 0 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px;}
+    #contact-list {display: flex; flex-direction: column; padding: 0 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--footer-h, 60px) + 80px + var(--kb, 0px) + var(--safe, 0px));}
     .contact {display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.15); color: #444; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer;
               transition: background 0.2s, transform 0.2s; margin-bottom: 5px;}
     .contact:hover {background: #ddd;}
@@ -2508,6 +2508,7 @@ const KeyboardHandler = {
   </script>
 </body>
 </html>
+
 
 
 
