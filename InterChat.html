@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
-  <meta charset="UTF-8">   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
@@ -122,7 +122,7 @@
                     position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); max-height: 100px; overflow-y: auto;}
     .pinned-text {white-space: normal; word-wrap: break-word; flex: 1; font-weight: 500; line-height: 1.4;}
      #messages {display: none;}
-    .message {max-width: 75%; padding: 10px; border-radius: 7.5px; margin-bottom: 4px; position: relative; font-size: 14.5px; line-height: 1.5; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); 
+    .message {max-width: 75%; padding: 5px 10px 5px 10px; border-radius: 7.5px; margin-bottom: 4px; position: relative; font-size: 14.5px; line-height: 1.5; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); 
               word-wrap: break-word;}
     .msg-sender-name {font-size: 12px; font-weight: bold; color: #d32f2f; margin-bottom: 2px;}
     .message.self {align-self: flex-end; background: #6b9e59; color: #fff; margin-right: 10px; border-top-right-radius: 0;}
@@ -136,17 +136,15 @@
     .status-checks.read {color: #07e5f5 !important;}
     .date-divider {text-align: center; margin: 20px 0 10px 0; clear: both; width: 100%; display: flex; justify-content: center;}
     .date-divider span {background: rgba(0, 0, 0, 0.05); color: #555; padding: 5px 15px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;}
-    .message.other .status-checks {display: none;}
-    .status-checks.read {color: #07e5f5 !important;}
-    .chat-input-bar {position: fixed; align-items: flex-end; background: transparent; display: none; padding: 8px 10px; bottom: 40px; gap: 8px;  z-index: 1001; transition: bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-                     box-sizing: border-box;  width: 100%; max-width: 100%;}    
-    .input-wrapper {display: flex; flex: 1; min-width: 0; align-items: flex-end; flex; align-items: center; background: #ccc; border-radius: 25px; padding: 5px 12px; gap: 2px;  min-height: 40px;
-                    transition: all 0.3s ease;}
-    #chat-input {color: #fff; flex: 1; min-width: 0; border: none; background: transparent; outline: none; resize: none; padding: 10px 5px; font-size: 15px; max-height: 100px; overflow-y: auto;
-                 font-family: inherit; &::-webkit-scrollbar {width: 0px; background: transparent;} scrollbar-width: none; -ms-overflow-style: none;}
-    .chat-input-bar button {height: 40px; width: 40px; padding: 4px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent;
-                            color: #54656f; transition: transform 0.1s ease, background 0.2s; flex-shrink: 0;}  
-    #chat-send-btn {background: #00a884; color: white; border-radius: 50%; width: 50px; height: 50px; flex-shrink: 0;}
+    .message.other .status-checks {display: none;}    
+    .status-checks.read {color: #07e5f5 !important;}    
+    .chat-input-bar {position: fixed; bottom: 40px; left:0px; right: 0px; background: transparent; display: none; padding: 8px 10px; gap: 8px;  z-index: 1001; align-items: center; border-radius: 0px;
+                     transition: bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);}    
+    .input-wrapper {flex: 1; background: #ccc; border-radius: 25px; display: flex; align-items: center; padding: 0 8px; gap: 2px; transition: all 0.3s ease;}
+    .chat-input-bar input {flex: 1; padding: 8px 10px; background: transparent; border: 0px; font-size: 14px; outline: none;}
+    .chat-input-bar button {height: 30px; width: 30px; padding: 4px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent;
+                        color: #54656f; transition: transform 0.1s ease, background 0.2s;}
+    #chat-send-btn {background: #00a884; color: white; border-radius: 50%; width: 35px; height: 35px;}
     #send-icon {display: inline-block;transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s;}
     .icon-spin {transform: rotate(360deg) scale(0.5); opacity: 0;}
     #camera-btn {display: flex; width: 30px; opacity: 1; overflow: hidden; transition: width 0.3s ease, opacity 0.2s ease, margin 0.3s ease;}
@@ -193,9 +191,7 @@
     .edit-cancel {background: none; border: none; color: #e65100; font-size: 20px; cursor: pointer; padding: 5px; line-height: 1;}    
     .edit-cancel:active {transform: scale(0.9);}   
     .message-edited-tag {font-size: 10px; color: rgba(255, 255, 255, 0.5); font-style: italic; margin-left: 5px;}
-    .message.other .message-edited-tag {color: rgba(0, 0, 0, 0.4);}
-    .chat-img{max-width: 230px; width: 100%; height: auto; border-radius: 10px; display: block; cursor: pointer;}
-    .img-caption{line-height: 1.35; opacity: 0.95; word-wrap: break-word;}
+    .message.other .message-edited-tag {color: rgba(0, 0, 0, 0.4);}    
     .reply-bar {position: fixed; bottom: 100px; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); border-top: 1px solid #ddd; padding: 10px 15px; z-index: 5000; display: none;
                 box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); backdrop-filter: blur(10px);}
     .reply-bar-content {display: flex; align-items: center; gap: 10px;}
@@ -243,7 +239,7 @@
     emoji-picker {width: 100%; height: 100%;}
     .draft-preview {color: #444 !important; font-size: 0.85em; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;}    
     .audio-bubble {display: flex; align-items: center; gap: 12px; padding: 6px 10px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.2);
-                   border-radius: 10px; width: 200px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1); position: relative; top: 5px;
+                   border-radius: 10px; min-width: 190px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1); position: relative; top: 5px;
                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
     .audio-play-btn {width: 35px; height: 35px; background: linear-gradient(135deg, #34b7f1 0%, #2196F3 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;
                      cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 12px rgba(52, 183, 241, 0.5), 0 2px 6px rgba(52, 183, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25); position: relative;
@@ -350,7 +346,7 @@
   <div class="chat-input-bar">
     <div class="input-wrapper">
       <button id="emoji-open-btn" type="button"><span class="material-icons">sentiment_satisfied_alt</span></button>
-      <textarea id="chat-input" placeholder="Mensagem" autocomplete="off" rows="1"></textarea>
+      <input type="text" id="chat-input" placeholder="Mensagem" autocomplete="off" />    
       <button id="attachment-btn" type="button"><span class="material-icons">attach_file</span></button>    
       <button id="camera-btn" type="button"><span class="material-icons">photo_camera</span></button>
     </div>
@@ -478,27 +474,6 @@
       if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
       return headers;
     }
-    /* ======================== IMAGE MENU BLOCK ========================= */
-    const chatInput = document.getElementById('chat-input');
-    chatInput.addEventListener('input', function() {
-      this.style.height = 'auto';
-      this.style.height = (this.scrollHeight) + 'px';
-      const messageContainer = document.querySelector('.message-container');
-      messageContainer.scrollTop = messageContainer.scrollHeight;
-    });
-    document.addEventListener('click', function(e){
-      const img = e.target.closest('.chat-img');
-      if (!img) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const url = img.dataset.url;
-      window.location.href = url;
-    });
-    document.addEventListener('contextmenu', function(e){
-      if (e.target.closest('.chat-img')) {
-        e.preventDefault();
-      }
-    });
     /* ======================= FUNCTION FIX LAYOUT ======================= */
     function adjustMainContent() {
       const main = document.querySelector('.main-content');
@@ -1032,12 +1007,8 @@
       } else {
         switch(msg.message_type) {
           case 'image':
-            finalContentHTML = `
-              <img src="${msg.file_url}" class="chat-img" data-url="${msg.file_url}" alt="imagem">
-            `;
-            if (msg.message) {
-              finalContentHTML += `<div class="img-caption">${msg.message}</div>`;
-            }
+            finalContentHTML = `<img src="${msg.file_url}" class="chat-img" style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${msg.file_url}', '_blank')">`;
+            if (msg.message) finalContentHTML += `<div class="img-caption">${msg.message}</div>`;
             break;          
           case 'audio':
             const audioID = `audio-${msg.id || Date.now()}`;
@@ -1152,9 +1123,8 @@
         const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
         const senderName = await fetchUserName();
         for (const msg of messagesToForward) {
-          const payload = {n_int: currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName, message: msg.message || "",
-                                                               message_type: msg.message_type || "text", file_url: msg.file_url || null, file_name: msg.file_name || null, is_forwarded: true};
-          const { error } = await supabaseClient.from('chat_messages').insert([payload]);
+          const { error } = await supabaseClient.from('chat_messages').insert([{n_int: currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName,
+                                                                                message: msg.message, is_forwarded: true}]);
           if (error) console.error("Erro ao encaminhar mensagem:", error);
         }
         messagesToForward = [];
@@ -1434,10 +1404,7 @@
     function actionForward() {
       if (selectedMessages.length === 0) return;
       messagesToForward = selectedMessages.map(msg => ({
-        message_type: msg.message_type || 'text',
-        message: msg.message || '',
-        file_url: msg.file_url || null,
-        file_name: msg.file_name || null
+        message: msg.message
       }));
       clearSelection();
       const messagesEl = document.getElementById("messages");
@@ -2062,7 +2029,7 @@
           payload: {readerNint: String(currentUserNint)}
         });
       }
-    }    
+    }
   </script>
 </body>
 </html>
