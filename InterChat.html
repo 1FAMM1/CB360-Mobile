@@ -2144,48 +2144,20 @@
         }
       },  
       handleMessageUpdate(msg) {
+  // 1. Localiza a mensagem no DOM
   const msgElement = Helpers.getMessageElement(msg.id);
   if (!msgElement) return;
 
-  // 1. ATUALIZAR A HORA (updated_at)
-  // Se a mensagem foi editada, o Supabase envia o updated_at
-  const timeEl = msgElement.querySelector('.msg-time');
-  if (timeEl) {
-    const newTime = msg.updated_at || msg.created_at;
-    if (newTime) {
-      timeEl.textContent = Helpers.formatTime(newTime);
-    }
-  }
-
-  // 2. ATUALIZAR O CONTEÚDO (Texto e Imagem)
+  // 2. ATUALIZAÇÃO DO TEXTO EM TEMPO REAL (O que faltava)
   if (msg.message && !msg.deleted_at) {
     const textContent = msgElement.querySelector('.msg-text-content');
-    
-    if (textContent) {
-      // Atualiza o texto sem destruir o balão
+    if (textContent && textContent.textContent !== msg.message) {
+      // Atualiza o texto imediatamente
       textContent.textContent = msg.message;
 
-      // Se houver imagem, verificamos se ela já existe para não a duplicar nem a deixar gigante
-      if (msg.file_url && msg.message_type === 'image') {
-        let imgTag = msgElement.querySelector('.message-image');
-        
-        if (imgTag) {
-          // Se já existe, apenas atualizamos o src (mantém o tamanho do CSS)
-          imgTag.src = msg.file_url;
-        } else {
-          // Se não existir (porque foi removida num update anterior), injetamos com as classes certas
-          const imgHTML = `
-            <div class="message-image-container">
-              <img src="${msg.file_url}" class="message-image" 
-                   onclick="ImageHandler.openFull('${msg.file_url}')" 
-                   style="max-width: 100%; border-radius: 8px; display: block; margin-bottom: 5px;">
-            </div>`;
-          textContent.insertAdjacentHTML('beforebegin', imgHTML);
-        }
-      }
-
-      // Adicionar o indicador visual de (editada)
+      // Adiciona ou garante que o indicador visual de edição existe
       if (!msgElement.querySelector('.edit-indicator')) {
+        const timeEl = msgElement.querySelector('.msg-time');
         if (timeEl) {
           timeEl.insertAdjacentHTML('beforebegin', 
             '<span class="edit-indicator" style="font-size: 0.7em; opacity: 0.5; margin-right: 4px;">(editada)</span>'
@@ -2193,40 +2165,41 @@
         }
       }
       
-      // Feedback visual: Pisca a cor de fundo para indicar que mudou
-      textContent.style.transition = "background 0.4s";
+      // Feedback visual rápido (pisca em amarelo para mostrar que mudou)
+      textContent.style.transition = "background 0.5s";
       textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
-      setTimeout(() => textContent.style.backgroundColor = "transparent", 800);
+      setTimeout(() => textContent.style.backgroundColor = "transparent", 1000);
     }
   }
 
-  // 3. LÓGICA DE APAGAR (Reforçada)
+  // 3. LÓGICA DE APAGAR
   if (msg.deleted_at) {
     msgElement.classList.add('deleted');
-    const imgCont = msgElement.querySelector('.message-image-container');
-    if (imgCont) imgCont.remove(); // Remove a imagem se for apagada
-    
     const textContent = msgElement.querySelector('.msg-text-content');
     if (textContent) {
       textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
     }
   }
 
-  // 4. REAÇÕES (O teu código original)
+  // 4. REAÇÕES
   if (msg.reactions !== undefined) {
     const oldReactions = msgElement.querySelector('.message-reactions');
     if (oldReactions) oldReactions.remove();
+    
     const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
     if (newReactionsHTML) {
       const textContent = msgElement.querySelector('.msg-text-content');
-      if (textContent) textContent.insertAdjacentHTML('afterend', newReactionsHTML);
+      if (textContent) {
+        textContent.insertAdjacentHTML('afterend', newReactionsHTML);
+      }
     }
   }
 
-  // 5. ESTRELAS (O teu código original)
+  // 5. ESTRELAS
   if (msg.starred_by !== undefined) {
     const oldStar = msgElement.querySelector('.star-icon');
     if (oldStar) oldStar.remove();
+    
     const isStarred = msg.starred_by && msg.starred_by.includes(AppState.currentUserNint);
     if (isStarred) {
       const textContent = msgElement.querySelector('.msg-text-content');
@@ -2325,6 +2298,7 @@
   </script>
 </body>
 </html>
+
 
 
 
