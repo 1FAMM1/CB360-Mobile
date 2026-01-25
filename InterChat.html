@@ -632,65 +632,70 @@ const ChatInputHandler = {
     };
     /* ======================== TYPING INDICATOR ========================= */
     const TypingIndicator = {
-      init() {
-        const inputMensage = DOM.chatInput();
-        const inputBar = DOM.inputBar();
-        const iconBtn = document.getElementById('send-icon');
-        const emojiBtn = document.getElementById('emoji-open-btn');
-        const emojiContainer = DOM.emojiContainer();
-        const picker = document.querySelector('emoji-picker');
-        const messageContainer = DOM.messages();    
-        inputMensage.addEventListener('input', function() {
-          const hasText = this.value.trim().length > 0;
-          const novoIcone = hasText ? 'send' : 'mic';      
-          if (iconBtn.textContent !== novoIcone) {
-            iconBtn.style.transform = 'rotate(180deg) scale(0)';
-            iconBtn.style.opacity = '0';        
-            setTimeout(() => {
-              iconBtn.textContent = novoIcone;
-              iconBtn.style.transform = 'rotate(0deg) scale(1)';
-              iconBtn.style.opacity = '1';          
-              if (hasText) {
-                inputBar.classList.add('typing');
-              } else {
-                inputBar.classList.remove('typing');
-              }
-            }, 150);
-          }
-        });    
-        emojiBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          if (emojiContainer.style.display === 'block') {
-            LayoutManager.resetLayout();
-            inputMensage.focus();
+  init() {
+    const inputMensage = DOM.chatInput();
+    const inputBar = DOM.inputBar();
+    const iconBtn = document.getElementById('send-icon');
+    const emojiBtn = document.getElementById('emoji-open-btn');
+    const emojiContainer = DOM.emojiContainer();
+    const picker = document.querySelector('emoji-picker');
+    const messageContainer = DOM.messages();    
+    inputMensage.addEventListener('input', function() {
+      const hasText = this.value.trim().length > 0;
+      const novoIcone = hasText ? 'send' : 'mic';      
+      if (iconBtn.textContent !== novoIcone) {
+        iconBtn.style.transform = 'rotate(180deg) scale(0)';
+        iconBtn.style.opacity = '0';        
+        setTimeout(() => {
+          iconBtn.textContent = novoIcone;
+          iconBtn.style.transform = 'rotate(0deg) scale(1)';
+          iconBtn.style.opacity = '1';          
+          if (hasText) {
+            inputBar.classList.add('typing');
           } else {
-            inputMensage.blur();
-            setTimeout(() => {
-              emojiContainer.style.display = 'block';
-              inputBar.style.bottom = '305px';
-              messageContainer.style.marginBottom = '325px';          
-              let scrollAcompanha = setInterval(() => {
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-              }, 10);
-              setTimeout(() => clearInterval(scrollAcompanha), 400);
-            }, 50);
+            inputBar.classList.remove('typing');
           }
-        });    
-        picker.addEventListener('emoji-click', event => {
-          const emoji = event.detail.unicode;
-          const inicio = inputMensage.selectionStart;
-          const fim = inputMensage.selectionEnd;      
-          inputMensage.value = inputMensage.value.substring(0, inicio) + emoji + inputMensage.value.substring(fim);
-          const novaPosicao = inicio + emoji.length;
-          inputMensage.setSelectionRange(novaPosicao, novaPosicao);
-          inputMensage.dispatchEvent(new Event('input'));
-        });    
-        inputMensage.addEventListener('focus', () => LayoutManager.resetLayout());
-        messageContainer.addEventListener('click', () => {
-          if (emojiContainer.style.display === 'block') LayoutManager.resetLayout();
-        });
+        }, 150);
       }
-    };
+    });    
+    emojiBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (emojiContainer.style.display === 'block') {
+        LayoutManager.resetLayout();
+        inputMensage.focus();
+      } else {
+        inputMensage.blur();
+        setTimeout(() => {
+          emojiContainer.style.display = 'block';
+          // Limpa o modo de reação (este picker é para escrever)
+          delete emojiContainer.dataset.mode;
+          inputBar.style.bottom = '305px';
+          messageContainer.style.marginBottom = '325px';          
+          let scrollAcompanha = setInterval(() => {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+          }, 10);
+          setTimeout(() => clearInterval(scrollAcompanha), 400);
+        }, 50);
+      }
+    });    
+    picker.addEventListener('emoji-click', event => {
+      // Só escreve no input se NÃO estiver em modo de reação
+      if (emojiContainer.dataset.mode !== 'reaction') {
+        const emoji = event.detail.unicode;
+        const inicio = inputMensage.selectionStart;
+        const fim = inputMensage.selectionEnd;      
+        inputMensage.value = inputMensage.value.substring(0, inicio) + emoji + inputMensage.value.substring(fim);
+        const novaPosicao = inicio + emoji.length;
+        inputMensage.setSelectionRange(novaPosicao, novaPosicao);
+        inputMensage.dispatchEvent(new Event('input'));
+      }
+    });    
+    inputMensage.addEventListener('focus', () => LayoutManager.resetLayout());
+    messageContainer.addEventListener('click', () => {
+      if (emojiContainer.style.display === 'block') LayoutManager.resetLayout();
+    });
+  }
+};
     /* ========================= AUDIO RECORDING ========================= */
     const AudioRecorder = {
       async start(e) {
@@ -1419,113 +1424,122 @@ const ChatInputHandler = {
     };
     /* ======================== REACTION MANAGER ========================= */
     const ReactionManager = {
-      render(reactions, messageId) {
-        if (!reactions || Object.keys(reactions).length === 0) return '';    
-        const grouped = {};
-        for (const [nint, emoji] of Object.entries(reactions)) {
-          if (!grouped[emoji]) grouped[emoji] = [];
-          grouped[emoji].push(nint);
-        }    
-        let html = '<div class="message-reactions">';
-        for (const [emoji, users] of Object.entries(grouped)) {
-          const count = users.length;
-          const isMyReaction = users.includes(AppState.currentUserNint);
-          const myClass = isMyReaction ? 'my-reaction' : '';
-          const isThumb = emoji === '👍' || emoji === '👎';
-          const thumbClass = isThumb ? 'thumb-emoji' : '';
-          const countHTML = count > 1 ? `<span class="reaction-count">${count}</span>` : '';      
-          html += `
-            <div class="reaction-badge ${myClass}" onclick="event.stopPropagation(); ReactionManager.toggle('${messageId}', '${emoji}')">
-              <span class="reaction-emoji ${thumbClass}">${emoji}</span>
-              ${countHTML}
-            </div>
-          `;
-        }
-        html += '</div>';
-        return html;
-      },  
-      async toggle(messageId, emoji) {
-        const { data: msg, error: fetchError } = await supabaseClient
-          .from('chat_messages')
-          .select('reactions')
-          .eq('id', messageId)
-          .single();    
-        if (fetchError) {
-          console.error("Erro ao ler reações:", fetchError);
-          return;
-        }    
-        let currentReactions = msg.reactions || {};    
-        if (!currentReactions[emoji]) {
-          currentReactions[emoji] = [];
-        }    
-        const userIndex = currentReactions[emoji].indexOf(AppState.currentUserNint);    
-        if (userIndex === -1) {
-          currentReactions[emoji].push(AppState.currentUserNint);
-        } else {
-          currentReactions[emoji].splice(userIndex, 1);
-          if (currentReactions[emoji].length === 0) {
-            delete currentReactions[emoji];
-          }
-        }    
-        const { error: updateError } = await supabaseClient
-          .from('chat_messages')
-          .update({ reactions: currentReactions })
-          .eq('id', messageId);    
-        if (updateError) {
-          console.error("Erro ao atualizar reação:", updateError);
-        }
-      },  
-      async handleClick(emoji) {
-        if (!AppState.reactionTargetId) {
-          console.warn("Nenhuma mensagem selecionada para reagir.");
-          return;
-        }    
-        const targetId = AppState.reactionTargetId;
-        const menu = DOM.reactionMenu();
-        if (menu) menu.style.display = 'none';    
-        SelectionManager.clear();    
-        try {
-          const { data: msg, error: fetchError } = await supabaseClient
-            .from('chat_messages')
-            .select('reactions')
-            .eq('id', targetId)
-            .single();      
-          if (fetchError) {
-            console.error("Erro ao ler do Supabase:", fetchError);
-            return;
-          }      
-          let currentReactions = msg.reactions || {};      
-          if (currentReactions[AppState.currentUserNint] === emoji) {
-            delete currentReactions[AppState.currentUserNint];
-          } else {
-            currentReactions[AppState.currentUserNint] = emoji;
-          }      
-          const { error: updateError } = await supabaseClient
-            .from('chat_messages')
-            .update({ reactions: currentReactions })
-            .eq('id', targetId);      
-          if (updateError) {
-            console.error("Erro ao gravar reação:", updateError);
-          }
-        } catch (err) {
-          console.error("Erro inesperado:", err);
-        }
-      },  
-      openFullPicker() {
-        const menu = DOM.reactionMenu();
-        const pickerContainer = DOM.emojiContainer();
-        const picker = pickerContainer.querySelector('emoji-picker');    
-        if (menu) menu.style.display = 'none';
-        pickerContainer.style.display = 'block';    
-        if (!picker.dataset.listenerSet) {
-          picker.addEventListener('emoji-click', event => {
-            this.handleClick(event.detail.unicode);
-            pickerContainer.style.display = 'none';
-          });
-          picker.dataset.listenerSet = "true";
-        }
+  render(reactions, messageId) {
+    if (!reactions || Object.keys(reactions).length === 0) return '';    
+    const grouped = {};
+    for (const [nint, emoji] of Object.entries(reactions)) {
+      if (!grouped[emoji]) grouped[emoji] = [];
+      grouped[emoji].push(nint);
+    }    
+    let html = '<div class="message-reactions">';
+    for (const [emoji, users] of Object.entries(grouped)) {
+      const count = users.length;
+      const isMyReaction = users.includes(AppState.currentUserNint);
+      const myClass = isMyReaction ? 'my-reaction' : '';
+      const isThumb = emoji === '👍' || emoji === '👎';
+      const thumbClass = isThumb ? 'thumb-emoji' : '';
+      const countHTML = count > 1 ? `<span class="reaction-count">${count}</span>` : '';      
+      html += `
+        <div class="reaction-badge ${myClass}" onclick="event.stopPropagation(); ReactionManager.toggle('${messageId}', '${emoji}')">
+          <span class="reaction-emoji ${thumbClass}">${emoji}</span>
+          ${countHTML}
+        </div>
+      `;
+    }
+    html += '</div>';
+    return html;
+  },  
+  async toggle(messageId, emoji) {
+    const { data: msg, error: fetchError } = await supabaseClient
+      .from('chat_messages')
+      .select('reactions')
+      .eq('id', messageId)
+      .single();    
+    if (fetchError) {
+      console.error("Erro ao ler reações:", fetchError);
+      return;
+    }    
+    let currentReactions = msg.reactions || {};    
+    if (!currentReactions[emoji]) {
+      currentReactions[emoji] = [];
+    }    
+    const userIndex = currentReactions[emoji].indexOf(AppState.currentUserNint);    
+    if (userIndex === -1) {
+      currentReactions[emoji].push(AppState.currentUserNint);
+    } else {
+      currentReactions[emoji].splice(userIndex, 1);
+      if (currentReactions[emoji].length === 0) {
+        delete currentReactions[emoji];
       }
-    };
+    }    
+    const { error: updateError } = await supabaseClient
+      .from('chat_messages')
+      .update({ reactions: currentReactions })
+      .eq('id', messageId);    
+    if (updateError) {
+      console.error("Erro ao atualizar reação:", updateError);
+    }
+  },  
+  async handleClick(emoji) {
+    if (!AppState.reactionTargetId) {
+      console.warn("Nenhuma mensagem selecionada para reagir.");
+      return;
+    }    
+    const targetId = AppState.reactionTargetId;
+    const menu = DOM.reactionMenu();
+    if (menu) menu.style.display = 'none';    
+    SelectionManager.clear();    
+    try {
+      const { data: msg, error: fetchError } = await supabaseClient
+        .from('chat_messages')
+        .select('reactions')
+        .eq('id', targetId)
+        .single();      
+      if (fetchError) {
+        console.error("Erro ao ler do Supabase:", fetchError);
+        return;
+      }      
+      let currentReactions = msg.reactions || {};      
+      if (currentReactions[AppState.currentUserNint] === emoji) {
+        delete currentReactions[AppState.currentUserNint];
+      } else {
+        currentReactions[AppState.currentUserNint] = emoji;
+      }      
+      const { error: updateError } = await supabaseClient
+        .from('chat_messages')
+        .update({ reactions: currentReactions })
+        .eq('id', targetId);      
+      if (updateError) {
+        console.error("Erro ao gravar reação:", updateError);
+      }
+    } catch (err) {
+      console.error("Erro inesperado:", err);
+    }
+  },  
+  openFullPicker() {
+    const menu = DOM.reactionMenu();
+    const pickerContainer = DOM.emojiContainer();
+    const picker = pickerContainer.querySelector('emoji-picker');    
+    if (menu) menu.style.display = 'none';
+    pickerContainer.style.display = 'block';
+    
+    // Marca que estamos em modo de reação (não escrever no input)
+    pickerContainer.dataset.mode = 'reaction';
+    
+    if (!picker.dataset.reactionListenerSet) {
+      picker.addEventListener('emoji-click', event => {
+        // Verifica se estamos em modo de reação
+        if (pickerContainer.dataset.mode === 'reaction') {
+          event.stopPropagation(); // Impede que outros listeners sejam ativados
+          this.handleClick(event.detail.unicode);
+          pickerContainer.style.display = 'none';
+          delete pickerContainer.dataset.mode; // Limpa o modo
+        }
+      });
+      picker.dataset.reactionListenerSet = "true";
+    }
+  }
+};
     /* ======================== SELECTION MANAGER ======================== */
     const SelectionManager = {
       toggle(messageElement, messageData) {
@@ -2461,5 +2475,6 @@ const ChatInputHandler = {
   </script>
 </body>
 </html>
+
 
 
