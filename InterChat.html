@@ -1828,7 +1828,7 @@ const ChatInputHandler = {
     ActionBarManager.close();
     
     // Atualiza os botões (esconde câmara, mostra enviar)
-    ChatInputHandler.toggleSendButton();
+    chatInput.dispatchEvent(new Event('input'));
   },
 
   cancel() {
@@ -2289,9 +2289,21 @@ const ChatInputHandler = {
   }
 
   // 2) MOSTRAR TAG "editada"
-  const editTag = msgElement.querySelector('.message-edited-tag');
-  if (editTag) {
-    editTag.style.display = msg.edited_at ? 'inline' : 'none';
+  let editTag = msgElement.querySelector('.message-edited-tag');
+  if (msg.edited_at) {
+    if (!editTag) {
+      const metaDiv = msgElement.querySelector('.msg-meta');
+      if (metaDiv) {
+        editTag = document.createElement('span');
+        editTag.className = 'message-edited-tag';
+        editTag.textContent = 'editada';
+        metaDiv.insertBefore(editTag, metaDiv.firstChild);
+      }
+    } else {
+      editTag.style.display = 'inline';
+    }
+  } else if (editTag) {
+    editTag.style.display = 'none';
   }
 
   // 3) ATUALIZAR CONTEÚDO
@@ -2365,8 +2377,7 @@ const ChatInputHandler = {
   // ✅ 7) DESSELECIONAR O BUBBLE APÓS UPDATE/EDIÇÃO
   clearSelectionUI();
 }
-
-};
+      };
     /* ========================= EVENT LISTENERS ========================= */
     const EventListeners = {
       init() {
@@ -2443,3 +2454,4 @@ const ChatInputHandler = {
   </script>
 </body>
 </html>
+
