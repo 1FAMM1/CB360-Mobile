@@ -1709,21 +1709,22 @@
         }
       },  
       edit() {
-        if (AppState.selectedMessages.length !== 1) return;
-        const msg = AppState.selectedMessages[0];    
-        if (String(msg.n_int) !== AppState.currentUserNint) return;
-        if (msg.deleted_at) return;    
-        AppState.currentEditingMessage = {
-          id: msg.id,
-          originalText: msg.message
-        };    
-        document.getElementById('edit-text-preview').textContent = msg.message;
-        document.getElementById('edit-bar').style.display = 'block';    
-        const inputEl = DOM.chatInput();
-        inputEl.value = msg.message;
-        inputEl.focus();    
-        SelectionManager.clear();
-      }
+    if (AppState.selectedMessages.length !== 1) return;
+    const msg = AppState.selectedMessages[0];
+    
+    // 1. Verificações de segurança
+    if (String(msg.n_int) !== AppState.currentUserNint || msg.deleted_at) return;
+
+    // 2. Chamar o Manager (Garante que o ID fica guardado no sítio certo)
+    if (typeof EditManager !== 'undefined') {
+        EditManager.start(msg.id, msg.message);
+    } else {
+        // Fallback caso não queiras usar o objeto EditManager
+        this._legacyEdit(msg);
+    }
+    
+    SelectionManager.clear();
+}
     };
     /* ========================== REPLY MANAGER ========================== */
     const ReplyManager = {
@@ -2250,4 +2251,3 @@
   </script>
 </body>
 </html>
-
