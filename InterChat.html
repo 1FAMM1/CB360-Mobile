@@ -2040,7 +2040,24 @@
         });
       }
     }
+    document.addEventListener('click', function(e){
+  const img = e.target.closest('.chat-img');
+  if (!img) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const url = img.dataset.url;
+  window.location.href = url;
+});
+
+document.addEventListener('contextmenu', function(e){
+  if (e.target.closest('.chat-img')) {
+    e.preventDefault();
+  }
+});
   </script>
 </body>
 </html>
+
 
