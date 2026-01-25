@@ -1174,8 +1174,8 @@
           <span class="msg-text-content">${contentHTML}</span>${starIcon}
           ${reactionsHTML}
           <div class="msg-meta">
-            ${time} ${checkHTML}
-          </div>
+  <span class="msg-time">${time}</span> ${checkHTML}
+</div>
         `;    
         if (!isDeleted && msg.edited_at) {
           const metaDiv = div.querySelector('.msg-meta');
@@ -2327,6 +2327,7 @@
   </script>
 </body>
 </html>
+
 
 
 
