@@ -1745,12 +1745,39 @@
     };
     /* ========================== EDIT MANAGER =========================== */
     const EditManager = {
-      cancel() {
-        AppState.currentEditingMessage = null;
-        document.getElementById('edit-bar').style.display = 'none';
-        DOM.chatInput().value = '';
-      }
-    };
+    editingMessageId: null,
+
+    start(messageId) {
+        const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (!msgElement) return;
+
+        this.editingMessageId = messageId;
+        
+        // 1. Captura o texto original (removendo o ícone de 'editado' se existir)
+        const textContent = msgElement.querySelector('.msg-text-content').innerText;
+        
+        // 2. Coloca o texto no input para edição
+        const chatInput = document.getElementById('chat-input');
+        chatInput.value = textContent;
+        chatInput.focus();
+
+        // 3. Mostra a barra de edição com o preview
+        const editBar = document.querySelector('.edit-bar');
+        const preview = editBar.querySelector('.edit-text-preview');
+        preview.textContent = textContent;
+        editBar.style.display = 'block';
+
+        // 4. Fecha a action-bar e limpa seleções
+        ActionBarManager.close();
+    },
+
+    cancel() {
+        this.editingMessageId = null;
+        document.querySelector('.edit-bar').style.display = 'none';
+        const chatInput = document.getElementById('chat-input');
+        chatInput.value = ''; // Limpa o input ao cancelar
+    }
+};
     /* ======================= MESSAGE INTERACTION ======================= */
     const MessageInteraction = {
       setup(messageElement, messageData) {
@@ -2223,3 +2250,4 @@
   </script>
 </body>
 </html>
+
