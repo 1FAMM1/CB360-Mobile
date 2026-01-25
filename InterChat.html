@@ -2147,6 +2147,37 @@
   const msgElement = Helpers.getMessageElement(msg.id);
   if (!msgElement) return;
 
+  // helper: limpa seleção/estado de UI
+  const clearSelectionUI = () => {
+    // 1) remove seleção de texto (azul)
+    const sel = window.getSelection?.();
+    if (sel) sel.removeAllRanges();
+
+    // 2) remove classes de seleção/edição em TODAS as mensagens
+    document
+      .querySelectorAll('.message.selected, .message.editing, .message.active, .message.highlight')
+      .forEach(el => el.classList.remove('selected', 'editing', 'active', 'highlight'));
+
+    // 3) remove também seleção interna (caso metas .selected noutros elementos)
+    msgElement.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+
+    // 4) fecha/remover menus/overlays comuns (ajusta nomes se os teus forem outros)
+    document.querySelectorAll('.context-menu, .message-menu, .message-actions, .msg-actions-bar')
+      .forEach(el => el.remove());
+
+    // 5) limpa estado global (se existir)
+    if (typeof AppState !== 'undefined' && AppState) {
+      if ('editingMessageId' in AppState) AppState.editingMessageId = null;
+      if ('selectedMessageId' in AppState) AppState.selectedMessageId = null;
+      if ('selectedMessage' in AppState) AppState.selectedMessage = null;
+    }
+
+    // 6) remove foco (evita outline / estado preso)
+    if (document.activeElement && msgElement.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
+  };
+
   // 0) DELETE
   if (msg.deleted_at) {
     msgElement.classList.add('deleted');
@@ -2159,10 +2190,7 @@
     msgElement.querySelector('.message-reactions')?.remove();
     msgElement.querySelector('.star-icon')?.remove();
 
-    // ✅ desselecionar também ao apagar
-    msgElement.classList.remove('selected', 'editing', 'active', 'highlight');
-    msgElement.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-
+    clearSelectionUI();
     return;
   }
 
@@ -2173,7 +2201,7 @@
     timeEl.textContent = Helpers.formatTime(t);
   }
 
-  // 2) MOSTRAR TAG "editada" se edited_at existir
+  // 2) MOSTRAR TAG "editada"
   const editTag = msgElement.querySelector('.message-edited-tag');
   if (editTag) {
     editTag.style.display = msg.edited_at ? 'inline' : 'none';
@@ -2248,21 +2276,9 @@
   }
 
   // ✅ 7) DESSELECIONAR O BUBBLE APÓS UPDATE/EDIÇÃO
-  // remove classes comuns de seleção/edição
-  msgElement.classList.remove('selected', 'editing', 'active', 'highlight');
-
-  // se tiveres algum elemento interno marcado como selected
-  msgElement.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-
-  // limpa foco (evita outline preso)
-  if (document.activeElement && msgElement.contains(document.activeElement)) {
-    document.activeElement.blur();
-  }
-
-
+  clearSelectionUI();
 }
-
-    };
+};
     /* ========================= EVENT LISTENERS ========================= */
     const EventListeners = {
       init() {
@@ -2339,6 +2355,7 @@
   </script>
 </body>
 </html>
+
 
 
 
