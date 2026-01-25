@@ -2144,40 +2144,47 @@
         }
       },  
       handleMessageUpdate(msg) {
-  // 1. Localiza a mensagem no DOM
   const msgElement = Helpers.getMessageElement(msg.id);
   if (!msgElement) return;
 
-  // --- NOVO: ATUALIZAR A HORA ---
+  // 1. ATUALIZAR A HORA (updated_at)
+  // Se a mensagem foi editada, o Supabase envia o updated_at
   const timeEl = msgElement.querySelector('.msg-time');
-  if (timeEl && (msg.updated_at || msg.created_at)) {
-    // Atualiza a hora para a nova hora de edição (ou criação)
-    timeEl.textContent = Helpers.formatTime(msg.updated_at || msg.created_at);
+  if (timeEl) {
+    const newTime = msg.updated_at || msg.created_at;
+    if (newTime) {
+      timeEl.textContent = Helpers.formatTime(newTime);
+    }
   }
 
-  // 2. ATUALIZAÇÃO DO TEXTO E IMAGEM
+  // 2. ATUALIZAR O CONTEÚDO (Texto e Imagem)
   if (msg.message && !msg.deleted_at) {
     const textContent = msgElement.querySelector('.msg-text-content');
+    
     if (textContent) {
-      // Atualiza o texto SEM apagar o resto do balão
+      // Atualiza o texto sem destruir o balão
       textContent.textContent = msg.message;
 
-      // --- NOVO: GARANTIR QUE A IMAGEM NÃO DESAPARECE ---
+      // Se houver imagem, verificamos se ela já existe para não a duplicar nem a deixar gigante
       if (msg.file_url && msg.message_type === 'image') {
-        let imgContainer = msgElement.querySelector('.message-image-container');
-        if (!imgContainer) {
-          // Se a imagem sumiu no update, reinserimos antes do texto
+        let imgTag = msgElement.querySelector('.message-image');
+        
+        if (imgTag) {
+          // Se já existe, apenas atualizamos o src (mantém o tamanho do CSS)
+          imgTag.src = msg.file_url;
+        } else {
+          // Se não existir (porque foi removida num update anterior), injetamos com as classes certas
           const imgHTML = `
             <div class="message-image-container">
               <img src="${msg.file_url}" class="message-image" 
                    onclick="ImageHandler.openFull('${msg.file_url}')" 
-                   onload="ScrollManager.toBottom()">
+                   style="max-width: 100%; border-radius: 8px; display: block; margin-bottom: 5px;">
             </div>`;
           textContent.insertAdjacentHTML('beforebegin', imgHTML);
         }
       }
 
-      // Adiciona o indicador "(editada)" se não existir
+      // Adicionar o indicador visual de (editada)
       if (!msgElement.querySelector('.edit-indicator')) {
         if (timeEl) {
           timeEl.insertAdjacentHTML('beforebegin', 
@@ -2186,35 +2193,37 @@
         }
       }
       
-      // Feedback visual (pisca em amarelo)
-      textContent.style.transition = "background 0.5s";
+      // Feedback visual: Pisca a cor de fundo para indicar que mudou
+      textContent.style.transition = "background 0.4s";
       textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
-      setTimeout(() => textContent.style.backgroundColor = "transparent", 1000);
+      setTimeout(() => textContent.style.backgroundColor = "transparent", 800);
     }
   }
 
-  // 3. LÓGICA DE APAGAR (Melhorada para remover imagem também)
+  // 3. LÓGICA DE APAGAR (Reforçada)
   if (msg.deleted_at) {
     msgElement.classList.add('deleted');
+    const imgCont = msgElement.querySelector('.message-image-container');
+    if (imgCont) imgCont.remove(); // Remove a imagem se for apagada
+    
     const textContent = msgElement.querySelector('.msg-text-content');
-    const imgContainer = msgElement.querySelector('.message-image-container');
-    if (imgContainer) imgContainer.remove(); // Remove imagem se apagar
     if (textContent) {
       textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
     }
   }
 
-  // 4. REAÇÕES (Mantém o teu código)
+  // 4. REAÇÕES (O teu código original)
   if (msg.reactions !== undefined) {
     const oldReactions = msgElement.querySelector('.message-reactions');
     if (oldReactions) oldReactions.remove();
     const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
-    if (newReactionsHTML && msgElement.querySelector('.msg-text-content')) {
-      msgElement.querySelector('.msg-text-content').insertAdjacentHTML('afterend', newReactionsHTML);
+    if (newReactionsHTML) {
+      const textContent = msgElement.querySelector('.msg-text-content');
+      if (textContent) textContent.insertAdjacentHTML('afterend', newReactionsHTML);
     }
   }
 
-  // 5. ESTRELAS (Mantém o teu código)
+  // 5. ESTRELAS (O teu código original)
   if (msg.starred_by !== undefined) {
     const oldStar = msgElement.querySelector('.star-icon');
     if (oldStar) oldStar.remove();
@@ -2229,7 +2238,7 @@
     }
   }
 
-  // 6. STATUS DE LEITURA (Mantém o teu código)
+  // 6. STATUS DE LEITURA
   if (msg.read_at && String(msg.n_int) === AppState.currentUserNint) {
     const checkEl = document.getElementById(`check-${msg.id}`);
     if (checkEl) {
@@ -2316,6 +2325,7 @@
   </script>
 </body>
 </html>
+
 
 
 
