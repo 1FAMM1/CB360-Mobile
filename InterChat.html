@@ -2144,55 +2144,83 @@
         }
       },  
       handleMessageUpdate(msg) {
-        if (msg.deleted_at) {
-          const msgElement = Helpers.getMessageElement(msg.id);
-          if (msgElement) {
-            msgElement.classList.add('deleted');
-            const textContent = msgElement.querySelector('.msg-text-content');
-            if (textContent) {
-              textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
-            }
-          }
-        }    
-        if (msg.reactions !== undefined) {
-          const msgElement = Helpers.getMessageElement(msg.id);
-          if (msgElement) {
-            const oldReactions = msgElement.querySelector('.message-reactions');
-            if (oldReactions) oldReactions.remove();        
-            const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
-            if (newReactionsHTML) {
-              const textContent = msgElement.querySelector('.msg-text-content');
-              if (textContent) {
-                textContent.insertAdjacentHTML('afterend', newReactionsHTML);
-              }
-            }
-          }
-        }    
-        if (msg.starred_by !== undefined) {
-          const msgElement = Helpers.getMessageElement(msg.id);
-          if (msgElement) {
-            const oldStar = msgElement.querySelector('.star-icon');
-            if (oldStar) oldStar.remove();        
-            const isStarred = msg.starred_by && msg.starred_by.includes(AppState.currentUserNint);
-            if (isStarred) {
-              const textContent = msgElement.querySelector('.msg-text-content');
-              if (textContent) {
-                textContent.insertAdjacentHTML('afterend', 
-                  '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
-                );
-              }
-            }
-          }
-        }    
-        if (msg.read_at && String(msg.n_int) === AppState.currentUserNint) {
-          const checkEl = document.getElementById(`check-${msg.id}`);
-          if (checkEl) {
-            checkEl.classList.remove('sent', 'delivered');
-            checkEl.classList.add('read');
-            checkEl.textContent = 'done_all';
-          }
+  // 1. Localiza a mensagem no DOM
+  const msgElement = Helpers.getMessageElement(msg.id);
+  if (!msgElement) return;
+
+  // 2. ATUALIZAÇÃO DO TEXTO EM TEMPO REAL (O que faltava)
+  if (msg.message && !msg.deleted_at) {
+    const textContent = msgElement.querySelector('.msg-text-content');
+    if (textContent && textContent.textContent !== msg.message) {
+      // Atualiza o texto imediatamente
+      textContent.textContent = msg.message;
+
+      // Adiciona ou garante que o indicador visual de edição existe
+      if (!msgElement.querySelector('.edit-indicator')) {
+        const timeEl = msgElement.querySelector('.msg-time');
+        if (timeEl) {
+          timeEl.insertAdjacentHTML('beforebegin', 
+            '<span class="edit-indicator" style="font-size: 0.7em; opacity: 0.5; margin-right: 4px;">(editada)</span>'
+          );
         }
       }
+      
+      // Feedback visual rápido (pisca em amarelo para mostrar que mudou)
+      textContent.style.transition = "background 0.5s";
+      textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
+      setTimeout(() => textContent.style.backgroundColor = "transparent", 1000);
+    }
+  }
+
+  // 3. LÓGICA DE APAGAR
+  if (msg.deleted_at) {
+    msgElement.classList.add('deleted');
+    const textContent = msgElement.querySelector('.msg-text-content');
+    if (textContent) {
+      textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
+    }
+  }
+
+  // 4. REAÇÕES
+  if (msg.reactions !== undefined) {
+    const oldReactions = msgElement.querySelector('.message-reactions');
+    if (oldReactions) oldReactions.remove();
+    
+    const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
+    if (newReactionsHTML) {
+      const textContent = msgElement.querySelector('.msg-text-content');
+      if (textContent) {
+        textContent.insertAdjacentHTML('afterend', newReactionsHTML);
+      }
+    }
+  }
+
+  // 5. ESTRELAS
+  if (msg.starred_by !== undefined) {
+    const oldStar = msgElement.querySelector('.star-icon');
+    if (oldStar) oldStar.remove();
+    
+    const isStarred = msg.starred_by && msg.starred_by.includes(AppState.currentUserNint);
+    if (isStarred) {
+      const textContent = msgElement.querySelector('.msg-text-content');
+      if (textContent) {
+        textContent.insertAdjacentHTML('afterend', 
+          '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
+        );
+      }
+    }
+  }
+
+  // 6. STATUS DE LEITURA
+  if (msg.read_at && String(msg.n_int) === AppState.currentUserNint) {
+    const checkEl = document.getElementById(`check-${msg.id}`);
+    if (checkEl) {
+      checkEl.classList.remove('sent', 'delivered');
+      checkEl.classList.add('read');
+      checkEl.textContent = 'done_all';
+    }
+  }
+}
     };
     /* ========================= EVENT LISTENERS ========================= */
     const EventListeners = {
@@ -2270,5 +2298,6 @@
   </script>
 </body>
 </html>
+
 
 
