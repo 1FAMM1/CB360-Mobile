@@ -139,6 +139,15 @@
       padding-top: var(--header-actual-h); 
       padding-bottom: 0px;
     }
+    
+    /* ✅ CORREÇÃO: Light mode deve ter mesmo espaçamento que dark mode */
+    body:not(.dark-mode) .message-container {
+      margin-bottom: 140px; /* ⬅️ Aumentado de 80px para compensar */
+    }
+    
+    body:not(.dark-mode) #contact-list {
+      margin-bottom: 80px; /* ⬅️ Aumentado de 20px */
+    }
     .contact-id-info {padding: 10px 20px 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
     #contact-list {display: flex; flex-direction: column; padding: 0 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px;}
     .contact {display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.15); color: #444; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer;
@@ -2550,6 +2559,7 @@ const KeyboardHandler = {
   </script>
 </body>
 </html>
+
 
 
 
