@@ -30,13 +30,13 @@
     /* ==================== VARIÁVEIS CSS DINÂMICAS ==================== */
     :root {
       --kb: 0px;
-      --footer-h: 60px;
+      --footer-h: 40px;
       --header-actual-h: 100px;
-      --input-bar-h: 0px;
+      --input-bar-h: 66px;
       --action-bar-h: 0px;
       --gap: 10px;
       --safe: env(safe-area-inset-bottom, 0px);
-      --total-offset: calc(var(--header-actual-h) + var(--input-bar-h) + var(--footer-h) + 0px);
+      --total-offset: calc(var(--header-actual-h) + var(--input-bar-h) + var(--footer-h) + 20px);
       --selection-color: #bcd9ff;
     }
     
@@ -102,7 +102,7 @@
     .message-container {
       overflow-y: auto; 
       -webkit-overflow-scrolling: touch; 
-      padding-bottom: calc(var(--input-bar-h) + var(--kb) + var(--safe) + 0px);
+      padding-bottom: calc(var(--input-bar-h) + var(--kb) + var(--safe) + 20px);
     }
     .message-container.keyboard-active {scroll-behavior: auto;}
     .chat-input-bar {
@@ -142,11 +142,11 @@
     
     /* ✅ CORREÇÃO: Light mode deve ter mesmo espaçamento que dark mode */
     body:not(.dark-mode) .message-container {
-      margin-bottom: 160px; /* ⬅️ Aumentado de 80px para compensar */
+      margin-bottom: 90px; /* ⬅️ Aumentado de 80px para compensar */
     }
     
     body:not(.dark-mode) #contact-list {
-      margin-bottom: 60px; /* ⬅️ Aumentado de 20px */
+      margin-bottom: 30px; /* ⬅️ Aumentado de 20px */
     }
     .contact-id-info {padding: 10px 20px 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
     #contact-list {display: flex; flex-direction: column; padding: 0 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px;}
@@ -2559,6 +2559,7 @@ const KeyboardHandler = {
   </script>
 </body>
 </html>
+
 
 
 
