@@ -32,11 +32,11 @@
       --kb: 0px;
       --footer-h: 60px;
       --header-actual-h: 100px;
-      --input-bar-h: 20px;
+      --input-bar-h: 0px;
       --action-bar-h: 0px;
       --gap: 10px;
       --safe: env(safe-area-inset-bottom, 0px);
-      --total-offset: calc(var(--header-actual-h) + var(--input-bar-h) + var(--footer-h) + 20px);
+      --total-offset: calc(var(--header-actual-h) + var(--input-bar-h) + var(--footer-h) + 0px);
       --selection-color: #bcd9ff;
     }
     
@@ -102,7 +102,7 @@
     .message-container {
       overflow-y: auto; 
       -webkit-overflow-scrolling: touch; 
-      padding-bottom: calc(var(--input-bar-h) + var(--kb) + var(--safe) + 80px);
+      padding-bottom: calc(var(--input-bar-h) + var(--kb) + var(--safe) + 0px);
     }
     .message-container.keyboard-active {scroll-behavior: auto;}
     .chat-input-bar {
@@ -2559,6 +2559,7 @@ const KeyboardHandler = {
   </script>
 </body>
 </html>
+
 
 
 
