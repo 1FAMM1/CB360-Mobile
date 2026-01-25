@@ -130,18 +130,15 @@
     .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px;}
     .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
     .footer strong {color: #ffebee;}
-    .message-container {
-  display: none;
-  flex-direction: column;
-  gap: 0;
-  padding: 15px;
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  /* O segredo está aqui: usar a mesma variável para os dois */
-  padding-bottom: calc(var(--input-bar-h) + var(--kb) + var(--safe) + 20px);
-  max-height: calc(100dvh - var(--total-offset) - var(--action-bar-h));
-  transition: all 0.3s ease;
+    .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    /* Calcula a altura disponível descontando header e footer */
+    height: calc(100dvh - var(--header-actual-h) - var(--footer-h));
+    overflow: hidden; /* O scroll será interno nos containers */
+    position: relative;
+    padding-top: var(--header-actual-h);
 }
 
     .contact-id-info {padding: 10px 20px 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
@@ -2555,6 +2552,7 @@ const KeyboardHandler = {
   </script>
 </body>
 </html>
+
 
 
 
