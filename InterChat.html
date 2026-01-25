@@ -1783,28 +1783,47 @@
     /* ========================== EDIT MANAGER =========================== */
     const EditManager = {
   editingMessageId: null,
+
   start(messageId) {
     const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
     if (!msgElement) return;
+    
     this.editingMessageId = messageId;
     const textContent = msgElement.querySelector('.msg-text-content').innerText;
     const chatInput = document.getElementById('chat-input');
+    
     chatInput.value = textContent;
     chatInput.focus();
+    
     const editBar = document.querySelector('.edit-bar');
     editBar.querySelector('.edit-text-preview').textContent = textContent;
     editBar.style.display = 'block';
+    
+    // Fecha a barra de ações (copiar, editar, etc)
     ActionBarManager.close();
+    
+    // Atualiza os botões (esconde câmara, mostra enviar)
+    ChatInputHandler.toggleSendButton();
   },
+
   cancel() {
     this.editingMessageId = null;
     document.querySelector('.edit-bar').style.display = 'none';
     document.getElementById('chat-input').value = '';
+    
+    // --- O QUE FALTA AQUI PARA NÃO FICAR PRESA ---
+    SelectionManager.clear(); // Remove o azul e o estado de presslong
+    ChatInputHandler.toggleSendButton(); // Volta a mostrar a câmara instantaneamente
   },
-  finish() { // Adicione esta função
+
+  finish() { 
     this.editingMessageId = null;
     document.querySelector('.edit-bar').style.display = 'none';
     document.getElementById('chat-input').value = '';
+    
+    // --- O QUE FALTA AQUI PARA NÃO FICAR PRESA ---
+    SelectionManager.clear(); // Limpa tudo após o envio bem-sucedido
+    ChatInputHandler.toggleSendButton(); // Garante que a câmara volta se o input estiver vazio
   }
 };
     /* ======================= MESSAGE INTERACTION ======================= */
@@ -2399,6 +2418,7 @@
   </script>
 </body>
 </html>
+
 
 
 
