@@ -557,17 +557,42 @@
         });
       }
     };
-    /* ======================= CHAT INPUT HANDLER ======================== */
-    const ChatInputHandler = {
-      init() {
-        const chatInput = DOM.chatInput();
-        chatInput.addEventListener('input', function() {
-          this.style.height = 'auto';
-          this.style.height = (this.scrollHeight) + 'px';
-          DOM.messages()?.scrollTo(0, DOM.messages().scrollHeight);
-        });
-      }
-    };
+   /* ======================= CHAT INPUT HANDLER ======================== */
+const ChatInputHandler = {
+  init() {
+    const chatInput = DOM.chatInput();
+    if (!chatInput) return;
+
+    chatInput.addEventListener('input', () => {
+      // 1. Ajuste de altura (o que já tinha)
+      chatInput.style.height = 'auto';
+      chatInput.style.height = (chatInput.scrollHeight) + 'px';
+      
+      // 2. Scroll para acompanhar o crescimento do input
+      DOM.messages()?.scrollTo(0, DOM.messages().scrollHeight);
+
+      // 3. AGORA: Troca instantânea do botão (Câmara vs Enviar)
+      this.toggleSendButton();
+    });
+  },
+
+  toggleSendButton() {
+    const chatInput = DOM.chatInput();
+    const cameraBtn = document.getElementById('camera-btn');
+    const sendBtn = document.getElementById('send-btn');
+    
+    if (!chatInput || !cameraBtn || !sendBtn) return;
+
+    // Se o input tiver qualquer texto (removendo espaços vazios)
+    if (chatInput.value.trim().length > 0) {
+      cameraBtn.style.display = 'none';
+      sendBtn.style.display = 'flex';
+    } else {
+      cameraBtn.style.display = 'flex';
+      sendBtn.style.display = 'none';
+    }
+  }
+};
     /* ========================= LAYOUT MANAGER ========================== */
     const LayoutManager = {
       resetLayout() {
@@ -2418,6 +2443,7 @@
   </script>
 </body>
 </html>
+
 
 
 
