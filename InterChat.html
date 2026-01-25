@@ -2147,33 +2147,67 @@
   const msgElement = Helpers.getMessageElement(msg.id);
   if (!msgElement) return;
 
-  // helper: limpa seleção/estado de UI
+  // helper: limpa seleção/estado de UI (presslong / context / editing)
   const clearSelectionUI = () => {
     // 1) remove seleção de texto (azul)
     const sel = window.getSelection?.();
     if (sel) sel.removeAllRanges();
 
-    // 2) remove classes de seleção/edição em TODAS as mensagens
-    document
-      .querySelectorAll('.message.selected, .message.editing, .message.active, .message.highlight')
-      .forEach(el => el.classList.remove('selected', 'editing', 'active', 'highlight'));
+    // 2) remove classes/atributos de seleção/edição em TODAS as mensagens
+    document.querySelectorAll('.message').forEach(m => {
+      m.classList.remove(
+        'selected',
+        'editing',
+        'active',
+        'highlight',
+        'pressing',
+        'pressed',
+        'context-open',
+        'menu-open',
+        'is-selected'
+      );
+      m.removeAttribute('data-selected');
+      m.removeAttribute('aria-selected');
+    });
 
     // 3) remove também seleção interna (caso metas .selected noutros elementos)
-    msgElement.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+    msgElement.querySelectorAll('.selected, .is-selected').forEach(el =>
+      el.classList.remove('selected', 'is-selected')
+    );
 
-    // 4) fecha/remover menus/overlays comuns (ajusta nomes se os teus forem outros)
-    document.querySelectorAll('.context-menu, .message-menu, .message-actions, .msg-actions-bar')
+    // 4) fecha/remover menus/overlays comuns
+    document
+      .querySelectorAll('.context-menu, .message-menu, .message-actions, .msg-actions-bar, .action-sheet, .popover')
       .forEach(el => el.remove());
 
     // 5) limpa estado global (se existir)
     if (typeof AppState !== 'undefined' && AppState) {
-      if ('editingMessageId' in AppState) AppState.editingMessageId = null;
-      if ('selectedMessageId' in AppState) AppState.selectedMessageId = null;
-      if ('selectedMessage' in AppState) AppState.selectedMessage = null;
+      const keysToNull = [
+        'editingMessageId',
+        'selectedMessageId',
+        'selectedMessage',
+        'longPressMessageId',
+        'contextMessageId',
+        'activeMessageId',
+        'menuMessageId'
+      ];
+      keysToNull.forEach(k => {
+        if (k in AppState) AppState[k] = null;
+      });
+
+      // caso tenhas booleans tipo "isSelecting"
+      if ('isSelecting' in AppState) AppState.isSelecting = false;
+      if ('isEditing' in AppState) AppState.isEditing = false;
     }
 
-    // 6) remove foco (evita outline / estado preso)
-    if (document.activeElement && msgElement.contains(document.activeElement)) {
+    // 6) força fechar handlers que dependem de click fora
+    // (muito comum em menus/context no presslong)
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    document.body.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    // 7) remove foco (evita outline / estado preso)
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
       document.activeElement.blur();
     }
   };
@@ -2278,6 +2312,7 @@
   // ✅ 7) DESSELECIONAR O BUBBLE APÓS UPDATE/EDIÇÃO
   clearSelectionUI();
 }
+
 };
     /* ========================= EVENT LISTENERS ========================= */
     const EventListeners = {
@@ -2355,6 +2390,7 @@
   </script>
 </body>
 </html>
+
 
 
 
