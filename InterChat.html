@@ -2144,92 +2144,102 @@
         }
       },  
       handleMessageUpdate(msg) {
-  // 1. Localiza a mensagem no DOM
   const msgElement = Helpers.getMessageElement(msg.id);
   if (!msgElement) return;
 
-  // --- NOVO: ATUALIZAR A HORA ---
-  const timeEl = msgElement.querySelector('.msg-time');
-  if (timeEl && (msg.updated_at || msg.created_at)) {
-    // Atualiza a hora para a nova hora de edição (ou criação)
-    timeEl.textContent = Helpers.formatTime(msg.updated_at || msg.created_at);
-  }
-
-  // 2. ATUALIZAÇÃO DO TEXTO E IMAGEM
-  if (msg.message && !msg.deleted_at) {
-    const textContent = msgElement.querySelector('.msg-text-content');
-    if (textContent) {
-      // Atualiza o texto SEM apagar o resto do balão
-      textContent.textContent = msg.message;
-
-      // --- NOVO: GARANTIR QUE A IMAGEM NÃO DESAPARECE ---
-      if (msg.file_url && msg.message_type === 'image') {
-        let imgContainer = msgElement.querySelector('.message-image-container');
-        if (!imgContainer) {
-          // Se a imagem sumiu no update, reinserimos antes do texto
-          const imgHTML = `
-            <div class="message-image-container">
-              <img src="${msg.file_url}" class="message-image" 
-                   onclick="ImageHandler.openFull('${msg.file_url}')" 
-                   onload="ScrollManager.toBottom()">
-            </div>`;
-          textContent.insertAdjacentHTML('beforebegin', imgHTML);
-        }
-      }
-
-      // Adiciona o indicador "(editada)" se não existir
-      if (!msgElement.querySelector('.edit-indicator')) {
-        if (timeEl) {
-          timeEl.insertAdjacentHTML('beforebegin', 
-            '<span class="edit-indicator" style="font-size: 0.7em; opacity: 0.5; margin-right: 4px;">(editada)</span>'
-          );
-        }
-      }
-      
-      // Feedback visual (pisca em amarelo)
-      textContent.style.transition = "background 0.5s";
-      textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
-      setTimeout(() => textContent.style.backgroundColor = "transparent", 1000);
-    }
-  }
-
-  // 3. LÓGICA DE APAGAR (Melhorada para remover imagem também)
+  // 0) DELETE
   if (msg.deleted_at) {
     msgElement.classList.add('deleted');
+
     const textContent = msgElement.querySelector('.msg-text-content');
-    const imgContainer = msgElement.querySelector('.message-image-container');
-    if (imgContainer) imgContainer.remove(); // Remove imagem se apagar
     if (textContent) {
       textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
     }
+
+    // remove reações/estrela se quiseres
+    msgElement.querySelector('.message-reactions')?.remove();
+    msgElement.querySelector('.star-icon')?.remove();
+
+    return; // nada mais a fazer
   }
 
-  // 4. REAÇÕES (Mantém o teu código)
+  // 1) ATUALIZAR HORA (agora existe .msg-time)
+  const timeEl = msgElement.querySelector('.msg-time');
+  if (timeEl && (msg.edited_at || msg.created_at)) {
+    timeEl.textContent = Helpers.formatTime(msg.edited_at || msg.created_at);
+  }
+
+  // 2) MOSTRAR TAG "editada" se edited_at existir
+  const editTag = msgElement.querySelector('.message-edited-tag');
+  if (editTag) {
+    editTag.style.display = msg.edited_at ? 'inline' : 'none';
+  }
+
+  // 3) ATUALIZAR CONTEÚDO SEM “rebentar” IMAGEM
+  const textContent = msgElement.querySelector('.msg-text-content');
+  if (textContent) {
+    if (msg.message_type === 'image' && msg.file_url) {
+      // garante que a imagem usa a mesma classe da UI: chat-img (não fica gigante)
+      let img = textContent.querySelector('img.chat-img');
+      if (!img) {
+        // re-render completo do conteúdo da imagem usando o teu renderer atual
+        textContent.innerHTML = MessageManager.buildMessageContent(msg, false);
+      } else {
+        img.src = msg.file_url;
+        img.dataset.url = msg.file_url;
+      }
+
+      // atualiza / cria legenda
+      const caption = textContent.querySelector('.img-caption');
+      const newCaption = (msg.message || '').trim();
+      if (newCaption) {
+        if (caption) caption.textContent = newCaption;
+        else textContent.insertAdjacentHTML('beforeend', `<div class="img-caption"></div>`);
+        textContent.querySelector('.img-caption').textContent = newCaption;
+      } else {
+        caption?.remove();
+      }
+    } else {
+      // texto normal
+      textContent.textContent = msg.message || '';
+    }
+
+    // feedback visual (opcional)
+    textContent.style.transition = "background 0.5s";
+    textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
+    setTimeout(() => (textContent.style.backgroundColor = "transparent"), 1000);
+  }
+
+  // 4) REAÇÕES (mantém a tua lógica)
   if (msg.reactions !== undefined) {
     const oldReactions = msgElement.querySelector('.message-reactions');
     if (oldReactions) oldReactions.remove();
+
     const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
-    if (newReactionsHTML && msgElement.querySelector('.msg-text-content')) {
-      msgElement.querySelector('.msg-text-content').insertAdjacentHTML('afterend', newReactionsHTML);
+    const anchor = msgElement.querySelector('.msg-text-content');
+    if (newReactionsHTML && anchor) {
+      anchor.insertAdjacentHTML('afterend', newReactionsHTML);
     }
   }
 
-  // 5. ESTRELAS (Mantém o teu código)
+  // 5) ESTRELAS (mantém a tua lógica)
   if (msg.starred_by !== undefined) {
     const oldStar = msgElement.querySelector('.star-icon');
     if (oldStar) oldStar.remove();
+
     const isStarred = msg.starred_by && msg.starred_by.includes(AppState.currentUserNint);
     if (isStarred) {
-      const textContent = msgElement.querySelector('.msg-text-content');
-      if (textContent) {
-        textContent.insertAdjacentHTML('afterend', 
+      const anchor = msgElement.querySelector('.msg-text-content');
+      if (anchor) {
+        anchor.insertAdjacentHTML(
+          'afterend',
           '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
         );
       }
     }
   }
 
-  // 6. STATUS DE LEITURA (Mantém o teu código)
+  // 6) STATUS DE LEITURA (corrige o teu bug de sintaxe)
   if (msg.read_at && String(msg.n_int) === AppState.currentUserNint) {
     const checkEl = document.getElementById(`check-${msg.id}`);
     if (checkEl) {
@@ -2239,6 +2249,7 @@
     }
   }
 }
+
     };
     /* ========================= EVENT LISTENERS ========================= */
     const EventListeners = {
@@ -2316,6 +2327,7 @@
   </script>
 </body>
 </html>
+
 
 
 
