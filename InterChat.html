@@ -7,6 +7,17 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <script>
+  (function () {
+    try {
+      if (localStorage.getItem('sgo-theme') === 'dark') {
+        // aplica cedo para não piscar
+        document.documentElement.classList.add('dark-mode');
+      }
+    } catch (e) {}
+  })();
+</script>
+
   <title>CB360_DOCUMENTOS</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
@@ -910,12 +921,12 @@ const ChatInputHandler = {
     };
     /* ========================== THEME MANAGER ========================== */
     const ThemeManager = {
-      load() {
-        if (localStorage.getItem('sgo-theme') === 'dark') {
-          document.body.classList.add('dark-mode');
-        }
-      }
-    };
+  load() {
+    const isDark = localStorage.getItem('sgo-theme') === 'dark';
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    document.body.classList.toggle('dark-mode', isDark); // opcional, mas ajuda se houver CSS dependente do body
+  }
+};
     /* ========================= CONTACT MANAGER ========================= */
     const ContactManager = {
       async load() {
@@ -2476,3 +2487,4 @@ const KeyboardHandler = {
   </script>
 </body>
 </html>
+
