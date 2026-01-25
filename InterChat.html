@@ -1167,7 +1167,7 @@
   const { error } = await supabaseClient.from('chat_messages').insert([payload]);
   if (error) console.error("Erro ao encaminhar mensagem:", error);
 }
-messagesToForward = []
+messagesToForward = [];
         await new Promise(resolve => setTimeout(resolve, 150));
       }
       currentChat = String(n_int);
@@ -2082,5 +2082,6 @@ messagesToForward = []
   </script>
 </body>
 </html>
+
 
 
