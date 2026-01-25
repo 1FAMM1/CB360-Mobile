@@ -1007,9 +1007,19 @@
       } else {
         switch(msg.message_type) {
           case 'image':
-            finalContentHTML = `<img src="${msg.file_url}" class="chat-img" style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${msg.file_url}', '_blank')">`;
-            if (msg.message) finalContentHTML += `<div class="img-caption">${msg.message}</div>`;
-            break;          
+  finalContentHTML = `
+    <img
+      src="${msg.file_url}"
+      class="chat-img"
+      data-url="${msg.file_url}"
+      alt="imagem"
+    >
+  `;
+  if (msg.message) {
+    finalContentHTML += `<div class="img-caption">${msg.message}</div>`;
+  }
+  break;
+          
           case 'audio':
             const audioID = `audio-${msg.id || Date.now()}`;
             finalContentHTML = `
@@ -2033,3 +2043,4 @@
   </script>
 </body>
 </html>
+
