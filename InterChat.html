@@ -1513,21 +1513,30 @@
         ActionBar.update();
       },  
       clear() {
-        AppState.selectedMessages = [];
-        document.querySelectorAll('.message.selected').forEach(el => {
-          el.classList.remove('selected');
-        });    
-        const actionBar = DOM.actionBar();
-        if (actionBar) actionBar.classList.remove('show');    
-        const menu = DOM.reactionMenu();
-        if (menu) menu.style.display = 'none';    
-        const starBtn = document.getElementById('action-star');
-        if (starBtn) {
-          const starIcon = starBtn.querySelector('.material-icons');
-          if (starIcon) starIcon.textContent = 'star_border';
-        }    
-        AppState.reactionTargetId = null;
-      }
+  AppState.selectedMessages = [];
+  
+  // Limpa TODAS as classes de estado que o Long Press pode ter deixado
+  document.querySelectorAll('.message').forEach(el => {
+    el.classList.remove('selected', 'pressing', 'pressed', 'long-press-active');
+    // Remove qualquer overlay de seleção que possa existir
+  });
+
+  const actionBar = DOM.actionBar();
+  if (actionBar) actionBar.classList.remove('show');
+
+  const menu = DOM.reactionMenu();
+  if (menu) {
+    menu.style.display = 'none';
+    menu.classList.remove('show');
+  }
+
+  // RESET de variáveis de controle de toque
+  AppState.reactionTargetId = null;
+  AppState.isLongPressing = false; // Se usar esta variável no EventListener
+  
+  // Limpa seleções de texto do sistema (o azul do navegador)
+  if (window.getSelection) { window.getSelection().removeAllRanges(); }
+}
     };
     /* =========================== ACTION BAR ============================ */
     const ActionBar = {
@@ -2390,6 +2399,7 @@
   </script>
 </body>
 </html>
+
 
 
 
