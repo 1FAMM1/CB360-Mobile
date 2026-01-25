@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
-  <meta charset="UTF-8">   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
@@ -1152,9 +1152,8 @@
         const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
         const senderName = await fetchUserName();
         for (const msg of messagesToForward) {
-          const payload = {n_int: currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName, message: msg.message || "",
-                                                               message_type: msg.message_type || "text", file_url: msg.file_url || null, file_name: msg.file_name || null, is_forwarded: true};
-          const { error } = await supabaseClient.from('chat_messages').insert([payload]);
+          const { error } = await supabaseClient.from('chat_messages').insert([{n_int: currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName,
+                                                                                message: msg.message, is_forwarded: true}]);
           if (error) console.error("Erro ao encaminhar mensagem:", error);
         }
         messagesToForward = [];
@@ -1434,10 +1433,7 @@
     function actionForward() {
       if (selectedMessages.length === 0) return;
       messagesToForward = selectedMessages.map(msg => ({
-        message_type: msg.message_type || 'text',
-        message: msg.message || '',
-        file_url: msg.file_url || null,
-        file_name: msg.file_name || null
+        message: msg.message
       }));
       clearSelection();
       const messagesEl = document.getElementById("messages");
