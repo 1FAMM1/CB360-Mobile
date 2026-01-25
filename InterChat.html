@@ -1746,38 +1746,30 @@
     };
     /* ========================== EDIT MANAGER =========================== */
     const EditManager = {
-    editingMessageId: null,
-
-    start(messageId) {
-        const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
-        if (!msgElement) return;
-
-        this.editingMessageId = messageId;
-        
-        // 1. Captura o texto original (removendo o ícone de 'editado' se existir)
-        const textContent = msgElement.querySelector('.msg-text-content').innerText;
-        
-        // 2. Coloca o texto no input para edição
-        const chatInput = document.getElementById('chat-input');
-        chatInput.value = textContent;
-        chatInput.focus();
-
-        // 3. Mostra a barra de edição com o preview
-        const editBar = document.querySelector('.edit-bar');
-        const preview = editBar.querySelector('.edit-text-preview');
-        preview.textContent = textContent;
-        editBar.style.display = 'block';
-
-        // 4. Fecha a action-bar e limpa seleções
-        ActionBarManager.close();
-    },
-
-    cancel() {
-        this.editingMessageId = null;
-        document.querySelector('.edit-bar').style.display = 'none';
-        const chatInput = document.getElementById('chat-input');
-        chatInput.value = ''; // Limpa o input ao cancelar
-    }
+  editingMessageId: null,
+  start(messageId) {
+    const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (!msgElement) return;
+    this.editingMessageId = messageId;
+    const textContent = msgElement.querySelector('.msg-text-content').innerText;
+    const chatInput = document.getElementById('chat-input');
+    chatInput.value = textContent;
+    chatInput.focus();
+    const editBar = document.querySelector('.edit-bar');
+    editBar.querySelector('.edit-text-preview').textContent = textContent;
+    editBar.style.display = 'block';
+    ActionBarManager.close();
+  },
+  cancel() {
+    this.editingMessageId = null;
+    document.querySelector('.edit-bar').style.display = 'none';
+    document.getElementById('chat-input').value = '';
+  },
+  finish() { // Adicione esta função
+    this.editingMessageId = null;
+    document.querySelector('.edit-bar').style.display = 'none';
+    document.getElementById('chat-input').value = '';
+  }
 };
     /* ======================= MESSAGE INTERACTION ======================= */
     const MessageInteraction = {
@@ -2251,3 +2243,4 @@
   </script>
 </body>
 </html>
+
