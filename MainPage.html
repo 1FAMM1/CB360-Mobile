@@ -859,64 +859,74 @@
 
 /* ======================== PWA PUSH SYSTEM ========================= */
 
+// 1. Função Utilitária (deve estar fora/antes da inicializarPush)
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+// 2. Chave Pública (BON0...)
+const PUBLIC_VAPID_KEY = "BON0DVn-crPvv9vQ43Egn7GvhXklY7e1puYKbuefOQWHMfDwjeIqg2IKdpsWz8hzWvbU6avlRR334mv9NCAVFOQ";
+
 async function inicializarPush() {
-    // 1. Verificar se o utilizador está logado
-    const nint = localStorage.getItem("currentCorpNint");
-    const corp = localStorage.getItem("currentCorpOperNr");
+    const nint = localStorage.getItem("currentCorpNint") || "205"; [cite: 3]
+    const corp = localStorage.getItem("currentCorpOperNr") || "0805"; [cite: 3]
+    
     if (!nint || !corp) return;
 
     try {
-        // Aguarda que o Service Worker esteja pronto
         const registration = await navigator.serviceWorker.ready;
 
-        // 2. Pedir permissão ao utilizador
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
             console.warn("Permissão de notificações negada.");
             return;
         }
 
-        // 3. Criar a subscrição (O "contrato" com o browser)
+        // 3. Criar a subscrição usando a chave convertida
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: 'A_TUA_CHAVE_VAPID_PUBLICA' // <--- COLA AQUI A TUA CHAVE
+            applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
         });
 
-        // 4. Preparar os dados para a tua nova tabela
         const subJSON = subscription.toJSON();
         const payload = {
             endpoint: subJSON.endpoint,
-            n_int: parseInt(nint, 10),
-            corp_oper_nr: corp.padStart(4, "0"), // Mantém o padrão 0805
+            n_int: parseInt(nint, 10), [cite: 97]
+            corp_oper_nr: corp.toString().padStart(4, "0"), [cite: 97]
             p256dh: subJSON.keys.p256dh,
             auth: subJSON.keys.auth
         };
 
-        // 5. Gravar no Supabase (Upsert para não duplicar se ele abrir noutra página)
+        // 4. Gravar no Supabase
         const response = await fetch(`${SUPABASE_URL}/rest/v1/user_push_subscriptions`, {
             method: 'POST',
             headers: {
-                ...getSupabaseHeaders(),
-                'Prefer': 'resolution=merge-duplicates' // Isto evita erros se o token já existir
+                ...getSupabaseHeaders(), [cite: 98]
+                'Prefer': 'resolution=merge-duplicates' [cite: 98]
             },
             body: JSON.stringify(payload)
         });
 
         if (response.ok) {
-            console.log("Notificações configuradas com sucesso para o utilizador " + nint);
+            console.log("✅ Notificações configuradas para o utilizador " + nint);
         }
 
     } catch (error) {
-        console.error("Erro ao configurar Push:", error);
+        console.error("❌ Erro ao configurar Push:", error);
     }
 }
 
-// Chamar a função automaticamente no init do site
+// Chamar a função
 document.addEventListener('DOMContentLoaded', () => {
-    // Dá um pequeno delay para não sobrecarregar o load inicial
-    setTimeout(inicializarPush, 2000);
+    setTimeout(inicializarPush, 2000); [cite: 102]
 });
-
     
     /* ====================== NEXT SERVICE LOADING ====================== */
     async function loadNextService() {
@@ -1298,4 +1308,5 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
 </body>
 </html>
+
 
