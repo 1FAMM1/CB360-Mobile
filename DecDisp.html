@@ -213,16 +213,7 @@
         © 2023-2025 - Sistema CB360 Mobile
       </div>
     </div>
-  </footer>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('App pronta: ', reg.scope))
-          .catch(err => console.log('Erro no motor da App: ', err));
-      });
-    }
-  </script>
+  </footer>  
   <script>
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
@@ -497,16 +488,15 @@
       const year = new Date().getFullYear();
       const month = currentMonthIndex + 1;
       try {
-        let regServUrl = `${SUPABASE_URL}/rest/v1/reg_serv?n_int=eq.${nintInt}&corp_oper_nr=eq.${corpPadded}&year=eq.${year}&month=eq.${month}&day=eq.${day}`;
-        if (value) {
-          regServUrl += `&value=in.(${value})`;
-        } else {
-          regServUrl += `§ion=eq.DECIR&value=neq.PN`;
-        }
-        let regDispUrl = `${SUPABASE_URL}/rest/v1/reg_disp?n_int=eq.${nintInt}&corp_oper_nr=eq.${corpPadded}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=neq.PN`;
-        await Promise.all([
-          fetch(regServUrl, {method: 'DELETE', headers: getSupabaseHeaders()}),
-          fetch(regDispUrl, {method: 'DELETE', headers: getSupabaseHeaders()})]);
+        let commonFilter = `n_int=eq.${nintInt}&corp_oper_nr=eq.${corpPadded}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=neq.PN`;
+        let regServUrl = `${SUPABASE_URL}/rest/v1/reg_serv?${commonFilter}`;
+        let regDispUrl = `${SUPABASE_URL}/rest/v1/reg_disp?${commonFilter}`;
+        const [res1, res2] = await Promise.all([
+          fetch(regServUrl, { method: 'DELETE', headers: getSupabaseHeaders() }),
+          fetch(regDispUrl, { method: 'DELETE', headers: getSupabaseHeaders() })
+        ]);
+        if (res1.ok) console.log("Eliminado de reg_serv");
+        if (res2.ok) console.log("Eliminado de reg_disp");
       } catch (e) {
         console.error("Erro ao apagar registros:", e);
       }
