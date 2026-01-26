@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>Composição Turnos Decir</title>
+  <style>
+    /* ==================== BODY ==================== */    
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .container {background-color: rgba(45, 45, 45, 0.95); border: 1px solid #444;}
+    .dark-mode .form-logo {border: 2px solid #444;}
+    .dark-mode h2 {color: #e0e0e0;}
+    .dark-mode .type-btn{background: #444; color: #ccc;border: 1px solid #222;}
+    .dark-mode .type-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
+    .dark-mode label {color: #b0b0b0;}
+    .dark-mode input[type="text"] {border: 1px solid #444; background-color: #2d2d2d; color: #e0e0e0;}
+    .dark-mode select {border: 1px solid #444; background-color: #2d2d2d; color: #e0e0e0;}
+    .dark-mode input[type="text"]:focus, select:focus {border-color: #66bb6a;}
+    .dark-mode #telegramForm {border: 1px solid #444;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;} 
+    .main-content {flex: 1; overflow-y: auto; padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;}
+    .container {background-color: white; margin-top: 10px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; max-height: 80vh;  width: 100%;
+                overflow: hidden;}
+    #telegramForm {display: none; flex-direction: column; flex: 1; overflow: hidden; border: 1px solid #ccc; border-radius: 10px; padding: 5px 10px; margin-top: 15px;}    
+    .logo-container {text-align: center;}
+    .form-logo {max-width: 80px; margin-top: 0; margin-bottom: -10px; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; border: 2px solid #ddd;}
+    h2 {font-size: 20px; text-align: center; color: #333; margin-bottom: 15px; transition: color 0.3s ease;}
+    .team-type-btn{display: block; margin: 20px 0 0 0; text-align: center; justify-content: center; align-items: center;}
+    .type-btn{max-width: 250px; min-width: 100px; height:50px; border-radius: 10px; border: 1px solid #ccc; font-size: 12px;}
+    .type-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
+    .type-btn:hover {transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}    
+    .form-grid {display: flex; gap: 20px; flex-wrap: nowrap;}
+    .form-column {flex: 1; min-width: 0;}    
+    .team-inputs{flex: 1; display: none; overflow-y: auto; min-height: 0;  margin: 20px 0 0 0; padding-right: 5px;}    
+    .team-inputs::-webkit-scrollbar {width: 6px;}
+    .team-inputs::-webkit-scrollbar-track {background: rgba(0, 0, 0, 0.05); border-radius: 10px;}
+    .team-inputs::-webkit-scrollbar-thumb {background: #d32f2f; border-radius: 10px; transition: background 0.3s ease;}
+    .team-inputs::-webkit-scrollbar-thumb:hover {background: #b71c1c;}    
+    .team-title{font-size: 16px; font-weight: bold; padding: 3px 0px; background: red; color: #eee; border-radius: 5px; text-align: center; justify-content: center; align-items: center;}
+    label {display: block; margin-top: 15px; margin-bottom: 5px; font-weight: bold; color: #555; transition: color 0.3s ease; font-size: 14px;}
+    input[type="text"], select {width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; box-sizing: border-box; background-color: white; color: #333; transition: all 0.3s ease;}
+    input[type="text"]:focus, select:focus {border-color: #4CAF50; outline: none;}
+    select {cursor: pointer; appearance: none; background-repeat: no-repeat; background-position: right 10px center; background-size: 20px; padding-right: 40px;}
+    .elac-container {display: none;}
+    .elac-row {display: flex; gap: 15px;}
+    .elac-row .form-group {flex: 1;}    
+    #elac-inline-slot {flex: 1;}    
+    .send-button { display: none; width: 100%; margin-top: 15px; margin-bottom: -10px; padding: 15px; background-color: #9c1616; color: white; border: none; border-radius: 5px; font-size: 15px; cursor: pointer;
+                  transition: background-color 0.3s ease;}
+    .send-button:hover {background-color: #bf3636;}
+    .send-button:disabled {background-color: #ccc; cursor: not-allowed;}
+    .popup-overlay {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 2000;}
+    .popup {position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; color: #333; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 400px; width: 90%; text-align: center; transition: all 0.3s ease;}
+    .popup h3 {margin-bottom: 15px;}
+    .popup h3.warning {color: #ff9800;}
+    .popup h3.error {color: #f44336;}
+    .popup h3.success {color: #4CAF50;}
+    .popup h3.info {color: #2196F3;}
+    .popup p {margin-bottom: 20px; color: #666; line-height: 1.5; transition: color 0.3s ease;}
+    .popup-buttons {display: flex; gap: 10px; justify-content: center;}
+    .popup-button {padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: opacity 0.3s ease;}
+    .popup-button.confirm {background-color: #4CAF50; color: white;}
+    .popup-button.cancel {background-color: #f44336; color: white;}
+    .popup-button.ok {background-color: #2196F3; color: white;}
+    .popup-button:hover {opacity: 0.8;}
+    .loading-spinner {display: none; width: 20px; height: 20px; border: 2px solid #ffffff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px;}
+    @keyframes spin {0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);}}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .main-content {padding-left: 20px; padding-right: 20px; justify-content: center; align-items: center;}}
+      .logo-container {text-align: Left; margin-bottom: 10px;}
+      .container {margin-top: 5px; margin-bottom: 10px;}
+      .form-logo {max-width: 60px;}
+      h2 {margin-left: 40px; margin-top: -45px; font-size: 15px;}
+      label {margin-top: 10px;}
+      .form-group {margin-bottom: 10px;}
+      .send-button {padding: 12px; margin-top: 20px; margin-bottom: 5px;}
+      .popup {width: 80%; max-width: 350px; padding: 20px;}
+      .popup h3 {font-size: 1.2em; margin-bottom: 12px;}
+      .popup p {font-size: 14px; margin-bottom: 15px; line-height: 1.4;}
+      .popup-buttons {flex-direction: column; gap: 8px;}
+      .popup-button {width: 100%; padding: 12px 15px; font-size: 14px; border-radius: 8px;}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>DECIR</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">
+      Equipa Afeta ao Dispositivo
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="container">
+      <div class="logo-container">
+        <img src="https://imgur.com/nut5KSx.png" alt="Logo" class="form-logo">
+      </div>
+      <h2>Formatação da(s) Equipa(s)</h2>
+      <div class="team-type-btn">
+        <button class="type-btn" id="1-ecin" onclick="showTeam('1-ecin')">1 ECIN</button>
+        <button class="type-btn" id="1-ecin-1elac" onclick="showTeam('1-ecin-1elac')">ECIN/ELAC</button>
+        <button class="type-btn" id="bcin" onclick="showTeam('bcin')">BCIN</button>
+      </div>
+      <form id="telegramForm">
+        <div class="team-inputs">
+        <div class="form-group">
+          <label for="shift">Turno:</label>
+          <select id="shift" name="shift">
+            <option value="">Selecione o turno...</option>
+            <option value="D">D - "08:00 - 20:00"</option>
+            <option value="N">N - "20:00 - 08:00"</option>
+          </select>
+        </div>      
+        <div class="form-grid">
+          <div class="form-column"  id="ecin01">
+            <div class="team-title">ECIN 01</div>
+            <div class="form-group">
+              <label for="chief">Chefe Equipa:</label>
+              <input type="text" id="chief" name="chief" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+            <div class="form-group">
+              <label for="driver">Motorista:</label>
+              <input type="text" id="driver" name="driver" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+            <div class="form-group">
+              <label for="element01">1º Elemento:</label>
+              <input type="text" id="element01" name="element01" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+            <div class="form-group">
+              <label for="element02">2º Elemento:</label>
+              <input type="text" id="element02" name="element02" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+            <div class="form-group">
+              <label for="element03">3º Elemento:</label>
+              <input type="text" id="element03" name="element03" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+          </div>
+          <div class="form-column" id="ecin02">
+            <div class="team-title">ECIN 02</div>
+            <div class="form-group">
+              <label for="chief2">Chefe Equipa:</label>
+              <input type="text" id="chief2" name="chief2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+            <div class="form-group">
+              <label for="driver2">Motorista:</label>
+              <input type="text" id="driver2" name="driver2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+            <div class="form-group">
+              <label for="element01_2">1º Elemento:</label>
+              <input type="text" id="element01_2" name="element01_2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+            <div class="form-group">
+              <label for="element02_2">2º Elemento:</label>
+              <input type="text" id="element02_2" name="element02_2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+            <div class="form-group">
+              <label for="element03_2">3º Elemento:</label>
+              <input type="text" id="element03_2" name="element03_2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+            </div>
+          </div>    
+        </div>
+        <div id="elac-inline-slot"></div>
+          <div class="elac-container" id="elac">
+            <div class="team-title">ELAC</div>
+            <div class="elac-row">
+              <div class="form-group">
+                <label for="elacChief">Chefe Equipa:</label>
+                <input type="text" id="elacChief" name="elacChief" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+              </div>
+              <div class="form-group">
+                <label for="elacDriver">Motorista:</label>
+                <input type="text" id="elacDriver" name="elacDriver" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
+              </div>
+            </div>
+          </div>
+        </div>      
+      </form>
+      <button type="submit" class="send-button" id="sendButton">📤 Enviar Equipa</button>
+      <div class="popup-overlay" id="popupOverlay">
+        <div class="popup">
+          <h3 id="popupTitle"></h3>
+          <p id="popupMessage"></p>
+          <div class="popup-buttons" id="popupButtons">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';    
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp, 
+        'x-my-nint': nint
+      };    
+      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
+      return headers;
+    }    
+    /* ======================= CORPORATION LOADING ======================= */
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        if (h2) h2.textContent = "Não definido";
+        return;
+      }
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        } else {
+          if (h2) h2.textContent = "Não encontrado";
+        }
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+        if (h2) h2.textContent = corpOperNr;
+      }
+    }
+    /* ========================== THEME LOADING ========================== */
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+    }    
+    /* ========================= TEAM DISPLAY ============================ */
+    let currentTeamType = null;
+    let elacOriginalParent = null;
+    let elacNextSibling = null;    
+    function showTeam(type) {
+      const teamInputs = document.querySelector('.team-inputs');
+      const sendButton = document.getElementById('sendButton');
+      const ecin01 = document.getElementById('ecin01');
+      const ecin02 = document.getElementById('ecin02');
+      const elac = document.getElementById('elac');
+      const elacSlot = document.getElementById('elac-inline-slot');
+      const form = document.getElementById('telegramForm');
+      document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('selected'));
+      const activeBtn = document.getElementById(type);
+      if (activeBtn) activeBtn.classList.add('selected');
+      if (!elacOriginalParent) {
+        elacOriginalParent = elac.parentNode;
+        elacNextSibling = elac.nextSibling;
+      }
+      teamInputs.style.display = 'block';
+      sendButton.style.display = 'block';
+      form.style.display = 'flex';
+      if (elac.parentNode !== elacOriginalParent) {
+        if (elacNextSibling) elacOriginalParent.insertBefore(elac, elacNextSibling);
+        else elacOriginalParent.appendChild(elac);
+      }
+      ecin01.style.display = 'none';
+      ecin02.style.display = 'none';
+      elac.style.display = 'none';
+      while (elacSlot.firstChild) elacSlot.removeChild(elacSlot.firstChild);
+      if (type === '1-ecin') ecin01.style.display = 'block';
+      else if (type === '1-ecin-1elac') { ecin01.style.display = 'block'; elac.style.display = 'block'; elacSlot.appendChild(elac); }
+      else if (type === 'bcin') { ecin01.style.display = 'block'; ecin02.style.display = 'block'; elac.style.display = 'block'; }    
+      currentTeamType = type;
+    }
+    /* ===================== TELEGRAM CONFIGURATION ====================== */
+    const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendTelegram';
+    const MIN_ELEMENTS = 4;    
+    function debugLog(message, data = null) { console.log(`🔍 DEBUG: ${message}`, data);}    
+    /* ==================== TELEGRAM MESSAGE ====================== */
+    function createTelegramMessage(data) {
+      debugLog('Criando mensagem Telegram', data);
+      const now = new Date();
+      const dateTime = now.toLocaleString('pt-PT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});    
+      let message = `🚨 <b>COMPOSIÇÃO DA EQUIPA</b> 🚨\n\n`;    
+      if (data.shift) {
+        const shiftText = data.shift === 'D' ? '"08:00 - 20:00"' : '"20:00 - 08:00"';
+        const shiftIcon = data.shift === 'D' ? '☀️' : '🌙';
+        message += `${shiftIcon} <b>Turno:</b> ${data.shift} - ${shiftText}\n\n`;
+      }
+      message += `<b>ECIN-01</b>\n\n`;
+      const ecin1Fields = [{label: '👨‍🚒 Chefe Equipa ECIN', value: data.chief}, {label: '🚒 Motorista ECIN', value: data.driver}, {label: '👤 1º Elemento ECIN', value: data.element01},
+                           {label: '👤 2º Elemento ECIN', value: data.element02}, {label: '👤 3º Elemento ECIN', value: data.element03}];
+      let ecin1Filled = 0;
+      ecin1Fields.forEach(el => { if(el.value){ message+=`${el.label}: ${el.value}\n`; ecin1Filled++; } });
+      message += `📊 Status ECIN: ${ecin1Filled}/${ecin1Fields.length} ${ecin1Filled===ecin1Fields.length?'✅ EQUIPA COMPLETA\n\n':'⚠️ EQUIPA INCOMPLETA\n\n'}`;
+      if(data.chief2 || data.driver2 || data.element01_2 || data.element02_2 || data.element03_2){
+        message += `<b>ECIN-02</b>\n\n`;
+        const ecin2Fields = [{label: '👨‍🚒 Chefe Equipa ECIN', value: data.chief2}, {label: '🚒 Motorista ECIN', value: data.driver2}, {label: '👤 1º Elemento ECIN', value: data.element01_2},
+                             {label: '👤 2º Elemento ECIN', value: data.element02_2}, {label: '👤 3º Elemento ECIN', value: data.element03_2}];
+        let ecin2Filled=0;
+        ecin2Fields.forEach(el=>{ if(el.value){ message+=`${el.label}: ${el.value}\n`; ecin2Filled++; } });
+        message += `📊 Status ECIN: ${ecin2Filled}/${ecin2Fields.length} ${ecin2Filled===ecin2Fields.length?'✅ EQUIPA COMPLETA\n\n':'⚠️ EQUIPA INCOMPLETA\n\n'}`;
+      }
+      if(data.elacChief || data.elacDriver){
+        message += `<b>ELAC</b>\n\n`;
+        const elacFields = [{label:'👨‍🚒 Chefe Equipa ELAC', value:data.elacChief}, {label:'🚒 Motorista ELAC', value:data.elacDriver}];
+        let elacFilled=0;
+        elacFields.forEach(el=>{ if(el.value){ message+=`${el.label}: ${el.value}\n`; elacFilled++; } });
+        message += `📊 Status ELAC: ${elacFilled}/${elacFields.length} ${elacFilled===elacFields.length?'✅ EQUIPA COMPLETA\n\n':'⚠️ EQUIPA INCOMPLETA\n\n'}`;
+      }    
+      message += `🕐 <b>Registado em:</b> ${dateTime}\n`;
+      debugLog('Mensagem criada', message);
+      return message;
+    }
+    /* =================== FORM DATA & VALIDATION =================== */
+    function validateNumericInput(input){
+      input.addEventListener('input', function(){ this.value=this.value.replace(/[^0-9]/g,''); if(this.value.length>3)this.value=this.value.slice(0,3); });
+    }
+    function getFormData(){
+      return {
+        shift: document.getElementById('shift').value.trim(),
+        chief: document.getElementById('chief').value.trim(),
+        driver: document.getElementById('driver').value.trim(),
+        element01: document.getElementById('element01').value.trim(),
+        element02: document.getElementById('element02').value.trim(),
+        element03: document.getElementById('element03').value.trim(),
+        chief2: document.getElementById('chief2') ? document.getElementById('chief2').value.trim() : '',
+        driver2: document.getElementById('driver2') ? document.getElementById('driver2').value.trim() : '',
+        element01_2: document.getElementById('element01_2') ? document.getElementById('element01_2').value.trim() : '',
+        element02_2: document.getElementById('element02_2') ? document.getElementById('element02_2').value.trim() : '',
+        element03_2: document.getElementById('element03_2') ? document.getElementById('element03_2').value.trim() : '',
+        elacChief: document.getElementById('elacChief') ? document.getElementById('elacChief').value.trim() : '',
+        elacDriver: document.getElementById('elacDriver') ? document.getElementById('elacDriver').value.trim() : ''
+      };
+    }    
+    function countTeamElements(fields){
+      return fields.filter(f=>f && f.trim()!=='').length;
+    }
+    function validateTeamsBeforeSend(data) {
+      if (!currentTeamType) return false;    
+      const ecin1Count = countTeamElements([data.chief, data.driver, data.element01, data.element02, data.element03]);
+      const ecin2Count = countTeamElements([data.chief2, data.driver2, data.element01_2, data.element02_2, data.element03_2]);
+      const elacCount = countTeamElements([data.elacChief, data.elacDriver]);    
+      if (currentTeamType === '1-ecin') {
+        if (ecin1Count < 4) {
+          showPopup(
+            '🚫 ECIN-01 Insuficiente',
+            `<strong>❌ ECIN-01 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin1Count}/5`,
+            [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
+            'error'
+          );
+          return false;
+        }
+      } else if (currentTeamType === '1-ecin-1elac') {
+        if (ecin1Count < 4) {
+          showPopup(
+            '🚫 ECIN-01 Insuficiente',
+            `<strong>❌ ECIN-01 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin1Count}/5`,
+            [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
+            'error'
+          );
+          return false;
+        }
+        if (elacCount < 1) {
+          showPopup(
+            '🚫 ELAC Insuficiente',
+            `<strong>❌ ELAC não possui elementos suficientes!</strong><br>Preenchidos: ${elacCount}/2`,
+            [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
+            'error'
+          );
+          return false;
+        }
+      } else if (currentTeamType === 'bcin') {
+        if (ecin1Count < 4) {
+          showPopup(
+            '🚫 ECIN-01 Insuficiente',
+            `<strong>❌ ECIN-01 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin1Count}/5`,
+            [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
+            'error'
+          );
+          return false;
+        }
+        if (ecin2Count < 4) {
+          showPopup(
+            '🚫 ECIN-02 Insuficiente',
+            `<strong>❌ ECIN-02 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin2Count}/5`,
+            [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
+            'error'
+          );
+          return false;
+        }
+        if (elacCount < 1) {
+          showPopup(
+            '🚫 ELAC Insuficiente',
+            `<strong>❌ ELAC não possui elementos suficientes!</strong><br>Preenchidos: ${elacCount}/2`,
+            [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
+            'error'
+          );
+          return false;
+        }
+      }    
+      return true;
+    }
+    /* =================== POPUPS & LOADING =================== */
+    function showPopup(title,message,buttons,titleClass='warning'){
+      document.getElementById('popupTitle').textContent=title;
+      document.getElementById('popupTitle').className=titleClass;
+      document.getElementById('popupMessage').innerHTML=message;
+      const container=document.getElementById('popupButtons'); container.innerHTML='';
+      buttons.forEach(btn=>{
+        const b=document.createElement('button'); b.className=`popup-button ${btn.class}`; b.textContent=btn.text; b.onclick=btn.action; container.appendChild(b);
+      });
+      document.getElementById('popupOverlay').style.display='block';
+    }
+    function hidePopup(){
+      document.getElementById('popupOverlay').style.display='none';
+    }
+    function showLoading(show){
+      const button=document.getElementById('sendButton');
+      if(!button)return console.error('❌ Botão sendButton não encontrado!');
+      button.disabled=show; button.innerHTML=show?'⏳ A Enviar...':'📤 Enviar Equipa';
+    }
+    function showSuccessPopup(){
+      showPopup('✅ Sucesso!','<strong>Mensagem enviada com sucesso para a SALOC!</strong>',[{text:'👍 OK',class:'ok',action:()=> {hidePopup();document.getElementById('telegramForm').reset();}}],'success');}
+    function showErrorPopup(errorMessage){ showPopup('❌ Erro no Envio',`<strong>Não foi possível enviar a mensagem!</strong><br><strong>Erro:</strong> ${errorMessage}`,[{text:'🔄 Tentar Novamente',class:'confirm',action: ()=>{hidePopup();processFormSubmission();}},{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error');}
+    /* =================== SEND TELEGRAM =================== */
+    async function sendTelegramMessage(message) {
+      showLoading(true);
+      try {
+        const corpOperNr = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+        const response = await fetch(TELEGRAM_API, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({message, corp_oper_nr: corpOperNr})
+        });
+        showLoading(false);
+        if (response.ok) showSuccessPopup();
+        else {
+          const data = await response.json();
+          showErrorPopup(data.error || 'Erro desconhecido');
+        }
+      } catch (err) {
+        showLoading(false);
+        showErrorPopup(err.message || 'Erro de conexão');
+      }
+    }
+    function processFormSubmission(){
+      const data=getFormData();
+      if(!data.shift){ showPopup('⚠️ Turno Obrigatório','<strong>Por favor selecione o turno!</strong>',[{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error'); return; }
+      if(!validateTeamsBeforeSend(data)) return;
+      const message=createTelegramMessage(data);
+      sendTelegramMessage(message);
+    }
+    /* =================== DOM EVENTS =================== */
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('input[type="text"]').forEach(validateNumericInput);
+      const sendButton = document.getElementById('sendButton');
+      if (sendButton) {
+        sendButton.addEventListener('click', function() {
+          processFormSubmission();
+        });
+      }
+      const popupOverlay = document.getElementById('popupOverlay');
+      if (popupOverlay) {
+        popupOverlay.addEventListener('click', e => {
+          if (e.target === popupOverlay) hidePopup();
+        });
+      }
+      debugLog('Inicialização completa');
+      loadCorpInfo();
+      loadTheme();
+    });   
+  </script>
+</body>
+</html>

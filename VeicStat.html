@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360_GEOSTAT</title>
+  <style>
+    /* ==================== BODY ==================== */  
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .vehicle-selector {background: rgba(45, 45, 45, 0.95); border: 1px solid #444;}
+    .dark-mode .vehicle-selector h3 {color: #fff !important;}
+    .dark-mode .vehicle-btn .vehicle-code {color: #fff !important;}
+    .dark-mode .vehicle-btn[class*=" v"], .dark-mode .vehicle-btn[class*=" V"], .vehicle-btn.pe, .vehicle-btn.erst, .vehicle-btn.mrsa, .vehicle-btn.atrl {background: #484848;}
+    .dark-mode .vehicle-btn[class*=" a"], .dark-mode .vehicle-btn[class*=" A"], .vehicle-btn.vdtd {background: #484848;}
+    .dark-mode .vehicle-btn.atrl {background: #484848;}
+    .dark-mode .vehicle-btn:hover {background: linear-gradient(145deg, #4a4a4a, #3a3a3a); border-color: #666; filter: brightness(1.2);}
+    .dark-mode .vehicle-btn.selected {background: rgba(39, 174, 96, 0.3); border-color: #27ae60; color: white; opacity: 0.8; animation: darkSelectedGlow 2s infinite;}
+    .dark-mode .vehicle-btn.inop {background: linear-gradient(145deg, #5a2d2d, #4a1d1d) !important; border-color: #8b0000 !important; color: #ffcccc !important;}
+    .dark-mode .current-vehicle {background: rgba(39, 174, 96, 0.3); border: 2px solid rgba(255, 255, 255, 0.2); color: #fff;}
+    .dark-mode .destination-info {background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; border-left: 4px solid #3498db;}
+    .dark-mode .container {background: rgba(45, 45, 45, 0.95); border: 1px solid #444;}
+    .dark-mode .btn-saida {background: linear-gradient(45deg, rgba(231, 76, 60, 0.2), rgba(192, 57, 43, 0.2)) !important; border: 2px solid rgba(231, 76, 60, 0.4);}
+    .dark-mode .btn-chegada-to {background: linear-gradient(45deg, rgba(52, 152, 219, 0.2), rgba(41, 128, 185, 0.2)) !important; border: 2px solid rgba(52, 152, 219, 0.4);}
+    .dark-mode .btn-saida-to {background: linear-gradient(45deg, rgba(243, 156, 18, 0.2), rgba(230, 126, 34, 0.2)) !important; border: 2px solid rgba(243, 156, 18, 0.4);}
+    .dark-mode .btn-chegada-und {background: linear-gradient(45deg, rgba(39, 174, 96, 0.2), rgba(34, 153, 84, 0.2)) !important; border: 2px solid rgba(39, 174, 96, 0.4);}
+    .dark-mode .geostat-btn:hover {opacity: 0.8; transform: translateY(-2px);}
+    .dark-mode .geostat-btn:active {background: linear-gradient(145deg, #2a2a2a, #1a1a1a);}
+    .dark-mode .warning {background: linear-gradient(45deg, rgba(243, 156, 18, 0.2), rgba(230, 126, 34, 0.2)); border: 1px solid rgba(243, 156, 18, 0.4); color: #fff;}
+    .dark-mode .popup-overlay {background: rgba(0, 0, 0, 0.8);}
+    .dark-mode .popup-content {background: #2d2d2d; border: 1px solid #555; color: #fff;}
+    .dark-mode .popup-content h3 {color: #fff;}
+    .dark-mode .popup-content p {color: #ccc;}
+    .dark-mode .popup-content input {background: #3a3a3a; border: 2px solid #555; color: #fff;}
+    .dark-mode .popup-content input:focus {border-color: #3498db;}
+    body.dark-mode .container:has(.button-grid) {background: transparent !important; padding: 15px 0 !important; margin: 0 !important; border: none !important; backdrop-filter: none !important;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}    
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: all 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;}
+    .footer:hover {background: linear-gradient(45deg, #c62828, #a00000); transition: all 0.3s ease;}
+    .main-content {flex: 1; overflow-y: auto; padding-top: 95px; padding-bottom: 80px; padding-left: 20px; padding-right: 20px;}
+    .vehicle-selector {background: rgba(245, 245, 245, 0.95);  border: 1px solid #ccc; margin: 20px 0; padding: 20px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; animation: fadeIn 0.5s ease-out;}
+    .vehicle-selector h3 {color: #2c3e50; margin-bottom: 15px;}
+    .vehicle-grid {display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;}
+    .vehicle-btn {padding: 15px 15px; border: 2px solid #bdc3c7; border-radius: 12px; background: white; cursor: pointer; text-align: center; transition: all 0.3s ease; font-weight: bold; position: relative;
+                  overflow: hidden; height: 80px !important; max-height: 80px !important; min-height: 80px !important; display: flex !important; flex-direction: column !important; justify-content: center !important;
+                  align-items: center !important;}
+    .vehicle-icon {font-size: 20px; display: block; margin-bottom: 8px; position: relative; z-index: 2; transition: all 0.3s ease;}
+    .vehicle-code {font-size: 14px; font-weight: bold; color: #2c3e50; transition: all 0.3s ease; position: relative; z-index: 2;}
+    .vehicle-btn[class*=" v"], .vehicle-btn[class*=" V"], .vehicle-btn.pe, .vehicle-btn.erst, .vehicle-btn.mrsa {background: #ddd; border-color: #e74c3c;}
+    .vehicle-btn[class*=" a"], .vehicle-btn[class*=" A"], .vehicle-btn.vdtd {background: #ddd; border-color: #3498db;}
+    .vehicle-btn.atrl {background: #ddd; border-color: #e74c3c;}
+    .vehicle-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+                          transition: left 0.5s ease; z-index: 1;}
+    .vehicle-btn:hover::before {left: 100%;}
+    .vehicle-btn:hover {transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); filter: brightness(1.1);}
+    .vehicle-btn:hover .vehicle-icon {transform: rotate(5deg) scale(1.1);}
+    .vehicle-btn:hover .vehicle-code {transform: scale(1.1);}
+    .vehicle-btn:active {animation: buttonBounce 0.3s ease; box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);}
+    .vehicle-btn.selected {color: white; transform: scale(1.05); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); animation: selectedPulse 2s infinite;}
+    .vehicle-btn.selected .vehicle-code {color: white;}
+    .vehicle-btn.selected::after {content: '✨'; position: absolute; top: -3px; right: -3px; font-size: 15px; animation: sparkle 2s infinite; z-index: 10;}
+    .vehicle-btn[class^="v"].selected, 
+    .vehicle-btn.pe.selected, 
+    .vehicle-btn.erst.selected, 
+    .vehicle-btn.mrsa.selected, 
+    .vehicle-btn.atrl.selected {background: linear-gradient(45deg, #e74c3c, #c0392b, #e74c3c); background-size: 200% 200%; animation: gradientShift 3s ease infinite, selectedPulse 2s infinite; border-color: #c0392b;}
+    .vehicle-btn.absc.selected, .vehicle-btn.abtd.selected, .vehicle-btn.abtm.selected, .vehicle-btn.vdtd.selected {background: linear-gradient(45deg, #3498db, #2980b9, #3498db); background-size: 200% 200%;
+                                                                                                            animation: gradientShift 3s ease infinite, selectedPulse 2s infinite; border-color: #2980b9;}
+    .vehicle-btn.inop {border-color: #7f8c8d !important; color: #2c3e50 !important; opacity: 0.6; cursor: not-allowed !important; position: relative; animation: inopFade 2s infinite;}
+    .vehicle-btn.inop::before {content: "⚠️ INOP"; position: absolute; top: 5px; left: 50%; transform: translateX(-50%); font-size: 10px; background: #e74c3c; color: white; padding: 2px 4px;
+                               border-radius: 3px; font-weight: bold; z-index: 10; opacity: 0.5;}
+    .vehicle-btn.inop .vehicle-code {color: #7f8c8d !important; text-decoration: line-through;}
+    .vehicle-btn.inop:hover {transform: none !important; box-shadow: none !important;}
+    .vehicle-btn.inop.selected {background: linear-gradient(45deg, #95a5a6, #7f8c8d) !important; color: #2c3e50 !important;}
+    .vehicle-btn.em-servico {animation: gentleShake 3s infinite; border: 2px solid; animation: borderBlink 1.5s infinite, gentleShake 3s infinite;}
+    .vehicle-btn.em-servico::before {content: "🚨 Em Serviço"; position: absolute; top: 5px; left: 50%; transform: translateX(-50%); font-size: 9px; background: rgba(241, 196, 15, 0.8); color: #2c3e50;
+                                     padding: 2px 4px; border-radius: 2px; font-weight: bold; z-index: 10; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);}
+    .current-vehicle {background: linear-gradient(45deg, #4ac259, #0eab22); color: white; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; margin: 15px 0;
+                      box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); transition: all 0.3s ease; animation: slideIn 0.3s ease-out;}
+    .current-vehicle.slide-out {animation: slideOut 0.3s ease-in forwards;}
+    .vehicle-name {font-size: 18px;}
+    .vehicle-status {font-size: 14px; margin-top: 5px; opacity: 0.9;}
+    .destination-info {margin-top: 15px; padding: 12px; background: #d9ddde; border-radius: 12px; font-size: 14px; color: #2c3e50; border: 1px solid #3498db; border-left: 4px solid #3498db; transition: all 0.3s ease;}
+    .container {padding: 10px 0; display: flex; flex-direction: column; align-items: center; gap: 15px;}
+    .button-grid {display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 350px; margin: 0 auto;}
+    #buttonsContainer { margin-top: 0px !important;}
+    .geostat-btn {padding: 15px 10px; font-size: 12px; color: white; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); transition: all 0.3s ease; min-height: 65px;
+                  display: flex; align-items: center; justify-content: center; text-align: center; animation: bounceIn 0.6s ease-out;}
+    .btn-icon {font-size: 18px; margin-bottom: 4px;}
+    .btn-icon-flipped {transform: scaleX(-1); display: inline-block;}
+    .btn-saida {background: linear-gradient(45deg, #e74c3c, #c0392b);}
+    .btn-chegada-to {background: linear-gradient(45deg, #3498db, #2980b9);}
+    .btn-saida-to {background: linear-gradient(45deg, #f39c12, #e67e22);}
+    .btn-chegada-und {background: linear-gradient(45deg, #27ae60, #229954);}
+    .geostat-btn:active {transform: scale(0.95);}
+    .geostat-btn:disabled {opacity: 0.3; cursor: not-allowed;}
+    .geostat-btn.sending {background: linear-gradient(45deg, #9b59b6, #8e44ad) !important; animation: pulse 1s infinite;}
+    .warning {background: linear-gradient(45deg, #f39c12, #e67e22); color: white; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: center; font-weight: bold; font-size: 15px; transition: all 0.3s ease;}
+    #warningMessage {position: relative !important; top: -15px !important; margin-bottom: -15px !important;}
+    .popup-overlay {position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 9999;}
+    .popup-content {background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 350px; width: 90%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); transition: all 0.3s ease;
+                    animation: bounceIn 0.4s ease-out;}
+    .popup-content h3 {color: #2c3e50; margin-bottom: 15px; font-size: 20px;}
+    .popup-content p {color: #34495e; margin-bottom: 10px;}
+    .popup-content input {width: 100%; padding: 15px; border: 2px solid #bdc3c7; border-radius: 8px; font-size: 18px; margin: 15px 0; text-align: center; font-weight: bold; transition: all 0.3s ease;}
+    .popup-content input:focus {border-color: #3498db; outline: none;}
+    .popup-buttons {display: flex; gap: 10px; margin-top: 20px;}
+    .popup-btn {flex: 1; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; transition: all 0.3s ease;}
+    .popup-btn.confirm {background: #27ae60; color: white;}
+    .popup-btn.confirm:hover {background: #229954;}
+    .popup-btn.cancel {background: #e74c3c; color: white;}
+    .popup-btn.cancel:hover {background: #c0392b;}
+    .toast-container {position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 6px;}
+    .toast {min-width: 200px; max-width: 350px; padding: 8px 16px; border-radius: 10px; color: white; font-weight: bold; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25); display: flex; align-items: center;
+            justify-content: space-between; opacity: 0; transform: translateX(100%); animation: toastslideIn 0.5s forwards, toastfadeOut 0.5s forwards 3s; cursor: pointer;}
+    .toast .icon {margin-right: 10px; font-size: 16px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+                  line-height: 1;}
+    .toast.success .icon { background: rgba(255, 255, 255, 0.3); }
+    .toast.error .icon   { background: rgba(255, 255, 255, 0.3); }
+    .toast.warning .icon { background: rgba(255, 255, 255, 0.3); }
+    .toast.success { background: linear-gradient(45deg, rgba(39, 174, 96, 0.9), rgba(46, 204, 113, 0.9)); }
+    .toast.error   { background: linear-gradient(45deg, rgba(231, 76, 60, 0.9), rgba(236, 112, 99, 0.9)); }
+    .toast.warning { background: linear-gradient(45deg, rgba(243, 156, 18, 0.9), rgba(230, 126, 34, 0.9)); }
+    @keyframes toastslideIn {from {opacity: 0; transform: translateX(100%);} to {opacity: 1; transform: translateX(0);}}
+    @keyframes toastfadeOut {to {opacity: 0; transform: translateX(100%);}}    
+    @keyframes fadeIn {from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);}}
+    @keyframes slideIn {from {transform: translateX(-100%);} to {transform: translateX(0);}}
+    @keyframes slideOut {from {transform: translateX(0); opacity: 1;} to {transform: translateX(100%); opacity: 0;}}
+    @keyframes bounceIn {0% {transform: scale(0.3); opacity: 0;} 50% {transform: scale(1.05);} 70% {transform: scale(0.9);} 100% {transform: scale(1); opacity: 1;}}
+    @keyframes selectedPulse {0%, 100% {box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);} 50% {box-shadow: 0 8px 35px rgba(0, 0, 0, 0.5);}}
+    @keyframes gradientShift {0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;}}
+    @keyframes buttonBounce {0% {transform: scale(1);} 50% {transform: scale(0.95);} 100% {transform: scale(1.05);}}
+    @keyframes inopFade {0%, 100% {opacity: 1;} 50% {opacity: 0.5;}}
+    @keyframes gentleShake {0%, 100% {transform: translateX(0);} 25% {transform: translateX(-1px);} 75% {transform: translateX(1px);}}
+    @keyframes borderBlink {0%, 100% {border-color: #f1c40f;} 50% {border-color: #e67e22;}}
+    @keyframes sparkle {0%, 100% {opacity: 0; transform: scale(0.5) rotate(0deg);} 50% {opacity: 1; transform: scale(1) rotate(180deg);}}
+    @keyframes pulse {0%, 100% {transform: scale(1);} 50% {transform: scale(1.05);}}
+    @keyframes darkSelectedGlow {0%, 100% {box-shadow: 0 0 15px rgba(39, 174, 96, 0.3);} 50% {box-shadow: 0 0 25px rgba(39, 174, 96, 0.6);}}
+    .main-content::-webkit-scrollbar {display: none;}
+    .vehicle-btn:focus, .geostat-btn:focus, .popup-btn:focus {outline: 3px solid #3498db; outline-offset: 2px;}    
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */    
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      html, body {height: 100vh; max-height: 100vh; overflow-x: hidden; overflow-y: auto;}
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      #buttonsContainer {margin-top: -20px !important; margin-bottom: -40px !important;}
+      .main-content {padding-left: 15px; padding-right: 15px;}
+      .vehicle-selector {margin-top: -15px; padding: 10px;}
+      .vehicle-selector h3 {font-size: 16px; margin-bottom: 12px; text-align: center;}
+      .vehicle-grid {grid-template-columns: repeat(3, 1fr); gap: 8px;}
+      .vehicle-btn {height: 70px !important; max-height: 70px !important; min-height: 70px !important; padding: 8px;}
+      .vehicle-icon {font-size: 20px;}
+      .vehicle-code {font-size: 12px;}
+      .current-vehicle {margin: 8px 0 8px 0;}
+      .destination-info {margin-top: 8px;}
+      .button-grid {max-width: 400px;}
+      .geostat-btn {padding: 8px 8px; font-size: 14px; min-height: 60px;}
+      .status {left: 15px; right: 15px; bottom: 65px;}
+      .popup-content {max-width: calc(100vw - 30px); width: 90%; max-height: calc(100vh - 100px); overflow-y: auto;}
+      .dark-mode .button-grid {margin-top: -7px; max-width: 400px;}}    
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>V-STATUS</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">
+      Sistema de Gestão de Status
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="vehicle-selector">
+      <h3>Selecione um Veículo:</h3>
+      <div class="vehicle-grid">
+      </div>
+      <div id="currentVehicle" class="current-vehicle" style="display: none;">
+        <div class="vehicle-name">
+          Veículo Selecionado: <span id="vehicleDisplay"></span>
+        </div>
+        <div class="vehicle-status">
+          Pronto para envio de Status
+        </div>
+      </div>
+      <div class="destination-info">
+        📍 <strong>Central:</strong> <span id="centralCorp">...</span><br>
+        📡 <strong>Sistema:</strong> Grupo CB360
+      </div>
+    </div>
+    <div id="buttonsContainer" class="container" style="display: none;">
+      <div class="button-grid">
+        <button class="geostat-btn btn-saida" onclick="sendGeostat('Saída Und.')">
+          <span class="btn-icon">🚒</span>
+          <strong>Saída do Quartel</strong>
+        </button>
+        <button class="geostat-btn btn-chegada-to" onclick="sendGeostat('Chegada TO')">
+          <span class="btn-icon">🔥</span>
+          <strong>Chegada ao TO</strong>
+        </button>
+        <button class="geostat-btn btn-saida-to" onclick="sendGeostat('Saída TO')">
+          <strong>Saída do TO</strong>
+          <span class="btn-icon btn-icon-flipped">🚒</span>
+        </button>
+        <button class="geostat-btn btn-chegada-und" onclick="sendArrivalHeadquarters()">
+          <span class="btn-icon">🏠</span>
+          <strong>Chegada ao Quartel</strong>
+        </button>
+      </div>
+    </div>
+    <div class="warning" id="warningMessage">
+      ⚠️ <strong>Selecione o Veículo</strong> antes de enviar Status
+    </div>
+  </div>
+  <div id="toastContainer" class="toast-container"></div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp, 
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendTelegram';
+    const TIMERS = {VEHICLE_RELOAD_INTERVAL: 5000, STATUS_CHECK_INTERVAL: 1500, INITIAL_SELECT_DELAY: 1000,
+                    RESELECT_DELAY: 100, ANIMATION_DURATION: 300, STATUS_DISPLAY_TIME: 3000, FOCUS_DELAY: 100};
+    const TYPES_WITH_PUMP = ['VLCI', 'VUCI', 'VFCI', 'VECI', 'VFCI', 'VRCI', 'VSAE', 'VTTU', 'VTTF', 'VTTR', 'VALE', 'VTTR', 'VTGC'];
+    const HIDDEN_VEHICLE_TYPES = ['ABTM', 'ABTD', 'VDTD'];
+    const VEHICLE_ICONS = {'VCOT': '🚒', 'VCOC': '🚒', 'VGEO': '🚒', 'VLCI': '🚒', 'VUCI': '🚒', 'VFCI': '🚒', 'VECI': '🚒', 'VRCI': '🚒', 'VE': '🚒', 'PE': '🚒', 
+                           'VLSA': '🚒', 'VSAT': '🚒', 'VSAE': '🚒', 'VTTU': '🚒', 'VTTF': '🚒', 'VTTR': '🚒', 'VTGC': '🚒', 'VALE': '🚒', 'VOPE': '🚒', 'VPMA': '🚒', 
+                           'VTTP': '🚒', 'VTPT': '🚒', 'ERST': '🚒', 'MRSA': '🚒', 'ATRL': '🚒', 'ABSC': '🚑', 'ABTM': '🚑', 'ABTD': '🚑', 'VDTD': '🚑'};
+    const VEHICLE_TYPE_ORDER = {'VCOT': 1, 'VCOC': 2, 'VGEO': 3, 'VLCI': 4, 'VUCI': 5, 'VFCI': 6, 'VECI': 7, 'VRCI': 8, 'VE': 9, 'PE': 10, 'VLSA': 11, 'VSAT': 12, 'VSAE': 13,
+                                'VTTU': 14, 'VTTF': 15, 'VTTR': 16, 'VTGC': 17, 'VALE': 18, 'VOPE': 19, 'VPMA': 20, 'VTTP': 21, 'VTPT': 22, 'ERST': 23, 'MRSA': 24,'ATRL': 25, 
+                                'ABSC': 26,  'ABTD': 27, 'ABTM': 28, 'VDTD': 29};
+    const BACKUP_VEHICLES = [ 'VCOT-01', 'VCOT-02', 'VTTP-01', 'VTTP-02', 'VTTP-03', 'VFCI-01', 'VFCI-02', 'VTTU-01', 'VTTF-02', 'ABSC-02', 'ABSC-03', 'ABSC-04'];
+    /* === VARIÁVEIS DE ESTADO GLOBAL ==*/    
+    let selectedVehicle = null;
+    let vehicleIcon = null;
+    let vehicleType = null;
+    let vehicleStatuses = {};
+    let vehicleINOP = {};
+    let currentVehicleList = [];
+    /* ============================= EVENTS ============================== */
+    window.addEventListener('load', function() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+      loadCorpInfo()
+      loadVehiclesFromAPI();
+      loadVehicleStatuses();
+      deselectVehicle();
+      const saved = localStorage.getItem('geostat-vehicle-6');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          setTimeout(() => selectVehicle(data.vehicle, data.icon, data.type, false), TIMERS.INITIAL_SELECT_DELAY);
+        } catch (err) {
+          console.error('❌ Erro ao carregar veículo salvo:', err);
+          localStorage.removeItem('geostat-vehicle-6');
+        }
+      }
+      startVehiclePolling();
+      startStatusPolling();
+    });
+    async function startVehiclePolling() {
+      try {
+        await loadVehiclesFromAPI();
+      } catch (err) {
+        console.error('❌ Erro no polling de veículos:', err);
+      }
+      setTimeout(startVehiclePolling, TIMERS.VEHICLE_RELOAD_INTERVAL);
+    }
+    async function startStatusPolling() {
+      try {
+        await loadVehicleStatuses();
+        checkSelectedVehicleINOP();
+      } catch (err) {
+        console.error('❌ Erro no polling de status:', err);
+      }
+      setTimeout(startStatusPolling, TIMERS.STATUS_CHECK_INTERVAL);
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        h2.textContent = "Não definido";
+        return;
+      }
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          h2.textContent = corp.corp_oper_nr;      
+          if (logoEl && corp.logo_url) {
+            logoEl.src = corp.logo_url.trim();
+          }
+        }
+      } catch (err) {
+        h2.textContent = corpOperNr;
+      }
+    }
+    window.addEventListener("DOMContentLoaded", loadCorpInfo);    
+    function updateCentralInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const centralEl = document.getElementById("centralCorp");
+      centralEl.textContent = `SALOC ${corpOperNr}`;
+    }
+    window.addEventListener("DOMContentLoaded", updateCentralInfo);    
+    /* ======================== VEHICLES LOADING ========================= */
+    async function loadVehiclesFromAPI() {
+      try {
+        const corpOperNr = localStorage.getItem('currentCorpOperNr');
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/vehicle_status?select=vehicle&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) throw new Error("Erro Supabase");
+        const data = await response.json();
+        const vehicleCodes = data.map(v => v.vehicle);
+        if (vehicleCodes.length > 0) {
+          const newVehicleList = sortVehicles(vehicleCodes);
+          if (JSON.stringify(newVehicleList) !== JSON.stringify(sortVehicles(currentVehicleList))) {
+            const wasSelected = selectedVehicle;
+            const wasIcon = vehicleIcon;
+            const wasType = vehicleType;
+            currentVehicleList = [...vehicleCodes];
+            generateVehicleButtons(vehicleCodes);
+            if (wasSelected && vehicleCodes.includes(wasSelected)) {
+              setTimeout(() => selectVehicle(wasSelected, wasIcon, wasType, false), TIMERS.RESELECT_DELAY);
+            }
+          }
+        } else {
+          loadBackupVehicles();
+        }
+      } catch (err) {
+        console.error('❌ Erro ao carregar veículos:', err);
+        loadBackupVehicles();
+      }
+    }
+    function loadBackupVehicles() {
+      currentVehicleList = [...BACKUP_VEHICLES];
+      generateVehicleButtons(BACKUP_VEHICLES);
+    }
+    function generateVehicleButtons(vehicles) {
+      const vehicleGrid = document.querySelector('.vehicle-grid');
+      if (!vehicleGrid) return;
+      vehicleGrid.innerHTML = '';
+      vehicles.forEach(code => {
+        const type = code.split('-')[0];
+        if (HIDDEN_VEHICLE_TYPES.includes(type)) return;
+        const icon = getVehicleIcon(type);
+        const typeClass = type.toLowerCase();
+        vehicleGrid.insertAdjacentHTML('beforeend', `
+      <div class="vehicle-btn ${typeClass}" onclick="selectVehicle('${code}','${icon}','${type}', true, event)">
+        <span class="vehicle-icon">${icon}</span>
+        <div class="vehicle-code">${code}</div>
+      </div>
+    `);
+      });
+    }
+    function getVehicleIcon(type) {
+      return VEHICLE_ICONS[type] || '🚗';
+    }
+    function sortVehicles(list) {
+      return list.sort((a, b) => {
+        const [typeA, numA] = a.split('-');
+        const [typeB, numB] = b.split('-');
+        const orderA = VEHICLE_TYPE_ORDER[typeA] || 999;
+        const orderB = VEHICLE_TYPE_ORDER[typeB] || 999;
+        if (orderA === orderB) {
+          return parseInt(numA) - parseInt(numB);
+        }
+        return orderA - orderB;
+      });
+    }
+    /* ========================= STATUS LOADING ========================== */    
+    async function loadVehicleStatuses() {
+      try {
+        const corpOperNr = localStorage.getItem('currentCorpOperNr');
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/vehicle_status?select=vehicle,current_status,is_inop&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) throw new Error("Erro Status Supabase");
+        const data = await response.json();
+        vehicleStatuses = {};
+        vehicleINOP = {};
+        data.forEach(item => {
+          vehicleStatuses[item.vehicle] = item.current_status || 'Disponível';
+          vehicleINOP[item.vehicle] = item.is_inop === true;
+        });
+        updateVehicleButtonColors();
+      } catch (err) {
+        console.error('❌ Erro ao carregar status:', err);
+      }
+    }
+    function updateVehicleButtonColors() {
+      document.querySelectorAll('.vehicle-btn').forEach(btn => {
+        const onclickAttr = btn.getAttribute('onclick');
+        if (!onclickAttr) return;
+        const match = onclickAttr.match(/'([^']+)'/);
+        if (!match) return;
+        const code = match[1];
+        btn.classList.remove('inop', 'em-servico');
+        if (vehicleINOP[code] === true) {
+          btn.classList.add('inop');
+        } else if (vehicleStatuses[code] === 'Em Serviço') {
+          btn.classList.add('em-servico');
+        }
+      });
+    }
+    function checkSelectedVehicleINOP() {
+      if (selectedVehicle && vehicleINOP[selectedVehicle] === true) {
+        showToast(`${selectedVehicle} ficou INOP! Selecione outro veículo.`, 'error');
+        deselectVehicle();
+      }
+    }
+    async function updateVehicleStatus(vehicle, action) {
+      const finalStatus = action === 'Chegada Und.' ? 'Disponível' : 'Em Serviço';
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/vehicle_status?vehicle=eq.${vehicle}`, {
+            method: 'PATCH',
+            headers: getSupabaseHeaders(),
+            body: JSON.stringify({ current_status: finalStatus })
+          }
+        );
+        if (res.ok) {
+          vehicleStatuses[vehicle] = finalStatus;
+          updateVehicleButtonColors();
+          saveBackup();
+        } else {
+          throw new Error("Falha ao atualizar Supabase");
+        }
+      } catch (err) {
+        console.error('❌ Erro ao atualizar status:', err);
+        vehicleStatuses[vehicle] = finalStatus;
+        saveBackup();
+      }
+    }
+    function saveBackup() {
+      localStorage.setItem('geostat-backup-statuses', JSON.stringify(vehicleStatuses));
+      localStorage.setItem('geostat-backup-inop', JSON.stringify(vehicleINOP));
+    }
+    function showToast(message, type = 'success', duration = 3000) {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span class="icon">${type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠'}</span> <span>${message}</span>`;
+      toast.addEventListener('click', () => toast.remove());
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), duration + 500);
+    }
+    function vibrate(ms = 200) {
+      if (navigator.vibrate) {
+        navigator.vibrate(ms);
+      }
+    }   
+    /* ========================= VEHICLES SELECT ========================= */    
+    function selectVehicle(vehicle, icon, type, animate = true, e = null) {
+      if (vehicleINOP[vehicle] === true) {
+        if (animate) {
+          showToast(`${vehicle} está INOP!`, 'error');
+          if (navigator.vibrate) {
+            navigator.vibrate([100, 100, 100]);
+          }
+        }
+        if (selectedVehicle) {
+          deselectVehicle();
+        }
+        return;
+      }
+      const event = e || window.event;
+      const clickedButton = event?.target ? event.target.closest('.vehicle-btn') :
+        document.querySelector(`[onclick*="${vehicle}"]`);
+      if (selectedVehicle === vehicle && clickedButton && clickedButton.classList.contains('selected')) {
+        deselectVehicle();
+        if (navigator.vibrate && animate) {
+          navigator.vibrate([50, 50, 50]);
+        }
+        if (animate) {
+          showToast(`Veículo desmarcado`, 'error');
+        }
+        return;
+      }
+      selectedVehicle = vehicle;
+      vehicleIcon = icon;
+      vehicleType = type;
+      localStorage.setItem('geostat-vehicle-6', JSON.stringify({
+        vehicle: vehicle,
+        icon: icon,
+        type: type
+      }));
+      document.querySelectorAll('.vehicle-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      if (clickedButton) {
+        clickedButton.classList.add('selected');
+      }
+      const currentVehicleEl = document.getElementById('currentVehicle');
+      const vehicleDisplayEl = document.getElementById('vehicleDisplay');
+      const buttonsContainerEl = document.getElementById('buttonsContainer');
+      const warningMessageEl = document.getElementById('warningMessage');
+      if (currentVehicleEl) currentVehicleEl.style.display = 'block';
+      if (vehicleDisplayEl) vehicleDisplayEl.innerHTML = `${icon} ${vehicle}`;
+      if (buttonsContainerEl) buttonsContainerEl.style.display = 'block';
+      if (warningMessageEl) warningMessageEl.style.display = 'none';
+      if (navigator.vibrate && animate) {
+        navigator.vibrate(100);
+      }
+    }
+    function deselectVehicle() {
+      const currentVehicleElement = document.getElementById('currentVehicle');
+      const cleanup = () => {
+        selectedVehicle = null;
+        vehicleIcon = null;
+        vehicleType = null;
+        localStorage.removeItem('geostat-vehicle-6');
+        document.querySelectorAll('.vehicle-btn').forEach(btn => {
+          btn.classList.remove('selected');
+        });
+        if (currentVehicleElement) {
+          currentVehicleElement.style.display = 'none';
+        }
+        const buttonsContainer = document.getElementById('buttonsContainer');
+        const warningMessage = document.getElementById('warningMessage');
+        if (buttonsContainer) buttonsContainer.style.display = 'none';
+        if (warningMessage) warningMessage.style.display = 'block';
+      };
+      if (currentVehicleElement && currentVehicleElement.style.display !== 'none') {
+        currentVehicleElement.classList.add('slide-out');
+        setTimeout(() => {
+          currentVehicleElement.classList.remove('slide-out');
+          cleanup();
+        }, TIMERS.ANIMATION_DURATION);
+      } else {
+        cleanup();
+      }
+    }
+    /* ========================== STATUS EVENT =========================== */
+    async function sendGeostat(action) {
+      if (!selectedVehicle) {
+        showToast('Selecione uma viatura primeiro!', 'error');
+        return;
+      }
+      const now = new Date();
+      const time = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+      const date = now.toLocaleDateString('pt-PT');
+      const message = `🚨 <b>ATUALIZAÇÃO DE STATUS</b>\n\n${vehicleIcon} <b>${selectedVehicle}</b>\n📍 <b>${action}</b>\n⏰ ${time}\n📅 ${date}`;
+      const corpOperNr = localStorage.getItem('currentCorpOperNr') || 'N/D';
+      try {
+        const res = await fetch(TELEGRAM_API, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({message, vehicle: selectedVehicle, action, corp_oper_nr: corpOperNr})
+        });
+        if (res.ok) {
+          showToast(`${action} enviado!`, 'success');
+          await updateVehicleStatus(selectedVehicle, action);
+          deselectVehicle();
+        } else {
+          const text = await res.text();
+          throw new Error(text);
+        }
+      } catch (err) {
+        console.error('❌ Erro ao enviar:', err);
+        showToast(`Erro ao enviar ${action}: ${err.message}`, 'error');
+      }
+    }
+    function sendArrivalHeadquarters() {
+      if (!selectedVehicle) {
+        showToast('Selecione um veículo primeiro!', 'error');
+        return;
+      }
+      showKilometersPopup();
+    }
+    function showKilometersPopup() {
+      const tipoVeiculo = selectedVehicle.split('-')[0];
+      const hasPump = TYPES_WITH_PUMP.includes(tipoVeiculo);
+      const popupHTML = `
+      <div id="kmPopup" class="popup-overlay">
+        <div class="popup-content">
+          <h3>🏠 Chegada ao Quartel</h3>
+          <p><strong>${vehicleIcon} ${selectedVehicle}</strong></p>
+          <p>Informe os quilómetros atuais:</p>
+          <input type="number" id="kmInput" placeholder="Ex: 12345" autofocus/>
+          ${hasPump ? `
+            <p style="margin-top:15px;">Tempo de Bomba:</p>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:15px;">
+              <div style="flex:1;">
+                <label>Hrs:</label>
+                <input type="number" id="hoursInput" placeholder="0" min="0" max="23"/>
+              </div>
+              <div style="flex:1;">
+                <label>Mins:</label>
+                <input type="number" id="minutesInput" placeholder="0" min="0" max="59"/>
+              </div>
+            </div>
+          ` : ''}
+          <div class="popup-buttons">
+            <button class="popup-btn confirm" onclick="sendWithKilometers()">✅ Enviar Status</button>
+            <button class="popup-btn cancel" onclick="closeKmPopup()">❌ Cancelar</button>
+          </div>
+        </div>
+      </div>
+    `;
+      document.body.insertAdjacentHTML('beforeend', popupHTML);
+      setTimeout(() => document.getElementById('kmInput')?.focus(), TIMERS.FOCUS_DELAY);
+    }
+    async function sendWithKilometers() {
+      const kmValue = document.getElementById('kmInput')?.value.trim();
+      const tipoVeiculo = selectedVehicle.split('-')[0];
+      const hasPump = TYPES_WITH_PUMP.includes(tipoVeiculo);
+      if (!kmValue || kmValue <= 0) {
+        showToast('Insira os quilómetros válidos!', 'error');
+        return;
+      }
+      let hours = 0;
+      let minutes = 0;
+      if (hasPump) {
+        const hoursInput = document.getElementById('hoursInput');
+        const minutesInput = document.getElementById('minutesInput');
+        hours = parseInt(hoursInput?.value.trim() || '0');
+        minutes = parseInt(minutesInput?.value.trim() || '0');
+      }
+      closeKmPopup();
+      await sendGeostatWithKmAndTime('Chegada Und.', kmValue, hours, minutes, hasPump);
+    }
+    function closeKmPopup() {
+      document.getElementById('kmPopup')?.remove();
+    }
+    async function sendGeostatWithKmAndTime(action, kilometers, hours, minutes, hasPump) {
+      if (!selectedVehicle) {
+        showToast('Selecione uma viatura primeiro!', 'error');
+        return;
+      }
+      const now = new Date();
+      const time = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+      const date = now.toLocaleDateString('pt-PT');
+      let message = `🚨 <b>ATUALIZAÇÃO DE STATUS</b>\n\n${vehicleIcon} <b>${selectedVehicle}</b>\n📍 <b>${action}</b>\n⏰ ${time}\n📅 ${date}\n🛣️ <b>KMs: ${kilometers}</b>`;
+      if (hasPump) {
+        message += `\n⏱️ <b>Tempo Bomba: ${hours.toString().padStart(2,'0')}h${minutes.toString().padStart(2,'0')}m</b>`;
+      }
+      const corpOperNr = localStorage.getItem('currentCorpOperNr') || 'N/D';
+      try {
+        const res = await fetch(TELEGRAM_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({message, vehicle: selectedVehicle, action, corp_oper_nr: corpOperNr})
+        });
+        if (res.ok) {
+          showToast(`${action} enviado!`, 'success');
+          await updateVehicleStatus(selectedVehicle, action);
+          deselectVehicle();
+        } else {
+          const text = await res.text();
+          throw new Error(text);
+        }
+      } catch (err) {
+        console.error('❌ Erro ao enviar:', err);
+        showToast(`Erro ao enviar ${action}: ${err.message}`, 'error');
+      }
+    } 
+  </script>
+</body>
+</html>

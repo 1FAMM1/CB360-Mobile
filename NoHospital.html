@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360 Mobile</title>
+  <style>
+    /* ==================== BODY ==================== */    
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: all 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;}
+    .footer:hover {background: linear-gradient(45deg, #c62828, #a00000); transition: all 0.3s ease;}
+    .main-content {flex: 1; overflow-y: auto; padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; -ms-overflow-style: none; scrollbar-width: none; }   
+    #hosp-alerts {display: flex; flex-direction: column; align-items: center; gap: 12px; width: 95%;}  
+    .hosp-card {width: 100%; max-width: 580px; border-radius: 15px; padding: 18px; font-size: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px; position: relative;
+                border: 2px solid; border-left: 10px solid; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 0 12px rgba(255, 255, 255, 0.15) inset; transition: transform 0.25s ease, box-shadow 0.25s ease; opacity: 0; transform: translateY(30px); transition: opacity 0.5s ease, transform 0.5s ease;}
+    .hosp-card.show {opacity: 1; transform: translateY(0);}
+    .hosp-green {border-color: #66bb6a; background: linear-gradient(135deg, rgba(245, 255, 247, 0.90) 75%, rgba(102, 187, 106, 0.95) 90%);}  
+    .hosp-red {border-color: #ef5350; background: linear-gradient( 135deg, rgba(255, 245, 247, 0.90) 75%, rgba(239, 83, 80, 0.95) 90%);}
+    .hosp-center {justify-content: center; align-items: center; text-align: center;}
+    .hosp-title {font-weight: bold; font-size: 18px; margin-bottom: 5px; color: #555; text-align: center;}
+    .hosp-ulssubtitle {color: #555; font-size: 14px; margin-bottom: 15px; text-align: center;}
+    .hosp-time-start  {font-size: 13px; text-align: left; margin-bottom: 0; color: #555;}
+    .hosp-time-end  {font-size: 13px; text-align: left; margin-bottom: 15px; color: #555;}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */    
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}       
+      .main-content {padding-top: 90px; padding-left: 15px; padding-right: 15px;}} 
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>CONSTRANGIMENTOS ULS</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">ALGARVE (FARO/PORTIMÃO)</div>
+  </div>
+  <div class="main-content">    
+    <div class="card-body" id="hosp-alerts"></div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';    
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp, 
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const titleEl = document.querySelector(".cb-title");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        if (h2) {h2.textContent = "Não definido";}
+        return;
+      }
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) {h2.textContent = corp.corp_oper_nr || "N/D";}
+          if (logoEl && corp.logo_url) {logoEl.src = corp.logo_url.trim();}
+          if (titleEl && corp.corporation) {titleEl.textContent = formatCorpName(corp.corporation);}
+        } else {
+          if (h2) {h2.textContent = "Não encontrado";}
+        }
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+        if (h2) {h2.textContent = corpOperNr;}
+      }
+    }
+    /* ======================= HOSPITAL WARNINGS ========================= */
+    async function updateWarnings() {
+      const container = document.getElementById("hosp-alerts");
+      if (!container) return;
+      container.innerHTML = "A carregar restrições...";
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/hospital_restrictions?select=service,hospital,start_date,start_time,end_date,end_time,next_hospital`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        container.innerHTML = "";
+        if (!data || data.length === 0) {
+          const card = document.createElement("div");
+          card.className = "hosp-card hosp-green hosp-center";
+          card.innerHTML = `
+            <div>
+            <div class="hosp-title">Sem Constrangimentos</div>
+            <div class="hosp-ulssubtitle" style="text-align:center; margin-top: 5px; font-size: 13px; font-weight: normal;">Não existem constragimentos nas ULS do Algarve.</div>
+          </div>
+        `;
+          container.appendChild(card);
+          requestAnimationFrame(() => card.classList.add("show"));
+          return;
+        }
+        data.forEach((item, index) => {
+          let hospitalName = item.hospital || "N/D";
+          hospitalName = hospitalName.replace(/^hospital\s*[:\-]\s*/i, "").trim();
+          let startTime = "N/D";
+          if (item.start_date) {
+            const [y, m, d] = item.start_date.split("-");
+            startTime = `${d}/${m}/${y}`;
+            if (item.start_time) startTime += ` ${item.start_time.substring(0,5)}`;
+          }
+          let endTime = "Indefinido";
+          if (item.end_date) {
+            const [y, m, d] = item.end_date.split("-");
+            endTime = `${d}/${m}/${y}`;
+            if (item.end_time) endTime += ` ${item.end_time.substring(0,5)}`;
+          }
+          let nextHospital = item.next_hospital || "Não definida";
+          nextHospital = nextHospital.replace(/^hospital\s*[:\-]\s*/i, "").trim();
+          const card = document.createElement("div");
+          card.className = "hosp-card hosp-red";
+          card.innerHTML = `
+            <div class="hosp-title">${item.service || "Serviço não definido"}</div>
+            <div class="hosp-ulssubtitle">Hospital: ${hospitalName}</div>
+            <div class="hosp-time-start"><strong>Início:</strong> ${startTime}</div>
+            <div class="hosp-time-end"><strong>Fim:</strong> ${endTime}</div>
+            <div class="hosp-time-end"><strong>Referência mais Próxima:</strong> ${nextHospital}</div>
+          `;
+          container.appendChild(card);
+          requestAnimationFrame(() => {
+            setTimeout(() => card.classList.add("show"), index * 200);
+          });
+        });
+      } catch (err) {
+        console.error("Erro ao carregar restrições:", err);
+        container.innerHTML = "Erro ao carregar restrições.";
+      }
+    }
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('sgo-theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+      loadCorpInfo();
+      updateWarnings();
+      setInterval(updateWarnings, 10 * 60 * 1000);
+    });
+  </script>
+</body>
+</html>

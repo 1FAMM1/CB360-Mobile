@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360 Mobile - Pedido de Férias</title>
+  <style>
+    /* ==================== BODY ==================== */  
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .vacations-req-subtitle {color: #e0e0e0;}
+    .dark-mode .vacations-req-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+    .dark-mode .vacations-req-btn:hover:not(.selected) {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
+    .dark-mode .vacations-req-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
+    .dark-mode .vacations-req-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.7);}
+    .dark-mode .calendar-container {border: 1px solid #222; background: rgba(65, 65, 65, 0.9); color: #fff;}
+    .dark-mode .calendar-header {color: #ff6b6b; border-bottom: 1px solid rgba(255, 255, 255, 0.2);}
+    .dark-mode .calendar-day-header {color: #aaa;}
+    .dark-mode .calendar-day {background: rgba(255, 255, 255, 0.1);}    
+    .dark-mode .calendar-day:hover {background: rgba(255, 255, 255, 0.15);}
+    .dark-mode .calendar-day.selected {background: linear-gradient(135deg, #ffb74d, #ff9800, #ef6c00); color: #444; border: 2px solid #ef6c00;}
+    .dark-mode .calendar-day.selected:hover {background: linear-gradient(135deg, #ff9800, #f57c00, #e65100); transform: scale(1.05);}
+    .dark-mode .calendar-day.today {background: #8a1c1c; border: 2px solid #f1c40f;}
+    .dark-mode .calendar-day.selected.today {background-color: rgba(39, 174, 96, 1); border: 2px solid #f39c12;}
+    .dark-mode .vacation-card {background: rgba(65, 65, 65, 0.9); border: 1px solid rgba(255, 255, 255, 0.15); border-left: 5px solid #00acc1; color: #fff;}
+    .dark-mode .vacation-state {font-weight: bold; color: #ff9800;}
+    .dark-mode .vacation-card.approved .vacation-state { color: #66bb6a; }
+    .dark-mode .vacation-card.rejected .vacation-state { color: #ef5350; }
+    .dark-mode .calendar-day.state-pending {background: linear-gradient(135deg, #ff9800, #ef6c00, #e65100);}
+    .dark-mode .calendar-day.state-approved {background: linear-gradient(135deg, #43a047, #2e7d32, #1b5e20);}
+    .dark-mode .calendar-day.state-rejected {background: linear-gradient(135deg, #e53935, #b71c1c, #8e0000);}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;} 
+    .main-content {flex: 1; overflow-y: auto; padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;}
+    .vacations-req-header {flex-shrink: 0; text-align: center; width: 100%;} 
+    .vacations-req-subtitle {font-size: 1.3em; color: #2c3e50; transition: color 0.3s ease;}
+    .vacations-req-buttons {display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 22vw, 220px), 1fr)); justify-content: center; align-items: stretch; margin-bottom: 10px;}
+    .vacations-req-btn {padding: clamp(10px, 1.5vw, 16px) clamp(12px, 2vw, 20px); min-height: clamp(42px, 6vh, 60px); min-width: clamp(80px, 28vw, 250px); max-width: clamp(190px, 18vw, 240px);
+                 font-size: clamp(11px, 1.2vw, 14px); border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; flex-direction: column;
+                 justify-content: center; align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
+    .vacations-req-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                         transition: left 0.4s ease; z-index: 1;}
+    .vacations-reqbtn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
+                        transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
+    .vacations-req-btn:active::after {width: 150px; height: 150px;}
+    .vacations-req-btn:hover:not(.selected) {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
+    .vacations-req-btn:active:not(.selected) {transform: scale(0.98); transition:0.1s ease;}
+    .vacations-req-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
+    .vacations-req-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.6);}
+    .vacations-req-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
+    .vacations-req-btn span {position: relative; z-index: 2;}
+    .calendar-container {margin: 0 auto 0 auto;  padding: clamp(10px, 3vw, 15px); background: rgba(0, 0, 0, 0.05); border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+                         display: none;  width: 100%;}
+    .calendar-container.show { display: block; animation: slideDown 0.3s ease;}    
+    .calendar-header {text-align: center;  font-size: clamp(1em, 3vw, 1.2em); font-weight: bold; color: #d32f2f;  margin-bottom: clamp(5px, 1vw, 10px); border-bottom: 1px solid rgba(0, 0, 0, 0.2); padding-bottom: 8px;}
+    .calendar-grid {display: grid;  grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: clamp(2px, 1vw, 5px);}
+    .calendar-day-header {text-align: center; font-weight: bold; padding: clamp(4px, 1.5vw, 8px); font-size: clamp(0.7em, 2vw, 0.9em); color: #666;}  
+    .calendar-day {text-align: center; padding: clamp(5px, 2vw, 10px); border-radius: 3px; background: rgba(0, 0, 0, 0.10); font-size: clamp(0.75em, 2vw, 0.9em); cursor: pointer;  transition: 0.2s ease;}
+    .calendar-day:hover {background: #e0e0e0; transform: scale(1.05);}
+    .calendar-day.empty {background: transparent; cursor: default;}    
+    .calendar-day.empty:hover {transform: none;}    
+    .calendar-day.today {background: #8a1c1c; color: white; font-weight: bold; border: 2px solid #e67e22; }
+    .calendar-day.selected {background: linear-gradient(135deg, #ffb74d, #ff9800, #ef6c00); color: #444; font-weight: bold; border: 2px solid #ef6c00;}
+    .calendar-day.selected:hover {background: linear-gradient(135deg, #ff9800, #f57c00, #e65100); color: #444; border: 2px solid #ef6c00; transform: scale(1.05);}
+    .calendar-day.selected.today {background-color: #229954; border: 2px solid #f39c12;}  
+    .vacation-card {background: #ddd; border: 1px solid #bdc3c7; border-left: 5px solid #00acc1; border-right: 5px solid #00acc1 !important;border-radius: 10px; margin: 0 0 5px 0; padding: 8px 15px; 
+                    font-size: 0.70em; display: flex; justify-content: space-between; align-items: center; color: #444;}
+    .vacation-card.pending {border-left-color: #ef6c00; border-right-color: #ef6c00 !important;}
+    .vacation-card.approved {border-left-color: #2e7d32; border-right-color: #2e7d32 !important;}
+    .vacation-card.rejected {border-left-color: #b71c1c; border-right-color: #b71c1c !important;}
+    .vacation-state {font-weight: bold;}
+    .vacation-card.pending .vacation-state {color: #ef6c00;}
+    .vacation-card.approved .vacation-state {color: #2e7d32;}
+    .vacation-card.rejected .vacation-state {color: #b71c1c;}
+    .calendar-day.state-pending {background: linear-gradient(135deg, #ffb74d, #ff9800, #ef6c00); color: #fff; font-weight: bold; border: 2px solid #ef6c00;}
+    .calendar-day.state-pending:hover {background: linear-gradient(135deg, #ff9800, #f57c00, #e65100);}
+    .calendar-day.state-approved {background: linear-gradient(135deg, #66bb6a, #43a047, #2e7d32); color: #fff; font-weight: bold; border: 2px solid #2e7d32;}
+    .calendar-day.state-approved:hover {background: linear-gradient(135deg, #4caf50, #388e3c, #1b5e20);}
+    .calendar-day.state-rejected {background: linear-gradient(135deg, #ef5350, #e53935, #b71c1c); color: #fff; font-weight: bold; border: 2px solid #8e0000;}
+    .calendar-day.state-rejected:hover {background: linear-gradient(135deg, #e53935, #c62828, #8e0000);} 
+    .save-vacation-btn {display: none; padding: 8px 15px; background: linear-gradient(135deg, #27ae60, #229954); color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: bold;
+                        cursor: pointer; margin: 5px auto 0 auto; transition: all 0.3s ease; justify-content: center; align-items: center;width: fit-content;}
+    .save-vacation-btn:hover {background: linear-gradient(135deg, #229954, #1e8449); transform: translateY(-2px);}
+    .save-vacation-btn:active {transform: translateY(0);}
+    .save-vacation-btn.show {display: flex;}
+    .toast {position: fixed; bottom: clamp(100px, 20vh, 175px); left: 50%; transform: translateX(-50%); background: rgba(194, 21, 21, 0.85); color: #fff; padding: 18px 30px; border-radius: 10px; 
+            font-size: clamp(16px, 3vw, 20px); font-weight: bold; width: 500px; max-width: 90%; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(-10px);}    
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .vacations-req-header {flex-shrink: 0; padding-bottom: 10px;}
+      .vacations-req-subtitle {font-size: 0.9em; font-weight: bold; margin-top: 10px;}
+      .vacations-req-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}
+      .vacations-req-btn {height: 50px; min-height: 30px; max-height:75px; font-size: 12px; padding: 15px 10px;}
+      .main-content {padding-left: 20px; padding-right: 20px; justify-content: center; align-items: center;}}
+    .main-content {transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    body.mobile-month-active .main-content {padding-top: 70px; justify-content: flex-start !important; align-items: stretch !important;}
+    .main-content.slide-out, .main-content.slide-in {transform: none;}  
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>PEDIDO FÉRIAS</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">VOLUNTARIADO</div>
+  </div>
+  <div class="main-content">
+    <div class="vacations-req-container">
+      <div class="vacations-req-header">
+        <p class="vacations-req-subtitle">Selecione o mês:</p>
+      </div>
+      <div class="vacations-req-buttons-container">
+        <div class="vacations-req-buttons">
+          <button class="vacations-req-btn" onclick="showCalendar(0, this)">Janeiro</button>
+          <button class="vacations-req-btn" onclick="showCalendar(1, this)">Fevereiro</button>
+          <button class="vacations-req-btn" onclick="showCalendar(2, this)">Março</button>
+          <button class="vacations-req-btn" onclick="showCalendar(3, this)">Abril</button>
+          <button class="vacations-req-btn" onclick="showCalendar(4, this)">Maio</button>
+          <button class="vacations-req-btn" onclick="showCalendar(5, this)">Junho</button>
+          <button class="vacations-req-btn" onclick="showCalendar(6, this)">Julho</button>
+          <button class="vacations-req-btn" onclick="showCalendar(7, this)">Agosto</button>
+          <button class="vacations-req-btn" onclick="showCalendar(8, this)">Setembro</button>
+          <button class="vacations-req-btn" onclick="showCalendar(9, this)">Outubro</button>
+          <button class="vacations-req-btn" onclick="showCalendar(10, this)">Novembro</button>
+          <button class="vacations-req-btn" onclick="showCalendar(11, this)">Dezembro</button>
+        </div>
+      </div>
+      <div id="calendarContainer" class="calendar-container">
+        <div class="calendar-header" id="calendarHeader"></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+      <button id="saveVacationBtn" class="save-vacation-btn" onclick="saveVacation()">Efetuar Pedido</button>
+      <div id="vacationCardsContainer" style="margin-top: 20px;"></div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    let vacationsData = [];
+    let currentMonthIndex = null;
+    let selectedDays = [];
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp, 
+        'x-my-nint': nint
+      };    
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) return;
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await response.json();
+        if (data?.[0]?.logo_url) logoEl.src = data[0].logo_url.trim();
+      } catch (err) {
+        console.error('Erro Corp:', err);
+      }
+    }
+    /* ========================== THEME LOADING ========================== */
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+    }
+    /* ======================== VACATIONS LOADING ======================== */
+    async function loadVacations() {
+      const n_int = localStorage.getItem("currentCorpNint");
+      const corp_oper_nr = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
+      const currentYear = new Date().getFullYear();
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat?n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr}&order=year,month`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await res.json();
+        vacationsData = data || [];
+        const container = document.getElementById('vacationCardsContainer');
+        container.innerHTML = '';
+        if (vacationsData.length === 0) {
+          const emptyMsg = document.createElement('div');
+          emptyMsg.className = 'vacation-card';
+          emptyMsg.style.justifyContent = 'center';
+          emptyMsg.style.textAlign = 'center';
+          emptyMsg.innerHTML = `<strong>Ainda não marcou Férias de Voluntário para o ano ${currentYear}.</strong>`;
+          container.appendChild(emptyMsg);
+          return;
+        }
+        vacationsData.forEach(v => {
+          if (v.day) {
+            const daysArray = v.day.split(',').map(Number);
+            showVacationCard(daysArray, v.month, v.year, v.state);
+          }
+        });
+      } catch (err) {
+        console.error("Erro Load:", err);
+      }
+    }
+    /* ======================== CALENDAR DISPLAY ========================= */
+    async function showCalendar(monthIndex, button = null) {
+      const calendarContainer = document.getElementById('calendarContainer');
+      const saveBtn = document.getElementById('saveVacationBtn');
+      const cardsContainer = document.getElementById('vacationCardsContainer');
+      if (currentMonthIndex === monthIndex) {
+        calendarContainer.classList.remove('show');
+        document.body.classList.remove('mobile-month-active');
+        if (saveBtn) saveBtn.style.display = 'none';
+        cardsContainer.style.display = 'block';
+        currentMonthIndex = null;
+        document.querySelectorAll('.vacations-req-btn').forEach(btn => btn.classList.remove('selected'));
+        return;
+      }
+      currentMonthIndex = monthIndex;
+      cardsContainer.style.display = 'none';
+      calendarContainer.classList.add('show');
+      document.body.classList.add('mobile-month-active');
+      if (saveBtn) saveBtn.style.display = 'block';
+      document.querySelectorAll('.vacations-req-btn').forEach(btn => btn.classList.remove('selected'));
+      if (button) button.classList.add('selected');
+      selectedDays = [];
+      renderCalendarGrid(monthIndex);
+    }
+    function renderCalendarGrid(monthIndex) {
+      const grid = document.getElementById('calendarGrid');
+      const header = document.getElementById('calendarHeader');
+      grid.innerHTML = '';
+      selectedDays = [];
+      const names = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const daysWeek = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];      
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = monthIndex + 1;
+      const todayRef = new Date();
+      todayRef.setHours(0, 0, 0, 0);    
+      daysWeek.forEach(d => {
+        const div = document.createElement('div');
+        div.className = 'calendar-day-header';
+        div.textContent = d;
+        grid.appendChild(div);
+      });    
+      const firstDay = new Date(year, monthIndex, 1).getDay();
+      const lastDay = new Date(year, monthIndex + 1, 0).getDate();    
+      for (let i = 0; i < firstDay; i++) {
+        grid.appendChild(Object.assign(document.createElement('div'), { className: 'calendar-day empty' }));
+      }    
+      const stateClass = {'Em Aprovação': 'state-pending', 'Aprovadas': 'state-approved', 'Recusadas': 'state-rejected'};
+      const monthRecords = vacationsData.filter(v => parseInt(v.month) === month);    
+      for (let day = 1; day <= lastDay; day++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day';
+        dayEl.textContent = day;    
+        const dateObj = new Date(year, monthIndex, day);
+        if (dateObj.getTime() === todayRef.getTime()) {
+          dayEl.classList.add('today');
+        }
+        if (dateObj < todayRef) {
+          dayEl.classList.add('disabled');
+        }    
+        const isDayDecir = (month === 5 && day >= 15) || (month > 5 && month < 10) || (month === 10 && day <= 15);
+        if (isDayDecir) dayEl.classList.add('decir-period');    
+        monthRecords.forEach(r => {
+          const days = r.day.split(',').map(d => parseInt(d.trim()));
+          if (days.includes(day)) {
+            dayEl.classList.add(stateClass[r.state] || 'state-pending');
+            selectedDays.push(day);
+          }
+        });    
+        dayEl.onclick = () => {
+          if (isDayDecir) {
+            showToast("Não é possível marcar Férias de Voluntariado em período DECIR.");
+            return;
+          }
+          if (dateObj < todayRef) {
+            showToast("Não pode marcar ou alterar férias em datas passadas.");
+            return;
+          }    
+          if (dayEl.classList.contains('state-approved')) {
+            showToast("Este dia já foi aprovado e não pode ser alterado.");
+            return;
+          }    
+          if (selectedDays.includes(day)) {
+            selectedDays = selectedDays.filter(d => d !== day);
+            dayEl.classList.remove('state-pending','state-approved','state-rejected');
+          } else {
+            selectedDays.push(day);
+            dayEl.classList.add('state-pending');
+          }
+        };
+        grid.appendChild(dayEl);
+      }
+      header.textContent = `${names[monthIndex]} ${year}`;
+    }
+    /* ======================== SAVING VACATIONS ========================= */
+    async function saveVacation() {
+      if (currentMonthIndex === null) return showToast("Selecione um mês.");
+      if (selectedDays.length === 0) return showToast("Selecione pelo menos um dia.");
+      const n_int = parseInt(localStorage.getItem("currentCorpNint") || "205");
+      const corp_oper_nr = (localStorage.getItem("currentCorpOperNr") || "0805").padStart(4, "0");
+      const year = new Date().getFullYear();
+      const month = currentMonthIndex + 1;
+      const daysStr = selectedDays.sort((a, b) => a - b).join(',');
+      try {
+        const check = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat?n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr}&year=eq.${year}&month=eq.${month}`, {
+          headers: getSupabaseHeaders()
+        });
+        const existing = await check.json();
+        let res;
+        if (existing.length > 0) {
+          res = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat?id=eq.${existing[0].id}`, {
+            method: 'PATCH',
+            headers: getSupabaseHeaders(),
+            body: JSON.stringify({
+              day: daysStr,
+              state: "Em Aprovação"
+            })
+          });
+        } else {
+          res = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat`, {
+            method: 'POST',
+            headers: getSupabaseHeaders(),
+            body: JSON.stringify({n_int, corp_oper_nr, year, month, day: daysStr, state: "Em Aprovação"})
+          });
+        }
+        if (res.ok) {
+          showToast("Pedido de Férias Enviado!");
+          await loadVacations();
+        }
+      } catch (err) {
+        showToast("Erro de ligação.");
+      }
+    }
+    function showVacationCard(days, month, year, state) {
+      const names = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      const stateClasses = {'Em Aprovação': 'pending', 'Aprovadas': 'approved', 'Recusadas': 'rejected'};
+      const card = document.createElement('div');
+      card.className = `vacation-card ${stateClasses[state] || ''}`;
+      const sortedDays = days.sort((a, b) => a - b);
+      let groups = [];
+      if (sortedDays.length > 0) {
+        let start = sortedDays[0];
+        let end = start;
+        for (let i = 1; i < sortedDays.length; i++) {
+          if (sortedDays[i] === end + 1) {
+            end = sortedDays[i];
+          } else {
+            groups.push(start === end ? String(start).padStart(2, '0') : `${String(start).padStart(2, '0')} a ${String(end).padStart(2, '0')}`);
+            start = sortedDays[i];
+            end = start;
+          }
+        }
+        groups.push(start === end ? String(start).padStart(2, '0') : `${String(start).padStart(2, '0')} a ${String(end).padStart(2, '0')}`);
+      }
+      const rangeStr = groups.join(', ');
+      card.innerHTML = `
+        <div style="display:flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="flex: 1; text-align: left;"><strong>Férias Solicitadas:</strong></div>
+          <div style="flex: 2; text-align: center;">${rangeStr} de ${names[month-1]}</div>
+          <div style="flex: 1; text-align: right;" class="vacation-state">${state}</div>
+        </div>
+      `;
+      document.getElementById('vacationCardsContainer').appendChild(card);
+    }
+    function showToast(message) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = 'toast show';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    /* ========================= GLOBAL LOADING ========================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCorpInfo();
+      loadTheme();
+      loadVacations();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,4200 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>Guia de Comando Inc. Rurais</title>
+
+  <!-- Leaflet CSS e JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+
+    /* ===== Variáveis CSS ===== */
+    :root {
+      --color-primary: #28a745;
+      --color-secondary: #2c5aa0;
+      --color-orange: #ff8c00;
+      --color-red: #ff0000;
+      --color-blue: #4f6ff0;
+      --color-cyan: #03b8e0;
+      --color-green: #64c854;
+      --color-gray-light: #f9f9f9;
+      --color-gray-medium: #c2c2c2;
+      --color-gray-dark: #8a8a8a;
+      --color-border: #555;
+      --color-black: #000;
+      --color-white: #fff;
+      --color-light-blue: #7faefa;
+      --color-dark-blue: #062f73;
+      --color-intensity: #dbdbdb;
+      --shadow-default: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --border-default: 1px solid #000;
+      --border-black: 1px solid var(--color-black);
+    }
+
+    /* ===== Classes Base Comuns ===== */
+    .checkbox-base {
+      position: absolute;
+      border: var(--border-default);
+      padding: 10px 15px;
+      width: 269px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 0px;
+    }
+
+    .checkbox-base input[type="checkbox"] {
+      width: 30px !important;
+      height: 30px !important;
+      position: relative !important;
+      left: -16px !important;
+      top: 0px !important;
+      cursor: pointer;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      border: var(--border-default);
+      background-color: var(--color-white);
+    }
+
+    .checkbox-base input[type="checkbox"]:checked {
+      background-color: var(--color-white);
+    }
+
+    .checkbox-base input[type="checkbox"]:checked::after {
+      content: "✗";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--color-black);
+    }
+
+    .checkbox-base input[type="checkbox"]:hover {
+      border-color: #007bff;
+    }
+
+    .checkbox-base label {
+      font-size: 15px !important;
+      font-weight: bold !important;
+      position: relative;
+      flex: 1;
+      text-align: center;
+      top: 0px;
+      cursor: pointer;
+      user-select: none;
+      color: var(--color-white) !important;
+    }
+
+    /* ===== Header Fixo, Todas as Configs ===== */
+    .header {
+      background: linear-gradient(45deg, #d32f2f, #b71c1c);
+      color: white;
+      padding: 20px 15px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      border-bottom: 2px solid #c62828;
+      transition: all 0.3s ease;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .header div {
+      margin-top: 5px;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .header-logo {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 80px;
+      width: auto;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      z-index: 1001;
+    }
+
+    .header-logo:hover {
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    /* ===== Footer Fixo, Todas as Configs ===== */
+    .footer {
+      background: linear-gradient(45deg, #d32f2f, #b71c1c);
+      color: white;
+      padding: 8px 15px;
+      text-align: center;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+      border-top: 2px solid #c62828;
+      transition: all 0.3s ease;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .footer-content {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .powered-by {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 3px;
+      color: #ffffff;
+    }
+
+    .footer-year {
+      font-size: 10px;
+      opacity: 0.8;
+      color: #ffcdd2;
+    }
+
+    .footer strong {
+      color: #ffebee;
+    }
+
+    .footer:hover {
+      background: linear-gradient(45deg, #c62828, #a00000);
+      transition: all 0.3s ease;
+    }
+
+    /* ===== Wrappers Principais ===== */
+    .main-wrapper {
+      max-width: 750px;
+      width: 100%;
+      margin: 0 auto;
+      position: absolute;
+    }
+
+    .header-wrapper {
+      position: relative;
+      margin-top: 150px;
+    }
+
+    .controls-wrapper {
+      position: relative;
+      margin-top: 4px;
+    }
+
+    .iam-wrapper {
+      position: relative;
+      margin-top: 4px;
+      min-height: 110px;
+    }
+
+    .isee-wrapper {
+      position: relative;
+      margin-top: 4px;
+      min-height: 540px;
+    }
+
+    .ido-wrapper,
+    .irequest-wrapper {
+      position: relative;
+      margin-top: 4px;
+      min-height: 64px;
+    }
+
+    .assumptions-wrapper,
+    .recognition-wrapper {
+      position: relative;
+      margin-top: 4px;
+      min-height: 30px;
+    }
+
+    .recognition-wrapper {
+      margin-bottom: 10px;
+    }
+
+    .sitacseparator-wrapper {
+      position: relative;
+      margin-top: 4px;
+      min-height: 30px;
+    }
+
+    .sitac-wrapper {
+      position: relative;
+      display: flex;
+      margin-top: 4px;
+      min-height: 30px;
+      gap: 10px;
+      align-items: ;
+    }
+
+    .posit-wrapper {
+      position: relative;
+      margin-top: 4px;
+      min-height: 200px;
+    }
+
+    .vehiclesnoto-wrapper {
+      position: relative;
+      margin-top: 4px;
+      min-height: 350px;
+    }
+
+    .passagecos-wrapper {
+      position: relative;
+      margin-top: 4px;
+      min-height: 50px;
+    }
+
+    .menagebuttons-wrapper {
+      position: relative;
+      margin-top: 4px;
+      min-height: 150px;
+    }
+
+    /* ===== Headers Guia Comando ===== */
+    .header-container {
+      align-content: center;
+      margin-top: 150px;
+      background-color: #28a745;
+      padding: 20px 60px;
+      border-radius: 0;
+      text-align: center;
+      box-shadow: var(--shadow-default);
+      height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .header-sgo-logo {
+      position: absolute;
+      margin-top: -10px;
+      left: 10px;
+      top: 45%;
+      transform: translateY(-50%);
+      height: 80px;
+      width: auto;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      z-index: 1001;
+    }
+
+    .header-sgo-logo:hover {
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .header-container-blue {
+      margin-top: 4px;
+      background-color: #2c5aa0;
+      padding: 15px 60px;
+      border-radius: 0;
+      text-align: center;
+      box-shadow: 0 0px 6px rgba(0, 0, 0, 0.1);
+      height: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .header-container .title {
+      color: var(--color-white) !important;
+      margin-bottom: 5px !important;
+      font-size: 22px !important;
+      font-weight: bold !important;
+    }
+
+    .header-container .title:nth-child(3) {
+      font-size: 15px !important;
+      margin-bottom: 5px !important;
+      font-weight: normal !important;
+    }
+
+    .header-container .title:last-child {
+      font-size: 20px !important;
+      margin-bottom: 0 !important;
+    }
+
+    .title-blue {
+      color: var(--color-white);
+      font-size: 18px;
+      font-weight: normal;
+      margin: 0;
+    }
+
+    /* ===== HR POSIT E MANOBRA ===== */
+    .inputs-wrapper {
+      margin-top: 4px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .container-hr-posit {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .container-ocorr-num {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .container-channel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .label-hr-posit {
+      background-color: var(--color-orange);
+      padding: 8px 18px;
+      font-weight: bold;
+      border: var(--border-default);
+      white-space: nowrap;
+    }
+
+    .label-ocorr-num {
+      background-color: var(--color-orange);
+      margin-left: -5px;
+      padding: 8px 45px;
+      font-weight: bold;
+      border: var(--border-default);
+      white-space: nowrap;
+    }
+
+    .label-channel {
+      background-color: var(--color-orange);
+      margin-left: -5px;
+      padding: 8px 20px;
+      font-weight: bold;
+      border: var(--border-default);
+      white-space: nowrap;
+    }
+
+    .input-field {
+      padding: 8px;
+      border: var(--border-default);
+      font-size: 16px;
+      text-align: center;
+      background-color: var(--color-white);
+    }
+
+    .input-hour {
+      margin-left: -6px;
+      width: 70px;
+    }
+
+    .input-occurrence {
+      margin-left: -6px;
+      width: 180px;
+    }
+
+    .input-channel {
+      margin-left: -6px;
+      width: 60px;
+    }
+
+    /* ===== SECÇÃO ESTOU ===== */
+    .iam-container {
+      position: absolute;
+      margin-top: 0px;
+      background-color: var(--color-orange);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 15px;
+      width: 50px;
+    }
+
+    .iam-text {
+      font-weight: bold;
+      font-size: 16px;
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+    }
+
+    .inputs-wrapper-iam {
+      margin-top: 4px;
+      display: flex;
+      gap: 5px;
+    }
+
+    .iamin-container {
+      position: absolute;
+      top: 0px;
+      left: 54px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      width: 696px;
+    }
+
+    .label-iamin {
+      background-color: var(--color-orange);
+      padding: 8px 40px;
+      font-weight: bold;
+      border: var(--border-default);
+      white-space: nowrap;
+    }
+
+    .input-iamin {
+      margin-left: -6px;
+      flex: 1;
+    }
+
+    /* ===== SEÇÃO COORDENADAS ===== */
+    .coordinates-container {
+      position: absolute;
+      top: 40px;
+      left: 54px;
+      background-color: var(--color-orange);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 80px;
+    }
+
+    .coordinates-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      margin: 2px 0;
+    }
+
+    .coordinates-input-container {
+      position: absolute;
+      top: 40px;
+      left: 133px;
+      background-color: var(--color-white);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 70px;
+      display: flex;
+      flex-direction: column;
+      width: 250px;
+      padding: 5px;
+      z-index: 10;
+    }
+
+    .coordinate-line {
+      display: flex;
+      align-items: center;
+      height: 50%;
+      gap: 5px;
+    }
+
+    .coordinate-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      text-align: center;
+      background-color: transparent;
+      pointer-events: auto;
+      cursor: text;
+    }
+
+    .coordinate-input:focus {
+      background-color: #f0f0f0;
+    }
+
+    .coordinate-letter {
+      font-weight: bold;
+      font-size: 14px;
+      color: #333;
+    }
+
+    /* ===== SECÇÃO LOCAL ===== */
+    .local-container {
+      position: absolute;
+      top: 40px;
+      left: 388px;
+      background-color: var(--color-orange);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 80px;
+    }
+
+    .local-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      margin: 2px 0;
+    }
+
+    .local-input-container {
+      position: absolute;
+      top: 40px;
+      left: 467px;
+      background-color: var(--color-white);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 70px;
+      display: flex;
+      flex-direction: column;
+      width: 283px;
+      padding: 5px;
+      z-index: 10;
+    }
+
+    .local-line {
+      display: flex;
+      align-items: center;
+      height: 50%;
+      gap: 5px;
+    }
+
+    .local-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      text-align: center;
+      background-color: transparent;
+      pointer-events: auto;
+      cursor: text;
+    }
+
+    .local-input:focus {
+      background-color: #f0f0f0;
+    }
+
+    /* ===== SECÇÃO VEJO ===== */
+    .isee-container {
+      position: absolute;
+      margin-top: 0px;
+      background-color: var(--color-red);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 540px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 15px;
+      width: 50px;
+    }
+
+    .isee-text {
+      color: var(--color-white);
+      font-weight: bold;
+      font-size: 16px;
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      letter-spacing: 2px;
+      transform: rotate(180deg);
+    }
+
+    /* ===== SUB-SECÇÃO INCÊNDIO ===== */
+    .fire-container {
+      position: absolute;
+      margin-top: 0px;
+      margin-left: 54px;
+      background-color: var(--color-red);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 150px;
+    }
+
+    .fire-text {
+      color: var(--color-white);
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .checkbox-fire-1 {
+      margin-top: 0px;
+      margin-left: 208px;
+      background-color: var(--color-red);
+    }
+
+    .checkbox-fire-2 {
+      margin-top: 0px;
+      margin-left: 481px;
+      background-color: var(--color-primary);
+    }
+
+    .checkbox-fire-3 {
+      margin-top: 34px;
+      margin-left: 208px;
+      background-color: var(--color-blue);
+    }
+
+    .checkbox-fire-4 {
+      margin-top: 34px;
+      margin-left: 481px;
+      background-color: var(--color-gray-light);
+    }
+
+    .checkbox-fire-4 label {
+      color: var(--color-black) !important;
+    }
+
+    /* ===== SUB-SECÇÃO INCÊNDIO INTENSIDADE ===== */
+    .intensity-container {
+      position: absolute;
+      margin-top: 68px;
+      left: 54px;
+      background-color: #dbdbdb;
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 30px;
+      width: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+    }
+
+    .intensity-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .checkbox-intensity-1 {
+      margin-top: 68px;
+      margin-left: 208px;
+      background-color: #dbdbdb;
+    }
+
+    .checkbox-intensity-1 label {
+      color: var(--color-black) !important;
+    }
+
+    .checkbox-intensity-2 {
+      margin-top: 68px;
+      margin-left: 481px;
+      background-color: #dbdbdb;
+    }
+
+    .checkbox-intensity-2 label {
+      color: var(--color-black) !important;
+    }
+
+    /* ===== SUB-SECÇÃO INCÊNDIO TIPO VEGETAÇÃO ===== */
+    .vegetationtype-container {
+      position: absolute;
+      margin-top: 102px;
+      margin-left: 54px;
+      background-color: var(--color-gray-medium);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 150px;
+    }
+
+    .vegetationtype-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .checkbox-vegetationtype-1,
+    .checkbox-vegetationtype-2 {
+      position: absolute;
+      background-color: var(--color-gray-medium);
+      border: var(--border-default);
+      padding: 10px 15px;
+      width: 132px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 0px;
+    }
+
+    .checkbox-vegetationtype-1 {
+      margin-top: 102px;
+      margin-left: 208px;
+      background-color: var(--color-gray-medium);
+    }
+
+    .checkbox-vegetationtype-1 label {
+      color: var(--color-black) !important;
+    }
+
+    .checkbox-vegetationtype-2 {
+      margin-top: 102px;
+      margin-left: 345px;
+      background-color: var(--color-gray-medium);
+    }
+
+    .checkbox-vegetationtype-2 label {
+      color: var(--color-black) !important;
+    }
+
+    .checkbox-vegetationtype-3 {
+      margin-top: 102px;
+      margin-left: 481px;
+      background-color: var(--color-gray-medium);
+    }
+
+    .checkbox-vegetationtype-3 label {
+      color: var(--color-black) !important;
+    }
+
+    .checkbox-vegetationtype-4 {
+      margin-top: 136px;
+      margin-left: 208px;
+      background-color: var(--color-gray-medium);
+    }
+
+    .checkbox-vegetationtype-4 label {
+      color: var(--color-black) !important;
+    }
+
+    .checkbox-vegetationtype-5 {
+      margin-top: 136px;
+      margin-left: 481px;
+      background-color: var(--color-gray-medium);
+    }
+
+    .checkbox-vegetationtype-5 label {
+      color: var(--color-black) !important;
+    }
+
+    /* ===== SUB-SECÇÃO INCÊNDIO PROPAGAÇÃO ===== */
+    .propagation-container {
+      position: absolute;
+      margin-top: 170px;
+      left: 54px;
+      background-color: var(--color-red);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 150px;
+    }
+
+    .propagation-text {
+      color: var(--color-white);
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .checkbox-propagation-1 {
+      margin-top: 170px;
+      margin-left: 208px;
+      background-color: var(--color-red);
+    }
+
+    .checkbox-propagation-2 {
+      margin-top: 170px;
+      margin-left: 481px;
+      background-color: var(--color-red);
+    }
+
+    /* ===== SUB-SECÇÃO INCÊNDIO DECLIVE ===== */
+    .slope-container {
+      position: absolute;
+      margin-top: 204px;
+      left: 54px;
+      background-color: #8a8a8a;
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 150px;
+      color: var(--color-white);
+    }
+
+    .slope-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .checkbox-slope-1 {
+      margin-top: 204px;
+      margin-left: 208px;
+      background-color: var(--color-gray-dark);
+    }
+
+    .checkbox-slope-2 {
+      margin-top: 204px;
+      margin-left: 481px;
+      background-color: var(--color-gray-dark);
+    }
+
+    .checkbox-slope-3 {
+      margin-top: 238px;
+      margin-left: 208px;
+      background-color: var(--color-gray-dark);
+    }
+
+    .checkbox-slope-4 {
+      margin-top: 238px;
+      margin-left: 481px;
+      background-color: var(--color-gray-dark);
+    }
+
+    /* =====  SUB-SECÇÃO INCÊNDIO EVOLUÇÃO ===== */
+    .evolveto-container {
+      position: absolute;
+      margin-top: 272px;
+      margin-left: 54px;
+      background-color: var(--color-red);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 220px;
+    }
+
+    .evolveto-text {
+      color: var(--color-white);
+      font-weight: bold;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .evolveto-input-container {
+      position: absolute;
+      margin-top: 272px;
+      margin-left: 278px;
+      background-color: var(--color-white);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 30px;
+      display: flex;
+      align-items: center;
+      width: 472px;
+      padding: 5px;
+      z-index: 10;
+    }
+
+    .evolveto-line {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      gap: 10px;
+    }
+
+    .evolveto-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      text-align: center;
+      background-color: transparent;
+      pointer-events: auto;
+      cursor: text;
+    }
+
+    .evolveto-input:focus {
+      background-color: #f0f0f0;
+    }
+
+    .evolveto-separator {
+      font-weight: bold;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .evolveto-label {
+      font-weight: bold;
+      font-size: 14px;
+      color: #333;
+    }
+
+    /* =====  SUB-SECÇÃO INCÊNDIO ACESSOS ===== */
+    .accesses-container {
+      position: absolute;
+      margin-top: 306px;
+      left: 54px;
+      background-color: #03b8e0;
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 98px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 150px;
+      color: var(--color-white);
+    }
+
+    .accesses-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .checkbox-accesses-1 {
+      margin-top: 306px;
+      margin-left: 208px;
+      background-color: var(--color-cyan);
+    }
+
+    .checkbox-accesses-2 {
+      margin-top: 306px;
+      margin-left: 481px;
+      background-color: var(--color-cyan);
+    }
+
+    .checkbox-accesses-3 {
+      margin-top: 340px;
+      margin-left: 208px;
+      background-color: var(--color-cyan);
+    }
+
+    .checkbox-accesses-4 {
+      margin-top: 340px;
+      margin-left: 481px;
+      background-color: var(--color-cyan);
+    }
+
+    .checkbox-accesses-5 {
+      margin-top: 374px;
+      margin-left: 208px;
+      background-color: var(--color-cyan);
+    }
+
+    .checkbox-accesses-6 {
+      margin-top: 374px;
+      margin-left: 481px;
+      background-color: var(--color-cyan);
+    }
+
+    /* =====  SUB-SECÇÃO INCÊNDIO PONTOS SENSÍVEIS ===== */
+    .sensitivepoints-container {
+      position: absolute;
+      margin-top: 408px;
+      left: 54px;
+      background-color: #64c854;
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 150px;
+      color: var(--color-white);
+    }
+
+    .sensitivepoints-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.2;
+      color: #000;
+    }
+
+    .checkbox-sensitivepoints-1 {
+      margin-top: 408px;
+      margin-left: 208px;
+      background-color: var(--color-green);
+    }
+
+    .checkbox-sensitivepoints-2 {
+      margin-top: 408px;
+      margin-left: 481px;
+      background-color: var(--color-green);
+    }
+
+    .checkbox-sensitivepoints-3 {
+      margin-top: 442px;
+      margin-left: 208px;
+      background-color: var(--color-green);
+    }
+
+    .checkbox-sensitivepoints-4 {
+      margin-top: 442px;
+      margin-left: 481px;
+      background-color: var(--color-green);
+    }
+
+    .checkbox-sensitivepoints-1 label,
+    .checkbox-sensitivepoints-2 label,
+    .checkbox-sensitivepoints-3 label,
+    .checkbox-sensitivepoints-4 label {
+      color: var(--color-black) !important;
+    }
+
+    .sensitivepoints-4-text-input,
+    .sensitivepoints-text-input {
+      flex: 1;
+      height: 30px;
+      width: 150px;
+      border: var(--border-default);
+      background-color: white;
+      margin-left: 0px;
+      font-size: 16px;
+      color: #000;
+      text-align: center;
+      transform: translateX(16px);
+    }
+
+    /* =====  SUB-SECÇÃO INCÊNDIO CONDIÇÕES METEOROLÓGICAS ===== */
+    .meteo-container {
+      position: absolute;
+      margin-top: 476px;
+      left: 54px;
+      background-color: var(--color-light-blue);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 292px;
+      color: var(--color-white);
+    }
+
+    .meteo-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.2;
+      color: var(--color-black);
+    }
+
+    .meteo-wind-container {
+      position: absolute;
+      top: 476px;
+      left: 350px;
+    }
+
+    .meteo-temperature-container {
+      position: absolute;
+      top: 510px;
+      left: 350px;
+    }
+
+    .meteo-wind-textbox,
+    .meteo-temperature-textbox {
+      display: flex;
+      align-items: center;
+      background-color: var(--color-light-blue);
+      border: var(--border-default);
+      padding: 5px 10px;
+      height: 30px;
+      width: 400px;
+      gap: 10px;
+    }
+
+    .meteo-wind-text-input,
+    .meteo-temperature-text-input {
+      height: 30px;
+      width: 105px;
+      border: var(--border-default);
+      background-color: var(--color-light-blue);
+      margin-left: -11px;
+      font-size: 14px;
+      color: black !important;
+      text-align: left;
+      cursor: default;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .meteo-wind-text-input:read-only,
+    .meteo-temperature-text-input:read-only {
+      color: black !important;
+      background-color: var(--color-light-blue);
+    }
+
+    .meteo-wind-text-input:focus,
+    .meteo-temperature-text-input:focus {
+      outline: none;
+      color: black !important;
+    }
+
+    .meteo-wind-text-input::placeholder,
+    .meteo-temperature-text-input::placeholder {
+      color: black !important;
+      opacity: 1;
+    }
+
+    .meteo-fixed-text {
+      font-weight: bold;
+      color: #000;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .meteo-editable-input {
+      border: none;
+      outline: none;
+      background: transparent;
+      text-align: center;
+      font-weight: bold;
+      width: 96px;
+      flex-shrink: 0;
+      color: black;
+    }
+
+    .meteo-editable-input:focus {
+      background-color: #f0f0f0;
+      color: black;
+    }
+
+    .meteo-editable-input::placeholder {
+      color: #666;
+    }
+
+    /* =====  SECÇÃO FAÇO ===== */
+    .ido-container {
+      position: absolute;
+      margin-top: 0px;
+      left: 0px;
+      background-color: var(--color-dark-blue);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 15px;
+      width: 50px;
+    }
+
+    .ido-text {
+      color: var(--color-white);
+      font-weight: bold;
+      font-size: 16px;
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      letter-spacing: 2px;
+      transform: rotate(180deg);
+    }
+
+    /* =====  SUB-SECÇÃO FAÇO AGORA ===== */
+    .idonow-container {
+      position: absolute;
+      margin-top: 0px;
+      left: 54px;
+      background-color: var(--color-dark-blue);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 150px;
+      color: var(--color-white);
+    }
+
+    .idonow-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .checkbox-idonow-1 {
+      width: 195px;
+      margin-top: 0px;
+      margin-left: 208px;
+      background-color: var(--color-dark-blue);
+    }
+
+    .checkbox-idonow-2 {
+      width: 343px;
+      margin-top: 0px;
+      margin-left: 407px;
+      background-color: var(--color-dark-blue);
+    }
+
+    .checkbox-idonow-3 {
+      width: 195px;
+      margin-top: 34px;
+      margin-left: 208px;
+      background-color: var(--color-dark-blue);
+    }
+
+    .checkbox-idonow-4 {
+      width: 343px;
+      margin-top: 34px;
+      margin-left: 407px;
+      background-color: var(--color-dark-blue);
+    }
+
+    .idonow-text-input {
+      flex: 1;
+      height: 30px;
+      width: 157px;
+      border: var(--border-default);
+      background-color: white;
+      margin-left: 2px;
+      font-size: 14px;
+      color: #000;
+      text-align: center;
+      transform: translateX(16px);
+    }
+
+    /* =====  SECÇÃO SOLICITO ===== */
+    .irequest-container {
+      position: absolute;
+      margin-top: 0px;
+      left: 0px;
+      background-color: #e0d099;
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 15px;
+      width: 50px;
+    }
+
+    .irequest-text {
+      color: #000;
+      font-weight: bold;
+      font-size: 16px;
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      letter-spacing: 2px;
+      transform: rotate(180deg);
+    }
+
+    /* =====  SUB-SECÇÃO SOLICITO AGORA ===== */
+    .irequestnow-container {
+      position: absolute;
+      margin-top: 0px;
+      left: 54px;
+      background-color: #e0d099;
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 150px;
+      color: #000;
+    }
+
+    .irequestnow-text {
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.2;
+      color: #000;
+    }
+
+    .checkbox-irequest-1 {
+      margin-top: 0px;
+      margin-left: 208px;
+      background-color: #e0d099;
+    }
+
+    .checkbox-irequest-2 {
+      margin-top: 0px;
+      margin-left: 481px;
+      background-color: #e0d099;
+    }
+
+    .checkbox-irequest-3 {
+      margin-top: 34px;
+      margin-left: 208px;
+      background-color: #e0d099;
+    }
+
+    .checkbox-irequest-4 {
+      margin-top: 34px;
+      margin-left: 481px;
+      background-color: #e0d099;
+    }
+
+    .checkbox-irequest-1 label,
+    .checkbox-irequest-2 label,
+    .checkbox-irequest-3 label,
+    .checkbox-irequest-4 label {
+      color: var(--color-black) !important;
+    }
+
+    .brigadeqtd-text-input,
+    .airenvironmentqtd-text-input,
+    .groupqtd-text-input {
+      flex: none;
+      height: 30px;
+      width: 40px;
+      border: var(--border-default);
+      background-color: #e0d099;
+      margin-left: -27px;
+      font-size: 14px;
+      color: #000;
+      text-align: center;
+      transform: translateX(10px);
+    }
+
+    /* =====  SECÇÃO ASSUMO COS ===== */
+    .assumptions-container {
+      position: absolute;
+      margin-top: 0px;
+      margin-left: 0px;
+      background-color: yellow;
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 205px;
+    }
+
+    .assumptions-text {
+      font-weight: bold;
+      font-size: 15px;
+      color: #000;
+      text-align: center;
+    }
+
+    .assumptions-input-container {
+      position: absolute;
+      margin-top: 0px;
+      margin-left: 209px;
+      background-color: var(--color-white);
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 30px;
+      display: flex;
+      align-items: center;
+      width: 541px;
+      padding: 5px;
+      z-index: 10;
+    }
+
+    .assumptions-line {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      gap: 10px;
+    }
+
+    .assumptions-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      text-align: center;
+      background-color: transparent;
+      pointer-events: auto;
+      cursor: text;
+    }
+
+    .assumptions-input:focus {
+      background-color: #f0f0f0;
+    }
+
+    .assumptions-separator {
+      font-weight: bold;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .assumptions-label {
+      font-weight: bold;
+      font-size: 14px;
+      color: #333;
+    }
+
+    /* =====  SECÇÃO PROSSIGO RECONHECIMENTO ===== */
+    .recognition-container {
+      position: absolute;
+      margin-top: 0px;
+      margin-left: 0px;
+      background-color: yellow;
+      border: var(--border-default);
+      box-shadow: var(--shadow-default);
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 750px;
+    }
+
+    .recognition-text {
+      font-weight: bold;
+      font-size: 15px;
+      color: #000;
+      text-align: center;
+    }
+
+    /* =====  SECÇÃO SITAC ===== */
+    .sitacseparator-container {
+      position: absolute;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      width: 752px;
+    }
+
+    .sitacseparator-text {
+      font-weight: bold;
+      font-size: 15px;
+      color: #000;
+      text-align: center;
+    }
+
+    /* ===== CAIXAS SITAC BASE ===== */
+    .sitac-box,
+    .sitac-drawbox {
+      width: 300px;
+      border: 1px solid #aaa;
+      background-color: #f4f4f4;
+      font-family: sans-serif;
+    }
+
+    .sitac-box-title,
+    .sitac-drawtitle {
+      padding: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      color: white;
+    }
+
+    .sitac-box-title {
+      background-color: #003366;
+    }
+
+    .sitac-drawtitle {
+      background-color: #003366;
+    }
+
+    .sitac-inputs,
+    .sitac-draws {
+      padding: 10px;
+    }
+
+    .sitac-input {
+      display: block;
+      width: 100%;
+      margin-bottom: 5px;
+      padding: 5px;
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+
+    .sitac-input:last-child {
+      margin-bottom: 0;
+    }
+
+    .sitac-input[type="textarea"],
+    textarea.sitac-input {
+      resize: vertical;
+      min-height: 335px;
+      font-family: sans-serif;
+    }
+
+    /* ===== MAPA SITAC ===== */
+    .sitac-draws {
+      min-height: 350px;
+      background-color: black;
+      position: relative;
+      padding: 0;
+      border: 1px solid #ccc;
+    }
+
+    #sitac-map {
+      width: 100%;
+      height: 353px;
+      background-color: #f0f0f0;
+    }
+
+    /* ===== OVERLAY DOS VEÍCULOS ==== */
+    .map-fireareas-vehicles-overlay {
+      position: absolute;
+      top: 80px;
+      left: 10px;
+      bottom: 10px;
+      width: 90px;
+      z-index: 1000;
+      background: transparent;
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      padding: 12px 6px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vehicles-overlay-title,
+    .markers-overlay-title {
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .vehicles-buttons-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 100%;
+    }
+
+    /* ===== CONTROLOS DO MAPA (EM BAIXO) ===== */
+    .map-controls {
+      position: absolute;
+      bottom: -50px;
+      left: 1.3%;
+      height: auto;
+      border-radius: 8px;
+      padding: 10px 6px;
+      background: transparent;
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 1001;
+    }
+
+    /* ===== BOTÕES BASE ===== */
+    .map-fireareas-vehicle-btn,
+    .map-fireareas-markers-btn,
+    .map-btn {
+      height: 25px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      font-size: 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-weight: bold;
+      padding: 10px 10px;
+    }
+
+    .map-fireareas-vehicle-btn,
+    .map-fireareas-markers-btn {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .map-btn {
+      min-width: 70px;
+    }
+
+    /* ===== HOVER BASE (IGUAL PARA TODOS) ===== */
+    .map-fireareas-vehicle-btn:hover,
+    .map-fireareas-markers-btn:hover,
+    .map-btn:hover {
+      background: rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .map-fireareas-vehicle-btn:active,
+    .map-fireareas-makers-btn:active,
+    .map-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* ===== CORES ESPECÍFICAS VEÍCULOS ===== */
+    .team-btn:hover,
+    .brigade-btn:hover,
+    .group-btn:hover,
+    .company-btn:hover,
+    .aircrafter-btn:hover {
+      border-color: #bd3737;
+      background: rgba(189, 55, 55, 0.5);
+      box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+    }
+
+    .aircrafterwater-btn:hover,
+    .aircraftdrop-btn:hover,
+    .onshoresupply-btn:hover {
+      border-color: #312abd;
+      background: rgba(49, 42, 189, 0.5);
+      box-shadow: 0 2px 8px rgba(49, 42, 189, 0.4);
+    }
+
+    /* ===== CORES ESPECÍFICAS DESENHOS ===== */
+    .perimetre-btn {
+      background: rgba(220, 53, 69, 0.8) !important;
+      border-color: #dc3545 !important;
+      min-width: 90px !important;
+      font-size: 10px !important;
+    }
+
+    .perimetre-btn:hover {
+      background: rgba(200, 35, 51, 0.9) !important;
+      border-color: #c82333 !important;
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4) !important;
+    }
+
+    .setor-a {
+      background: rgba(0, 102, 204, 0.8) !important;
+      border-color: #0066cc !important;
+    }
+
+    .setor-a:hover {
+      background: rgba(0, 82, 163, 0.9) !important;
+      border-color: #0052a3 !important;
+      box-shadow: 0 2px 8px rgba(0, 102, 204, 0.4) !important;
+    }
+
+    .setor-b {
+      background: rgba(0, 204, 102, 0.8) !important;
+      border-color: #00cc66 !important;
+    }
+
+    .setor-b:hover {
+      background: rgba(0, 163, 82, 0.9) !important;
+      border-color: #00a352 !important;
+      box-shadow: 0 2px 8px rgba(0, 204, 102, 0.4) !important;
+    }
+
+    .setor-c {
+      background: rgba(255, 204, 0, 0.8) !important;
+      border-color: #ffcc00 !important;
+      color: #333 !important;
+    }
+
+    .setor-c:hover {
+      background: rgba(230, 184, 0, 0.9) !important;
+      border-color: #e6b800 !important;
+      box-shadow: 0 2px 8px rgba(255, 204, 0, 0.4) !important;
+    }
+
+    .setor-d {
+      background: rgba(255, 102, 0, 0.8) !important;
+      border-color: #ff6600 !important;
+    }
+
+    .setor-d:hover {
+      background: rgba(229, 90, 0, 0.9) !important;
+      border-color: #e55a00 !important;
+      box-shadow: 0 2px 8px rgba(255, 102, 0, 0.4) !important;
+    }
+
+    .setor-e {
+      background: rgba(204, 0, 204, 0.8) !important;
+      border-color: #cc00cc !important;
+    }
+
+    .setor-e:hover {
+      background: rgba(163, 0, 163, 0.9) !important;
+      border-color: #a300a3 !important;
+      box-shadow: 0 2px 8px rgba(204, 0, 204, 0.4) !important;
+    }
+
+    .setor-f {
+      background: rgba(153, 102, 51, 0.8) !important;
+      border-color: #996633 !important;
+    }
+
+    .setor-f:hover {
+      background: rgba(128, 85, 41, 0.9) !important;
+      border-color: #805529 !important;
+      box-shadow: 0 2px 8px rgba(153, 102, 51, 0.4) !important;
+    }
+
+    .tool-btn {
+      background: rgba(108, 117, 125, 0.8) !important;
+      border-color: #6c757d !important;
+    }
+
+    .tool-btn:hover {
+      background: rgba(90, 98, 104, 0.9) !important;
+      border-color: #5a6268 !important;
+      box-shadow: 0 2px 8px rgba(108, 117, 125, 0.4) !important;
+    }
+
+    .delete-btn {
+      background: rgba(220, 53, 69, 0.8) !important;
+      border-color: #dc3545 !important;
+    }
+
+    .delete-btn:hover {
+      background: rgba(200, 35, 51, 0.9) !important;
+      border-color: #c82333 !important;
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4) !important;
+    }
+
+    /* ===== POPUPS LEAFLET ===== */
+    .leaflet-popup-content {
+      font-size: 14px;
+      line-height: 1.4;
+      margin: 12px;
+      min-width: 200px;
+    }
+
+    .popup-input {
+      width: 200px;
+      padding: 6px 10px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      margin: 2px 0 8px 0;
+      box-sizing: border-box;
+    }
+
+    .popup-input:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .popup-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      border: 1px solid #28a745;
+      background-color: #28a745;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 4px 4px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .popup-btn:hover {
+      background-color: #218838;
+      transform: translateY(-1px);
+    }
+
+    .leaflet-popup-content strong {
+      display: block;
+      margin-bottom: 1px;
+      font-size: 15px;
+    }
+
+    .leaflet-popup-content small {
+      display: block;
+      margin: 0;
+      color: #666;
+      line-height: 1.8;
+    }
+
+    .leaflet-popup-content div {
+      text-align: center;
+    }
+
+    .popup-btn:first-of-type {
+      margin-right: 4px;
+    }
+
+    .popup-btn:last-of-type {
+      margin-left: 4px;
+    }
+
+    /* ===== SITAC DRAWBOX ESPECÍFICO ===== */
+    .sitac-drawbox {
+      width: 450px;
+      border: 1px solid #aaa;
+      background-color: #d62b2b;
+      font-family: sans-serif;
+      position: relative;
+    }
+
+    /* ===== TOGGLE SITAC ===== */
+    .sitac-drawtitle {
+      transition: all 0.3s ease;
+      user-select: none;
+      position: relative;
+    }
+
+    .sitac-drawtitle:hover {
+      background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .sitac-drawtitle:active {
+      transform: scale(0.98);
+    }
+
+    /* ===== ESTADO EXPANDIDO ===== */
+    .sitac-drawbox.expanded {
+      position: fixed !important;
+      top: 150px !important;
+      left: 0 !important;
+      width: 750px !important;
+      height: 1027px !important;
+      z-index: 9999 !important;
+      background: white !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .sitac-drawbox.expanded .sitac-drawtitle {
+      padding: 20px;
+      font-size: 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-align: center;
+    }
+
+    .sitac-drawbox.expanded #sitac-map {
+      width: 100% !important;
+      height: calc(1027px - 120px) !important;
+    }
+
+    /* ===== INDICADOR VISUAL ===== */
+    #sitac-size-indicator {
+      transition: transform 0.3s ease;
+    }
+
+    .sitac-drawbox.expanded #sitac-size-indicator {
+      transform: rotate(180deg);
+    }
+
+    /* ===== TRANSIÇÕES ===== */
+    .sitac-drawbox {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #sitac-map {
+      transition: all 0.3s ease;
+    }
+
+    /* ===== COMPORTAMENTO IDÊNTICO: OCULTOS NO NORMAL, VISÍVEIS NO EXPANDIDO ===== */
+    .sitac-drawbox:not(.expanded) .map-fireareas-vehicles-overlay,
+    .sitac-drawbox:not(.expanded) .map-controls {
+      display: none !important;
+    }
+
+    .sitac-drawbox.expanded .map-fireareas-vehicles-overlay,
+    .sitac-drawbox.expanded .map-controls {
+      display: flex !important;
+    }
+
+    /* =====  SECÇÃO POSITs ===== */
+    .posit-box {
+      width: 750px;
+      border: 1px solid #aaa;
+      background-color: #f4f4f4;
+      font-family: sans-serif;
+    }
+
+    .posit-box-title {
+      background-color: #003366;
+      padding: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      color: white;
+    }
+
+    .posit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: sans-serif;
+      table-layout: fixed;
+    }
+
+    .posit-table td {
+      padding: 3px;
+      vertical-align: middle;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .posit-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .posit-label {
+      font-weight: bold;
+      font-size: 13px;
+      color: #003366;
+      width: 80px;
+      text-align: left;
+    }
+
+    .posit-hora-cell {
+      width: 90px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding-right: 5px;
+    }
+
+    .posit-hora-label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .posit-hora-input {
+      width: 90px;
+      padding: 3px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+
+    .posit-desc-cell {
+      width: 550px;
+      padding-left: 5px;
+    }
+
+    .posit-desc-input {
+      width: 100%;
+      padding: 3px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+
+    /* =====  SECÇÃO MEIOS ===== */
+    .vehiclesnoto-box {
+      width: 750px;
+      border: 1px solid #aaa;
+      background-color: #f4f4f4;
+      font-family: sans-serif;
+    }
+
+    .vehiclesnoto-box-title {
+      background-color: #003366;
+      padding: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      color: white;
+    }
+
+    .vehiclesnoto-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: sans-serif;
+      table-layout: fixed;
+    }
+
+    .vehiclesnoto-header {
+      background-color: #e6e6e6;
+      padding: 8px 5px;
+      font-weight: bold;
+      font-size: 12px;
+      color: #003366;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+
+    .vehiclesnoto-header:nth-child(1) {
+      width: 15%;
+    }
+
+    .vehiclesnoto-header:nth-child(2) {
+      width: 25%;
+    }
+
+    .vehiclesnoto-header:nth-child(3) {
+      width: 15%;
+    }
+
+    .vehiclesnoto-header:nth-child(4) {
+      width: 45%;
+    }
+
+    .vehiclesnoto-cell {
+      padding: 3px;
+      vertical-align: middle;
+      border: 1px solid #ddd;
+    }
+
+    .vehiclesnoto-input {
+      width: 100%;
+      padding: 3px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+
+    .vehiclesnoto-time-input {
+      width: 100%;
+      padding: 3px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 12px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    /* Estilos para PASSAGEM COS */
+    .passagecos-wrapper {
+      width: 750px;
+      border: 1px solid #aaa;
+      background-color: #a3a3a3;
+      font-family: sans-serif;
+      padding: 10px;
+    }
+
+    .passagecos-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .passagecos-text {
+      font-size: 14px;
+      font-weight: bold;
+      white-space: nowrap;
+      margin-right: 5px;
+    }
+
+    .passagecos-input-container {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+
+    .passagecos-line {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      width: 100%;
+    }
+
+    .passagecos-hora-input {
+      width: 90px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .passagecos-input {
+      flex: 1;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .passagecos-hora-input:focus,
+    .passagecos-input:focus {
+      outline: none;
+      border-color: #003366;
+      box-shadow: 0 0 3px rgba(0, 51, 102, 0.3);
+    }
+
+    /* ===== CONTROLOS DO SISTEMA ===== */
+    .menagebuttons-container {
+      padding: 5px;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ===== BOTÕES BASE SISTEMA ===== */
+    .recharge-btn {
+      background: #dc3545 !important;
+      color: white !important;
+      border: 2px solid #dc3545 !important;
+      font-weight: bold !important;
+      height: 30px !important;
+      width: 90px !important;
+      font-size: 13px !important;
+    }
+
+    .recharge-btn:hover {
+      background: #c82333 !important;
+      border-color: #c82333 !important;
+      transform: translateY(-2px) !important;
+    }
+
+    .recharge-btn.active {
+      background: #bd2130 !important;
+      border-color: #bd2130 !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .save-btn {
+      background: #0066cc !important;
+      color: white !important;
+      border: 2px solid #004080 !important;
+      font-weight: bold !important;
+      height: 30px !important;
+      width: 90px !important;
+      font-size: 13px !important;
+    }
+
+    .save-btn:hover {
+      background: #0052a3 !important;
+      border-color: #004080 !important;
+      transform: translateY(-2px) !important;
+    }
+
+    .save-btn.active {
+      background: #bd2130 !important;
+      border-color: #bd2130 !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .close-btn {
+      background: #ffcc00 !important;
+      color: black !important;
+      border: 2px solid #cc9900 !important;
+      font-weight: bold !important;
+      height: 30px !important;
+      width: 90px !important;
+      font-size: 13px !important;
+    }
+
+    .close-btn:hover {
+      background: #e6b800 !important;
+      border-color: #cc9900 !important;
+      transform: translateY(-2px) !important;
+    }
+
+    .close-btn.active {
+      background: #bd2130 !important;
+      border-color: #bd2130 !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    /* ===== MEDIA QUERIES PARA RESPONSIVIDADE (VERSÃO AJUSTADA) ===== */
+    /* Para telas grandes (desktops) */
+    @media (min-width: 1201px) {
+      .main-wrapper {
+        transform: scale(1);
+        width: 750px;
+        /* Usa a largura fixa em vez de 100% */
+        left: 50%;
+        margin-top: -50px;
+        margin-left: -375px;
+        /* Metade da largura (750px/2) */
+      }
+    }
+
+    /* Para telas médias-grandes (laptops pequenos) */
+    @media (max-width: 1200px) and (min-width: 1081px) {
+      .main-wrapper {
+        transform: scale(0.9);
+        transform-origin: top center;
+        width: 111.11%;
+        margin: 0 auto;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        padding: 10px;
+      }
+    }
+
+    /* Para dispositivos como Poco F4 GT (1080px) - REDUZIDO */
+    @media (max-width: 1080px) and (min-width: 901px) {
+      .main-wrapper {
+        transform: scale(0.78);
+        transform-origin: top center;
+        width: 128.21%;
+        margin: 0 auto;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        padding: 10px;
+      }
+    }
+
+    /* Para tablets em landscape e smartphones grandes - REDUZIDO */
+    @media (max-width: 900px) and (min-width: 769px) {
+      .main-wrapper {
+        transform: scale(0.68);
+        transform-origin: top center;
+        width: 147.06%;
+        margin: 0 auto;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        padding: 8px;
+      }
+    }
+
+    /* Para tablets em portrait - REDUZIDO */
+    @media (max-width: 768px) and (min-width: 601px) {
+      .main-wrapper {
+        transform: scale(0.58);
+        transform-origin: top center;
+        width: 172.41%;
+        margin: 0 auto;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        padding: 5px;
+      }
+    }
+
+    /* Para smartphones - REDUZIDO */
+    @media (max-width: 600px) and (min-width: 481px) {
+      .main-wrapper {
+        transform: scale(0.53);
+        transform-origin: top center;
+        width: 188.68%;
+        margin: 0 auto;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        padding: 5px;
+      }
+    }
+
+    /* Para smartphones pequenos - REDUZIDO */
+    @media (max-width: 480px) and (min-width: 361px) {
+      .header {
+        padding: 8px 15px;
+      }
+
+      .header h1 {
+        font-size: 1.3em !important;
+        margin: 0 !important;
+      }
+
+      .header-logo {
+        height: 50px;
+        top: 32px;
+        left: 10px;
+      }
+
+      .footer {
+        padding: 5px 15px;
+      }
+
+      .powered-by {
+        font-size: 11px;
+      }
+
+      .footer-year {
+        font-size: 9px;
+      }
+
+      .main-wrapper {
+        transform: scale(0.48);
+        transform-origin: top center;
+        width: 208.33%;
+        margin: 0 auto;
+      }
+
+      .label-ocorr-num {
+        margin-left: -5px;
+      }
+
+      .input-occurrence {
+        width: 183px;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        padding: 3px;
+      }
+
+      /* ===== AJUSTES PARA VEÍCULOS ===== */
+      .map-fireareas-vehicles-overlay {
+        width: 60px !important;
+        padding: 8px 4px !important;
+        gap: 6px !important;
+        top: 80px !important;
+        left: 8px !important;
+      }
+
+      .map-fireareas-vehicle-btn,
+      .map-fireareas-markers-btn {
+        height: 22px !important;
+        font-size: 8px !important;
+        padding: 2px !important;
+      }
+
+      .vehicles-overlay-title,
+      .markers-overlay-title {
+        font-size: 8px !important;
+        margin-bottom: 2px !important;
+      }
+
+      /* ===== AJUSTES PARA DESENHOS ===== */
+      .map-controls {
+        padding: 6px 4px !important;
+        gap: 4px !important;
+        left: 17% !important;
+        flex-wrap: wrap !important;
+      }
+
+      .map-btn {
+        height: 22px !important;
+        font-size: 8px !important;
+        padding: 3px 6px !important;
+        min-width: 50px !important;
+      }
+
+      .perimetre-btn {
+        min-width: 65px !important;
+        font-size: 8px !important;
+      }
+
+      /* ===== AJUSTE DO MAPA ===== */
+      #sitac-map {
+        height: 355px !important;
+      }
+
+      .sitac-draws {
+        min-height: 300px !important;
+      }
+    }
+
+    /* Para smartphones muito pequenos - REDUZIDO */
+    @media (max-width: 360px) {
+      .main-wrapper {
+        transform: scale(0.43);
+        transform-origin: top center;
+        width: 232.56%;
+        margin: 0 auto;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        padding: 2px;
+      }
+    }
+
+    /* Orientação landscape para dispositivos móveis - REDUZIDO */
+    @media (max-width: 1080px) and (orientation: landscape) {
+      .main-wrapper {
+        transform: scale(0.68);
+        transform-origin: top center;
+        width: 147.06%;
+        margin: 0 auto;
+        margin-top: -25px;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        padding: 5px;
+      }
+
+      .header {
+        padding: 8px 15px !important;
+        position: fixed !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+      }
+
+      .header h1 {
+        font-size: 1.3em !important;
+        margin: 0 !important;
+      }
+
+      .header-logo {
+        height: 45px !important;
+        left: 8px !important;
+      }
+
+      .header div {
+        font-size: 11px !important;
+        margin-top: 5px !important;
+      }
+
+      /* FOOTER COMPACTO */
+      .footer {
+        padding: 3px 15px !important;
+      }
+
+      .footer .powered-by {
+        font-size: 10px !important;
+      }
+
+      .footer .footer-year {
+        font-size: 8px !important;
+      }
+    }
+
+    /* Orientação landscape para smartphones - REDUZIDO */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .main-wrapper {
+        transform: scale(0.53);
+        transform-origin: top center;
+        width: 188.68%;
+        margin: 0 auto;
+      }
+    }
+
+    /* Garante que inputs permaneçam funcionais após escala */
+    @media (max-width: 1200px) {
+
+      input[type="text"],
+      input[type="checkbox"] {
+        pointer-events: auto;
+      }
+
+      .main-wrapper * {
+        font-size: inherit;
+      }
+
+      .checkbox-base {
+        pointer-events: auto;
+      }
+
+      .checkbox-base input[type="checkbox"] {
+        cursor: pointer;
+      }
+
+      .checkbox-base label {
+        cursor: pointer;
+      }
+    }
+
+    /* Ajustes específicos para melhorar usabilidade em mobile */
+    @media (max-width: 768px) {
+
+      /* Aumenta área de toque para checkboxes */
+      .checkbox-base input[type="checkbox"] {
+        min-width: 30px !important;
+        min-height: 30px !important;
+      }
+
+      /* Melhora contraste para leitura */
+      body {
+        background-color: #f0f0f0;
+      }
+    }
+
+    /* Para dispositivos com densidade de pixels alta (Retina, etc.) */
+    @media (-webkit-min-device-pixel-ratio: 2),
+    (min-resolution: 192dpi) {
+      .main-wrapper {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <img src="https://i.imgur.com/4Ho5HRV.png" alt="CB Faro Cruz Lusa" class="header-logo">
+    <h1>Apoio à Decisão</h1>
+    <div class="header-subtitle">
+      Guias de Comando
+    </div>
+  </div>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <div class="main-wrapper">
+    <!-- WRAPPER CABEÇALHOS -->
+    <div class="header-wrapper">
+      <div class="header-container">
+        <img src="https://imgur.com/JZndZab.png" alt="CB Faro Cruz Lusa" class="header-sgo-logo">
+        <h1 class="title">Sistema de Gestão de Operações</h1>
+        <h2 class="title">Guia de Comando</h2>
+        <h2 class="title">Incêndios Florestais</h2>
+      </div>
+      <div class="header-container-blue">
+        <h1 class="title-blue">Ponto de Situação Inicial / Reconhecimento</h1>
+      </div>
+    </div>
+    <!-- WRAPPER HR POSIT E MANOBRA -->
+    <div class="controls-wrapper">
+      <div class="inputs-wrapper">
+        <div class="container-hr-posit">
+          <span class="label-hr-posit">Hr Posit:</span>
+          <input type="text" class="input-field input-hour" maxlength="5" placeholder="00:00" />
+        </div>
+        <div class="container-ocorr-num">
+          <span class="label-ocorr-num">Ocorr. Nº:</span>
+          <input type="text" class="input-field input-occurrence" maxlength="12" placeholder="Indique o NOC" />
+        </div>
+        <div class="container-channel">
+          <span class="label-channel">Canal Manobra:</span>
+          <input type="text" class="input-field input-channel" maxlength="2" placeholder="00" />
+        </div>
+      </div>
+    </div>
+    <!-- WRAPPER SECÇÃO ESTOU -->
+    <div class="iam-wrapper">
+      <div class="iam-container">
+        <span class="iam-text">ESTOU</span>
+      </div>
+      <div class="iamin-container">
+        <span class="label-iamin">Estou em:</span>
+        <input type="text" class="input-field input-iamin" placeholder="Indique a localização" />
+      </div>
+      <!-- Coordenadas -->
+      <div class="coordinates-container">
+        <span class="coordinates-text">Coord:</span>
+        <span class="coordinates-text">SIRESP</span>
+      </div>
+      <div class="coordinates-input-container">
+        <div class="coordinate-line">
+          <input type="text" class="coordinate-input" placeholder="Latitude" />
+          <span class="coordinate-letter">N</span>
+        </div>
+        <div class="coordinate-line">
+          <input type="text" class="coordinate-input" placeholder="Longitude" />
+          <span class="coordinate-letter">W</span>
+        </div>
+      </div>
+      <!-- Local -->
+      <div class="local-container">
+        <span class="local-text">Freguesia</span>
+        <span class="local-text">Município</span>
+      </div>
+      <div class="local-input-container">
+        <div class="local-line">
+          <input type="text" class="local-input" placeholder="Indique a freguesia" />
+        </div>
+        <div class="local-line">
+          <input type="text" class="local-input" placeholder="Indique o município" />
+        </div>
+      </div>
+    </div>
+    <!-- WRAPPER SECÇÃO VEJO (TODA A SEÇÃO) -->
+    <div class="isee-wrapper">
+      <!-- Título principal VEJO -->
+      <div class="isee-container">
+        <span class="isee-text">VEJO</span>
+      </div>
+      <!-- Incêndio -->
+      <div class="fire-container">
+        <span class="fire-text">Incêndio:</span>
+      </div>
+      <div class="checkbox-base checkbox-fire-1">
+        <input type="checkbox" id="active" />
+        <label for="active">Activo (Curso)</label>
+      </div>
+      <div class="checkbox-base checkbox-fire-2">
+        <input type="checkbox" id="aftermath" />
+        <label for="aftermath">Rescaldo (Conclusão)</label>
+      </div>
+      <div class="checkbox-base checkbox-fire-3">
+        <input type="checkbox" id="dominated" />
+        <label for="dominated">Dominado (Resolução)</label>
+      </div>
+      <div class="checkbox-base checkbox-fire-4">
+        <input type="checkbox" id="extinct" />
+        <label for="extinct">Extinto (Finalizado)</label>
+      </div>
+      <!-- Intensidade -->
+      <div class="intensity-container">
+        <span class="intensity-text">Com:</span>
+      </div>
+      <div class="checkbox-base checkbox-intensity-1">
+        <input type="checkbox" id="weak" />
+        <label for="weak">Fraca Intensidade</label>
+      </div>
+      <div class="checkbox-base checkbox-intensity-2">
+        <input type="checkbox" id="alot" />
+        <label for="alot">Muita Intensidade</label>
+      </div>
+      <!-- Tipo de Vegetação -->
+      <div class="vegetationtype-container">
+        <span class="vegetationtype-text">Em:</span>
+      </div>
+      <div class="checkbox-base checkbox-vegetationtype-1">
+        <input type="checkbox" id="pineforest" />
+        <label for="pineforest">Pinhal</label>
+      </div>
+      <div class="checkbox-base checkbox-vegetationtype-2">
+        <input type="checkbox" id="wilderness" />
+        <label for="wilderness">Mato</label>
+      </div>
+      <div class="checkbox-base checkbox-vegetationtype-3">
+        <input type="checkbox" id="agricola" />
+        <label for="agricola">Combustível Agrícola</label>
+      </div>
+      <div class="checkbox-base checkbox-vegetationtype-4">
+        <input type="checkbox" id="eucalyptus" />
+        <label for="eucalyptus">Eucaliptal</label>
+      </div>
+      <div class="checkbox-base checkbox-vegetationtype-5">
+        <input type="checkbox" id="mixedtype" />
+        <label for="mixedtype">Povoamento Misto</label>
+      </div>
+      <!-- Propagação -->
+      <div class="propagation-container">
+        <span class="propagation-text">Propagação:</span>
+      </div>
+      <div class="checkbox-base checkbox-propagation-1">
+        <input type="checkbox" id="surface" />
+        <label for="surface">Incêndio Superficie</label>
+      </div>
+      <div class="checkbox-base checkbox-propagation-2">
+        <input type="checkbox" id="cups" />
+        <label for="cups">Incêndio Copas</label>
+      </div>
+      <!-- Declive -->
+      <div class="slope-container">
+        <span class="slope-text">Em:</span>
+      </div>
+      <div class="checkbox-base checkbox-slope-1">
+        <input type="checkbox" id="soft" />
+        <label for="soft">Declive Suave</label>
+      </div>
+      <div class="checkbox-base checkbox-slope-2">
+        <input type="checkbox" id="accented" />
+        <label for="accented">Declive Acentuado</label>
+      </div>
+      <div class="checkbox-base checkbox-slope-3">
+        <input type="checkbox" id="moderate" />
+        <label for="moderate">Declive Moderado</label>
+      </div>
+      <div class="checkbox-base checkbox-slope-4">
+        <input type="checkbox" id="plan" />
+        <label for="plan">Terreno Plano</label>
+      </div>
+      <!-- Evolução -->
+      <div class="evolveto-container">
+        <span class="evolveto-text">A evoluir para:</span>
+      </div>
+      <div class="evolveto-input-container">
+        <div class="evolveto-line">
+          <input type="text" class="evolveto-input" placeholder="Indique a direção" />
+          <span class="evolveto-separator">|</span>
+          <span class="evolveto-label">Ponto Cardeal</span>
+        </div>
+      </div>
+      <!-- Acessos -->
+      <div class="accesses-container">
+        <span class="accesses-text">Acessos:</span>
+      </div>
+      <div class="checkbox-base checkbox-accesses-1">
+        <input type="checkbox" id="goodaccess" />
+        <label for="goodaccess">Bons</label>
+      </div>
+      <div class="checkbox-base checkbox-accesses-2">
+        <input type="checkbox" id="roads" />
+        <label for="roads">Estrada Asfaltada</label>
+      </div>
+      <div class="checkbox-base checkbox-accesses-3">
+        <input type="checkbox" id="difficultaccesses" />
+        <label for="difficultaccesses">Difíceis</label>
+      </div>
+      <div class="checkbox-base checkbox-accesses-4">
+        <input type="checkbox" id="stripes" />
+        <label for="stripes">Estradões</label>
+      </div>
+      <div class="checkbox-base checkbox-accesses-5">
+        <input type="checkbox" id="noaccess" />
+        <label for="noaccess">Sem Acessos</label>
+      </div>
+      <div class="checkbox-base checkbox-accesses-6">
+        <input type="checkbox" id="all-terrain" />
+        <label for="all-terrain">Todo-o-Terreno</label>
+      </div>
+      <!-- Pontos Sensíveis -->
+      <div class="sensitivepoints-container">
+        <span class="sensitivepoints-text">Pontos</span>
+        <span class="sensitivepoints-text">Sensíveis:</span>
+      </div>
+      <div class="checkbox-base checkbox-sensitivepoints-1">
+        <input type="checkbox" id="habitacoes" />
+        <label for="habitacoes">Habitações</label>
+      </div>
+      <div class="checkbox-base checkbox-sensitivepoints-2">
+        <input type="checkbox" id="industria" />
+        <label for="industria">Indústria</label>
+      </div>
+      <div class="checkbox-base checkbox-sensitivepoints-3">
+        <input type="checkbox" id="comercio" />
+        <label for="comercio">Comércio</label>
+      </div>
+      <div class="checkbox-base checkbox-sensitivepoints-4">
+        <input type="checkbox" id="sensitivepoints-4 checkbox" />
+        <label for="sensitivepoints-checkbox">Outro </label>
+        <input type="text" class="sensitivepoints-text-input" placeholder="Indique qual..." />
+      </div>
+      <!-- Condições Meteorológicas -->
+      <div class="meteo-container">
+        <span class="meteo-text">Condições</span>
+        <span class="meteo-text">Meteorológicas:</span>
+      </div>
+      <div class="meteo-wind-container">
+        <div class="meteo-wind-textbox">
+          <input type="text" class="meteo-wind-text-input" placeholder=" Vento:" readonly />
+          <input type="text" class="meteo-editable-input" placeholder="NORTE" />
+          <span class="meteo-fixed-text">a</span>
+          <input type="text" class="meteo-editable-input" placeholder="20" />
+          <span class="meteo-fixed-text">KM/H</span>
+        </div>
+      </div>
+      <div class="meteo-temperature-container">
+        <div class="meteo-temperature-textbox">
+          <input type="text" class="meteo-temperature-text-input" placeholder=" Ar:" readonly />
+          <input type="text" class="meteo-editable-input" placeholder="38" />
+          <span class="meteo-fixed-text">ºC</span>
+          <input type="text" class="meteo-editable-input" placeholder="58" />
+          <span class="meteo-fixed-text">%HR</span>
+        </div>
+      </div>
+    </div>
+    <!-- WRAPPER SECÇÃO FAÇO -->
+    <div class="ido-wrapper">
+      <div class="ido-container">
+        <span class="ido-text">FAÇO</span>
+      </div>
+      <div class="idonow-container">
+        <span class="idonow-text">Faço:</span>
+      </div>
+      <div class="checkbox-base checkbox-idonow-1">
+        <input type="checkbox" id="headattack" />
+        <label for="headattack">Ataque Cabeça</label>
+      </div>
+      <div class="checkbox-base checkbox-idonow-2">
+        <input type="checkbox" id="flankattack" />
+        <label for="flankattack">Ataque Flanco(s)</label>
+        <input type="text" class="idonow-text-input" placeholder="Indique o Flanco..." />
+      </div>
+      <div class="checkbox-base checkbox-idonow-3">
+        <input type="checkbox" id="idoresidual" />
+        <label for="idoresidual">Rescaldo</label>
+      </div>
+      <div class="checkbox-base checkbox-idonow-4">
+        <input type="checkbox" id="sensitivedefense" />
+        <label for="sensitivedefense">Defesa Ponto Sensível</label>
+      </div>
+    </div>
+    <!-- WRAPPER SECÇÃO PEÇO -->
+    <div class="irequest-wrapper">
+      <div class="irequest-container">
+        <span class="irequest-text">PEÇO</span>
+      </div>
+      <div class="irequestnow-container">
+        <span class="irequestnow-text">Solicito:</span>
+        <span class="irequestnow-text">(Quantificar)</span>
+      </div>
+      <div class="checkbox-base checkbox-irequest-1">
+        <input type="checkbox" id="brigade" />
+        <input type="text" class="brigadeqtd-text-input" placeholder="00" maxlength="2" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" />
+        <label for="brigade">Brigada(s) Combate</label>
+      </div>
+      <div class="checkbox-base checkbox-irequest-2">
+        <input type="checkbox" id="airenvironment" />
+        <input type="text" class="airenvironmentqtd-text-input" placeholder="00" maxlength="2" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" />
+        <label for="airenvironment">Meio(s) Aéreo(s)</label>
+      </div>
+      <div class="checkbox-base checkbox-irequest-3">
+        <input type="checkbox" id="group" />
+        <input type="text" class="groupqtd-text-input" placeholder="00" maxlength="2" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" />
+        <label for="group">Grupo(s) Combate</label>
+      </div>
+      <div class="checkbox-base checkbox-irequest-4">
+        <input type="checkbox" id="other" />
+        <label for="other">Outros</label>
+      </div>
+    </div>
+    <!-- WRAPPER ASSUMO COS -->
+    <div class="assumptions-wrapper">
+      <div class="assumptions-container">
+        <span class="assumptions-text">Assumo COS</span>
+      </div>
+      <div class="assumptions-input-container">
+        <div class="assumptions-line">
+          <input type="text" class="assumptions-input" placeholder="Indique a denominação do COS" />
+          <span class="assumptions-separator">|</span>
+          <span class="assumptions-label">Categoria e Nome</span>
+        </div>
+      </div>
+    </div>
+    <!-- WRAPPER PROSSIGO RECONHECIMENTO -->
+    <div class="recognition-wrapper">
+      <div class="recognition-container">
+        <span class="recognition-text">Prossigo com Reconhecimento</span>
+      </div>
+    </div>
+    <!-- WRAPPER SEPARADOR SITAC -->
+    <div class="sitacseparator-wrapper">
+      <div class="sitacseparator-container">
+        <span class="sitacseparator-text">*******************</span>
+      </div>
+    </div>
+    <!-- WRAPPER SITAC -->
+    <div class="sitac-wrapper">
+      <div class="sitac-box">
+        <div class="sitac-box-title">Informações</div>
+        <div class="sitac-inputs">
+          <textarea class="sitac-input sitac-textarea" rows="10" placeholder="Digite suas informações aqui..."></textarea>
+        </div>
+      </div>
+      <!-- Caixa SITAC -->
+      <div class="sitac-drawbox">
+        <div class="sitac-drawtitle" id="sitac-header" onclick="toggleSitacSize()" style="cursor: pointer;">
+          SITAC
+          <span id="sitac-size-indicator" style="font-size: 14px; opacity: 0.7; float: right;">🔍</span>
+        </div>
+        <div class="sitac-draws">
+          <!-- Mapa com georeferenciação -->
+          <div id="sitac-map"></div>
+          <!-- CONTROLOS DOS VEÍCULOS (FLUTUANTE NO TOPO DO MAPA) -->
+          <div class="map-fireareas-vehicles-overlay">
+            <div class="vehicles-overlay-title">MEIOS AÇÃO</div>
+            <div class="vehicles-buttons-row">
+              <button class="map-fireareas-vehicle-btn team-btn" onclick="addVehicle('Equipa')">
+                Equipa
+              </button>
+              <button class="map-fireareas-vehicle-btn brigade-btn" onclick="addVehicle('Brigada')">
+                Brigada
+              </button>
+              <button class="map-fireareas-vehicle-btn group-btn" onclick="addVehicle('Grupo')">
+                Grupo
+              </button>
+              <button class="map-fireareas-vehicle-btn company-btn" onclick="addVehicle('Companhia')">
+                Companhia
+              </button>
+              <button class="map-fireareas-vehicle-btn aircrafter-btn" onclick="addVehicle('Meio Aéreo')">
+                Meio Aéreo
+              </button>
+              <button class="map-fireareas-vehicle-btn aircrafterwater-btn" onclick="addVehicle('Meio Aéreo (Água)')">
+                Meio Aéreo (Água)
+              </button>
+              <div class="markers-overlay-title">MARCADORES</div>
+              <button class="map-fireareas-markers-btn aircraftdrop-btn" onclick="addMarker('Descarga')">
+                Descarga Meio Aéreo
+              </button>
+              <button class="map-fireareas-markers-btn onshoresupply-btn" onclick="addMarker('Abastecimento em Nora')">
+                Abastecimento em Nora
+              </button>
+              <button class="map-fireareas-markers-btn sensepointpp-btn" onclick="addMarker('Pontos Sensiveis Pessoas')">
+                PS Pessoas
+              </button>
+              <button class="map-fireareas-markers-btn sensepointrsk-btn" onclick="addMarker('Pontos Sensiveis Sinistro')">
+                PS Sinistro
+              </button>
+              <button class="map-fireareas-markers-btn recognition-btn" onclick="addMarker('Reconhecimento')">
+                Reconhecimento
+              </button>
+              <button class="map-fireareas-markers-btn commandpost-btn" onclick="addMarker('Posto de Comando')">
+                Posto de Comando
+              </button>
+            </div>
+          </div>
+          <!-- CONTROLOS MAPA -->
+          <div class="map-controls">
+            <!-- PERÍMETRO -->
+            <button class="map-btn perimetre-btn" onclick="drawPerimetre()">
+              🔴 Perímetro
+            </button>
+            <!-- SETORES A-F -->
+            <button class="map-btn setor-btn setor-a" onclick="drawSetor('A', '#0066cc')">
+              🔵 Alpha
+            </button>
+            <button class="map-btn setor-btn setor-b" onclick="drawSetor('B', '#00cc66')">
+              🟢 Bravo
+            </button>
+            <button class="map-btn setor-btn setor-c" onclick="drawSetor('C', '#ffcc00')">
+              🟡 Charlie
+            </button>
+            <button class="map-btn setor-btn setor-d" onclick="drawSetor('D', '#ff6600')">
+              🟠 Delta
+            </button>
+            <button class="map-btn setor-btn setor-e" onclick="drawSetor('E', '#cc00cc')">
+              🟣 Echo
+            </button>
+            <button class="map-btn setor-btn setor-f" onclick="drawSetor('F', '#996633')">
+              🟤 Foxtrot
+            </button>
+            <!-- FERRAMENTAS -->
+            <button class="map-btn tool-btn" onclick="editForms()">
+              ✏️ Editar
+            </button>
+            <button class="map-btn tool-btn delete-btn" onclick="limparTudo()">
+              🗑️ Limpar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Caixa PONTOS DE SITUAÇÃO -->
+    <div class="posit-wrapper">
+      <div class="posit-box">
+        <div class="posit-box-title">PONTOS DE SITUAÇÃO</div>
+        <div class="posit-inputs">
+          <table class="posit-table">
+            <tr>
+              <td class="posit-label">2º POSIT</td>
+              <td class="posit-hora-cell">
+                <span class="posit-hora-label">Hrs.</span>
+                <input type="time" class="posit-hora-input">
+              </td>
+              <td class="posit-desc-cell">
+                <input type="text" class="posit-desc-input" placeholder="Descrição...">
+              </td>
+            </tr>
+            <tr>
+              <td class="posit-label">3º POSIT</td>
+              <td class="posit-hora-cell">
+                <span class="posit-hora-label">Hrs.</span>
+                <input type="time" class="posit-hora-input">
+              </td>
+              <td class="posit-desc-cell">
+                <input type="text" class="posit-desc-input" placeholder="Descrição...">
+              </td>
+            </tr>
+            <tr>
+              <td class="posit-label">4º POSIT</td>
+              <td class="posit-hora-cell">
+                <span class="posit-hora-label">Hrs.</span>
+                <input type="time" class="posit-hora-input">
+              </td>
+              <td class="posit-desc-cell">
+                <input type="text" class="posit-desc-input" placeholder="Descrição...">
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <!-- Caixa MEIOS -->
+      <div class="vehiclesnoto-wrapper">
+        <div class="vehiclesnoto-box">
+          <div class="vehiclesnoto-box-title">MEIOS</div>
+          <div class="vehiclesnoto-inputs">
+            <table class="vehiclesnoto-table">
+              <thead>
+                <tr>
+                  <th class="vehiclesnoto-header">MEIO</th>
+                  <th class="vehiclesnoto-header">ENTIDADE</th>
+                  <th class="vehiclesnoto-header">Hr. no TO</th>
+                  <th class="vehiclesnoto-header">MISSÃO</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+                <tr>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td>
+                  <td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td>
+                  <td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- WRAPPER PASSAGEM COS -->
+      <div class="passagecos-wrapper">
+        <div class="passagecos-container">
+          <span class="passagecos-text">Passagem COS às </span>
+          <div class="passagecos-input-container">
+            <div class="passagecos-line">
+              <input type="time" class="passagecos-hora-input">
+              <span class="passagecos-text">, para </span>
+              <input type="text" class="passagecos-input" placeholder="Indique o nome e categoriaa do novo COS" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="menagebuttons-wrapper">
+        <div class="menagebuttons-container">
+          <button class="menagebuttons--btn close-btn" onclick="encerrarSessao()">
+            Encerrar
+          </button>
+          <button class="menagebuttons--btn recharge-btn" onclick="carregarDados()">
+            Carregar
+          </button>
+          <button class="menagebuttons--btn save-btn" onclick="exportToPDF()">
+            Exportar PDF
+          </button>
+          <button class="menagebuttons--btn export-btn" onclick="exportToJSON()">
+            Gravar JSON
+          </button>
+        </div>
+      </div>
+    </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+    <script>
+      // ============================================================================
+      // SITAC - SISTEMA INTEGRADO TÁTICO
+      // ============================================================================
+      // ============================================================================
+      // 📋 CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
+      // ============================================================================
+      var sitacMap;
+      var vehicleLayer, markerLayer, drawingLayer;
+      var vehicleCounter = 0;
+      var markerCounter = 0;
+      var drawControl;
+      var currentDrawingTool = null;
+      var activeElementButton = null;
+      var editMode = false;
+      var currentEditingLayer = null;
+      var isSitacExpanded = false;
+      var savedDescriptions = {};
+      const GITHUB_ICONS_BASE = 'https://raw.githubusercontent.com/1FAMM1/CB360-Mobile/main/icons/';
+      // CONFIGURAÇÃO UNIFICADA DE ELEMENTOS
+      const ELEMENT_CONFIG = {
+        // VEÍCULOS
+        'Equipa': {
+          type: 'vehicle',
+          iconUrl: GITHUB_ICONS_BASE + 'team.png',
+          size: [25, 25],
+          color: '#dc3545',
+          fallback: '',
+          buttonClass: 'team-btn'
+        },
+        'Brigada': {
+          type: 'vehicle',
+          iconUrl: GITHUB_ICONS_BASE + 'brigade.png',
+          size: [25, 25],
+          color: '#dc3545',
+          fallback: '',
+          buttonClass: 'brigade-btn'
+        },
+        'Grupo': {
+          type: 'vehicle',
+          iconUrl: GITHUB_ICONS_BASE + 'group.png',
+          size: [25, 25],
+          color: '#dc3545',
+          fallback: '',
+          buttonClass: 'group-btn'
+        },
+        'Companhia': {
+          type: 'vehicle',
+          iconUrl: GITHUB_ICONS_BASE + 'company.png',
+          size: [25, 25],
+          color: '#dc3545',
+          fallback: '',
+          buttonClass: 'company-btn'
+        },
+        'Meio Aéreo': {
+          type: 'vehicle',
+          iconUrl: GITHUB_ICONS_BASE + 'aircrafter.png',
+          size: [25, 25],
+          color: '#dc3545',
+          fallback: '',
+          buttonClass: 'aircrafter-btn'
+        },
+        'Meio Aéreo (Água)': {
+          type: 'vehicle',
+          iconUrl: GITHUB_ICONS_BASE + 'aircraftwater.png',
+          size: [25, 25],
+          color: '#1515ad',
+          fallback: '',
+          buttonClass: 'aircrafterwater-btn'
+        },
+        // MARCADORES
+        'Descarga': {
+          type: 'marker',
+          iconUrl: GITHUB_ICONS_BASE + 'aircraftdrop.png',
+          size: [25, 25],
+          color: '#1515ad',
+          fallback: '',
+          buttonClass: 'aircraftdrop-btn'
+        },
+        'Abastecimento em Nora': {
+          type: 'marker',
+          iconUrl: GITHUB_ICONS_BASE + 'onshoresupply.png',
+          size: [25, 25],
+          color: '#1515ad',
+          fallback: '',
+          buttonClass: 'onshoresupply-btn'
+        },
+        'PS Pessoas': {
+          type: 'marker',
+          iconUrl: GITHUB_ICONS_BASE + 'sensepointpp.png',
+          size: [25, 25],
+          color: '#212121',
+          fallback: '',
+          buttonClass: 'sensepointpp-btn'
+        },
+        'PS Sinistro': {
+          type: 'marker',
+          iconUrl: GITHUB_ICONS_BASE + 'sensepointrsk.png',
+          size: [25, 25],
+          color: '#212121',
+          fallback: '',
+          buttonClass: 'sensepointrsk-btn'
+        },
+        'Reconhecimento': {
+          type: 'marker',
+          iconUrl: GITHUB_ICONS_BASE + 'recognition.png',
+          size: [25, 25],
+          color: '#212121',
+          fallback: '',
+          buttonClass: 'recognition-btn'
+        },
+        'Posto de Comando': {
+          type: 'marker',
+          iconUrl: GITHUB_ICONS_BASE + 'comandpost.png',
+          size: [25, 25],
+          color: '#212121',
+          fallback: '',
+          buttonClass: 'commandpost-btn'
+        }
+      };
+      // CONFIGURAÇÃO DE SETORES
+      const SECTOR_CONFIG = {
+        'perimetre': {
+          name: '🔴 Perímetro',
+          color: '#dc3545',
+          buttonClass: 'perimetre-btn'
+        },
+        'A': {
+          name: '🔵 Sector Alpha',
+          color: '#0066cc',
+          buttonClass: 'setor-a'
+        },
+        'B': {
+          name: '🟢 Sector Bravo',
+          color: '#00cc66',
+          buttonClass: 'setor-b'
+        },
+        'C': {
+          name: '🟡 Sector Charlie',
+          color: '#ffcc00',
+          buttonClass: 'setor-c'
+        },
+        'D': {
+          name: '🟠 Sector Delta',
+          color: '#ff6600',
+          buttonClass: 'setor-d'
+        },
+        'E': {
+          name: '🟣 Sector Echo',
+          color: '#cc00cc',
+          buttonClass: 'setor-e'
+        },
+        'F': {
+          name: '🟤 Sector Foxtrot',
+          color: '#996633',
+          buttonClass: 'setor-f'
+        }
+      };
+      // ============================================================================
+      // 🗺️ INICIALIZAÇÃO DO MAPA
+      // ============================================================================
+      function initSitacMap() {
+        if (!document.getElementById("sitac-map")) return;
+        sitacMap = L.map("sitac-map").setView([39.5, -8.0], 7);
+        // CAMADAS BASE
+        const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap"
+        });
+        const satelliteLayer = L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+            attribution: "© Esri"
+          }
+        );
+        osmLayer.addTo(sitacMap);
+        L.control.layers({
+          "🗺️ Mapa": osmLayer,
+          "🛰️ Satélite": satelliteLayer
+        }).addTo(sitacMap);
+        // GRUPOS DE CAMADAS
+        vehicleLayer = L.layerGroup().addTo(sitacMap);
+        markerLayer = L.layerGroup().addTo(sitacMap);
+        drawingLayer = L.featureGroup().addTo(sitacMap);
+        setupDrawControl();
+        setupEventListeners();
+        console.log("🗺️ SITAC inicializado");
+      }
+      // ============================================================================
+      // 🎯 SISTEMA UNIFICADO DE ELEMENTOS (VEÍCULOS E MARCADORES)
+      // ============================================================================
+      // FUNÇÃO PRINCIPAL - ADICIONAR ELEMENTO
+      async function addElement(elementName, latlng = null) {
+        const config = ELEMENT_CONFIG[elementName];
+        if (!config) {
+          console.error(`Elemento não encontrado: ${elementName}`);
+          return;
+        }
+        const position = latlng || sitacMap.getCenter();
+        const targetLayer = (config.type === 'vehicle') ? vehicleLayer : markerLayer;
+        const counter = (config.type === 'vehicle') ? ++vehicleCounter : ++markerCounter;
+        const uniqueId = `${config.type}-${elementName}-${Date.now()}`;
+        // Criar ícone
+        const icon = await createElementIcon(config);
+        const marker = L.marker(position, {
+          icon: icon,
+          draggable: true,
+          title: elementName,
+          uniqueId: uniqueId,
+          elementName: elementName,
+          elementConfig: config
+        }).addTo(targetLayer);
+        // Configurar popup
+        setupElementPopup(marker, config, uniqueId);
+        marker.openPopup();
+        // Event listeners
+        marker.on('dragend', () => updateElementPopup(marker, config, uniqueId));
+        marker.on('popupopen', () => updateElementPopup(marker, config, uniqueId));
+        console.log(`✅ ${elementName} adicionado`);
+      }
+      // CRIAR ÍCONE COM FALLBACK
+      async function createElementIcon(config) {
+        return new Promise((resolve) => {
+          if (config.iconUrl) {
+            const img = new Image();
+            img.onload = () => {
+              const icon = L.icon({
+                iconUrl: config.iconUrl,
+                iconSize: config.size,
+                iconAnchor: [config.size[0] / 2, config.size[1] / 2],
+                className: 'element-marker'
+              });
+              resolve(icon);
+            };
+            img.onerror = () => {
+              console.warn(`Erro ao carregar ícone: ${config.iconUrl}`);
+              resolve(createFallbackIcon(config));
+            };
+            img.src = config.iconUrl;
+          } else {
+            resolve(createFallbackIcon(config));
+          }
+        });
+      }
+      // CRIAR ÍCONE FALLBACK
+      function createFallbackIcon(config) {
+        return L.divIcon({
+          html: `<div style="
+            background: ${config.color}; 
+            color: white; 
+            border-radius: 50%; 
+            width: ${config.size[0]}px; 
+            height: ${config.size[1]}px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 16px;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            cursor: move;
+        ">${config.fallback}</div>`,
+          iconSize: config.size,
+          iconAnchor: [config.size[0] / 2, config.size[1] / 2],
+          className: 'element-marker'
+        });
+      }
+      // CONFIGURAR POPUP DO ELEMENTO
+      function setupElementPopup(marker, config, uniqueId) {
+        marker.bindPopup('');
+        updateElementPopup(marker, config, uniqueId);
+      }
+      // ATUALIZAR POPUP DO ELEMENTO
+      function updateElementPopup(marker, config, uniqueId) {
+        const currentPos = marker.getLatLng();
+        const savedDesc = savedDescriptions[uniqueId] || '';
+        let popupContent;
+        if (savedDesc) {
+          popupContent = `
+            <div>
+                <strong style="color: ${config.color}">${config.fallback} ${savedDesc}</strong><br>
+                <small>📌 ${currentPos.lat.toFixed(6)}, ${currentPos.lng.toFixed(6)}</small><br>
+                <button class="popup-btn" onclick="editElementDescription('${uniqueId}', '${config.name || marker.options.elementName}')">
+                    ✏️ Editar
+                </button>
+                <button class="popup-btn" onclick="removeElement('${marker._leaflet_id}')" style="background:#dc3545;">
+                    🗑️ Remover
+                </button>
+            </div>
+        `;
+        } else {
+          const placeholder = (config.type === 'vehicle') ? 'Indicativo do veículo...' : 'Descrição do local...';
+          popupContent = `
+            <div>
+                <strong style="color: ${config.color}">${config.fallback} ${marker.options.elementName}</strong><br>
+                <small>📌 ${currentPos.lat.toFixed(6)}, ${currentPos.lng.toFixed(6)}</small><br>
+                <input type="text" class="popup-input" placeholder="${placeholder}" maxlength="100" id="${uniqueId}">
+                <br>
+                <button class="popup-btn" onclick="saveElementDescription('${uniqueId}', '${marker.options.elementName}')">
+                    💾 Guardar
+                </button>
+                <button class="popup-btn" onclick="removeElement('${marker._leaflet_id}')" style="background:#dc3545;">
+                    🗑️ Remover
+                </button>
+            </div>
+        `;
+        }
+        marker.setPopupContent(popupContent);
+      }
+      // ============================================================================
+      // 🎨 SISTEMA DE PERÍMETRO E SETORES
+      // ============================================================================
+      // DESENHAR PERÍMETRO
+      function drawPerimetre() {
+        startSectorDrawing('perimetre');
+      }
+      // DESENHAR SETOR
+      function drawSetor(sector, color) {
+        startSectorDrawing(sector);
+      }
+      // INICIAR DESENHO DE SETOR
+      function startSectorDrawing(sectorKey) {
+        const sectorConfig = SECTOR_CONFIG[sectorKey];
+        if (!sectorConfig) return;
+        console.log(`🎨 Desenhar ${sectorConfig.name}`);
+        resetAllButtons();
+        const button = document.querySelector(`.${sectorConfig.buttonClass}`);
+        if (button) button.classList.add('active');
+        stopDrawing();
+        if (drawControl) {
+          sitacMap.removeControl(drawControl);
+        }
+        drawControl = new L.Control.Draw({
+          edit: {
+            featureGroup: drawingLayer,
+            remove: true
+          },
+          draw: {
+            polygon: {
+              allowIntersection: false,
+              drawError: {
+                color: '#e1e100',
+                message: '<strong>Erro:</strong> as linhas não se podem cruzar!'
+              },
+              shapeOptions: {
+                color: sectorConfig.color,
+                fillColor: sectorConfig.color,
+                fillOpacity: 0.3,
+                weight: 3,
+                opacity: 0.8
+              }
+            },
+            polyline: false,
+            rectangle: false,
+            circle: false,
+            marker: false,
+            circlemarker: false
+          }
+        });
+        sitacMap.addControl(drawControl);
+        currentDrawingTool = sectorKey;
+        setTimeout(() => {
+          const polygonButton = document.querySelector('.leaflet-draw-draw-polygon');
+          if (polygonButton) {
+            polygonButton.click();
+          }
+        }, 300);
+      }
+      // ============================================================================
+      // 🎮 EVENT LISTENERS E CONFIGURAÇÕES (CONTINUAÇÃO)
+      // ============================================================================
+      // CONFIGURAR EVENT LISTENERS
+      function setupEventListeners() {
+        // CONFIGURAR BOTÕES DE ELEMENTOS
+        Object.entries(ELEMENT_CONFIG).forEach(([elementName, config]) => {
+          const btn = document.querySelector(`.${config.buttonClass}`);
+          if (btn) {
+            btn.addEventListener("click", () => {
+              resetAllButtons();
+              btn.classList.add('active');
+              activeElementButton = elementName;
+              sitacMap.getContainer().style.cursor = 'crosshair';
+              console.log(`🎯 Modo ${elementName} ativado`);
+            });
+          }
+        });
+        // CONFIGURAR BOTÕES DE SETORES
+        Object.entries(SECTOR_CONFIG).forEach(([sectorKey, config]) => {
+          const btn = document.querySelector(`.${config.buttonClass}`);
+          if (btn) {
+            btn.addEventListener("click", () => startSectorDrawing(sectorKey));
+          }
+        });
+        // BOTÃO DE EDIÇÃO
+        const editBtn = document.querySelector('.tool-btn');
+        if (editBtn) {
+          editBtn.addEventListener("click", editForms);
+        }
+        // BOTÃO DE LIMPEZA
+        const clearBtn = document.querySelector('.delete-btn');
+        if (clearBtn) {
+          clearBtn.addEventListener("click", clearMap);
+        }
+        // CLICK NO MAPA
+        sitacMap.on('click', function(e) {
+          // MODO ELEMENTOS
+          if (activeElementButton) {
+            addElement(activeElementButton, e.latlng);
+            resetElementMode();
+            return;
+          }
+          // MODO EDIÇÃO - Desativar quando clica fora
+          if (editMode && e.originalEvent && e.originalEvent.target) {
+            const clickedElement = e.originalEvent.target;
+            if (!clickedElement.classList.contains('leaflet-interactive') &&
+              !clickedElement.closest('.leaflet-popup')) {
+              stopIndividualEditMode();
+              resetAllButtons();
+              console.log('✅ Modo edição desativado');
+            }
+          }
+        });
+      }
+      // CONFIGURAR CONTROLE DE DESENHO
+      function setupDrawControl() {
+        if (drawControl) {
+          sitacMap.removeControl(drawControl);
+        }
+        drawControl = new L.Control.Draw({
+          edit: {
+            featureGroup: drawingLayer,
+            remove: true
+          },
+          draw: false
+        });
+        sitacMap.addControl(drawControl);
+        // EVENT LISTENER PARA CRIAÇÃO DE POLÍGONOS
+        sitacMap.on('draw:created', function(e) {
+          const layer = e.layer;
+          const uniqueId = 'drawing-' + Date.now();
+          layer.uniqueId = uniqueId;
+          layer.sectorType = currentDrawingTool;
+          drawingLayer.addLayer(layer);
+          const sectorConfig = SECTOR_CONFIG[currentDrawingTool];
+          const popupContent = createSectorPopup(uniqueId, currentDrawingTool, layer);
+          layer.bindPopup(popupContent).openPopup();
+          stopDrawing();
+          resetAllButtons();
+          console.log(`✅ ${sectorConfig.name} criado`);
+        });
+        // EVENT LISTENER PARA EDIÇÃO DE POLÍGONOS
+        sitacMap.on('draw:edited', function(e) {
+          const layers = e.layers;
+          layers.eachLayer(function(layer) {
+            if (layer.uniqueId) {
+              const popupContent = createSectorPopup(layer.uniqueId, layer.sectorType, layer);
+              layer.setPopupContent(popupContent);
+              console.log(`📐 Área atualizada para ${SECTOR_CONFIG[layer.sectorType].name}`);
+            }
+          });
+        });
+      }
+      // ============================================================================
+      // 🔧 FUNÇÕES DE CONTROLE E UTILIDADES
+      // ============================================================================
+      // SALVAR DESCRIÇÃO DO ELEMENTO
+      function saveElementDescription(inputId, elementName) {
+        const input = document.getElementById(inputId);
+        const description = input.value.trim();
+        if (description) {
+          savedDescriptions[inputId] = description;
+          console.log(`💾 ${elementName} salvo:`, description);
+          // Atualizar popup
+          [vehicleLayer, markerLayer].forEach(layer => {
+            layer.eachLayer(function(marker) {
+              if (marker.options && marker.options.uniqueId === inputId) {
+                setTimeout(() => {
+                  marker.closePopup();
+                  marker.openPopup();
+                }, 100);
+              }
+            });
+          });
+        } else {
+          alert("Por favor, insira uma descrição.");
+          input.focus();
+        }
+      }
+      // EDITAR DESCRIÇÃO DO ELEMENTO
+      function editElementDescription(inputId, elementName) {
+        const currentDesc = savedDescriptions[inputId] || '';
+        const newDesc = prompt(`Editar ${elementName}:`, currentDesc);
+        if (newDesc !== null && newDesc.trim()) {
+          savedDescriptions[inputId] = newDesc.trim();
+          [vehicleLayer, markerLayer].forEach(layer => {
+            layer.eachLayer(function(marker) {
+              if (marker.options && marker.options.uniqueId === inputId) {
+                marker.closePopup();
+                marker.openPopup();
+              }
+            });
+          });
+        }
+      }
+      // REMOVER ELEMENTO
+      function removeElement(elementId) {
+        if (confirm("❌ Remover este elemento?")) {
+          [vehicleLayer, markerLayer].forEach(layer => {
+            layer.eachLayer(function(marker) {
+              if (marker._leaflet_id == elementId) {
+                if (marker.options && marker.options.uniqueId) {
+                  delete savedDescriptions[marker.options.uniqueId];
+                }
+                layer.removeLayer(marker);
+              }
+            });
+          });
+          sitacMap.closePopup();
+        }
+      }
+      // CALCULAR ÁREA DOS POLÍGONOS
+      function calculateArea(layer) {
+        if (layer instanceof L.Polygon) {
+          const latlngs = layer.getLatLngs()[0];
+          const area = L.GeometryUtil.geodesicArea(latlngs);
+          const hectares = area / 10000;
+          if (hectares >= 1) {
+            return hectares.toFixed(2) + ' ha';
+          } else {
+            return area.toFixed(0) + ' m²';
+          }
+        }
+        return 'N/A';
+      }
+      // CRIAR POPUP PARA SETORES
+      function createSectorPopup(uniqueId, sectorType, layer) {
+        const sectorConfig = SECTOR_CONFIG[sectorType];
+        const title = sectorConfig ? sectorConfig.name : '🎨 Setor';
+        const savedDesc = savedDescriptions[uniqueId] || '';
+        const area = calculateArea(layer);
+        return `
+        <div>
+            <strong>${title}</strong><br>
+            <small><strong>📐 Área:</strong> ${area}</small><br>
+            <textarea class="popup-input" placeholder="Descrição do setor..."
+                       maxlength="500" id="${uniqueId}" rows="3">${savedDesc}</textarea>
+            <br>
+            <button class="popup-btn" onclick="saveSectorDescription('${uniqueId}', '${title}', '${sectorType}')">
+                💾 Guardar
+            </button>
+            <button class="popup-btn" onclick="deleteSector(this)" style="background:#dc3545;">
+                🗑️ Eliminar
+            </button>
+        </div>
+    `;
+      }
+      // SALVAR DESCRIÇÃO DO SETOR
+      function saveSectorDescription(inputId, sectorTitle, sectorType) {
+        const input = document.getElementById(inputId);
+        const description = input.value.trim();
+        if (description) {
+          savedDescriptions[inputId] = description;
+          console.log(`🎨 ${sectorTitle} salvo:`, description);
+          drawingLayer.eachLayer(function(layer) {
+            if (layer.uniqueId === inputId) {
+              const popupContent = createSectorPopup(inputId, sectorType, layer);
+              layer.setPopupContent(popupContent);
+            }
+          });
+          sitacMap.closePopup();
+        } else {
+          alert("Por favor, insira uma descrição para o setor.");
+          input.focus();
+        }
+      }
+      // ELIMINAR SETOR
+      function deleteSector(button) {
+        if (confirm("❌ Eliminar este setor?")) {
+          const popup = button.closest('.leaflet-popup-content');
+          const marker = sitacMap._popup._source;
+          if (marker.uniqueId) {
+            delete savedDescriptions[marker.uniqueId];
+          }
+          drawingLayer.removeLayer(marker);
+          sitacMap.closePopup();
+        }
+      }
+      // ============================================================================
+      // ✏️ SISTEMA DE EDIÇÃO INDIVIDUAL
+      // ============================================================================
+      // ATIVAR MODO DE EDIÇÃO INDIVIDUAL
+      function editForms() {
+        console.log('✏️ Modo edição individual ativado');
+        resetAllButtons();
+        document.querySelector('.tool-btn').classList.add('active');
+        editMode = true;
+        sitacMap.getContainer().style.cursor = 'pointer';
+        if (drawControl) {
+          sitacMap.removeControl(drawControl);
+        }
+        setupIndividualEditMode();
+        console.log('👆 Clique no setor que deseja editar');
+      }
+      // CONFIGURAR MODO DE EDIÇÃO INDIVIDUAL
+      function setupIndividualEditMode() {
+        drawingLayer.off('click');
+        sitacMap.off('click.editMode');
+        drawingLayer.on('click', function(e) {
+          if (!editMode) return;
+          const layer = e.layer;
+          if (layer && layer.uniqueId) {
+            startIndividualEdit(layer);
+            L.DomEvent.stopPropagation(e);
+          }
+        });
+        sitacMap.on('click.editMode', function(e) {
+          if (editMode && currentEditingLayer) {
+            finishIndividualEdit();
+          }
+        });
+      }
+      // INICIAR EDIÇÃO INDIVIDUAL
+      function startIndividualEdit(layer) {
+        if (currentEditingLayer) {
+          finishIndividualEdit();
+        }
+        currentEditingLayer = layer;
+        layer.editing.enable();
+        const originalStyle = {
+          color: layer.options.color,
+          weight: layer.options.weight || 3,
+          opacity: layer.options.opacity || 0.8
+        };
+        layer.setStyle({
+          color: '#ff0000',
+          weight: 4,
+          opacity: 1,
+          dashArray: '10, 5'
+        });
+        layer._originalStyle = originalStyle;
+        const sectorConfig = SECTOR_CONFIG[layer.sectorType];
+        const sectorName = sectorConfig ? sectorConfig.name : '🎨 Setor';
+        console.log(`✏️ Editando: ${sectorName}`);
+        const popupContent = `
+        <div style="text-align: center;">
+            <strong>✏️ Editando ${sectorName}</strong><br>
+            <small>Arraste os pontos para modificar<br>Clique fora para salvar</small>
+        </div>
+    `;
+        layer.bindPopup(popupContent).openPopup();
+      }
+      // FINALIZAR EDIÇÃO INDIVIDUAL
+      function finishIndividualEdit() {
+        if (!currentEditingLayer) return;
+        const layer = currentEditingLayer;
+        layer.editing.disable();
+        if (layer._originalStyle) {
+          layer.setStyle(layer._originalStyle);
+          delete layer._originalStyle;
+        }
+        const popupContent = createSectorPopup(layer.uniqueId, layer.sectorType, layer);
+        layer.setPopupContent(popupContent);
+        sitacMap.closePopup();
+        const sectorConfig = SECTOR_CONFIG[layer.sectorType];
+        const sectorName = sectorConfig ? sectorConfig.name : '🎨 Setor';
+        console.log(`✅ ${sectorName} salvo`);
+        currentEditingLayer = null;
+      }
+      // PARAR MODO DE EDIÇÃO INDIVIDUAL
+      function stopIndividualEditMode() {
+        if (currentEditingLayer) {
+          finishIndividualEdit();
+        }
+        editMode = false;
+        drawingLayer.eachLayer(function(layer) {
+          if (layer.editing && layer.editing._enabled) {
+            layer.editing.disable();
+          }
+          if (layer instanceof L.Polygon) {
+            const originalStyle = {
+              dashArray: null,
+              weight: 3,
+              opacity: 0.8,
+              fillOpacity: 0.3
+            };
+            const sectorConfig = SECTOR_CONFIG[layer.sectorType];
+            if (sectorConfig) {
+              originalStyle.color = sectorConfig.color;
+              originalStyle.fillColor = sectorConfig.color;
+            }
+            layer.setStyle(originalStyle);
+          }
+        });
+        drawingLayer.off('click');
+        sitacMap.off('click.editMode');
+        sitacMap.getContainer().style.cursor = '';
+        console.log('🔄 Modo edição desativado');
+      }
+      // ============================================================================
+      // 🔄 FUNÇÕES DE RESET E CONTROLO
+      // ============================================================================
+      // RESET TODOS OS BOTÕES
+      function resetAllButtons() {
+        document.querySelectorAll('.map-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        activeElementButton = null;
+        sitacMap.getContainer().style.cursor = '';
+        stopDrawing();
+        if (editMode) {
+          stopIndividualEditMode();
+        }
+      }
+      // RESET MODO ELEMENTO
+      function resetElementMode() {
+        activeElementButton = null;
+        sitacMap.getContainer().style.cursor = '';
+        document.querySelectorAll('.map-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+      }
+      // PARAR DESENHO
+      function stopDrawing() {
+        if (currentDrawingTool) {
+          console.log(`🛑 Parando desenho: ${currentDrawingTool}`);
+          if (drawControl) {
+            sitacMap.removeControl(drawControl);
+          }
+          drawControl = new L.Control.Draw({
+            edit: {
+              featureGroup: drawingLayer,
+              remove: true
+            },
+            draw: false
+          });
+          sitacMap.addControl(drawControl);
+          currentDrawingTool = null;
+        }
+      }
+      // ============================================================================
+      // 🌍 LOCALIZAÇÃO E UTILITÁRIOS
+      // ============================================================================
+      // OBTER LOCALIZAÇÃO ATUAL
+      function getCurrentLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function(position) {
+              const lat = position.coords.latitude;
+              const lng = position.coords.longitude;
+              sitacMap.setView([lat, lng], 12);
+              L.marker([lat, lng], {
+                  icon: L.divIcon({
+                    className: "current-location-marker",
+                    html: "📌",
+                    iconSize: [50, 50],
+                    iconAnchor: [30, 30]
+                  })
+                })
+                .addTo(sitacMap)
+                .bindPopup("📌 Sua Localização Atual")
+                .openPopup();
+            },
+            function(error) {
+              console.log("Localização não disponível:", error.message);
+            }
+          );
+        }
+      }
+      // ============================================================================
+      // 🔄 TOGGLE SITAC
+      // ============================================================================
+      // TOGGLE TAMANHO DO SITAC
+      function toggleSitacSize() {
+        const sitacBox = document.querySelector(".sitac-drawbox");
+        const indicator = document.getElementById("sitac-size-indicator");
+        if (!isSitacExpanded) {
+          sitacBox.classList.add("expanded");
+          if (indicator) indicator.textContent = "📺";
+          isSitacExpanded = true;
+          setTimeout(() => {
+            if (sitacMap) sitacMap.invalidateSize();
+          }, 300);
+          console.log("🔍→📺 SITAC expandido");
+          window.scrollTo(0, 0);
+        } else {
+          sitacBox.classList.remove("expanded");
+          if (indicator) indicator.textContent = "🔍";
+          isSitacExpanded = false;
+          setTimeout(() => {
+            if (sitacMap) sitacMap.invalidateSize();
+          }, 300);
+          console.log("📺→🔍 SITAC minimizado");
+        }
+      }
+      // ============================================================================
+      // 🗑️ LIMPEZA
+      // ============================================================================
+      // LIMPAR MAPA
+      function clearMap() {
+        if (confirm("🗑️ Limpar todos os elementos do mapa?")) {
+          vehicleLayer.clearLayers();
+          markerLayer.clearLayers();
+          drawingLayer.clearLayers();
+          savedDescriptions = {};
+          vehicleCounter = 0;
+          markerCounter = 0;
+          resetAllButtons();
+          console.log("🗑️ Mapa limpo");
+        }
+      }
+      // ============================================================================
+      // 📋 FUNÇÕES DE COMPATIBILIDADE
+      // ============================================================================
+      // FUNÇÕES DE SETORES INDIVIDUAIS
+      function desenharSetorA() {
+        startSectorDrawing('A');
+      }
+
+      function desenharSetorB() {
+        startSectorDrawing('B');
+      }
+
+      function desenharSetorC() {
+        startSectorDrawing('C');
+      }
+
+      function desenharSetorD() {
+        startSectorDrawing('D');
+      }
+
+      function desenharSetorE() {
+        startSectorDrawing('E');
+      }
+
+      function desenharSetorF() {
+        startSectorDrawing('F');
+      }
+      // FUNÇÕES ANTIGAS (compatibilidade)
+      function addVehicle(type) {
+        const elementName = Object.keys(ELEMENT_CONFIG).find(key =>
+          ELEMENT_CONFIG[key].buttonClass === `${type}-btn`
+        );
+        if (elementName) addElement(elementName);
+      }
+
+      function addMarker(type) {
+        const elementName = Object.keys(ELEMENT_CONFIG).find(key =>
+          ELEMENT_CONFIG[key].buttonClass === `${type}-btn`
+        );
+        if (elementName) addElement(elementName);
+      }
+
+      function addVehicleAtPosition(type, latlng) {
+        const elementName = Object.keys(ELEMENT_CONFIG).find(key =>
+          ELEMENT_CONFIG[key].buttonClass === `${type}-btn`
+        );
+        if (elementName) addElement(elementName, latlng);
+      }
+
+      function addMarkerAtPosition(type, latlng) {
+        const elementName = Object.keys(ELEMENT_CONFIG).find(key =>
+          ELEMENT_CONFIG[key].buttonClass === `${type}-btn`
+        );
+        if (elementName) addElement(elementName, latlng);
+      }
+      // FUNÇÕES DE REMOÇÃO (compatibilidade)
+      function removeVehicle(elementId) {
+        removeElement(elementId);
+      }
+
+      function removeMarker(elementId) {
+        removeElement(elementId);
+      }
+      // FUNÇÕES DE DESCRIÇÃO (compatibilidade)
+      function saveVehicleDescription(inputId, name) {
+        saveElementDescription(inputId, name);
+      }
+
+      function saveMarkerDescription(inputId, name) {
+        saveElementDescription(inputId, name);
+      }
+
+      function editVehicleDescription(inputId, name) {
+        editElementDescription(inputId, name);
+      }
+
+      function editMarkerDescription(inputId, name) {
+        editElementDescription(inputId, name);
+      }
+      // FUNÇÃO DE LIMPEZA (compatibilidade)
+      function limparTudo() {
+        clearMap();
+      }
+      // ============================================================================
+      // 📊 ESTATÍSTICAS E DEBUG
+      // ============================================================================
+      // MOSTRAR ESTATÍSTICAS DO MAPA
+      function showMapStats() {
+        let vehicleCount = 0;
+        let markerCount = 0;
+        let sectorCount = 0;
+        vehicleLayer.eachLayer(() => vehicleCount++);
+        markerLayer.eachLayer(() => markerCount++);
+        drawingLayer.eachLayer(() => sectorCount++);
+        console.log(`📊 ESTATÍSTICAS DO SITAC:
+    🚗 Veículos: ${vehicleCount}
+    📍 Marcadores: ${markerCount}
+    🎨 Setores: ${sectorCount}
+    💾 Descrições salvas: ${Object.keys(savedDescriptions).length}
+    📺 Expandido: ${isSitacExpanded ? 'Sim' : 'Não'}
+    ✏️ Modo edição: ${editMode ? 'Ativo' : 'Inativo'}`);
+        return {
+          vehicles: vehicleCount,
+          markers: markerCount,
+          sectors: sectorCount,
+          descriptions: Object.keys(savedDescriptions).length,
+          expanded: isSitacExpanded,
+          editMode: editMode
+        };
+      }
+      // ============================================================================
+      // 🚀 INICIALIZAÇÃO
+      // ============================================================================
+      // INICIALIZAÇÃO PRINCIPAL
+      document.addEventListener("DOMContentLoaded", function() {
+        console.log("🚀 Iniciando SITAC Otimizado...");
+        // Aguardar DOM estar pronto
+        setTimeout(initSitacMap, 200);
+        // Obter localização após inicializar
+        setTimeout(getCurrentLocation, 1000);
+        console.log("✅ SITAC carregado com sucesso!");
+      });
+      // REDIMENSIONAR MAPA
+      window.addEventListener("resize", function() {
+        if (sitacMap) {
+          setTimeout(() => sitacMap.invalidateSize(), 100);
+        }
+      });
+      // ============================================================================
+      // 🎯 MELHORIAS ADICIONAIS
+      // ============================================================================
+      // FUNÇÃO PARA EXPORTAR DADOS (NOVA FUNCIONALIDADE)
+      function exportSitacData() {
+        const data = {
+          vehicles: [],
+          markers: [],
+          sectors: [],
+          descriptions: savedDescriptions,
+          timestamp: new Date().toISOString()
+        };
+        // Coletar veículos
+        vehicleLayer.eachLayer(function(marker) {
+          if (marker.options.uniqueId) {
+            data.vehicles.push({
+              id: marker.options.uniqueId,
+              name: marker.options.elementName,
+              position: marker.getLatLng(),
+              description: savedDescriptions[marker.options.uniqueId] || ''
+            });
+          }
+        });
+        // Coletar marcadores
+        markerLayer.eachLayer(function(marker) {
+          if (marker.options.uniqueId) {
+            data.markers.push({
+              id: marker.options.uniqueId,
+              name: marker.options.elementName,
+              position: marker.getLatLng(),
+              description: savedDescriptions[marker.options.uniqueId] || ''
+            });
+          }
+        });
+        // Coletar setores
+        drawingLayer.eachLayer(function(layer) {
+          if (layer.uniqueId) {
+            data.sectors.push({
+              id: layer.uniqueId,
+              type: layer.sectorType,
+              coordinates: layer.getLatLngs(),
+              description: savedDescriptions[layer.uniqueId] || ''
+            });
+          }
+        });
+        // Download do arquivo
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: 'application/json'
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sitac-data-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        console.log('📁 Dados do SITAC exportados');
+      }
+      // FUNÇÃO PARA IMPORTAR DADOS (NOVA FUNCIONALIDADE)
+      function importSitacData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            // Limpar mapa atual
+            clearMap();
+            // Importar descrições
+            savedDescriptions = data.descriptions || {};
+            // Importar veículos
+            if (data.vehicles) {
+              data.vehicles.forEach(async (vehicle) => {
+                await addElement(vehicle.name, vehicle.position);
+              });
+            }
+            // Importar marcadores
+            if (data.markers) {
+              data.markers.forEach(async (marker) => {
+                await addElement(marker.name, marker.position);
+              });
+            }
+            console.log('📁 Dados do SITAC importados com sucesso');
+            alert('✅ Dados importados com sucesso!');
+          } catch (error) {
+            console.error('Erro ao importar dados:', error);
+            alert('❌ Erro ao importar dados. Verifique o arquivo.');
+          }
+        };
+        reader.readAsText(file);
+      }
+      console.log("🎯 SITAC Otimizado - Versão 2.0 carregada!");
+    </script>
+</body>
+
+</html>

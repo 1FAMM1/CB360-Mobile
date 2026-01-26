@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360 Mobile</title>
+  <style>
+    /* ==================== BODY ==================== */
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}    
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .forms-container {border: 1px solid #444; background: rgba(45, 45, 45, 0.95); color: #fff;}
+    .dark-mode .forms-subtitle {color: #e0e0e0;}
+    .dark-mode .forms-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+    .dark-mode .forms-btn:hover {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
+    .dark-mode .forms-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
+     .dark-mode .modal-content {background: #2c2c2c; color: white;}
+    .dark-mode .modal-body {color: #e0e0e0;}
+    .dark-mode .modal-footer {border-top-color: #444;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: all 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;}
+    .footer:hover {background: linear-gradient(45deg, #c62828, #a00000); transition: all 0.3s ease;}
+    .main-content {flex: 1; overflow-y: auto; padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center;justify-content: flex-start;}
+    .forms-container {background: rgba(245, 245, 245, 0.95); padding: 40px 0px 0px 0px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); max-width: 550px; width: 100%; 
+                       transition: all 0.3s ease; text-align: center; display: flex; flex-direction: column; height: calc(100vh - 100px); max-height: 685px;}
+    .forms-header {flex-shrink: 0; margin-bottom: 15px;}
+    .forms-buttons-container {margin: -15px 0 10px 0; height: 100%; transition: all 0.3s ease;}
+    .forms-subtitle {font-size: clamp(1em, 3vw, 1.3em); margin-bottom: 0; color: #2c3e50; transition: color 0.3s ease;}
+    .forms-buttons {display: grid; gap: clamp(8px, 2vw, 20px); grid-template-columns: repeat(auto-fit, minmax(clamp(100px, 20vw, 150px), 1fr)); justify-content: center; padding: clamp(8px, 2vw, 14px);}
+    .forms-btn {padding: 18px 12px; border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; text-align: center; transition: all 0.2s ease; position: relative; overflow: hidden; height: 100%;
+               width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; color: #2c3e50; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); cursor: pointer;}
+    .forms-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); 
+                               transition: left 0.4s ease; z-index: 1;}
+    .forms-btn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
+                        transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
+    .forms-btn:active::after {width: 150px; height: 150px;}
+    .forms-btn:hover {transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
+    .forms-btn:hover::before {left: 100%;}
+    .forms-btn:active {transform: scale(0.98); transition: all 0.1s ease;}
+    .forms-btn.selected {color: white; transform: scale(1.03); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
+    .forms-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
+     .modal {display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); animation: fadeIn 0.3s ease;}
+    .modal.show {display: flex; align-items: center; justify-content: center;}
+    .modal-content {background: white; margin: 20px; padding: 0; border-radius: 15px; width: 90%; max-width: 500px; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                    animation: slideIn 0.3s ease;}
+    .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px; text-align: center; font-size: 18px; font-weight: bold;}
+    .modal-body {padding: 20px; max-height: 400px; overflow-y: auto; line-height: 1.6; color: #2c3e50;}
+    .modal-footer {padding: 15px 20px; text-align: center; border-top: 1px solid #eee;}
+    .modal-close {background: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s ease;}
+    .modal-close:hover {background: #b71c1c;}
+    @keyframes fadeIn {from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);}}
+    @keyframes slideIn {from {transform: translateX(-100%);} to {transform: translateX(0);}}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .main-content {padding-top: 130px; padding-left: 10px; padding-right: 10px;}
+      .forms-container {padding: 20px 15px; margin: -50px 0 0 0;}
+      .forms-header {flex-shrink: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); padding-bottom: 10px;}
+      .dark-mode .forms-header {border-bottom: 1px solid rgba(255, 255, 255, 0.1);}
+      .forms-subtitle {margin-top: -10px;}
+      .forms-buttons-container {min-height: 150px; max-height: 175px; border-bottom: 1px solid rgba(0, 0, 0, 0.1);}
+      .dark-mode .forms-buttons-container {border-bottom: 1px solid rgba(255, 255, 255, 0.1);}
+      .forms-buttons {grid-template-columns: repeat(3, 1fr) !important; gap: 5px;}
+      .forms-btn {min-height: 75px; max-height: 75px; min-width: 90px; max-width: 160px; font-size: 11px; padding: 15px 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>SGO</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">FERRAMENTAS DE APOIO À DECISÃO</div>
+  </div>
+  <div class="main-content">
+    <div class="forms-container">
+      <div class="forms-header">
+        <p class="forms-subtitle">GUIAS DE COMANDO</p>
+      </div>
+      <div class="forms-buttons-container">
+        <div class="forms-buttons">
+          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+            <span style=" font-size: 20px; margin-bottom: 8px;">☢️☣️</span>
+            <div>Matérias Perigosas</div>
+          </button>
+          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+            <span style=" font-size: 24px; margin-bottom: 8px;">💥🚙</span>
+            <div>Acidentes</div>
+          </button>
+          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+            <span style=" font-size: 20px; margin-bottom: 8px;">🏘️🔥</span>
+            <div>Incêndios Estrurais</div>
+          </button>
+          <button class="forms-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='GCIncRural.html', 300);">
+            <span style=" font-size: 20px; margin-bottom: 8px;">🌲🔥</span>
+            <div>Incêndios Florestais</div>
+          </button>
+          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+            <span style=" font-size: 20px; margin-bottom: 8px;">📋</span>
+            <div>SICAC</div>
+          </button>
+        </div>
+      </div>
+      <div class="forms-header">
+        <p class="forms-subtitle" style="margin:5px 0 0 0;">FORMULÁRIOS NRBQ</p>
+      </div>
+      <div class="forms-buttons-container">
+        <div class="forms-buttons">
+          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+            <span style=" font-size: 20px; margin-bottom: 8px;">☣️</span>
+            <div>Notificação Inícial</div>
+          </button>
+          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+            <span style=" font-size: 20px; margin-bottom: 8px;">☣️</span>
+            <div>Reconhecimento</div>
+          </button>
+          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+            <span style=" font-size: 20px; margin-bottom: 8px;">☣️</span>
+            <div>Intervenção</div>
+          </button>
+        </div>
+      </div>
+      <div class="forms-header">
+        <p class="forms-subtitle" style="margin:5px 0 0 0;">OUTRAS FERRAMENTAS</p>
+      </div>
+      <div class="forms-buttons-container">
+        <div class="forms-buttons">
+          <button class="forms-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='DecirTeam.html', 300);">
+            <span style=" font-size: 20px; margin-bottom: 8px;">🔥</span>
+            <div>Equipa(s) DECIR</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <div id="emDesenvolvimentoModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">🚧 Em Desenvolvimento</div>
+      <div class="modal-body" style="text-align:center; font-size:16px;">
+        Esta funcionalidade ainda está em desenvolvimento.<br>
+        Por favor, verifique mais tarde.
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeModal('emDesenvolvimentoModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ========================= MODAL FUNCTIONS ========================= */
+    function showEmDesenvolvimento() {
+      showModal('emDesenvolvimentoModal');
+    }
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        if (navigator.vibrate) navigator.vibrate(50);
+      }
+    }
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+      }
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        if (h2) h2.textContent = "Não definido";
+        return;
+      }
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        } else {
+          if (h2) h2.textContent = "Não encontrado";
+        }
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+        if (h2) h2.textContent = corpOperNr;
+      }
+    }
+    /* ========================== THEME LOADING ========================== */
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+    }
+    /* ========================== BUTTON TOOGLE ========================== */
+    function toggleButton(button) {
+      const allButtons = document.querySelectorAll('.forms-btn');
+      allButtons.forEach(btn => {
+        if (btn !== button) {
+          btn.classList.remove('selected');
+        }
+      });
+      button.classList.add('selected');
+      if (navigator.vibrate) {
+        navigator.vibrate(100);
+      }
+      setTimeout(() => {
+        button.classList.remove('selected');
+      }, 2000);
+    }
+    /* ========================= GLOBAL LOADING ========================== */
+    const buttons = document.querySelectorAll('.forms-btn');
+    buttons.forEach((button, index) => {
+      button.style.opacity = '0';
+      button.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        button.style.transition = 'all 0.5s ease';
+        button.style.opacity = '1';
+        button.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCorpInfo();
+      loadTheme();
+      document.addEventListener('touchstart', function(event) {
+        if (event.touches.length > 1) {
+          event.preventDefault();
+        }
+      });
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+    });
+    window.addEventListener('click', event => {
+      const isButtonClick = event.target.closest('.forms-btn');
+      if (!isButtonClick) clearAllSelections();
+    });
+    document.addEventListener('selectstart', e => e.preventDefault());
+    document.addEventListener('contextmenu', e => e.preventDefault());
+  </script>
+</body>
+</html>

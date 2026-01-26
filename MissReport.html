@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360_RELATÓRIOS</title>
+  <style>
+    /* ==================== BODY ==================== */
+    html, body {overscroll-behavior: none;}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none; display: flex;
+          flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .report-stats-container, .dark-mode .report-list-container {background: rgba(45, 45, 45, 0.95); border: 1px solid #444;}
+    .dark-mode .report-stats-container h1, .dark-mode .report-list-container h1 {color: #fff;}
+    .dark-mode .report-stats-container h1::after, .dark-mode .report-list-container h1::after {background: rgba(255, 255, 255, 0.2);}
+    .dark-mode .stats-badge {background: rgba(255, 255, 255, 0.25); border: 1px solid #444; color: #fff;}
+    .dark-mode .stats-badge.has-reports {background: linear-gradient(45deg, #e74c3c, #c0392b); border: 1px solid #c0392b;}
+    .dark-mode .stats-badge.no-reports {background: linear-gradient(45deg, #27ae60, #229954); border: 1px solid #229954;}
+    .dark-mode .cards-container::-webkit-scrollbar-track {background: rgba(255, 255, 255, 0.05);}
+    .dark-mode .report-card {background: #2d2d2d; border: 1px solid #444; border-left-color: #ff4d4d; border-left: 6px solid #d32f2f; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
+    .dark-mode .report-card:active {transform: scale(0.98); background: #1f1f1f; border-left-color: #2ecc71; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);}
+    .dark-mode .report-nr {color: #ecf0f1;}
+    .dark-mode .report-date {color: #bbb;}
+    .dark-mode .badge-pending {background: #4a3728; color: #ffb74d;}
+    .dark-mode .open-platform {color: #bbb;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;} .header h1 {margin: 0; font-size: 1.5em; font-weight: bold;} .header-subtitle {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;}
+    .main-content {flex: 1; overflow-y: auto; padding-top: 95px; padding-bottom: 80px; padding-left: 20px; padding-right: 20px;}
+    .report-stats-container, .report-list-container {background: rgba(245, 245, 245, 0.95); padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+                                                     animation: fadeIn 0.5s ease-out;}
+    .report-stats-container h1, .report-list-container h1 {text-align: center; font-size: clamp(0.5em, 5vw, 1.1em); color: #2c3e50; position: relative;}
+    .report-stats-container h1::after, .report-list-container h1::after {content: ""; display: block; height: 1px; background: rgba(0,0,0,0.1); margin: 15px auto; width: 90%;}
+    .stats-badge {background: #ccc; border-radius: 50px; padding: 5px 15px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: clamp(15px, 4vw, 25px);
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-weight: 600; font-size: clamp(0.85em, 2.5vw, 1em); max-width: fit-content; animation: fadeIn 0.5s ease-out; transition: background 0.3s ease;}
+    .stats-badge.has-reports {background: linear-gradient(45deg, #e74c3c, #c0392b); color: white;}
+    .stats-badge.no-reports {background: linear-gradient(45deg, #27ae60, #229954); color: white;}
+    .stat-item {display: flex; align-items: center; gap: 6px; white-space: nowrap;}
+    .report-list-container {margin: 10px 0 0 0; display: flex; flex-direction: column; max-height: calc(100vh - 300px); min-height: 100px; overflow: hidden;}
+    .cards-container {display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 5px; margin-top: 10px; overflow-y: auto; flex: 1; padding-right: 5px; padding-bottom: 10px;}
+    .cards-container::-webkit-scrollbar {width: 4px;}
+    .cards-container::-webkit-scrollbar-track {background: rgba(0, 0, 0, 0.05); border-radius: 10px;}
+    .cards-container::-webkit-scrollbar-thumb {background: linear-gradient(to bottom, #d32f2f, #b71c1c); border-radius: 10px;}
+    .cards-container {scrollbar-width: thin; scrollbar-color: #d32f2f rgba(0, 0, 0, 0.05);}
+    .message {text-align: center; font-weight: 600; padding: clamp(8px, 2vw, 10px) clamp(10px, 3vw, 15px); border-radius: 5px; font-size: clamp(0.85em, 2.5vw, 1em); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+              animation: fadeIn 0.4s ease-out;}
+    .message.loading {background: linear-gradient(45deg, #3498db, #2980b9); color: white;}
+    .message.error {background: linear-gradient(45deg, #e74c3c, #c0392b); color: white;}
+    .no-reports {text-align: center; font-weight: 600; padding: 10px 15px; border-radius: 5px; background: #27ae60; font-size: 1em; box-shadow: 0 4px 12px rgba(0,0,0,0.1); animation: fadeIn 0.4s ease-out;
+                 color: #fff;}
+    .report-card {background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 5px; border: 1px solid #ccc; border-left: 6px solid #d32f2f; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                  transition: transform 0.2s ease; cursor: pointer;}
+    .report-card:active {transform: scale(0.98); background: #f9f9f9;}
+    .card-top {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
+    .report-nr {font-family: 'Monaco', monospace; font-weight: 800; color: #2c3e50; font-size: clamp(0.9em, 3vw, 1.1em);}
+    .report-date {font-size: clamp(0.75em, 2.5vw, 0.85em); color: #7f8c8d; display: flex; align-items: center; gap: 4px;}
+    .status-row {display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee;}
+    .badge-pending {background: #fff3e0; color: #e65100; padding: 4px 10px; border-radius: 6px; font-size: clamp(0.65em, 2vw, 0.75em); font-weight: 700; text-transform: uppercase;}
+    .open-platform {font-size: clamp(0.75em, 2.5vw, 0.875em); color: #7f8c8d;}
+    @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important;}
+      .header-logo {height: 50px; top: 32px;}
+      .main-content {padding-top: 130px; padding-left: 10px; padding-right: 10px;}
+      .report-stats-container {padding: 20px 15px; margin: -50px 0 0 0;}
+      .cards-container {grid-template-columns: 1fr;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>OS MEUS RELATÓRIOS</h1>
+    <div class="header-subtitle">CONTROLO DE RELATÓRIOS PENDENTES</div>
+  </header>
+  <div class="main-content">
+    <div class="report-stats-container">
+      <h1>📊 RESUMO DE PENDENTES 📊</h1>
+      <div id="statsBadge" class="stats-badge" style="display: flex;">
+        <div class="stat-item">
+          <span>📋</span>
+          <span id="totalPendingReports">0</span> Relatórios Pendentes
+        </div>
+      </div>
+    </div>
+    <div class="report-list-container">
+      <h1>📑 LISTA DE RELATÓRIOS 📑</h1>
+      <div id="reportsCardsContainer" class="cards-container"></div>
+      <div id="noReportsMessage" class="no-reports" style="display: none;">
+        ✓ NÃO TEM RELATÓRIOS PENDENTES
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+        const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+        const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentCorpNint");
+        const headers = {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'x-my-corpo': corp,
+          'x-my-nint': nint
+        };
+        if (options.returnRepresentation) {
+          headers['Prefer'] = 'return=representation';
+        }
+        return headers;
+      }
+    /* ======================= CORPORATION LOADING ======================= */    
+    async function loadCorpInfo() {
+      const corpOperNr = sessionStorage.getItem("currentCorpOperNr") || localStorage.getItem("currentCorpOperNr");
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const logoEl = document.getElementById("corpLogo");
+          if (logoEl && data[0].logo_url) logoEl.src = data[0].logo_url.trim();
+        }
+      } catch (err) {
+        console.error('Erro Logo:', err);
+      }
+    }
+    /* ========================= REPORTS LOADING ========================= */
+    async function loadUserReports() {
+      const corpNr = localStorage.getItem('currentCorpOperNr');
+      const nInt = localStorage.getItem('currentCorpNint');
+      const container = document.getElementById('reportsCardsContainer');
+      const counter = document.getElementById('totalPendingReports');
+      const noReportsMsg = document.getElementById('noReportsMessage');
+      const statsBadge = document.getElementById('statsBadge');
+      container.innerHTML = '<div class="message loading">A atualizar lista...</div>';
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reports_control?select=report_nr,report_date,report_state&corp_oper_nr=eq.${corpNr}&n_int=eq.${nInt}&report_state=eq.true&order=report_date.desc`;
+        const response = await fetch(url, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+          container.innerHTML = `<div class="message error">Erro de Colunas: ${data.message}</div>`;
+          return;
+        }
+        counter.textContent = data.length;
+        statsBadge.classList.remove('has-reports', 'no-reports');
+        if (data.length > 0) {
+          statsBadge.classList.add('has-reports');
+        } else {
+          statsBadge.classList.add('no-reports');
+        }
+        if (data.length === 0) {
+          noReportsMsg.style.display = 'block';
+          container.innerHTML = '';
+          return;
+        }
+        noReportsMsg.style.display = 'none';
+        container.innerHTML = data.map(report => {
+          let formattedDate = 'Data n/a';
+          if (report.report_date) {
+            const d = new Date(report.report_date);
+            if (!isNaN(d)) {
+              const day = String(d.getDate()).padStart(2, '0');
+              const month = String(d.getMonth() + 1).padStart(2, '0'); 
+              const year = d.getFullYear();
+              formattedDate = `${day}/${month}/${year}`;
+            }
+          }     
+          return `
+            <div class="report-card" onclick="openGescorp()">
+              <div class="card-top">
+                <span class="report-nr">OCORRÊNCIA: ${report.report_nr || '---'}</span>
+                <span class="report-date">📅 ${formattedDate}</span>
+              </div>
+              <div class="status-row">
+                <span class="badge-pending">⚠️ AGUARDA GESCORP</span>
+                <span class="open-platform">ABRIR PLATAFORMA ➔</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        container.innerHTML = '<div class="message error">Erro de ligação ao servidor.</div>';
+      }
+    }
+    /* ========================== GO TO GESCORP ========================== */
+    function openGescorp() {
+      window.open('https://mobile.gescorp.pt/', '_blank');
+    }
+    /* ========================= INITIALIZATION ========================== */
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+      loadCorpInfo();
+      loadUserReports();
+    });
+  </script>
+</body>
+</html>

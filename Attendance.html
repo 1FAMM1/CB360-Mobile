@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>CB360 Mobile - Assiduidade</title>
+   <style>
+    /* =============== CSS VARIABLES ================ */
+    :root {--primary-red: #d32f2f; --primary-red-dark: #b71c1c; --primary-red-darker: #c62828; --bg-light: #f5f5f5; --bg-light-alt: #e8e8e8; --text-dark: #2c3e50;
+           --border-light: #ccc; --shadow-default: 0 4px 20px rgba(0, 0, 0, 0.3); --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+           --gradient-primary: linear-gradient(45deg, var(--primary-red), var(--primary-red-dark)); --gradient-bg-light: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-light-alt) 100%);
+           --transition-default: 0.3s ease;}
+    /* ================ RESET & BODY ================ */
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gradient-bg-light); min-height: 100vh; user-select: none; transition: var(--transition-default);
+          display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ================= DARK MODE ================== */
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .stats-card {background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%); border-color: #444;}
+    .dark-mode .stats-card h3, .dark-mode .stats-value, .dark-mode .gauge-value {color: #fff;}
+    .dark-mode .stats-label, .dark-mode .loading-text, .dark-mode .gauge-label {color: #aaa;}
+    .dark-mode .risk-details {color: #666;}
+    .dark-mode .risk-details strong {color: #666;}
+    .dark-mode .stats-card {background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%); border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px rgba(0, 0, 0, 0.05), 0 0 5px rgba(255, 255, 255, 0.05);}
+    .dark-mode .stats-card.picket {box-shadow: 0 0 12px rgba(34, 197, 94, 0.15);}
+    .dark-mode .stats-card.instruction {box-shadow: 0 0 12px rgba(255, 152, 0, 0.15);}
+    .dark-mode .stats-card.absence {box-shadow: 0 0 12px rgba(244, 67, 54, 0.15);}
+    .dark-mode .gauge-value, .dark-mode .gauge-label {fill: #ccc;}
+    .dark-mode .voluntary-back-header {color: #ddd;}
+    .dark-mode .btn-choose {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+    .dark-mode .modal-content {background: #2c2c2c; color: white;}
+    .dark-mode .modal-body {color: #e0e0e0;}
+    .dark-mode .modal-footer {border-top-color: #444;}
+    /* =========== LIGHT MODE ================= */
+    .header, .footer {background: var(--gradient-primary); color: white; text-align: center; box-shadow: var(--shadow-default); transition: var(--transition-default); position: fixed; 
+                      left: 0; right: 0; z-index: 1000;}
+    .header {padding: 20px 15px;top: 0; border-bottom: 2px solid var(--primary-red-darker);}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: var(--transition-default); z-index: 1001;}
+    .footer {padding: 8px 15px; bottom: 0; border-top: 2px solid var(--primary-red-darker);}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;}
+    .main-content {flex: 1; padding: 50px 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;}    
+    .main-btn {display: flex; flex-direction: row; gap: 25px; justify-content: center; align-items: center; margin-top: 100px; flex-wrap: wrap;}
+    .btn-choose {display: flex; flex-direction: column; align-items: center; justify-content: center; width: 160px; height: 160px; border-radius: 15px; border: none; cursor: pointer;
+                 background: linear-gradient(135deg, #d32f2f, #b71c1c); color: #fff; font-size: 18px; font-weight: bold; box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
+                 transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease; text-align: center;}
+    .btn-choose:hover {transform: translateY(-6px) scale(1.05); box-shadow: 0 14px 30px rgba(0,0,0,0.35); background: linear-gradient(135deg, #b71c1c, #d32f2f);}
+    .btn-icon {font-size: 40px; margin-bottom: 10px; transition: transform 0.3s ease;}
+    .btn-text {font-size: 16px;}
+    .btn-choose:hover .btn-icon {transform: rotate(-10deg) scale(1.1);}    
+    .voluntary-content {display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; max-width: 600px; gap: 15px;}
+    .stats-container {width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 15px;}
+    .stats-card {background: var(--bg-light-alt); border-radius: 5px; overflow: hidden; box-shadow: var(--shadow-card); border: 1px solid var(--border-light); transition: transform 0.2s ease;}
+    .card-header {padding: 5px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f0f0f0;}
+    .card-header h3 {font-size: 0.85rem; font-weight: 700; margin: 0; letter-spacing: 0.5px; text-transform: uppercase;}
+    .card-body {padding: 0 10px;}
+    .stats-card.picket .card-header {background: #f0fdf4; border-bottom: 2px solid #16a34a;}
+    .stats-card.picket h3 {color: #166534;}
+    .stats-card.picket .stats-value {color: #22c55e;}
+    .stats-card.instruction .card-header {background: #fffaf0; border-bottom: 2px solid #ff9800;}
+    .stats-card.instruction h3 {color: #b46d00;}
+    .stats-card.instruction .stats-value {color: #ff9800;}
+    .stats-card.absence .card-header {background: #fff5f5; border-bottom: 2px solid #f44336;}
+    .stats-card.absence h3 {color: #c53030;}
+    .stats-card.absence .stats-value {color: #f44336;}
+    .stats-card.reserve .card-header {background: #f0f7ff; border-bottom: 2px solid #2196f3;}
+    .stats-card.reserve h3 {color: #1a65a5;}
+    .stats-row {display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0;}
+    .stats-label {font-size: clamp(0.75rem, 2vw + 0.5rem, 1.4rem); color: #64748b; font-weight: 500;}
+    .stats-value {font-size: clamp(1.15rem, 3vw + 0.5rem, 1.85rem); font-weight: 500; color: #1e293b;}
+    .loading-container {display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; padding: 40px;}
+    .loading-spinner {width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary-red); border-radius: 50%; animation: spin 1s linear infinite;}
+    .loading-text {font-size: clamp(1rem, 3vw, 1.1rem); color: #666; font-weight: 500;}
+    .error-message {background: #ffebee; color: var(--primary-red-darker); padding: 20px; border-radius: 12px; border-left: 4px solid #f44336; text-align: center; font-weight: 500;
+                    font-size: clamp(0.9rem, 3vw, 1rem);}
+    .empty-state {text-align: center; padding: 40px; color: #999; font-size: clamp(1rem, 3vw, 1.1rem);}
+    .empty-state-icon {font-size: clamp(3rem, 10vw, 4rem); margin-bottom: 15px;}
+    .gauge-container {display: flex; justify-content: center;}
+    .gauge-svg {width: 100%; max-width: 280px; height: auto; shape-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}
+    .gauge-value {font-size: clamp(1.5rem, 6vw, 2rem); font-weight: bold; fill: #777;}
+    .gauge-label {font-size: clamp(0.8rem, 3vw, 1rem); fill: #777;}
+    .risk-info {background: #f8fafc; padding: 12px; border-radius: 6px; margin-bottom: 10px; text-align: center;}
+    .risk-status {display: flex; align-items: center; justify-content: center; gap: 10px; font-size: clamp(1rem, 3.5vw, 1.1rem); font-weight: 600; margin-bottom: 5px;}
+    .risk-dot {width: 12px; height: 12px; border-radius: 50%; display: inline-block; animation: pulse 2s infinite;}
+    .risk-status.low {color: #4caf50;}
+    .risk-status.low .risk-dot {background: #4caf50; box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);}
+    .risk-status.medium {color: #ff9800;}
+    .risk-status.medium .risk-dot {background: #ff9800; box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);}
+    .risk-status.high {color: #f44336;}
+    .risk-status.high .risk-dot {background: #f44336; box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);}
+    .risk-details {font-size: clamp(0.9rem, 3vw, 1rem); color: #666;}
+    .risk-details strong {color: #666; font-weight: 700;}    
+    .voluntary-back-header {display: flex; align-items: center; gap: 8px; font-size: 20px; cursor: pointer; margin: 10px 0 0 0; align-self: flex-start;}
+    .back-arrow {font-size: 25px; line-height: 1; font-weight: bold;}
+    .back-text {line-height: 1; font-weight: bold;}
+    .voluntary-back-header:hover {opacity: 0.75;}
+    .modal {display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); animation: fadeIn 0.3s ease;}
+    .modal.show {display: flex; align-items: center; justify-content: center;}
+    .modal-content {background: white; margin: 20px; padding: 0; border-radius: 15px; width: 90%; max-width: 500px; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                    animation: slideIn 0.3s ease;}
+    .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px; text-align: center; font-size: 18px; font-weight: bold;}
+    .modal-body {padding: 20px; max-height: 400px; overflow-y: auto; line-height: 1.6; color: #2c3e50;}
+    .modal-footer {padding: 15px 20px; text-align: center; border-top: 1px solid #eee;}
+    .modal-close {background: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s ease;}
+    .modal-close:hover {background: #b71c1c;}
+    @keyframes spin {0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);}}
+    @keyframes pulse {0%, 100% {transform: scale(1); opacity: 1;} 50% {transform: scale(1.2); opacity: 0.7;}}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .main-content {padding-top: 70px; padding-left: 10px; padding-right: 10px;}
+      .stats-container {margin:0;}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="...">
+    <h1>ASSIDUIDADE</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">VISUALIZAÇÃO GLOBAL</div>
+  </div>
+  <div class="main-content">
+    <div class="main-btn">
+      <button class="btn-choose" id="btn-professionals">
+        <span class="btn-icon">👨‍💼👨‍🚒</span>
+        <span class="btn-text">Profissionais</span>
+      </button>
+      <button class="btn-choose" id="btn-voluntaries">
+        <span class="btn-icon">👨‍🚒👩‍🚒</span>
+        <span class="btn-text">Voluntários</span>
+      </button>
+    </div>
+    <div class="voluntary-content" style="display: none;">
+      <div id="loadingContainer" class="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">A carregar dados...</div>
+      </div>
+      <div id="voluntaryStatsContainer" class="stats-container" style="display: none;">
+        <div class="voluntary-back-header">
+          <span class="material-icons back-arrow" style="font-weight: bold;">arrow_back</span>
+          <span class="back-text">VOLUNTARIADO</span>
+        </div>
+        <div class="stats-card picket">
+          <div class="card-header">
+            <span>📋</span>
+            <h3>Piquetes</h3>
+          </div>
+          <div class="card-body">
+            <div class="stats-row">
+              <span class="stats-label">Quantidade</span>
+              <span class="stats-value" id="picketQty">0</span>
+            </div>
+            <div class="stats-row">
+              <span class="stats-label">Total horas acumuladas</span>
+              <span class="stats-value" id="picketHours">0h</span>
+            </div>
+          </div>
+        </div>
+        <div class="stats-card instruction">
+          <div class="card-header">
+            <span>📖</span>
+            <h3>INSTRUÇÃO CONTINUA</h3>
+          </div>
+          <div class="card-body">
+            <div class="stats-row">
+              <span class="stats-label">Total horas acumuladas</span>
+              <span class="stats-value" id="instructionQty">0h</span>
+            </div>
+          </div>
+        </div>
+        <div class="stats-card absence">
+          <div class="card-header">
+            <span>❌</span>
+            <h3>Faltas</h3>
+          </div>
+          <div class="card-body">
+            <div class="stats-row">
+              <span class="stats-label">Total acumulado</span>
+              <span class="stats-value" id="absenceQty">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="stats-card reserve">
+          <div class="card-header">
+            <span>⚠️</span>
+            <h3>Risco de Reserva</h3>
+          </div>
+          <div class="card-body">
+            <div class="gauge-container">
+              <svg viewBox="0 0 200 120" class="gauge-svg">
+                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e2e8f0" stroke-width="16" stroke-linecap="round"></path>
+                <defs>
+                  <lineargradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#4caf50"></stop>
+                    <stop offset="50%" stop-color="#ff9800"></stop>
+                    <stop offset="100%" stop-color="#f44336"></stop>
+                  </lineargradient>
+                </defs>
+                <path id="progressArc" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gaugeGradient)" stroke-width="16" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1.5s ease-out;"></path>
+                <text x="100" y="85" text-anchor="middle" class="gauge-value" id="gaugePercentage">0%</text>
+                <text x="100" y="105" text-anchor="middle" class="gauge-label" id="gaugeHours">0/200h</text>
+              </svg>
+            </div>
+            <div class="risk-info">
+              <div class="risk-status" id="riskStatus">
+                <span class="risk-dot"></span>
+                <span id="riskText">Calculando...</span>
+              </div>
+              <div class="risk-details" id="riskDetails">
+                Faltam <strong id="hoursRemaining">200h</strong> para o limite
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="professional-content" style="display: none;">
+      <div id="professionalStatsContainer" class="stats-container" style="display: none;">
+        <div class="provessional-back-header">
+          <span class="material-icons back-arrow" style="font-weight: bold;">arrow_back</span>
+          <span class="back-text">PROFISSIONAIS</span>
+        </div>
+      </div>
+    </div>
+  </div>  
+  <div id="emDesenvolvimentoModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">🚧 Em Desenvolvimento</div>
+      <div class="modal-body" style="text-align:center; font-size:16px;">
+        Esta funcionalidade ainda está em desenvolvimento.<br>
+        Por favor, verifique mais tarde.
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeModal('emDesenvolvimentoModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp, 
+        'x-my-nint': nint
+      };    
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    function showEmDesenvolvimento() {
+      showModal('emDesenvolvimentoModal');
+    }
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        if (navigator.vibrate) navigator.vibrate(50);
+      }
+    }
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+      }
+    }
+    /* =========================== NAVIGATION ============================ */
+    const mainBtn = document.querySelector('.main-btn');
+    const contentVoluntary = document.querySelector('.voluntary-content');
+    const contentProfessionals = document.querySelector('.content-professionals');
+    const btnProfessionals = document.getElementById('btn-professionals');
+    const btnVoluntaries = document.getElementById('btn-voluntaries');
+    const backVoluntary = contentVoluntary.querySelector('.voluntary-back-header');
+    contentVoluntary.style.display = 'none';
+    if (contentProfessionals) contentProfessionals.style.display = 'none';
+    btnProfessionals.addEventListener('click', () => {
+      showEmDesenvolvimento();
+    });
+    btnVoluntaries.addEventListener('click', () => {
+      mainBtn.style.display = 'none';
+      contentVoluntary.style.display = 'flex';
+      loadAttendanceData();
+    });
+    backVoluntary.addEventListener('click', () => {
+      contentVoluntary.style.display = 'none';
+      mainBtn.style.display = 'flex';
+    });
+    if (contentProfessionals) {
+      const backProfessionals = contentProfessionals.querySelector('.voluntary-back-header');
+      backProfessionals.addEventListener('click', () => {
+        contentProfessionals.style.display = 'none';
+        mainBtn.style.display = 'flex';
+      });
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await res.json();
+        if (data.length) {
+          if (h2) h2.textContent = data[0].corp_oper_nr || "N/D";
+          if (logoEl && data[0].logo_url) logoEl.src = data[0].logo_url.trim();
+        }
+      } catch (e) {
+        console.error("Erro loadCorpInfo:", e);
+      }
+    }
+    /* ========================== THEME LOADING ========================== */
+    function loadTheme() {
+      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+    }
+    /* ===================== ATTENDANCE DATA LOADING ===================== */
+    async function loadAttendanceData() {
+      const nInt = localStorage.getItem("currentCorpNint");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const loadingContainer = document.getElementById('loadingContainer');
+      const statsContainer = document.getElementById('voluntaryStatsContainer');
+      const errorContainer = document.getElementById('errorContainer');
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_assid?n_int=eq.${nInt}&corp_oper_nr=eq.${corpOperNr}&select=shift_type,qtd_hours,hour_instru`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) throw new Error('Falha no servidor');
+        const records = await response.json();
+        console.log("Registos carregados:", records);
+        let picketCount = 0,
+          picketHours = 0,
+          trainingHours = 0,
+          absenceCount = 0;
+        records.forEach(record => {
+          const type = (record.shift_type || "").toLowerCase().trim();
+          const rawQtd = String(record.qtd_hours || "0").replace(',', '.').trim();
+          const rawInstru = String(record.hour_instru || "0").replace(',', '.').trim();
+          const valQtd = parseFloat(rawQtd) || 0;
+          const valInstru = parseFloat(rawInstru) || 0;
+          if (valInstru > 0) console.log(`Encontrada Formação: ${valInstru}h`);
+          if (type.includes('formacao') || type.includes('formação') || type.includes('instru')) {
+            trainingHours += valInstru;
+          } else if (type === 'piquete' || type === 'reforço') {
+            picketCount++;
+            picketHours += valQtd;
+          } else if (type === 'falta') {
+            absenceCount++;
+          }
+        });
+        const GOAL_PICKET = 160,
+          GOAL_TRAINING = 40;
+        const missingPicket = Math.max(0, GOAL_PICKET - picketHours);
+        const missingTraining = Math.max(0, GOAL_TRAINING - trainingHours);
+        const maxDeficit = Math.max((missingPicket / GOAL_PICKET) * 100, (missingTraining / GOAL_TRAINING) * 100);
+        let riskLevel = 'low',
+          riskMessage = 'Risco Reduzido';
+        if (maxDeficit > 50) {
+          riskLevel = 'high';
+          riskMessage = 'Risco Elevado';
+        } else if (maxDeficit > 20) {
+          riskLevel = 'medium';
+          riskMessage = 'Risco Moderado';
+        }
+        if (document.getElementById('picketQty')) document.getElementById('picketQty').textContent = picketCount;
+        if (document.getElementById('picketHours')) document.getElementById('picketHours').textContent = picketHours.toFixed(1) + 'h';
+        if (document.getElementById('absenceQty')) document.getElementById('absenceQty').textContent = absenceCount;
+        const trainingEl = document.getElementById('instructionQty');
+        if (trainingEl) {
+          trainingEl.textContent = trainingHours.toFixed(1) + 'h';
+        } else {
+          console.warn("AVISO: Não encontrei o ID 'instructionQty' no HTML");
+        }
+        const totalUtil = Math.min(picketHours, GOAL_PICKET) + Math.min(trainingHours, GOAL_TRAINING);
+        updateGauge(totalUtil, (missingPicket + missingTraining), riskLevel, riskMessage);
+        const riskDetails = document.getElementById('riskDetails');
+        if (riskDetails) {
+          let info = [];
+          if (missingPicket > 0) info.push(`<strong>${missingPicket.toFixed(1)}h</strong> Piquete`);
+          if (missingTraining > 0) info.push(`<strong>${missingTraining.toFixed(1)}h</strong> Formação`);
+          riskDetails.innerHTML = info.length > 0 ? `Faltam: ${info.join(' e ')}` : `✅ Requisitos Cumpridos!`;
+        }
+        if (loadingContainer) loadingContainer.style.display = 'none';
+        if (statsContainer) statsContainer.style.display = 'flex';
+      } catch (error) {
+        console.error('Erro:', error);
+        if (loadingContainer) loadingContainer.style.display = 'none';
+        if (errorContainer) {
+          errorContainer.style.display = 'block';
+          errorContainer.innerHTML = `<div class="error-message">❌ Erro ao carregar dados.</div>`;
+        }
+      }
+    }
+    function updateGauge(totalUtil, totalHoursRemaining, riskLevel, riskMessage) {
+      const REQUIRED_HOURS = 200;
+      const arcLength = 251.2;
+      const missingPercentage = Math.min(100, (totalHoursRemaining / REQUIRED_HOURS) * 100);
+      const offset = (missingPercentage / 100) * arcLength;
+      const progressArc = document.getElementById('progressArc');
+      if (progressArc) progressArc.style.strokeDashoffset = arcLength - offset;
+      if (document.getElementById('gaugePercentage')) document.getElementById('gaugePercentage').textContent = Math.round(missingPercentage) + '%';
+      if (document.getElementById('gaugeHours')) document.getElementById('gaugeHours').textContent = totalUtil.toFixed(1) + '/' + REQUIRED_HOURS + 'h';
+      const riskStatus = document.getElementById('riskStatus');
+      const riskTextEl = document.getElementById('riskText');
+      if (riskStatus && riskTextEl) {
+        riskStatus.className = `risk-status ${riskLevel}`;
+        riskTextEl.textContent = riskMessage;
+      }
+    }
+    /* ========================= GLOBAL LOADING ========================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCorpInfo();
+      loadTheme();   
+    });
+  </script>
+</body>
+</html>

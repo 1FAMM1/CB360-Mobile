@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>CB360_DOCUMENTOS</title>
+  <style>
+    /* ==================== BODY ==================== */
+    html, body {overscroll-behavior: none;}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; display: flex; flex-direction: column;
+          height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .documents-list-title {color: #ddd;}
+    .dark-mode .comun-card {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15);}
+    .dark-mode .comun-card:hover {background: rgba(255, 255, 255, 0.15);}
+    .dark-mode .comun-title {color: #fff;}
+    .dark-mode .modal-content { background: #2c2c2c; border: 1px solid #444; }
+    .dark-mode .modal-body {color: #eee;}
+    .dark-mode .modal-footer {border-top-color: #444;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828; position: fixed;
+             top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header-subtitle {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828; position: fixed;
+             bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;}
+    .main-content {flex: 1; display: flex; flex-direction: column; padding-top: 100px; padding-bottom: 80px; overflow: hidden;}
+    .upload-docs-bar {padding: 0 20px 15px;}
+    #upload-doc-btn {width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600; cursor: pointer;
+                     background: linear-gradient(45deg, #1976d2, #0d47a1); color: #fff; box-shadow: 0 6px 14px rgba(0,0,0,0.2); transition: transform 0.15s ease, box-shadow 0.15s ease;}
+    #upload-doc-btn:hover {transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,0.25);}
+    #upload-doc-btn .material-icons {font-size: 22px;}
+    .documents-list-title {display: flex; justify-content: center; font-weight: bold; color: #444; margin: 0 0 15px 0; padding: 0 20px; font-size: 16px;}
+    .documents-list-container {flex: 1; overflow-y: auto; padding: 0 20px;}
+    .documents-list-container::-webkit-scrollbar {display: none;}
+    .documents-list-container {-ms-overflow-style: none; scrollbar-width: none;}
+    .documents-list {display: flex; flex-direction: column; gap: 5px; padding-bottom: 20px;}
+    .comun-card {background: #ddd; border: 1px solid #bdc3c7; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; 
+                 box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); cursor: pointer; transition: background 0.3s ease, box-shadow 0.2s ease;}
+    .comun-card:hover {background: #c8c8c8; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);}
+    .comun-title {font-size: 15px; font-weight: 600; color: #333; flex: 1;}
+    .comun-icon {font-size: 28px; color: #d32f2f;}
+    #pdf-viewer-container {position: fixed; left: 0; right: 0; display: none; flex-direction: column; background: #fff; z-index: 999;}
+    #pdf-viewer-header {background: #d32f2f; color: #eee; padding: 10px; display: flex; align-items: center; gap: 10px; justify-content: space-between;}
+    #pdf-controls {display: flex; gap: 8px; align-items: center;}
+    #pdf-controls button {background: rgba(255, 255, 255, 0.2); border: none; color: #fff; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background 0.2s;}
+    #pdf-controls button:hover {background: rgba(255, 255, 255, 0.3);}
+    #pdf-controls span {font-size: 14px; min-width: 50px; text-align: center;}
+    #pdf-viewer {flex: 1; overflow: auto; background: #fff; padding: 10px; text-align: center;}
+    #pdf-viewer::-webkit-scrollbar {display: none;}
+    #pdf-viewer {-ms-overflow-style: none; scrollbar-width: none;}    
+    .modal {display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);align-items: center; justify-content: center;}
+    .modal.show { display: flex; }
+    .modal-content {background: #fff; width: 90%; max-width: 450px; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; animation: fadeIn 0.3s ease;}
+    .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: center;}
+    .modal-header h3 {font-size: 1.2rem; margin: 0;}
+    .modal-close-btn {background: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s ease;}
+    .modal-close-btn:hover {background: #b71c1c;}
+    .modal-upload-submit-btn {background:#1976d2; color:#fff; border:none; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer;}
+    .modal-body {padding: 20px; max-height: 60vh; overflow-y: auto; color: #333;}
+    .modal-footer {padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center;}    
+    .choose-file-btn {width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; background: linear-gradient(45deg, #1976d2, #0d47a1); color: #fff;
+                      box-shadow: 0 6px 14px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap:8px;}
+    #message-modal .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 15px 20px; text-align: center;}
+    #message-modal.success .modal-header {background: linear-gradient(45deg, #388e3c, #1b5e20);}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width:480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important;}
+      .header-logo {height: 50px; top: 32px;}
+      .main-content {padding-top: 80px; padding-bottom: 40px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .documents-list-container {padding: 0 20px;}
+      .documents-list-title {padding: 0 20px;}
+      .upload-docs-bar {padding: 15px 20px;}}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Mark_Logo_White.png">
+    <h1>DOCUMENTOS</h1>
+    <div class="header-subtitle">VISUALIZAÇÃO E ENVIO DE DOCUMENTOS</div>
+  </header>
+  <div class="main-content">    
+    <div class="documents-list-title">LISTA DE DOCUMENTOS</div>
+    <div class="documents-list-container">
+      <div id="documents-list" class="documents-list"></div>
+    </div>
+    <div class="upload-docs-bar">
+      <button id="upload-doc-btn"><span class="material-icons">upload_file</span>Adicionar documento</button>
+    </div>
+    <div id="pdf-viewer-container">
+      <div id="pdf-viewer-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="material-icons" style="cursor:pointer" id="pdf-back-btn">arrow_back</span>
+          <span id="pdf-title" style="font-weight:600"></span>
+        </div>
+        <div id="pdf-controls">
+          <button id="zoom-out">−</button>
+          <span id="zoom-level">100%</span>
+          <button id="zoom-in">+</button>
+        </div>
+      </div>
+      <div id="pdf-viewer"></div>
+    </div>
+  </div>
+  <div id="upload-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📄 Adicionar Documento</h3>          
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <input type="file" id="upload-file-input" accept="application/pdf" style="display:none;"/>
+        <button id="choose-file-btn" class="choose-file-btn"><span class="material-icons">attach_file</span>Escolher ficheiro PDF</button>
+        <div id="selected-file-name"  style="margin-top:12px; font-size:14px; color:#555;"> Nenhum ficheiro selecionado</div>
+        <div id="upload-status" style="margin-top:10px; font-size:14px;"></div>
+      </div>
+      <div class="modal-footer" style="gap:10px;">
+        <button class="modal-close-btn" id="upload-cancel-btn">Cancelar</button>
+        <button id="upload-submit-btn" class="modal-upload-submit-btn">Upload</button>
+      </div>
+    </div>  
+  </div>
+  <div id="message-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="message-modal-title">Mensagem</h3>
+      </div>
+      <div class="modal-body" id="message-modal-body" style="text-align:center; font-size:16px;"></div>
+      <div class="modal-footer">
+        <button class="modal-close-btn" onclick="closeMessageModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <div id="confirm-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Confirmação</h3>
+      </div>
+      <div class="modal-body" id="confirm-modal-body" style="text-align:center; font-size:16px;"></div>
+      <div class="modal-footer" style="gap:10px;">
+        <button class="modal-close-btn" id="confirm-cancel-btn">Cancelar</button>
+        <button class="modal-upload-submit-btn" id="confirm-ok-btn">Apagar</button>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-content">
+      <div class="powered-by"><strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360</div>
+      <div class="footer-year">© 2023-2025 - Sistema CB360 Mobile</div>
+    </div>
+  </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
+      return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */   
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await resp.json();
+        if (data?.length && data[0].logo_url) {
+          document.getElementById("corpLogo").src = data[0].logo_url.trim();
+        }
+      } catch (err) {
+        console.error("Erro Logo:", err);
+      }
+    }
+    /* ========================= MESSAGSE MODALS ========================= */
+    function showMessageModal(message, title = "Mensagem", type = "error") {
+      const modal = document.getElementById("message-modal");
+      const body = document.getElementById("message-modal-body");
+      const header = modal.querySelector(".modal-header");
+      body.textContent = message;
+      document.getElementById("message-modal-title").textContent = title;
+      modal.classList.remove("success", "error");
+      modal.classList.add(type);
+      modal.style.display = "flex";
+    }
+    function closeMessageModal() {
+      document.getElementById("message-modal").style.display = "none";
+    }
+    function showConfirmModal(message) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById("confirm-modal");
+        const body = document.getElementById("confirm-modal-body");
+        const btnCancel = document.getElementById("confirm-cancel-btn");
+        const btnOk = document.getElementById("confirm-ok-btn");
+        body.textContent = message;
+        modal.style.display = "flex";
+        const cleanUp = () => {
+          modal.style.display = "none";
+          btnCancel.onclick = null;
+          btnOk.onclick = null;
+        };
+        btnCancel.onclick = () => {cleanUp(); resolve(false);};
+        btnOk.onclick = () => {cleanUp(); resolve(true);};
+      });
+    }
+    /* ======================== DOCUMENTS LOADING ======================== */
+    function markAsRead(url) {
+      let viewedDocs = JSON.parse(localStorage.getItem("viewed_documents") || "[]");
+      if (!viewedDocs.includes(url)) {
+        viewedDocs.push(url);
+        localStorage.setItem("viewed_documents", JSON.stringify(viewedDocs));
+      }
+    }
+    async function loadUserDocuments() {
+      const corp = localStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint");
+      const list = document.getElementById("documents-list");
+      list.innerHTML = "<p style='text-align:center; padding:20px;'>A carregar documentos...</p>";
+      const viewedDocs = JSON.parse(localStorage.getItem("viewed_documents") || "[]");
+      try {
+        const resp = await fetch(
+          `${SUPABASE_URL}/rest/v1/personal_docs?select=doc_title,doc_url&corp_oper_nr=eq.${corp}&n_int=eq.${nint}&order=created_at.desc`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const documents = await resp.json();
+        list.innerHTML = ""; 
+        if (!Array.isArray(documents) || documents.length === 0) {
+          list.innerHTML = `<div class="comun-card"><div class="comun-title" style="text-align: center;">Sem documentos disponíveis.</div></div>`;
+          return;
+        }
+        documents.forEach(doc => {
+          if (!doc.doc_url) return;
+          const publicUrl = doc.doc_url.startsWith('http')
+          ? doc.doc_url
+          : `${SUPABASE_URL}/storage/v1/object/public/personal_docs/${doc.doc_url}`;
+          const isRead = viewedDocs.includes(publicUrl);
+          const row = document.createElement("div");
+          row.style.display = "flex";
+          row.style.gap = "8px";
+          row.style.alignItems = "center";
+          const card = document.createElement("div");
+          card.className = "comun-card";
+          card.style.flex = "1";
+          card.innerHTML = `
+            <div class="comun-title">${doc.doc_title}</div>
+            <span class="material-icons comun-icon"
+              style="color:${isRead ? '#4CAF50' : '#d32f2f'}">
+              ${isRead ? 'check_circle' : 'picture_as_pdf'}
+            </span>
+          `;
+          card.onclick = () => {
+            markAsRead(publicUrl);
+            const icon = card.querySelector('.comun-icon');
+            icon.innerText = 'check_circle';
+            icon.style.color = '#4CAF50';
+            openPdfViewer(publicUrl, doc.doc_title);
+          };
+          const deleteCard = document.createElement("div");
+          deleteCard.className = "comun-card";
+          deleteCard.style.width = "52px";
+          deleteCard.style.minWidth = "52px";
+          deleteCard.style.justifyContent = "center";
+          deleteCard.style.cursor = "pointer";
+          deleteCard.innerHTML = `
+            <span class="material-icons comun-icon" style="color:#777;">delete</span>
+          `;
+          deleteCard.onclick = async (e) => {
+            e.stopPropagation();
+            await deleteDocument(publicUrl, row);
+          };   
+          card.querySelector('.comun-icon:nth-child(2)').onclick = () => {
+            deleteDocument(publicUrl, card);
+          };
+          row.appendChild(card);
+          row.appendChild(deleteCard);
+          list.appendChild(row);
+        });
+      } catch (err) {
+        console.error("Erro ao carregar documentos:", err);
+        list.innerHTML = `<div class="comun-card"><div class="comun-title">Erro ao carregar documentos</div></div>`;
+      }
+    }
+    let currentScale = 0.75;
+    let currentPdf = null;
+    let pinchScale = 1;
+    let lastPinchDistance = 0;
+    let isPinching = false;
+    async function openPdfViewer(pdfUrl, title) {
+      const viewerContainer = document.getElementById("pdf-viewer-container");
+      const pdfViewer = document.getElementById("pdf-viewer");
+      const pdfTitle = document.getElementById("pdf-title");
+      const commListContainer = document.querySelector(".documents-list-container");
+      const commTitle = document.querySelector(".documents-list-title");
+      const header = document.querySelector(".header");
+      const footer = document.querySelector(".footer");
+      const headerHeight = header.offsetHeight;
+      const footerHeight = footer.offsetHeight;
+      viewerContainer.style.top = `${headerHeight}px`;
+      viewerContainer.style.bottom = `${footerHeight}px`;      
+      commListContainer.style.display = "none";
+      commTitle.style.display = "none";
+      viewerContainer.style.display = "flex";
+      pdfTitle.textContent = title;
+      pdfViewer.innerHTML = "<p style='text-align:center; padding:20px;'>A carregar PDF...</p>";
+      currentScale = 0.75;
+      pinchScale = 1;
+      updateZoomLevel();
+      setupPinchZoom(pdfViewer);      
+      document.getElementById("pdf-back-btn").onclick = () => {
+        viewerContainer.style.display = "none";
+        commListContainer.style.display = "block";
+        if (commTitle) commTitle.style.display = "flex";
+        currentPdf = null;
+      };
+      try {
+        currentPdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        await renderPdf();
+      } catch (err) {
+        pdfViewer.innerHTML = "<p style='text-align:center; font-weight:bold; padding:20px; color:red;'>Não foi possível carregar o PDF.</p>";
+      }
+    }
+    /* ======================= DELETING DOCUMENTS ======================== */
+    async function deleteDocument(publicUrl, rowElement) {
+      try {
+        const confirmDelete = await showConfirmModal("Tem a certeza que deseja apagar este documento? Esta ação é irreversível.");
+        if (!confirmDelete) return true;
+        const fileName = publicUrl.split('/').pop();
+        const { data: storageData, error: storageError } = await supabaseClient
+        .storage
+        .from('personal_docs')
+        .remove([fileName]);
+        if (storageError) {
+          console.warn("Aviso Supabase Storage:", storageError.message);
+          if (!storageError.message.includes("file not found")) throw storageError;
+        }
+        const { data: tableData, error: tableError } = await supabaseClient
+        .from('personal_docs')
+        .delete()
+        .eq('doc_url', publicUrl);
+        if (tableError) {
+          console.warn("Aviso Supabase Table:", tableError.message);
+          if (!tableError.message.includes("No rows found")) throw tableError;
+        }
+        if (rowElement) rowElement.remove();
+        const list = document.getElementById("documents-list");
+        if (!list.querySelector('.comun-card')) {
+          list.innerHTML = `<div class="comun-card"><div class="comun-title" style="text-align: center;">Sem documentos disponíveis.</div></div>`;
+        }
+        showMessageModal("Documento apagado com sucesso!", "Sucesso", "success"); 
+        return true;        
+      } catch (err) {
+        console.error("Erro ao apagar documento:", err);
+        showMessageModal(`Falha ao apagar documento: ${err.message}`, "Erro", "error");
+        return false;
+      }
+    }
+    /* ======================== DOCUMENTS SAVING ========================= */
+    function sanitizeFileName(fileName) {
+      return fileName
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/ /g, "_")
+        .replace(/[^a-zA-Z0-9_\-\.]/g, "");
+    }
+    async function uploadPdfToSupabase(file, corpOperNr, nint) {
+      try {
+        const safeFileName = `${nint}_${sanitizeFileName(file.name)}`;
+        const {data, error} = await supabaseClient.storage
+        .from("personal_docs")
+        .upload(safeFileName, file, { upsert: true });
+        if (error) throw error;
+        const { data: urlData, error: urlError } = supabaseClient.storage
+        .from("personal_docs")
+        .getPublicUrl(safeFileName);
+        if (urlError) throw urlError;
+        const publicUrl = urlData.publicUrl;
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/personal_docs`, {
+          method: "POST",
+          headers: getSupabaseHeaders({ returnRepresentation: true }),
+          body: JSON.stringify({n_int: nint, corp_oper_nr: corpOperNr, doc_title: file.name, doc_url: publicUrl})
+        });
+        if (!resp.ok) throw new Error("Falha ao registrar documento na tabela");
+        return publicUrl;
+      } catch (err) {
+        console.error("Erro ao enviar PDF:", err.message);
+        return null;
+      }
+    }
+    /* =========================== ZOOM PINCH ============================ */
+    function setupPinchZoom(element) {
+      let initialPinchCenter = {x: 0, y: 0};
+      let scrollAtStart = {x: 0, y: 0};
+      element.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+          isPinching = true;
+          lastPinchDistance = getPinchDistance(e.touches);
+          scrollAtStart.x = element.scrollLeft;
+          scrollAtStart.y = element.scrollTop;
+          const rect = element.getBoundingClientRect();
+          initialPinchCenter.x = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+          initialPinchCenter.y = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+        }
+      });
+      element.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && isPinching) {
+          e.preventDefault();
+          const distance = getPinchDistance(e.touches);
+          const ratio = distance / lastPinchDistance;
+          pinchScale *= ratio;
+          pinchScale = Math.max(0.5, Math.min(6, pinchScale));
+          const canvases = element.querySelectorAll('canvas');
+          canvases.forEach(canvas => {
+            const rect = canvas.getBoundingClientRect();
+            const originX = ((initialPinchCenter.x - (rect.left - element.getBoundingClientRect().left)) / rect.width) * 100;
+            const originY = ((initialPinchCenter.y - (rect.top - element.getBoundingClientRect().top)) / rect.height) * 100;
+            canvas.style.transform = `scale(${pinchScale})`;
+            canvas.style.transformOrigin = `${originX}% ${originY}%`;
+          });
+          updateZoomLevel(currentScale * pinchScale);
+          lastPinchDistance = distance;
+        }
+      }, {
+        passive: false
+      });
+      element.addEventListener('touchend', async (e) => {
+        if (isPinching && e.touches.length < 2) {
+          isPinching = false;
+          const oldScale = currentScale;
+          currentScale = currentScale * pinchScale;
+          currentScale = Math.max(0.5, Math.min(8.0, currentScale));
+          const scaleChange = currentScale / oldScale;
+          const pinchDocX = scrollAtStart.x + initialPinchCenter.x;
+          const pinchDocY = scrollAtStart.y + initialPinchCenter.y;
+          pinchScale = 1;
+          await renderPdf();
+          element.scrollLeft = pinchDocX * scaleChange - initialPinchCenter.x;
+          element.scrollTop = pinchDocY * scaleChange - initialPinchCenter.y;
+          updateZoomLevel(currentScale);
+        }
+      });
+    }
+    function getPinchDistance(touches) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    async function renderPdf() {
+      if (!currentPdf) return;
+      const pdfViewer = document.getElementById("pdf-viewer");
+      const tempContainer = document.createElement('div');
+      try {
+        for (let i = 1; i <= currentPdf.numPages; i++) {
+          const page = await currentPdf.getPage(i);
+          const canvas = document.createElement('canvas');
+          canvas.style.marginBottom = "10px";
+          canvas.style.display = "block";
+          canvas.style.marginLeft = "auto";
+          canvas.style.marginRight = "auto";
+          canvas.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+          const ctx = canvas.getContext('2d');
+          const viewport = page.getViewport({
+            scale: currentScale
+          });
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          await page.render({
+            canvasContext: ctx,
+            viewport: viewport
+          }).promise;
+          tempContainer.appendChild(canvas);
+        }
+        pdfViewer.innerHTML = "";
+        pdfViewer.appendChild(tempContainer);
+      } catch (err) {
+        pdfViewer.innerHTML = "<p style='color:red;'>Erro ao renderizar páginas.</p>";
+      }
+    }
+    function updateZoomLevel(scale) {
+      const finalScale = scale || currentScale;
+      const zoomPercent = Math.round((finalScale / 1.5) * 100);
+      document.getElementById("zoom-level").textContent = zoomPercent + "%";
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('sgo-theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+      loadCorpInfo();
+      loadUserDocuments();
+      document.getElementById("zoom-in").onclick = async () => {
+        if (currentPdf && currentScale < 7.5) {
+          currentScale += 0.5;
+          updateZoomLevel();
+          await renderPdf();
+        }
+      };
+      document.getElementById("zoom-out").onclick = async () => {
+        if (currentPdf && currentScale > 0.5) {
+          currentScale -= 0.5;
+          updateZoomLevel();
+          await renderPdf();
+        }
+      };
+      document.getElementById("upload-doc-btn").onclick = () => {
+        document.getElementById("upload-modal").style.display = "flex";
+        document.getElementById("upload-file-input").value = "";
+        document.getElementById("upload-status").textContent = "";
+      };
+      document.getElementById("choose-file-btn").onclick = () => {
+        document.getElementById("upload-file-input").click();
+      };
+      document.getElementById("upload-file-input").onchange = (e) => {
+        const fileName = e.target.files[0]?.name || "Nenhum ficheiro selecionado";
+        document.getElementById("selected-file-name").textContent = fileName;
+      };
+      document.getElementById("upload-cancel-btn").onclick = () => {
+        document.getElementById("upload-modal").style.display = "none";
+      };
+      document.getElementById("upload-submit-btn").onclick = async () => {
+        const fileInput = document.getElementById("upload-file-input");
+        const statusEl = document.getElementById("upload-status");
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const nint = localStorage.getItem("currentCorpNint");
+        if (!fileInput.files.length) {
+          statusEl.textContent = "Escolha um ficheiro para enviar.";
+          return;
+        }
+        const file = fileInput.files[0];
+        if (file.type !== "application/pdf") {
+          statusEl.textContent = "Apenas ficheiros PDF são permitidos.";
+          return;
+        }
+        statusEl.textContent = "A enviar documento...";
+        const result = await uploadPdfToSupabase(file, corpOperNr, nint);
+        if (result) {
+          statusEl.textContent = "Upload concluído!";
+          await loadUserDocuments();
+          setTimeout(() => document.getElementById("upload-modal").style.display = "none", 1000);
+        } else {
+          statusEl.textContent = "Erro ao enviar documento. Veja console.";
+        }
+      };
+    });
+  </script>
+</body>
+</html>

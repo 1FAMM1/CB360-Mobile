@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360 Mobile - Disponibilidades Piquetes</title>
+  <style>
+    /* ==================== BODY ==================== */  
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .availability-pik-subtitle {color: #e0e0e0;}
+    .dark-mode .availability-pik-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+    .dark-mode .availability-pik-btn:hover:not(.selected) {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
+    .dark-mode .availability-pik-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
+    .dark-mode .availability-pik-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.7);}
+    .dark-mode .calendar-container {border: 1px solid #222; background: rgba(65, 65, 65, 0.9); color: #fff;}
+    .dark-mode .calendar-header {color: #ff6b6b; border-bottom: 1px solid rgba(255, 255, 255, 0.2); padding-bottom: 8px;}
+    .dark-mode .calendar-day-header {color: #aaa;}
+    .dark-mode .calendar-day {background: rgba(255, 255, 255, 0.1);}    
+    .dark-mode .calendar-day:hover {background: rgba(255, 255, 255, 0.15);}
+    .dark-mode .calendar-day.selected {background: linear-gradient(135deg, #3ad0ec, #28c0de, #1aa9c5); color: white; font-weight: bold; border: 2px solid #1aa9c5;}
+    .dark-mode .calendar-day.today {background: #8a1c1c; border: 2px solid #f1c40f;}
+    .dark-mode .calendar-day.selected.today {background-color: rgba(39, 174, 96, 1); border: 2px solid #f39c12;}
+    .dark-mode .calendar-legend {border: 1px solid #222}
+    .dark-mode .calendar-legend {background: rgba(255, 255, 255, 0.08);}
+    .dark-mode .legend-item {color: #fff;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;} 
+    .main-content {flex: 1; overflow-y: auto; padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; transition: filter 0.3s ease, opacity 0.3s ease;}
+    .content-blur {filter: blur(2px); opacity: 1; pointer-events: none;}
+    .availability-pik-header {flex-shrink: 0; text-align: center; width: 100%;} 
+    .availability-pik-subtitle {font-size: 1.3em; color: #2c3e50; transition: color 0.3s ease;}
+    .availability-pik-buttons {display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 22vw, 220px), 1fr)); justify-content: center; align-items: stretch; margin-bottom: 10px;}
+    .availability-pik-btn {padding: clamp(10px, 1.5vw, 16px) clamp(12px, 2vw, 20px); min-height: clamp(42px, 6vh, 60px); min-width: clamp(80px, 28vw, 250px); max-width: clamp(190px, 18vw, 240px);
+                 font-size: clamp(11px, 1.2vw, 14px); border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; flex-direction: column;
+                 justify-content: center; align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
+    .availability-pik-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                         transition: left 0.4s ease; z-index: 1;}
+    .availability-pik-btn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
+                        transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
+    .availability-pik-btn:active::after {width: 150px; height: 150px;}
+    .availability-pik-btn:hover:not(.selected) {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
+    .availability-pik-btn:active:not(.selected) {transform: scale(0.98); transition:0.1s ease;}
+    .availability-pik-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
+    .availability-pik-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.6);}
+    .availability-pik-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
+    .availability-pik-btn span {position: relative; z-index: 2;} 
+    .availability-pik-card {display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; border-radius: 15px; margin-bottom: 5px; background: #d0e2f5;
+                  border: 1px solid #bbb; border-left: 5px solid #bbb; border-right: 5px solid #bbb; width: 100%; max-width: 100%;}
+    .calendar-container {margin: 0 auto 0 auto;  padding: clamp(10px, 3vw, 15px); background: rgba(0, 0, 0, 0.05); border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+                         display: none;  width: 100%;}
+    .calendar-container.show { display: block; animation: slideDown 0.3s ease;}    
+    .calendar-header {text-align: center;  font-size: clamp(1em, 3vw, 1.2em); font-weight: bold; color: #d32f2f;  margin-bottom: clamp(5px, 1vw, 10px); border-bottom: 1px solid rgba(0, 0, 0, 0.2); padding-bottom: 8px;}
+    .calendar-grid {display: grid;  grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: clamp(2px, 1vw, 5px);}
+    .calendar-day-header {text-align: center; font-weight: bold; padding: clamp(4px, 1.5vw, 8px); font-size: clamp(0.7em, 2vw, 0.9em); color: #666;}  
+    .calendar-day {text-align: center; padding: clamp(5px, 2vw, 10px); border-radius: 3px; background: rgba(0, 0, 0, 0.10); font-size: clamp(0.75em, 2vw, 0.9em); cursor: pointer;  transition: 0.2s ease;}
+    .calendar-day:hover {background: #e0e0e0; transform: scale(1.05);}
+    .calendar-day.empty {background: transparent; cursor: default;}    
+    .calendar-day.empty:hover {transform: none;}    
+    .calendar-day.today {background: #8a1c1c; color: white; font-weight: bold; border: 2px solid #e67e22; }
+    .calendar-day.selected {background: linear-gradient(135deg, #3ad0ec, #28c0de, #1aa9c5); color: white; font-weight: bold; border: 2px solid #1aa9c5;}
+    .calendar-day.selected.today {background-color: #229954; border: 2px solid #f39c12;}
+    .calendar-legend {display: none; width: 100%;  margin: 5px auto 0; border-radius: 10px; background: rgba(0, 0, 0, 0.05); border: 1px solid #ccc; justify-content: center; align-items: center;
+                      padding: clamp(8px, 2vw, 12px) clamp(10px, 3vw, 20px); gap: clamp(10px, 5vw, 42px); font-size: clamp(11px, 2vw, 13px); white-space: nowrap; text-align: center;}
+    .calendar-legend.show {display: flex;}
+    .legend-item {display: inline-flex; font-size: clamp(8px, 3vw, 20px); align-items: center; justify-content: center; gap: 5px; color: #333; margin: 0;}
+    .legend-color {width: clamp(20px, 2vw, 22px); height: clamp(20px, 2vw, 22px); border-radius: 4px; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.2);}
+    .legend-color.pick {background: linear-gradient(135deg, #3ad0ec, #28c0de, #1aa9c5); border-color: rgba(255, 255, 255, 0.05);}
+    .toast {position: fixed; bottom: clamp(320px, 45vh, 480px); left: 50%; transform: translateX(-50%); background: rgba(194, 21, 21, 0.85); color: #fff; padding: 18px 30px; border-radius: 10px; 
+            font-size: clamp(16px, 3vw, 20px); font-weight: bold; width: 500px; max-width: 90%; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(-10px);}
+    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .availability-pik-header {flex-shrink: 0; padding-bottom: 10px;}
+      .availability-pik-subtitle {font-size: 0.9em; font-weight: bold; margin-top: 10px;}
+      .availability-pik-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}
+      .availability-pik-btn {height: 50px; min-height: 30px; max-height:75px; font-size: 12px; padding: 15px 10px;}
+      .main-content {padding-left: 20px; padding-right: 20px; justify-content: center; align-items: center;}}
+    .main-content {transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    body.mobile-month-active .main-content {padding-top: 70px; justify-content: flex-start !important; align-items: stretch !important;}
+    .main-content.slide-out, .main-content.slide-in {transform: none;}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>DISPONIBILIDADES</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">PIQUETES</div>
+  </div>
+  <div class="main-content">
+    <div class="availability-pik-header">
+      <p class="availability-pik-subtitle">Selecione o mês e dias:</p>
+    </div>
+    <div class="availability-pik-buttons">
+      <button class="availability-pik-btn" onclick="showCalendar(0, this)">Janeiro</button>
+      <button class="availability-pik-btn" onclick="showCalendar(1, this)">Fevereiro</button>
+      <button class="availability-pik-btn" onclick="showCalendar(2, this)">Março</button>
+      <button class="availability-pik-btn" onclick="showCalendar(3, this)">Abril</button>
+      <button class="availability-pik-btn" onclick="showCalendar(4, this)">Maio</button>
+      <button class="availability-pik-btn" onclick="showCalendar(5, this)">Junho</button>
+      <button class="availability-pik-btn" onclick="showCalendar(6, this)">Julho</button>
+      <button class="availability-pik-btn" onclick="showCalendar(7, this)">Agosto</button>
+      <button class="availability-pik-btn" onclick="showCalendar(8, this)">Setembro</button>
+      <button class="availability-pik-btn" onclick="showCalendar(9, this)">Outubro</button>
+      <button class="availability-pik-btn" onclick="showCalendar(10, this)">Novembro</button>
+      <button class="availability-pik-btn" onclick="showCalendar(11, this)">Dezembro</button>
+    </div>
+    <div id="calendarContainer" class="calendar-container">
+      <div class="calendar-header" id="calendarHeader"></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+    <div id="legend" class="calendar-legend">
+      <div class="legend-item">
+        <span class="legend-color pick"></span>
+        <span class="legend-text">PIQUETE</span>
+      </div>        
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
+      return headers;
+    }
+    /* ===================== UTILITY FUNCTIONS ===================== */
+    function getWorkYear(selectedMonthIndex) {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      if (currentMonth === 11 && selectedMonthIndex === 0 && now.getDate() >= 15) {
+        return currentYear + 1;
+      }
+      return currentYear;
+    }
+    function isPastMonth(selectedMonthIndex, selectedYear) {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      return selectedYear < currentYear || (selectedYear === currentYear && selectedMonthIndex < currentMonth);
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        if (h2) h2.textContent = "Não definido";
+        return;
+      }
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await response.json();
+        if (data?.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        }
+      } catch (err) {
+        console.error('Erro ao carregar info da corporação:', err);
+      }
+    }
+    /* ========================== THEME LOADING ========================== */    
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+    }
+    /* ========================== GLOBAL STATE =========================== */
+    let currentMonthIndex = null;
+    let selectedDays = [];
+    let isLoadingCalendar = false;
+    let allowPiqPastMonthsEdit = false;
+    /* ========================== LOADING DAYS =========================== */
+    async function loadSelectedDaysFromSupabase(monthIndex) {
+      const nint = localStorage.getItem("currentCorpNint");
+      const corp = (localStorage.getItem("currentCorpOperNr") || "").padStart(4, "0");
+      if (!nint || !corp) return [];
+      const month = monthIndex + 1;
+      const year = getWorkYear(monthIndex);
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/reg_serv?select=day&n_int=eq.${nint}&corp_oper_nr=eq.${corp}&month=eq.${month}&year=eq.${year}&value=eq.PN`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await res.json();
+        return data.map(d => `${year}-${String(month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`);
+      } catch (err) {
+        console.error('Erro ao ler dias selecionados:', err);
+        return [];
+      }
+    }
+    /* ============================ CALENDAR ============================= */
+    async function showCalendar(monthIndex, button) {
+      if (isLoadingCalendar) return;
+      const calendarContainer = document.getElementById('calendarContainer');
+      const legend = document.getElementById('legend');
+      if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
+        button.classList.remove('selected');
+        calendarContainer.classList.remove('show');
+        document.body.classList.remove('mobile-month-active');
+        legend.style.display = 'none';
+        currentMonthIndex = null;
+        return;
+      }
+      isLoadingCalendar = true;
+      currentMonthIndex = monthIndex;
+      document.querySelectorAll('.availability-pik-btn').forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+      document.body.classList.add('mobile-month-active');
+      const year = getWorkYear(monthIndex);
+      const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const dayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+      const firstDay = new Date(year, monthIndex, 1);
+      const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+      const startingDayOfWeek = firstDay.getDay();
+      const calendarHeader = document.getElementById('calendarHeader');
+      const calendarGrid = document.getElementById('calendarGrid');
+      calendarHeader.textContent = `${monthNames[monthIndex]} ${year}`;
+      calendarGrid.innerHTML = '';
+      dayNames.forEach(day => {
+        const div = document.createElement('div');
+        div.className = 'calendar-day-header';
+        div.textContent = day;
+        calendarGrid.appendChild(div);
+      });
+      for (let i = 0; i < startingDayOfWeek; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'calendar-day empty';
+        calendarGrid.appendChild(empty);
+      }
+      selectedDays = await loadSelectedDaysFromSupabase(monthIndex);
+      const today = new Date();
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = day;
+        const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        if (selectedDays.includes(dateStr)) dayElement.classList.add('selected');
+        if (year === today.getFullYear() && monthIndex === today.getMonth() && day === today.getDate()) {
+          dayElement.classList.add('today');
+        }
+        dayElement.onclick = () => handleDayClick(day, dateStr, dayElement);
+        calendarGrid.appendChild(dayElement);
+      }
+      calendarContainer.classList.add('show');
+      legend.style.display = 'block';
+      calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      isLoadingCalendar = false;
+    }
+    /* ======================== HANDLE DAY CLICK ========================= */
+    async function handleDayClick(day, dateStr, element) {
+      const year = getWorkYear(currentMonthIndex);
+      const month = currentMonthIndex + 1;
+      const nint = localStorage.getItem("currentCorpNint");
+      const corp = (localStorage.getItem("currentCorpOperNr") || "").padStart(4, "0");
+      if (!allowPiqPastMonthsEdit) {
+        if (isPastMonth(currentMonthIndex, year)) return showToast("Não permitido alterar meses passados.");
+        if (currentMonthIndex === new Date().getMonth() && year === new Date().getFullYear()) {
+          return showToast("Não pode efetuar alteração às disponibilidades do mês atual. Use a opção TROCAS DE SERVIÇO para efetuar uma troca com outro Bombeiro.");
+        }
+      }
+      if (selectedDays.includes(dateStr)) {
+        element.classList.add('processing');
+        try {
+          const query = `n_int=eq.${nint}&corp_oper_nr=eq.${corp}&month=eq.${month}&day=eq.${day}&value=eq.PN`;
+          await Promise.all([
+            fetch(`${SUPABASE_URL}/rest/v1/reg_serv?${query}`, {method: 'DELETE', headers: getSupabaseHeaders()}),
+            fetch(`${SUPABASE_URL}/rest/v1/reg_disp?${query}`, {method: 'DELETE', headers: getSupabaseHeaders()})
+          ]);
+          selectedDays = selectedDays.filter(d => d !== dateStr);
+          element.classList.remove('selected', 'processing');
+        } catch (err) {
+          showToast("Erro ao remover disponibilidade.");
+        }
+        return;
+      }
+      const success = await saveDayToPiqDisp(day);
+      if (success) {
+        selectedDays.push(dateStr);
+        element.classList.add('selected');
+      }
+    }
+    /* ============================== SAVE =============================== */
+    async function saveDayToPiqDisp(day) {
+      const year = getWorkYear(currentMonthIndex);
+      const month = currentMonthIndex + 1;
+      const nint = parseInt(localStorage.getItem("currentCorpNint"), 10) || 0;
+      const corp = (localStorage.getItem("currentCorpOperNr") || "").padStart(4, "0");
+      try {
+        const checkServ = await fetch(`${SUPABASE_URL}/rest/v1/reg_serv?select=value&n_int=eq.${nint}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=in.(EN,ET)`, {
+          headers: getSupabaseHeaders()
+        });
+        const servData = await checkServ.json();
+        if (servData.length > 0) return showToast(`ATENÇÃO! Já deu disponibilidade para ECIN Noite no dia (${day}/${month}). Não pode dar disponibilidade para PIQUETE.`);
+        const checkDisp = await fetch(`${SUPABASE_URL}/rest/v1/reg_disp?select=value&n_int=eq.${nint}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=in.(ET,PN)`, {
+          headers: getSupabaseHeaders()
+        });
+        const dispData = await checkDisp.json();
+        if (dispData.length > 0) return showToast(`ATENÇÃO! Já deu disponibilidade para ECIN Noite no dia (${day}/${month}). Não pode dar disponibilidade para PIQUETE.`);
+        const userRes = await fetch(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,section&n_int=eq.${nint}`, {
+          headers: getSupabaseHeaders()
+        });
+        const userData = await userRes.json();
+        const { abv_name = "N/D", section = "N/D" } = userData[0] || {};
+        const payloadServ = { n_int: nint, abv_name, section, day, month, year, value: "PN", corp_oper_nr: corp };
+        const payloadDisp = { n_int: nint, day, month, year, value: "PN", corp_oper_nr: corp };
+        const [res1, res2] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/reg_serv`, { 
+            method: "POST", 
+            headers: getSupabaseHeaders({returnRepresentation: true}),
+            body: JSON.stringify(payloadServ)
+          }),
+          fetch(`${SUPABASE_URL}/rest/v1/reg_disp`, { 
+            method: "POST", 
+            headers: getSupabaseHeaders({returnRepresentation: true}), 
+            body: JSON.stringify(payloadDisp)
+          })
+        ]);
+        if (res1.ok && res2.ok) {
+          return true;
+        } else {
+          const errorText = await res2.text();
+          console.error("Erro Supabase:", errorText);
+          showToast("Erro ao gravar na base de dados.");
+          return false;
+        }
+      } catch (err) {
+        console.error("Erro na função saveDayToPiqDisp:", err);
+        return false;
+      }
+    }
+    /* ============================== TOAST ============================== */
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = message;
+      const content = document.querySelector(".main-content"); 
+      document.body.appendChild(toast);
+      if (content) content.classList.add("content-blur");
+      setTimeout(() => toast.classList.add("show"), 50);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        if (content) content.classList.remove("content-blur");
+        setTimeout(() => toast.remove(), 300);
+      }, 4500);
+    }
+    /* ============================== INIT =============================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCorpInfo();
+      loadTheme();
+      document.querySelectorAll('.availability-pik-btn').forEach((btn, i) => {
+        btn.style.opacity = '0';
+        btn.style.transform = 'translateY(15px)';
+        btn.style.transition = 'all 0.4s ease';
+        setTimeout(() => {
+          btn.style.opacity = '1';
+          btn.style.transform = 'translateY(0)';
+        }, i * 80);
+      });
+    });
+  </script>
+</body>
+</html>

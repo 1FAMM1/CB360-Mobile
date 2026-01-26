@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360_SITVEÍC</title>
+  <style>
+    /* ==================== BODY ==================== */    
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; padding-top: 70px; padding-bottom: 60px; scrollbar-width: none !important; -ms-overflow-style: none !important;}
+    body::-webkit-scrollbar {display: none !important;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%); color: #fff;}
+    .dark-mode .stats {border: 1px solid #444; background: rgba(45, 45, 45, 0.95); color: #fff;}
+    .dark-mode .stats-title {color: #fff !important;}
+    .dark-mode .vehicle-item {background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: #fff;}
+    .dark-mode .vehicle-name {color: #fff;}
+    .dark-mode .vehicle-type {color: #b0b0b0;}
+    .dark-mode .stat-disponivel {background: rgba(39, 174, 96, 0.3); color: #58d68d;}
+    .dark-mode .stat-servico {background: rgba(243, 156, 18, 0.3); color: #f7dc6f;}
+    .dark-mode .stat-inop {background: rgba(231, 76, 60, 0.3); color: #ec7063;}
+    .dark-mode .vehicle-status {background: rgba(39, 174, 96, 0.2) !important; color: #58d68d !important;}
+    .dark-mode .vehicle-status .status-dot {background: #58d68d !important;}
+    .dark-mode .vehicle-status[style*="background: #fff3cd"] {background: rgba(243, 156, 18, 0.2) !important; color: #f7dc6f !important;}
+    .dark-mode .vehicle-status[style*="background: #fff3cd"] .status-dot {background: #f7dc6f !important;}
+    .dark-mode .vehicle-status[style*="background: #ffebee"] {background: rgba(231, 76, 60, 0.2) !important; color: #ec7063 !important;}
+    .dark-mode .vehicle-status[style*="background: #ffebee"] .status-dot {background: #ec7063 !important;}
+    .dark-mode .loading {color: #b0b0b0;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}    
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: all 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;}
+    .container {padding: 5px 10px; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; height: calc(100vh - 140px);}
+    .stats {top: 0; border: 1px solid #ccc; background: rgba(245, 245, 245, 0.95); border-radius: 10px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; position: sticky; z-index: 500; flex-shrink: 0;}
+    .stats-title {margin-bottom: 15px; color: #2c3e50;}
+    .stats-grid {display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; text-align: center;}
+    .stat-item {padding: 10px; border-radius: 5px;}
+    .stat-disponivel {background: #d0ebd0; color: #1e8449;}
+    .stat-servico {background: #ffe8a1; color: #6c5403;}
+    .stat-inop {background: #f8d7da; color: #b71c1c;}
+    .stat-number {font-size: 24px; font-weight: bold;}
+    .stat-label {font-size: 12px; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 5px;}
+    .vehicle-scroll-area {flex: 1; overflow-y: auto; padding-right: 0 !important; scrollbar-width: none !important; -ms-overflow-style: none !important;}
+    .vehicle-scroll-area::-webkit-scrollbar {display: none !important; width: 0 !important; height: 0 !important; background: transparent !important;}
+    .vehicle-scroll-area::-webkit-scrollbar-track {display: none !important;}
+    .vehicle-scroll-area::-webkit-scrollbar-thumb {display: none !important;}
+    .vehicle-list {display: grid; grid-template-columns: 1fr; gap: 15px;}
+    .vehicle-item {background: #e6e6e6; border-radius: 8px; padding: 15px; transition: all 0.3s ease;}
+    .vehicle-item[class*=" v"], .vehicle-item[class*=" V"] {border-left: 5px solid #e74c3c !important; border: 2px solid #e74c3c;}
+    .vehicle-item[class*=" a"], .vehicle-item[class*=" A"], .vehicle-item.vdtd {border-left: 5px solid #3498db !important; border: 2px solid #3498db;}
+    .vehicle-item.atrl {border-left: 5px solid #e74c3c !important; border: 2px solid #e74c3c;}
+    .vehicle-header {display: flex; align-items: center; margin-bottom: 10px;}
+    .vehicle-icon-large {font-size: 30px; margin-right: 15px;}
+    .vehicle-name {font-size: 18px; font-weight: bold; color: #2c3e50;}
+    .vehicle-type {font-size: 14px; color: #7f8c8d; margin-top: 5px;}
+    .vehicle-status {display: flex; align-items: center; margin-top: 10px; padding: 8px 12px; background: #e8f5e8; border-radius: 5px; font-size: 12px; color: #27ae60; gap: 5px;}
+    .status-dot {width: 8px; height: 8px; background: #27ae60; border-radius: 50%; margin-right: 8px;}
+    .loading {text-align: center; padding: 40px; color: #7f8c8d; font-size: 18px; display: flex; align-items: center; justify-content: center;}
+    .refresh-btn {position: fixed; top: 80px; right: 15px; background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; border: none; border-radius: 50%; width: 40px; height: 40px;
+                  font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; z-index: 999;}
+    .refresh-btn:hover {transform: scale(1.1);}
+    .refresh-btn.spinning {animation: spin 1s linear infinite;}
+    @keyframes spin {from {transform: rotate(0deg);} to {transform: rotate(360deg);}}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */    
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .vehicle-list {margin-top: 0px; grid-template-columns: repeat(2, 1fr); gap: 5px;}
+      .stat-item {padding: 8px;}
+      .refresh-btn {top: auto; bottom: 70px; font-size: 15px; width: 30px; height: 30px;}
+      .container {height: calc(100vh - 130px);}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>SITVEÍC</h1>
+    <h2 id="corpInfo" style="display:none;"></h2>
+    <div class="header-subtitle">Situação Operacional de Veículos</div>
+  </div>
+  <main class="container">
+    <section class="stats">
+      <h3 class="stats-title">📊 Resumo da Frota</h3>
+      <div class="stats-grid">
+        <div class="stat-item stat-disponivel">
+          <div class="stat-number" id="countDisponivel">0</div>
+          <div class="stat-label">✅ Disponível</div>
+        </div>
+        <div class="stat-item stat-servico">
+          <div class="stat-number" id="countServico">0</div>
+          <div class="stat-label">🚨 Em Serviço</div>
+        </div>
+        <div class="stat-item stat-inop">
+          <div class="stat-number" id="countInop">0</div>
+          <div class="stat-label">⚠️ INOP</div>
+        </div>
+      </div>
+    </section>
+    <section class="vehicle-scroll-area">
+      <div id="loading" class="loading">
+        🔄 A Carregar Veículos...
+      </div>
+      <div class="vehicle-list" id="vehicleList" style="display: none;">
+      </div>
+    </section>
+  </main>
+  <button class="refresh-btn" onclick="refreshData()" id="refreshBtn" aria-label="Atualizar dados">🔄</button>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';    
+     function getSupabaseHeaders(options = {}) {
+       const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
+       const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+       const headers = {
+         'apikey': SUPABASE_ANON_KEY,
+         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+         'Content-Type': 'application/json',
+         'x-my-corpo': corp,
+         'x-my-nint': nint
+       };
+       if (options.returnRepresentation) {
+         headers['Prefer'] = 'return=representation';
+       }
+       return headers;
+     }
+    /* ======================= INICIALIZAÇÃO ======================= */
+    let vehicleStatuses = {};
+    let vehicleINOP = {};
+    let vehicles = [];
+    window.addEventListener('load', function() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+      loadCorpInfo();
+      loadVehicleData();
+    });
+    /* ======================= CARREGAR INFO CORP ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || corpOperNr;
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        }
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+      }
+    }
+    /* ======================= CARREGAR DADOS VEÍCULOS ======================= */
+    async function loadVehicleData() {
+      try {
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/vehicle_status?select=vehicle,current_status,is_inop&corp_oper_nr=eq.${corpOperNr}&order=vehicle.asc`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) throw new Error("Erro na resposta do Supabase");
+        const data = await response.json();
+        if (data && data.length > 0) {
+          vehicleStatuses = {};
+          vehicleINOP = {};
+          data.forEach(v => {
+            vehicleStatuses[v.vehicle] = v.current_status || 'Disponível';
+            vehicleINOP[v.vehicle] = v.is_inop === true;
+          });
+          processVehicleList(data.map(d => d.vehicle));
+          renderVehicles();
+          updateStats();
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar dados:', error);
+        document.getElementById('loading').textContent = "❌ Erro ao ligar ao servidor";
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('vehicleList').style.display = 'grid';
+      }
+    }
+    /* ======================= PROCESSAR E ORDENAR ======================= */
+    function processVehicleList(vehicleCodes) {
+      vehicles = vehicleCodes.map(code => {
+        const prefix = code.split('-')[0];
+        let type, icon, className;
+        const mapping = {'VLCI': {t: 'Veículo Ligeiro de Combate a Incêndios', i: '🚒', c: 'vlci'},
+                         'VUCI': {t: 'Veículo Urbano de Combate a Incêndios', i: '🚒', c: 'vuci'},
+                         'VFCI': {t: 'Veículo Florestal de Combate a Incêndios', i: '🚒', c: 'vfci'},
+                         'VECI': {t: 'Veículo Especial de Combate a Incêndios', i: '🚒', c: 'veci'},
+                         'VRCI': {t: 'Veículo Rural de Combate a Incêndios', i: '🚒', c: 'vrci'},
+                         'VE': {t: 'Veículo Escada', i: '🚒', c: 've'},
+                         'PE': {t: 'Plataforma Elevatória', i: '🚒', c: 'pe'},
+                         'VLSA': {t: 'Veículo Ligeiro de Socorro e Assistência', i: '🚒', c: 'vlsa'},
+                         'VSAT': {t: 'Veículo de Socorro e Assistência Tático', i: '🚒', c: 'vsat' },
+                         'VSAE': {t: 'Veículo de Socorro e Assistência Especial', i: '🚒', c: 'vsae'},
+                         'VCOT': {t: 'Veículo de Comando Operacional Tático', i: '🚒', c: 'vcot'},
+                         'VCOC': {t: 'Veículo de Comando e Comunicações', i: '🚒', c: 'vcoc'},
+                         'VGEO': {t: 'Veículo de Gestão Estratégica de Operações', i: '🚒', c: 'vgeo'},
+                         'VTTU': {t: 'Veículo Tanque Tático Urbano', i: '🚒', c: 'vttu'},
+                         'VTTF': {t: 'Veículo Tanque Tático Florestal', i: '🚒', c: 'vttf'},
+                         'VTTR': {t: 'Veículo Tanque Tático Rural', i: '🚒', c: 'vttr'},
+                         'VTGC': {t: 'Veículo Tanque de Grande Capacidade', i: '🚒', c: 'vtgc'},
+                         'VALE': {t: 'Veículo de Apoio Logístico Especial', i: '🚒', c: 'vale'},
+                         'VOPE': {t: 'Veículo para Operações Especiais', i: '🚒', c: 'vope'},
+                         'VPMA': {t: 'Veículo de Proteção Multirriscos e Ambiente', i: '🚒', c: 'vpma'},
+                         'VTTP': {t: 'Veículo Tático de Transporte de Pessoal', i: '🚒', c: 'vttp'},
+                         'VTPT': {t: 'Veículo Tático de Transporte de Pessoal', i: '🚒', c: 'vtpt'},
+                         'ERST': {t: 'Embarcação de Reconhecimento e Socorro', i: '🛥️', c: 'erst'},
+                         'MRSA': {t: 'Meio de Reconhecimento e Socorro Aquático', i: '🛥️', c: 'mrsa'}, 
+                         'ABSC': {t: 'Ambulância de Socorro', i: '🚑', c: 'absc'},
+                         'ABTD': {t: 'Ambulância de Transporte de Doentes', i: '🚑', c: 'abtd'},
+                         'ABTM': {t: 'Ambulância de Transporte Múltiplo', i: '🚑', c: 'abtm'},
+                         'VDTD': {t: 'Veículo Dedicado ao Transporte de Doentes', i: '🚑', c: 'vdtd'},
+                         'ATRL': {t: 'Atrelado de Apoio', i: '🚗', c: 'atrl'}};
+        const info = mapping[prefix] || { t: 'Não Classificado', i: '🚗', c: 'outros' };
+        return { code, icon: info.i, type: info.t, class: info.c };
+      });
+      const prefixOrder = ['VCOT','VTTP','VLCI','VFCI','VTTU','VTTF','VOPE','ABSC','ABTM','VDTD','ATRL'];
+      vehicles.sort((a, b) => {
+        const orderA = prefixOrder.indexOf(a.code.split('-')[0]);
+        const orderB = prefixOrder.indexOf(b.code.split('-')[0]);
+        const finalA = orderA === -1 ? 999 : orderA;
+        const finalB = orderB === -1 ? 999 : orderB;
+        return finalA !== finalB ? finalA - finalB : a.code.localeCompare(b.code);
+      });
+    }
+    /* ======================= UI RENDER ======================= */
+    function renderVehicles() {
+      const list = document.getElementById('vehicleList');      
+      if (!list) return;
+      list.innerHTML = '';
+      vehicles.forEach(v => {
+        const item = document.createElement('div');
+        item.className = `vehicle-item ${v.class}`;
+        let statusText = "✅ Disponível";
+        let statusStyle = "";
+        if (vehicleINOP[v.code]) {
+          statusText = "⚠️ INOP";
+          statusStyle = "background: #ffebee; color: #c62828;";
+        } else if (vehicleStatuses[v.code] === "Em Serviço") {
+          statusText = "🚨 Em Serviço";
+          statusStyle = "background: #fff3cd; color: #856404;";
+        }
+        item.innerHTML = `
+          <div class="vehicle-header">
+            <div class="vehicle-icon-large">${v.icon}</div>
+            <div>
+              <div class="vehicle-name">${v.code}</div>
+              <div class="vehicle-type">${v.type}</div>
+            </div>
+          </div>
+          <div class="vehicle-status" style="${statusStyle}">
+            <div class="status-dot" style="${vehicleINOP[v.code] ? 'background:#c62828' : (vehicleStatuses[v.code]==='Em Serviço' ? 'background:#f39c12' : '')}"></div>
+              ${statusText}
+            </div>
+          `;
+            list.appendChild(item);
+      });
+    }
+    function updateStats() {
+      let disp = 0, serv = 0, inop = 0;
+      vehicles.forEach(v => {
+        if (vehicleINOP[v.code]) inop++;
+        else if (vehicleStatuses[v.code] === "Em Serviço") serv++;
+        else disp++;
+      });
+      document.getElementById('countDisponivel').textContent = disp;
+      document.getElementById('countServico').textContent = serv;
+      document.getElementById('countInop').textContent = inop;
+    }
+    async function refreshData() {
+      const btn = document.getElementById('refreshBtn');
+      btn?.classList.add('spinning');
+      await loadVehicleData();
+      btn?.classList.remove('spinning');
+    }
+    setInterval(loadVehicleData, 30000);
+  </script>
+</body>
+</html>

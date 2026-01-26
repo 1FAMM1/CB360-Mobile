@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>CB360 Mobile</title>
+  <style>
+    /* =============== CSS VARIABLES ================ */ 
+    :root {--color-primary: #d32f2f; --color-primary-dark: #b71c1c; --color-primary-border: #c62828; --color-primary-light: #ffcdd2; --color-primary-lighter: #ffebee; --color-accent: #0282fa;
+           --color-accent-light: #aad3f2; --color-success: #2e7d32; --color-success-light: #66bb6a; --color-error: #b71c1c; --color-error-light: #ff8a80; --color-error-dark: #f44336;
+           --color-bg-gradient-start: #f5f5f5; --color-bg-gradient-end: #e8e8e8; --color-card-bg: #d0e2f5; --color-card-border: #bbb; --color-text-primary: #333; --color-text-secondary: #444;
+           --color-text-white: #fff; --color-disabled: #9e9e9e; --dm-bg-gradient-start: #1a1a1a; --dm-bg-gradient-end: #2d2d2d; --dm-card-bg: #5c5c5c; --dm-card-border: #666; --dm-text-primary: #ddd; 
+           --dm-text-secondary: #ccc; --spacing-xs: 5px; --spacing-sm: 8px; --spacing-md: 10px; --spacing-lg: 15px; --spacing-xl: 20px; --radius-sm: 5px; --radius-md: 8px; --radius-lg: 12px;
+           --radius-xl: 15px; --radius-circle: 50%; --shadow-sm: 0 4px 12px rgba(0,0,0,0.1); --shadow-md: 0 4px 20px rgba(0,0,0,0.3); --shadow-lg: 0 6px 20px rgba(0,0,0,0.3); --font-size-xs: 9px;
+           --font-size-sm: 10px; --font-size-base: 12px; --font-size-md: 13px; --font-size-lg: 14px; --font-size-xl: 15px; --font-size-2xl: 25px; --font-size-3xl: 1.5em; --z-base: 1; --z-header: 1000;
+           --z-logo: 1001; --z-toast: 9999; --transition-fast: 0.2s ease; --transition-base: 0.3s ease; --transition-slow: 0.4s ease;}
+    /* ==================== BODY ==================== */
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
+          min-height: 100vh; user-select: none; transition: var(--transition-base); display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============== DARK MODE THEME =============== */
+    .dark-mode {background: linear-gradient(135deg, var(--dm-bg-gradient-start) 0%, var(--dm-bg-gradient-end) 100%); color: var(--color-text-white);}
+    .dark-mode .events-title-header, .dark-mode .back-header {color: var(--dm-text-primary);}
+    .dark-mode .event-card, .dark-mode .main-event-card, .dark-mode .shift-event-card {background: var(--dm-card-bg); border-color: var(--dm-card-border);}
+    .dark-mode .main-event-card {margin: var(--spacing-xl) 0 0 0;}
+    .dark-mode .event-title, .dark-mode .event-dates .dates-value, .dark-mode .shift-dates-value, .dark-mode .main-event-type {color: var(--color-accent-light);}
+    .dark-mode .event-prevention {background: var(--color-primary);}
+    .dark-mode .main-event-location, .dark-mode .main-event-value {color: var(--dm-text-secondary);}
+    .dark-mode .shift-add.shift-state-approved {background-color: var(--color-success-light); color: var(--color-text-white); opacity: 0.9;}
+    .dark-mode .shift-add.shift-state-not-approved {background-color: var(--color-error-light); color: var(--color-text-white); opacity: 0.9;}
+    .dark-mode .shift-state-pending-approval, .dark-mode .shift-state-not-approved {color: var(--color-error-light);}
+    .dark-mode .shift-state-approved {color: var(--color-success-light);}
+    .dark-mode .shift-closed {background-color: var(--color-primary);}
+    /* ============== LIGHT MODE THEME ============== */
+    .header {background: linear-gradient(45deg, var(--color-primary), var(--color-primary-dark)); color: var(--color-text-white); padding: var(--spacing-xl) var(--spacing-lg); text-align: center;
+             box-shadow: var(--shadow-md); border-bottom: 2px solid var(--color-primary-border); transition: var(--transition-base); position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-header);}
+    .header h1, .header h2 {margin: 0; font-size: var(--font-size-3xl); font-weight: bold;}
+    .header div {margin-top: var(--spacing-xs); font-size: var(--font-size-base); opacity: 0.9;}
+    .header-logo {position: absolute; left: var(--spacing-md); top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: var(--radius-md); transition: var(--transition-base);
+                  z-index: var(--z-logo);}
+    .footer {background: linear-gradient(45deg, var(--color-primary), var(--color-primary-dark)); color: var(--color-text-white); padding: var(--spacing-sm) var(--spacing-lg); text-align: center;
+             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid var(--color-primary-border); transition: var(--transition-base); position: fixed; bottom: 0; left: 0; right: 0;
+             z-index: var(--z-header);}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: var(--font-size-md); font-weight: bold; margin-bottom: 3px; color: var(--color-text-white);}
+    .footer-year {font-size: var(--font-size-sm); opacity: 0.8; color: var(--color-primary-light);}
+    .footer strong {color: var(--color-primary-lighter);}
+    .event-card, .main-event-card {background: var(--color-card-bg); border-radius: var(--radius-sm); border: 1px solid var(--color-card-border); padding: var(--spacing-md); margin-bottom: var(--spacing-xs);
+                                   box-shadow: var(--shadow-sm); width: 100%; box-sizing: border-box; transition: transform var(--transition-fast), box-shadow var(--transition-fast);}
+    .main-event-card {margin: 0 !important;}
+    .event-title {font-size: var(--font-size-xl); font-weight: 700; text-align: left; color: var(--color-accent); margin-bottom: -2px;}
+    .event-dates {display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: -3px;}
+    .event-dates .label {font-size: var(--font-size-md); font-weight: 700;}
+    .event-dates .dates-value {font-size: var(--font-size-md); color: var(--color-accent);}
+    .event-location {text-align: left;}
+    .event-location .label {font-size: var(--font-size-md); font-weight: 700; text-align: left;}
+    .event-location .location-value {font-size: var(--font-size-md);}
+    .event-prevention {margin-left: auto; background-color: var(--color-primary-dark); color: var(--color-text-white); font-weight: 700; font-size: var(--font-size-sm); padding: var(--spacing-xs) 11px;
+                       border-radius: var(--radius-xl); white-space: nowrap;}
+    .main-event-location {font-size: var(--font-size-md); font-weight: 700; margin-bottom: 4px; color: var(--color-text-secondary);}
+    .main-event-type {font-size: var(--font-size-xl); font-weight: 700; color: var(--color-primary); text-align: left; margin-bottom: 3px;}
+    .main-event-value {font-size: var(--font-size-lg); color: var(--color-text-secondary);}
+    .shift-event-card {background: var(--color-card-bg); border-radius: var(--radius-sm); border: 1px solid var(--color-card-border); padding: var(--spacing-xs) var(--spacing-md); margin-bottom: var(--spacing-xs);
+                       box-shadow: var(--shadow-sm); width: 100%; box-sizing: border-box; transition: transform var(--transition-fast), box-shadow var(--transition-fast);}
+    .shift-event-card > div {display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md);}
+    .shift-content {display: flex; flex-direction: column; gap: 2px; flex: 1;}
+    .shift-dates-left .label, .shift-event-location .label, .shift-event-state .label {font-size: var(--font-size-md); font-weight: bold;}
+    .shift-event-state {margin-top: -1px;}
+    .shift-dates-value, .shift-location-value, .shift-state-value {font-size: var(--font-size-lg);}
+    .shift-state-value {font-weight: bold;}
+    .shift-dates-value {color: var(--color-accent);}
+    .shift-add {background-color: #0d47a1; color: var(--color-text-white); font-weight: 700; font-size: var(--font-size-xl); line-height: var(--font-size-xl);  width: 20px; height: 20px; display: inline-flex;
+                align-items: center; justify-content: center; border-radius: var(--radius-circle); flex-shrink: 0; cursor: pointer; padding: 0; border: none; text-align: center; vertical-align: middle;}
+    .shift-add.shift-state-approved {background-color: var(--color-success); color: var(--color-text-white); cursor: not-allowed; opacity: 0.8;}
+    .shift-add.shift-state-not-approved {background-color: var(--color-error); color: var(--color-text-white);cursor: not-allowed; opacity: 0.8;}
+    .shift-state-approved {color: var(--color-success);}
+    .shift-state-pending-approval, .shift-state-not-approved {color: var(--color-error);}
+    .shift-closed {display: inline-block; align-self: flex-start; background-color: var(--color-error-dark); color: var(--color-text-white); font-weight: bold; font-size: var(--font-size-base);
+                   padding: 4px var(--spacing-md); border-radius: var(--radius-lg); margin: 1px 0 -1px 0; text-align: center;}
+    .shift-closed-btn {background-color: var(--color-disabled) !important; cursor: not-allowed !important; opacity: 0.6 !important; display: none;}
+    #shift-cards-container::-webkit-scrollbar {width: 0; height: 0;}
+    #shift-cards-container {scrollbar-width: none; -ms-overflow-style: none;}
+    .events-title-header, .back-header {font-size: var(--font-size-2xl); font-weight: bold; color: var(--color-text-primary); text-align: left; display: flex; align-items: center; gap: var(--spacing-sm);
+                                        height: 40px; margin: var(--spacing-xl) 0 var(--spacing-md) 0; padding: 0;}
+    .back-arrow {font-size: 30px !important; margin: 3px 0 0 -4px; font-weight: bold;}
+    .back-header:hover {opacity: 0.75;}
+    #events-container, #shifts-container {margin-top: 50px; padding: 0 var(--spacing-xl) !important;}
+    .toast-container {position: fixed; top: 210px; right: var(--spacing-xl); z-index: var(--z-toast); display: flex; flex-direction: column; gap: var(--spacing-md); pointer-events: none;}
+    .toast {min-width: 250px; max-width: 350px; padding: var(--spacing-xs) var(--spacing-md); border-radius: var(--radius-sm); color: var(--color-text-white); font-weight: 500; font-size: var(--font-size-lg);
+            box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: var(--spacing-base); opacity: 0; transform: translateX(100%); animation: toastSlideIn 0.3s ease-out forwards;;
+            cursor: pointer; pointer-events: auto;}
+    .toast .icon {font-size: var(--font-size-lg); width: 25px; height: 25px; border-radius: var(--radius-circle); display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.25);
+                  flex-shrink: 0;}
+    .toast.success {background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);}
+    .toast.error {background: linear-gradient(135deg, #e74c3c 0%, #ec7063 100%);}
+    @keyframes toastSlideIn {from {opacity: 0; transform: translateX(100%);} to {opacity: 1; transform: translateX(0);}}
+    @keyframes toastSlideOut {from {opacity: 1; transform: translateX(0);} to {opacity: 0; transform: translateX(100%);}}
+    /* ================================================= 
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */    
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: var(--spacing-sm) var(--spacing-lg);}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: var(--spacing-md);}
+      .footer {padding: var(--spacing-xs) var(--spacing-lg);}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: var(--font-size-xs);}
+      .event-subtitle {font-size: 1.3em; margin-top: -10px;}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>EVENTOS</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">PREVENÇÕES</div>
+  </div>
+  <div id="events-container"></div>
+  <div id="shifts-container" style="display:none; ">    
+    <div id="shifts-list"></div>
+  </div>
+  <div id="toastContainer" class="toast-container"></div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp, 
+        'x-my-nint': nint
+      };    
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        if (h2) h2.textContent = "Não definido";
+        return;
+      }
+      try {
+        const resp = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await resp.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        } else {
+          if (h2) h2.textContent = "Não encontrado";
+        }
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+        if (h2) h2.textContent = corpOperNr;
+      }
+    }
+    /* ========================= LOAD EVENTS LIST ========================== */
+    async function loadEventList() {
+      const container = document.getElementById("events-container");
+      if (!container) return;
+      container.innerHTML = "";
+      const titleHeader = document.createElement('div');
+      titleHeader.className = 'events-title-header';
+      titleHeader.textContent = 'Eventos a Decorrer';
+      container.appendChild(titleHeader);
+      try {
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=event,event_type,value,location,date_start,date_end&corp_oper_nr=eq.${corpOperNr}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await resp.json();
+        if (!data || data.length === 0) {
+          const card = document.createElement("div");
+          card.className = "event-card";
+          card.innerHTML = `<div class="event-title">Sem eventos registados</div>`;
+          container.appendChild(card);
+          return;
+        }
+        data.forEach(event => container.appendChild(createEventCards(event)));
+      } catch (err) {
+        console.error("Erro ao carregar event_list:", err);
+        const errorCard = document.createElement('div');
+        errorCard.className = 'event-card';
+        errorCard.innerHTML = '<div class="event-title">Erro ao carregar eventos</div>';
+        container.appendChild(errorCard);
+      }
+    }
+    /* =================== FORMAT DATE ======================== */
+    function formatDateWithWeekday(dateStr) {
+      const date = new Date(dateStr);
+      if (isNaN(date)) return dateStr;
+      const days = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+      const dd = String(date.getDate()).padStart(2, '0');
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      const weekday = days[date.getDay()];
+      return `${dd}-${mm}-${yyyy} (${weekday})`;
+    }
+    function formatDateSimple(dateStr) {
+      const date = new Date(dateStr);
+      if (isNaN(date)) return dateStr;
+      const dd = String(date.getDate()).padStart(2, '0');
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      return `${dd}-${mm}-${yyyy}`;
+    }
+    /* =================== CREATE EVENT CARD ======================== */
+    function createEventCards(event) {
+      const card = document.createElement("div");
+      card.className = "event-card";
+      let datesText = formatDateSimple(event.date_start);
+      if (event.date_end) {
+        datesText += ` até ${formatDateSimple(event.date_end)}`;
+      }
+      card.innerHTML = `
+        <div>
+          <div class="event-title">${event.event}</div>
+          <div class="event-dates">
+            <span class="dates-left">
+              <span class="label">Data(s):</span>
+              <span class="dates-value">${datesText}</span>
+            </span>
+            <span class="event-prevention">${event.event_type || ''}</span>
+          </div>
+          <div class="event-location">
+            <span class="label">Localidade:</span>
+            <span class="location-value">${event.location}</span>
+          </div>
+        </div>
+      `;
+      card.addEventListener('click', () => showEventShiftCards(event.event));
+      return card;
+    }
+    /* =================== CREATE MAIN EVENT CARD ======================== */
+    function createMainEventCard(event) {
+      const card = document.createElement("div");
+      card.className = "main-event-card";
+      let datesText = `${event.date_start}`;
+      if (event.date_end) datesText += ` até ${event.date_end}`;
+      card.innerHTML = `
+        <div>
+          <div class="main-event-location">📌 ${event.location}</div>              
+          <div class="main-event-type">${event.event}</div>          
+          <div class="main-event-value">
+            <span class="label" style="font-weight: bold;">Valor:</span> 
+            <span class="main-event-value">${event.value} €/h</span> 
+          </div>            
+        </div>
+      `;
+      return card;
+    }
+    /* =================== CREATE SHIFT CARD ======================== */
+    async function createEventShiftCards(shift) {
+      const card = document.createElement("div");
+      card.className = "shift-event-card";
+      card.dataset.event = shift.event;
+      card.dataset.rawDate = shift.event_shift_date;
+      card.dataset.shift = shift.event_shift;
+      const isClosed = shift.act_oper >= shift.nec_oper;
+      const closedHTML = isClosed 
+        ? `<div class="shift-closed">🔒 FECHADO ${shift.nec_oper} OP</div>` 
+        : '';
+      card.innerHTML = `
+        <div>
+          <div class="shift-content">
+            <div class="shift-dates-left">
+              <span class="label">Data:</span>
+              <span class="shift-dates-value">${formatDateWithWeekday(shift.event_shift_date)}</span>
+            </div>
+            ${closedHTML}
+            <div class="shift-event-location">
+              <span class="label">Turno:</span>
+              <span class="shift-location-value">${shift.event_shift}</span>
+            </div>    
+            <div class="shift-event-state" style="display:none">
+              <span class="label">Estado:</span>
+              <span class="shift-state-value"></span>
+            </div>
+          </div>    
+          <button class="shift-add">+</button>
+        </div>
+      `;
+      const nint = localStorage.getItem("currentCorpNint");
+      const corp_oper_nr = localStorage.getItem("currentCorpOperNr");
+      const addBtn = card.querySelector('.shift-add');
+      const stateDiv = card.querySelector('.shift-event-state');
+      const stateValue = card.querySelector('.shift-state-value');
+      if (isClosed) {
+        addBtn.textContent = "🔒";
+        addBtn.disabled = true;
+        addBtn.classList.add('shift-closed-btn');
+      }
+      try {
+        const resp = await fetch(
+          `${SUPABASE_URL}/rest/v1/event_disp?select=shift_state&event=eq.${encodeURIComponent(shift.event)}&n_int=eq.${nint}&corp_oper_nr=eq.${corp_oper_nr}&event_shift_date=eq.${shift.event_shift_date}&event_shift=eq.${encodeURIComponent(shift.event_shift)}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await resp.json();
+        const stateValue = card.querySelector('.shift-state-value');
+        if (!isClosed && data && data.length > 0) {
+          const state = data[0].shift_state;
+          stateValue.textContent = state;
+          stateDiv.style.display = 'block';
+          if (state === "Em Aprovação") {
+            addBtn.style.display = 'none';
+            stateValue.classList.add('shift-state-pending-approval');
+          } else if (state === "Aprovado") {
+            addBtn.textContent = "✓";
+            addBtn.disabled = true;
+            addBtn.classList.add('shift-state-approved');
+            stateValue.classList.add('shift-state-approved');
+          } else if (state === "Não Aprovado") {
+            addBtn.textContent = "X";
+            addBtn.disabled = true;
+            addBtn.classList.add('shift-state-not-approved');
+            stateValue.classList.add('shift-state-not-approved');
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao verificar estado do turno:", err);
+      }
+      if (!isClosed) {
+        addBtn.addEventListener('click', () => registerShift(card));
+      }
+      return card;
+    }
+    /* ========================= SHOW EVENT SHIFTS ========================== */
+    async function showEventShiftCards(eventName) {
+     const eventsContainer = document.getElementById('events-container');
+      const shiftsContainer = document.getElementById('shifts-container');
+      const shiftsList = document.getElementById('shifts-list');
+      eventsContainer.style.display = 'none';
+      shiftsContainer.style.display = 'block';
+      shiftsList.innerHTML = "";
+      const backHeader = document.createElement('div');
+      backHeader.className = 'back-header';
+      backHeader.innerHTML = `
+        <span class="material-icons back-arrow">arrow_back</span>
+        <span class="back-text">Prevenções</span>
+      `;
+      backHeader.addEventListener('click', () => {
+        shiftsContainer.style.display = 'none';
+        eventsContainer.style.display = 'block';
+      });
+      shiftsList.appendChild(backHeader);
+      try {
+        const eventResp = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=*&event=eq.${encodeURIComponent(eventName)}`, {
+          headers: getSupabaseHeaders()
+        });
+        const eventData = await eventResp.json();
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/event_shifts?select=event,event_shift_date,event_shift,nec_oper,act_oper&event=eq.${encodeURIComponent(eventName)}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await resp.json();
+        if (eventData && eventData.length > 0) {
+          const mainEventCard = createMainEventCard(eventData[0]);
+          shiftsList.appendChild(mainEventCard);
+          const datesDiv = document.createElement('div');
+          datesDiv.id = 'event-shifts';
+          datesDiv.className = 'event-shift';
+          datesDiv.textContent = '📅 Datas:';
+          datesDiv.style.margin = '20px 0 5px 0';
+          datesDiv.style.fontWeight = 'bold';
+          shiftsList.appendChild(datesDiv);
+        }
+        if (!data || !data.length) {
+          const noShiftsCard = document.createElement('div');
+          noShiftsCard.className = 'event-card';
+          noShiftsCard.innerHTML = '<div class="event-title">Sem turnos registados</div>';
+          shiftsList.appendChild(noShiftsCard);
+          return;
+        }
+        data.sort((a, b) => new Date(a.event_shift_date) - new Date(b.event_shift_date));
+        let shiftCardsContainer = document.getElementById('shift-cards-container');
+        if (!shiftCardsContainer) {
+          shiftCardsContainer = document.createElement('div');
+          shiftCardsContainer.id = 'shift-cards-container';
+          shiftCardsContainer.style.overflowY = 'auto';
+          shiftCardsContainer.style.overflowX = 'hidden';
+          shiftCardsContainer.style.width = '100%';
+          shiftsList.appendChild(shiftCardsContainer);
+          const style = document.createElement('style');
+          style.innerHTML = `
+            #shift-cards-container::-webkit-scrollbar { width: 0; height: 0; }
+            #shift-cards-container { scrollbar-width: none; -ms-overflow-style: none; }
+            .fade-in-card { opacity: 0; transform: translateY(10px); transition: opacity 0.3s ease, transform 0.3s ease; }
+            .fade-in-card.show { opacity: 1; transform: translateY(0); }
+          `;
+          document.head.appendChild(style);
+        } else {
+          shiftCardsContainer.innerHTML = '';
+        }
+        const shiftCards = await Promise.all(data.map(shift => createEventShiftCards(shift)));
+        shiftCards.forEach((card, index) => {
+          card.classList.add('fade-in-card');
+          shiftCardsContainer.appendChild(card);
+          setTimeout(() => card.classList.add('show'), index * 50);
+        });
+        function adjustShiftCardsHeight() {
+          const datesDiv = document.getElementById('event-shifts');
+          const footer = document.querySelector('footer');
+          if (!datesDiv || !footer) return;
+          const top = datesDiv.getBoundingClientRect().bottom;
+          const footerTop = footer.getBoundingClientRect().top;
+          const availableHeight = footerTop - top - 30;
+          shiftCardsContainer.style.height = availableHeight + 'px';
+        }
+        adjustShiftCardsHeight();
+        window.removeEventListener('resize', adjustShiftCardsHeight);
+        window.addEventListener('resize', adjustShiftCardsHeight);
+      } catch (err) {
+        console.error(err);
+        const errorCard = document.createElement('div');
+        errorCard.className = 'event-card';
+        errorCard.innerHTML = '<div class="event-title">Erro ao carregar turnos</div>';
+        shiftsList.innerHTML = "";
+        shiftsList.appendChild(errorCard);
+      }
+    }
+    /* ========================= REGISTER SHIFT ========================== */
+    async function registerShift(card) {
+      const nint = localStorage.getItem("currentCorpNint");
+      const corp_oper_nr = localStorage.getItem("currentCorpOperNr");
+      if (!nint || !corp_oper_nr) {
+        showToast('Dados de utilizador em falta', 'error');
+        return;
+      }
+      const addBtn = card.querySelector('.shift-add');
+      if (addBtn) addBtn.disabled = true; 
+      const rawDate = card.dataset.rawDate;
+      const shift = card.dataset.shift;
+      const event = card.dataset.event;
+      const stateDiv = card.querySelector('.shift-event-state');
+      const stateValue = card.querySelector('.shift-state-value');
+      const payload = {n_int: nint, event: event, corp_oper_nr: corp_oper_nr, event_shift_date: rawDate, event_shift: shift, shift_state: 'Em Aprovação'};
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/event_disp`, {
+          method: 'POST',
+          headers: getSupabaseHeaders({returnRepresentation: true}),
+          body: JSON.stringify(payload)
+        });
+        if (!resp.ok) {
+          if (addBtn) addBtn.disabled = false;
+          showToast('Erro ao gravar disponibilidade', 'error');
+          return;
+        }
+        stateValue.textContent = 'Em Aprovação';
+        stateDiv.style.display = 'block';
+        stateValue.classList.remove('shift-state-rejected', 'shift-state-approved');
+        stateValue.classList.add('shift-state-pending-approval');
+        if (addBtn) addBtn.style.display = 'none';
+        showToast('Disponibilidade registada com sucesso!', 'success');
+      } catch (err) {
+        console.error(err);
+        if (addBtn) addBtn.disabled = false;
+        showToast('Erro de ligação ao servidor', 'error');
+      }
+    }
+    /* ========================== SHOW TOAST ========================== */
+    function showToast(message, type = 'success', duration = 3000) {
+      let container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+      toast.innerHTML = `
+        <span class="icon">${icon}</span>
+        <span>${message}</span>
+      `;
+      toast.addEventListener('click', () => {
+        toast.style.animation = 'toastSlideOut 0.3s forwards ease-in';
+        setTimeout(() => toast.remove(), 1000);
+      });
+      container.appendChild(toast);
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.style.animation = 'toastSlideOut 0.3s forwards ease-in';
+          setTimeout(() => toast.remove(), 1000);
+        }
+      }, duration);
+    }
+    /* ========================= INITIALIZATION ========================== */
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+      loadCorpInfo();
+      loadEventList();
+    });
+  </script>
+</body>
+</html>

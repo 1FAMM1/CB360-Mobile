@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360_FOMIO</title>
+  <style>
+    /* ==================== BODY ==================== */
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh;
+          user-select: none; display: flex; flex-direction: column; transition: all 0.3s ease; overflow: hidden; scrollbar-width: none !important; -ms-overflow-style: none !important;}
+    body::-webkit-scrollbar {display: none !important; width: 0 !important; height: 0 !important;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%); color: #fff;}
+    .dark-mode .planning-header {background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%); border-bottom-color: #d32f2f;}
+    .dark-mode .table-wrapper {background: rgba(45, 45, 45, 0.95);}
+    .dark-mode .table th, body.dark-mode .table td {border-bottom-color: #444; border-right-color: #444; color: #fff;}
+    .dark-mode .table th {background: #3a3a3a; color: #fff; text-align: center;}
+    .dark-mode .table tbody tr:hover {background: #4a4a4a;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}    
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: all 0.3s ease; z-index: 1001;}
+    .planning-header {background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 15px 20px; text-align: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+                      border-bottom: 3px solid #d32f2f; position: fixed; top: 100px; left: 0; width: 100%; z-index: 999; margin-top: 0;}
+    .planning-header h2 {margin: 0px; font-size: 1.4em; font-weight: 600; margin-bottom: 8px;}
+    .planning-info {font-size: 14px; opacity: 0.9; font-weight: 500;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: all 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;}
+    .main-content {flex: 1; padding: 205px 20px 60px 20px; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    .tables-scroll-area {flex: 1; overflow-y: scroll !important; overflow-x: hidden; padding-bottom: 20px; scrollbar-width: none !important; -ms-overflow-style: none !important; min-height: 0;
+                         max-height: calc(100vh - 265px);}    
+    .tables-container {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; max-width: 1200px; margin: 0 auto; width: 100%; min-height: 100vh; padding-bottom: 50px;}
+    .table-wrapper {background: rgba(255, 255, 255, 0.95); border-radius: 6px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); overflow: hidden; transition: all 0.3s ease;}
+    .table-wrapper:nth-child(7) .table-header {background: linear-gradient(45deg, #ffd600, #ffb300); color: black; font-weight: bold;}
+    .table-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 16px;}
+    .table {width: 100%; border-collapse: collapse;}
+    .table th, .table td {padding: 12px 15px; text-align: left; border-bottom: 1px solid #ecf0f1; border-right: 1px solid #ecf0f1; transition: all 0.3s ease;}
+    .table th:last-child, .table td:last-child {border-right: none;}
+    .table th {background: #dae0e6; font-weight: bold; color: #2c3e50; text-align: center;}
+    .table tbody tr:hover {background: none !important;}
+    .table th:first-child, .table td:first-child {width: 160px; min-width: 100px; max-width: 200px;}
+    .table th:last-child, .table td:last-child {width: auto;}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */    
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .planning-header {top: 59px; padding: 10px 15px;}
+      .planning-header h2 {font-size: 1.0em; margin-bottom: 5px;}
+      .planning-info {font-size: 12px;}
+      .main-content {padding: 135px 10px 30px 10px;}
+      .tables-scroll-area {max-height: calc(100vh - 190px);}}    
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>EQUIPA DE SERVIÇO</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div>FORÇA MÍNIMA DE INTERVENÇÃO</div>
+  </header>
+  <section class="planning-header">
+    <h2>TURNO</h2>
+    <div class="planning-info" id="planning-info">
+      A carregar informações...
+    </div>
+  </section>
+  <main class="main-content">
+    <section class="tables-scroll-area">
+      <div class="tables-container" id="tables-container">
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) return;
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        }
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+      }
+    }
+    /* ======================= LEITURA DIRETA (SUBSTITUI API) ======================= */
+    async function loadPlanningHeader() {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/fomio_date?select=header_text&limit=1`, {
+          method: 'GET',
+          headers: getSupabaseHeaders()
+        });
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const headerText = data[0].header_text.replace(/^Dia:\s*/i, '');
+          document.getElementById('planning-info').textContent = headerText;
+        } else {
+          document.getElementById('planning-info').textContent = 'Informações não disponíveis';
+        }
+      } catch (error) {
+        console.error('Erro ao carregar header:', error);
+        document.getElementById('planning-info').textContent = 'Erro ao carregar informações';
+      }
+    }
+    async function loadAllTeams() {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/fomio_teams?select=*`, {
+          method: 'GET',
+          headers: getSupabaseHeaders()
+        });
+        const allMembers = await response.json();
+        if (allMembers && Array.isArray(allMembers)) {
+          const grouped = allMembers.reduce((acc, m) => {
+            if (!acc[m.team_name]) acc[m.team_name] = [];
+            acc[m.team_name].push(m);
+            return acc;
+          }, {});
+          teamsMap.forEach(team => {
+            populateTable(team.id, grouped[team.id] || []);
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar equipas:', error);
+      }
+    }
+    /* ======================= UTILS & RENDER ======================= */
+    const teamsMap = [{label: 'OFOPE', id: 'ofope'}, {label: 'Chefe de Serviço', id: 'chefe_servico'}, {label: 'OPTEL', id: 'optel'}, {label: 'Equipa 01', id: 'equipa_01'},
+                      {label: 'Equipa 02', id: 'equipa_02'}, {label: 'Logística', id: 'logistica'}, {label: 'INEM', id: 'inem'}, {label: 'INEM Reserva', id: 'inem_reserva'},
+                      {label: 'Serviço Geral', id: 'servico_geral'}];
+    function createTables() {
+      const container = document.getElementById('tables-container');
+      if (!container) return;
+      container.innerHTML = '';
+      teamsMap.forEach(team => {
+        const tableHTML = `
+        <div class="table-wrapper" data-team="${team.id}" style="display: none;">
+          <div class="table-header">${team.label}</div>
+          <table class="table">
+            <thead>
+              <tr><th>Patente</th><th>Nome</th></tr>
+            </thead>
+            <tbody id="${team.id}-tbody"></tbody>
+          </table>
+        </div>`;
+        container.insertAdjacentHTML('beforeend', tableHTML);
+      });
+    }
+    function populateTable(teamName, data) {
+      const tbody = document.getElementById(`${teamName}-tbody`);
+      const tableWrapper = tbody?.closest('.table-wrapper');
+      if (!tbody || !tableWrapper) return;
+      tbody.innerHTML = '';
+      if (data.length === 0) {
+        tableWrapper.style.display = 'none';
+        return;
+      }
+      const sortedData = sortByPatente(data);
+      const blockedWords = ['falta', 'baixa', 'dispensa', 'licença'];
+      sortedData.forEach(member => {
+        const obs = (member.observ || '').toLowerCase();
+        if (blockedWords.some(word => obs.includes(word))) return;
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${member.patente || ''}</td><td>${member.nome || ''}</td>`;
+        tbody.appendChild(row);
+      });
+      tableWrapper.style.display = tbody.children.length > 0 ? 'block' : 'none';
+    }
+    function sortByPatente(data) {
+      const patenteOrder = ['Comandante', '2º Comandante', 'Adj. de Comando', 'Oficial Bº Superior', 'Oficial Bº Principal', 'Oficial Bº 1ª', 'Oficial Bº 2ª', 
+                            'Oficial Bº Estagiário', 'Chefe', 'Subchefe', 'Bombeiro(a) 1ª', 'Bombeiro(a) 2ª', 'Bombeiro(a) 3ª', 'Estagiário(a)', 'Bº Especialista', 'Cadete'];
+      return data.sort((a, b) => {
+        const indexA = patenteOrder.indexOf(a.patente);
+        const indexB = patenteOrder.indexOf(b.patente);
+        const orderA = indexA === -1 ? 999 : indexA;
+        const orderB = indexB === -1 ? 999 : indexB;
+        if (orderA === orderB) return (Number(a.n_int) || 0) - (Number(b.n_int) || 0);
+        return orderA - orderB;
+      });
+    }
+    window.addEventListener('load', async () => {
+      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+      await loadCorpInfo();
+      createTables();
+      loadPlanningHeader();
+      loadAllTeams();
+    });
+    setInterval(() => {
+      loadAllTeams();
+      loadPlanningHeader();
+    }, 10 * 60 * 1000);
+  </script>    
+</body>
+</html>

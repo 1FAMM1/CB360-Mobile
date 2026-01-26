@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360 Mobile - Disponibilidades Extras</title>
+  <style>
+    /* ==================== BODY ==================== */    
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .availability-extras-subtitle {color: #e0e0e0;}
+    .dark-mode .availability-extras-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+    .dark-mode .availability-extras-btn:hover:not(.selected) {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
+    .dark-mode .availability-extras-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
+    .dark-mode .availability-extras-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.7);}
+    .dark-mode .calendar-container {border: 1px solid #222; background: rgba(65, 65, 65, 0.9); color: #fff;}
+    .dark-mode .calendar-header {color: #ff6b6b; border-bottom: 1px solid rgba(255, 255, 255, 0.2); padding-bottom: 8px;}
+    .dark-mode .calendar-day-header {color: #aaa;}
+    .dark-mode .calendar-day {background: rgba(255, 255, 255, 0.1);}    
+    .dark-mode .calendar-day:hover {background: rgba(255, 255, 255, 0.15);}
+    .dark-mode .calendar-day.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.9), rgba(183, 28, 28, 0.9)); color: #fff; font-weight: bold; border: 2px solid rgba(183, 28, 28, 1);}
+    .dark-mode .calendar-day.today {background: #8a1c1c; border: 2px solid #f1c40f;}
+    .dark-mode .calendar-day.selected.today {background-color: rgba(39, 174, 96, 1); border: 2px solid #f39c12;}
+    .dark-mode .calendar-legend {border: 1px solid #222}
+    .dark-mode .calendar-legend {background: rgba(255, 255, 255, 0.08);}
+    .dark-mode .legend-item {color: #fff;}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;} 
+    .main-content {flex: 1; overflow-y: auto; padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;}
+    .availability-extras-header {flex-shrink: 0; text-align: center; width: 100%;} 
+    .availability-extras-subtitle {font-size: 1.3em; color: #2c3e50; transition: color 0.3s ease;}
+    .availability-extras-buttons {display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 22vw, 220px), 1fr)); justify-content: center; align-items: stretch; margin-bottom: 10px;}
+    .availability-extras-btn {padding: clamp(10px, 1.5vw, 16px) clamp(12px, 2vw, 20px); min-height: clamp(42px, 6vh, 60px); min-width: clamp(80px, 28vw, 250px); max-width: clamp(190px, 18vw, 240px);
+                 font-size: clamp(11px, 1.2vw, 14px); border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; flex-direction: column;
+                 justify-content: center; align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
+    .availability-extras-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                         transition: left 0.4s ease; z-index: 1;}
+    .availability-extras-btn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
+                        transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
+    .availability-extras-btn:active::after {width: 150px; height: 150px;}
+    .availability-extras-btn:hover:not(.selected) {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
+    .availability-extras-btn:active:not(.selected) {transform: scale(0.98); transition:0.1s ease;}
+    .availability-extras-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
+    .availability-extras-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.6);}
+    .availability-extras-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
+    .availability-extras-btn span {position: relative; z-index: 2;}
+    .calendar-container {margin: 0 auto 0 auto;  padding: clamp(10px, 3vw, 15px); background: rgba(0, 0, 0, 0.05); border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+                         display: none;  width: 100%;}
+    .calendar-container.show { display: block; animation: slideDown 0.3s ease;}    
+    .calendar-header {text-align: center;  font-size: clamp(1em, 3vw, 1.2em); font-weight: bold; color: #d32f2f;  margin-bottom: clamp(5px, 1vw, 10px); border-bottom: 1px solid rgba(0, 0, 0, 0.2); padding-bottom: 8px;}
+    .calendar-grid {display: grid;  grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: clamp(2px, 1vw, 5px);}
+    .calendar-day-header {text-align: center; font-weight: bold; padding: clamp(4px, 1.5vw, 8px); font-size: clamp(0.7em, 2vw, 0.9em); color: #666;}  
+    .calendar-day {text-align: center; padding: clamp(5px, 2vw, 10px); border-radius: 3px; background: rgba(0, 0, 0, 0.10); font-size: clamp(0.75em, 2vw, 0.9em); cursor: pointer;  transition: 0.2s ease;}
+    .calendar-day:hover {background: #e0e0e0; transform: scale(1.05);}
+    .calendar-day.empty {background: transparent; cursor: default;}    
+    .calendar-day.empty:hover {transform: none;}    
+    .calendar-day.today {background: #8a1c1c; color: white; font-weight: bold; border: 2px solid #e67e22; }
+    .calendar-day.selected {background: linear-gradient(135deg, #d32f2f, #b71c1c); color: #fff; font-weight: bold; border: 2px solid #b71c1c;}
+    .calendar-day.selected.today {background-color: #229954; border: 2px solid #f39c12;}
+    .calendar-legend {display: none; width: 100%;  margin: 5px auto 0; border-radius: 10px; background: rgba(0, 0, 0, 0.05); border: 1px solid #ccc; justify-content: center; align-items: center;
+                      padding: clamp(8px, 2vw, 12px) clamp(10px, 3vw, 20px); gap: clamp(10px, 5vw, 42px); font-size: clamp(11px, 2vw, 13px); white-space: nowrap; text-align: center;}
+    .calendar-legend.show {display: flex;}
+    .legend-item {display: inline-flex; font-size: clamp(8px, 3vw, 20px); align-items: center; gap: 5px; color: #333; margin: 0 8px;}
+    .legend-color {width: clamp(20px, 2vw, 22px); height: clamp(20px, 2vw, 22px); border-radius: 3px; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.2);}
+    .legend-color.extras {background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: rgba(255, 255, 255, 0.2);}
+    .toast {position: fixed; bottom: clamp(100px, 20vh, 175px); left: 50%; transform: translateX(-50%); background: rgba(194, 21, 21, 0.85); color: #fff; padding: 18px 30px; border-radius: 10px; 
+            font-size: clamp(16px, 3vw, 20px); font-weight: bold; width: 500px; max-width: 90%; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(-10px);}
+    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS MODAL ============ */
+    @media (max-width: 600px) and (min-width: 401px) {
+      .disp-modal-content {width: 90%;}
+      .disp-btn {flex: 1 1 48%; font-weight: 600;}
+      .disp-modal-header {font-size: 1.1em; }
+      .disp-modal-body {gap: 10px; padding: 20px 15px;}
+      .disp-modal-footer {padding: 10px 15px;}
+    }
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .availability-extras-header {flex-shrink: 0; padding-bottom: 10px;}
+      .availability-extras-subtitle {font-size: 0.9em; font-weight: bold; margin-top: 10px;}
+      .availability-extras-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}
+      .availability-extras-btn {height: 50px; min-height: 30px; max-height:75px; font-size: 12px; padding: 15px 10px;}
+      .main-content {padding-left: 20px; padding-right: 20px; justify-content: center; align-items: center;}}
+    .main-content {transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    body.mobile-month-active .main-content {padding-top: 70px; justify-content: flex-start !important; align-items: stretch !important;}
+    .main-content.slide-out, .main-content.slide-in {transform: none;}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>DISPONIBILIDADES</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">EXTRAS</div>
+  </div>
+  <div class="main-content">
+      <div class="availability-extras-header">
+        <p class="availability-extras-subtitle">Selecione o mês e dias:</p>
+      </div>
+        <div class="availability-extras-buttons">
+          <button class="availability-extras-btn" onclick="showCalendar(0, this)">Janeiro</button>
+          <button class="availability-extras-btn" onclick="showCalendar(1, this)">Fevereiro</button>
+          <button class="availability-extras-btn" onclick="showCalendar(2, this)">Março</button>
+          <button class="availability-extras-btn" onclick="showCalendar(3, this)">Abril</button>
+          <button class="availability-extras-btn" onclick="showCalendar(4, this)">Maio</button>
+          <button class="availability-extras-btn" onclick="showCalendar(5, this)">Junho</button>
+          <button class="availability-extras-btn" onclick="showCalendar(6, this)">Julho</button>
+          <button class="availability-extras-btn" onclick="showCalendar(7, this)">Agosto</button>
+          <button class="availability-extras-btn" onclick="showCalendar(8, this)">Setembro</button>
+          <button class="availability-extras-btn" onclick="showCalendar(9, this)">Outubro</button>
+          <button class="availability-extras-btn" onclick="showCalendar(10, this)">Novembro</button>
+          <button class="availability-extras-btn" onclick="showCalendar(11, this)">Dezembro</button>
+        </div>
+      <div id="calendarContainer" class="calendar-container">
+        <div class="calendar-header" id="calendarHeader"></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+      <div id="legend" class="calendar-legend">
+        <div class="legend-item">
+          <span class="legend-color extras"></span>
+          <span class="legend-text">TURNOS EXTRA</span>
+        </div>
+      </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        if (h2) h2.textContent = "Não definido";
+        return;
+      }
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        } else {
+          if (h2) h2.textContent = "Não encontrado";
+        }
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+        if (h2) h2.textContent = corpOperNr;
+      }
+    }
+    /* ========================== THEME LOADING ========================== */
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+    }
+    /* ======================== CALENDAR DISPLAY ========================= */
+    let currentMonthIndex = null;
+    let selectedDays = [];
+    async function loadSelectedDaysFromSupabase(monthIndex) {
+      const currentNintCorpStr = localStorage.getItem("currentCorpNint");
+      const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
+      if (!currentNintCorpStr || !currentCorpOperNrStr) return [];
+      const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
+      const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
+      const month = monthIndex + 1;
+      const today = new Date();
+      const currentDay = today.getDate();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      let year = currentYear;
+      if (currentMonth === 11 && monthIndex === 0 && currentDay >= 15) {
+        year = currentYear + 1;
+      }
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_extras?select=day&n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&month=eq.${month}&year=eq.${year}&value=eq.EX`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) {
+          console.error('Erro ao ler Supabase:', await response.text());
+          return [];
+        }
+        const data = await response.json();
+        return data.map(d => `${year}-${String(month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`);
+      } catch (err) {
+        console.error('Erro de conexão ao ler:', err);
+        return [];
+      }
+    }
+    let isLoadingCalendar = false;
+    async function showCalendar(monthIndex, button) {
+      document.getElementById('legend').style.display = 'none';
+      
+      if (isLoadingCalendar) return;
+      isLoadingCalendar = true;
+      if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
+        button.classList.remove('selected');
+        document.getElementById('calendarContainer').classList.remove('show');
+        document.body.classList.remove('mobile-month-active');
+        currentMonthIndex = null;
+        isLoadingCalendar = false;
+        return;
+      }
+      currentMonthIndex = monthIndex;
+      document.querySelectorAll('.availability-extras-btn').forEach(btn => btn.classList.remove('selected'));
+      document.body.classList.add('mobile-month-active');
+      button.classList.add('selected');
+      const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const today = new Date();
+      const currentDay = today.getDate();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      function getHeaderYear(selectedMonthIndex) {
+        if (currentMonth === 11 && selectedMonthIndex === 0 && currentDay >= 15) {
+          return currentYear + 1;
+        }
+        return currentYear;
+      }
+      const headerYear = getHeaderYear(monthIndex);
+      const firstDay = new Date(headerYear, monthIndex, 1);
+      const lastDay = new Date(headerYear, monthIndex + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDayOfWeek = firstDay.getDay();
+      const calendarContainer = document.getElementById('calendarContainer');
+      const calendarHeader = document.getElementById('calendarHeader');
+      const calendarGrid = document.getElementById('calendarGrid');
+      calendarHeader.textContent = `${monthNames[monthIndex]} ${headerYear}`;
+      calendarGrid.innerHTML = '';
+      dayNames.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-day-header';
+        dayHeader.textContent = day;
+        calendarGrid.appendChild(dayHeader);
+      });
+      for (let i = 0; i < startingDayOfWeek; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'calendar-day empty';
+        calendarGrid.appendChild(emptyDay);
+      }
+      selectedDays = await loadSelectedDaysFromSupabase(monthIndex);
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = day;
+        const dateStr = `${headerYear}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        if (selectedDays.includes(dateStr)) dayElement.classList.add('selected');
+        if (headerYear === currentYear && monthIndex === currentMonth && day === currentDay) {
+          dayElement.classList.add('today');
+        }
+        dayElement.addEventListener('click', async () => {
+          const year = getWorkYear(currentMonthIndex);
+          const now = new Date();
+          const currentDay = now.getDate();
+          if (!allowPiqPastMonthsEdit) {
+            if (isPastMonth(currentMonthIndex, year)) {
+              showToast("Não é possível alterar registos de meses anteriores.");
+              return;
+            }
+            if (currentMonthIndex === now.getMonth() && year === now.getFullYear() && day <= currentDay) {
+              showToast("Não é possível alterar registos de dias anteriores ou do dia atual.");
+              return;
+            }
+          }
+          const currentNintCorpStr = localStorage.getItem("currentCorpNint");
+          const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
+          const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
+          const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
+          const month = currentMonthIndex + 1;
+          if (selectedDays.includes(dateStr)) {
+            selectedDays = selectedDays.filter(d => d !== dateStr);
+            dayElement.classList.remove('selected');
+            try {
+              const resServ = await fetch(
+                `${SUPABASE_URL}/rest/v1/reg_extras?n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&month=eq.${month}&day=eq.${day}&value=eq.EX`, {
+                  method: 'DELETE',
+                  headers: getSupabaseHeaders()
+                }
+              );
+              if (!resServ.ok) console.error(await resServ.text());
+              const resDisp = await fetch(
+                `${SUPABASE_URL}/rest/v1/reg_disp?n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&month=eq.${month}&day=eq.${day}&value=eq.EX`, {
+                  method: 'DELETE',
+                  headers: getSupabaseHeaders()
+                }
+              );
+              if (!resDisp.ok) console.error(await resDisp.text());
+            } catch (err) {
+              console.error(err);
+            }
+          } else {
+            const saved = await saveDayToPiqDisp(day);
+            if (saved) {
+              selectedDays.push(dateStr);
+              dayElement.classList.add('selected');
+            }
+          }
+        });
+        calendarGrid.appendChild(dayElement);
+      }
+      calendarContainer.classList.add('show');
+      document.getElementById('legend').style.display = 'block';
+      calendarContainer.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
+      isLoadingCalendar = false;
+    }
+    /* =========================== SHOW TOAST ============================ */
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.classList.add("show"), 50);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    /* ======================== SAVE DAY TO SCALE ======================== */
+    let allowPiqPastMonthsEdit = false;
+    function isPastMonth(selectedMonthIndex, selectedYear) {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      return (
+        selectedYear < currentYear ||
+        (selectedYear === currentYear && selectedMonthIndex < currentMonth)
+      );
+    }
+    function getWorkYear(selectedMonthIndex) {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      const currentDay = now.getDate();
+      if (currentMonth === 11 && selectedMonthIndex === 0 && currentDay >= 15) {
+        return currentYear + 1;
+      }
+      return currentYear;
+    }
+    async function saveDayToPiqDisp(day) {
+      if (currentMonthIndex === null) return false;
+      const year = getWorkYear(currentMonthIndex);
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentDay = now.getDate();
+      if (!allowPiqPastMonthsEdit) {
+        if (isPastMonth(currentMonthIndex, year)) {
+          showToast("Não é possível alterar registos de meses anteriores.");
+          return false;
+        }
+        if (currentMonthIndex === currentMonth && year === now.getFullYear() && day <= currentDay) {
+          showToast("Não é possível alterar registos de dias anteriores ou do dia atual. Para alterações efetue-as a partir do menu 'Trocas de Serviço'. Obrigado.");
+          return false;
+        }
+      }
+      const currentNintCorpStr = localStorage.getItem("currentCorpNint");
+      const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
+      if (!currentNintCorpStr || !currentCorpOperNrStr) {
+        return false;
+      }
+      const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
+      const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
+      const month = currentMonthIndex + 1;
+      const value = "EX";
+      try {
+        const checkServRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_extras?select=value&n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=eq.EX`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (checkServRes.ok) {
+          const existsServ = await checkServRes.json();
+          if (existsServ.length > 0) {
+            showToast("Já existe uma disponibilidade para EXTRA registada para este dia.");
+            return false;
+          }
+        }
+        const checkDispRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_disp?select=value&n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (checkDispRes.ok) {
+          const existsDisp = await checkDispRes.json();
+          const blocking = existsDisp.filter(r => r.value === "ED" || r.value === "ET");
+          if (blocking.length > 0) {
+            showToast("Já existe uma disponibilidade registada para outro tipo de serviço neste dia. Por favor verifique o menú VISUALIZAR DISPONIBILIDADES.");
+            return false;
+          }
+        }
+        let abv_name = "N/D";
+        const userRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${currentNintCorp}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          if (userData.length > 0) {
+            abv_name = userData[0].abv_name;
+          }
+        }
+        const payloadRegServ = {n_int: currentNintCorp, abv_name, day, month, year, value, corp_oper_nr: currentCorpOperNr};
+        const resServ = await fetch(`${SUPABASE_URL}/rest/v1/reg_extras`, {
+          method: "POST",
+          headers: getSupabaseHeaders({
+            returnRepresentation: true
+          }),
+          body: JSON.stringify(payloadRegServ)
+        });
+        const payloadRegDisp = {n_int: currentNintCorp, day, month, year, value, corp_oper_nr: currentCorpOperNr};
+        const resDisp = await fetch(`${SUPABASE_URL}/rest/v1/reg_disp`, {
+          method: "POST",
+          headers: getSupabaseHeaders({
+            returnRepresentation: true
+          }),
+          body: JSON.stringify(payloadRegDisp)
+        });
+        if (resServ.ok && resDisp.ok) {
+          return true;
+        } else {
+          console.error("Erro numa das gravações");
+          return false;
+        }
+      } catch (err) {
+        console.error("Erro geral:", err);
+        return false;
+      }
+    }
+    /* ========================= GLOBAL LOADING ========================== */
+    const buttons = document.querySelectorAll('.availability-extras-btn');
+    buttons.forEach((button, index) => {
+      button.style.opacity = '0';
+      button.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        button.style.transition = 'all 0.5s ease';
+        button.style.opacity = '1';
+        button.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCorpInfo();
+      loadTheme();
+    });
+  </script>
+</body>
+</html>

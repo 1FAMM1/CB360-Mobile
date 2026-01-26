@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>CB360_OCORRÊNCIAS</title>
+    <style>
+    /* ==================== BODY ==================== */
+    html, body {overscroll-behavior: none;}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .epe-container, .dark-mode .occurrences-container {background: rgba(45, 45, 45, 0.95); border: 1px solid #444;}
+    .dark-mode .epe-container h1, .dark-mode .occurrences-container h1 {color: #fff;}
+    .dark-mode .epe-title {color: #ddd;}
+    .dark-mode .epe-container h1::after, .dark-mode .occurrences-container h1::after {background: rgba(255, 255, 255, 0.2);}
+    .dark-mode .stats-badge {display: none; background: rgba(255, 255, 255, 0.25); border: 1px solid #444; color: #fff;}
+    .dark-mode .occurrence-card {background: rgba(45, 45, 45, 0.95); border: 1px solid #444; color: #fff;}    
+    .dark-mode .occurrence-card {background: #555; border: 1px solid #444;}
+    .dark-mode .card-header {border-bottom: 1px solid #444;}
+    .dark-mode .occurrence-card h3 {color: #f9fafb;}    
+    .dark-mode .location-text {color: #d1d5db;}
+    .dark-mode .cards-container::-webkit-scrollbar-track {background: rgba(255, 255, 255, 0.05);}
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;}
+    .main-content {flex: 1; overflow-y: auto; padding-top: 95px; padding-bottom: 80px; padding-left: 20px; padding-right: 20px;}
+    .epe-container, .occurrences-container {background: rgba(245, 245, 245, 0.95); padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); transition: 0.3s ease;
+                                            animation: fadeIn 0.5s ease-out;}    
+    .epe-container h1, .occurrences-container h1 {text-align:center; font-size: clamp(0.5em, 5vw, 1.1em); color:#2c3e50; position:relative;}
+    .epe-container h1::after, .occurrences-container h1::after {content: ""; display: block; height:1px; background: rgba(0,0,0,0.1); margin: 15px auto; width:90%;}
+    .epe-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;}    
+    .epe-item {display: flex; flex-direction: column; gap: 8px;}    
+    .epe-title {font-size: clamp(0.75em, 3vw, 0.95em); font-weight: 600; color: #2c3e50; text-align: center; text-transform: uppercase; letter-spacing: 1px;}
+    .dark-mode .epe-title {color: #fff;}    
+    .message {text-align: center; font-weight: 600; padding: clamp(8px, 2vw, 10px) clamp(10px, 3vw, 15px); border-radius: 5px; font-size: clamp(0.85em, 2.5vw, 1em); box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+              animation: fadeIn 0.4s ease-out;}
+    .epe-level-0{background: #27ae60; color: #fff;}
+    .epe-level-1{background: #3498db; color: #fff;}
+    .epe-level-2{background: #f1c40f; color: #000;}
+    .epe-level-3{background: #e67e22; color: #fff;}
+    .epe-level-4{background: #e74c3c; color: #fff;}
+    .stats-badge {display: none; background: #ccc; border-radius: 50px; padding: 5px 15px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: clamp(15px, 4vw, 25px);
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-weight: 600; font-size: clamp(0.85em, 2.5vw, 1em); max-width: fit-content; animation: fadeIn 0.5s ease-out;}
+    .stat-item {display: flex; align-items: center; gap: 6px; white-space: nowrap;}
+    .occurrences-container {margin: 10px 0 0 0; display: flex; flex-direction: column; max-height: calc(100vh - 350px); min-height: 100px; overflow: hidden;}
+    .cards-container {display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 5px; margin-top: 10px; overflow-y: auto; flex: 1; padding-right: 5px; padding-bottom: 10px;}
+    .occurrence-card {flex-shrink: 0; min-height: 120px; background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); border-radius: 5px; border: 1px solid #ccc; display: flex; flex-direction: column;}
+    .cards-container::-webkit-scrollbar {width: 4px;}
+    .cards-container::-webkit-scrollbar-track {background: rgba(0, 0, 0, 0.05); border-radius: 10px;}
+    .cards-container::-webkit-scrollbar-thumb {background: linear-gradient(to bottom, #d32f2f, #b71c1c); border-radius: 10px;}
+    .cards-container {scrollbar-width: thin; scrollbar-color: #d32f2f rgba(0, 0, 0, 0.05);}    
+    .statsBadge {margin: -10px 0 0 0;}
+    .occurrence-card {background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); border-radius: 8px; padding: 0;  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
+                      border: 1px solid #ccc; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; display: flex; flex-direction: column; overflow: hidden;}
+    
+    .card-header {padding: 8px 20px; background: linear-gradient(135deg, #ff4d4d 0%, #b71c1c 100%); border-bottom: 1px solid #ccc; display: flex; justify-content: flex-end;}
+    .card-body {padding: 10px; display: flex; flex-direction: column; gap: 15px;}
+    .occurrence-card h3 {font-size: 1rem; font-weight: 600; color: #111827; margin: 0; letter-spacing: -0.025em;}
+    .location-wrapper {display: flex; align-items: flex-start; gap: 8px; color: #4b5563;}
+    .location-text {font-family: 'Inter', 'Segoe UI', sans-serif; font-size: 0.80rem; line-height: 1.5; color: #374151; text-transform: uppercase;}
+    .status-badge {padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;}
+    .status-in-progress {background: #fef3c7; color: #92400e;}
+    .status-completed {background: #d1fae5; color: #065f46;}    
+    .no-occurrences {text-align: center; font-weight: 600; padding: 10px 15px; border-radius: 5px; background: #27ae60; font-size: 1em; box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+                     animation: fadeIn 0.4s ease-out; color: #fff;}    
+    .message.loading {background: linear-gradient(45deg, #3498db, #2980b9); color: white;}
+    .message.error {background: linear-gradient(45deg, #e74c3c, #c0392b);color: white;}
+    .message.empty {background: linear-gradient(45deg, #95a5a6, #7f8c8d); color: white;}
+    /* ==================== POPUP OVERLAY ==================== */
+    .popup-overlay {position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 9999;
+                    animation: fadeIn 0.3s ease-out;}
+    .popup-overlay.active {display: flex;}
+    .popup-content {background: #eee; padding: 20px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 85vh; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideUp 0.3s ease-out;
+                    position: relative;}
+    .popup-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #e74c3c; padding-bottom: 10px;}
+    .popup-header h2 { color: #2c3e50; font-size: 1.4em; margin: 0;}
+    .close-btn {background: #e74c3c; color: white; border: none; border-radius: 50%; width: 34px; height: 34px; font-size: 18px; cursor: pointer; transition: 0.3s;}
+    .close-btn:hover {background: #c0392b; transform: rotate(90deg);}
+    .occurrence-info {background: #dcdcdc; color: #222; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e74c3c; border-left: 6px solid #e74c3c;}
+    .occurrence-info p {margin: 4px 0; font-size: 14px;}
+    .occurrence-info strong {color: #e74c3c;}
+    textarea {width: 100%; min-height: 120px; padding: 12px; border: 2px solid #bdc3c7; border-radius: 8px; font-size: 14px; resize: vertical; margin-bottom: 5px; transition: 0.3s;}
+    textarea:focus {border-color: #3498db; outline: none; box-shadow: 0 0 0 2px rgba(52,152,219,0.15);}
+    .attachment-section { margin-bottom: 15px;}
+    .attachment-label {display: block; font-weight: bold; margin-bottom: 8px; color: #2c3e50;}
+    .attachment-btn {background: linear-gradient(45deg, #3498db, #2980b9); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; 
+                     align-items: center; gap: 8px; transition: all 0.3s ease; width: 100%; justify-content: center;}
+    .attachment-btn:hover {background: linear-gradient(45deg, #2980b9, #21618c);}
+    .attachment-btn:active {transform: translateY(0);}
+    .attachment-preview {margin-top: 10px; padding: 10px; background: #f8f9fa; border: 2px dashed #bdc3c7; border-radius: 8px; max-height: 160px; overflow-y: auto; display: none;}
+    .attachment-preview.has-files {display: block;}
+    .attachment-preview::-webkit-scrollbar {width: 6px;}
+    .attachment-preview::-webkit-scrollbar-thumb {background: linear-gradient(45deg, #3498db, #2980b9); border-radius: 10px;}
+    .attachment-preview::-webkit-scrollbar-track {background: rgba(0,0,0,0.1);}
+    .attachment-item {display: flex; align-items: center; justify-content: space-between; padding: 8px; background: white; border-radius: 6px; margin-bottom: 6px; color: #bbb;}
+    .attachment-name {font-size: 13px; font-weight: 500;}
+    .remove-attachment {background: #e74c3c; border: none; color: white; border-radius: 50%; width: 24px; height: 24px; min-width: 24px; min-height: 24px; cursor: pointer; font-size: 14px;
+                        display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s;}
+    .popup-actions {display: flex; gap: 10px; margin-top: 10px;}
+    .send-btn {flex: 1; background: linear-gradient(45deg, #27ae60, #229954); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 12px;
+               cursor: pointer; transition: 0.3s;}
+    .send-btn:hover {background: linear-gradient(45deg, #229954, #1e8449);}
+    .cancel-btn {flex: 1; background: linear-gradient(45deg, #95a5a6, #7f8c8d); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer;}
+    .cancel-btn:hover {background: linear-gradient(45deg, #7f8c8d, #6c7a7d);}
+    @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
+    @keyframes slideUp {from {transform: translateY(50px); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
+    .toast {min-width: 250px; max-width: 350px; padding: 12px 20px; border-radius: 8px; color: white; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transform: translateX(100%);
+            transition: transform 0.4s ease, opacity 0.4s ease; cursor: pointer;}
+    .toast-success {background-color: #4CAF50;} 
+    .toast-error {background-color: #f44336;}
+    .toast-warning {background-color: #ff9800; color: #000;}
+    .toast-info {background-color: #2196F3;}
+    .toast.show {opacity: 1; transform: translateX(0);}
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .main-content {padding-top: 130px; padding-left: 10px; padding-right: 10px;}
+      .epe-container {padding: 20px 15px; margin: -50px 0 0 0;}
+      .epe-grid {grid-template-columns: 1fr 1fr; gap: 12px;}
+      .footer {padding: 5px 15px;}      
+      .cards-container {grid-template-columns: 1fr;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>GESTÃO DE OCORRÊNCIAS</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">VISUALIZAÇÃO E GESTÃO DE OCORRÊNCIAS</div>
+  </header>
+  <div class="main-content">
+    <div class="epe-container">
+      <h1>⚠️ ESTADOS DE PRONTIDÃO ESPECIAL ⚠️</h1>
+      <div class="epe-grid">
+        <div class="epe-item">
+          <div class="epe-title">EPE DECIR</div>
+          <div id="epedecir" class="message loading">Carregando...</div>
+        </div>
+        <div class="epe-item">
+          <div class="epe-title">EPE DIOPS</div>
+          <div id="epediops" class="message loading">Carregando...</div>
+        </div>
+      </div>
+    </div>
+    <div class="occurrences-container">
+      <h1>🔥 OCORRÊNCIAS EM CURSO 🔥</h1>
+      <div id="statsBadge" class="stats-badge">
+        <div class="stat-item"><span>🚨</span> <span id="totalOccurrences">0</span></div>
+        <div class="stat-item"><span>🚒</span> <span id="totalVehicles">0</span></div>
+        <div class="stat-item"><span>👨‍🚒</span> <span id="totalElements">0</span></div>
+      </div>
+      <div id="cardsContainer" class="cards-container"></div>
+      <div id="noOccurrencesMessage" class="no-occurrences" style="display: none;">
+        ✓ SEM OCORRÊNCIAS ATIVAS
+      </div>
+    </div>
+    <div id="occurrencePopup" class="popup-overlay">
+      <div class="popup-content">
+        <div class="popup-header">
+          <h2>📋 Detalhes da Ocorrência</h2>
+          <button class="close-btn" onclick="closeOccurrencePopup()">×</button>
+        </div>
+        <div class="occurrence-info" id="occurrenceDetails">
+          <p><strong>Ocorrência:</strong> <span id="detailOccurrence">-</span></p>
+          <p><strong>Local:</strong> <span id="detailLocal">-</span></p>
+          <p><strong>Estado:</strong>
+            <select id="detailStatus">
+              <option value="Em Curso">Em Curso</option>
+              <option value="Finalizada">Finalizada</option>
+            </select>
+          </p>
+        </div>
+        <div class="attachment-section">
+          <label class="attachment-label">📝 Descrição:</label>
+          <textarea id="messageText" placeholder="Escreva aqui informações adicionais sobre a ocorrência..."></textarea>
+        </div>
+        <div class="attachment-section">
+          <label class="attachment-label">📎 Anexos: <span style="font-size: 12px; color: #7f8c8d;">(Clique várias vezes para adicionar mais fotos)</span></label>
+          <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+          <button class="attachment-btn" onclick="document.getElementById('fileInput').click()">
+            <span>📎</span>
+            <span>Adicionar Foto (<span id="photoCount">0</span>/10)</span>
+          </button>
+          <div id="attachmentPreview" class="attachment-preview"></div>
+        </div>
+        <div class="popup-actions">
+          <button class="cancel-btn" onclick="closeOccurrencePopup()">❌ Cancelar</button>
+          <button class="send-btn" onclick="sendOccurrenceReport()">
+            <span>📤</span>
+            <span>Enviar Relatório</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;"></div>
+    <div id="lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:10000;">
+      <img id="lightboxImg" src="" style="max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 5px 20px rgba(0,0,0,0.5);" />
+    </div>
+    <div class="footer">
+      <div class="footer-content">
+        <div class="powered-by">
+          <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+        </div>
+        <div class="footer-year">
+          © 2023-2025 - Sistema CB360 Mobile
+        </div>
+      </div>
+    </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+    <script>
+      const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+      const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendTelegram';
+      let selectedFiles = [];
+      let currentOccurrence = null;
+      function getSupabaseHeaders(options = {}) {
+        const corp = localStorage.getItem("currentCorpOperNr");
+        const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+        const headers = {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'x-my-corpo': corp,
+          'x-my-nint': nint
+        };
+        if (options.returnRepresentation) {
+          headers['Prefer'] = 'return=representation';
+        }
+        return headers;
+      }
+      async function loadCorpInfo() {
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        if (!corpOperNr) return;
+        try {
+          const headers = getSupabaseHeaders();
+          headers['x-my-corpo'] = corpOperNr;
+          const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+              headers: headers
+            }
+          );
+          const data = await response.json();
+          if (data && data.length > 0) {
+            const corp = data[0];
+            const logoEl = document.getElementById("corpLogo");
+            const infoEl = document.getElementById("corpInfo");
+            if (infoEl) infoEl.textContent = corpOperNr;
+            if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+          }
+        } catch (err) {
+          console.error('❌ Erro no loadCorpInfo:', err);
+        }
+      }
+      let controllerEpe, controllerOcorrencias;
+      async function LoadEPE() {
+        if (controllerEpe) controllerEpe.abort();
+        controllerEpe = new AbortController();
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        if (!corpOperNr) return;
+        try {
+          const headers = getSupabaseHeaders();
+          headers['x-my-corpo'] = corpOperNr;
+          const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/epe_status?select=epe_type,epe&corp_oper_nr=eq.${corpOperNr}`, {
+              signal: controllerEpe.signal,
+              headers: headers
+            }
+          );
+          if (!response.ok) throw new Error(`Erro Supabase: ${response.status}`);
+          const epeData = await response.json();
+          const epeDecirStatus = document.getElementById('epedecir');
+          const epeDiopsStatus = document.getElementById('epediops');
+          if (!epeDecirStatus || !epeDiopsStatus) return;
+          epeDecirStatus.className = 'message';
+          epeDiopsStatus.className = 'message';
+          const levelMap = {'Monitorização': 'epe-level-0', 'MONITORIZAÇÃO': 'epe-level-0', 'Nível I': 'epe-level-1', 'NÍVEL I': 'epe-level-1', 'Nível II': 'epe-level-2', 
+                            'NÍVEL II': 'epe-level-2', 'Nível III': 'epe-level-3', 'NÍVEL III': 'epe-level-3', 'Nível IV': 'epe-level-4', 'NÍVEL IV': 'epe-level-4'};
+          const decir = epeData.find(item => item.epe_type === 'epe-decir');
+          if (decir) {
+            epeDecirStatus.textContent = decir.epe; epeDecirStatus.classList.add(levelMap[decir.epe] || 'empty');
+          } else {
+            epeDecirStatus.textContent = 'N/D';
+            epeDecirStatus.classList.add('empty');
+          }
+          const diops = epeData.find(item => item.epe_type === 'epe-diops');
+          if (diops) {
+            epeDiopsStatus.textContent = diops.epe;
+            epeDiopsStatus.classList.add(levelMap[diops.epe] || 'empty');
+          } else {
+            epeDiopsStatus.textContent = 'N/D';
+            epeDiopsStatus.classList.add('empty');
+          }
+        } catch (error) {
+          if (error.name !== 'AbortError') {
+            console.error('❌ Erro ao carregar EPE:', error);
+          }
+        }
+      }
+      async function LoadOccurrences() {
+        if (controllerOcorrencias) controllerOcorrencias.abort();
+        controllerOcorrencias = new AbortController();
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        if (!corpOperNr) return;
+        try {
+          const headers = getSupabaseHeaders();
+          headers['x-my-corpo'] = corpOperNr;
+          const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/occurrences_control?select=*&corp_oper_nr=eq.${corpOperNr}&order=id.desc`, {
+              signal: controllerOcorrencias.signal,
+              headers: headers
+            }
+          );
+          if (!response.ok) throw new Error(`Erro Supabase Ocorrências: ${response.status}`);
+          const ocorrencias = await response.json();
+          const cardsContainer = document.getElementById('cardsContainer');
+          const statsBadge = document.getElementById('statsBadge');
+          const noMsg = document.getElementById('noOccurrencesMessage');
+          cardsContainer.innerHTML = '';
+          cardsContainer.style.display = 'none';
+          statsBadge.style.display = 'none';
+          noMsg.style.display = 'none';
+          if (!ocorrencias || ocorrencias.length === 0) {
+            noMsg.style.display = 'block';
+            return;
+          }
+          const ocorrenciasEmCurso = ocorrencias.filter(occ => occ.status && occ.status.toLowerCase() === 'em curso');
+          const totalOccurrences = ocorrenciasEmCurso.length;
+          const totalVehicles = ocorrenciasEmCurso.reduce((sum, occ) => sum + Number(occ.vehicles || 0), 0);
+          const totalElements = ocorrenciasEmCurso.reduce((sum, occ) => sum + Number(occ.elements || 0), 0);
+          document.getElementById('totalOccurrences').textContent = totalOccurrences;
+          document.getElementById('totalVehicles').textContent = totalVehicles;
+          document.getElementById('totalElements').textContent = totalElements;
+          if (totalOccurrences > 0) statsBadge.style.display = 'flex';
+          cardsContainer.style.display = 'grid';
+          ocorrencias.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'occurrence-card';
+            const statusClass = (item.status && item.status.toLowerCase() === 'finalizada') 
+            ? 'status-completed' 
+            : 'status-in-progress';
+            card.innerHTML = `
+              <div class="card-header">
+                <span class="status-badge ${statusClass}">${item.status || 'N/D'}</span>
+              </div>
+              <div class="card-body">
+                <h3>🔥 ${item.occorrence || 'Sem Nome'}</h3>
+                <div class="location-wrapper">
+                  <span>📍</span>
+                  <span class="location-text">${item.local || 'Localização não disponível'}</span>
+                </div>
+              </div>
+            `;
+            card.onclick = () => openOccurrencePopup(item);
+            cardsContainer.appendChild(card);
+          });
+        } catch (error) {
+          if (error.name !== 'AbortError') {
+            console.error('❌ Erro ao carregar ocorrências:', error);
+          }
+        }
+      }
+      function showToast(message, type = 'info', duration = 4000) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        toast.onclick = () => {
+          container.removeChild(toast);
+        };
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 50);
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => {
+            if (toast.parentNode === container) container.removeChild(toast);
+          }, 400);
+        }, duration);
+      }
+      function openOccurrencePopup(occurrence) {
+        currentOccurrence = occurrence;
+        document.getElementById('detailOccurrence').textContent = occurrence.occorrence;
+        document.getElementById('detailLocal').textContent = occurrence.local;
+        const statusSelect = document.getElementById('detailStatus');
+        statusSelect.value = occurrence.status;
+        document.getElementById('messageText').value = '';
+        selectedFiles = [];
+        updateAttachmentPreview();
+        document.getElementById('occurrencePopup').classList.add('active');
+      }
+      function closeOccurrencePopup() {
+        document.getElementById('occurrencePopup').classList.remove('active');
+        currentOccurrence = null;
+        selectedFiles = [];
+        updateAttachmentPreview();
+      }
+      function handleFileSelect(event) {
+        const files = Array.from(event.target.files);
+        selectedFiles = [...selectedFiles, ...files];
+        if (selectedFiles.length > 10) {
+          showToast('⚠️ Só é permitido um máximo de 10 fotos!', 'warning');
+          selectedFiles = selectedFiles.slice(0, 10);
+        }
+        updateAttachmentPreview();
+        event.target.value = '';
+      }
+      function updateAttachmentPreview() {
+        const preview = document.getElementById('attachmentPreview');
+        const counter = document.getElementById('photoCount');
+        if (counter) counter.textContent = selectedFiles.length;
+        if (selectedFiles.length === 0) {
+          preview.classList.remove('has-files');
+          preview.innerHTML = '';
+          return;
+        }
+        preview.classList.add('has-files');
+        preview.innerHTML = '';
+        selectedFiles.forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const item = document.createElement('div');
+            item.className = 'attachment-item';
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.marginBottom = '6px';
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.alt = file.name;
+            img.style.width = '50px';
+            img.style.height = '50px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '6px';
+            img.style.cursor = 'pointer';
+            img.style.marginRight = '10px';
+            img.title = file.name;
+            img.onclick = () => openLightbox(e.target.result);
+            const infoDiv = document.createElement('div');
+            infoDiv.style.flex = '1';
+            infoDiv.style.display = 'flex';
+            infoDiv.style.flexDirection = 'column';
+            infoDiv.style.justifyContent = 'center';
+            infoDiv.innerHTML = `<span class="attachment-name">${file.name}</span>`;
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-attachment';
+            removeBtn.textContent = '×';
+            removeBtn.onclick = () => {
+              removeAttachment(index);
+            };
+            item.appendChild(img);
+            item.appendChild(infoDiv);
+            item.appendChild(removeBtn);
+            preview.appendChild(item);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+      function openLightbox(src) {
+        const lightbox = document.getElementById('lightbox');
+        const img = document.getElementById('lightboxImg');
+        img.src = src;
+        lightbox.style.display = 'flex';
+      }
+      document.getElementById('lightbox').addEventListener('click', function() {
+        this.style.display = 'none';
+      });
+      function removeAttachment(index) {
+        selectedFiles.splice(index, 1);
+        updateAttachmentPreview();
+      }
+      async function sendOccurrenceReport() {
+        if (!currentOccurrence) return;
+        const messageText = document.getElementById('messageText').value.trim();
+        if (!messageText && selectedFiles.length === 0) {
+          showToast('❌ Escreva a descrição ou adicione anexos!', 'error');
+          return;
+        }
+        const sendBtn = document.querySelector('.send-btn');
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span>⏳</span><span>A Enviar...</span>';
+        try {
+          const corpOperNr = (localStorage.getItem("currentCorpOperNr") || '').trim();
+          if (!corpOperNr) throw new Error('corp_oper_nr não definido!');
+          const selectedStatus = document.getElementById('detailStatus').value;
+          const now = new Date();
+          const time = now.toLocaleTimeString('pt-PT', {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          const date = now.toLocaleDateString('pt-PT');
+          let message = `🚨 <b>ATUALIZAÇÃO DE OCORRÊNCIA</b>\n\n`;
+          message += `📋 <b>Ocorrência:</b> ${currentOccurrence.occorrence}\n`;
+          message += `📍 <b>Local:</b> ${currentOccurrence.local}\n`;
+          message += `📊 <b>Estado:</b> ${selectedStatus}\n`;
+          message += `⏰ ${time}\n`;
+          message += `📅 ${date}`;
+          if (messageText) {
+            message += `\n\n💬 <b>Descrição:</b>\n\n<i>${messageText}</i>`;
+          }
+          const formData = new FormData();
+          formData.append('corp_oper_nr', corpOperNr);
+          formData.append('message', message);
+          selectedFiles.forEach((file) => {
+            formData.append('photos', file, file.name);
+          });
+          const res = await fetch(TELEGRAM_API, {
+            method: 'POST',
+            body: formData
+          });
+          const result = await res.json();
+          if (result.success) {
+            showToast('✅ Relatório e anexos enviados com sucesso!', 'success');
+            closeOccurrencePopup();
+          } else {
+            showToast(`❌ Erro ao enviar: ${JSON.stringify(result)}`, 'error', 8000);
+            console.error('Resposta completa do backend:', result);
+          }
+        } catch (err) {
+          console.error('❌ Erro ao enviar:', err);
+          showToast(`❌ ${err.message}`, 'error', 8000);
+        } finally {
+          sendBtn.disabled = false;
+          sendBtn.innerHTML = '<span>📤</span><span>Enviar Relatório</span>';
+        }
+      }
+      window.addEventListener('load', function() {
+        const savedTheme = localStorage.getItem('sgo-theme');
+        if (savedTheme === 'dark') {
+          document.body.classList.add('dark-mode');
+        }
+        loadCorpInfo();
+        LoadEPE();
+        LoadOccurrences();
+        setInterval(LoadEPE, 8000);
+        setInterval(LoadOccurrences, 8000);
+      });
+      document.getElementById('occurrencePopup').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeOccurrencePopup();
+        }
+      });
+    </script>
+</body>
+</html>
