@@ -2,7 +2,7 @@ const webpush = require('web-push');
 const { createClient } = require('@supabase/supabase-js');
 
 export default async function handler(req, res) {
-  // Configurar cabeçalhos de resposta para JSON
+ 
   res.setHeader('Content-Type', 'application/json');
 
   if (req.method !== 'POST') {
