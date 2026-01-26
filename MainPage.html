@@ -851,8 +851,73 @@
       } catch (error) {
         welcomeNameEl.textContent = 'Utilizador';
         avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
-      }
+      }    
     }
+
+
+
+
+/* ======================== PWA PUSH SYSTEM ========================= */
+
+async function inicializarPush() {
+    // 1. Verificar se o utilizador está logado
+    const nint = localStorage.getItem("currentCorpNint");
+    const corp = localStorage.getItem("currentCorpOperNr");
+    if (!nint || !corp) return;
+
+    try {
+        // Aguarda que o Service Worker esteja pronto
+        const registration = await navigator.serviceWorker.ready;
+
+        // 2. Pedir permissão ao utilizador
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            console.warn("Permissão de notificações negada.");
+            return;
+        }
+
+        // 3. Criar a subscrição (O "contrato" com o browser)
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: 'A_TUA_CHAVE_VAPID_PUBLICA' // <--- COLA AQUI A TUA CHAVE
+        });
+
+        // 4. Preparar os dados para a tua nova tabela
+        const subJSON = subscription.toJSON();
+        const payload = {
+            endpoint: subJSON.endpoint,
+            n_int: parseInt(nint, 10),
+            corp_oper_nr: corp.padStart(4, "0"), // Mantém o padrão 0805
+            p256dh: subJSON.keys.p256dh,
+            auth: subJSON.keys.auth
+        };
+
+        // 5. Gravar no Supabase (Upsert para não duplicar se ele abrir noutra página)
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/user_push_subscriptions`, {
+            method: 'POST',
+            headers: {
+                ...getSupabaseHeaders(),
+                'Prefer': 'resolution=merge-duplicates' // Isto evita erros se o token já existir
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            console.log("Notificações configuradas com sucesso para o utilizador " + nint);
+        }
+
+    } catch (error) {
+        console.error("Erro ao configurar Push:", error);
+    }
+}
+
+// Chamar a função automaticamente no init do site
+document.addEventListener('DOMContentLoaded', () => {
+    // Dá um pequeno delay para não sobrecarregar o load inicial
+    setTimeout(inicializarPush, 2000);
+});
+
+    
     /* ====================== NEXT SERVICE LOADING ====================== */
     async function loadNextService() {
       const nintCorpStr = localStorage.getItem("currentCorpNint");
@@ -1233,3 +1298,4 @@
   </script>
 </body>
 </html>
+
