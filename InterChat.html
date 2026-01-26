@@ -2,22 +2,19 @@
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
- <meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+ <meta name="viewport" content="width=device-width, user-scalable=no, viewport-fit=cover, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <script> 
-  (function () {
-    try {
-      if (localStorage.getItem('sgo-theme') === 'dark') {
-
-        document.documentElement.classList.add('dark-mode');
-      }
-    } catch (e) {}
-  })();
-</script>
-
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('sgo-theme') === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <title>CB360_DOCUMENTOS</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
@@ -323,7 +320,6 @@
       .footer-year {font-size: 8px !important;}
       .chat-input-bar {bottom: 38px;}}
   </style>
-
 </head>
 <body>
   <header class="header">
@@ -426,6 +422,7 @@
     <emoji-picker locale="pt" class="light"></emoji-picker>
   </div>
   <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;"/>
+  <input type="file" id="doc-file-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,image/*" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;" />
   <div id="attach-modal" class="attach-modal">
     <div class="attach-card">
       <div class="attach-header">
@@ -443,6 +440,7 @@
     </div>
   </div>
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     (function () {
@@ -456,6 +454,11 @@
       window.addEventListener('orientationchange', setVH);
       setVH();
     })();
+  </script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc ="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.worker.min.js";
+    }
   </script>
   <script>
     /* ===================== SUPABASE CONFIGURATION ====================== */
@@ -570,41 +573,31 @@
       }
     };
    /* ======================= CHAT INPUT HANDLER ======================== */
-const ChatInputHandler = {
-  init() {
-    const chatInput = DOM.chatInput();
-    if (!chatInput) return;
-
-    chatInput.addEventListener('input', () => {
-      // 1. Ajuste de altura (o que já tinha)
-      chatInput.style.height = 'auto';
-      chatInput.style.height = (chatInput.scrollHeight) + 'px';
-      
-      // 2. Scroll para acompanhar o crescimento do input
-      DOM.messages()?.scrollTo(0, DOM.messages().scrollHeight);
-
-      // 3. AGORA: Troca instantânea do botão (Câmara vs Enviar)
-      this.toggleSendButton();
-    });
-  },
-
-  toggleSendButton() {
-    const chatInput = DOM.chatInput();
-    const cameraBtn = document.getElementById('camera-btn');
-    const sendBtn = document.getElementById('send-btn');
-    
-    if (!chatInput || !cameraBtn || !sendBtn) return;
-
-    // Se o input tiver qualquer texto (removendo espaços vazios)
-    if (chatInput.value.trim().length > 0) {
-      cameraBtn.style.display = 'none';
-      sendBtn.style.display = 'flex';
-    } else {
-      cameraBtn.style.display = 'flex';
-      sendBtn.style.display = 'none';
-    }
-  }
-};
+    const ChatInputHandler = {
+      init() {
+        const chatInput = DOM.chatInput();
+        if (!chatInput) return;
+        chatInput.addEventListener('input', () => {
+          chatInput.style.height = 'auto';
+          chatInput.style.height = (chatInput.scrollHeight) + 'px';
+          DOM.messages()?.scrollTo(0, DOM.messages().scrollHeight);
+          this.toggleSendButton();
+        });
+      },
+      toggleSendButton() {
+        const chatInput = DOM.chatInput();
+        const cameraBtn = document.getElementById('camera-btn');
+        const sendBtn = document.getElementById('send-btn');
+        if (!chatInput || !cameraBtn || !sendBtn) return;
+        if (chatInput.value.trim().length > 0) {
+          cameraBtn.style.display = 'none';
+          sendBtn.style.display = 'flex';
+        } else {
+          cameraBtn.style.display = 'flex';
+          sendBtn.style.display = 'none';
+        }
+      }
+    };
     /* ========================= LAYOUT MANAGER ========================== */
     const LayoutManager = {
       resetLayout() {
@@ -638,76 +631,74 @@ const ChatInputHandler = {
         if (msgElement) {
           msgElement.scrollIntoView({behavior: 'smooth', block: 'center'});
           msgElement.style.background = 'rgba(188, 217, 255, 0.5)';
-          setTimeout(() => { msgElement.style.background = ''; }, 1500);
+          setTimeout(() => {msgElement.style.background = '';}, 1500);
         }
       }
     };
     /* ======================== TYPING INDICATOR ========================= */
     const TypingIndicator = {
-  init() {
-    const inputMensage = DOM.chatInput();
-    const inputBar = DOM.inputBar();
-    const iconBtn = document.getElementById('send-icon');
-    const emojiBtn = document.getElementById('emoji-open-btn');
-    const emojiContainer = DOM.emojiContainer();
-    const picker = document.querySelector('emoji-picker');
-    const messageContainer = DOM.messages();    
-    inputMensage.addEventListener('input', function() {
-      const hasText = this.value.trim().length > 0;
-      const novoIcone = hasText ? 'send' : 'mic';      
-      if (iconBtn.textContent !== novoIcone) {
-        iconBtn.style.transform = 'rotate(180deg) scale(0)';
-        iconBtn.style.opacity = '0';        
-        setTimeout(() => {
-          iconBtn.textContent = novoIcone;
-          iconBtn.style.transform = 'rotate(0deg) scale(1)';
-          iconBtn.style.opacity = '1';          
-          if (hasText) {
-            inputBar.classList.add('typing');
-          } else {
-            inputBar.classList.remove('typing');
+      init() {
+        const inputMensage = DOM.chatInput();
+        const inputBar = DOM.inputBar();
+        const iconBtn = document.getElementById('send-icon');
+        const emojiBtn = document.getElementById('emoji-open-btn');
+        const emojiContainer = DOM.emojiContainer();
+        const picker = document.querySelector('emoji-picker');
+        const messageContainer = DOM.messages();    
+        inputMensage.addEventListener('input', function() {
+          const hasText = this.value.trim().length > 0;
+          const novoIcone = hasText ? 'send' : 'mic';      
+          if (iconBtn.textContent !== novoIcone) {
+            iconBtn.style.transform = 'rotate(180deg) scale(0)';
+            iconBtn.style.opacity = '0';        
+            setTimeout(() => {
+              iconBtn.textContent = novoIcone;
+              iconBtn.style.transform = 'rotate(0deg) scale(1)';
+              iconBtn.style.opacity = '1';          
+              if (hasText) {
+                inputBar.classList.add('typing');
+              } else {
+                inputBar.classList.remove('typing');
+              }
+            }, 150);
           }
-        }, 150);
+        });    
+        emojiBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (emojiContainer.style.display === 'block') {
+            LayoutManager.resetLayout();
+            inputMensage.focus();
+          } else {
+            inputMensage.blur();
+            setTimeout(() => {
+              emojiContainer.style.display = 'block';
+              delete emojiContainer.dataset.mode;
+              inputBar.style.bottom = '305px';
+              messageContainer.style.marginBottom = '325px';          
+              let scrollAcompanha = setInterval(() => {
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+              }, 10);
+              setTimeout(() => clearInterval(scrollAcompanha), 400);
+            }, 50);
+          }
+        });    
+        picker.addEventListener('emoji-click', event => {
+          if (emojiContainer.dataset.mode !== 'reaction') {
+            const emoji = event.detail.unicode;
+            const inicio = inputMensage.selectionStart;
+            const fim = inputMensage.selectionEnd;      
+            inputMensage.value = inputMensage.value.substring(0, inicio) + emoji + inputMensage.value.substring(fim);
+            const novaPosicao = inicio + emoji.length;
+            inputMensage.setSelectionRange(novaPosicao, novaPosicao);
+            inputMensage.dispatchEvent(new Event('input'));
+          }
+        });    
+        inputMensage.addEventListener('focus', () => LayoutManager.resetLayout());
+        messageContainer.addEventListener('click', () => {
+          if (emojiContainer.style.display === 'block') LayoutManager.resetLayout();
+        });
       }
-    });    
-    emojiBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (emojiContainer.style.display === 'block') {
-        LayoutManager.resetLayout();
-        inputMensage.focus();
-      } else {
-        inputMensage.blur();
-        setTimeout(() => {
-          emojiContainer.style.display = 'block';
-          // Limpa o modo de reação (este picker é para escrever)
-          delete emojiContainer.dataset.mode;
-          inputBar.style.bottom = '305px';
-          messageContainer.style.marginBottom = '325px';          
-          let scrollAcompanha = setInterval(() => {
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-          }, 10);
-          setTimeout(() => clearInterval(scrollAcompanha), 400);
-        }, 50);
-      }
-    });    
-    picker.addEventListener('emoji-click', event => {
-      // Só escreve no input se NÃO estiver em modo de reação
-      if (emojiContainer.dataset.mode !== 'reaction') {
-        const emoji = event.detail.unicode;
-        const inicio = inputMensage.selectionStart;
-        const fim = inputMensage.selectionEnd;      
-        inputMensage.value = inputMensage.value.substring(0, inicio) + emoji + inputMensage.value.substring(fim);
-        const novaPosicao = inicio + emoji.length;
-        inputMensage.setSelectionRange(novaPosicao, novaPosicao);
-        inputMensage.dispatchEvent(new Event('input'));
-      }
-    });    
-    inputMensage.addEventListener('focus', () => LayoutManager.resetLayout());
-    messageContainer.addEventListener('click', () => {
-      if (emojiContainer.style.display === 'block') LayoutManager.resetLayout();
-    });
-  }
-};
+    };
     /* ========================= AUDIO RECORDING ========================= */
     const AudioRecorder = {
       async start(e) {
@@ -716,17 +707,17 @@ const ChatInputHandler = {
         if (!Helpers.isChatActive()) return;    
         AppState.recordTimeout = setTimeout(async () => {
           try {
-            const permission = await navigator.permissions.query({ name: 'microphone' });
+            const permission = await navigator.permissions.query({name: 'microphone'});
             if (permission.state === 'denied') {
               alert('⚠️ Acesso ao microfone bloqueado!\n\nPor favor, ativa nas definições do browser.');
               return;
             }        
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({audio: true});
             AppState.mediaRecorder = new MediaRecorder(stream);
             AppState.audioChunks = [];        
             AppState.mediaRecorder.ondataavailable = e => AppState.audioChunks.push(e.data);
             AppState.mediaRecorder.onstop = async () => {
-              const audioBlob = new Blob(AppState.audioChunks, { type: 'audio/webm' });
+              const audioBlob = new Blob(AppState.audioChunks, {type: 'audio/webm'});
               if (audioBlob.size > 2000) {
                 await this.upload(audioBlob);
               }
@@ -763,11 +754,11 @@ const ChatInputHandler = {
         const fileName = `audio_${Date.now()}.webm`;
         const filePath = `${AppState.currentChat}/${fileName}`;    
         try {
-          const { data, error } = await supabaseClient.storage
+          const {data, error} = await supabaseClient.storage
             .from(CONFIG.STORAGE_BUCKET)
             .upload(filePath, blob);      
           if (error) throw error;      
-          const { data: { publicUrl } } = supabaseClient.storage
+          const {data: {publicUrl}} = supabaseClient.storage
             .from(CONFIG.STORAGE_BUCKET)
             .getPublicUrl(filePath);      
           await MessageSender.send("Enviou um áudio", publicUrl);
@@ -865,11 +856,11 @@ const ChatInputHandler = {
         const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
         const fileName = `photo_${Date.now()}.${ext}`;
         const filePath = `${AppState.currentChat}/${fileName}`;    
-        const { error } = await supabaseClient.storage
+        const {error} = await supabaseClient.storage
           .from(CONFIG.STORAGE_BUCKET)
-          .upload(filePath, file, { contentType: file.type || "image/jpeg" });    
+          .upload(filePath, file, {contentType: file.type || "image/jpeg"});    
         if (error) throw error;    
-        const { data: { publicUrl } } = supabaseClient.storage
+        const {data: {publicUrl} } = supabaseClient.storage
           .from(CONFIG.STORAGE_BUCKET)
           .getPublicUrl(filePath);    
         if (!publicUrl) throw new Error("Sem URL público.");    
@@ -877,19 +868,98 @@ const ChatInputHandler = {
       },  
       async sendImageMessage(imageUrl, fileName, caption = "") {
         const senderName = await UserManager.fetchName();    
-        const payload = {n_int: AppState.currentUserNint, recipient_nint: String(AppState.currentChat), corp_oper_nr: Helpers.getCorpNr(), abv_name: senderName, message_type: "image",
-                         file_url: imageUrl, file_name: fileName, message: caption};    
-        const { error } = await supabaseClient
+        const payload = {n_int: AppState.currentUserNint, recipient_nint: String(AppState.currentChat), corp_oper_nr: Helpers.getCorpNr(), abv_name: senderName, 
+                         message_type: "image", file_url: imageUrl, file_name: fileName, message: caption};    
+        const {error} = await supabaseClient
           .from("chat_messages")
           .insert([payload]);    
         if (error) throw error;
       }
     };
+    /* ========================== FILE HANDLER =========================== */
+    const FileHandler = {
+      init() {
+        const input = document.getElementById('doc-file-input');
+        if (!input) return;    
+        input.addEventListener('change', async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (!file) return;    
+          try {
+            if (!Helpers.isChatActive()) return;    
+            const MAX_MB = 25;
+            if (file.size > MAX_MB * 1024 * 1024) {
+              alert(`Ficheiro muito grande (máx. ${MAX_MB}MB).`);
+              return;
+            }    
+            const chatId = AppState.currentChat;
+            const now = Date.now();
+            const safeName = file.name.replace(/[^\w.\-() ]+/g, '_');
+            const rand = (crypto.randomUUID?.() || Math.random().toString(16).slice(2));
+            const basePath = `chat/${chatId}/${now}_${rand}_${safeName}`;    
+            let previewUrl = null;
+            const isPdf = (file.type === 'application/pdf') || file.name.toLowerCase().endsWith('.pdf');
+            if (isPdf && window.pdfjsLib) {
+              const thumbBlob = await this._renderPdfFirstPageToBlob(file, { targetWidth: 700 });
+              if (thumbBlob) {
+                const thumbPath = basePath.replace(/\.pdf$/i, '') + `_preview.png`;    
+                const { error: upThumbErr } = await supabaseClient
+                  .storage.from('cb_files')
+                  .upload(thumbPath, thumbBlob, { contentType: 'image/png' });    
+                if (!upThumbErr) {
+                  const { data: pubThumb } = supabaseClient.storage.from('cb_files').getPublicUrl(thumbPath);
+                  previewUrl = pubThumb?.publicUrl || null;
+                }
+              }
+            }
+            const { error: upErr } = await supabaseClient
+              .storage.from('cb_files')
+              .upload(basePath, file, { contentType: file.type || 'application/octet-stream' });    
+            if (upErr) throw upErr;    
+            const { data: pubFile } = supabaseClient.storage.from('cb_files').getPublicUrl(basePath);
+            const fileUrl = pubFile?.publicUrl;    
+            const senderName = await UserManager.fetchName();    
+            const payload = {n_int: AppState.currentUserNint, recipient_nint: String(AppState.currentChat), corp_oper_nr: Helpers.getCorpNr(), abv_name: senderName,
+                             message_type: 'file', file_name: file.name, file_url: fileUrl, preview_url: previewUrl, message: ''};    
+            const { error: insErr } = await supabaseClient
+              .from('chat_messages')
+              .insert([payload]);    
+            if (insErr) throw insErr;    
+          } catch (err) {
+            console.error('Erro ao enviar ficheiro:', err);
+            alert('Não foi possível enviar o ficheiro.');
+          }
+        });
+      },
+      openPicker() {
+        document.getElementById('doc-file-input')?.click();
+      },    
+      async _renderPdfFirstPageToBlob(file, { targetWidth = 700 } = {}) {
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          const page = await pdf.getPage(1);
+          const viewport1 = page.getViewport({ scale: 1 });
+          const scale = Math.max(0.5, Math.min(3, targetWidth / viewport1.width));
+          const viewport = page.getViewport({ scale });    
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d', { alpha: false });
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);    
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.9));
+          return blob || null;
+        } catch (e) {
+          console.warn('Não consegui gerar thumbnail PDF:', e);
+          return null;
+        }
+      }
+    };    
     /* ========================== USER MANAGER =========================== */
     const UserManager = {
       async fetchName() {
         try {
-          const { data } = await supabaseClient
+          const {data} = await supabaseClient
             .from('reg_elems')
             .select('abv_name')
             .eq('n_int', AppState.currentUserNint)
@@ -921,18 +991,15 @@ const ChatInputHandler = {
       }
     };
     /* ========================== THEME MANAGER ========================== */
-    const ThemeManager = {
-  load() {
-    const isDark = localStorage.getItem('sgo-theme') === 'dark';
-    document.documentElement.classList.toggle('dark-mode', isDark);
-    document.body.classList.toggle('dark-mode', isDark); // opcional, mas ajuda se houver CSS dependente do body
-  }
-};
+    const ThemeManager = {load() {
+      const isDark = localStorage.getItem('sgo-theme') === 'dark';
+      document.documentElement.classList.toggle('dark-mode', isDark);
+      document.body.classList.toggle('dark-mode', isDark);}};
     /* ========================= CONTACT MANAGER ========================= */
     const ContactManager = {
       async load() {
         const corpOperNr = Helpers.getCorpNr();        
-        const { data: users, error } = await supabaseClient
+        const {data: users, error} = await supabaseClient
           .from('reg_elems')
           .select('n_int, abv_name, photo_url, elem_state')
           .eq('corp_oper_nr', corpOperNr)
@@ -997,19 +1064,19 @@ const ChatInputHandler = {
     const BadgeManager = {
       async update() {
         const currentCorp = Helpers.getCorpNr();
-        const { count: totalGeral } = await supabaseClient
+        const {count: totalGeral} = await supabaseClient
           .from('chat_messages')
-          .select('*', { count: 'exact', head: true })
+          .select('*', {count: 'exact', head: true})
           .eq('recipient_nint', 'geral')
           .eq('corp_oper_nr', currentCorp)
           .neq('n_int', AppState.currentUserNint);        
-        const { count: lidasGeral } = await supabaseClient
+        const {count: lidasGeral} = await supabaseClient
           .from('chat_message_reads')
-          .select('*', { count: 'exact', head: true })
+          .select('*', {count: 'exact', head: true})
           .eq('n_int', AppState.currentUserNint)
           .eq('corp_oper_nr', currentCorp);        
         const unreadGeral = Math.max(0, (totalGeral || 0) - (lidasGeral || 0));
-        const { data: privData } = await supabaseClient
+        const {data: privData} = await supabaseClient
           .from('chat_messages')
           .select('n_int')
           .eq('recipient_nint', AppState.currentUserNint)
@@ -1095,7 +1162,7 @@ const ChatInputHandler = {
         for (const msg of AppState.messagesToForward) {
           const payload = {n_int: AppState.currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName, message: msg.message || "", message_type: msg.message_type || "text",
                            file_url: msg.file_url || null, file_name: msg.file_name || null, is_forwarded: true};      
-          const { error } = await supabaseClient.from('chat_messages').insert([payload]);
+          const {error} = await supabaseClient.from('chat_messages').insert([payload]);
           if (error) console.error("Erro ao encaminhar mensagem:", error);
         }    
         AppState.messagesToForward = [];
@@ -1142,7 +1209,7 @@ const ChatInputHandler = {
           query = query.or(`and(n_int.eq.${AppState.currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${AppState.currentUserNint})`);
         }    
         try {
-          const { data: msgs, error } = await query.order('created_at', {ascending: true});      
+          const {data: msgs, error} = await query.order('created_at', {ascending: true});      
           if (AppState.currentChat !== chatRef) return;
           if (error) return console.error(error);      
           if (!msgs || msgs.length === 0) {
@@ -1187,7 +1254,7 @@ const ChatInputHandler = {
         if (messagesEl.style.display !== 'none') {
           ScrollManager.toBottom();
         }
-      },  
+      },
       createMessageElement(msg, chatRef) {
         const time = Helpers.formatTime(msg.edited_at || msg.created_at);
         const isMe = String(msg.n_int) === AppState.currentUserNint;
@@ -1216,15 +1283,15 @@ const ChatInputHandler = {
           <span class="msg-text-content">${contentHTML}</span>${starIcon}
           ${reactionsHTML}
           <div class="msg-meta">
-  <span class="msg-time">${time}</span> ${checkHTML}
-</div>
+            <span class="msg-time">${time}</span> ${checkHTML}
+          </div>
         `;    
         if (!isDeleted && msg.edited_at) {
           const metaDiv = div.querySelector('.msg-meta');
           if (metaDiv) {
             const editTag = document.createElement('span');
             editTag.className = 'message-edited-tag';
-            editTag.textContent = 'editada';
+            editTag.textContent = 'Editada: ';
             metaDiv.insertBefore(editTag, metaDiv.firstChild);
           }
         }    
@@ -1299,11 +1366,23 @@ const ChatInputHandler = {
                 <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
               </div>`;      
           case 'file':
+            if (msg.preview_url) {
+              return `
+              <img src="${msg.preview_url}"
+                class="chat-img"
+                data-url="${msg.file_url}"
+                alt="PDF preview">
+                <div class="img-caption">${msg.file_name || 'Documento PDF'}</div>
+              `;
+            }
             return `
               <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
                 <span class="material-icons">insert_drive_file</span>
-                <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">${msg.file_name || 'Documento'}</a>
-              </div>`;      
+                  <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
+                    ${msg.file_name || 'Documento'}
+                  </a>
+              </div>
+            `;     
           default:
             return Helpers.escapeHtml(msg.message);
         }
@@ -1311,102 +1390,73 @@ const ChatInputHandler = {
     };
     /* ========================= MESSAGE SENDER ========================== */
     const MessageSender = {
-  async send(audioText = null, audioUrl = null) {
-    const inputEl = DOM.chatInput();
-    const sendBtn = document.getElementById("chat-send-btn");
-    const text = audioText || inputEl.value.trim();
-    
-    if (!text && !audioUrl) return;
-    sendBtn.disabled = true;
-
-    // 1. LÓGICA DE EDIÇÃO (O QUE FALTA)
-    if (typeof EditManager !== 'undefined' && EditManager.editingMessageId && !audioUrl) {
-      try {
-        const { error } = await supabaseClient
-          .from('chat_messages')
-          .update({ 
-            message: text,
-            edited_at: new Date().toISOString() 
-          })
-          .eq('id', EditManager.editingMessageId);
-
-        if (error) throw error;
-
-        // Limpa o input ANTES de chamar finish()
-        inputEl.value = '';
+      async send(audioText = null, audioUrl = null) {
+        const inputEl = DOM.chatInput();
+        const sendBtn = document.getElementById("chat-send-btn");
+        const text = audioText || inputEl.value.trim();        
+        if (!text && !audioUrl) return;
+        sendBtn.disabled = true;
+        if (typeof EditManager !== 'undefined' && EditManager.editingMessageId && !audioUrl) {
+          try {
+            const {error} = await supabaseClient
+              .from('chat_messages')
+              .update({
+                message: text,
+                edited_at: new Date().toISOString() 
+              })
+              .eq('id', EditManager.editingMessageId);    
+            if (error) throw error;
+            inputEl.value = '';
+            inputEl.dispatchEvent(new Event('input', {bubbles: true}));
+            EditManager.finish();
+          } catch (err) {
+            console.error("Erro ao editar:", err);
+          } finally {
+            sendBtn.disabled = false;
+          }
+          return;
+        }
+        if (!audioUrl) {
+          inputEl.value = "";
+          LayoutManager.resetLayout();
+          inputEl.dispatchEvent(new Event('input'));
+        }    
+        const currentCorp = Helpers.getCorpNr();
+        const senderName = await UserManager.fetchName();
+        const messageData = {n_int: AppState.currentUserNint, recipient_nint: AppState.currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text, 
+                             file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};    
+        if (AppState.currentReplyToMessage) {
+          messageData.reply_to_message_id = AppState.currentReplyToMessage.id;
+        }    
+        const {error} = await supabaseClient.from('chat_messages').insert([messageData]);
         
-        // Dispara o evento input para atualizar os botões
-        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-        
-        // Agora sim, fecha a barra de edição
-        EditManager.finish();
-      } catch (err) {
-        console.error("Erro ao editar:", err);
-      } finally {
+        if (AppState.currentReplyToMessage) {
+            ReplyManager.cancel();
+        }    
         sendBtn.disabled = false;
       }
-      return; // Importante: sai da função para não executar o insert abaixo
-    }
-
-    // 2. LÓGICA DE RESPOSTA (JÁ EXISTENTE)
-    if (!audioUrl) {
-      inputEl.value = "";
-      LayoutManager.resetLayout();
-      inputEl.dispatchEvent(new Event('input'));
-    }
-
-    // 3. LÓGICA DE NOVA MENSAGEM (O SEU INSERT ATUAL)
-    const currentCorp = Helpers.getCorpNr();
-    const senderName = await UserManager.fetchName();
-    const messageData = {
-        n_int: AppState.currentUserNint, 
-        recipient_nint: AppState.currentChat, 
-        corp_oper_nr: currentCorp, 
-        abv_name: senderName, 
-        message: text, 
-        file_url: audioUrl, 
-        message_type: audioUrl ? 'audio' : 'text'
     };
-
-    if (AppState.currentReplyToMessage) {
-      messageData.reply_to_message_id = AppState.currentReplyToMessage.id;
-    }
-
-    const { error } = await supabaseClient.from('chat_messages').insert([messageData]);
-    
-    if (AppState.currentReplyToMessage) {
-        ReplyManager.cancel();
-    }
-
-    sendBtn.disabled = false;
-  }
-};
     /* ========================== READ MANAGER =========================== */
     const ReadManager = {
       async markGeralAsRead() {
         const currentCorp = Helpers.getCorpNr();    
-        const { data: messages } = await supabaseClient
+        const {data: messages} = await supabaseClient
           .from('chat_messages')
           .select('id')
           .eq('recipient_nint', 'geral')
           .eq('corp_oper_nr', currentCorp)
           .neq('n_int', AppState.currentUserNint);    
         if (!messages || messages.length === 0) return;    
-        const { data: alreadyRead } = await supabaseClient
+        const {data: alreadyRead} = await supabaseClient
           .from('chat_message_reads')
           .select('message_id')
           .eq('n_int', AppState.currentUserNint);    
         const readIds = new Set(alreadyRead?.map(r => r.message_id) || []);    
         const toInsert = messages
           .filter(m => !readIds.has(m.id))
-          .map(m => ({
-            message_id: m.id,
-            n_int: AppState.currentUserNint,
-            read_at: new Date().toISOString(),
-            corp_oper_nr: currentCorp
-          }));    
+          .map(m => ({message_id: m.id, n_int: AppState.currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp}));    
         if (toInsert.length === 0) return;    
-        const { error } = await supabaseClient
+        const {error} = await supabaseClient
           .from('chat_message_reads')
           .insert(toInsert);    
         if (error) {
@@ -1418,7 +1468,7 @@ const ChatInputHandler = {
       async sendReceipt(toNint) {
         if (toNint === 'geral' || !toNint) return;    
         const currentCorp = Helpers.getCorpNr();    
-        const { error } = await supabaseClient
+        const {error} = await supabaseClient
           .from('chat_messages')
           .update({read_at: new Date().toISOString()})
           .eq('n_int', toNint)
@@ -1436,122 +1486,118 @@ const ChatInputHandler = {
     };
     /* ======================== REACTION MANAGER ========================= */
     const ReactionManager = {
-  render(reactions, messageId) {
-    if (!reactions || Object.keys(reactions).length === 0) return '';    
-    const grouped = {};
-    for (const [nint, emoji] of Object.entries(reactions)) {
-      if (!grouped[emoji]) grouped[emoji] = [];
-      grouped[emoji].push(nint);
-    }    
-    let html = '<div class="message-reactions">';
-    for (const [emoji, users] of Object.entries(grouped)) {
-      const count = users.length;
-      const isMyReaction = users.includes(AppState.currentUserNint);
-      const myClass = isMyReaction ? 'my-reaction' : '';
-      const isThumb = emoji === '👍' || emoji === '👎';
-      const thumbClass = isThumb ? 'thumb-emoji' : '';
-      const countHTML = count > 1 ? `<span class="reaction-count">${count}</span>` : '';      
-      html += `
-        <div class="reaction-badge ${myClass}" onclick="event.stopPropagation(); ReactionManager.toggle('${messageId}', '${emoji}')">
-          <span class="reaction-emoji ${thumbClass}">${emoji}</span>
-          ${countHTML}
-        </div>
-      `;
-    }
-    html += '</div>';
-    return html;
-  },  
-  async toggle(messageId, emoji) {
-    const { data: msg, error: fetchError } = await supabaseClient
-      .from('chat_messages')
-      .select('reactions')
-      .eq('id', messageId)
-      .single();    
-    if (fetchError) {
-      console.error("Erro ao ler reações:", fetchError);
-      return;
-    }    
-    let currentReactions = msg.reactions || {};    
-    if (!currentReactions[emoji]) {
-      currentReactions[emoji] = [];
-    }    
-    const userIndex = currentReactions[emoji].indexOf(AppState.currentUserNint);    
-    if (userIndex === -1) {
-      currentReactions[emoji].push(AppState.currentUserNint);
-    } else {
-      currentReactions[emoji].splice(userIndex, 1);
-      if (currentReactions[emoji].length === 0) {
-        delete currentReactions[emoji];
-      }
-    }    
-    const { error: updateError } = await supabaseClient
-      .from('chat_messages')
-      .update({ reactions: currentReactions })
-      .eq('id', messageId);    
-    if (updateError) {
-      console.error("Erro ao atualizar reação:", updateError);
-    }
-  },  
-  async handleClick(emoji) {
-    if (!AppState.reactionTargetId) {
-      console.warn("Nenhuma mensagem selecionada para reagir.");
-      return;
-    }    
-    const targetId = AppState.reactionTargetId;
-    const menu = DOM.reactionMenu();
-    if (menu) menu.style.display = 'none';    
-    SelectionManager.clear();    
-    try {
-      const { data: msg, error: fetchError } = await supabaseClient
-        .from('chat_messages')
-        .select('reactions')
-        .eq('id', targetId)
-        .single();      
-      if (fetchError) {
-        console.error("Erro ao ler do Supabase:", fetchError);
-        return;
-      }      
-      let currentReactions = msg.reactions || {};      
-      if (currentReactions[AppState.currentUserNint] === emoji) {
-        delete currentReactions[AppState.currentUserNint];
-      } else {
-        currentReactions[AppState.currentUserNint] = emoji;
-      }      
-      const { error: updateError } = await supabaseClient
-        .from('chat_messages')
-        .update({ reactions: currentReactions })
-        .eq('id', targetId);      
-      if (updateError) {
-        console.error("Erro ao gravar reação:", updateError);
-      }
-    } catch (err) {
-      console.error("Erro inesperado:", err);
-    }
-  },  
-  openFullPicker() {
-    const menu = DOM.reactionMenu();
-    const pickerContainer = DOM.emojiContainer();
-    const picker = pickerContainer.querySelector('emoji-picker');    
-    if (menu) menu.style.display = 'none';
-    pickerContainer.style.display = 'block';
-    
-    // Marca que estamos em modo de reação (não escrever no input)
-    pickerContainer.dataset.mode = 'reaction';
-    
-    if (!picker.dataset.reactionListenerSet) {
-      picker.addEventListener('emoji-click', event => {
-        // Verifica se estamos em modo de reação
-        if (pickerContainer.dataset.mode === 'reaction') {
-          event.stopPropagation(); // Impede que outros listeners sejam ativados
-          this.handleClick(event.detail.unicode);
-          pickerContainer.style.display = 'none';
-          delete pickerContainer.dataset.mode; // Limpa o modo
+      render(reactions, messageId) {
+        if (!reactions || Object.keys(reactions).length === 0) return '';    
+        const grouped = {};
+        for (const [nint, emoji] of Object.entries(reactions)) {
+          if (!grouped[emoji]) grouped[emoji] = [];
+          grouped[emoji].push(nint);
+        }    
+        let html = '<div class="message-reactions">';
+        for (const [emoji, users] of Object.entries(grouped)) {
+          const count = users.length;
+          const isMyReaction = users.includes(AppState.currentUserNint);
+          const myClass = isMyReaction ? 'my-reaction' : '';
+          const isThumb = emoji === '👍' || emoji === '👎';
+          const thumbClass = isThumb ? 'thumb-emoji' : '';
+          const countHTML = count > 1 ? `<span class="reaction-count">${count}</span>` : '';      
+          html += `
+            <div class="reaction-badge ${myClass}" onclick="event.stopPropagation(); ReactionManager.toggle('${messageId}', '${emoji}')">
+              <span class="reaction-emoji ${thumbClass}">${emoji}</span>
+              ${countHTML}
+            </div>
+          `;
         }
-      });
-      picker.dataset.reactionListenerSet = "true";
-    }
-  }
-};
+        html += '</div>';
+        return html;
+      },  
+      async toggle(messageId, emoji) {
+        const {data: msg, error: fetchError} = await supabaseClient
+          .from('chat_messages')
+          .select('reactions')
+          .eq('id', messageId)
+          .single();    
+        if (fetchError) {
+          console.error("Erro ao ler reações:", fetchError);
+          return;
+        }    
+        let currentReactions = msg.reactions || {};    
+        if (!currentReactions[emoji]) {
+          currentReactions[emoji] = [];
+        }    
+        const userIndex = currentReactions[emoji].indexOf(AppState.currentUserNint);    
+        if (userIndex === -1) {
+          currentReactions[emoji].push(AppState.currentUserNint);
+        } else {
+          currentReactions[emoji].splice(userIndex, 1);
+          if (currentReactions[emoji].length === 0) {
+            delete currentReactions[emoji];
+          }
+        }    
+        const {error: updateError} = await supabaseClient
+          .from('chat_messages')
+          .update({reactions: currentReactions})
+          .eq('id', messageId);    
+        if (updateError) {
+          console.error("Erro ao atualizar reação:", updateError);
+        }
+      },  
+      async handleClick(emoji) {
+        if (!AppState.reactionTargetId) {
+          console.warn("Nenhuma mensagem selecionada para reagir.");
+          return;
+        }    
+        const targetId = AppState.reactionTargetId;
+        const menu = DOM.reactionMenu();
+        if (menu) menu.style.display = 'none';    
+        SelectionManager.clear();    
+        try {
+          const {data: msg, error: fetchError} = await supabaseClient
+            .from('chat_messages')
+            .select('reactions')
+            .eq('id', targetId)
+            .single();      
+          if (fetchError) {
+            console.error("Erro ao ler do Supabase:", fetchError);
+            return;
+          }      
+          let currentReactions = msg.reactions || {};      
+          if (currentReactions[AppState.currentUserNint] === emoji) {
+            delete currentReactions[AppState.currentUserNint];
+          } else {
+            currentReactions[AppState.currentUserNint] = emoji;
+          }      
+          const {error: updateError} = await supabaseClient
+            .from('chat_messages')
+            .update({reactions: currentReactions})
+            .eq('id', targetId);      
+          if (updateError) {
+            console.error("Erro ao gravar reação:", updateError);
+          }
+        } catch (err) {
+          console.error("Erro inesperado:", err);
+        }
+      },  
+      openFullPicker() {
+        const menu = DOM.reactionMenu();
+        const pickerContainer = DOM.emojiContainer();
+        const picker = pickerContainer.querySelector('emoji-picker');    
+        if (menu) menu.style.display = 'none';
+        pickerContainer.style.display = 'block';
+        pickerContainer.dataset.mode = 'reaction';        
+        if (!picker.dataset.reactionListenerSet) {
+          picker.addEventListener('emoji-click', event => {
+            if (pickerContainer.dataset.mode === 'reaction') {
+              event.stopPropagation();
+              this.handleClick(event.detail.unicode);
+              pickerContainer.style.display = 'none';
+              delete pickerContainer.dataset.mode;
+            }
+          });
+          picker.dataset.reactionListenerSet = "true";
+        }
+      }
+    };
     /* ======================== SELECTION MANAGER ======================== */
     const SelectionManager = {
       toggle(messageElement, messageData) {
@@ -1571,30 +1617,21 @@ const ChatInputHandler = {
         ActionBar.update();
       },  
       clear() {
-  AppState.selectedMessages = [];
-  
-  // Limpa TODAS as classes de estado que o Long Press pode ter deixado
-  document.querySelectorAll('.message').forEach(el => {
-    el.classList.remove('selected', 'pressing', 'pressed', 'long-press-active');
-    // Remove qualquer overlay de seleção que possa existir
-  });
-
-  const actionBar = DOM.actionBar();
-  if (actionBar) actionBar.classList.remove('show');
-
-  const menu = DOM.reactionMenu();
-  if (menu) {
-    menu.style.display = 'none';
-    menu.classList.remove('show');
-  }
-
-  // RESET de variáveis de controle de toque
-  AppState.reactionTargetId = null;
-  AppState.isLongPressing = false; // Se usar esta variável no EventListener
-  
-  // Limpa seleções de texto do sistema (o azul do navegador)
-  if (window.getSelection) { window.getSelection().removeAllRanges(); }
-}
+        AppState.selectedMessages = [];
+        document.querySelectorAll('.message').forEach(el => {
+          el.classList.remove('selected', 'pressing', 'pressed', 'long-press-active');
+        });
+        const actionBar = DOM.actionBar();
+        if (actionBar) actionBar.classList.remove('show');
+        const menu = DOM.reactionMenu();
+      if (menu) {
+        menu.style.display = 'none';
+        menu.classList.remove('show');
+      }
+        AppState.reactionTargetId = null;
+        AppState.isLongPressing = false;
+        if (window.getSelection) {window.getSelection().removeAllRanges();}
+      }
     };
     /* =========================== ACTION BAR ============================ */
     const ActionBar = {
@@ -1665,7 +1702,7 @@ const ChatInputHandler = {
         const currentCorp = Helpers.getCorpNr();    
         try {
           for (const msg of AppState.selectedMessages) {
-            const { data: msgData, error: fetchError } = await supabaseClient
+            const {data: msgData, error: fetchError} = await supabaseClient
               .from('chat_messages')
               .select('starred_by')
               .eq('id', msg.id)
@@ -1681,9 +1718,9 @@ const ChatInputHandler = {
             } else {
               starredBy.push(AppState.currentUserNint);
             }        
-            const { error: updateError } = await supabaseClient
+            const {error: updateError} = await supabaseClient
               .from('chat_messages')
-              .update({ starred_by: starredBy })
+              .update({starred_by: starredBy})
               .eq('id', msg.id)
               .eq('corp_oper_nr', currentCorp);        
             if (updateError) {
@@ -1731,12 +1768,8 @@ const ChatInputHandler = {
       },  
       forward() {
         if (AppState.selectedMessages.length === 0) return;    
-        AppState.messagesToForward = AppState.selectedMessages.map(msg => ({
-          message_type: msg.message_type || 'text',
-          message: msg.message || '',
-          file_url: msg.file_url || null,
-          file_name: msg.file_name || null
-        }));    
+        AppState.messagesToForward = AppState.selectedMessages.map(msg => ({message_type: msg.message_type || 'text', message: msg.message || '', file_url: msg.file_url || null,
+                                                                            file_name: msg.file_name || null}));    
         SelectionManager.clear();    
         const messagesEl = DOM.messages();
         const contactListEl = DOM.contactList();
@@ -1763,7 +1796,7 @@ const ChatInputHandler = {
             if (String(msg.n_int) === AppState.currentUserNint) {
               await supabaseClient
                 .from('chat_messages')
-                .update({ 
+                .update({
                   deleted_at: new Date().toISOString(),
                   message: 'Mensagem apagada'
                 })
@@ -1803,22 +1836,16 @@ const ChatInputHandler = {
         }
       },  
       edit() {
-    if (AppState.selectedMessages.length !== 1) return;
-    const msg = AppState.selectedMessages[0];
-    
-    // 1. Verificações de segurança
-    if (String(msg.n_int) !== AppState.currentUserNint || msg.deleted_at) return;
-
-    // 2. Chamar o Manager (Garante que o ID fica guardado no sítio certo)
-    if (typeof EditManager !== 'undefined') {
+        if (AppState.selectedMessages.length !== 1) return;
+        const msg = AppState.selectedMessages[0];
+        if (String(msg.n_int) !== AppState.currentUserNint || msg.deleted_at) return;
+        if (typeof EditManager !== 'undefined') {
         EditManager.start(msg.id, msg.message);
-    } else {
-        // Fallback caso não queiras usar o objeto EditManager
-        this._legacyEdit(msg);
-    }
-    
-    SelectionManager.clear();
-}
+        } else {
+          this._legacyEdit(msg);
+        }
+        SelectionManager.clear();
+      }
     };
     /* ========================== REPLY MANAGER ========================== */
     const ReplyManager = {
@@ -1840,50 +1867,36 @@ const ChatInputHandler = {
     };
     /* ========================== EDIT MANAGER =========================== */
     const EditManager = {
-  editingMessageId: null,
-
-  start(messageId) {
-    const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
-    if (!msgElement) return;
-    
-    this.editingMessageId = messageId;
-    const textContent = msgElement.querySelector('.msg-text-content').innerText;
-    const chatInput = document.getElementById('chat-input');
-    
-    chatInput.value = textContent;
-    chatInput.focus();
-    
-    const editBar = document.querySelector('.edit-bar');
-    editBar.querySelector('.edit-text-preview').textContent = textContent;
-    editBar.style.display = 'block';
-    
-    // Fecha a barra de ações (copiar, editar, etc)
-    ActionBarManager.close();
-    
-    // Atualiza os botões (esconde câmara, mostra enviar)
-    chatInput.dispatchEvent(new Event('input'));
-  },
-
-  cancel() {
-    this.editingMessageId = null;
-    document.querySelector('.edit-bar').style.display = 'none';
-    document.getElementById('chat-input').value = '';
-    
-    // --- O QUE FALTA AQUI PARA NÃO FICAR PRESA ---
-    SelectionManager.clear(); // Remove o azul e o estado de presslong
-    ChatInputHandler.toggleSendButton(); // Volta a mostrar a câmara instantaneamente
-  },
-
-  finish() { 
-    this.editingMessageId = null;
-    document.querySelector('.edit-bar').style.display = 'none';
-    document.getElementById('chat-input').value = '';
-    
-    // --- O QUE FALTA AQUI PARA NÃO FICAR PRESA ---
-    SelectionManager.clear(); // Limpa tudo após o envio bem-sucedido
-    ChatInputHandler.toggleSendButton(); // Garante que a câmara volta se o input estiver vazio
-  }
-};
+      editingMessageId: null,    
+      start(messageId) {
+        const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (!msgElement) return;        
+        this.editingMessageId = messageId;
+        const textContent = msgElement.querySelector('.msg-text-content').innerText;
+        const chatInput = document.getElementById('chat-input');        
+        chatInput.value = textContent;
+        chatInput.focus();        
+        const editBar = document.querySelector('.edit-bar');
+        editBar.querySelector('.edit-text-preview').textContent = textContent;
+        editBar.style.display = 'block';
+        ActionBarManager.close();
+        chatInput.dispatchEvent(new Event('input'));
+      },    
+      cancel() {
+        this.editingMessageId = null;
+        document.querySelector('.edit-bar').style.display = 'none';
+        document.getElementById('chat-input').value = '';
+        SelectionManager.clear();
+        ChatInputHandler.toggleSendButton();
+      },    
+      finish() {
+        this.editingMessageId = null;
+        document.querySelector('.edit-bar').style.display = 'none';
+        document.getElementById('chat-input').value = '';
+        SelectionManager.clear();
+        ChatInputHandler.toggleSendButton();
+      }
+    };
     /* ======================= MESSAGE INTERACTION ======================= */
     const MessageInteraction = {
       setup(messageElement, messageData) {
@@ -1901,7 +1914,7 @@ const ChatInputHandler = {
               this.showReactionMenu(messageElement, messageData.id, menu);
             }
           }, 500);
-        }, { passive: true });        
+        }, {passive: true});        
         messageElement.addEventListener('touchend', () => clearTimeout(pressTimer));
         messageElement.addEventListener('touchmove', () => clearTimeout(pressTimer));        
         messageElement.addEventListener('click', (e) => {
@@ -1973,114 +1986,102 @@ const ChatInputHandler = {
       }
     };
    /* =================== KEYBOARD HANDLER (PWA FIX) ==================== */
-const KeyboardHandler = {
-  init() {
-    (function () {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-      const THRESH_OPEN  = isIOS ? 80  : 120;
-      const THRESH_CLOSE = isIOS ? 40  : 60;
-      let keyboardOpen = false;
-      let baseInnerHeight = window.innerHeight;
-      const body = document.body;
-      const mainContent = document.querySelector(".main-content");
-      const messages = document.querySelector(".message-container");
-      const inputBar = document.querySelector(".chat-input-bar");
-      const inputEl = document.getElementById("chat-input");
-      const emojiContainer = document.getElementById("full-emoji-picker-container");      
-      
-      function setKb(px) {
-        document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
-      }      
-      
-      function isChatVisible() {
-        const el = document.getElementById("messages");
-        return el && el.style.display !== "none";
-      }      
-      
-      function getKeyboardHeight() {
-        if (!window.visualViewport) return 0;
-        const vv = window.visualViewport;
-        const a = window.innerHeight - vv.height;
-        const b = window.innerHeight - vv.height - vv.offsetTop;
-        const c = window.innerHeight - vv.height + vv.offsetTop;
-        return Math.max(0, a, b, c);
-      }      
-      
-      function onKeyboardOpen(kbHeight) {
-        if (!isChatVisible()) return;
-        keyboardOpen = true;
-        body.classList.add("keyboard-open");
-        messages?.classList.add("keyboard-active");
-        inputBar?.classList.add("keyboard-active");
-        mainContent?.classList.add("keyboard-active");
-        setKb(kbHeight);
-        if (emojiContainer && emojiContainer.style.display === "block") {
-          emojiContainer.style.display = "none";
-        }
-        ScrollManager.toBottom(); // ✅ CORRIGIDO
-        setTimeout(() => ScrollManager.toBottom(), 120); // ✅ CORRIGIDO
-      }      
-      
-      function onKeyboardClose() {
-        keyboardOpen = false;
-        body.classList.remove("keyboard-open");
-        messages?.classList.remove("keyboard-active");
-        inputBar?.classList.remove("keyboard-active");
-        mainContent?.classList.remove("keyboard-active");
-        setKb(0);
-      }      
-      
-      function detectKeyboard() {
-        if (!keyboardOpen) baseInnerHeight = window.innerHeight;
-        const kb = getKeyboardHeight();
-        if (!keyboardOpen && kb > THRESH_OPEN) {
-          onKeyboardOpen(kb);
-        } else if (keyboardOpen && kb < THRESH_CLOSE) {
-          onKeyboardClose();
-        } else if (keyboardOpen) {
-          setKb(kb);
-          ScrollManager.toBottom(); // ✅ CORRIGIDO
-          setTimeout(() => ScrollManager.toBottom(), 120); // ✅ CORRIGIDO
-        }
-      }      
-      
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", detectKeyboard);
-        window.visualViewport.addEventListener("scroll", detectKeyboard);
-      } else {
-        window.addEventListener("resize", detectKeyboard);
-      }      
-      
-      inputEl?.addEventListener("focus", () => {
-        ScrollManager.toBottom(); // ✅ CORRIGIDO
-        setTimeout(() => ScrollManager.toBottom(), 120); // ✅ CORRIGIDO
-      });      
-      
-      inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));      
-      
-      window.addEventListener("orientationchange", () => {
-        setTimeout(() => {
-          baseInnerHeight = window.innerHeight;
-          detectKeyboard();
-        }, 300);
-      });      
-      
-      const messagesEl = document.getElementById("messages");
-      if (messagesEl) {
-        const obs = new MutationObserver(() => {
-          if (!isChatVisible()) onKeyboardClose();
-        });
-        obs.observe(messagesEl, {attributes: true, attributeFilter: ["style"]});
-      }      
-      
-      body.addEventListener('touchmove', function(e) {
-        if (keyboardOpen && body.classList.contains('keyboard-open')) {
-          e.preventDefault();
-        }
-      }, {passive: false});      
-    })();
-  }
-};
+    const KeyboardHandler = {
+      init() {
+        (function () {
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+          const THRESH_OPEN  = isIOS ? 80  : 120;
+          const THRESH_CLOSE = isIOS ? 40  : 60;
+          let keyboardOpen = false;
+          let baseInnerHeight = window.innerHeight;
+          const body = document.body;
+          const mainContent = document.querySelector(".main-content");
+          const messages = document.querySelector(".message-container");
+          const inputBar = document.querySelector(".chat-input-bar");
+          const inputEl = document.getElementById("chat-input");
+          const emojiContainer = document.getElementById("full-emoji-picker-container");          
+          function setKb(px) {
+            document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
+          }          
+          function isChatVisible() {
+            const el = document.getElementById("messages");
+            return el && el.style.display !== "none";
+          }          
+          function getKeyboardHeight() {
+            if (!window.visualViewport) return 0;
+            const vv = window.visualViewport;
+            const a = window.innerHeight - vv.height;
+            const b = window.innerHeight - vv.height - vv.offsetTop;
+            const c = window.innerHeight - vv.height + vv.offsetTop;
+            return Math.max(0, a, b, c);
+          }          
+          function onKeyboardOpen(kbHeight) {
+            if (!isChatVisible()) return;
+            keyboardOpen = true;
+            body.classList.add("keyboard-open");
+            messages?.classList.add("keyboard-active");
+            inputBar?.classList.add("keyboard-active");
+            mainContent?.classList.add("keyboard-active");
+            setKb(kbHeight);
+            if (emojiContainer && emojiContainer.style.display === "block") {
+              emojiContainer.style.display = "none";
+            }
+            ScrollManager.toBottom();
+            setTimeout(() => ScrollManager.toBottom(), 120);
+          }          
+          function onKeyboardClose() {
+            keyboardOpen = false;
+            body.classList.remove("keyboard-open");
+            messages?.classList.remove("keyboard-active");
+            inputBar?.classList.remove("keyboard-active");
+            mainContent?.classList.remove("keyboard-active");
+            setKb(0);
+          }          
+          function detectKeyboard() {
+            if (!keyboardOpen) baseInnerHeight = window.innerHeight;
+            const kb = getKeyboardHeight();
+            if (!keyboardOpen && kb > THRESH_OPEN) {
+              onKeyboardOpen(kb);
+            } else if (keyboardOpen && kb < THRESH_CLOSE) {
+              onKeyboardClose();
+            } else if (keyboardOpen) {
+              setKb(kb);
+              ScrollManager.toBottom();
+              setTimeout(() => ScrollManager.toBottom(), 120);
+            }
+          }          
+          if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", detectKeyboard);
+            window.visualViewport.addEventListener("scroll", detectKeyboard);
+          } else {
+            window.addEventListener("resize", detectKeyboard);
+          }          
+          inputEl?.addEventListener("focus", () => {
+            ScrollManager.toBottom();
+            setTimeout(() => ScrollManager.toBottom(), 120);
+          });          
+          inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));
+          window.addEventListener("orientationchange", () => {
+            setTimeout(() => {
+              baseInnerHeight = window.innerHeight;
+              detectKeyboard();
+            }, 300);
+          });          
+          const messagesEl = document.getElementById("messages");
+          if (messagesEl) {
+            const obs = new MutationObserver(() => {
+              if (!isChatVisible()) onKeyboardClose();
+            });
+            obs.observe(messagesEl, {attributes: true, attributeFilter: ["style"]});
+          }          
+          body.addEventListener('touchmove', function(e) {
+            if (keyboardOpen && body.classList.contains('keyboard-open')) {
+              e.preventDefault();
+            }
+          }, {passive: false});      
+        })();
+      }
+    };
     /* ======================== REALTIME MANAGER ========================= */
     const RealtimeManager = {
       init() {
@@ -2184,7 +2185,7 @@ const KeyboardHandler = {
       },  
       async handleNewMessage(msg) {
         if (msg.reply_to_message_id) {
-          const { data: replyData } = await supabaseClient
+          const {data: replyData} = await supabaseClient
             .from('chat_messages')
             .select('id, message, abv_name')
             .eq('id', msg.reply_to_message_id)
@@ -2201,11 +2202,7 @@ const KeyboardHandler = {
             const geralContact = document.querySelector('.contact[data-nint="geral"]');
             const currentBadge = geralContact?.querySelector('.unread-badge');
             const badgeValue = currentBadge ? currentBadge.textContent : null;        
-            supabaseClient.from('chat_message_reads').insert({
-              message_id: msg.id,
-              n_int: AppState.currentUserNint,
-              read_at: new Date().toISOString(),
-              corp_oper_nr: currentCorp
+            supabaseClient.from('chat_message_reads').insert({message_id: msg.id, n_int: AppState.currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp
             }).then(() => {
               if (badgeValue && geralContact) {
                 setTimeout(() => {
@@ -2231,187 +2228,125 @@ const KeyboardHandler = {
         }
       },  
       handleMessageUpdate(msg) {
-  const msgElement = Helpers.getMessageElement(msg.id);
-  if (!msgElement) return;
-
-  // helper: limpa seleção/estado de UI (presslong / context / editing)
-  const clearSelectionUI = () => {
-    // 1) remove seleção de texto (azul)
-    const sel = window.getSelection?.();
-    if (sel) sel.removeAllRanges();
-
-    // 2) remove classes/atributos de seleção/edição em TODAS as mensagens
-    document.querySelectorAll('.message').forEach(m => {
-      m.classList.remove(
-        'selected',
-        'editing',
-        'active',
-        'highlight',
-        'pressing',
-        'pressed',
-        'context-open',
-        'menu-open',
-        'is-selected'
-      );
-      m.removeAttribute('data-selected');
-      m.removeAttribute('aria-selected');
-    });
-
-    // 3) remove também seleção interna (caso metas .selected noutros elementos)
-    msgElement.querySelectorAll('.selected, .is-selected').forEach(el =>
-      el.classList.remove('selected', 'is-selected')
-    );
-
-    // 4) fecha/remover menus/overlays comuns
-    document
-      .querySelectorAll('.context-menu, .message-menu, .message-actions, .msg-actions-bar, .action-sheet, .popover')
-      .forEach(el => el.remove());
-
-    // 5) limpa estado global (se existir)
-    if (typeof AppState !== 'undefined' && AppState) {
-      const keysToNull = [
-        'editingMessageId',
-        'selectedMessageId',
-        'selectedMessage',
-        'longPressMessageId',
-        'contextMessageId',
-        'activeMessageId',
-        'menuMessageId'
-      ];
-      keysToNull.forEach(k => {
-        if (k in AppState) AppState[k] = null;
-      });
-
-      // caso tenhas booleans tipo "isSelecting"
-      if ('isSelecting' in AppState) AppState.isSelecting = false;
-      if ('isEditing' in AppState) AppState.isEditing = false;
-    }
-
-    // 6) força fechar handlers que dependem de click fora
-    // (muito comum em menus/context no presslong)
-    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    document.body.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-    // 7) remove foco (evita outline / estado preso)
-    if (document.activeElement && typeof document.activeElement.blur === 'function') {
-      document.activeElement.blur();
-    }
-  };
-
-  // 0) DELETE
-  if (msg.deleted_at) {
-    msgElement.classList.add('deleted');
-
-    const textContent = msgElement.querySelector('.msg-text-content');
-    if (textContent) {
-      textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
-    }
-
-    msgElement.querySelector('.message-reactions')?.remove();
-    msgElement.querySelector('.star-icon')?.remove();
-
-    clearSelectionUI();
-    return;
-  }
-
-  // 1) ATUALIZAR HORA
-  const timeEl = msgElement.querySelector('.msg-time');
-  const t = msg.edited_at || msg.updated_at || msg.created_at;
-  if (timeEl && t) {
-    timeEl.textContent = Helpers.formatTime(t);
-  }
-
-  // 2) MOSTRAR TAG "editada"
-  let editTag = msgElement.querySelector('.message-edited-tag');
-  if (msg.edited_at) {
-    if (!editTag) {
-      const metaDiv = msgElement.querySelector('.msg-meta');
-      if (metaDiv) {
-        editTag = document.createElement('span');
-        editTag.className = 'message-edited-tag';
-        editTag.textContent = 'editada';
-        metaDiv.insertBefore(editTag, metaDiv.firstChild);
+        const msgElement = Helpers.getMessageElement(msg.id);
+        if (!msgElement) return;
+        const clearSelectionUI = () => {
+          const sel = window.getSelection?.();
+          if (sel) sel.removeAllRanges();
+          document.querySelectorAll('.message').forEach(m => {
+            m.classList.remove('selected', 'editing', 'active', 'highlight', 'pressing', 'pressed', 'context-open', 'menu-open', 'is-selected');
+            m.removeAttribute('data-selected');
+            m.removeAttribute('aria-selected');
+          });
+          msgElement.querySelectorAll('.selected, .is-selected').forEach(el => el.classList.remove('selected', 'is-selected'));
+          document
+            .querySelectorAll('.context-menu, .message-menu, .message-actions, .msg-actions-bar, .action-sheet, .popover')
+            .forEach(el => el.remove());
+          if (typeof AppState !== 'undefined' && AppState) {
+            const keysToNull = ['editingMessageId', 'selectedMessageId', 'selectedMessage', 'longPressMessageId', 'contextMessageId', 'activeMessageId', 'menuMessageId'];
+            keysToNull.forEach(k => {
+              if (k in AppState) AppState[k] = null;
+            });
+            if ('isSelecting' in AppState) AppState.isSelecting = false;
+            if ('isEditing' in AppState) AppState.isEditing = false;
+          }
+          document.body.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+          document.body.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
+          document.body.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+          if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+          }
+        };
+        if (msg.deleted_at) {
+          msgElement.classList.add('deleted');
+          const textContent = msgElement.querySelector('.msg-text-content');
+          if (textContent) {
+            textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
+          }
+          msgElement.querySelector('.message-reactions')?.remove();
+          msgElement.querySelector('.star-icon')?.remove();
+          clearSelectionUI();
+          return;
+        }
+        const timeEl = msgElement.querySelector('.msg-time');
+        const t = msg.edited_at || msg.updated_at || msg.created_at;
+        if (timeEl && t) {
+          timeEl.textContent = Helpers.formatTime(t);
+        }
+        let editTag = msgElement.querySelector('.message-edited-tag');
+        if (msg.edited_at) {
+          if (!editTag) {
+            const metaDiv = msgElement.querySelector('.msg-meta');
+            if (metaDiv) {
+              editTag = document.createElement('span');
+              editTag.className = 'message-edited-tag';
+              editTag.textContent = 'Editada: ';
+              metaDiv.insertBefore(editTag, metaDiv.firstChild);
+            }
+          } else {
+            editTag.style.display = 'inline';
+          }
+        } else if (editTag) {
+          editTag.style.display = 'none';
+        }
+        const textContent = msgElement.querySelector('.msg-text-content');
+        if (textContent) {
+          if (msg.message_type === 'image' && msg.file_url) {
+            let img = textContent.querySelector('img.chat-img');
+            if (!img) {
+              textContent.innerHTML = MessageManager.buildMessageContent(msg, false);
+            } else {
+              img.src = msg.file_url;
+              img.dataset.url = msg.file_url;
+            }      
+            const caption = textContent.querySelector('.img-caption');
+            const newCaption = (msg.message || '').trim();
+            if (newCaption) {
+              if (caption) caption.textContent = newCaption;
+              else textContent.insertAdjacentHTML('beforeend', `<div class="img-caption"></div>`);
+              textContent.querySelector('.img-caption').textContent = newCaption;
+            } else {
+              caption?.remove();
+            }
+          } else {
+            textContent.textContent = msg.message || '';
+          }
+          textContent.style.transition = "background 0.5s";
+          textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
+          setTimeout(() => (textContent.style.backgroundColor = "transparent"), 1000);
+        }
+        if (msg.reactions !== undefined) {
+          msgElement.querySelector('.message-reactions')?.remove();      
+          const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
+          const anchor = msgElement.querySelector('.msg-text-content');
+          if (newReactionsHTML && anchor) {
+            anchor.insertAdjacentHTML('afterend', newReactionsHTML);
+          }
+        }
+        if (msg.starred_by !== undefined) {
+          msgElement.querySelector('.star-icon')?.remove();      
+          const isStarred = msg.starred_by && msg.starred_by.includes(AppState.currentUserNint);
+          if (isStarred) {
+            const anchor = msgElement.querySelector('.msg-text-content');
+            if (anchor) {
+              anchor.insertAdjacentHTML(
+                'afterend',
+                '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
+              );
+            }
+          }
+        }
+        if (msg.read_at && String(msg.n_int) === AppState.currentUserNint) {
+          const checkEl = document.getElementById(`check-${msg.id}`);
+          if (checkEl) {
+            checkEl.classList.remove('sent', 'delivered');
+            checkEl.classList.add('read');
+            checkEl.textContent = 'done_all';
+          }
+        }
+        clearSelectionUI();
       }
-    } else {
-      editTag.style.display = 'inline';
-    }
-  } else if (editTag) {
-    editTag.style.display = 'none';
-  }
-
-  // 3) ATUALIZAR CONTEÚDO
-  const textContent = msgElement.querySelector('.msg-text-content');
-  if (textContent) {
-    if (msg.message_type === 'image' && msg.file_url) {
-      let img = textContent.querySelector('img.chat-img');
-      if (!img) {
-        textContent.innerHTML = MessageManager.buildMessageContent(msg, false);
-      } else {
-        img.src = msg.file_url;
-        img.dataset.url = msg.file_url;
-      }
-
-      const caption = textContent.querySelector('.img-caption');
-      const newCaption = (msg.message || '').trim();
-      if (newCaption) {
-        if (caption) caption.textContent = newCaption;
-        else textContent.insertAdjacentHTML('beforeend', `<div class="img-caption"></div>`);
-        textContent.querySelector('.img-caption').textContent = newCaption;
-      } else {
-        caption?.remove();
-      }
-    } else {
-      textContent.textContent = msg.message || '';
-    }
-
-    // feedback visual
-    textContent.style.transition = "background 0.5s";
-    textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
-    setTimeout(() => (textContent.style.backgroundColor = "transparent"), 1000);
-  }
-
-  // 4) REAÇÕES
-  if (msg.reactions !== undefined) {
-    msgElement.querySelector('.message-reactions')?.remove();
-
-    const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
-    const anchor = msgElement.querySelector('.msg-text-content');
-    if (newReactionsHTML && anchor) {
-      anchor.insertAdjacentHTML('afterend', newReactionsHTML);
-    }
-  }
-
-  // 5) ESTRELAS
-  if (msg.starred_by !== undefined) {
-    msgElement.querySelector('.star-icon')?.remove();
-
-    const isStarred = msg.starred_by && msg.starred_by.includes(AppState.currentUserNint);
-    if (isStarred) {
-      const anchor = msgElement.querySelector('.msg-text-content');
-      if (anchor) {
-        anchor.insertAdjacentHTML(
-          'afterend',
-          '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
-        );
-      }
-    }
-  }
-
-  // 6) STATUS DE LEITURA
-  if (msg.read_at && String(msg.n_int) === AppState.currentUserNint) {
-    const checkEl = document.getElementById(`check-${msg.id}`);
-    if (checkEl) {
-      checkEl.classList.remove('sent', 'delivered');
-      checkEl.classList.add('read');
-      checkEl.textContent = 'done_all';
-    }
-  }
-
-  // ✅ 7) DESSELECIONAR O BUBBLE APÓS UPDATE/EDIÇÃO
-  clearSelectionUI();
-}
-      };
+    };
     /* ========================= EVENT LISTENERS ========================= */
     const EventListeners = {
       init() {
@@ -2440,11 +2375,14 @@ const KeyboardHandler = {
               SelectionManager.clear();
             }
           }
-        }, {passive: true});    
+        }, {passive: true});
+        document.getElementById('attachment-btn')?.addEventListener('click', () => {
+          if (!Helpers.isChatActive()) return;
+          FileHandler.openPicker();
+        });
         document.addEventListener('click', (e) => {
           const menu = DOM.reactionMenu();
-          const picker = DOM.emojiContainer();
-          
+          const picker = DOM.emojiContainer();          
           if (menu && !menu.contains(e.target) && !picker.contains(e.target) && AppState.selectedMessages.length === 0) {
             menu.style.display = 'none';
             picker.style.display = 'none';
@@ -2471,33 +2409,24 @@ const KeyboardHandler = {
     function updateProgress(id) {AudioPlayer.updateProgress(id);}
     function resetAudioIcon(id) {AudioPlayer.resetIcon(id);}
     /* ===================== MAIN CONTENT HEIGHT FIX ===================== */
-function adjustMainContent() {
-  const main = document.querySelector('.main-content');
-  const header = document.querySelector('.header');
-  const footer = document.querySelector('.footer');
-  if (!main) return;
-
-  const alturaViewport = window.innerHeight;
-  const headerHeight = header?.offsetHeight || 0;
-  const footerHeight = footer?.offsetHeight || 0;
-
-  // (mesma ideia do velho: garantir espaço para header+footer e evitar “overflow marado”)
-  const extra = 100;
-
-  const alturaMain = alturaViewport - headerHeight - footerHeight + extra;
-  main.style.height = alturaMain + 'px';
-  main.style.maxHeight = alturaMain + 'px';
-}
-
+    function adjustMainContent() {
+      const main = document.querySelector('.main-content');
+      const header = document.querySelector('.header');
+      const footer = document.querySelector('.footer');
+      if (!main) return;    
+      const alturaViewport = window.innerHeight;
+      const headerHeight = header?.offsetHeight || 0;
+      const footerHeight = footer?.offsetHeight || 0;
+      const extra = 100;    
+      const alturaMain = alturaViewport - headerHeight - footerHeight + extra;
+      main.style.height = alturaMain + 'px';
+      main.style.maxHeight = alturaMain + 'px';
+    }
     /* ==================== STARTING THE APPLICATION ===================== */    
     document.addEventListener('DOMContentLoaded', async () => {
       adjustMainContent();
-  window.addEventListener('resize', adjustMainContent);
-  window.addEventListener('pageshow', adjustMainContent);
-
-
-
-      
+      window.addEventListener('resize', adjustMainContent);
+      window.addEventListener('pageshow', adjustMainContent);
       await CorpManager.loadInfo();
       ThemeManager.load();
       await ContactManager.load();
@@ -2507,6 +2436,7 @@ function adjustMainContent() {
       TypingIndicator.init();
       AudioRecorder.init();
       CameraHandler.init();
+      FileHandler.init();
       KeyboardHandler.init();
       EventListeners.init();
       RealtimeManager.init();
