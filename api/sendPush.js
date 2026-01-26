@@ -2,57 +2,51 @@ const webpush = require('web-push');
 const { createClient } = require('@supabase/supabase-js');
 
 export default async function handler(req, res) {
- 
   res.setHeader('Content-Type', 'application/json');
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: "Método não permitido" });
-  }
+  webpush.setVapidDetails(
+    'mailto:fmartins.ahbfaro@gmail.com',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+  const { n_int, title, message } = req.body;
 
   try {
-    const { n_int, title, message } = req.body;
-
-    // Verificar se as chaves existem
-    if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-      throw new Error("Chaves VAPID não configuradas no Vercel");
-    }
-
-    webpush.setVapidDetails(
-      'mailto:fmartins.ahbfaro@gmail.com',
-      process.env.VAPID_PUBLIC_KEY,
-      process.env.VAPID_PRIVATE_KEY
-    );
-
-    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
-    // Procurar o 205
-    const { data: subs, error: subError } = await supabase
+    // 1. Procuramos TODOS os registos do utilizador (repara que tirei o .single())
+    const { data: subs, error } = await supabase
       .from('user_push_subscriptions')
       .select('*')
-      .eq('n_int', parseInt(n_int))
-      .single();
+      .eq('n_int', parseInt(n_int));
 
-    if (subError || !subs) {
-      return res.status(404).json({ error: "Utilizador não encontrado no Supabase" });
+    if (error || !subs || subs.length === 0) {
+      return res.status(404).json({ error: "Nenhum dispositivo encontrado." });
     }
 
-    const pushConfig = {
-      endpoint: subs.endpoint,
-      keys: {
-        auth: subs.auth,
-        p256dh: subs.p256dh
-      }
-    };
+    // 2. Criamos uma lista de envios para todos os dispositivos encontrados
+    const envios = subs.map(dispositivo => {
+      const config = {
+        endpoint: dispositivo.endpoint,
+        keys: { auth: dispositivo.auth, p256dh: dispositivo.p256dh }
+      };
 
-    await webpush.sendNotification(pushConfig, JSON.stringify({ title, message }));
+      return webpush.sendNotification(config, JSON.stringify({ title, message }))
+        .catch(err => {
+          // Se o token expirou (ex: utilizador desinstalou), podias apagar da DB aqui
+          console.error("Falha num dispositivo específico:", err.endpoint);
+        });
+    });
 
-    return res.status(200).json({ success: true, message: "Push enviado!" });
+    // 3. Executa todos os envios ao mesmo tempo
+    await Promise.all(envios);
+
+    return res.status(200).json({ 
+      success: true, 
+      mensagem: `Enviado para ${subs.length} dispositivos.` 
+    });
 
   } catch (err) {
-    console.error("Erro na API:", err.message);
-    return res.status(500).json({ 
-      error: "Erro Interno", 
-      details: err.message 
-    });
+    return res.status(500).json({ error: err.message });
   }
 }
