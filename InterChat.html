@@ -2,7 +2,7 @@
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, user-scalable=no, viewport-fit=cover, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
@@ -15,7 +15,7 @@
       } catch (e) {}
     })();
   </script>
-  <title>CB360_DOCUMENTOS</title>
+  <title>CB360_CHAT_INTERNO</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <style>
@@ -2310,12 +2310,8 @@
             } else {
               caption?.remove();
             }
-            }
-          // ADICIONADO: Se for ficheiro, não sobrescrevemos o conteúdo com texto vazio
+          }
           else if (msg.message_type === 'file') {
-            // No caso de ficheiro, geralmente não editamos o texto, 
-            // então mantemos o que lá está para não estragar a bolha do documento.
-          
           } else {
             textContent.textContent = msg.message || '';
           }
