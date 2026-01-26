@@ -1,8 +1,12 @@
 {
   "name": "cb-360-push",
   "version": "1.0.0",
+  "main": "api/sendPush.js",
   "dependencies": {
-    "@supabase/supabase-js": "^2.0.0",
-    "web-push": "^3.6.6"
+    "@supabase/supabase-js": "^2.45.0",
+    "web-push": "^3.6.7"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
