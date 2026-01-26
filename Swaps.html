@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>CB360 Mobile - Trocas Serviço</title>
+  <style>
+    /* ==================== BODY ==================== */  
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    /* ============= DARK MODE OPTIONS ============== */
+    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
+    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
+    .dark-mode .back-header {color: #ccc;}
+    .dark-mode .pending-swaps-title {color: #fff; background: rgba(66, 165, 245, 0.6);}
+    .dark-mode .swap-subtitle {color: #e0e0e0;}
+    .dark-mode .swap-card {background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);}
+    .dark-mode .swap-month-btn, .dark-mode .shifts-btn, .dark-mode .swap-options-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15);
+                                                                                      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+    .dark-mode .swap-month-btn:hover:not(.selected) {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
+    .dark-mode .shifts-btn:hover:not(.selected) {background: rgba(255, 255, 255, 0.12); border-color: rgba(34, 139, 34, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
+    .dark-mode .swap-month-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
+    .dark-mode .swap-month-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.7);}
+    .dark-mode .shifts-btn.selected {background: linear-gradient(135deg, rgba(34, 139, 34, 0.5), rgba(0, 100, 0, 0.5)); border-color: rgba(0, 128, 0, 0.8); box-shadow: 0 3px 5px rgba(34, 139, 34, 0.5);}
+    .dark-mode .combobox-container, .dark-mode .shifts-container {background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2);}
+    .dark-mode .combobox-label, .dark-mode .shifts-label {color: #e0e0e0;}
+    .dark-mode .combobox-select {background: rgba(255, 255, 255, 0.1); color: #fff; border-color: rgba(255, 255, 255, 0.3);}
+    .dark-mode .combobox-select option {background: #2d2d2d; color: #fff;}
+    .dark-mode .swap-options-btn .material-icons {color: #fff;}
+    
+    
+    .dark-mode .modal-content { background: #2c2c2c; border: 1px solid #444; }
+    .dark-mode .modal-body {color: #eee;}
+    .dark-mode .modal-footer {border-top-color: #444;}
+    
+    
+    /* ============= LIGHT MODE OPTIONS ============= */
+    .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
+    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
+    .footer {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
+             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
+    .footer-content {max-width: 400px; margin: 0 auto;}
+    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
+    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
+    .footer strong {color: #ffebee;} 
+    .main-content {flex: 1; overflow-y: auto; padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;                        transition: filter 0.3s ease, opacity 0.3s ease;}
+    .content-blur {filter: blur(2px); opacity: 1; pointer-events: none;}
+    .main-content::-webkit-scrollbar {width: 0px; background: transparent;}
+    .main-content {scrollbar-width: none; -ms-overflow-style: none;}
+    .back-header {font-size: 20px; color: #444; text-align: left; display: flex; align-items: center; height: 40px; margin: 10px 0 0 0; padding: 0;}
+    #back-header {position: fixed; top: 50px; left: 0; right: 0; display: flex; align-items: center; padding: 10px 20px; z-index: 1001;}    
+    .back-text {font-weight: bold !important;}
+    .back-header.show {opacity: 1; pointer-events: auto;}   
+    .back-arrow {font-size: 25px !important; margin: 4px 0 0 0px; font-weight: bold !important;} 
+    .back-header:hover {opacity: 0.75;}
+    .swap-options-buttons {display: flex; gap: 5px; justify-content: center; align-items: stretch; width: 100%; max-width: 700px; margin: 0 auto 15px auto;}
+    .swap-options-btn {padding: clamp(16px, 2.5vh, 28px) clamp(16px, 2vw, 24px); min-height: clamp(88px, 13vh, 130px); min-width: clamp(80px, 28vw, 250px); max-width: clamp(190px, 18vw, 240px);
+                       font-size: clamp(13px, 1.8vw, 16px); border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; 
+                       flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; 
+                       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
+    .pending-swaps-container {width: 100%; max-width: 700px; margin: 70px 0 20px 0; display: none; flex-direction: column; gap: 10px; align-self: stretch;}
+    .pending-swaps-title {display: block; color: #000; background: rgba(255, 167, 38, 0.50); text-align: center; font-size: 18px; font-weight: bold; padding: 10px; border-radius: 10px;}
+    .pending-swaps-list {max-height: 600px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;}
+    .pending-swaps-list::-webkit-scrollbar {width: 0px; background: transparent;}
+    .pending-swaps-list {scrollbar-width: none; -ms-overflow-style: none;}
+    .pending-swaps-list::-webkit-scrollbar-thumb {background: #bbb; border-radius: 6px;}
+    .swap-card {display: flex; justify-content: space-between; align-items: center; border: 1px solid #ccc; border-radius: 12px; padding: 12px; background: #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: transform 0.2s ease;}
+    .swap-info p {margin: 2px 0; font-size: 0.9em;}
+    .swap-actions {display: flex; flex-direction: column; gap: 6px;}
+    .swap-actions button {font-size: 18px; border: none; border-radius: 8px; padding: 6px 12px; cursor: pointer; transition: background 0.2s ease, transform 0.1s ease;}
+    .swap-actions button:hover {transform: scale(1.05);}
+    .approve-btn {background: #4CAF50; color: white;}
+    .reject-btn { background: #D32F2F; color: white;}
+    .swap-header {flex-shrink: 0; text-align: center; width: 100%;} 
+    .swap-subtitle {font-size: 1.3em; color: #2c3e50; transition: color 0.3s ease;}
+    .swap-month-buttons, .own-shifts-buttons, .other-shifts-buttons {display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 22vw, 220px), 1fr)); justify-content: center;
+                                                                     align-items: stretch; margin-bottom: 10px;}
+    .swap-month-btn {padding: clamp(10px, 1.5vw, 16px) clamp(12px, 2vw, 20px); min-height: clamp(42px, 6vh, 60px); min-width: clamp(80px, 28vw, 250px); max-width: clamp(190px, 18vw, 240px);
+                     font-size: clamp(11px, 1.2vw, 14px); border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; 
+                     flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; 
+                     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
+    .swap-month-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                             transition: left 0.4s ease; z-index: 1;}
+    .swap-month-btn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
+                            transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
+    .swap-month-btn:active::after {width: 150px; height: 150px;}
+    .swap-month-btn:hover:not(.selected) {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
+    .swap-month-btn:active:not(.selected) {transform: scale(0.98); transition:0.1s ease;}
+    .swap-month-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
+    .swap-month-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.6);}
+    .swap-month-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
+    .swap-month-btn span {position: relative; z-index: 2;}
+    .shifts-btn {padding: clamp(6px, 1vw, 10px) clamp(8px, 2vw, 12px); height: clamp(25px, 4vw, 30px); min-width: clamp(60px, 20vw, 200px); max-width: clamp(120px, 25vw, 220px); font-size: clamp(10px, 1vw, 12px);
+                 border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center;
+                 align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
+    .shifts-btn:hover:not(.selected) {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
+    .shifts-btn.selected {color: white; transform: scale(1.03); box-shadow: 0 3px 5px rgba(34, 139, 34, 0.5); background: linear-gradient(135deg, #228B22, #006400); border-color: #006400;}
+    .shifts-container, .combobox-container {width: 100%; max-width: 500px; margin: 0 auto 5px auto; padding: 10px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                                            display: none;  opacity: 0; transition: opacity 0.3s ease;}
+    .shifts-container.show, .combobox-container.show {display: block; opacity: 1;}
+    .shifts-label, .combobox-label {display: block; font-size: 0.9em; font-weight: bold; color: #2c3e50; margin-bottom: 10px; text-align: center;}
+    .combobox-select {width: 100%; padding: 8px 15px; font-size: 0.7em; border: 2px solid #bdc3c7; border-radius: 8px; background: #eee; color: #2c3e50; cursor: pointer; appearance: none; background-repeat: no-repeat;
+                      transition: border-color 0.3s ease, box-shadow 0.3s ease;  padding-right: 40px;}
+    .combobox-select:focus {outline: none; border-color: #d32f2f; box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);}
+    .combobox-select option {padding: 10px;}    
+    .swap-btn {display: none; text-align: center; margin-top: 10px;}
+    .swap-btn button {padding: clamp(8px, 1.5vw, 14px) clamp(12px, 2vw, 20px); font-size: clamp(12px, 1.2vw, 16px); border-radius: 12px; border: none; background: linear-gradient(135deg, #d32f2f, #b71c1c); 
+                        color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); transition: transform 0.15s ease, box-shadow 0.15s ease;}
+    .swap-btn button:hover {transform: scale(1.03); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);}
+    .toast {position: fixed; bottom: clamp(320px, 45vh, 480px); left: 50%; transform: translateX(-50%); background: rgba(194, 21, 21, 0.85); color: #fff; padding: 18px 30px; border-radius: 10px; 
+            font-size: clamp(16px, 3vw, 20px); font-weight: bold; width: 500px; max-width: 90%; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(-10px);}
+    .swap-options-btn .material-icons {font-size: 32px; margin-bottom: 6px; display: block; color: #333;}
+        
+    
+    .modal {display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);align-items: center; justify-content: center;}
+    .modal.show { display: flex; }
+    .modal-content {background: #fff; width: 90%; max-width: 450px; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; animation: fadeIn 0.3s ease;}
+    .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: center;}
+    .modal-header h3 {font-size: 1.2rem; margin: 0;}
+    .modal-close {background: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s ease;}
+    .modal-close:hover {background: #b71c1c;}
+    .modal-body {padding: 20px; max-height: 60vh; overflow-y: auto; color: #333;}
+    .modal-footer {padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center;}
+    
+    
+    /* =================================================
+    MEDIA QUERIES - FULL RESPONSIVENESS
+    ================================================= */
+    /* ============ RESPONSIVENESS 480px ============ */
+    @media (max-width: 480px) {
+      .header {padding: 8px 15px;}
+      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
+      .header-logo {height: 50px; top: 32px; left: 10px;}
+      .footer {padding: 5px 15px;}
+      .powered-by {font-size: 11px;}
+      .footer-year {font-size: 9px;}
+      .swap-header {flex-shrink: 0; padding-bottom: 10px;}
+      .swap-subtitle {font-size: 0.9em; font-weight: bold; margin-top: 10px;}
+      .swap-month-buttons, .own-shifts-buttons, .other-shifts-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}
+      .swap-month-btn {height: 50px; min-height: 30px; max-height:75px; font-size: 12px; padding: 15px 10px;}
+      .main-content {padding-left: 20px; padding-right: 20px; justify-content: center; align-items: center;}}
+    body.mobile-month-selected .main-content {padding-top: 90px; justify-content: flex-start !important; align-items: stretch !important;}
+    .main-content.slide-out, .main-content.slide-in {transform: none;}
+    .main-content:has(#pending-swaps-container[style*="flex"]) {justify-content: flex-start !important; align-items: stretch !important;}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <h1>TROCAS DE SERVIÇO</h1>
+    <h2 id="corpInfo" style="display: none;"></h2>
+    <div class="header-subtitle">PIQUETES | ECIN | PROFISSIONAIS</div>
+  </div>  
+  <div class="main-content">
+    <div id="back-header" class="back-header" onclick="goBackToMain()" style="display: none;">
+      <span class="material-icons back-arrow">arrow_back</span>
+      <span class="back-text" style="margin-left: 10px; font-weight: 500;"></span>
+    </div>
+    <div class="swap-options-buttons">
+      <button class="swap-options-btn" onclick="selectOption(0, this)">
+        <span class="material-icons" style="margin-bottom:4px;">sync_alt</span>
+        <span>Pedidos Pendentes</span>
+      </button>
+      <button class="swap-options-btn" onclick="selectOption(1, this)">
+        <span class="material-icons" style="margin-bottom:4px;">swap_horiz</span>
+        <span>Trocas Profissionais</span>
+      </button>
+      <button class="swap-options-btn" onclick="selectOption(2, this)">
+        <span class="material-icons" style="margin-bottom:4px;">compare_arrows</span>
+        <span>Trocas Voluntariado</span>
+      </button>
+    </div>
+    <div id="pending-swaps-container" class="pending-swaps-container">      
+      <div class="pending-swaps-title">Pedidos Pendentes</div>
+      <div class="pending-swaps-list" id="pending-swaps-list"></div>
+    </div>
+    <div id="made-swap" style="display: none;">      
+      <div class="swap-header">
+        <p class="swap-subtitle">Selecione o mês:</p>
+      </div>
+      <div class="swap-month-buttons">
+        <button class="swap-month-btn" onclick="selectMonth(0, this)">Janeiro</button>
+        <button class="swap-month-btn" onclick="selectMonth(1, this)">Fevereiro</button>
+        <button class="swap-month-btn" onclick="selectMonth(2, this)">Março</button>
+        <button class="swap-month-btn" onclick="selectMonth(3, this)">Abril</button>
+        <button class="swap-month-btn" onclick="selectMonth(4, this)">Maio</button>
+        <button class="swap-month-btn" onclick="selectMonth(5, this)">Junho</button>
+        <button class="swap-month-btn" onclick="selectMonth(6, this)">Julho</button>
+        <button class="swap-month-btn" onclick="selectMonth(7, this)">Agosto</button>
+        <button class="swap-month-btn" onclick="selectMonth(8, this)">Setembro</button>
+        <button class="swap-month-btn" onclick="selectMonth(9, this)">Outubro</button>
+        <button class="swap-month-btn" onclick="selectMonth(10, this)">Novembro</button>
+        <button class="swap-month-btn" onclick="selectMonth(11, this)">Dezembro</button>
+      </div>    
+      <div id="shiftsContainer" class="shifts-container">
+        <label class="shifts-label">Os meus turnos:</label>
+        <div id="shiftsButtons" class="own-shifts-buttons"></div>
+      </div>
+      <div id="comboboxContainer" class="combobox-container">
+          <label class="combobox-label">Selecione o Bombeiro para Troca:</label>
+          <select id="elementsSelect" class="combobox-select">
+          <option value="">A Carregar...</option>
+        </select>
+      </div>
+      <div id="elementsShiftsContainer" class="shifts-container" style="display:none;">
+        <label class="shifts-label">Turnos do Bombeiro:</label>
+        <div id="elementsShiftsButtons" class="other-shifts-buttons"></div>
+      </div>
+      <div id="swap-btn" class="swap-btn" style="display:none; text-align:center; margin-top:10px;">
+        <button onclick="handleSwapClick()">Enviar Pedido</button>
+      </div>
+    </div>
+  </div>
+  <div id="emDesenvolvimentoModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">🚧 Em Desenvolvimento</div>
+      <div class="modal-body" style="text-align:center; font-size:16px;">
+        Esta funcionalidade ainda está em desenvolvimento.<br>
+        Por favor, verifique mais tarde.
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeModal('emDesenvolvimentoModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023-2025 - Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
+      return headers;
+    }
+    /* ======================== UTILITY FUNCTIONS ======================== */
+    function getWorkYear(selectedMonthIndex) {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      if (currentMonth === 11 && selectedMonthIndex === 0 && now.getDate() >= 15) {
+        return currentYear + 1;
+      }
+      return currentYear;
+    }    
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.add('show');
+    }
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.remove('show');
+      const mainMenu = document.querySelector('.swap-options-buttons');
+      if (mainMenu) mainMenu.style.display = 'flex';
+      hideBackHeader();
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        if (h2) h2.textContent = "Não definido";
+        return;
+      }
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          headers: getSupabaseHeaders()
+        });
+        const data = await response.json();
+        if (data?.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        }
+      } catch (err) {
+        console.error('Erro ao carregar info da corporação:', err);
+      }
+    }
+    /* ========================== THEME LOADING ========================== */    
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+    }    
+    /* ======================== BACK MENU OPTION ========================= */
+    function showBackHeader(text = "Voltar", onClick = null) {
+      const header = document.getElementById("back-header");
+      header.querySelector(".back-text").textContent = text;
+      if (onClick && typeof onClick === "function") {
+        header.onclick = onClick;
+      }
+      header.style.display = "flex";
+    }
+    function hideBackHeader() {
+      const header = document.getElementById("back-header");
+      header.style.display = "none";
+      header.onclick = null;
+    }
+    function goBackToMain() {
+      const madeSwap = document.getElementById('made-swap');
+      const viewSwap = document.getElementById('pending-swaps-container');
+      if (madeSwap) madeSwap.style.display = 'none';
+      if (viewSwap) viewSwap.style.display = 'none';
+      const mainMenu = document.querySelector('.swap-options-buttons');
+      if (mainMenu) mainMenu.style.display = 'flex';
+      resetSwapUI();
+    }
+    /* ========================= SELECT OPTIONS ========================== */
+    function selectOption(index, btn) {
+      document.querySelectorAll('.swap-options-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const mainMenu = document.querySelector('.swap-options-buttons');
+      const pendingContainer = document.getElementById("pending-swaps-container");
+      const madeSwap = document.getElementById('made-swap');
+      if (mainMenu) mainMenu.style.display = 'none';
+      if (pendingContainer) pendingContainer.style.display = 'none';
+      if (madeSwap) madeSwap.style.display = 'none';
+      hideBackHeader();
+      if (index === 0) {
+        if (pendingContainer) pendingContainer.style.display = 'flex';
+        showBackHeader("Voltar", () => {
+          pendingContainer.style.display = 'none';
+          if (mainMenu) mainMenu.style.display = 'flex';
+          hideBackHeader();
+        });
+        loadPendingSwaps();
+      }
+      if (index === 1) {
+        btn.classList.remove('selected');
+        openModal('emDesenvolvimentoModal');
+        return;
+      }
+      if (index === 2) {
+        if (madeSwap) madeSwap.style.display = 'block';
+        const subtitle = document.querySelector('.swap-subtitle');
+        if (subtitle) subtitle.style.display = 'block';
+        const monthButtons = document.querySelector('.swap-month-buttons');
+        if (monthButtons) {
+          monthButtons.style.display = 'grid';
+          monthButtons.querySelectorAll('.swap-month-btn').forEach((mBtn, i) => {
+            mBtn.style.opacity = '0';
+            mBtn.style.transform = 'translateY(15px)';
+            mBtn.style.transition = 'all 0.4s ease';
+            setTimeout(() => {
+              mBtn.style.opacity = '1';
+              mBtn.style.transform = 'translateY(0)';
+            }, i * 50);
+          });
+        }
+        showBackHeader("Voltar", () => {
+          if (madeSwap) madeSwap.style.display = 'none';
+          if (mainMenu) mainMenu.style.display = 'flex';
+          hideBackHeader();
+          resetSwapUI();
+        });
+      }
+    }
+    /* ================= LOAD/ACEPT/REJECT PENDING SWAPS ================= */
+    async function loadPendingSwaps() {
+      const nint = localStorage.getItem("currentCorpNint");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      if (!nint || !corpOperNr) return;
+      const container = document.getElementById("pending-swaps-container");
+      const list = document.getElementById("pending-swaps-list");
+      list.innerHTML = "";
+      container.style.display = "flex";
+      const supabaseHeaders = getSupabaseHeaders({ returnRepresentation: true });
+      try {
+        const myResp = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${nint}`, {
+            headers: supabaseHeaders
+          }
+        );
+        const myData = await myResp.json();
+        const myName = myData?.[0]?.abv_name || "Elemento";
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_swaps?select=*,n_int,n_int_end,start_shift_day,start_shift_month,start_shift_year,end_shift_day,end_shift_month,end_shift_year&n_int_end=eq.${nint}&element_approval=is.null&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: supabaseHeaders
+          }
+        );
+        const swaps = await response.json();
+        if (!Array.isArray(swaps) || swaps.length === 0) {
+          const emptyCard = document.createElement("div");
+          emptyCard.className = "swap-card";
+          emptyCard.style.justifyContent = "center";
+          emptyCard.style.textAlign = "center";
+          emptyCard.style.opacity = "0.7";
+          emptyCard.innerHTML = `
+            <div class="swap-info" style="width:100%;">
+              <p style="font-weight:bold;">Sem pedidos pendentes</p>
+              <p style="font-size:0.85em;">Não existem pedidos de troca para ti neste momento.</p>
+            </div>
+          `;
+          list.appendChild(emptyCard);
+          return;
+        }
+        for (const swap of swaps) {
+          const namesResp = await fetch(
+            `${SUPABASE_URL}/rest/v1/reg_elems?select=n_int,abv_name&n_int=in.(${swap.n_int},${swap.n_int_end})&corp_oper_nr=eq.${corpOperNr}`, {
+              headers: supabaseHeaders
+            }
+          );
+          const elems = await namesResp.json();
+          const proponente = elems.find(e => e.n_int == swap.n_int)?.abv_name || "Desconhecido";
+          const proposto = elems.find(e => e.n_int == swap.n_int_end)?.abv_name || "Desconhecido";
+          const swapCard = document.createElement("div");
+          swapCard.className = "swap-card";
+          const swapInfo = document.createElement("div");
+          swapInfo.className = "swap-info";
+          swapInfo.innerHTML = `
+            <p><strong>Proponente:</strong> ${proponente}</p>
+            <p><strong>Piquete:</strong> ${String(swap.start_shift_day).padStart(2, "0")}/${String(swap.start_shift_month).padStart(2, "0")}/${swap.start_shift_year}</p>
+            <p><strong>Proposto:</strong> ${proposto}</p>
+            <p><strong>Piquete:</strong> ${String(swap.end_shift_day).padStart(2, "0")}/${String(swap.end_shift_month).padStart(2, "0")}/${swap.end_shift_year}</p>
+          `;
+          const swapActions = document.createElement("div");
+          swapActions.className = "swap-actions";
+          const approveBtn = document.createElement("button");
+          approveBtn.className = "approve-btn";
+          approveBtn.textContent = "✔";
+          const rejectBtn = document.createElement("button");
+          rejectBtn.className = "reject-btn";
+          rejectBtn.textContent = "✖";
+          swapActions.appendChild(approveBtn);
+          swapActions.appendChild(rejectBtn);
+          swapCard.appendChild(swapInfo);
+          swapCard.appendChild(swapActions);
+          list.appendChild(swapCard);
+          const sendNotification = async (accepted) => {
+            const title = accepted
+            ? "Troca de Serviço Aceite"
+            : "Troca de Serviço Rejeitada";
+            const msg = accepted
+            ? `O elemento ${myName} aceitou a tua solicitação de troca de serviço do dia ${swap.start_shift_day} para o dia ${swap.end_shift_day}.`
+            : `O elemento ${myName} rejeitou a tua solicitação de troca de serviço do dia ${swap.start_shift_day} para o dia ${swap.end_shift_day}.`;
+            await fetch(`${SUPABASE_URL}/rest/v1/user_notifications`, {
+              method: "POST",
+              headers: supabaseHeaders,
+              body: JSON.stringify([{n_int: swap.n_int, corp_oper_nr: corpOperNr, title, message: msg, is_read: false, created_at: new Date().toISOString()}])
+            });
+          };
+          approveBtn.onclick = async () => {
+            try {
+              await fetch(`${SUPABASE_URL}/rest/v1/reg_swaps?id=eq.${swap.id}`, {
+                method: "PATCH",
+                headers: supabaseHeaders,
+                body: JSON.stringify({element_approval: true})
+              });
+              swapCard.style.background = "#d4edda";
+              approveBtn.disabled = true;
+              rejectBtn.disabled = true;
+              await sendNotification(true);
+            } catch (err) {
+          console.error(err);
+            }
+          };
+          rejectBtn.onclick = async () => {
+            try {
+              await fetch(`${SUPABASE_URL}/rest/v1/reg_swaps?id=eq.${swap.id}`, {
+                method: "PATCH",
+                headers: supabaseHeaders,
+                body: JSON.stringify({element_approval: false})
+              });
+              swapCard.style.background = "#f8d7da";
+              approveBtn.disabled = true;
+              rejectBtn.disabled = true;
+              await sendNotification(false);
+            } catch (err) {
+              console.error(err);
+            }
+          };
+        }
+      } catch (err) {
+        console.error(err);
+        list.innerHTML = "<p style='text-align:center; font-weight:bold;'>Erro ao carregar trocas pendentes</p>";
+      }
+    }
+    /* ======================== SELECT MONTH ========================= */
+    async function selectMonth(monthIndex, button) {
+      const comboboxContainer = document.getElementById('comboboxContainer');
+      const shiftsContainer = document.getElementById('shiftsContainer');
+      const elementsShiftsContainer = document.getElementById('elementsShiftsContainer');
+      const swapbtn = document.getElementById('swap-btn');
+      const mainContent = document.querySelector('.main-content');      
+      if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
+        button.classList.remove('selected');
+        comboboxContainer.style.display = 'none';
+        shiftsContainer.style.display = 'none';
+        elementsShiftsContainer.style.display = 'none';
+        swapbtn.style.display = 'none';  
+        document.body.classList.remove('mobile-month-selected');
+        currentMonthIndex = null;
+        return;
+      }
+      currentMonthIndex = monthIndex;
+      document.querySelectorAll('.swap-month-btn').forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+      document.body.classList.add('mobile-month-selected');
+      elementsShiftsContainer.style.display = 'none';
+      await loadShifts(monthIndex);
+      comboboxContainer.style.display = 'block';
+      await loadElements();
+      setTimeout(() => {
+        comboboxContainer.classList.add('show');
+        comboboxContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      }, 100);      
+    }
+    /* =========================== THEME SHITS =========================== */    
+    async function loadShifts(monthIndex) {
+      const nint = localStorage.getItem("currentCorpNint");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const shiftsContainer = document.getElementById("shiftsContainer");
+      const shiftsButtons = document.getElementById("shiftsButtons");
+      if (!nint || !corpOperNr || !shiftsContainer) return;
+      shiftsContainer.style.display = "block";
+      const year = getWorkYear(monthIndex);
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nint}&month=eq.${monthIndex + 1}&year=eq.${year}&value=in.(PN,ED,EN,ET)&order=day.asc`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) {
+          const err = await response.json();
+          shiftsButtons.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
+          return;
+        }
+        const data = await response.json();
+        shiftsButtons.innerHTML = "";
+        if (!Array.isArray(data) || data.length === 0) {
+          const noShiftsMsg = document.createElement("div");
+          noShiftsMsg.textContent = "Sem turnos disponíveis";
+          noShiftsMsg.style.cssText = "font-size: 12px; font-weight: bold; text-align: center; opacity: 0.7; grid-column: 1 / -1;";
+          shiftsButtons.appendChild(noShiftsMsg);
+        } else {
+          const today = new Date();
+          const currentMonth = today.getMonth();
+          const valueMap = {PN: "Piquete", ED: "ECIN Dia", EN: "ECIN Noite", ET: "ECIN 24 H"};
+          data.forEach(row => {
+            const btn = document.createElement("button");
+            btn.className = "shifts-btn";
+            const displayValue = valueMap[row.value] || row.value;
+            btn.textContent = `${String(row.day).padStart(2, "0")} - ${displayValue}`;
+            if ((monthIndex === currentMonth) && (row.day < today.getDate())) {
+              btn.disabled = true;
+              btn.style.opacity = "0.4";
+              btn.style.cursor = "not-allowed";
+            }
+            btn.addEventListener("click", () => {
+              if (btn.disabled) return;
+              const isSelected = btn.classList.contains("selected");
+              document.querySelectorAll("#shiftsButtons .shifts-btn")
+                .forEach(b => b.classList.remove("selected"));
+              if (!isSelected) {
+                btn.classList.add("selected");
+                btn.dataset.day = row.day;
+                btn.dataset.value = row.value;
+              } else {
+                delete btn.dataset.day;
+                delete btn.dataset.value;
+              }
+            });
+            shiftsButtons.appendChild(btn);
+          });
+        }
+        shiftsContainer.classList.add("show");
+      } catch (err) {
+        console.error("Erro ao carregar turnos:", err);
+        shiftsButtons.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
+      }
+    }
+    /* ======================== ELEMENTS LOADING ========================= */
+    let currentMonthIndex = null;
+    async function loadElements() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const myNInt = localStorage.getItem("currentCorpNint");
+      const select = document.getElementById("elementsSelect");
+      if (!corpOperNr) {
+        select.innerHTML = '<option value="">Corporação não definida</option>';
+        return;
+      }      
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,n_int&corp_oper_nr=eq.${corpOperNr}&order=n_int.asc`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          select.innerHTML = '<option value="">Selecione um bombeiro...</option>';
+          data.forEach(bombeiro => {
+            const option = document.createElement('option');
+            option.value = bombeiro.n_int;
+            option.textContent = `${String(bombeiro.n_int).padStart(3, '0')} - ${bombeiro.abv_name}`;
+            if (String(bombeiro.n_int) === String(myNInt)) {
+              option.disabled = true;
+              option.textContent += " (tu)";
+            }
+            select.appendChild(option);
+          });
+        } else {
+          select.innerHTML = '<option value="">Nenhum bombeiro encontrado</option>';
+        }
+      } catch (err) {
+        console.error('Erro ao carregar bombeiros:', err);
+        select.innerHTML = '<option value="">Erro ao carregar</option>';
+      }
+    }
+    /* ===================== ELEMENT SHIFTS LOADING ====================== */
+    async function loadElementShifts(nint, monthIndex) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const container = document.getElementById("elementsShiftsContainer");
+      const buttonsDiv = document.getElementById("elementsShiftsButtons");
+      const switchBtn = document.getElementById("swap-btn");
+      container.style.display = "block";
+      if (switchBtn) switchBtn.style.display = "none";
+      const year = getWorkYear(monthIndex);
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nint}&month=eq.${monthIndex + 1}&year=eq.${year}&value=in.(PN,ED,EN,ET)&order=day.asc`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) {
+          const err = await response.json();
+          console.error("Erro Supabase:", err);
+          buttonsDiv.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
+          return;
+        }
+        const data = await response.json();
+        buttonsDiv.innerHTML = "";
+        if (!Array.isArray(data) || data.length === 0) {
+          const noShiftsMsg = document.createElement("div");
+          noShiftsMsg.textContent = "Sem turnos disponíveis";
+          noShiftsMsg.style.cssText = "font-size: 12px; font-weight: bold; text-align: center; opacity: 0.7; grid-column: 1 / -1;";
+          buttonsDiv.appendChild(noShiftsMsg);
+        } else {
+          const today = new Date();
+          const currentMonth = today.getMonth();
+          const valueMap = { PN: "Piquete", ED: "ECIN Dia", EN: "ECIN Noite", ET: "ECIN 24 H" };
+          data.forEach(row => {
+            const btn = document.createElement("button");
+            btn.className = "shifts-btn";
+            const displayValue = valueMap[row.value] || row.value;
+            btn.textContent = `${String(row.day).padStart(2, "0")} - ${displayValue}`;
+            if ((monthIndex === currentMonth) && (row.day < today.getDate())) {
+              btn.disabled = true;
+              btn.style.opacity = "0.4";
+              btn.style.cursor = "not-allowed";
+            }
+            btn.addEventListener("click", () => {
+              if (btn.disabled) return;
+              const isAlreadySelected = btn.classList.contains("selected");
+              document.querySelectorAll("#elementsShiftsButtons .shifts-btn").forEach(b => b.classList.remove("selected"));
+              if (!isAlreadySelected) {
+                btn.classList.add("selected");
+                btn.dataset.day = row.day;
+                btn.dataset.value = row.value;
+                if (switchBtn) switchBtn.style.display = "block";
+              } else {
+                delete btn.dataset.day;
+                delete btn.dataset.value;
+                const anySelected = document.querySelectorAll("#elementsShiftsButtons .shifts-btn.selected").length > 0;
+                if (switchBtn) switchBtn.style.display = anySelected ? "block" : "none";
+              }
+            });
+            buttonsDiv.appendChild(btn);
+          });
+        }
+        container.classList.add("show");
+      } catch (err) {
+        console.error("Erro ao carregar turnos do bombeiro:", err);
+        buttonsDiv.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
+      }
+    }
+    /* ======================== SEND SWAP REQUEST ======================== */
+    async function sendSwapRequest(targetNInt) {
+      const supabaseHeaders = getSupabaseHeaders({ returnRepresentation: true });
+      const myShiftBtn = document.querySelector("#shiftsButtons .shifts-btn.selected");
+      if (!myShiftBtn) {
+        showToast("Seleciona o teu turno antes de enviar!");
+        return;
+      }
+      const targetShiftBtn = document.querySelector("#elementsShiftsButtons .shifts-btn.selected");
+      if (!targetShiftBtn) {
+        showToast("Seleciona o turno do elemento com quem quer trocar!");
+        return;
+      }
+      const myShiftDay = parseInt(myShiftBtn.dataset.day);
+      const myShiftType = myShiftBtn.dataset.value;
+      const targetShiftDay = parseInt(targetShiftBtn.dataset.day);
+      const targetShiftType = targetShiftBtn.dataset.value;
+      const myNInt = localStorage.getItem("currentCorpNint");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const monthNumber = currentMonthIndex + 1;
+      const year = new Date().getFullYear();
+      if (String(targetNInt) === String(myNInt)) {
+        showToast("Não podes solicitar uma troca contigo próprio 😄");
+        return;
+      }
+      if (myShiftDay === targetShiftDay) {
+        showToast("Não é possível trocar turnos no mesmo dia.");
+        return;
+      }
+      try {
+        const checkUrl =`${SUPABASE_URL}/rest/v1/reg_swaps?` + `or=(` + `and(n_int.eq.${myNInt},start_shift_day.eq.${myShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${targetNInt},end_shift_day.eq.${targetShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year}),` + `and(n_int.eq.${targetNInt},start_shift_day.eq.${targetShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${myNInt},end_shift_day.eq.${myShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year})` + `)&corp_oper_nr=eq.${corpOperNr}`;
+        const checkResp = await fetch(checkUrl, { headers: supabaseHeaders });
+        const existingSwaps = await checkResp.json();
+        if (existingSwaps?.length > 0) {
+          showToast("Já existe um pedido de troca idêntico entre estes turnos.");
+          return;
+        }
+        const swapResp = await fetch(`${SUPABASE_URL}/rest/v1/reg_swaps`, {
+          method: "POST",
+          headers: supabaseHeaders,
+          body: JSON.stringify([{corp_oper_nr: corpOperNr, n_int: myNInt, start_shift_day: myShiftDay, start_shift_month: monthNumber, start_shift_year: year, n_int_end: targetNInt, end_shift_day: targetShiftDay,
+                                 end_shift_month: monthNumber, end_shift_year: year, created_at: new Date().toISOString()}])});
+        if (!swapResp.ok) {
+          const err = await swapResp.json();
+          console.error("Erro Supabase:", err);
+          throw new Error("Erro ao gravar troca");
+        }
+        const nameResp = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${myNInt}`, {
+            headers: supabaseHeaders
+          }
+        );
+        const nameData = await nameResp.json();
+        const myName = nameData?.[0]?.abv_name || "Elemento";
+        const message = `O elemento ${myName} solicitou uma troca de serviço contigo:\n` + `• Dia ${targetShiftDay} (${targetShiftType}) por\n` + `• Dia ${myShiftDay} (${myShiftType}).`;
+        await fetch(`${SUPABASE_URL}/rest/v1/user_notifications`, {
+          method: "POST",
+          headers: supabaseHeaders,
+          body: JSON.stringify([{n_int: targetNInt, corp_oper_nr: corpOperNr, title: "📢 Pedido de Troca de Serviço", message, is_read: false, created_at: new Date().toISOString()}])
+        });
+        showToast("Pedido de troca enviado com sucesso!");
+      } catch (err) {
+        console.error("Erro no pedido de troca:", err);
+        showToast("Erro ao enviar pedido de troca.");
+      }
+    }
+    function handleSwapClick() {
+      const selectedShiftBtn = document.querySelector("#elementsShiftsButtons .shifts-btn.selected");
+      if (!selectedShiftBtn) {
+        showToast("Selecione um turno para enviar o pedido!");
+        return;
+      }
+      const targetNInt = document.getElementById("elementsSelect").value;
+      if (!targetNInt) {
+        showToast("Selecione um elemento para enviar o pedido!");
+        return;
+      }
+      const shiftDay = selectedShiftBtn.dataset.day;
+      const shiftType = selectedShiftBtn.dataset.value;
+      sendSwapRequest(targetNInt, shiftDay, shiftType);
+    }
+    /* ========================== RESET SWAP UI ========================== */  
+    function resetSwapUI() {
+      document.getElementById("shiftsContainer").style.display = 'none';
+      document.getElementById("comboboxContainer").style.display = 'none';
+      document.getElementById("elementsShiftsContainer").style.display = 'none';
+      const switchBtn = document.getElementById("swap-btn");
+      if (switchBtn) switchBtn.style.display = "none";
+      document.querySelectorAll(".shifts-btn.selected").forEach(btn => btn.classList.remove("selected"));
+      document.querySelectorAll(".swap-month-btn.selected").forEach(btn => btn.classList.remove("selected"));
+      const select = document.getElementById("elementsSelect");
+      if (select) select.value = "";
+      currentMonthIndex = null;
+      document.body.classList.remove("mobile-month-selected");
+    }
+    /* ============================== TOAST ============================== */
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = message;
+      const content = document.querySelector(".main-content"); 
+      document.body.appendChild(toast);
+      if (content) content.classList.add("content-blur");
+      setTimeout(() => toast.classList.add("show"), 50);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        if (content) content.classList.remove("content-blur");
+        resetSwapUI()
+        setTimeout(() => toast.remove(), 300);
+      }, 4500);
+    }
+    /* ============================== INIT =============================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCorpInfo();
+      loadTheme();
+      document.querySelectorAll('.swap-month-btn').forEach((btn, i) => {
+        btn.style.opacity = '0';
+        btn.style.transform = 'translateY(15px)';
+        btn.style.transition = 'all 0.4s ease';
+        setTimeout(() => {
+          btn.style.opacity = '1';
+          btn.style.transform = 'translateY(0)';
+        }, i * 80);
+      });  
+      const elementsSelect = document.getElementById("elementsSelect");
+      elementsSelect.addEventListener("change", async () => {
+        const nint = elementsSelect.value;
+        if (!nint || currentMonthIndex === null) {
+          document.getElementById("elementsShiftsContainer").classList.remove("show");
+          return;
+        }
+        await loadElementShifts(nint, currentMonthIndex);
+      });
+    });
+  </script>
+</body>
+</html>
