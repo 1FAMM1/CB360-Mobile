@@ -919,8 +919,7 @@
             const { data: pubFile } = supabaseClient.storage.from('cb_files').getPublicUrl(basePath);
             const fileUrl = pubFile?.publicUrl;    
             const senderName = await UserManager.fetchName();
-            const isImage = (file.type || '').startsWith('image/');
-            const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+            const isImage = (file.type || '').startsWith('image/');            
             const payload = {n_int: AppState.currentUserNint, recipient_nint: String(AppState.currentChat), corp_oper_nr: Helpers.getCorpNr(), abv_name: senderName,
                              message_type: isImage ? 'image' : 'file', file_name: file.name, file_url: fileUrl, preview_url: isPdf ? previewUrl : null, message: ''};   
             const { error: insErr } = await supabaseClient
@@ -2446,3 +2445,4 @@
   </script>
 </body>
 </html>
+
