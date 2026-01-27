@@ -41,14 +41,12 @@ export default async function handler(req, res) {
 
     const payload = JSON.stringify({
       title: recipient_nint === 'geral' ? `Geral: ${sender_name}` : sender_name,
-      message: message_text,
-      // Ícone grande à direita
+      body: message_text, // MUDAR DE 'message' PARA 'body'
       icon: 'https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_files/logo_app.png',
-      // Ícone pequeno da barra de estado (silhueta branca)
       badge: badgeCaminhaoBranco,
       vibrate: [200, 100, 200],
       data: {
-        url: '/', // Caminho para abrir ao clicar
+        url: '/',
         sender_nint: sender_nint
       }
     });
