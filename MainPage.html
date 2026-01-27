@@ -325,7 +325,7 @@
             <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">construction</span>
             <div>Ferramentas Úteis</div>
           </button>
-          <button class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='InterChat.html', 300);">
+          <button id="internalChat" class="menu-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='InterChat.html', 300);">
             <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">chat</span>
             <div>Chat Interno</div>
           </button>
@@ -531,7 +531,7 @@
       }
       return headers;
     }
-
+    /* =================== ACTIVATE PUSH NOTIFICATIONS =================== */
     const PUBLIC_VAPID_KEY = "BON0DVn-crPvv9vQ43Egn7GvhXklY7e1puYKbuefOQWHMfDwjeIqg2IKdpsWz8hzWvbU6avlRR334mv9NCAVFOQ";
     function urlBase64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -1180,6 +1180,24 @@
         badge.textContent = '!';
       }
     }
+    /* ====================== IPMA WARNINGS LOADING ====================== */
+    function updateMeteoBadge(count) {
+      const badge = document.querySelector("#meteoadv .badge");
+      if (badge) {
+        badge.style.display = "inline-block";
+        badge.textContent = count;
+      }
+    }
+    async function countIPMAWarningsFromSite() {
+      try {
+        const response = await fetch("https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json");
+        const data = await response.json();
+        const warnings = data.filter(a => a.idAreaAviso === "FAR" && a.awarenessLevelID !== "green");
+        updateMeteoBadge(warnings.length);
+      } catch (err) {
+        console.error("Erro ao buscar e contar avisos IPMA:", err);
+      }
+    }
     /* ====================== NO HOSPITAL LOADING ======================== */
     async function updateNohospitalBadge() {
       const corpOperNr = localStorage.getItem('currentCorpOperNr')
@@ -1200,22 +1218,34 @@
         badge.textContent = '!';
       }
     }
-    /* ====================== IPMA WARNINGS LOADING ====================== */
-    function updateMeteoBadge(count) {
-      const badge = document.querySelector("#meteoadv .badge");
-      if (badge) {
-        badge.style.display = "inline-block";
-        badge.textContent = count;
+    /* ====================== INTERNAL CHAT LOADING ====================== */
+    async function updateChatBadge() {
+      const corpOperNr = localStorage.getItem('currentCorpOperNr');
+      const myNInt = localStorage.getItem('currentCorpNint');
+      const badge = document.querySelector('#internalChat .badge');
+      if (!badge) return;
+      if (!corpOperNr || !myNInt) {
+        badge.textContent = '0';
+        return;
       }
-    }
-    async function countIPMAWarningsFromSite() {
       try {
-        const response = await fetch("https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json");
-        const data = await response.json();
-        const warnings = data.filter(a => a.idAreaAviso === "FAR" && a.awarenessLevelID !== "green");
-        updateMeteoBadge(warnings.length);
+        const privUrl = `${SUPABASE_URL}/rest/v1/chat_messages?select=id&corp_oper_nr=eq.${corpOperNr}&recipient_nint=eq.${myNInt}&read_at=is.null`;
+        const privRes = await fetch(privUrl, { headers: getSupabaseHeaders() });
+        const privData = await privRes.json();
+        const unreadPrivateCount = privData.length;
+        const geralUrl = `${SUPABASE_URL}/rest/v1/chat_messages?select=id&corp_oper_nr=eq.${corpOperNr}&recipient_nint=eq.geral`;
+        const geralRes = await fetch(geralUrl, { headers: getSupabaseHeaders() });
+        const geralMsgs = await geralRes.json();
+        const readsUrl = `${SUPABASE_URL}/rest/v1/chat_message_reads?select=message_id&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${myNInt}`;
+        const readsRes = await fetch(readsUrl, { headers: getSupabaseHeaders() });
+        const readsData = await readsRes.json();
+        const readSet = new Set(readsData.map(r => r.message_id));
+        const unreadGeneralCount = geralMsgs.filter(m => !readSet.has(m.id)).length;
+        const total = unreadPrivateCount + unreadGeneralCount;
+        badge.textContent = `${total}`;
       } catch (err) {
-        console.error("Erro ao buscar e contar avisos IPMA:", err);
+        console.error('Erro ao atualizar chat badge:', err);
+        badge.textContent = '!';
       }
     }
     /* ============================= EVENTS ============================== */
@@ -1236,6 +1266,7 @@
       updateComunicatesBadge();
       countIPMAWarningsFromSite();
       updateNohospitalBadge();
+      updateChatBadge();
       checkRealNotifications();
       setInterval(updateSwapsBadge, 10000);
       setInterval(updateOccurrencesBadge, 10000);
@@ -1244,6 +1275,7 @@
       setInterval(updateComunicatesBadge, 10000);
       setInterval(countIPMAWarningsFromSite, 10 * 60 * 1000);
       setInterval(updateNohospitalBadge, 10000);
+      setInterval(updateChatBadge, 10000);
       setInterval(checkRealNotifications, 10000);
       const buttons = document.querySelectorAll('.menu-btn');
       buttons.forEach((button, index) => {
@@ -1277,4 +1309,3 @@
   </script>
 </body>
 </html>
-
