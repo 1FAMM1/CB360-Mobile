@@ -67,7 +67,8 @@
     .modal-header h3 {font-size: 1.2rem; margin: 0;}
     .modal-close {background: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s ease;}
     .modal-close:hover {background: #b71c1c;}
-    .modal-body {padding: 20px; max-height: 60vh; overflow-y: auto; color: #333;}
+    .modal-body {padding: 20px; max-height: 60vh; overflow-y: auto; color: #333; scrollbar-width: none; -ms-overflow-style: none;}
+    .modal-body::-webkit-scrollbar {display: none;}
     .modal-footer {padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center;}
     .notif-item {background: #f9f9f9; border-left: 4px solid #d32f2f; padding: 12px; margin-bottom: 10px; border-radius: 4px;}
     .theme-toggle {position: fixed; top: 40px; right: 15px; width: 50px; height: 25px; background: rgba(255, 255, 255, 0.2); border-radius: 25px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -143,7 +144,8 @@
     #configModal .menu-btn:hover {background: #1565c0;}
     #passwordChangeContainer {display: flex; flex-direction: column; align-items: center; gap: 10px;}
     #passwordChangeContainer input {width: 100%;}
-    #passwordChangeContainer button.menu-btn {width: auto; align-self: center;}    
+    #passwordChangeContainer button.menu-btn {width: auto; align-self: center;}
+    
     /* =================================================
     MEDIA QUERIES - FULL RESPONSIVENESS
     ================================================= */
@@ -225,7 +227,7 @@
     <div class="menu-item" onclick="showContact()">📞 Contacto</div>
   </div>
   <div class="header">
-    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <img id="corpLogo" class="header-logo" alt="" src="">
     <h1>CB360</h1>
     <h2 id="corpInfo" style="display: none;"></h2>
     <div class="header-subtitle">MOBILE</div>
@@ -357,19 +359,19 @@
     </div>
   </footer>
   <div id="policiesModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">📋 Políticas de Privacidade</div>
-      <div class="modal-body">
-        <h3>Política de Privacidade - CB360</h3>
-        <p><strong>Última atualização:</strong> Dezembro 2025</p>
-        <h4>1. Informações que Coletamos</h4>
-        <p>• Dados de localização para funcionalidades de GPS<br>• Informações de uso do sistema<br>• Dados operacionais dos bombeiros</p>
-        <h4>2. Como Usamos as Informações</h4>
-        <p>• Melhorar a eficiência operacional<br>• Garantir a segurança das equipas<br>• Análise estatística de ocorrências</p>
-        <h4>3. Proteção de Dados</h4>
-        <p>Todos os dados são criptografados e armazenados de forma segura, seguindo as melhores práticas de segurança.</p>
-        <h4>4. Contacto</h4>
-        <p>Para questões sobre privacidade, contacte: privacy@cb360.pt</p>
+  <div class="modal-content">
+    <div class="modal-header">📋 Políticas de Privacidade</div>
+      <div class="modal-body" style="line-height: 1.5;">
+        <h3 style="font-size:16px; margin-bottom: 10px;">Política de Privacidade - CB360 Mobile</h3>
+        <p style="font-size:14px; margin-bottom: 20px;"><strong>Última atualização:</strong> Janeiro 2026</p>  
+        <h4 style="margin-top: 20px;">1. Informações que Coletamos</h4>
+        <p style="font-size:13px;">• Dados de localização para funcionalidades de GPS<br>• Informações de uso do sistema<br>• Dados operacionais dos bombeiros</p>  
+        <h4 style="margin-top: 20px;">2. Como Usamos as Informações</h4>
+        <p style="font-size:13px;">• Melhorar a eficiência operacional<br>• Garantir a segurança das equipas<br>• Análise estatística de ocorrências</p>  
+        <h4 style="margin-top: 20px;">3. Proteção de Dados</h4>
+        <p style="font-size:13px;">Todos os dados são criptografados e armazenados de forma segura, seguindo as melhores práticas de segurança.</p>  
+        <h4 style="margin-top: 20px;">4. Contacto</h4>
+        <p style="font-size:13px;">Para questões sobre privacidade, contacte: <a href="mailto:privacy.cb360mobile@gmail.com">privacy.cb360mobile@gmail.com</a></p>
       </div>
       <div class="modal-footer">
         <button class="modal-close" onclick="closeModal('policiesModal')">Fechar</button>
@@ -379,19 +381,19 @@
   <div id="termsModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">📄 Termos de Uso</div>
-      <div class="modal-body">
-        <h3>Termos de Uso - CB360</h3>
-        <p><strong>Vigência:</strong> Dezembro 2025</p>
-        <h4>1. Aceitação dos Termos</h4>
-        <p>Ao usar o sistema CB360, você concorda com estes termos de uso.</p>
-        <h4>2. Uso Autorizado</h4>
-        <p>• Sistema destinado exclusivamente a bombeiros autorizados<br>• Uso apenas para fins operacionais<br>• Proibido compartilhar credenciais de acesso</p>
-        <h4>3. Responsabilidades</h4>
-        <p>• Manter informações atualizadas<br>• Usar o sistema de forma responsável<br>• Reportar problemas técnicos</p>
-        <h4>4. Limitações</h4>
-        <p>O sistema é fornecido "como está" e pode ter interrupções para manutenção.</p>
-        <h4>5. Modificações</h4>
-        <p>Estes termos podem ser atualizados sem aviso prévio.</p>
+      <div class="modal-body" style="line-height: 1.5;">
+        <h3 style="font-size:16px; margin-bottom: 10px;">Termos de Uso - CB360</h3>
+        <p style="font-size:14px; margin-bottom: 20px;"><strong>Vigência:</strong> Janeiro 2026</p>  
+        <h4 style="margin-top: 20px;">1. Aceitação dos Termos</h4>
+        <p style="font-size:13px;">Ao usar o sistema CB360, você concorda com estes termos de uso.</p>  
+        <h4 style="margin-top: 20px;">2. Uso Autorizado</h4>
+        <p style="font-size:13px;">• Sistema destinado exclusivamente a bombeiros autorizados.<br>• Uso apenas para fins operacionais.<br>• Proibido compartilhar credenciais de acesso.</p>  
+        <h4 style="margin-top: 20px;">3. Responsabilidades</h4>
+        <p style="font-size:13px;">• Manter informações atualizadas.<br>• Usar o sistema de forma responsável.<br>• Reportar problemas técnicos.</p>  
+        <h4 style="margin-top: 20px;">4. Limitações</h4>
+        <p style="font-size:13px;">O sistema é fornecido "como está" e pode ter interrupções para manutenção.</p>  
+        <h4 style="margin-top: 20px;">5. Modificações</h4>
+        <p style="font-size:13px;">Estes termos podem ser atualizados sem aviso prévio.</p>
       </div>
       <div class="modal-footer">
         <button class="modal-close" onclick="closeModal('termsModal')">Fechar</button>
@@ -401,20 +403,26 @@
   <div id="aboutModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">ℹ️ Sobre o Sistema</div>
-      <div class="modal-body">
-        <h3>CB360 - Sistema de Gestão Operacional</h3>
-        <p><strong>Versão:</strong> 2.1.0</p>
-        <p><strong>Build:</strong> 2025.01.15</p>
-        <h4>📋 Funcionalidades</h4>
-        <p>• Gestão de Status Operacional<br>• Controlo de Veículos<br>• Sistema FOMIO<br>• Relatórios e Estatísticas<br>• Gestão de Ocorrências</p>
-        <h4>🛠️ Tecnologias</h4>
-        <p>• Interface Web Responsiva<br>• Integração GPS<br>• Base de Dados em Tempo Real<br>• Sincronização Multi-dispositivo</p>
-        <h4>🏢 Desenvolvido para</h4>
-        <p><strong>CB's Algarve</strong><br>Corpo de Bombeiros Voluntários</p>
-        <h4>👨‍💻 Desenvolvimento</h4>
-        <p><strong>Fábio Martins</strong><br>Grupo CB360<br>Email: dev@cb360.pt</p>
-        <h4>📅 Histórico de Versões</h4>
-        <p>• v2.1.0 - Interface mobile otimizada<br>• v2.0.0 - Novo design e funcionalidades<br>• v1.5.0 - Sistema FOMIO integrado<br>• v1.0.0 - Versão inicial</p>
+      <div class="modal-body" style="line-height: 1.5;">
+        <h3 style="font-size:16px; margin-bottom: 5px;">CB360 - Sistema de Gestão Operacional</h3>
+        <p style="font-size:13px; margin-bottom: 2px;"><strong>Versão:</strong> 3.1.1</p>
+        <p style="font-size:13px; margin-bottom: 15px;"><strong>Build:</strong> 01.02.2026</p>
+        <h4 style="margin-top: 20px;">📋 Funcionalidades</h4>
+        <p style="font-size:13px;">• Escalas de Serviço.<br>•Trocas de Serviço.<br>• Envio de Disponibilidades.<br>
+                                   • Pedidos de Férias.<br>• Pedidos de Fardamento.<br>• Controlo de Assiduidade.<br>
+                                   • Ocorrências em Curso.<br>• Gestão Documental.<br>• Comunicados.<br>
+                                   • Avisos Meteorológicos.<br>• Constrangimentos Hospitalares.<br>• Gestão de Veículos.<br>
+                                   • Ferramentas Úteis.<br>• Chat Interno.<br></p>
+        <h4 style="margin-top: 20px;">🛠️ Tecnologias</h4>
+        <p style="font-size:13px;">• Interface Web Responsiva<br>• Integração GPS<br>• Base de Dados em Tempo Real<br>• Sincronização Multi-dispositivo</p>
+        <h4 style="margin-top: 20px;">🏢 Desenvolvido para</h4>
+        <p style="font-size:13px;"><strong>CB's Algarve.</strong><br>Corpo de Bombeiros.</p>
+        <h4 style="margin-top: 20px;">👨‍💻 Desenvolvimento</h4>
+        <p style="font-size:13px;"><strong>Fábio Martins</strong><br>Grupo CB360<br>Email: <a href="mailto:dev.grupocb360@gmail.com">dev.grupocb360@gmail.com</a></p>  
+        <h4 style="margin-top: 20px;">📅 Histórico de Versões</h4>
+        <p style="font-size:13px;">• v3.1.1 - Compatibilidade com iOS.<br>• v3.0.1 - Atualização de design e funcionalidades.<br>
+                                   • v2.1.0 - Interface mobile otimizada<br>• v2.0.0 - Novo design e funcionalidades<br>
+                                   • v1.5.0 - Integradas várias novas funcionalidades.<br>• v1.0.0 - Versão inicial.</p>
       </div>
       <div class="modal-footer">
         <button class="modal-close" onclick="closeModal('aboutModal')">Fechar</button>
@@ -424,19 +432,34 @@
   <div id="contactModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">📞 Contacto</div>
-      <div class="modal-body">
-        <h3>Informações de Contacto</h3>
-        <h4>🏢 CB Faro Cruz Lusa</h4>
-        <p><strong>Morada:</strong><br>Rua dos Bombeiros, nº 123<br>8000-000 Faro</p>
-        <p><strong>Telefone:</strong> +351 289 123 456<br><strong>Email:</strong> geral@cbfarocruzlusa.pt<br><strong>Website:</strong> www.cbfarocruzlusa.pt</p>
-        <h4>💻 Suporte Técnico</h4>
-        <p><strong>Desenvolvedor:</strong> Fábio Martins<br><strong>Email:</strong> suporte@cb360.pt<br><strong>Telefone:</strong> +351 912 345 678</p>
-        <h4>🚨 Emergências</h4>
-        <p><strong>Número Nacional de Emergência:</strong><br><span style="font-size: 24px; color: #d32f2f; font-weight: bold;">112</span></p>
-        <h4>⏰ Horários</h4>
-        <p><strong>Quartel:</strong> 24h/dia, 7 dias/semana<br><strong>Suporte Técnico:</strong> Segunda a Sexta, 9h-18h</p>
-        <h4>🌐 Redes Sociais</h4>
-        <p>Facebook: @CBFaroCruzLusa<br>Instagram: @cb_faro_cruzlusa<br>Twitter: @CBFaroCruzLusa</p>
+      <div class="modal-body" style="line-height: 1.5;">
+        <h3 style="font-size:16px; margin-bottom: 15px;">Informações de Contacto</h3>  
+        <h4 style="margin-top: 20px;">🏢 Grupo - CB360</h4>
+        <p style="font-size:13px;"><strong>Morada:</strong><br>Rua dos Bombeiros, nº 123<br>8000-000 Faro</p>
+        <p style="font-size:13px; margin-top: 5px;">
+          <strong>Telefone:</strong> <a href="tel:+351289803066">+351 289 803 066</a><br>
+          <strong>Email:</strong> <a href="mailto:geral.grupocxb360@gmail.com">geral.grupocxb360@gmail.com</a><br>
+          <strong>Website:</strong> <a href="https://cb360-online.vercel.app" target="_blank">www.cb360-online.vercel.app</a>
+        </p>  
+        <h4 style="margin-top: 20px;">💻 Suporte Técnico</h4>
+        <p style="font-size:13px;">
+          <strong>Desenvolvedor:</strong> Fábio Martins<br>
+          <strong>Email:</strong> <a href="mailto:suporte@cb360.pt">suporte@cb360.pt</a><br>
+          <strong>Telefone:</strong> <a href="tel:+351912345678">+351 912 345 678</a>
+        </p>  
+        <h4 style="margin-top: 20px;">🚨 Emergências</h4>
+        <p style="font-size:13px;"><strong>Número Nacional de Emergência:</strong><br>
+          <span style="font-size: 24px; color: #d32f2f; font-weight: bold; display: block; margin-top: 5px;">112</span>
+        </p>  
+        <h4 style="margin-top: 20px;">⏰ Horários</h4>
+        <p style="font-size:13px;"><strong>Quartel:</strong> 24h/dia, 7 dias/semana<br>
+          <strong>Suporte Técnico:</strong> Segunda a Sexta, 9h-18h</p>  
+        <h4 style="margin-top: 20px;">🌐 Redes Sociais</h4>
+        <p style="font-size:13px;">
+          Facebook: @GrupoCB360<br>
+          Instagram: @GrupoCB360<br>
+          Twitter: @GrupoCB360
+        </p>
       </div>
       <div class="modal-footer">
         <button class="modal-close" onclick="closeModal('contactModal')">Fechar</button>
@@ -547,9 +570,9 @@
     async function enableNotifications() {
       if (!('Notification' in window)) return alert('Notificações não suportadas.');
       const permission = await Notification.requestPermission();
-      if (permission !== 'granted') return alert('Notificações não foram ativadas.');
+      if (permission !== 'granted') return showToast('Notificações não foram ativadas.');
       await initializePushWithoutPermission();
-      alert('Notificações ativadas ✅');
+      showToast('Notificações ativadas ✅');
     }
     async function initializePushWithoutPermission() {
       const nint = localStorage.getItem("currentCorpNint");
@@ -573,7 +596,6 @@
         headers: { ...getSupabaseHeaders(), Prefer: "resolution=merge-duplicates" },
         body: JSON.stringify(payload)
       });
-      console.log("✅ Push registado/atualizado no Supabase");
     }
     /* ======================= FUNCTION FIX LAYOUT ======================= */
     function ajustarMainContent() {
@@ -987,7 +1009,6 @@
       }
       if (navigator.vibrate) navigator.vibrate(30);
     }
-
     function loadTheme() {
       if (localStorage.getItem('sgo-theme') === 'dark') {
         document.body.classList.add('dark-mode');
