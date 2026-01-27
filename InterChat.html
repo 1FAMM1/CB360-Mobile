@@ -1454,22 +1454,20 @@ const MessageSender = {
     
     // --- DISPARO DA NOTIFICAÇÃO (FASE 2) ---
     if (!error) {
-      // Definimos se é grupo ou privado com base no AppState.currentChat
-      // Geralmente, se for nulo ou 0, é o grupo geral
-      const isGroup = !AppState.currentChat || AppState.currentChat === 0;
+  const isGeral = AppState.currentChat === 'geral';
 
-      fetch('/api/sendPush', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          target_nint: isGroup ? null : AppState.currentChat,
-          is_group: isGroup,
-          sender_name: senderName,
-          message_text: text || "Enviou um áudio 🎤",
-          sender_nint: AppState.currentUserNint // Para evitar auto-notificação
-        })
-      }).catch(err => console.error("Erro silencioso no push:", err));
-    }
+  fetch('/api/sendPush', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recipient_nint: AppState.currentChat, // Envia "geral" ou o ID
+      corp_nr: Helpers.getCorpNr(),
+      sender_name: senderName,
+      message_text: text || "Enviou um áudio 🎤",
+      sender_nint: AppState.currentUserNint
+    })
+  }).catch(err => console.error("Erro no push:", err));
+}
 
     // --- FINALIZAÇÃO ---
     if (AppState.currentReplyToMessage) {
@@ -2488,6 +2486,7 @@ const MessageSender = {
   </script>
 </body>
 </html>
+
 
 
 
