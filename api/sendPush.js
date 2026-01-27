@@ -41,16 +41,16 @@ export default async function handler(req, res) {
 
     // --- NOVO PAYLOAD CORRIGIDO ---
     const payload = JSON.stringify({
-      title: recipient_nint === 'geral' ? `Geral: ${sender_name}` : sender_name,
-      body: message_text, // MUDAR DE 'message' PARA 'body'
-      icon: 'https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_files/logo_app.png',
-      badge: badgeCaminhaoBranco,
-      vibrate: [200, 100, 200],
-      data: {
-        url: '/',
-        sender_nint: sender_nint
-      }
-    });
+  title: recipient_nint === 'geral' ? `Geral: ${sender_name}` : sender_name,
+  body: message_text,
+  // VOLTAMOS AO TEU LOGO VERMELHO
+  icon: 'https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_files/logo_app.png', 
+  // Deixamos o badge vazio para o Android usar o ícone da app do manifest
+  badge: '/icon-192.png', 
+  vibrate: [200, 100, 200],
+  priority: 'high', // Força o banner a aparecer
+  data: { url: '/' }
+});
 
     // Disparamos para todos os dispositivos em paralelo
     const envios = subs.map(dispositivo => {
