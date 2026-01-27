@@ -39,6 +39,7 @@ export default async function handler(req, res) {
     // --- CONFIGURAÇÃO VISUAL DA NOTIFICAÇÃO ---
     const badgeCaminhaoBranco = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAACXBIWXMAAAsTAAALEwEAmpwYAAABtElEQVR4nO2YvUoDQRRGZ7MYU8RGsRPyCOIDCH6AnZVN9m0S7K0S06RIYp0itgnYpUonpAsWFoogIkSMv83AwpCw6p6Z3Z07H7gxO3u+7M7unAnEGGOMMcYYY4wZp06SByS7SBaR9JH0Xv6vInmS3CAnmXWSe0lX8pD8ID+SL8m9f8I6A6yRE0y6T04y6768S96T3X8D7CAnmHSTnGTW/SAnmHSdnGTW9ZAsS76RfCH5Yp6zLflpXv9j5ASTbpKz5CH5Yd69fSR9Y69D5AST7pKTzLo+klW9663IHSY9JCeZdV0kvfX8D7CAnGDSTXKSWddHsqp3vRW5w6SH5CSzrostyYp8IflC8sk8YVvy07y6H8mS5AvJF/OcbclP8+p2khY5waS75CSzrodkWfKF5AvJF/OcbclP8+p+5P8X/v9H8oPkG8kX85xtye/S/66S8+Qp+WHevX0kfWOfQ+QEky6S7pITTLpLTjLrOklmneRe0pU8JD/Ij+RLcu8vFcaY9fUPmXf3R0pA0pMAAAAASUVORK5CYII=';
 
+    // --- NOVO PAYLOAD CORRIGIDO ---
     const payload = JSON.stringify({
       title: recipient_nint === 'geral' ? `Geral: ${sender_name}` : sender_name,
       body: message_text, // MUDAR DE 'message' PARA 'body'
