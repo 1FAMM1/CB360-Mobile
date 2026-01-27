@@ -466,6 +466,22 @@
               headers: supabaseHeaders,
               body: JSON.stringify([{n_int: swap.n_int, corp_oper_nr: corpOperNr, title, message: msg, is_read: false, created_at: new Date().toISOString()}])
             });
+            try {
+    await fetch('https://cb-360-app.vercel.app/api/sendPush', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipient_nint: swap.n_int,
+        corp_nr: corpOperNr,
+        sender_name: title,
+        message_text: msg,
+        sender_nint: nint // O teu nint (quem está a responder)
+      })
+    });
+  } catch (e) {
+    console.error("Erro ao enviar push de resposta:", e);
+  }
+
           };
           approveBtn.onclick = async () => {
             try {
@@ -761,6 +777,17 @@
           headers: supabaseHeaders,
           body: JSON.stringify([{n_int: targetNInt, corp_oper_nr: corpOperNr, title: "📢 Pedido de Troca de Serviço", message, is_read: false, created_at: new Date().toISOString()}])
         });
+        await fetch('https://cb-360-app.vercel.app/api/sendPush', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    recipient_nint: targetNInt, // O colega que recebe o pedido
+    corp_nr: corpOperNr,
+    sender_name: 'Pedido de Troca',
+    message_text: `O elemento ${myName} solicitou uma troca: Dia ${targetShiftDay} por Dia ${myShiftDay}.`,
+    sender_nint: myNInt
+  })
+});
         showToast("Pedido de troca enviado com sucesso!");
       } catch (err) {
         console.error("Erro no pedido de troca:", err);
