@@ -9,35 +9,29 @@ self.addEventListener('activate', (e) => {
 
 // Evento de Receção da Notificação
 self.addEventListener('push', function(event) {
-  // Valores padrão caso algo falhe no JSON
-  let data = { 
-    title: 'CB360 Mobile', 
-    body: 'Nova atualização no sistema!',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png'
-  };
+  let data = { title: 'CB360 Mobile', message: 'Nova atualização no sistema!' };
 
   try {
     if (event.data) {
-      // Tenta ler o JSON enviado pela tua API (sendPush.js)
+      // Tenta ler como JSON, se falhar vai para o catch
       data = event.data.json();
     }
   } catch (err) {
-    // Se não for JSON, lê como texto simples
-    data.body = event.data.text();
+    // Se o envio não for JSON (ex: texto simples), assume como a mensagem
+    data.message = event.data.text();
   }
 
   const options = {
-    body: data.body || 'Tens uma nova mensagem.',
-    icon: data.icon || '/icon-192.png', // O logo vermelho que vem da API
-    badge: data.badge, // A bolinha da esquerda
-    vibrate: [200, 100, 200],
-    tag: 'cb360-msg',
-    renotify: true,
-    requireInteraction: true, // Ajuda o banner a ficar visível
+    body: data.message || data.body || 'Tens uma nova mensagem.',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    vibrate: [100, 50, 100],
     data: {
-      url: data.data?.url || '/'
-    }
+      url: data.url || '/'
+    },
+    // No iOS, estas tags ajudam a agrupar notificações
+    tag: 'cb360-notification',
+    renotify: true
   };
 
   const title = data.title || 'CB360 Mobile';
@@ -54,15 +48,13 @@ self.addEventListener('notificationclick', function(event) {
   // Tenta focar numa janela aberta ou abrir uma nova
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      const targetUrl = event.notification.data.url || '/';
-      
       for (const client of clientList) {
-        if (client.url === targetUrl && 'focus' in client) {
+        if (client.url === '/' && 'focus' in client) {
           return client.focus();
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
+        return clients.openWindow(event.notification.data.url || '/');
       }
     })
   );
