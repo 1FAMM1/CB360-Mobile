@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <title>CB360 Mobile - Disponibilidades DECIR</title>
+  <title>CB360 Mobile - DECIR</title>
   <style>
     /* ==================== BODY ==================== */    
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
@@ -148,7 +148,7 @@
 </head>
 <body>
   <div class="header">
-    <img id="corpLogo" class="header-logo" alt="Logo" src="">
+    <img id="corpLogo" class="header-logo" alt="" src="">
     <h1>DISPONIBILIDADES</h1>
     <h2 id="corpInfo" style="display: none;"></h2>
     <div class="header-subtitle">DECIR</div>
@@ -213,14 +213,23 @@
         © 2023-2025 - Sistema CB360 Mobile
       </div>
     </div>
-  </footer>  
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
   <script>
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
-      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const corp = localStorage.getItem("currentCorpOperNr"); 
+      const nint = localStorage.getItem("currentCorpNint");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -482,21 +491,21 @@
     async function deleteDayFromTables(day, value = null) {
       const nint = localStorage.getItem("currentCorpNint");
       const corp = localStorage.getItem("currentCorpOperNr");
-      if (!nint || !corp || currentMonthIndex === null) return;
+      if (!nint || !corp || currentMonthIndex === null) return;    
       const nintInt = parseInt(nint, 10);
       const corpPadded = corp.padStart(4, "0");
       const year = new Date().getFullYear();
-      const month = currentMonthIndex + 1;
+      const month = currentMonthIndex + 1;    
       try {
-        let commonFilter = `n_int=eq.${nintInt}&corp_oper_nr=eq.${corpPadded}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=neq.PN`;
+        let commonFilter = `n_int=eq.${nintInt}&corp_oper_nr=eq.${corpPadded}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=neq.PN`;    
         let regServUrl = `${SUPABASE_URL}/rest/v1/reg_serv?${commonFilter}`;
         let regDispUrl = `${SUPABASE_URL}/rest/v1/reg_disp?${commonFilter}`;
         const [res1, res2] = await Promise.all([
           fetch(regServUrl, { method: 'DELETE', headers: getSupabaseHeaders() }),
           fetch(regDispUrl, { method: 'DELETE', headers: getSupabaseHeaders() })
-        ]);
+        ]);    
         if (res1.ok) console.log("Eliminado de reg_serv");
-        if (res2.ok) console.log("Eliminado de reg_disp");
+        if (res2.ok) console.log("Eliminado de reg_disp");    
       } catch (e) {
         console.error("Erro ao apagar registros:", e);
       }
