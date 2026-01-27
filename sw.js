@@ -28,24 +28,16 @@ self.addEventListener('push', function(event) {
   }
 
   const options = {
-    // Prioriza o 'body' da API, depois 'message', e por fim o padrão
-    body: data.body || data.message || 'Tens uma nova mensagem.',
-    
-    // Agora o ícone e o badge são dinâmicos!
-    icon: data.icon || '/icon-192.png',
-    badge: data.badge || '/icon-192.png',
-    
-    // Ativa a vibração enviada pela API
-    vibrate: data.vibrate || [200, 100, 200],
-    
+    body: data.body || 'Tens uma nova mensagem.',
+    icon: data.icon || '/icon-192.png', // O logo vermelho que vem da API
+    badge: data.badge, // A bolinha da esquerda
+    vibrate: [200, 100, 200],
+    tag: 'cb360-msg',
+    renotify: true,
+    requireInteraction: true, // Ajuda o banner a ficar visível
     data: {
-      // Garante que o URL de destino também é dinâmico
-      url: (data.data && data.data.url) || data.url || '/'
-    },
-    
-    // Tag ajuda a substituir notificações antigas pelas novas
-    tag: 'cb360-notification',
-    renotify: true
+      url: data.data?.url || '/'
+    }
   };
 
   const title = data.title || 'CB360 Mobile';
