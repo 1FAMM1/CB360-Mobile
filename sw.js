@@ -24,7 +24,7 @@ self.addEventListener('push', function(event) {
   const options = {
     body: data.message || data.body || 'Tens uma nova mensagem.',
     icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    badge: '',
     vibrate: [200, 100, 200, 100, 200],
     data: {
       url: data.url || '/'
