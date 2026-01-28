@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-PT" style="background-color: #d32f2f;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <meta name="theme-color" content="#d32f2f">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <title>CB360 Mobile - Assiduidade</title>
    <style>
@@ -16,8 +17,8 @@
            --transition-default: 0.3s ease;}
     /* ================ RESET & BODY ================ */
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gradient-bg-light); min-height: 100vh; user-select: none; transition: var(--transition-default);
-          display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gradient-bg-light); min-height: 100vh; user-select: none; display: flex; f
+          lex-direction: column; height: 100vh; overflow: hidden;}
     /* ================= DARK MODE ================== */
     .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
     .dark-mode .stats-card {background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%); border-color: #444;}
@@ -36,12 +37,11 @@
     .dark-mode .modal-body {color: #e0e0e0;}
     .dark-mode .modal-footer {border-top-color: #444;}
     /* =========== LIGHT MODE ================= */
-    .header, .footer {background: var(--gradient-primary); color: white; text-align: center; box-shadow: var(--shadow-default); transition: var(--transition-default); position: fixed; 
-                      left: 0; right: 0; z-index: 1000;}
+    .header, .footer {background: var(--gradient-primary); color: white; text-align: center; box-shadow: var(--shadow-default); position: fixed; left: 0; right: 0; z-index: 1000;}
     .header {padding: 20px 15px;top: 0; border-bottom: 2px solid var(--primary-red-darker);}
     .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
     .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: var(--transition-default); z-index: 1001;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
     .footer {padding: 8px 15px; bottom: 0; border-top: 2px solid var(--primary-red-darker);}
     .footer-content {max-width: 400px; margin: 0 auto;}
     .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
@@ -340,17 +340,28 @@
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) return;
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) {
+        logoEl.src = cachedLogo;
+      }
+      if (h2) h2.textContent = corpOperNr;
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
-          headers: getSupabaseHeaders()
-        });
-        const data = await res.json();
-        if (data.length) {
-          if (h2) h2.textContent = data[0].corp_oper_nr || "N/D";
-          if (logoEl && data[0].logo_url) logoEl.src = data[0].logo_url.trim();
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (corp.logo_url && corp.logo_url !== cachedLogo) {
+            localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+            if (logoEl) logoEl.src = corp.logo_url.trim();
+          }
         }
-      } catch (e) {
-        console.error("Erro loadCorpInfo:", e);
+      } catch (err) {
+        console.error('Erro silencioso:', err);
       }
     }
     /* ========================== THEME LOADING ========================== */
