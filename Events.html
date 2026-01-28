@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-PT" style="background-color: #d32f2f;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <meta name="theme-color" content="#d32f2f">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <title>CB360 Mobile</title>
   <style>
@@ -19,9 +20,10 @@
            --font-size-sm: 10px; --font-size-base: 12px; --font-size-md: 13px; --font-size-lg: 14px; --font-size-xl: 15px; --font-size-2xl: 25px; --font-size-3xl: 1.5em; --z-base: 1; --z-header: 1000;
            --z-logo: 1001; --z-toast: 9999; --transition-fast: 0.2s ease; --transition-base: 0.3s ease; --transition-slow: 0.4s ease;}
     /* ==================== BODY ==================== */
+    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
-          min-height: 100vh; user-select: none; transition: var(--transition-base); display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #d32f2f; min-height: 100vh; user-select: none; display: flex; flex-direction: column; 
+          height: 100vh; overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);}
     /* ============== DARK MODE THEME =============== */
     .dark-mode {background: linear-gradient(135deg, var(--dm-bg-gradient-start) 0%, var(--dm-bg-gradient-end) 100%); color: var(--color-text-white);}
     .dark-mode .events-title-header, .dark-mode .back-header {color: var(--dm-text-primary);}
@@ -168,27 +170,28 @@
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
-      if (!corpOperNr) {
-        if (h2) h2.textContent = "Não definido";
-        return;
+      if (!corpOperNr) return;
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) {
+        logoEl.src = cachedLogo;
       }
+      if (h2) h2.textContent = corpOperNr;
       try {
-        const resp = await fetch(
+        const response = await fetch(
           `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
-        const data = await resp.json();
+        const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
-          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
-          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
-        } else {
-          if (h2) h2.textContent = "Não encontrado";
+          if (corp.logo_url && corp.logo_url !== cachedLogo) {
+            localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+            if (logoEl) logoEl.src = corp.logo_url.trim();
+          }
         }
       } catch (err) {
-        console.error('Erro no loadCorpInfo:', err);
-        if (h2) h2.textContent = corpOperNr;
+        console.error('Erro silencioso:', err);
       }
     }
     /* ========================= LOAD EVENTS LIST ========================== */
