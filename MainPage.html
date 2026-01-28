@@ -1,20 +1,53 @@
 <!DOCTYPE html>
-<html lang="pt-PT"> 
+<html lang="pt-PT" style="background-color: #d32f2f;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="prefetch" href="MainPage.html">
+  <link rel="prefetch" href="ScalesView.html">
+  <link rel="prefetch" href="Swaps.html">
+  <link rel="prefetch" href="MainPageEl.html">
+  <link rel="prefetch" href="PiqDisp.html">
+  <link rel="prefetch" href="DecirTeam.html">
+  <link rel="prefetch" href="ExtDisp.html">
+  <link rel="prefetch" href="DispView.html">
+  <link rel="prefetch" href="SolVacat.html">
+  <link rel="prefetch" href="Attendance.html">
+  <link rel="prefetch" href="OnGoingOcr.html">
+  <link rel="prefetch" href="FomioPage.html">
+  <link rel="prefetch" href="Events.html">
+  <link rel="prefetch" href="MissReport.html">
+  <link rel="prefetch" href="Documents.html">
+  <link rel="prefetch" href="Comunic.html">
+  <link rel="prefetch" href="MeteoAdv.html">
+  <link rel="prefetch" href="NoHospital.html">
+  <link rel="prefetch" href="MainPageVe.html">
+  <link rel="prefetch" href="VeicStat.html">
+  <link rel="prefetch" href="VeicSitop.html">
+  <link rel="prefetch" href="Tools.html">
+  <link rel="prefetch" href="GCIncRural.html">
+  <link rel="prefetch" href="DecirTeam.html">
+  <link rel="prefetch" href="InterChat.html">  
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <title>CB360 Mobile</title>
+  <meta name="theme-color" content="#d32f2f">
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('sgo-theme') === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <style>
+  <title>CB360 Mobile</title>  
+  <style>    
     /* ================ RESET & BODY ================ */
-    html {
-    background-color: #d32f2f !important; /* Cor do teu Header */
-}
+    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; user-select: none;
           display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
     /* ================= DARK MODE ================== */
     .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
@@ -51,10 +84,10 @@
     .dark-mode .switch-btn {color: #ddd;}
     /* ================= LIGHT MODE ================= */
     .header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  border-bottom: 2px solid #c62828;
-             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
+             transition: all 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
     .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
     .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
+    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: all 0.3s ease; z-index: 1001;}
     .menu-dots {position: fixed; top: 14px; right: 15px; width: 50px; height: 25px; background: rgba(255, 255, 255, 0.2); border-radius: 6px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 border: 2px solid rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; z-index: 1002; font-size: 16px; color: white;}
     .menu-dots:hover {background: rgba(255, 255, 255, 0.3); transform: scale(1.1);}
@@ -81,7 +114,8 @@
     .theme-toggle .sun-icon, .theme-toggle .moon-icon {position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; transition: all 0.3s ease;}
     .theme-toggle .sun-icon {left: 4px; opacity: 1;}
     .theme-toggle .moon-icon {right: 4px; opacity: 0.5;}
-    .main-content {flex: 1 1 auto; max-height: calc(100dvh - 150px - 0px); display: flex; flex-direction: column; overflow-y: auto; padding-top: 100px; padding-bottom: 0px;}
+    .main-content {flex: 1 1 auto; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); max-height: calc(100dvh - 150px - 0px); display: flex; flex-direction: column; overflow-y: auto; 
+                   padding-top: 100px; padding-bottom: 0px;}
     .main-content::-webkit-scrollbar {display: none;}
     .welcome-box {width: 100%; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin: -65px 0 0 -20px;}
     .welcome-text {text-align: left;}
@@ -147,8 +181,7 @@
     #configModal .menu-btn:hover {background: #1565c0;}
     #passwordChangeContainer {display: flex; flex-direction: column; align-items: center; gap: 10px;}
     #passwordChangeContainer input {width: 100%;}
-    #passwordChangeContainer button.menu-btn {width: auto; align-self: center;}
-    
+    #passwordChangeContainer button.menu-btn {width: auto; align-self: center;}    
     /* =================================================
     MEDIA QUERIES - FULL RESPONSIVENESS
     ================================================= */
@@ -875,12 +908,13 @@
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
-      const titleEl = document.querySelector(".menu-title");
       const logoEl = document.getElementById("corpLogo");
-      if (!corpOperNr) {
-        if (h2) {h2.textContent = "Não definido";}
-        return;
+      if (!corpOperNr) return;
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) {
+        logoEl.src = cachedLogo;
       }
+      if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
           `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
@@ -890,15 +924,13 @@
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
-          if (h2) {h2.textContent = corp.corp_oper_nr || "N/D";}
-          if (logoEl && corp.logo_url) {logoEl.src = corp.logo_url.trim();}
-          if (titleEl && corp.corporation) {titleEl.textContent = formatCorpName(corp.corporation);}
-        } else {
-          if (h2) {h2.textContent = "Não encontrado";}
+          if (corp.logo_url && corp.logo_url !== cachedLogo) {
+            localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+            if (logoEl) logoEl.src = corp.logo_url.trim();
+          }
         }
       } catch (err) {
-        console.error('Erro no loadCorpInfo:', err);
-        if (h2) {h2.textContent = corpOperNr;}
+        console.error('Erro silencioso:', err);
       }
     }
     /* ======================== USERNAME LOADING ========================= */
@@ -1334,4 +1366,3 @@
   </script>
 </body>
 </html>
-
