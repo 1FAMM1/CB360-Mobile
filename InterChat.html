@@ -2,11 +2,11 @@
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <meta name="theme-color" content="#d32f2f">
   <script>
     (function () {
       try {
@@ -21,9 +21,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <style>
     /* ==================== BODY ==================== */
+    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
-          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #d32f2f; min-height: 100vh; user-select: none; display: flex; flex-direction: column; 
+          height: 100vh; height: 100dvh; overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);}
     /* ============= DARK MODE OPTIONS ============== */
     .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
     .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
@@ -54,7 +55,7 @@
     .dark-mode .action-bar-close {color: #f9a825;}
     .dark-mode .action-btn {color: #f9a825;}
     .dark-mode .action-btn:active {background: rgba(249, 168, 37, 0.1);}
-    .dark-mode {--selection-color: #2b5278; }
+    .dark-mode {--selection-color: #2b5278;}
     .dark-mode .message.selected {color: #fff !important;}
     .dark-mode .message.selected .status-checks {color: rgba(255,255,255,0.7) !important;}
     .dark-mode .reply-bar {background: rgba(45, 45, 45, 0.95); border-top: 1px solid #555;}
@@ -104,7 +105,8 @@
     .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px;}
     .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
     .footer strong {color: #ffebee;}
-    .main-content {flex: 1 1 auto; max-height: calc(100dvh - 0px - 0px); display: flex; flex-direction: column; overflow-y: auto; padding-top: 100px; padding-bottom: 0px;}
+    .main-content {flex: 1 1 auto;  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); max-height: calc(100dvh - 0px - 0px); display: flex; flex-direction: column; overflow-y: auto; 
+                   padding-top: 100px; padding-bottom: 0px;}
     .contact-id-info {padding: 10px 20px 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
     #contact-list {display: flex; flex-direction: column; padding: 0 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px;}
     .contact {display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.15); color: #444; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer;
@@ -977,20 +979,32 @@
     /* ======================== CORPORATION DATA ========================= */
     const CorpManager = {
       async loadInfo() {
-        const corpOperNr = Helpers.getCorpNr();
-        const logoEl = document.getElementById("corpLogo");    
+        const corpOperNr = Helpers.getCorpNr() || localStorage.getItem("currentCorpOperNr");
+        const logoEl = document.getElementById("corpLogo");
+        const h2 = document.getElementById("corpInfo");
+        if (!corpOperNr) return;
+        const cachedLogo = localStorage.getItem("cached_logo_url");
+        if (cachedLogo && logoEl) {
+          logoEl.src = cachedLogo;
+        }
+        if (h2) h2.textContent = corpOperNr;
         try {
           const response = await fetch(
-            `${CONFIG.SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`,
-            {headers: Helpers.getSupabaseHeaders()
+            `${CONFIG.SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+              headers: Helpers.getSupabaseHeaders()
             }
-          );      
+          );
           const data = await response.json();
-          if (data && data.length > 0 && logoEl && data[0].logo_url) {
-            logoEl.src = data[0].logo_url.trim();
+          if (data && data.length > 0) {
+            const corp = data[0];
+            const newLogoUrl = corp.logo_url ? corp.logo_url.trim() : null;
+            if (newLogoUrl && newLogoUrl !== cachedLogo) {
+              localStorage.setItem("cached_logo_url", newLogoUrl);
+              if (logoEl) logoEl.src = newLogoUrl;
+            }
           }
         } catch (err) {
-          console.error('Erro no loadCorpInfo:', err);
+          console.error('Erro no CorpManager.loadInfo:', err);
         }
       }
     };
@@ -2458,4 +2472,3 @@
   </script>
 </body>
 </html>
-
