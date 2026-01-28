@@ -237,31 +237,39 @@
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
-      const h2 = document.getElementById("corpInfo");
-      const logoEl = document.getElementById("corpLogo");      
-      if (!corpOperNr) {
-        if (h2) h2.textContent = "Não definido";
-        return;
-      }      
-      try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`,
-          { headers: getSupabaseHeaders() }
-        );        
-        const data = await response.json();        
-        if (data && data.length > 0) {
-          const corp = data[0];
-          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
-          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
-        } else {
-          if (h2) h2.textContent = "Não encontrado";
-        }
-      } catch (err) {
-        console.error('Erro no loadCorpInfo:', err);
-        if (h2) h2.textContent = corpOperNr;
-      }
+    const corpOperNr = localStorage.getItem("currentCorpOperNr");
+    const h2 = document.getElementById("corpInfo");
+    const logoEl = document.getElementById("corpLogo");
+    
+    if (!corpOperNr) return;
+
+    // 1. TENTA CARREGAR LOGO DA CACHE IMEDIATAMENTE
+    const cachedLogo = localStorage.getItem("cached_logo_url");
+    if (cachedLogo && logoEl) {
+        logoEl.src = cachedLogo;
     }
+    if (h2) h2.textContent = corpOperNr;
+
+    // 2. SÓ DEPOIS FAZ O FETCH PARA ATUALIZAR (Background)
+    try {
+        const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`,
+            { headers: getSupabaseHeaders() }
+        );
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+            const corp = data[0];
+            // Se o logo mudou ou não existia na cache, atualiza
+            if (corp.logo_url && corp.logo_url !== cachedLogo) {
+                localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+                if (logoEl) logoEl.src = corp.logo_url.trim();
+            }
+        }
+    } catch (err) {
+        console.error('Erro silencioso:', err);
+    }
+}
     /* ========================== THEME LOADING ========================== */
     function loadTheme() {
       const savedTheme = localStorage.getItem('sgo-theme');
@@ -615,5 +623,6 @@
 </body>
 
 </html>
+
 
 
