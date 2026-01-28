@@ -191,7 +191,7 @@
       const statsBadge = document.getElementById('statsBadge');
       container.innerHTML = '<div class="message loading">A atualizar lista...</div>';
       try {
-        const url = `${SUPABASE_URL}/rest/v1/reports_control?select=report_nr,report_date,report_state&corp_oper_nr=eq.${corpNr}&n_int=eq.${nInt}&report_state=eq.true&order=report_date.desc`;
+        const url = `${SUPABASE_URL}/rest/v1/reports_control?select=report_nr,report_date,report_state&corp_oper_nr=eq.${corpNr}&n_int=eq.${nInt}&report_state=eq.false&order=report_date.desc`;
         const response = await fetch(url, {
           headers: getSupabaseHeaders()
         });
@@ -254,3 +254,4 @@
   </script>
 </body>
 </html>
+
