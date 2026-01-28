@@ -1155,7 +1155,7 @@
         return;
       }
       try {
-        const url = `${SUPABASE_URL}/rest/v1/reports_control?select=id&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nInt}&report_state=is.false`;
+        const url = `${SUPABASE_URL}/rest/v1/reports_control?select=id&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nInt}&report_state=eq.false`;
         const response = await fetch(url, {
           headers: getSupabaseHeaders()
         });
@@ -1334,4 +1334,5 @@
   </script>
 </body>
 </html>
+
 
