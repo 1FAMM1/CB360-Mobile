@@ -18,8 +18,8 @@
     /* ================ RESET & BODY ================ */
     html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gradient-bg-light); min-height: 100vh; user-select: none; display: flex; f
-          lex-direction: column; height: 100vh; overflow: hidden;}
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gradient-bg-light); min-height: 100vh; user-select: none; transition: var(--transition-default);
+          display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
     /* ================= DARK MODE ================== */
     .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
     .dark-mode .stats-card {background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%); border-color: #444;}
@@ -38,7 +38,7 @@
     .dark-mode .modal-body {color: #e0e0e0;}
     .dark-mode .modal-footer {border-top-color: #444;}
     /* =========== LIGHT MODE ================= */
-    .header, .footer {background: var(--gradient-primary); color: white; text-align: center; box-shadow: var(--shadow-default); position: fixed; left: 0; right: 0; z-index: 1000;}
+    .header, .footer {background-color: #d32f2f; color: white; text-align: center; box-shadow: var(--shadow-default); position: fixed; left: 0; right: 0; z-index: 1000;}
     .header {padding: 20px 15px;top: 0; border-bottom: 2px solid var(--primary-red-darker);}
     .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
     .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
@@ -472,6 +472,7 @@
   </script>
 </body>
 </html>
+
 
 
 
