@@ -766,7 +766,7 @@
           const {data: {publicUrl}} = supabaseClient.storage
             .from(CONFIG.STORAGE_BUCKET)
             .getPublicUrl(filePath);      
-          await MessageSender.send(publicUrl);
+          await MessageSender.send("Enviou um áudio", publicUrl);
         } catch (err) {
           console.error("Erro:", err.message);
         }
@@ -2253,50 +2253,6 @@
           BadgeManager.update();
         }
       },  
-      async handleNewMessage(msg) {
-        if (msg.reply_to_message_id) {
-          const {data: replyData} = await supabaseClient
-            .from('chat_messages')
-            .select('id, message, abv_name')
-            .eq('id', msg.reply_to_message_id)
-            .single();      
-          if (replyData) {
-            msg.reply_to_message = replyData;
-          }
-        }    
-        const involved = [msg.n_int, msg.recipient_nint].map(String);    
-        if (AppState.currentChat === 'geral' && msg.recipient_nint === 'geral') {
-          MessageManager.addToDOM(msg, 'geral');      
-          if (String(msg.n_int) !== AppState.currentUserNint && DOM.messages()?.style.display !== 'none') {
-            const currentCorp = Helpers.getCorpNr();
-            const geralContact = document.querySelector('.contact[data-nint="geral"]');
-            const currentBadge = geralContact?.querySelector('.unread-badge');
-            const badgeValue = currentBadge ? currentBadge.textContent : null;        
-            supabaseClient.from('chat_message_reads').insert({message_id: msg.id, n_int: AppState.currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp
-            }).then(() => {
-              if (badgeValue && geralContact) {
-                setTimeout(() => {
-                  let badge = geralContact.querySelector('.unread-badge');
-                  if (!badge) {
-                    badge = document.createElement('div');
-                    badge.className = 'unread-badge';
-                    geralContact.appendChild(badge);
-                  }
-                  badge.textContent = badgeValue;
-                }, 100);
-              }
-            });
-          }
-        } else if (AppState.currentChat !== 'geral' && involved.includes(AppState.currentUserNint) && involved.includes(AppState.currentChat)) {
-          MessageManager.addToDOM(msg, AppState.currentChat);      
-          if (String(msg.recipient_nint) === AppState.currentUserNint) {
-            setTimeout(() => ReadManager.sendReceipt(AppState.currentChat), 100);
-          }
-        }    
-        if (String(msg.n_int) !== AppState.currentUserNint) {
-          BadgeManager.update();
-        }
-      },  
       handleMessageUpdate(msg) {
         const msgElement = Helpers.getMessageElement(msg.id);
         if (!msgElement) return;
@@ -2516,7 +2472,3 @@
   </script>
 </body>
 </html>
-
-
-
-
