@@ -1,122 +1,119 @@
-/* =========================================================
-   CB360 Mobile - Service Worker Completo
-   Otimizado para: Notificações Push + Navegação sem Barra
-   ========================================================= */
+// Força o Service Worker a atualizar-se mal haja uma nova versão
 
-const CACHE_NAME = 'cb360-cache-v1';
+self.addEventListener('install', (e) => {
 
-// Adiciona aqui os teus ficheiros principais para carregamento instantâneo
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  // Se tiveres um ficheiro CSS ou JS comum, coloca-o aqui:
-  // '/style.css',
-  // '/script.js'
-];
-
-// 1. Instalação e Cache Inicial
-self.addEventListener('install', (event) => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('SW: A guardar ficheiros essenciais na cache');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
+
 });
 
-// 2. Ativação e Limpeza de Cache Antiga
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    Promise.all([
-      clients.claim(),
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cache) => {
-            if (cache !== CACHE_NAME) {
-              console.log('SW: A remover cache antiga:', cache);
-              return caches.delete(cache);
-            }
-          })
-        );
-      })
-    ])
-  );
+
+
+self.addEventListener('activate', (e) => {
+
+  e.waitUntil(clients.claim());
+
 });
 
-// 3. O SEGREDO PARA MATAR A BARRA: Intercetar Pedidos (Fetch)
-// Ele tenta entregar da cache primeiro. Se não tiver, vai à rede e guarda para a próxima.
-self.addEventListener('fetch', (event) => {
-  // Apenas intercetamos pedidos do nosso próprio domínio
-  if (event.request.url.includes(self.location.origin)) {
-    event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          // Entrega imediata da cache (A barra não tem tempo de aparecer)
-          return cachedResponse;
-        }
 
-        return fetch(event.request).then((networkResponse) => {
-          // Se for um ficheiro válido, guarda na cache para o próximo clique
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return networkResponse;
-        }).catch(() => {
-          // Se estiver offline e sem cache, podes retornar uma página de erro aqui
-        });
-      })
-    );
-  }
-});
 
-/* =========================================================
-   GESTÃO DE NOTIFICAÇÕES PUSH (O teu código original)
-   ========================================================= */
+// Evento de Receção da Notificação
 
 self.addEventListener('push', function(event) {
+
   let data = { title: 'CB360 Mobile', message: 'Nova atualização no sistema!' };
 
+
+
   try {
+
     if (event.data) {
+
+      // Tenta ler como JSON, se falhar vai para o catch
+
       data = event.data.json();
+
     }
+
   } catch (err) {
+
+    // Se o envio não for JSON (ex: texto simples), assume como a mensagem
+
     data.message = event.data.text();
+
   }
 
+
+
   const options = {
+
     body: data.message || data.body || 'Tens uma nova mensagem.',
+
     icon: '/icon-192.png',
+
     vibrate: [200, 100, 200, 100, 200],
+
     data: {
+
       url: data.url || '/'
+
     },
+
+    // No iOS, estas tags ajudam a agrupar notificações
+
     tag: 'cb360-notification',
+
     renotify: true
+
   };
 
+
+
+  const title = data.title || 'CB360 Mobile';
+
+
+
   event.waitUntil(
-    self.registration.showNotification(data.title || 'CB360 Mobile', options)
+
+    self.registration.showNotification(title, options)
+
   );
+
 });
 
+
+
+// Evento de Clique na Notificação
+
 self.addEventListener('notificationclick', function(event) {
+
   event.notification.close();
+
+
+
+  // Tenta focar numa janela aberta ou abrir uma nova
+
   event.waitUntil(
+
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+
       for (const client of clientList) {
+
         if (client.url === '/' && 'focus' in client) {
+
           return client.focus();
+
         }
+
       }
+
       if (clients.openWindow) {
+
         return clients.openWindow(event.notification.data.url || '/');
+
       }
+
     })
+
   );
+
 });
