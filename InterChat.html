@@ -1408,60 +1408,84 @@
     };
     /* ========================= MESSAGE SENDER ========================== */
     const MessageSender = {
-      async send(audioText = null, audioUrl = null) {
-        const inputEl = DOM.chatInput();
-        const sendBtn = document.getElementById("chat-send-btn");
-        const text = audioText || inputEl.value.trim();
-        if (!text && !audioUrl) return;
-        sendBtn.disabled = true;
-        if (typeof EditManager !== 'undefined' && EditManager.editingMessageId && !audioUrl) {
-          try {
-            const {error} = await supabaseClient
-            .from('chat_messages')
-            .update({
-              message: text,
-              edited_at: new Date().toISOString() 
-            })
-            .eq('id', EditManager.editingMessageId);
-            if (error) throw error;
-            inputEl.value = '';
-            inputEl.dispatchEvent(new Event('input', {bubbles: true}));
-            EditManager.finish();
-          } catch (err) {
-            console.error("Erro ao editar:", err);
-          } finally {
-            sendBtn.disabled = false;
-          }
-          return;
-        }
-        if (!audioUrl) {
-          inputEl.value = "";
-          LayoutManager.resetLayout();
-          inputEl.dispatchEvent(new Event('input'));
-        }
-        const currentCorp = Helpers.getCorpNr();
-        const senderName = await UserManager.fetchName();
-        const messageData = {n_int: AppState.currentUserNint, recipient_nint: AppState.currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text, 
-                             file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};
-        if (AppState.currentReplyToMessage) {
-          messageData.reply_to_message_id = AppState.currentReplyToMessage.id;
-        }
-        const { error } = await supabaseClient.from('chat_messages').insert([messageData]);
-        if (!error) {
-          const isGeral = AppState.currentChat === 'geral';
-          fetch('/api/sendPush', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({recipient_nint: AppState.currentChat, corp_nr: Helpers.getCorpNr(), sender_name: senderName, message_text: text || "Enviou um áudio 🎤",
-                                  sender_nint: AppState.currentUserNint})
-          }).catch(err => console.error("Erro no push:", err));
-        }
-        if (AppState.currentReplyToMessage) {
-          ReplyManager.cancel();
-        }    
+  async send(audioText = null, audioUrl = null) {
+    const inputEl = DOM.chatInput();
+    const sendBtn = document.getElementById("chat-send-btn");
+    const text = audioText || inputEl.value.trim();
+    if (!text && !audioUrl) return;
+    sendBtn.disabled = true;
+    if (typeof EditManager !== 'undefined' && EditManager.editingMessageId && !audioUrl) {
+      try {
+        const {error} = await supabaseClient
+        .from('chat_messages')
+        .update({
+          message: text,
+          edited_at: new Date().toISOString() 
+        })
+        .eq('id', EditManager.editingMessageId);
+        if (error) throw error;
+        inputEl.value = '';
+        inputEl.dispatchEvent(new Event('input', {bubbles: true}));
+        EditManager.finish();
+      } catch (err) {
+        console.error("Erro ao editar:", err);
+      } finally {
         sendBtn.disabled = false;
       }
+      return;
+    }
+    if (!audioUrl) {
+      inputEl.value = "";
+      LayoutManager.resetLayout();
+      inputEl.dispatchEvent(new Event('input'));
+    }
+    const currentCorp = Helpers.getCorpNr();
+    const senderName = await UserManager.fetchName();
+    const messageData = {
+      n_int: AppState.currentUserNint, 
+      recipient_nint: AppState.currentChat, 
+      corp_oper_nr: currentCorp, 
+      abv_name: senderName, 
+      message: text, 
+      file_url: audioUrl, 
+      message_type: audioUrl ? 'audio' : 'text',
+      created_at: new Date().toISOString() // 🔥 ADICIONA ISTO
     };
+    if (AppState.currentReplyToMessage) {
+      messageData.reply_to_message_id = AppState.currentReplyToMessage.id;
+    }
+    
+    const { data, error } = await supabaseClient // 🔥 MUDA PARA "data"
+      .from('chat_messages')
+      .insert([messageData])
+      .select() // 🔥 ADICIONA ISTO para receber a mensagem inserida
+      .single(); // 🔥 ADICIONA ISTO
+    
+    // 🔥 ADICIONA ESTE BLOCO COMPLETO
+    if (!error && data) {
+      MessageManager.addToDOM(data, AppState.currentChat);
+    }
+    
+    if (!error) {
+      const isGeral = AppState.currentChat === 'geral';
+      fetch('/api/sendPush', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipient_nint: AppState.currentChat, 
+          corp_nr: Helpers.getCorpNr(), 
+          sender_name: senderName, 
+          message_text: text || "Enviou um áudio 🎤",
+          sender_nint: AppState.currentUserNint
+        })
+      }).catch(err => console.error("Erro no push:", err));
+    }
+    if (AppState.currentReplyToMessage) {
+      ReplyManager.cancel();
+    }    
+    sendBtn.disabled = false;
+  }
+};
     /* ========================== READ MANAGER =========================== */
     const ReadManager = {
       async markGeralAsRead() {
@@ -2253,168 +2277,172 @@
           BadgeManager.update();
         }
       },  
+      async handleNewMessage(msg) {
+        if (msg.reply_to_message_id) {
+          const {data: replyData} = await supabaseClient
+            .from('chat_messages')
+            .select('id, message, abv_name')
+            .eq('id', msg.reply_to_message_id)
+            .single();      
+          if (replyData) {
+            msg.reply_to_message = replyData;
+          }
+        }    
+        const involved = [msg.n_int, msg.recipient_nint].map(String);    
+        if (AppState.currentChat === 'geral' && msg.recipient_nint === 'geral') {
+          MessageManager.addToDOM(msg, 'geral');      
+          if (String(msg.n_int) !== AppState.currentUserNint && DOM.messages()?.style.display !== 'none') {
+            const currentCorp = Helpers.getCorpNr();
+            const geralContact = document.querySelector('.contact[data-nint="geral"]');
+            const currentBadge = geralContact?.querySelector('.unread-badge');
+            const badgeValue = currentBadge ? currentBadge.textContent : null;        
+            supabaseClient.from('chat_message_reads').insert({message_id: msg.id, n_int: AppState.currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp
+            }).then(() => {
+              if (badgeValue && geralContact) {
+                setTimeout(() => {
+                  let badge = geralContact.querySelector('.unread-badge');
+                  if (!badge) {
+                    badge = document.createElement('div');
+                    badge.className = 'unread-badge';
+                    geralContact.appendChild(badge);
+                  }
+                  badge.textContent = badgeValue;
+                }, 100);
+              }
+            });
+          }
+        } else if (AppState.currentChat !== 'geral' && involved.includes(AppState.currentUserNint) && involved.includes(AppState.currentChat)) {
+          MessageManager.addToDOM(msg, AppState.currentChat);      
+          if (String(msg.recipient_nint) === AppState.currentUserNint) {
+            setTimeout(() => ReadManager.sendReceipt(AppState.currentChat), 100);
+          }
+        }    
+        if (String(msg.n_int) !== AppState.currentUserNint) {
+          BadgeManager.update();
+        }
+      },  
       handleMessageUpdate(msg) {
-  const msgElement = Helpers.getMessageElement(msg.id);
-  if (!msgElement) return;
-
-  const clearSelectionUI = () => {
-    const sel = window.getSelection?.();
-    if (sel) sel.removeAllRanges();
-
-    document.querySelectorAll('.message').forEach(m => {
-      m.classList.remove(
-        'selected', 'editing', 'active', 'highlight',
-        'pressing', 'pressed', 'context-open', 'menu-open', 'is-selected'
-      );
-      m.removeAttribute('data-selected');
-      m.removeAttribute('aria-selected');
-    });
-
-    msgElement.querySelectorAll('.selected, .is-selected')
-      .forEach(el => el.classList.remove('selected', 'is-selected'));
-
-    document
-      .querySelectorAll('.context-menu, .message-menu, .message-actions, .msg-actions-bar, .action-sheet, .popover')
-      .forEach(el => el.remove());
-
-    if (typeof AppState !== 'undefined' && AppState) {
-      const keysToNull = [
-        'editingMessageId', 'selectedMessageId', 'selectedMessage',
-        'longPressMessageId', 'contextMessageId', 'activeMessageId', 'menuMessageId'
-      ];
-      keysToNull.forEach(k => { if (k in AppState) AppState[k] = null; });
-      if ('isSelecting' in AppState) AppState.isSelecting = false;
-      if ('isEditing' in AppState) AppState.isEditing = false;
-    }
-
-    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    document.body.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-    if (document.activeElement && typeof document.activeElement.blur === 'function') {
-      document.activeElement.blur();
-    }
-  };
-
-  // Apagada
-  if (msg.deleted_at) {
-    msgElement.classList.add('deleted');
-    const textContent = msgElement.querySelector('.msg-text-content');
-    if (textContent) {
-      textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
-    }
-    msgElement.querySelector('.message-reactions')?.remove();
-    msgElement.querySelector('.star-icon')?.remove();
-    clearSelectionUI();
-    return;
-  }
-
-  // Hora
-  const timeEl = msgElement.querySelector('.msg-time');
-  const t = msg.edited_at || msg.updated_at || msg.created_at;
-  if (timeEl && t) {
-    timeEl.textContent = Helpers.formatTime(t);
-  }
-
-  // Tag "editada"
-  let editTag = msgElement.querySelector('.message-edited-tag');
-  if (msg.edited_at) {
-    if (!editTag) {
-      const metaDiv = msgElement.querySelector('.msg-meta');
-      if (metaDiv) {
-        editTag = document.createElement('span');
-        editTag.className = 'message-edited-tag';
-        editTag.textContent = 'Editada: ';
-        metaDiv.insertBefore(editTag, metaDiv.firstChild);
+        const msgElement = Helpers.getMessageElement(msg.id);
+        if (!msgElement) return;
+        const clearSelectionUI = () => {
+          const sel = window.getSelection?.();
+          if (sel) sel.removeAllRanges();
+          document.querySelectorAll('.message').forEach(m => {
+            m.classList.remove('selected', 'editing', 'active', 'highlight', 'pressing', 'pressed', 'context-open', 'menu-open', 'is-selected');
+            m.removeAttribute('data-selected');
+            m.removeAttribute('aria-selected');
+          });
+          msgElement.querySelectorAll('.selected, .is-selected').forEach(el => el.classList.remove('selected', 'is-selected'));
+          document
+            .querySelectorAll('.context-menu, .message-menu, .message-actions, .msg-actions-bar, .action-sheet, .popover')
+            .forEach(el => el.remove());
+          if (typeof AppState !== 'undefined' && AppState) {
+            const keysToNull = ['editingMessageId', 'selectedMessageId', 'selectedMessage', 'longPressMessageId', 'contextMessageId', 'activeMessageId', 'menuMessageId'];
+            keysToNull.forEach(k => {
+              if (k in AppState) AppState[k] = null;
+            });
+            if ('isSelecting' in AppState) AppState.isSelecting = false;
+            if ('isEditing' in AppState) AppState.isEditing = false;
+          }
+          document.body.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+          document.body.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
+          document.body.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+          if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+          }
+        };
+        if (msg.deleted_at) {
+          msgElement.classList.add('deleted');
+          const textContent = msgElement.querySelector('.msg-text-content');
+          if (textContent) {
+            textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
+          }
+          msgElement.querySelector('.message-reactions')?.remove();
+          msgElement.querySelector('.star-icon')?.remove();
+          clearSelectionUI();
+          return;
+        }
+        const timeEl = msgElement.querySelector('.msg-time');
+        const t = msg.edited_at || msg.updated_at || msg.created_at;
+        if (timeEl && t) {
+          timeEl.textContent = Helpers.formatTime(t);
+        }
+        let editTag = msgElement.querySelector('.message-edited-tag');
+        if (msg.edited_at) {
+          if (!editTag) {
+            const metaDiv = msgElement.querySelector('.msg-meta');
+            if (metaDiv) {
+              editTag = document.createElement('span');
+              editTag.className = 'message-edited-tag';
+              editTag.textContent = 'Editada: ';
+              metaDiv.insertBefore(editTag, metaDiv.firstChild);
+            }
+          } else {
+            editTag.style.display = 'inline';
+          }
+        } else if (editTag) {
+          editTag.style.display = 'none';
+        }
+        const textContent = msgElement.querySelector('.msg-text-content');
+        if (textContent) {
+          if (msg.message_type === 'image' && msg.file_url) {
+            let img = textContent.querySelector('img.chat-img');
+            if (!img) {
+              textContent.innerHTML = MessageManager.buildMessageContent(msg, false);
+            } else {
+              img.src = msg.file_url;
+              img.dataset.url = msg.file_url;
+            }      
+            const caption = textContent.querySelector('.img-caption');
+            const newCaption = (msg.message || '').trim();
+            if (newCaption) {
+              if (caption) caption.textContent = newCaption;
+              else textContent.insertAdjacentHTML('beforeend', `<div class="img-caption"></div>`);
+              textContent.querySelector('.img-caption').textContent = newCaption;
+            } else {
+              caption?.remove();
+            }
+          }
+          else if (msg.message_type === 'file') {
+          } else {
+            textContent.textContent = msg.message || '';
+          }
+          textContent.style.transition = "background 0.5s";
+          textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
+          setTimeout(() => (textContent.style.backgroundColor = "transparent"), 1000);
+        }
+        if (msg.reactions !== undefined) {
+          msgElement.querySelector('.message-reactions')?.remove();      
+          const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
+          const anchor = msgElement.querySelector('.msg-text-content');
+          if (newReactionsHTML && anchor) {
+            anchor.insertAdjacentHTML('afterend', newReactionsHTML);
+          }
+        }
+        if (msg.starred_by !== undefined) {
+          msgElement.querySelector('.star-icon')?.remove();      
+          const isStarred = msg.starred_by && msg.starred_by.includes(AppState.currentUserNint);
+          if (isStarred) {
+            const anchor = msgElement.querySelector('.msg-text-content');
+            if (anchor) {
+              anchor.insertAdjacentHTML(
+                'afterend',
+                '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
+              );
+            }
+          }
+        }
+        if (msg.read_at && String(msg.n_int) === AppState.currentUserNint) {
+          const checkEl = document.getElementById(`check-${msg.id}`);
+          if (checkEl) {
+            checkEl.classList.remove('sent', 'delivered');
+            checkEl.classList.add('read');
+            checkEl.textContent = 'done_all';
+          }
+        }
+        clearSelectionUI();
       }
-    } else {
-      editTag.style.display = 'inline';
-    }
-  } else if (editTag) {
-    editTag.style.display = 'none';
-  }
-
-  // ✅ Conteúdo
-  const textContent = msgElement.querySelector('.msg-text-content');
-  if (textContent) {
-    if (msg.message_type === 'image' && msg.file_url) {
-      let img = textContent.querySelector('img.chat-img');
-      if (!img) {
-        textContent.innerHTML = MessageManager.buildMessageContent(msg, false);
-      } else {
-        img.src = msg.file_url;
-        img.dataset.url = msg.file_url;
-      }
-
-      const caption = textContent.querySelector('.img-caption');
-      const newCaption = (msg.message || '').trim();
-      if (newCaption) {
-        if (caption) caption.textContent = newCaption;
-        else textContent.insertAdjacentHTML('beforeend', `<div class="img-caption"></div>`);
-        textContent.querySelector('.img-caption').textContent = newCaption;
-      } else {
-        caption?.remove();
-      }
-    }
-
-    // ✅ FILE: no teu código estava vazio — se vier UPDATE, re-renderiza
-    else if (msg.message_type === 'file') {
-      textContent.innerHTML = MessageManager.buildMessageContent(msg, false);
-    }
-
-    // ✅ AUDIO: ESTE É O FIX — não substituir por texto no UPDATE
-    else if (msg.message_type === 'audio') {
-      textContent.innerHTML = MessageManager.buildMessageContent(msg, false);
-    }
-
-    // Texto normal
-    else {
-      textContent.textContent = msg.message || '';
-    }
-
-    textContent.style.transition = "background 0.5s";
-    textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
-    setTimeout(() => (textContent.style.backgroundColor = "transparent"), 1000);
-  }
-
-  // Reações
-  if (msg.reactions !== undefined) {
-    msgElement.querySelector('.message-reactions')?.remove();
-    const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
-    const anchor = msgElement.querySelector('.msg-text-content');
-    if (newReactionsHTML && anchor) {
-      anchor.insertAdjacentHTML('afterend', newReactionsHTML);
-    }
-  }
-
-  // Estrela
-  if (msg.starred_by !== undefined) {
-    msgElement.querySelector('.star-icon')?.remove();
-    const isStarred = msg.starred_by && msg.starred_by.includes(AppState.currentUserNint);
-    if (isStarred) {
-      const anchor = msgElement.querySelector('.msg-text-content');
-      if (anchor) {
-        anchor.insertAdjacentHTML(
-          'afterend',
-          '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
-        );
-      }
-    }
-  }
-
-  // Checks de leitura
-  if (msg.read_at && String(msg.n_int) === AppState.currentUserNint) {
-    const checkEl = document.getElementById(`check-${msg.id}`);
-    if (checkEl) {
-      checkEl.classList.remove('sent', 'delivered');
-      checkEl.classList.add('read');
-      checkEl.textContent = 'done_all';
-    }
-  }
-
-  clearSelectionUI();
-}
-
+    };
     /* ========================= EVENT LISTENERS ========================= */
     const EventListeners = {
       init() {
@@ -2512,5 +2540,6 @@
   </script>
 </body>
 </html>
+
 
 
