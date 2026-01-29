@@ -1,44 +1,43 @@
 document.addEventListener('click', async (e) => {
+    // 1. Procura se o clique foi num link <a>
     const link = e.target.closest('a');
     
-    // Verifica se o link é válido e interno
-    if (!link || !link.href || !link.href.startsWith(window.location.origin) || link.target === '_blank') return;
+    // 2. Filtra: tem de ser um link interno e não pode ser para abrir em nova aba
+    if (!link || !link.href.includes(window.location.origin) || link.target === '_blank') return;
 
-    e.preventDefault(); 
-    e.stopPropagation(); // Impede que outros scripts forcem a navegação
+    // 3. PARA TUDO: Impede o browser de navegar (e de mostrar a barra!)
+    e.preventDefault();
 
     const url = link.href;
 
     try {
+        // 4. Vai buscar o HTML da nova página via rede (sempre fresco, sem cache)
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Falha ao carregar');
+        const html = await response.text();
         
-        const text = await response.text();
+        // 5. Transforma o texto em HTML real
         const parser = new DOMParser();
-        const newDoc = parser.parseFromString(text, 'text/html');
+        const newDoc = parser.parseFromString(html, 'text/html');
 
-        // Em vez de mudar o BODY todo (que causa o piscar/barra)
-        // Muda apenas o que está dentro do teu container de conteúdo
-        // Se usas uma div para o conteúdo, troca 'main' pelo ID dela
-        const oldContent = document.querySelector('main'); 
-        const newContent = newDoc.querySelector('main');
+        // 6. Troca o conteúdo (Mantém o Header/Footer se quiseres, ou troca tudo)
+        // Se o teu conteúdo principal estiver numa div id="app", troca apenas essa
+        document.body.innerHTML = newDoc.body.innerHTML;
 
-        if (oldContent && newContent) {
-            oldContent.innerHTML = newContent.innerHTML;
-            
-            // Atualiza o título do Header sem destruir o Header
-            const newTitle = newDoc.querySelector('.header h1');
-            if (newTitle) document.querySelector('.header h1').innerText = newTitle.innerText;
-        } else {
-            // Se não encontrar os seletores, troca o body como plano B
-            document.body.innerHTML = newDoc.body.innerHTML;
-        }
+        // 7. Atualiza a URL lá em cima para o utilizador saber onde está
+        window.history.pushState({ path: url }, '', url);
 
-        window.history.pushState({}, '', url);
+        // 8. Move o scroll para o topo
         window.scrollTo(0, 0);
 
+        console.log('Navegação concluída sem recarregamento de página.');
+
     } catch (err) {
-        console.error('Erro na transição:', err);
-        window.location.href = url; // Se falhar, faz a navegação normal
+        // Se a internet falhar, ele faz a navegação normal como segurança
+        window.location.href = url;
     }
-}, true); // O 'true' aqui é importante para capturar o clique antes de outros
+});
+
+// Garante que o botão "Voltar" do telemóvel funciona corretamente
+window.onpopstate = () => {
+    window.location.reload(); 
+};
