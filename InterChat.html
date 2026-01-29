@@ -766,7 +766,7 @@
           const {data: {publicUrl}} = supabaseClient.storage
             .from(CONFIG.STORAGE_BUCKET)
             .getPublicUrl(filePath);      
-          await MessageSender.send("Enviou um áudio", publicUrl);
+          await MessageSender.send(publicUrl);
         } catch (err) {
           console.error("Erro:", err.message);
         }
@@ -2472,3 +2472,4 @@
   </script>
 </body>
 </html>
+
