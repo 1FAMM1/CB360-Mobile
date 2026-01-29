@@ -8,16 +8,6 @@
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
   <meta name="theme-color" content="#d32f2f">
   <meta name="view-transition" content="same-origin" />
-  <script>
-    (function () {
-      try {
-        if (localStorage.getItem('sgo-theme') === 'dark') {
-          document.documentElement.classList.add('dark-mode');
-        }
-      } catch (e) {}
-    })();
-  </script>
-  <title>CB360_CHAT_INTERNO</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <style>
@@ -328,7 +318,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="Logo" src="https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Mark_Logo_White.png">
     <h1>CHAT INTERNO</h1>
     <div class="header-subtitle">CHAT DE CONVERSAÇÃO INTERNA</div>
   </header> 
@@ -364,7 +354,7 @@
   <div class="chat-input-bar">
     <div class="input-wrapper">
       <button id="emoji-open-btn" type="button"><span class="material-icons">sentiment_satisfied_alt</span></button>
-      <textarea id="chat-input" placeholder="Mensagem" autocomplete="off" rows="1"></textarea>
+      <input type="text" id="chat-input" placeholder="Mensagem" autocomplete="off" />    
       <button id="attachment-btn" type="button"><span class="material-icons">attach_file</span></button>    
       <button id="camera-btn" type="button"><span class="material-icons">photo_camera</span></button>
     </div>
@@ -424,650 +414,366 @@
     </div>
   </div>
   <div id="full-emoji-picker-container">
-    <emoji-picker locale="pt" class="light"></emoji-picker>
+    <emoji-picker locale="pt" class="light"></emoji-picker
   </div>
-  <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;"/>
-  <input type="file" id="doc-file-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,image/*" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;" />
-  <div id="attach-modal" class="attach-modal">
-    <div class="attach-card">
-      <div class="attach-header">
-        <span>Enviar Foto</span>
-        <button id="attach-cancel" class="attach-x" type="button">✕</button>
-      </div>
-      <div class="attach-preview">
-        <img id="attach-preview-img" src="" alt="preview" />
-        <div id="attach-loading" class="attach-loading">A enviar...</div>
-      </div>
-      <div class="attach-footer">
-        <input id="attach-caption" type="text" placeholder="Adicione uma legenda..." autocomplete="off" />
-        <button id="attach-send" type="button">Enviar</button>
-      </div>
-    </div>
-  </div>
+      <input
+  type="file"
+  id="camera-file-input"
+  accept="image/*"
+  capture="environment"
+  style="display:none"
+/>
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    (function () {
-      function setVH() {
-        document.documentElement.style.setProperty(
-          '--vh',
-          (window.innerHeight * 0.01) + 'px'
-        );
-      }
-      window.addEventListener('resize', setVH);
-      window.addEventListener('orientationchange', setVH);
-      setVH();
-    })();
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    if (window['pdfjs-dist/build/pdf']) {
-      window.pdfjsLib = window['pdfjs-dist/build/pdf'];
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
-  </script>
-  <script>
+(function () {
+  function setVH() {
+    document.documentElement.style.setProperty(
+      '--vh',
+      (window.innerHeight * 0.01) + 'px'
+    );
+  }
+  window.addEventListener('resize', setVH);
+  window.addEventListener('orientationchange', setVH);
+  setVH();
+})();
+</script>
+  <script> 
     /* ===================== SUPABASE CONFIGURATION ====================== */
-    const CONFIG = {
-      SUPABASE_URL: 'https://rjkbodfqsvckvnhjwmhg.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0',
-      DEFAULT_CORP: '',
-      DEFAULT_NINT: '',
-      STORAGE_BUCKET: 'cb_files',
-      KEYBOARD_THRESHOLD: {OPEN_IOS: 80, OPEN_ANDROID: 120, CLOSE_IOS: 40, CLOSE_ANDROID: 60},
-      AVATAR_COLORS: {'A': '#f44336', 'B': '#e91e63', 'C': '#9c27b0', 'D': '#673ab7', 'E': '#3f51b5', 'F': '#2196f3', 'G': '#03a9f4', 'H': '#00bcd4', 
-                      'I': '#009688', 'J': '#4caf50', 'K': '#8bc34a', 'L': '#cddc39', 'M': '#ffeb3b', 'N': '#ffc107', 'O': '#ff9800', 'P': '#ff5722',
-                      'Q': '#795548', 'R': '#9e9e9e', 'S': '#60727b', 'T': '#333333', 'U': '#ff4081', 'V': '#7c4dff', 'W': '#536dfe', 'X': '#448aff', 
-                      'Y': '#00e676', 'Z': '#cfd8dc'}};
-    /* ======================== GLOBAL CONSTANTS ========================= */
-    const AppState = {
-      currentChat: 'null',
-      currentChatName: '',
-      lastDateLabel: '',
-      totalTeam: 0,
-      currentReplyToMessage: null,
-      currentEditingMessage: null,
-      selectedMessages: [],
-      messagesToForward: [],
-      reactionTargetId: null,
-      mediaRecorder: null,
-      audioChunks: [],
-      isRecording: false,
-      recordTimeout: null,
-      confirmResolver: null,
-      currentUserNint: String(localStorage.getItem("currentCorpNint") || CONFIG.DEFAULT_NINT),  
-      reset() {
-        this.selectedMessages = [];
-        this.currentReplyToMessage = null;
-        this.currentEditingMessage = null;
-        this.reactionTargetId = null;
-      }
-    };
-    /* ====================== HELPERS AND UTILITIES ====================== */
-    const Helpers = {
-      getCorpNr: () => localStorage.getItem("currentCorpOperNr") || CONFIG.DEFAULT_CORP,  
-      getUserNint: () => localStorage.getItem("currentCorpNint") || CONFIG.DEFAULT_NINT,  
-      isChatActive: (chat = AppState.currentChat) => chat && chat !== 'null',  
-      getMessageElement: (id) => document.querySelector(`[data-message-id="${id}"]`),  
-      getSupabaseHeaders: (options = {}) => {
-        const headers = {
-          'apikey': CONFIG.SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-          'x-my-corpo': Helpers.getCorpNr(),
-          'x-my-nint': Helpers.getUserNint()
-        };
-        if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
-        return headers;
-      },  
-      escapeHtml: (text) => {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-      },  
-      formatTime: (date) => {
-        return new Date(date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      },  
-      getDateLabel: (date) => {
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
-        if (date.toDateString() === today.toDateString()) return "Hoje";
-        if (date.toDateString() === yesterday.toDateString()) return "Ontem";
-        return date.toLocaleDateString('pt-PT', {day: '2-digit', month: '2-digit', year: 'numeric'});
-      }
-    };
-    /* ========================== DOM HELPERS ============================ */
-    const DOM = {
-      messages: () => document.getElementById("messages"),
-      contactList: () => document.getElementById("contact-list"),
-      contactTitle: () => document.getElementById("contact-title"),
-      chatIdInfo: () => document.getElementById("chat-id-info"),
-      backHeader: () => document.getElementById("back-header"),
-      pinnedMessage: () => document.getElementById("pinned-message"),
-      inputBar: () => document.querySelector(".chat-input-bar"),
-      chatInput: () => document.getElementById("chat-input"),
-      typingStatus: () => document.getElementById("typing-status"),
-      actionBar: () => document.getElementById("action-bar"),
-      reactionMenu: () => document.getElementById("reaction-menu"),
-      emojiContainer: () => document.getElementById("full-emoji-picker-container")
-    };
-    /* ===================== SUPABASE INITIALIZATION ===================== */
-    const supabaseClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-    /* ================== VIEWPORT MANAGEMENT (PWA FIX) ================== */
-    (function initViewport() {
-      function setVH() {
-        document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
-      }
-      window.addEventListener('resize', setVH);
-      window.addEventListener('orientationchange', setVH);
-      setVH();
-    })();
-    /* ======================= IMAGE MENU HANDLER ======================== */
-    const ImageHandler = {
-      init() {
-        document.addEventListener('click', (e) => {
-          const img = e.target.closest('.chat-img');
-          if (!img) return;
-          e.preventDefault();
-          e.stopPropagation();
-          window.location.href = img.dataset.url;
-        });        
-        document.addEventListener('contextmenu', (e) => {
-          if (e.target.closest('.chat-img')) e.preventDefault();
-        });
-      }
-    };
-   /* ======================= CHAT INPUT HANDLER ======================== */
-    const ChatInputHandler = {
-      init() {
-        const chatInput = DOM.chatInput();
-        if (!chatInput) return;
-        chatInput.addEventListener('input', () => {
-          chatInput.style.height = 'auto';
-          chatInput.style.height = (chatInput.scrollHeight) + 'px';
-          DOM.messages()?.scrollTo(0, DOM.messages().scrollHeight);
-          this.toggleSendButton();
-        });
-      },
-      toggleSendButton() {
-        const chatInput = DOM.chatInput();
-        const cameraBtn = document.getElementById('camera-btn');
-        const sendBtn = document.getElementById('send-btn');
-        if (!chatInput || !cameraBtn || !sendBtn) return;
-        if (chatInput.value.trim().length > 0) {
-          cameraBtn.style.display = 'none';
-          sendBtn.style.display = 'flex';
-        } else {
-          cameraBtn.style.display = 'flex';
-          sendBtn.style.display = 'none';
-        }
-      }
-    };
-    /* ========================= LAYOUT MANAGER ========================== */
-    const LayoutManager = {
-      resetLayout() {
-        const emojiContainer = DOM.emojiContainer();
-        const inputBar = DOM.inputBar();
-        const messageContainer = DOM.messages();        
-        emojiContainer.style.display = 'none';
-        inputBar.style.removeProperty('bottom');
-        messageContainer.style.removeProperty('margin-bottom');        
-        setTimeout(() => ScrollManager.toBottom(), 100);
-      },      
-      scrollToBottom() {
-        const messagesEl = DOM.messages();
-        if (messagesEl && messagesEl.style.display !== 'none') {
-          setTimeout(() => {
-            messagesEl.scrollTo({
-              top: messagesEl.scrollHeight,
-              behavior: 'smooth'
-            });
-          }, 50);
-        }
-      }
-    };
-    /* ========================= SCROLL MANAGER ========================== */
-    const ScrollManager = {
-      toBottom() {
-        LayoutManager.scrollToBottom();
-      },  
-      toMessage(messageId) {
-        const msgElement = Helpers.getMessageElement(messageId);
-        if (msgElement) {
-          msgElement.scrollIntoView({behavior: 'smooth', block: 'center'});
-          msgElement.style.background = 'rgba(188, 217, 255, 0.5)';
-          setTimeout(() => {msgElement.style.background = '';}, 1500);
-        }
-      }
-    };
-    /* ======================== TYPING INDICATOR ========================= */
-    const TypingIndicator = {
-      init() {
-        const inputMensage = DOM.chatInput();
-        const inputBar = DOM.inputBar();
-        const iconBtn = document.getElementById('send-icon');
-        const emojiBtn = document.getElementById('emoji-open-btn');
-        const emojiContainer = DOM.emojiContainer();
-        const picker = document.querySelector('emoji-picker');
-        const messageContainer = DOM.messages();    
-        inputMensage.addEventListener('input', function() {
-          const hasText = this.value.trim().length > 0;
-          const novoIcone = hasText ? 'send' : 'mic';      
-          if (iconBtn.textContent !== novoIcone) {
-            iconBtn.style.transform = 'rotate(180deg) scale(0)';
-            iconBtn.style.opacity = '0';        
-            setTimeout(() => {
-              iconBtn.textContent = novoIcone;
-              iconBtn.style.transform = 'rotate(0deg) scale(1)';
-              iconBtn.style.opacity = '1';          
-              if (hasText) {
-                inputBar.classList.add('typing');
-              } else {
-                inputBar.classList.remove('typing');
-              }
-            }, 150);
-          }
-        });    
-        emojiBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          if (emojiContainer.style.display === 'block') {
-            LayoutManager.resetLayout();
-            inputMensage.focus();
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);    
+    /* ======================== GLOBAL VARIABLES ========================= */
+    let currentChat = 'null';
+    let currentChatName = '';
+    let lastDateLabel = "";
+    let totalTeam = 0;
+    let currentReplyToMessage = null;
+    let currentEditingMessage = null;
+    let selectedMessages = [];
+    let messagesToForward = [];
+    let reactionTargetId = null;
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+    let recordTimeout;
+    let recordingTimer;
+    const currentUserNint = String(localStorage.getItem("currentCorpNint") || "205");
+    function getSupabaseHeaders(options = {}) {
+      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint
+      };
+      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
+      return headers;
+    }
+    /* ======================= FUNCTION FIX LAYOUT ======================= */
+    function adjustMainContent() {
+      const main = document.querySelector('.main-content');
+      const header = document.querySelector('.header');
+      const footer = document.querySelector('.footer');
+      if (!main) return;
+      const alturaViewport = window.innerHeight;
+      const headerHeight = header?.offsetHeight || 0;
+      const footerHeight = footer?.offsetHeight || 0;
+      const extra = 100;
+      const alturaMain = alturaViewport - headerHeight - footerHeight + extra;
+      main.style.height = alturaMain + 'px';
+      main.style.maxHeight = alturaMain + 'px';
+    }    
+    window.addEventListener('load', adjustMainContent);
+    window.addEventListener('resize', adjustMainContent);
+    window.addEventListener('pageshow', adjustMainContent);
+    /* ================== TYPING BAR & EMOJI CONTROLER =================== */
+    const inputMensage = document.getElementById('chat-input');
+    const barraDeInput = document.querySelector('.chat-input-bar');
+    const iconBtn = document.getElementById('send-icon'); 
+    const emojiBtn = document.getElementById('emoji-open-btn');
+    const emojiContainer = document.getElementById('full-emoji-picker-container');
+    const picker = document.querySelector('emoji-picker');
+    const messageContainer = document.querySelector('.message-container');
+    function resetLayout() {
+      emojiContainer.style.display = 'none';
+      barraDeInput.style.bottom = '60px'; 
+      messageContainer.style.marginBottom = '80px';
+      setTimeout(() => {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }, 100);
+    }
+    inputMensage.addEventListener('input', function() {
+      const hasText = this.value.trim().length > 0;
+      const novoIcone = hasText ? 'send' : 'mic';
+      if (iconBtn.textContent !== novoIcone) {
+        iconBtn.style.transform = 'rotate(180deg) scale(0)';
+        iconBtn.style.opacity = '0';
+        setTimeout(() => {
+          iconBtn.textContent = novoIcone;
+          iconBtn.style.transform = 'rotate(0deg) scale(1)';
+          iconBtn.style.opacity = '1';
+          if (hasText) {
+            barraDeInput.classList.add('typing');
           } else {
-            inputMensage.blur();
-            setTimeout(() => {
-              emojiContainer.style.display = 'block';
-              delete emojiContainer.dataset.mode;
-              inputBar.style.bottom = '305px';
-              messageContainer.style.marginBottom = '325px';          
-              let scrollAcompanha = setInterval(() => {
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-              }, 10);
-              setTimeout(() => clearInterval(scrollAcompanha), 400);
-            }, 50);
+            barraDeInput.classList.remove('typing');
           }
-        });    
-        picker.addEventListener('emoji-click', event => {
-          if (emojiContainer.dataset.mode !== 'reaction') {
-            const emoji = event.detail.unicode;
-            const inicio = inputMensage.selectionStart;
-            const fim = inputMensage.selectionEnd;      
-            inputMensage.value = inputMensage.value.substring(0, inicio) + emoji + inputMensage.value.substring(fim);
-            const novaPosicao = inicio + emoji.length;
-            inputMensage.setSelectionRange(novaPosicao, novaPosicao);
-            inputMensage.dispatchEvent(new Event('input'));
-          }
-        });    
-        inputMensage.addEventListener('focus', () => LayoutManager.resetLayout());
-        messageContainer.addEventListener('click', () => {
-          if (emojiContainer.style.display === 'block') LayoutManager.resetLayout();
-        });
+        }, 150);
       }
-    };
+    });
+    emojiBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (emojiContainer.style.display === 'block') {
+        resetLayout();
+        inputMensage.focus();
+      } else {
+        inputMensage.blur(); 
+        setTimeout(() => {
+          emojiContainer.style.display = 'block';
+          barraDeInput.style.bottom = '305px'; 
+          messageContainer.style.marginBottom = '325px'; 
+          let scrollAcompanha = setInterval(() => {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+          }, 10);
+          setTimeout(() => clearInterval(scrollAcompanha), 400);
+        }, 50);
+      }
+    });
+    picker.addEventListener('emoji-click', event => {
+      const emoji = event.detail.unicode;
+      const inicio = inputMensage.selectionStart;
+      const fim = inputMensage.selectionEnd;
+      inputMensage.value = inputMensage.value.substring(0, inicio) + emoji + inputMensage.value.substring(fim);
+      const novaPosicao = inicio + emoji.length;
+      inputMensage.setSelectionRange(novaPosicao, novaPosicao);
+      inputMensage.dispatchEvent(new Event('input'));
+    });
+    inputMensage.addEventListener('focus', () => {
+      resetLayout();
+    });
+    messageContainer.addEventListener('click', (e) => {
+      if (emojiContainer.style.display === 'block') {
+        resetLayout();
+      }
+    });
     /* ========================= AUDIO RECORDING ========================= */
-const AudioRecorder = {
-  async start(e) {
-    const iconBtn = document.getElementById('send-icon');
-    if (iconBtn.textContent !== 'mic') return;
-    if (!Helpers.isChatActive()) return;    
-    AppState.recordTimeout = setTimeout(async () => {
-      try {
-        const permission = await navigator.permissions.query({name: 'microphone'});
-        if (permission.state === 'denied') {
-          alert('⚠️ Acesso ao microfone bloqueado!\n\nPor favor, ativa nas definições do browser.');
-          return;
-        }        
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-        AppState.mediaRecorder = new MediaRecorder(stream);
-        AppState.audioChunks = [];        
-        AppState.mediaRecorder.ondataavailable = e => AppState.audioChunks.push(e.data);
-        AppState.mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(AppState.audioChunks, {type: 'audio/webm'});
-          if (audioBlob.size > 2000) {
-            await this.upload(audioBlob);
+    async function startAudioLogic(e) {
+      if (iconBtn.textContent !== 'mic') return;
+      if (currentChat === 'null') return;
+      recordTimeout = setTimeout(async () => {
+        try {
+          const permission = await navigator.permissions.query({ name: 'microphone' });
+          if (permission.state === 'denied') {
+            alert('⚠️ Acesso ao microfone bloqueado!\n\nPor favor, ativa nas definições do browser.');
+            return;
           }
-          stream.getTracks().forEach(t => t.stop());
-        };        
-        AppState.mediaRecorder.start();
-        AppState.isRecording = true;
-        iconBtn.classList.add("recording-pulse");
-        DOM.chatInput().placeholder = "🔴 A gravar... solte para enviar";
-        DOM.inputBar().style.backgroundColor = "#fff5f5";
-      } catch (err) {
-        console.error("Erro ao aceder ao microfone:", err);
-        this.handleError(err);
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            if (audioBlob.size > 2000) {
+              await uploadAudioToSupabase(audioBlob);
+            }
+            stream.getTracks().forEach(t => t.stop());
+          };
+          mediaRecorder.start();
+          isRecording = true;
+          iconBtn.classList.add("recording-pulse");
+          inputMensage.placeholder = "🔴 A gravar... solte para enviar";
+          if (barraDeInput) barraDeInput.style.backgroundColor = "#fff5f5";
+        } catch (err) {
+          console.error("Erro ao aceder ao microfone:", err);
+          if (err.name === 'NotAllowedError') {
+            alert('⚠️ Permissão negada!\n\nClica no cadeado ao lado do URL e permite o acesso ao microfone.');
+          } else if (err.name === 'NotFoundError') {
+            alert('⚠️ Microfone não encontrado!\n\nVerifica se tens um microfone ligado.');
+          } else {
+            alert('❌ Erro ao aceder ao microfone: ' + err.message);
+          }
+        }
+      }, 250);
+    }
+    function stopAudioLogic() {
+      clearTimeout(recordTimeout);
+      if (isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        iconBtn.classList.remove("recording-pulse");
+        inputMensage.placeholder = "Mensagem";
+        if (barraDeInput) barraDeInput.style.backgroundColor = "";
+      } else {
+        inputMensage.placeholder = "Mensagem";
+        if (barraDeInput) barraDeInput.style.backgroundColor = "";
       }
-    }, 250);
-  },  
-  stop() {
-    clearTimeout(AppState.recordTimeout);
-    const iconBtn = document.getElementById('send-icon');
-    const inputBar = DOM.inputBar();
-    const chatInput = DOM.chatInput();    
-    if (AppState.isRecording) {
-      AppState.mediaRecorder.stop();
-      AppState.isRecording = false;
-      iconBtn.classList.remove("recording-pulse");
-      chatInput.placeholder = "Mensagem";
-      inputBar.style.backgroundColor = "";
-    } else {
-      chatInput.placeholder = "Mensagem";
-      inputBar.style.backgroundColor = "";
     }
-  },  
-  async upload(blob) {
-    const fileName = `audio_${Date.now()}.webm`;
-    const filePath = `${AppState.currentChat}/${fileName}`;    
-    try {
-      const {data, error} = await supabaseClient.storage
-        .from(CONFIG.STORAGE_BUCKET)
-        .upload(filePath, blob);      
-      if (error) throw error;      
-      const {data: {publicUrl}} = supabaseClient.storage
-        .from(CONFIG.STORAGE_BUCKET)
-        .getPublicUrl(filePath);      
-      
-      // Chamada corrigida: Texto para o Push e URL para o Player
-      await MessageSender.send("🎙️ Mensagem de voz", publicUrl); 
-    } catch (err) {
-      console.error("Erro no upload de áudio:", err.message);
-    }
-  },  
-  handleError(err) {
-    if (err.name === 'NotAllowedError') {
-      alert('⚠️ Permissão negada!\n\nClica no cadeado ao lado do URL e permite o acesso ao microfone.');
-    } else if (err.name === 'NotFoundError') {
-      alert('⚠️ Microfone não encontrado!\n\nVerifica se tens um microfone ligado.');
-    } else {
-      alert('❌ Erro ao aceder ao microfone: ' + err.message);
-    }
-  },  
-  init() {
-    const iconBtn = document.getElementById('send-icon');    
-    iconBtn.addEventListener('mousedown', () => this.start());
-    window.addEventListener('mouseup', () => this.stop());    
+    iconBtn.addEventListener('mousedown', startAudioLogic);
+    window.addEventListener('mouseup', stopAudioLogic);
     iconBtn.addEventListener('touchstart', (e) => {
       if (iconBtn.textContent === 'mic') e.preventDefault();
-      this.start();
-    }, {passive: false});    
-    window.addEventListener('touchend', () => this.stop());
-  }
-};
-    /* ===================== CAMERA & IMAGE HANDLER ====================== */
-    const CameraHandler = {
-      pendingFile: null,
-      previewUrl: null,  
-      init() {
-        const cameraBtn = document.getElementById("camera-btn");
-        const cameraInput = document.getElementById("camera-file-input");
-        const attachModal = document.getElementById("attach-modal");
-        const attachImg = document.getElementById("attach-preview-img");
-        const attachCaption = document.getElementById("attach-caption");
-        const attachSend = document.getElementById("attach-send");
-        const attachCancel = document.getElementById("attach-cancel");
-        const attachLoading = document.getElementById("attach-loading");    
-        cameraBtn.addEventListener("click", (e) => {
-          e.preventDefault();
-          if (!Helpers.isChatActive()) return;
-          cameraInput.value = "";
-          cameraInput.click();
-        });    
-        cameraInput.addEventListener("change", () => {
-          const file = cameraInput.files?.[0];
-          if (!file) return;      
-          this.pendingFile = file;
-          if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);      
-          this.previewUrl = URL.createObjectURL(file);
-          attachImg.src = this.previewUrl;
-          attachCaption.value = "";
-          attachModal.style.display = "flex";      
-          setTimeout(() => attachCaption.focus(), 150);
-        });    
-        attachCancel.addEventListener("click", () => this.closeModal());    
-        attachSend.addEventListener("click", async () => {
-          if (!this.pendingFile) return;      
-          const caption = (attachCaption.value || "").trim();      
-          try {
-            attachLoading.style.display = "block";
-            attachSend.disabled = true;        
-            const publicUrl = await this.uploadImage(this.pendingFile);
-            await this.sendImageMessage(publicUrl, this.pendingFile.name || `foto_${Date.now()}.jpg`, caption);        
-            this.closeModal();
-          } catch (err) {
-            console.error("Erro ao enviar foto:", err);
-            alert("Não foi possível enviar a foto.");
-            attachLoading.style.display = "none";
-            attachSend.disabled = false;
-          }
-        });
-      },  
-      closeModal() {
-        const attachModal = document.getElementById("attach-modal");
-        const attachLoading = document.getElementById("attach-loading");
-        const attachSend = document.getElementById("attach-send");
-        const cameraInput = document.getElementById("camera-file-input");    
-        attachModal.style.display = "none";
-        attachLoading.style.display = "none";
-        attachSend.disabled = false;    
-        if (this.previewUrl) {
-          URL.revokeObjectURL(this.previewUrl);
-          this.previewUrl = null;
-        }    
-        this.pendingFile = null;
-        cameraInput.value = "";
-      },  
-      async uploadImage(file) {
-        if (file.type && !file.type.startsWith("image/")) {
-          throw new Error("Ficheiro não é imagem.");
-        }    
-        const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
-        const fileName = `photo_${Date.now()}.${ext}`;
-        const filePath = `${AppState.currentChat}/${fileName}`;    
-        const {error} = await supabaseClient.storage
-          .from(CONFIG.STORAGE_BUCKET)
-          .upload(filePath, file, {contentType: file.type || "image/jpeg"});    
-        if (error) throw error;    
-        const {data: {publicUrl} } = supabaseClient.storage
-          .from(CONFIG.STORAGE_BUCKET)
-          .getPublicUrl(filePath);    
-        if (!publicUrl) throw new Error("Sem URL público.");    
-        return publicUrl;
-      },  
-      async sendImageMessage(imageUrl, fileName, caption = "") {
-        const senderName = await UserManager.fetchName();    
-        const payload = {n_int: AppState.currentUserNint, recipient_nint: String(AppState.currentChat), corp_oper_nr: Helpers.getCorpNr(), abv_name: senderName, 
-                         message_type: "image", file_url: imageUrl, file_name: fileName, message: caption};    
-        const {error} = await supabaseClient
-          .from("chat_messages")
-          .insert([payload]);    
+      startAudioLogic();
+    }, {passive: false});
+    window.addEventListener('touchend', stopAudioLogic);
+    async function uploadAudioToSupabase(blob) {
+      const fileName = `audio_${Date.now()}.webm`;
+      const filePath = `${currentChat}/${fileName}`;
+      try {
+        const { data, error } = await supabaseClient.storage
+        .from('cb_files')
+        .upload(filePath, blob);
         if (error) throw error;
+        const { data: { publicUrl } } = supabaseClient.storage
+        .from('cb_files')
+        .getPublicUrl(filePath);
+        await sendMessage("Enviou um áudio", publicUrl); 
+      } catch (err) {
+        console.error("Erro:", err.message);
       }
-    };
-    /* ========================== FILE HANDLER =========================== */
-    const FileHandler = {
-      init() {
-        const input = document.getElementById('doc-file-input');
-        if (!input) return;    
-        input.addEventListener('change', async (e) => {
-          const file = e.target.files?.[0];
-          e.target.value = '';
-          if (!file) return;    
-          try {
-            if (!Helpers.isChatActive()) return;    
-            const MAX_MB = 25;
-            if (file.size > MAX_MB * 1024 * 1024) {
-              alert(`Ficheiro muito grande (máx. ${MAX_MB}MB).`);
-              return;
-            }    
-            const chatId = AppState.currentChat;
-            const now = Date.now();
-            const safeName = file.name.replace(/[^\w.\-() ]+/g, '_');
-            const rand = (crypto.randomUUID?.() || Math.random().toString(16).slice(2));
-            const basePath = `chat/${chatId}/${now}_${rand}_${safeName}`;    
-            let previewUrl = null;
-            const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-            if (isPdf && window.pdfjsLib) {
-              const thumbBlob = await this._renderPdfFirstPageToBlob(file, { targetWidth: 700 });
-              if (thumbBlob) {
-                const thumbPath = basePath.replace(/\.pdf$/i, '') + `_preview.png`;    
-                const { error: upThumbErr } = await supabaseClient
-                  .storage.from('cb_files')
-                  .upload(thumbPath, thumbBlob, { contentType: 'image/png' });    
-                if (!upThumbErr) {
-                  const { data: pubThumb } = supabaseClient.storage.from('cb_files').getPublicUrl(thumbPath);
-                  previewUrl = pubThumb?.publicUrl || null;
-                }
-              }
-            }
-            const { error: upErr } = await supabaseClient
-              .storage.from('cb_files')
-              .upload(basePath, file, { contentType: file.type || 'application/octet-stream' });    
-            if (upErr) throw upErr;    
-            const { data: pubFile } = supabaseClient.storage.from('cb_files').getPublicUrl(basePath);
-            const fileUrl = pubFile?.publicUrl;    
-            const senderName = await UserManager.fetchName();
-            const isImage = (file.type || '').startsWith('image/');
-            const payload = {n_int: AppState.currentUserNint, recipient_nint: String(AppState.currentChat), corp_oper_nr: Helpers.getCorpNr(), abv_name: senderName,
-                             message_type: isImage ? 'image' : 'file', file_name: file.name, file_url: fileUrl, preview_url: isPdf ? previewUrl : null, message: ''};   
-            const { error: insErr } = await supabaseClient
-              .from('chat_messages')
-              .insert([payload]);    
-            if (insErr) throw insErr;    
-          } catch (err) {
-            console.error('Erro ao enviar ficheiro:', err);
-            alert('Não foi possível enviar o ficheiro.');
+    }
+    
+    
+    
+    
+    
+    
+    const cameraBtn = document.getElementById("camera-btn");
+const cameraInput = document.getElementById("camera-file-input");
+
+cameraBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (currentChat === "null") return; // só dentro de um chat
+  cameraInput.click();               // abre a câmara (ou seletor)
+});
+
+cameraInput.addEventListener("change", async () => {
+  const file = cameraInput.files?.[0];
+  if (!file) return;
+
+  try {
+    // upload + obter URL
+    const publicUrl = await uploadImageToSupabase(file);
+
+    // inserir mensagem tipo image
+    await sendImageMessage(publicUrl, file.name || `foto_${Date.now()}.jpg`);
+
+  } catch (err) {
+    console.error("Erro ao enviar foto:", err);
+    alert("Não foi possível enviar a foto.");
+  } finally {
+    // permite escolher a mesma foto novamente
+    cameraInput.value = "";
+  }
+});
+
+async function uploadImageToSupabase(file) {
+  if (!file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
+
+  const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
+  const fileName = `photo_${Date.now()}.${ext}`;
+  const filePath = `${currentChat}/${fileName}`;
+
+  const { error } = await supabaseClient
+    .storage
+    .from("cb_files")
+    .upload(filePath, file);
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabaseClient
+    .storage
+    .from("cb_files")
+    .getPublicUrl(filePath);
+
+  if (!publicUrl) throw new Error("Sem URL público.");
+  return publicUrl;
+}
+
+async function sendImageMessage(imageUrl, fileName) {
+  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+  const senderName = await fetchUserName();
+
+  const payload = {
+    n_int: currentUserNint,
+    recipient_nint: String(currentChat),
+    corp_oper_nr: currentCorp,
+    abv_name: senderName,
+    message_type: "image",
+    file_url: imageUrl,
+    file_name: fileName,
+    message: "" // opcional legenda
+  };
+
+  const { error } = await supabaseClient
+    .from("chat_messages")
+    .insert([payload]);
+
+  if (error) throw error;
+}
+
+    /* ==================== LOADING CORPORATION DATA ===================== */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const logoEl = document.getElementById("corpLogo");
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
           }
-        });
-      },
-      openPicker() {
-        document.getElementById('doc-file-input')?.click();
-      },    
-      async _renderPdfFirstPageToBlob(file, { targetWidth = 700 } = {}) {
-        try {
-          const arrayBuffer = await file.arrayBuffer();
-          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          const page = await pdf.getPage(1);
-          const viewport1 = page.getViewport({ scale: 1 });
-          const scale = Math.max(0.5, Math.min(3, targetWidth / viewport1.width));
-          const viewport = page.getViewport({ scale });    
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d', { alpha: false });
-          canvas.width = Math.floor(viewport.width);
-          canvas.height = Math.floor(viewport.height);    
-          await page.render({ canvasContext: ctx, viewport }).promise;
-          const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.9));
-          return blob || null;
-        } catch (e) {
-          console.warn('Não consegui gerar thumbnail PDF:', e);
-          return null;
-        }
-      }
-    };
-    /* ========================== USER MANAGER =========================== */
-    const UserManager = {
-      async fetchName() {
-        try {
-          const {data} = await supabaseClient
-            .from('reg_elems')
-            .select('abv_name')
-            .eq('n_int', AppState.currentUserNint)
-            .maybeSingle();      
-          return (data && data.abv_name) ? data.abv_name : "Utilizador";
-        } catch {
-          return "Utilizador";
-        }
-      }
-    };
-    /* ======================== CORPORATION DATA ========================= */
-    const CorpManager = {
-      async loadInfo() {
-        const corpOperNr = Helpers.getCorpNr() || localStorage.getItem("currentCorpOperNr");
-        const logoEl = document.getElementById("corpLogo");
-        const h2 = document.getElementById("corpInfo");
-        if (!corpOperNr) return;
-        const cachedLogo = localStorage.getItem("cached_logo_url");
-        if (cachedLogo && logoEl) {
-          logoEl.src = cachedLogo;
-        }
-        if (h2) h2.textContent = corpOperNr;
-        try {
-          const response = await fetch(
-            `${CONFIG.SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
-              headers: Helpers.getSupabaseHeaders()
-            }
-          );
-          const data = await response.json();
-          if (data && data.length > 0) {
-            const corp = data[0];
-            const newLogoUrl = corp.logo_url ? corp.logo_url.trim() : null;
-            if (newLogoUrl && newLogoUrl !== cachedLogo) {
-              localStorage.setItem("cached_logo_url", newLogoUrl);
-              if (logoEl) logoEl.src = newLogoUrl;
-            }
-          }
-        } catch (err) {
-          console.error('Erro no CorpManager.loadInfo:', err);
-        }
-      }
-    };
-    /* ========================== THEME MANAGER ========================== */
-    const ThemeManager = {load() {
-      const isDark = localStorage.getItem('sgo-theme') === 'dark';
-      document.documentElement.classList.toggle('dark-mode', isDark);
-      document.body.classList.toggle('dark-mode', isDark);}};
-    /* ========================= CONTACT MANAGER ========================= */
-    const ContactManager = {
-      async load() {
-        const corpOperNr = Helpers.getCorpNr();        
-        const {data: users, error} = await supabaseClient
-          .from('reg_elems')
-          .select('n_int, abv_name, photo_url, elem_state')
-          .eq('corp_oper_nr', corpOperNr)
-          .eq('elem_state', true)
-          .order('n_int', {ascending: true});        
-        if (error) return console.error(error);        
-        AppState.totalTeam = users.length + 1;        
-        const listEl = DOM.contactList();
-        listEl.innerHTML = '';
-        this.addGeralContact(listEl);
-        users.forEach(user => {
-          if (String(user.n_int) === AppState.currentUserNint) return;
-          this.addContact(listEl, user);
-        });
-      },      
-      addGeralContact(listEl) {
-        const draftGeral = localStorage.getItem("draft_geral");
-        const subTextGeral = draftGeral 
-          ? `<div class="draft-preview">Rascunho: ${draftGeral}</div>` 
-          : `<div class="nint">Broadcast</div>`;        
-        const geral = document.createElement("div");
-        geral.className = "contact";
-        geral.dataset.nint = 'geral';
-        geral.onclick = () => ChatManager.open('geral', 'Chat Geral');        
-        geral.innerHTML = `
-          <div class="contact-avatar" style="background-color: #333;">G</div>
-          <div class="contact-info">
-            <div class="name">Chat Geral</div>
-            ${subTextGeral}
-          </div>`;        
-        listEl.appendChild(geral);
-      },      
-      addContact(listEl, user) {
+        );
+        const data = await response.json();
+        if (data && data.length > 0 && logoEl && data[0].logo_url) logoEl.src = data[0].logo_url.trim();
+      } catch (err) {console.error('Erro no loadCorpInfo:', err);}
+    }
+    /* ========================== LOADING THEME ========================== */
+    function loadTheme() {
+      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+    }
+    /* ======================== LOADING CONTACTS ========================= */
+    async function loadContacts() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const colors = {'A': '#f44336','B': '#e91e63','C': '#9c27b0','D': '#673ab7','E': '#3f51b5','F': '#2196f3','G': '#03a9f4',
+                      'H': '#00bcd4','I': '#009688','J': '#4caf50','K': '#8bc34a','L': '#cddc39','M': '#ffeb3b','N': '#ffc107',
+                      'O': '#ff9800','P': '#ff5722','Q': '#795548','R': '#9e9e9e','S': '#60727b','T': '#333333','U': '#ff4081',
+                      'V': '#7c4dff','W': '#536dfe','X': '#448aff','Y': '#00e676','Z': '#cfd8dc'};    
+      const {data: users, error} = await supabaseClient.from('reg_elems')
+        .select('n_int, abv_name, photo_url, elem_state')
+        .eq('corp_oper_nr', corpOperNr)
+        .eq('elem_state', true)
+        .order('n_int', {ascending: true});    
+      if (error) return console.error(error);      
+      totalTeam = users.length + 1;
+      const listEl = document.getElementById("contact-list");
+      listEl.innerHTML = '';
+      const geral = document.createElement("div");
+      geral.className = "contact";
+      geral.dataset.nint = 'geral';
+      geral.onclick = () => openChat('geral', 'Chat Geral');
+      const draftGeral = localStorage.getItem("draft_geral");
+      const subTextGeral = draftGeral ? `<div class="draft-preview">Rascunho: ${draftGeral}</div>` : `<div class="nint">Broadcast</div>`;    
+      geral.innerHTML = `
+        <div class="contact-avatar" style="background-color: #333;">G</div>
+        <div class="contact-info">
+          <div class="name">Chat Geral</div>
+          ${subTextGeral}
+        </div>`;
+      listEl.appendChild(geral);
+      users.forEach(user => {
+        if (String(user.n_int) === currentUserNint) return;        
         const contactId = String(user.n_int);
         const firstLetter = user.abv_name.charAt(0).toUpperCase();
-        const avatarColor = CONFIG.AVATAR_COLORS[firstLetter] || '#d32f2f';        
+        const avatarColor = colors[firstLetter] || '#d32f2f';
         const savedDraft = localStorage.getItem(`draft_${contactId}`);
         const subText = savedDraft 
           ? `<div class="draft-preview">Rascunho: ${savedDraft}</div>` 
-          : `<div class="nint">ID: ${user.n_int}</div>`;        
+          : `<div class="nint">ID: ${user.n_int}</div>`;    
         const div = document.createElement("div");
         div.className = "contact";
         div.setAttribute('data-nint', contactId);
-        div.onclick = () => ChatManager.open(user.n_int, user.abv_name);        
-        const avatarContent = user.photo_url 
-          ? `<img src="${user.photo_url}">` 
-          : firstLetter;        
+        div.onclick = () => openChat(user.n_int, user.abv_name);        
+        const avatarContent = user.photo_url ? `<img src="${user.photo_url}">` : firstLetter;        
         div.innerHTML = `
           <div class="contact-avatar" style="background-color: ${user.photo_url ? 'transparent' : avatarColor};">
             ${avatarContent}
@@ -1077,303 +783,232 @@ const AudioRecorder = {
             <div class="name">${user.abv_name}</div>
             ${subText}
           </div>`;
-        
         listEl.appendChild(div);
-      }
-    };
-    /* ========================== BADGE MANAGER ========================== */
-    const BadgeManager = {
-      async update() {
-        const currentCorp = Helpers.getCorpNr();
-        const {count: totalGeral} = await supabaseClient
-          .from('chat_messages')
-          .select('*', {count: 'exact', head: true})
-          .eq('recipient_nint', 'geral')
-          .eq('corp_oper_nr', currentCorp)
-          .neq('n_int', AppState.currentUserNint);        
-        const {count: lidasGeral} = await supabaseClient
-          .from('chat_message_reads')
-          .select('*', {count: 'exact', head: true})
-          .eq('n_int', AppState.currentUserNint)
-          .eq('corp_oper_nr', currentCorp);        
-        const unreadGeral = Math.max(0, (totalGeral || 0) - (lidasGeral || 0));
-        const {data: privData} = await supabaseClient
-          .from('chat_messages')
-          .select('n_int')
-          .eq('recipient_nint', AppState.currentUserNint)
-          .eq('corp_oper_nr', currentCorp)
-          .is('read_at', null);        
-        const privCounts = {};
-        if (privData) {
-          privData.forEach(msg => {
-            privCounts[msg.n_int] = (privCounts[msg.n_int] || 0) + 1;
-          });
-        }
-        document.querySelectorAll('.contact').forEach(contactEl => {
-          const nint = contactEl.getAttribute('data-nint');
-          let finalCount = (nint === 'geral') ? unreadGeral : (privCounts[nint] || 0);
-          let badge = contactEl.querySelector('.unread-badge');          
-          if (finalCount > 0) {
-            if (!badge) {
-              badge = document.createElement('div');
-              badge.className = 'unread-badge';
-              contactEl.appendChild(badge);
-            }
-            badge.textContent = finalCount > 99 ? '99+' : finalCount;
-          } else {
-            if (badge) badge.remove();
-          }
+      });
+    }
+    /* ========================== UPDATE BADGES ========================== */
+    async function updateUnreadBadges() {
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const { count: totalGeral } = await supabaseClient
+      .from('chat_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('recipient_nint', 'geral')
+      .eq('corp_oper_nr', currentCorp)
+      .neq('n_int', currentUserNint);
+      const { count: lidasGeral } = await supabaseClient
+      .from('chat_message_reads')
+      .select('*', { count: 'exact', head: true })
+      .eq('n_int', currentUserNint)
+      .eq('corp_oper_nr', currentCorp);
+      const unreadGeral = Math.max(0, (totalGeral || 0) - (lidasGeral || 0));
+      const { data: privData } = await supabaseClient
+      .from('chat_messages')
+      .select('n_int')
+      .eq('recipient_nint', currentUserNint)
+      .eq('corp_oper_nr', currentCorp)
+      .is('read_at', null);
+      const privCounts = {};
+      if (privData) {
+        privData.forEach(msg => {
+          privCounts[msg.n_int] = (privCounts[msg.n_int] || 0) + 1;
         });
       }
-    };
-    /* ========================== CHAT MANAGER =========================== */
-    const ChatManager = {
-      async open(n_int, name) {
-        const messagesEl = DOM.messages();
-        const contactListEl = DOM.contactList();
-        const contactTitle = DOM.contactTitle();
-        const chatIdInfo = DOM.chatIdInfo();
-        const backBtn = DOM.backHeader();
-        const pinnedEl = DOM.pinnedMessage();
-        const inputBar = DOM.inputBar();
-        const typingStatusEl = DOM.typingStatus();
-        const inputMensage = DOM.chatInput();    
-        messagesEl.innerHTML = '';
-        if (AppState.messagesToForward.length > 0) {
-          await this.forwardMessages(n_int);
-        }    
-        AppState.currentChat = String(n_int);
-        AppState.currentChatName = name;
-        if (AppState.currentChat === 'geral') {
-          await ReadManager.markGeralAsRead();
-          BadgeManager.update();
-        } else {
-          const badge = document.querySelector(`.contact[data-nint="${n_int}"] .unread-badge`);
-          if (badge) badge.remove();
-          ReadManager.sendReceipt(AppState.currentChat);
-        }
-        contactListEl.style.display = 'none';
-        contactTitle.style.display = 'none';
-        messagesEl.style.display = 'flex';
-        backBtn.style.display = 'flex';
-        chatIdInfo.style.display = 'block';
-        typingStatusEl.style.display = 'none';
-        inputBar.style.display = 'flex';    
-        chatIdInfo.textContent = `A conversar com: ${name}`;
-        if (AppState.currentChat === 'geral') {
-          pinnedEl.style.display = 'flex';
-          document.getElementById("pinned-text-content").textContent = 
-            "ATENÇÃO! Este chat é supervisionado por IA. Qualquer mensagem que viole normas éticas será imediatamente bloqueada.";
-        } else {
-          pinnedEl.style.display = 'none';
-        }
-        const savedDraft = localStorage.getItem(`draft_${AppState.currentChat}`);
-        if (savedDraft) {
-          inputMensage.value = savedDraft;
-          inputMensage.dispatchEvent(new Event('input'));
-        } else {
-          inputMensage.value = "";
-          inputMensage.dispatchEvent(new Event('input'));
-        }    
-        await MessageManager.load(AppState.currentChat);
-      },  
-      async forwardMessages(n_int) {
-        const currentCorp = Helpers.getCorpNr();
-        const senderName = await UserManager.fetchName();    
-        for (const msg of AppState.messagesToForward) {
-          const payload = {n_int: AppState.currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName, message: msg.message || "", message_type: msg.message_type || "text",
-                           file_url: msg.file_url || null, file_name: msg.file_name || null, is_forwarded: true};      
-          const {error} = await supabaseClient.from('chat_messages').insert([payload]);
-          if (error) console.error("Erro ao encaminhar mensagem:", error);
-        }    
-        AppState.messagesToForward = [];
-        await new Promise(resolve => setTimeout(resolve, 150));
-      },  
-      goBack() {
-        const text = DOM.chatInput().value.trim();    
-        if (text !== "" && Helpers.isChatActive()) {
-          localStorage.setItem(`draft_${AppState.currentChat}`, text);
-        } else if (Helpers.isChatActive()) {
-          localStorage.removeItem(`draft_${AppState.currentChat}`);
-        }    
-        LayoutManager.resetLayout();
-        DOM.chatInput().value = "";
-        DOM.chatInput().dispatchEvent(new Event('input'));    
-        DOM.pinnedMessage().style.display = 'none';
-        DOM.messages().style.display = 'none';
-        DOM.backHeader().style.display = 'none';
-        DOM.chatIdInfo().style.display = 'none';
-        DOM.typingStatus().style.display = 'none';
-        document.getElementById("reply-bar").style.display = 'none';
-        DOM.inputBar().style.display = 'none';    
-        DOM.contactList().style.display = 'flex';
-        DOM.contactTitle().style.display = 'block';    
-        AppState.currentChat = 'null';
-        ContactManager.load();
-      }
-    };
-    /* ========================= MESSAGE MANAGER ========================= */
-    const MessageManager = {
-      async load(chat = AppState.currentChat) {
-        const currentCorp = Helpers.getCorpNr();
-        const messagesEl = DOM.messages();
-        const chatRef = chat || 'geral';    
-        messagesEl.innerHTML = '';
-        AppState.lastDateLabel = "";    
-        let query = supabaseClient
-          .from('chat_messages')
-          .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
-          .eq('corp_oper_nr', currentCorp);    
-        if (chatRef === 'geral') {
-          query = query.eq('recipient_nint', 'geral');
-        } else {
-          query = query.or(`and(n_int.eq.${AppState.currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${AppState.currentUserNint})`);
-        }    
-        try {
-          const {data: msgs, error} = await query.order('created_at', {ascending: true});      
-          if (AppState.currentChat !== chatRef) return;
-          if (error) return console.error(error);      
-          if (!msgs || msgs.length === 0) {
-            this.showEmptyPlaceholder();
-          } else {
-            msgs.forEach(msg => this.addToDOM(msg, chatRef));
-            ScrollManager.toBottom();
+      document.querySelectorAll('.contact').forEach(contactEl => {
+        const nint = contactEl.getAttribute('data-nint');
+        let finalCount = (nint === 'geral') ? unreadGeral : (privCounts[nint] || 0);
+        let badge = contactEl.querySelector('.unread-badge');
+        if (finalCount > 0) {
+          if (!badge) {
+            badge = document.createElement('div');
+            badge.className = 'unread-badge';
+            contactEl.appendChild(badge);
           }
-        } catch (err) {
-          console.error(err);
+          badge.textContent = finalCount > 99 ? '99+' : finalCount;
+        } else {
+          if (badge) badge.remove();
         }
-      },  
-      showEmptyPlaceholder() {
-        const messagesEl = DOM.messages();
-        const emptyMsg = document.createElement("div");
-        emptyMsg.className = "empty-chat-placeholder";
-        emptyMsg.innerHTML = `
-          <div style="text-align: center; width: 100%; padding: 20px;">
-            <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
-            <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${AppState.currentChatName || 'este contacto'}</strong></span>
+      });
+    }
+    /* ====================== BACK TO CONTACT LIST ======================= */
+    function goBackToMain() {
+      const text = inputMensage.value.trim();
+      if (text !== "" && currentChat !== 'null') {
+        localStorage.setItem(`draft_${currentChat}`, text);
+      } else if (currentChat !== 'null') {
+        localStorage.removeItem(`draft_${currentChat}`);
+      }
+      resetLayout();
+      inputMensage.value = "";
+      inputMensage.dispatchEvent(new Event('input'));
+      document.getElementById("pinned-message").style.display = 'none';
+      document.getElementById("messages").style.display = 'none';
+      document.getElementById("back-header").style.display = 'none';
+      document.getElementById("chat-id-info").style.display = 'none';
+      document.getElementById("typing-status").style.display = 'none';
+      const inputBar = document.querySelector(".chat-input-bar");
+      if (inputBar) inputBar.style.display = 'none';
+      document.getElementById("contact-list").style.display = 'flex';
+      document.getElementById("contact-title").style.display = 'block';
+      currentChat = 'null';
+      loadContacts();
+    }
+    /* ======================== SCROLL TO BOTTOM ========================= */
+    function scrollToBottom() {
+      const messagesEl = document.getElementById("messages");
+      if (messagesEl && messagesEl.style.display !== 'none') {
+        setTimeout(() => {
+          messagesEl.scrollTo({
+            top: messagesEl.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 50);
+      }
+    }
+    /* ========================= FETCH USER NAME ========================= */
+    async function fetchUserName() {
+      try {
+        const {data} = await supabaseClient.from('reg_elems').select('abv_name').eq('n_int', currentUserNint).maybeSingle();
+        return (data && data.abv_name) ? data.abv_name : "Utilizador";
+      } catch {return "Utilizador";}
+    }
+    /* ======================= RENDER REACTIONS ========================== */
+    function renderReactions(reactions, messageId) {
+      if (!reactions || Object.keys(reactions).length === 0) return '';
+      const grouped = {};
+      for (const [nint, emoji] of Object.entries(reactions)) {
+        if (!grouped[emoji]) grouped[emoji] = [];
+        grouped[emoji].push(nint);
+      }
+      let html = '<div class="message-reactions">';
+      for (const [emoji, users] of Object.entries(grouped)) {
+        const count = users.length;
+        const isMyReaction = users.includes(currentUserNint);
+        const myClass = isMyReaction ? 'my-reaction' : '';
+        const isThumb = emoji === '👍' || emoji === '👎';
+        const thumbClass = isThumb ? 'thumb-emoji' : '';
+        const countHTML = count > 1 ? `<span class="reaction-count">${count}</span>` : '';
+        html += `
+          <div class="reaction-badge ${myClass}" onclick="event.stopPropagation(); toggleReaction('${messageId}', '${emoji}')">
+            <span class="reaction-emoji ${thumbClass}">${emoji}</span>
+            ${countHTML}
           </div>
         `;
-        messagesEl.appendChild(emptyMsg);
-      },  
-      addToDOM(msg, chatRef) {
-        if (!Helpers.isChatActive() || AppState.currentChat !== String(chatRef)) return;    
-        const messagesEl = DOM.messages();
-        if (!messagesEl) return;
-        const msgDate = new Date(msg.created_at);
-        const dateLabel = Helpers.getDateLabel(msgDate);    
-        if (dateLabel !== AppState.lastDateLabel) {
-          const divider = document.createElement("div");
-          divider.className = "date-divider";
-          divider.innerHTML = `<span>${dateLabel}</span>`;
-          messagesEl.appendChild(divider);
-          AppState.lastDateLabel = dateLabel;
-        }    
-        const emptyMsg = messagesEl.querySelector(".empty-chat-placeholder");
-        if (emptyMsg) emptyMsg.remove();    
-        const div = this.createMessageElement(msg, chatRef);
-        messagesEl.appendChild(div);    
-        if (messagesEl.style.display !== 'none') {
-          ScrollManager.toBottom();
+      }
+      html += '</div>';
+      return html;
+    }
+    /* ======================= TOGGLE REACTIONS ========================== */
+    async function toggleReaction(messageId, emoji) {
+      const { data: msg, error: fetchError } = await supabaseClient
+      .from('chat_messages')
+      .select('reactions')
+      .eq('id', messageId)
+      .single();
+      if (fetchError) {
+        console.error("Erro ao ler reações:", fetchError);
+        return;
+      }
+      let currentReactions = msg.reactions || {};
+      if (!currentReactions[emoji]) {
+        currentReactions[emoji] = [];
+      }
+      const userIndex = currentReactions[emoji].indexOf(currentUserNint);
+      if (userIndex === -1) {
+        currentReactions[emoji].push(currentUserNint);
+      } else {
+        currentReactions[emoji].splice(userIndex, 1);
+        if (currentReactions[emoji].length === 0) {
+          delete currentReactions[emoji];
         }
-      },
-      createMessageElement(msg, chatRef) {
-        const time = Helpers.formatTime(msg.edited_at || msg.created_at);
-        const isMe = String(msg.n_int) === AppState.currentUserNint;
-        const isDeleted = msg.deleted_at !== null && msg.deleted_at !== undefined;    
-        const div = document.createElement("div");
-        div.className = "message " + (isMe ? "self" : "other");
-        div.dataset.messageId = msg.id;
-        div.dataset.messageText = msg.message;
-        div.dataset.senderName = msg.abv_name;
-        div.dataset.senderNint = msg.n_int;    
-        if (isDeleted) div.classList.add('deleted');
-        if (msg.is_forwarded) div.classList.add('is-forwarded');    
-        const nameHTML = (chatRef === 'geral' && !isMe) 
-          ? `<div class="msg-sender-name">${msg.abv_name}</div>` 
-          : "";    
-        const replyPreviewHTML = this.buildReplyPreview(msg);
-        const checkHTML = this.buildStatusChecks(msg, isMe, chatRef);
-        const reactionsHTML = ReactionManager.render(msg.reactions, msg.id);
-        const starIcon = (msg.starred_by && msg.starred_by.includes(AppState.currentUserNint))
-          ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
-          : '';    
-        const contentHTML = this.buildMessageContent(msg, isDeleted);    
-        div.innerHTML = `
-          ${nameHTML}
-          ${replyPreviewHTML}
-          <span class="msg-text-content">${contentHTML}</span>${starIcon}
-          ${reactionsHTML}
-          <div class="msg-meta">
-            <span class="msg-time">${time}</span> ${checkHTML}
-          </div>
-        `;    
-        if (!isDeleted && msg.edited_at) {
-          const metaDiv = div.querySelector('.msg-meta');
-          if (metaDiv) {
-            const editTag = document.createElement('span');
-            editTag.className = 'message-edited-tag';
-            editTag.textContent = 'Editada: ';
-            metaDiv.insertBefore(editTag, metaDiv.firstChild);
+      }
+      const { error: updateError } = await supabaseClient
+      .from('chat_messages')
+      .update({ reactions: currentReactions })
+      .eq('id', messageId);
+      if (updateError) {
+        console.error("Erro ao atualizar reação:", updateError);
+      }
+    }
+    /* ======================= ADD MESSAGE TO DOM ======================== */
+    function addMessageToDOM(msg, chatRef) {
+      if (!currentChat || currentChat !== String(chatRef)) return;
+      const messagesEl = document.getElementById("messages");
+      if (!messagesEl) return;
+      const msgDate = new Date(msg.created_at);
+      const dateLabel = getDateLabel(msgDate);
+      if (dateLabel !== lastDateLabel) {
+        const divider = document.createElement("div");
+        divider.className = "date-divider";
+        divider.innerHTML = `<span>${dateLabel}</span>`;
+        messagesEl.appendChild(divider);
+        lastDateLabel = dateLabel;
+      }
+      const emptyMsg = messagesEl.querySelector(".empty-chat-placeholder");
+      if (emptyMsg) emptyMsg.remove();
+      let time = "";
+      if (msg.edited_at) {
+        time = new Date(msg.edited_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      } else if (msg.created_at) {
+        time = new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      }
+      const isMe = String(msg.n_int) === currentUserNint;
+      let checkHTML = '';
+      if (isMe) {
+        let icon = 'done';
+        let checkClass = 'sent';
+        if (chatRef === 'geral') {
+          const numLeituras = (msg.chat_message_reads && msg.chat_message_reads[0]) ? msg.chat_message_reads[0].count : 0;
+          icon = 'done_all';
+          checkClass = (numLeituras >= (totalTeam - 1) && totalTeam > 1) ? 'read' : 'delivered';
+          const contador = numLeituras > 0 ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` : '';
+          const msgId = msg.id || 'temp-' + Date.now();
+          checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>${contador}`;
+        } else {
+          const recipientDot = document.querySelector(`.contact[data-nint="${chatRef}"] .status-dot`);
+          const isOnline = recipientDot && recipientDot.classList.contains('online');
+          if (msg.read_at) {
+            icon = 'done_all'; checkClass = 'read';
+          } else if (isOnline) {
+            icon = 'done_all'; checkClass = 'delivered';
           }
-        }    
-        MessageInteraction.setup(div, msg);    
-        return div;
-      },  
-      buildReplyPreview(msg) {
-        if (!msg.reply_to_message_id || !msg.reply_to_message) return '';    
+          const msgId = msg.id || 'temp-' + Date.now();
+          checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>`;
+        }
+      }
+      const div = document.createElement("div");
+      div.className = "message " + (isMe ? "self" : "other");
+      div.dataset.messageId = msg.id;
+      div.dataset.messageText = msg.message;
+      div.dataset.senderName = msg.abv_name;
+      div.dataset.senderNint = msg.n_int;
+      const isDeleted = msg.deleted_at !== null && msg.deleted_at !== undefined;
+      if (isDeleted) div.classList.add('deleted');
+      const nameHTML = (chatRef === 'geral' && !isMe) ? `<div class="msg-sender-name">${msg.abv_name}</div>` : "";
+      let replyPreviewHTML = '';
+      if (msg.reply_to_message_id && msg.reply_to_message) {
         const replyMsg = msg.reply_to_message;
-        return `
+        replyPreviewHTML = `
           <div class="reply-preview" onclick="scrollToMessage('${msg.reply_to_message_id}')">
             <div class="reply-preview-name">${replyMsg.abv_name || 'Utilizador'}</div>
             <div class="reply-preview-text">${replyMsg.message || ''}</div>
           </div>
         `;
-      },  
-      buildStatusChecks(msg, isMe, chatRef) {
-        if (!isMe) return '';    
-        let icon = 'done';
-        let checkClass = 'sent';    
-        if (chatRef === 'geral') {
-          const numLeituras = (msg.chat_message_reads && msg.chat_message_reads[0]) 
-            ? msg.chat_message_reads[0].count 
-            : 0;
-          icon = 'done_all';
-          checkClass = (numLeituras >= (AppState.totalTeam - 1) && AppState.totalTeam > 1) 
-            ? 'read' 
-            : 'delivered';
-          const contador = numLeituras > 0 
-            ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` 
-            : '';
-          const msgId = msg.id || 'temp-' + Date.now();
-          return `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>${contador}`;
-        } else {
-          const recipientDot = document.querySelector(`.contact[data-nint="${chatRef}"] .status-dot`);
-          const isOnline = recipientDot && recipientDot.classList.contains('online');      
-          if (msg.read_at) {
-            icon = 'done_all';
-            checkClass = 'read';
-          } else if (isOnline) {
-            icon = 'done_all';
-            checkClass = 'delivered';
-          }      
-          const msgId = msg.id || 'temp-' + Date.now();
-          return `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>`;
-        }
-      },  
-      buildMessageContent(msg, isDeleted) {
-        if (isDeleted) {
-          return '<span class="deleted-icon">🚫</span> Mensagem apagada';
-        }    
+      }
+      const reactionsHTML = renderReactions(msg.reactions, msg.id);
+      const isStarred = msg.starred_by && msg.starred_by.includes(currentUserNint);
+      const starIcon = isStarred ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>' : '';
+      let finalContentHTML = "";
+      if (isDeleted) {
+        finalContentHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
+      } else {
         switch(msg.message_type) {
           case 'image':
-            let html = `<img src="${msg.file_url}" class="chat-img" data-url="${msg.file_url}" alt="imagem">`;
-            if (msg.message) {
-              html += `<div class="img-caption">${msg.message}</div>`;
-            }
-            return html;      
+            finalContentHTML = `<img src="${msg.file_url}" class="chat-img" style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${msg.file_url}', '_blank')">`;
+            if (msg.message) finalContentHTML += `<div class="img-caption">${msg.message}</div>`;
+            break;          
           case 'audio':
             const audioID = `audio-${msg.id || Date.now()}`;
-            return `
+            finalContentHTML = `
               <div class="audio-bubble">
                 <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
                   <span class="material-icons">play_arrow</span>
@@ -1385,882 +1020,508 @@ const AudioRecorder = {
                   <div class="audio-time" id="time-${audioID}">0:00</div>
                 </div>
                 <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
-              </div>`;      
+              </div>`;
+            break;
           case 'file':
-            if (msg.preview_url) {
-              return `
-              <img src="${msg.preview_url}"
-                class="chat-img"
-                data-url="${msg.file_url}"
-                alt="PDF preview">
-                <div class="img-caption">${msg.file_name || 'Documento PDF'}</div>
-              `;
-            }
-            return `
+            finalContentHTML = `
               <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
                 <span class="material-icons">insert_drive_file</span>
-                  <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
-                    ${msg.file_name || 'Documento'}
-                  </a>
-              </div>
-            `;     
+                <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">${msg.file_name || 'Documento'}</a>
+              </div>`;
+            break;
           default:
-            return Helpers.escapeHtml(msg.message);
+            const tempSpan = document.createElement('span');
+            tempSpan.textContent = msg.message;
+            finalContentHTML = tempSpan.innerHTML;
         }
       }
-    };
-    /* ========================= MESSAGE SENDER ========================= */
-const MessageSender = {
-  async send(audioText = null, audioUrl = null) {
-    const inputEl = DOM.chatInput();
-    const sendBtn = document.getElementById("chat-send-btn");
-    const text = audioText || inputEl.value.trim();
-    
-    if (!text && !audioUrl) return;
-    sendBtn.disabled = true;
-
-    // Lógica de Edição
-    if (typeof EditManager !== 'undefined' && EditManager.editingMessageId && !audioUrl) {
-      try {
-        const {error} = await supabaseClient
-          .from('chat_messages')
-          .update({
-            message: text,
-            edited_at: new Date().toISOString() 
-          })
-          .eq('id', EditManager.editingMessageId);
-        if (error) throw error;
-        inputEl.value = '';
-        inputEl.dispatchEvent(new Event('input', {bubbles: true}));
-        EditManager.finish();
-      } catch (err) {
-        console.error("Erro ao editar:", err);
-      } finally {
-        sendBtn.disabled = false;
+      div.innerHTML = `
+        ${nameHTML}
+        ${replyPreviewHTML}
+        <span class="msg-text-content">${finalContentHTML}</span>${starIcon}
+        ${reactionsHTML}
+        <div class="msg-meta">
+          ${time} ${checkHTML}
+        </div>
+      `;
+      if (!isDeleted && msg.edited_at) {
+        const metaDiv = div.querySelector('.msg-meta');
+        if (metaDiv) {
+          const editTag = document.createElement('span');
+          editTag.className = 'message-edited-tag';
+          editTag.textContent = 'editada';
+          metaDiv.insertBefore(editTag, metaDiv.firstChild);
+        }
       }
-      return;
+      setupMessageInteraction(div, msg);
+      messagesEl.appendChild(div);
+      if (messagesEl.style.display !== 'none') {
+        scrollToBottom();
+      }
     }
-
-    // Limpeza do input se não for áudio
-    if (!audioUrl) {
-      inputEl.value = "";
-      LayoutManager.resetLayout();
-      inputEl.dispatchEvent(new Event('input'));
-    }
-
-    const currentCorp = Helpers.getCorpNr();
-    const senderName = await UserManager.fetchName();
-
-    // Montagem do Payload para a Base de Dados
-    const messageData = {
-      n_int: AppState.currentUserNint, 
-      recipient_nint: AppState.currentChat, 
-      corp_oper_nr: currentCorp, 
-      abv_name: senderName, 
-      message: text, 
-      file_url: audioUrl, 
-      // Se houver audioUrl, o tipo é 'audio', senão é 'text'
-      message_type: audioUrl ? 'audio' : 'text'
-    };
-
-    // Lógica de Resposta (Reply)
-    if (AppState.currentReplyToMessage) {
-      messageData.reply_to_message_id = AppState.currentReplyToMessage.id;
-    }
-
-    // Inserir na Base de Dados
-    const { error } = await supabaseClient.from('chat_messages').insert([messageData]);
-
-    if (!error) {
-      // Enviar Notificação Push
-      fetch('/api/sendPush', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipient_nint: AppState.currentChat, 
-          corp_nr: Helpers.getCorpNr(), 
-          sender_name: senderName, 
-          message_text: text || "Enviou um áudio 🎤",
-          sender_nint: AppState.currentUserNint
-        })
-      }).catch(err => console.error("Erro no push:", err));
-    }
-
-    // Finalizar estado de resposta
-    if (AppState.currentReplyToMessage) {
-      ReplyManager.cancel();
+    /* ======================== GET MESSAGE DATE  ======================== */
+    function getDateLabel(date) {
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+      if (date.toDateString() === today.toDateString()) return "Hoje";
+      if (date.toDateString() === yesterday.toDateString()) return "Ontem";
+      return date.toLocaleDateString('pt-PT', {day: '2-digit', month: '2-digit', year: 'numeric'});
     }    
-    sendBtn.disabled = false;
-  }
-};
-    /* ========================== READ MANAGER =========================== */
-    const ReadManager = {
-      async markGeralAsRead() {
-        const currentCorp = Helpers.getCorpNr();    
-        const {data: messages} = await supabaseClient
-          .from('chat_messages')
-          .select('id')
-          .eq('recipient_nint', 'geral')
-          .eq('corp_oper_nr', currentCorp)
-          .neq('n_int', AppState.currentUserNint);    
-        if (!messages || messages.length === 0) return;    
-        const {data: alreadyRead} = await supabaseClient
-          .from('chat_message_reads')
-          .select('message_id')
-          .eq('n_int', AppState.currentUserNint);    
-        const readIds = new Set(alreadyRead?.map(r => r.message_id) || []);    
-        const toInsert = messages
-          .filter(m => !readIds.has(m.id))
-          .map(m => ({message_id: m.id, n_int: AppState.currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp}));    
-        if (toInsert.length === 0) return;    
-        const {error} = await supabaseClient
-          .from('chat_message_reads')
-          .insert(toInsert);    
-        if (error) {
-          console.error("Erro na leitura:", error);
-        } else {
-          BadgeManager.update();
-        }
-      },  
-      async sendReceipt(toNint) {
-        if (toNint === 'geral' || !toNint) return;    
-        const currentCorp = Helpers.getCorpNr();    
-        const {error} = await supabaseClient
-          .from('chat_messages')
-          .update({read_at: new Date().toISOString()})
-          .eq('n_int', toNint)
-          .eq('recipient_nint', AppState.currentUserNint)
-          .eq('corp_oper_nr', currentCorp)
-          .is('read_at', null);    
-        if (!error && window.readReceiptChannel) {
-          window.readReceiptChannel.send({
-            type: 'broadcast',
-            event: 'read',
-            payload: {readerNint: String(AppState.currentUserNint)}
-          });
-        }
+    function toggleAudio(id, btn) {
+      const audio = document.getElementById(id);
+      const icon = btn.querySelector('.material-icons');
+      if (audio.paused) {
+        document.querySelectorAll('audio').forEach(a => {
+          if (a.id !== id) {
+            a.pause();
+            const otherBtn = document.querySelector(`[onclick*="${a.id}"] .material-icons`);
+            if (otherBtn) otherBtn.textContent = 'play_arrow';
+          }
+        });
+        audio.play();
+        icon.textContent = 'pause';
+      } else {
+        audio.pause();
+        icon.textContent = 'play_arrow';
       }
-    };
-    /* ======================== REACTION MANAGER ========================= */
-    const ReactionManager = {
-      render(reactions, messageId) {
-        if (!reactions || Object.keys(reactions).length === 0) return '';    
-        const grouped = {};
-        for (const [nint, emoji] of Object.entries(reactions)) {
-          if (!grouped[emoji]) grouped[emoji] = [];
-          grouped[emoji].push(nint);
-        }    
-        let html = '<div class="message-reactions">';
-        for (const [emoji, users] of Object.entries(grouped)) {
-          const count = users.length;
-          const isMyReaction = users.includes(AppState.currentUserNint);
-          const myClass = isMyReaction ? 'my-reaction' : '';
-          const isThumb = emoji === '👍' || emoji === '👎';
-          const thumbClass = isThumb ? 'thumb-emoji' : '';
-          const countHTML = count > 1 ? `<span class="reaction-count">${count}</span>` : '';      
-          html += `
-            <div class="reaction-badge ${myClass}" onclick="event.stopPropagation(); ReactionManager.toggle('${messageId}', '${emoji}')">
-              <span class="reaction-emoji ${thumbClass}">${emoji}</span>
-              ${countHTML}
+    }
+    function updateProgress(id) {
+      const audio = document.getElementById(id);
+      const fill = document.getElementById(`fill-${id}`);
+      const timeDisplay = document.getElementById(`time-${id}`);
+      if (!audio.duration) return;
+      const percent = (audio.currentTime / audio.duration) * 100;
+      fill.style.width = percent + "%";
+      const mins = Math.floor(audio.currentTime / 60);
+      const secs = Math.floor(audio.currentTime % 60);
+      timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+    function resetAudioIcon(id) {
+      const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
+      if (icon) icon.textContent = 'play_arrow';
+      const fill = document.getElementById(`fill-${id}`);
+      if (fill) fill.style.width = "0%";
+    }    
+    /* ============================ OPEN CHAT ============================ */
+    async function openChat(n_int, name) {
+      const messagesEl = document.getElementById("messages");
+      const contactListEl = document.getElementById("contact-list");
+      const contactTitle = document.getElementById("contact-title");
+      const chatIdInfo = document.getElementById("chat-id-info");
+      const backBtn = document.getElementById("back-header");
+      const pinnedEl = document.getElementById("pinned-message");
+      const inputBar = document.querySelector(".chat-input-bar");    
+      const typingStatusEl = document.getElementById("typing-status");
+      messagesEl.innerHTML = '';
+      if (typeof messagesToForward !== 'undefined' && messagesToForward.length > 0) {
+        const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+        const senderName = await fetchUserName();
+        for (const msg of messagesToForward) {
+          const { error } = await supabaseClient.from('chat_messages').insert([{n_int: currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName,
+                                                                                message: msg.message, is_forwarded: true}]);
+          if (error) console.error("Erro ao encaminhar mensagem:", error);
+        }
+        messagesToForward = [];
+        await new Promise(resolve => setTimeout(resolve, 150));
+      }
+      currentChat = String(n_int);
+      currentChatName = name;
+      if (currentChat === 'geral') {
+        await markGeralAsRead();
+        updateUnreadBadges();
+      } else {
+        const badge = document.querySelector(`.contact[data-nint="${n_int}"] .unread-badge`);
+        if (badge) badge.remove();
+        sendReadReceipt(currentChat);
+      }
+      contactListEl.style.display = 'none';
+      contactTitle.style.display = 'none';
+      messagesEl.style.display = 'flex';
+      backBtn.style.display = 'flex';
+      chatIdInfo.style.display = 'block';
+      typingStatusEl.style.display = 'none';
+      inputBar.style.display = 'flex';
+      chatIdInfo.textContent = `A conversar com: ${name}`;
+      if (currentChat === 'geral') {Ain
+        pinnedEl.style.display = 'flex';
+        document.getElementById("pinned-text-content").textContent = "ATENÇÃO! Este chat é supervisionado por IA. Qualquer mensagem que viole normas éticas será imediatamente bloqueada.";
+      } else { 
+        pinnedEl.style.display = 'none';
+      }
+      const savedDraft = localStorage.getItem(`draft_${currentChat}`);
+      if (savedDraft) {
+        inputMensage.value = savedDraft;
+        inputMensage.dispatchEvent(new Event('input'));
+      } else {
+        inputMensage.value = "";
+        inputMensage.dispatchEvent(new Event('input'));
+      }
+      await loadMessages(currentChat);
+    }
+    /* ======================== LOADING MESSAGES ========================= */
+    async function loadMessages(chat = currentChat) {
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const messagesEl = document.getElementById("messages");
+      const chatRef = chat || 'geral';
+      messagesEl.innerHTML = '';
+      lastDateLabel = "";
+      let query = supabaseClient
+      .from('chat_messages')
+      .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
+      .eq('corp_oper_nr', currentCorp);
+      if (chatRef === 'geral') {
+        query = query.eq('recipient_nint', 'geral');
+      } else {
+        query = query.or(`and(n_int.eq.${currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${currentUserNint})`);
+      }      
+      try {
+        const {data: msgs, error} = await query.order('created_at', {ascending: true});
+        if (currentChat !== chatRef) return;    
+        if (error) return console.error(error);
+        if (!msgs || msgs.length === 0) {
+          const emptyMsg = document.createElement("div");
+          emptyMsg.className = "empty-chat-placeholder";
+          emptyMsg.innerHTML = `
+            <div style="text-align: center; width: 100%; padding: 20px;">
+              <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
+              <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${currentChatName || 'este contacto'}</strong></span>
             </div>
           `;
-        }
-        html += '</div>';
-        return html;
-      },  
-      async toggle(messageId, emoji) {
-        const {data: msg, error: fetchError} = await supabaseClient
-          .from('chat_messages')
-          .select('reactions')
-          .eq('id', messageId)
-          .single();    
-        if (fetchError) {
-          console.error("Erro ao ler reações:", fetchError);
-          return;
-        }    
-        let currentReactions = msg.reactions || {};    
-        if (!currentReactions[emoji]) {
-          currentReactions[emoji] = [];
-        }    
-        const userIndex = currentReactions[emoji].indexOf(AppState.currentUserNint);    
-        if (userIndex === -1) {
-          currentReactions[emoji].push(AppState.currentUserNint);
+          messagesEl.appendChild(emptyMsg);
         } else {
-          currentReactions[emoji].splice(userIndex, 1);
-          if (currentReactions[emoji].length === 0) {
-            delete currentReactions[emoji];
-          }
-        }    
-        const {error: updateError} = await supabaseClient
-          .from('chat_messages')
-          .update({reactions: currentReactions})
-          .eq('id', messageId);    
-        if (updateError) {
-          console.error("Erro ao atualizar reação:", updateError);
-        }
-      },  
-      async handleClick(emoji) {
-        if (!AppState.reactionTargetId) {
-          console.warn("Nenhuma mensagem selecionada para reagir.");
-          return;
-        }    
-        const targetId = AppState.reactionTargetId;
-        const menu = DOM.reactionMenu();
-        if (menu) menu.style.display = 'none';    
-        SelectionManager.clear();    
-        try {
-          const {data: msg, error: fetchError} = await supabaseClient
-            .from('chat_messages')
-            .select('reactions')
-            .eq('id', targetId)
-            .single();      
-          if (fetchError) {
-            console.error("Erro ao ler do Supabase:", fetchError);
-            return;
-          }      
-          let currentReactions = msg.reactions || {};      
-          if (currentReactions[AppState.currentUserNint] === emoji) {
-            delete currentReactions[AppState.currentUserNint];
-          } else {
-            currentReactions[AppState.currentUserNint] = emoji;
-          }      
-          const {error: updateError} = await supabaseClient
-            .from('chat_messages')
-            .update({reactions: currentReactions})
-            .eq('id', targetId);      
-          if (updateError) {
-            console.error("Erro ao gravar reação:", updateError);
-          }
-        } catch (err) {
-          console.error("Erro inesperado:", err);
-        }
-      },  
-      openFullPicker() {
-        const menu = DOM.reactionMenu();
-        const pickerContainer = DOM.emojiContainer();
-        const picker = pickerContainer.querySelector('emoji-picker');    
-        if (menu) menu.style.display = 'none';
-        pickerContainer.style.display = 'block';
-        pickerContainer.dataset.mode = 'reaction';        
-        if (!picker.dataset.reactionListenerSet) {
-          picker.addEventListener('emoji-click', event => {
-            if (pickerContainer.dataset.mode === 'reaction') {
-              event.stopPropagation();
-              this.handleClick(event.detail.unicode);
-              pickerContainer.style.display = 'none';
-              delete pickerContainer.dataset.mode;
-            }
-          });
-          picker.dataset.reactionListenerSet = "true";
-        }
+          msgs.forEach(msg => addMessageToDOM(msg, chatRef)); 
+          scrollToBottom();
+        } 
+      } catch (err) {
+        console.error(err);
       }
-    };
-    /* ======================== SELECTION MANAGER ======================== */
-    const SelectionManager = {
-      toggle(messageElement, messageData) {
-        const messageId = messageData.id;
-        const index = AppState.selectedMessages.findIndex(m => m.id === messageId);    
-        if (index > -1) {
-          AppState.selectedMessages.splice(index, 1);
-          messageElement.classList.remove('selected');
-        } else {
-          AppState.selectedMessages.push(messageData);
-          messageElement.classList.add('selected');
-        }    
-        const menu = DOM.reactionMenu();
-        if (menu && AppState.selectedMessages.length !== 1) {
-          menu.style.display = 'none';
-        }    
-        ActionBar.update();
-      },  
-      clear() {
-        AppState.selectedMessages = [];
-        document.querySelectorAll('.message').forEach(el => {
-          el.classList.remove('selected', 'pressing', 'pressed', 'long-press-active');
-        });
-        const actionBar = DOM.actionBar();
-        if (actionBar) actionBar.classList.remove('show');
-        const menu = DOM.reactionMenu();
+    }
+    /* ====================== MARK MESSAGE AS READ ======================= */    
+    async function markGeralAsRead() {
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const { data: messages } = await supabaseClient
+      .from('chat_messages')
+      .select('id')
+      .eq('recipient_nint', 'geral')
+      .eq('corp_oper_nr', currentCorp)
+      .neq('n_int', currentUserNint);
+      if (!messages || messages.length === 0) return;
+      const { data: alreadyRead } = await supabaseClient
+      .from('chat_message_reads')
+      .select('message_id')
+      .eq('n_int', currentUserNint);
+      const readIds = new Set(alreadyRead?.map(r => r.message_id) || []);
+      const toInsert = messages
+      .filter(m => !readIds.has(m.id))
+      .map(m => ({message_id: m.id, n_int: currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp}));
+      if (toInsert.length === 0) return;
+      const { error } = await supabaseClient
+      .from('chat_message_reads')
+      .insert(toInsert);
+      if (error) {
+        console.error("Erro na 2ª leitura:", error);
+      } else {
+        updateUnreadBadges();
+      }
+    }
+    /* ========================== SEND MESSAGE (UPDATED) =========================== */
+    async function sendMessage(audioText = null, audioUrl = null) {
+      const inputEl = document.getElementById("chat-input");
+      const sendBtn = document.getElementById("chat-send-btn");
+      const text = audioText || inputEl.value.trim();
+      if (!text && !audioUrl) return;    
+      sendBtn.disabled = true;
+      if (!audioUrl) {
+        inputEl.value = "";
+        resetLayout();
+        inputEl.dispatchEvent(new Event('input'));
+      }    
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";  
+      if (currentEditingMessage && !audioUrl) {
+        return;
+      }    
+      const senderName = await fetchUserName();
+      const messageData = {n_int: currentUserNint, recipient_nint: currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text,file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};    
+      if (currentReplyToMessage) {
+        messageData.reply_to_message_id = currentReplyToMessage.id;
+      }    
+      const { error } = await supabaseClient.from('chat_messages').insert([messageData]);    
+      sendBtn.disabled = false;    
+      if (error) {
+        console.error(error); 
+        if (!audioUrl) {
+          inputEl.value = text;
+          inputEl.dispatchEvent(new Event('input'));
+        }
+      } else {
+        cancelReply();
+        clearSelection();
+        const messageContainer = document.querySelector('.message-container');
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }
+    }
+    /* ==================== TOOGLE MESSAGE SELECTION ===================== */
+    function toggleMessageSelection(messageElement, messageData) {
+      const messageId = messageData.id;
+      const index = selectedMessages.findIndex(m => m.id === messageId);
+      if (index > -1) {
+        selectedMessages.splice(index, 1);
+        messageElement.classList.remove('selected');
+      } else {
+        selectedMessages.push(messageData);
+        messageElement.classList.add('selected');
+      }
+      const menu = document.getElementById('reaction-menu');
       if (menu) {
-        menu.style.display = 'none';
-        menu.classList.remove('show');
-      }
-        AppState.reactionTargetId = null;
-        AppState.isLongPressing = false;
-        if (window.getSelection) {window.getSelection().removeAllRanges();}
-      }
-    };
-    /* =========================== ACTION BAR ============================ */
-    const ActionBar = {
-      update() {
-        const actionBar = DOM.actionBar();
-        const counter = document.getElementById('action-counter');
-        const replyBtn = document.getElementById('action-reply');
-        const copyBtn = document.getElementById('action-copy');
-        const editBtn = document.getElementById('action-edit');
-        const deleteBtn = document.getElementById('action-delete');
-        const starBtn = document.getElementById('action-star');
-        const menu = DOM.reactionMenu();    
-        const count = AppState.selectedMessages.length;    
-        if (count === 0) {
-          actionBar.classList.remove('show');
-          if (menu) menu.style.display = 'none';
-          return;
-        }    
-        actionBar.classList.add('show');    
-        if (count > 1 && menu) {
+        if (selectedMessages.length === 1) {          
+        } else {
           menu.style.display = 'none';
-        }    
-        counter.textContent = count === 1 ? '1' : `${count}`;    
-        const isOne = count === 1;
-        const firstMsg = AppState.selectedMessages[0];
-        const allMine = AppState.selectedMessages.every(m => String(m.n_int) === AppState.currentUserNint);
-        if (isOne) {
-          replyBtn.classList.remove('disabled');
-        } else {
-          replyBtn.classList.add('disabled');
-        }
-        if (isOne) {
-          copyBtn.classList.remove('disabled');
-        } else {
-          copyBtn.classList.add('disabled');
-        }
-        if (isOne && String(firstMsg.n_int) === AppState.currentUserNint) {
-          editBtn.classList.remove('disabled');
-        } else {
-          editBtn.classList.add('disabled');
-        }
-        if (allMine) {
-          deleteBtn.classList.remove('disabled');
-        } else {
-          deleteBtn.classList.add('disabled');
-        }
-        if (starBtn && count > 0) {
-          const allStarred = AppState.selectedMessages.every(m => 
-            m.starred_by && m.starred_by.includes(AppState.currentUserNint)
-          );      
-          const starIcon = starBtn.querySelector('.material-icons');
-          if (starIcon) {
-            starIcon.textContent = allStarred ? 'star' : 'star_border';
-          }
         }
       }
-    };
-    /* ========================= MESSAGE ACTIONS ========================= */
-    const MessageActions = {
-      reply() {
-        if (AppState.selectedMessages.length !== 1) return;
-        const msg = AppState.selectedMessages[0];
-        ReplyManager.set(msg.id, msg.abv_name, msg.message);
-        SelectionManager.clear();
-      },  
-      async star() {
-        if (AppState.selectedMessages.length === 0) return;    
-        const currentCorp = Helpers.getCorpNr();    
-        try {
-          for (const msg of AppState.selectedMessages) {
-            const {data: msgData, error: fetchError} = await supabaseClient
-              .from('chat_messages')
-              .select('starred_by')
-              .eq('id', msg.id)
-              .single();        
-            if (fetchError) {
-              console.error("Erro ao buscar favoritos:", fetchError);
-              continue;
-            }        
-            let starredBy = msgData?.starred_by || [];
-            const index = starredBy.indexOf(AppState.currentUserNint);        
-            if (index > -1) {
-              starredBy.splice(index, 1);
-            } else {
-              starredBy.push(AppState.currentUserNint);
-            }        
-            const {error: updateError} = await supabaseClient
-              .from('chat_messages')
-              .update({starred_by: starredBy})
-              .eq('id', msg.id)
-              .eq('corp_oper_nr', currentCorp);        
-            if (updateError) {
-              console.error("Erro ao atualizar favorito:", updateError);
-            }        
-            const msgIndex = AppState.selectedMessages.findIndex(m => m.id === msg.id);
-            if (msgIndex > -1) {
-              AppState.selectedMessages[msgIndex].starred_by = starredBy;
-            }
-          }      
-          ActionBar.update();
-          setTimeout(() => SelectionManager.clear(), 300);
-        } catch (error) {
-          console.error("Erro inesperado em actionStar:", error);
+      updateActionBar();
+    }
+    /* ======================== UPDATE ACTION BAR ======================== */
+    function updateActionBar() {
+      const actionBar = document.getElementById('action-bar');
+      const counter = document.getElementById('action-counter');
+      const replyBtn = document.getElementById('action-reply');
+      const copyBtn = document.getElementById('action-copy');
+      const editBtn = document.getElementById('action-edit');
+      const deleteBtn = document.getElementById('action-delete');
+      const starBtn = document.getElementById('action-star');
+      const menu = document.getElementById('reaction-menu');      
+      const count = selectedMessages.length;
+      if (count === 0) {
+        actionBar.classList.remove('show');
+        if (menu) menu.style.display = 'none';
+        return;
+      }      
+      actionBar.classList.add('show');
+      if (count > 1 && menu) {
+        menu.style.display = 'none';
+      }      
+      counter.textContent = count === 1 ? '1' : `${count}`;
+      const isOne = count === 1;
+      const firstMsg = selectedMessages[0];
+      const allMine = selectedMessages.every(m => String(m.n_int) === currentUserNint);      
+      if (isOne) {
+        replyBtn.classList.remove('disabled');
+      } else {
+        replyBtn.classList.add('disabled');
+      }      
+      if (isOne) {
+        copyBtn.classList.remove('disabled');
+      } else {
+        copyBtn.classList.add('disabled');
+      }      
+      if (isOne && String(firstMsg.n_int) === currentUserNint) {
+        editBtn.classList.remove('disabled');
+      } else {
+        editBtn.classList.add('disabled');
+      }      
+      if (allMine) {
+        deleteBtn.classList.remove('disabled');
+      } else {
+        deleteBtn.classList.add('disabled');
+      }
+      if (starBtn && count > 0) {
+        const allStarred = selectedMessages.every(m => 
+          m.starred_by && m.starred_by.includes(currentUserNint)
+        );        
+        const starIcon = starBtn.querySelector('.material-icons');
+        if (starIcon) {
+          starIcon.textContent = allStarred ? 'star' : 'star_border';
         }
-      },  
-      copy() {
-        if (AppState.selectedMessages.length !== 1) return;
-        const msg = AppState.selectedMessages[0];    
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(msg.message).then(() => {
-            alert('✅ Texto copiado!');
-          }).catch(() => {
-            this.fallbackCopy(msg.message);
-          });
-        } else {
-          this.fallbackCopy(msg.message);
-        }    
-        SelectionManager.clear();
-      },  
-      fallbackCopy(text) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-9999px';
-        document.body.appendChild(textArea);
-        textArea.select();    
-        try {
-          document.execCommand('copy');
-          alert('✅ Texto copiado!');
-        } catch (err) {
-          alert('❌ Erro ao copiar texto');
-        }    
-        document.body.removeChild(textArea);
-      },  
-      forward() {
-        if (AppState.selectedMessages.length === 0) return;    
-        AppState.messagesToForward = AppState.selectedMessages.map(msg => ({message_type: msg.message_type || 'text', message: msg.message || '', file_url: msg.file_url || null,
-                                                                            file_name: msg.file_name || null}));    
-        SelectionManager.clear();    
-        const messagesEl = DOM.messages();
-        const contactListEl = DOM.contactList();
-        const contactTitle = DOM.contactTitle();
-        const backBtn = DOM.backHeader();
-        const inputBar = DOM.inputBar();
-        const chatIdInfo = DOM.chatIdInfo();    
-        if (window.innerWidth <= 768) {
-          messagesEl.style.display = 'none';
-          contactListEl.style.display = 'block';
-          contactTitle.style.display = 'block';
-          backBtn.style.display = 'none';
-          inputBar.style.display = 'none';
-          chatIdInfo.style.display = 'none';
-        }
-      },  
-      async delete() {
-        if (!AppState.selectedMessages || AppState.selectedMessages.length === 0) return;    
-        const allMine = AppState.selectedMessages.every(m => String(m.n_int) === AppState.currentUserNint);
-        const choice = await this.askConfirm(AppState.selectedMessages.length, allMine);    
-        if (choice === 'cancel') return;    
-        for (const msg of AppState.selectedMessages) {
-          if (choice === 'todos') {
-            if (String(msg.n_int) === AppState.currentUserNint) {
-              await supabaseClient
-                .from('chat_messages')
-                .update({
-                  deleted_at: new Date().toISOString(),
-                  message: 'Mensagem apagada'
-                })
-                .eq('id', msg.id);
-            }
-          } else if (choice === 'mim') {
-            const msgElement = Helpers.getMessageElement(msg.id);
-            if (msgElement) msgElement.style.display = 'none';
-          }
-        }    
-        SelectionManager.clear();
-      },  
-      askConfirm(count, allMine) {
-        const modal = document.getElementById('modal-confirm');
-        if (modal) {
-          const textElement = modal.querySelector('.confirm-text');
-          if (textElement) {
-            textElement.innerText = count === 1 ? 'Elimininar mensagem?' : `Elimininar ${count} mensagens?`;
-          }      
-          const btnTodos = modal.querySelector('.btn-confirm-action');
-          if (btnTodos) {
-            btnTodos.style.display = allMine ? 'block' : 'none';
-          }      
-          modal.style.display = 'flex';
-        }    
-        return new Promise(resolve => {
-          AppState.confirmResolver = resolve;
-        });
-      },  
-      confirmResponse(choice) {
-        const modal = document.getElementById('modal-confirm');
-        if (modal) modal.style.display = 'none';
-        
-        if (AppState.confirmResolver) {
-          AppState.confirmResolver(choice);
-          AppState.confirmResolver = null;
-        }
-      },  
-      edit() {
-        if (AppState.selectedMessages.length !== 1) return;
-        const msg = AppState.selectedMessages[0];
-        if (String(msg.n_int) !== AppState.currentUserNint || msg.deleted_at) return;
-        if (typeof EditManager !== 'undefined') {
-        EditManager.start(msg.id, msg.message);
-        } else {
-          this._legacyEdit(msg);
-        }
-        SelectionManager.clear();
       }
-    };
-    /* ========================== REPLY MANAGER ========================== */
-    const ReplyManager = {
-      set(messageId, senderName, messageText) {
-        AppState.currentReplyToMessage = {
-          id: messageId,
-          name: senderName,
-          text: messageText
-        };    
-        document.getElementById('reply-to-name').textContent = senderName;
-        document.getElementById('reply-to-text').textContent = messageText;
-        document.getElementById('reply-bar').style.display = 'block';
-        DOM.chatInput().focus();
-      },  
-      cancel() {
-        AppState.currentReplyToMessage = null;
-        document.getElementById('reply-bar').style.display = 'none';
-      }
-    };
-    /* ========================== EDIT MANAGER =========================== */
-    const EditManager = {
-      editingMessageId: null,    
-      start(messageId) {
-        const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
-        if (!msgElement) return;        
-        this.editingMessageId = messageId;
-        const textContent = msgElement.querySelector('.msg-text-content').innerText;
-        const chatInput = document.getElementById('chat-input');        
-        chatInput.value = textContent;
-        chatInput.focus();        
-        const editBar = document.querySelector('.edit-bar');
-        editBar.querySelector('.edit-text-preview').textContent = textContent;
-        editBar.style.display = 'block';
-        ActionBarManager.close();
-        chatInput.dispatchEvent(new Event('input'));
-      },    
-      cancel() {
-        this.editingMessageId = null;
-        document.querySelector('.edit-bar').style.display = 'none';
-        document.getElementById('chat-input').value = '';
-        SelectionManager.clear();
-        ChatInputHandler.toggleSendButton();
-      },    
-      finish() {
-        this.editingMessageId = null;
-        document.querySelector('.edit-bar').style.display = 'none';
-        document.getElementById('chat-input').value = '';
-        SelectionManager.clear();
-        ChatInputHandler.toggleSendButton();
-      }
-    };
-    /* ======================= MESSAGE INTERACTION ======================= */
-    const MessageInteraction = {
-      setup(messageElement, messageData) {
-        let pressTimer;
-        let isLongPress = false;        
-        messageElement.addEventListener('touchstart', (e) => {
-          isLongPress = false;
-          pressTimer = setTimeout(() => {
-            isLongPress = true;
-            if (navigator.vibrate) navigator.vibrate(50);            
-            const menu = DOM.reactionMenu();
-            if (menu) menu.style.display = 'none';            
-            SelectionManager.toggle(messageElement, messageData);            
-            if (AppState.selectedMessages.length === 1 && menu) {
-              this.showReactionMenu(messageElement, messageData.id, menu);
-            }
-          }, 500);
-        }, {passive: true});        
-        messageElement.addEventListener('touchend', () => clearTimeout(pressTimer));
-        messageElement.addEventListener('touchmove', () => clearTimeout(pressTimer));        
-        messageElement.addEventListener('click', (e) => {
-          const menu = DOM.reactionMenu();
-          if (AppState.selectedMessages.length > 0) {
-            e.preventDefault();
-            SelectionManager.toggle(messageElement, messageData);
-            if (menu) menu.style.display = 'none';
-          }
-        });
-      },      
-      showReactionMenu(messageElement, messageId, menu) {
-        AppState.reactionTargetId = messageId;
-        const scrollContainer = menu.querySelector('.emoji-scroll-container');
-        if (scrollContainer) scrollContainer.scrollLeft = 0;        
-        menu.style.display = 'flex';        
-        const menuWidth = 215;
-        const menuHeight = 45;
-        const rect = messageElement.getBoundingClientRect();        
-        let posX = rect.left + (rect.width / 2) - (menuWidth / 2);
-        if (posX < 10) posX = 10;
-        if (posX + menuWidth > window.innerWidth) {
-          posX = window.innerWidth - menuWidth - 10;
-        }        
-        let posY = rect.bottom + 10;
-        if (posY + menuHeight > window.innerHeight - 60) {
-          posY = rect.top - menuHeight - 10;
-        }        
-        menu.style.left = posX + 'px';
-        menu.style.top = posY + 'px';
-      }
-    };
-    /* ========================== AUDIO PLAYER =========================== */
-    const AudioPlayer = {
-      toggle(id, btn) {
-        const audio = document.getElementById(id);
-        const icon = btn.querySelector('.material-icons');    
-        if (audio.paused) {
-          document.querySelectorAll('audio').forEach(a => {
-            if (a.id !== id) {
-              a.pause();
-              const otherBtn = document.querySelector(`[onclick*="${a.id}"] .material-icons`);
-              if (otherBtn) otherBtn.textContent = 'play_arrow';
-            }
-          });      
-          audio.play();
-          icon.textContent = 'pause';
-        } else {
-          audio.pause();
-          icon.textContent = 'play_arrow';
-        }
-      },  
-      updateProgress(id) {
-        const audio = document.getElementById(id);
-        const fill = document.getElementById(`fill-${id}`);
-        const timeDisplay = document.getElementById(`time-${id}`);    
-        if (!audio.duration) return;    
-        const percent = (audio.currentTime / audio.duration) * 100;
-        fill.style.width = percent + "%";    
-        const mins = Math.floor(audio.currentTime / 60);
-        const secs = Math.floor(audio.currentTime % 60);
-        timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-      },  
-      resetIcon(id) {
-        const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
-        if (icon) icon.textContent = 'play_arrow';    
-        const fill = document.getElementById(`fill-${id}`);
-        if (fill) fill.style.width = "0%";
-      }
-    };
-   /* =================== KEYBOARD HANDLER (PWA FIX) ==================== */
-    const KeyboardHandler = {
-      init() {
-        (function () {
-          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-          const THRESH_OPEN  = isIOS ? 80  : 120;
-          const THRESH_CLOSE = isIOS ? 40  : 60;
-          let keyboardOpen = false;
-          let baseInnerHeight = window.innerHeight;
-          const body = document.body;
-          const mainContent = document.querySelector(".main-content");
-          const messages = document.querySelector(".message-container");
-          const inputBar = document.querySelector(".chat-input-bar");
-          const inputEl = document.getElementById("chat-input");
-          const emojiContainer = document.getElementById("full-emoji-picker-container");          
-          function setKb(px) {
-            document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
-          }          
-          function isChatVisible() {
-            const el = document.getElementById("messages");
-            return el && el.style.display !== "none";
-          }          
-          function getKeyboardHeight() {
-            if (!window.visualViewport) return 0;
-            const vv = window.visualViewport;
-            const a = window.innerHeight - vv.height;
-            const b = window.innerHeight - vv.height - vv.offsetTop;
-            const c = window.innerHeight - vv.height + vv.offsetTop;
-            return Math.max(0, a, b, c);
-          }          
-          function onKeyboardOpen(kbHeight) {
-            if (!isChatVisible()) return;
-            keyboardOpen = true;
-            body.classList.add("keyboard-open");
-            messages?.classList.add("keyboard-active");
-            inputBar?.classList.add("keyboard-active");
-            mainContent?.classList.add("keyboard-active");
-            setKb(kbHeight);
-            if (emojiContainer && emojiContainer.style.display === "block") {
-              emojiContainer.style.display = "none";
-            }
-            ScrollManager.toBottom();
-            setTimeout(() => ScrollManager.toBottom(), 120);
-          }          
-          function onKeyboardClose() {
-            keyboardOpen = false;
-            body.classList.remove("keyboard-open");
-            messages?.classList.remove("keyboard-active");
-            inputBar?.classList.remove("keyboard-active");
-            mainContent?.classList.remove("keyboard-active");
-            setKb(0);
-          }          
-          function detectKeyboard() {
-            if (!keyboardOpen) baseInnerHeight = window.innerHeight;
-            const kb = getKeyboardHeight();
-            if (!keyboardOpen && kb > THRESH_OPEN) {
-              onKeyboardOpen(kb);
-            } else if (keyboardOpen && kb < THRESH_CLOSE) {
-              onKeyboardClose();
-            } else if (keyboardOpen) {
-              setKb(kb);
-              ScrollManager.toBottom();
-              setTimeout(() => ScrollManager.toBottom(), 120);
-            }
-          }          
-          if (window.visualViewport) {
-            window.visualViewport.addEventListener("resize", detectKeyboard);
-            window.visualViewport.addEventListener("scroll", detectKeyboard);
-          } else {
-            window.addEventListener("resize", detectKeyboard);
-          }          
-          inputEl?.addEventListener("focus", () => {
-            ScrollManager.toBottom();
-            setTimeout(() => ScrollManager.toBottom(), 120);
-          });          
-          inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));
-          window.addEventListener("orientationchange", () => {
-            setTimeout(() => {
-              baseInnerHeight = window.innerHeight;
-              detectKeyboard();
-            }, 300);
-          });          
-          const messagesEl = document.getElementById("messages");
-          if (messagesEl) {
-            const obs = new MutationObserver(() => {
-              if (!isChatVisible()) onKeyboardClose();
-            });
-            obs.observe(messagesEl, {attributes: true, attributeFilter: ["style"]});
-          }          
-          body.addEventListener('touchmove', function(e) {
-            if (keyboardOpen && body.classList.contains('keyboard-open')) {
-              e.preventDefault();
-            }
-          }, {passive: false});      
-        })();
-      }
-    };
-    /* ======================== REALTIME MANAGER ========================= */
-    const RealtimeManager = {
-      init() {
-        const currentCorp = Helpers.getCorpNr();
-        supabaseClient.channel('chat_realtime')
-          .on('postgres_changes', {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'chat_messages',
-            filter: `corp_oper_nr=eq.${currentCorp}`
-          }, async (payload) => {
-            await this.handleNewMessage(payload.new);
-          })
-          .on('postgres_changes', {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'chat_messages',
-            filter: `corp_oper_nr=eq.${currentCorp}`
-          }, (payload) => {
-            this.handleMessageUpdate(payload.new);
-          })
-          .subscribe();
-        supabaseClient.channel('reads_realtime')
-          .on('postgres_changes', {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'chat_message_reads',
-            filter: `corp_oper_nr=eq.${currentCorp}`
-          }, () => {
-            BadgeManager.update();
-          })
-          .subscribe();
-        const readReceiptChannel = supabaseClient.channel('read-receipts');
-        readReceiptChannel.on('broadcast', {event: 'read'}, (payload) => {
-          if (String(payload.payload.readerNint) === AppState.currentChat) {
-            document.querySelectorAll('.status-checks').forEach(check => {
-              if (!check.classList.contains('read')) {
-                check.classList.remove('sent', 'delivered');
-                check.classList.add('read');
-                check.textContent = 'done_all';
-              }
-            });
-          }
-        }).subscribe();    
-        window.readReceiptChannel = readReceiptChannel;
-        const typingChannel = supabaseClient.channel('typing-status', {
-          config: {broadcast: {ack: true, self: false}}
-        });    
-        typingChannel.on('broadcast', {event: 'typing'}, (payload) => {
-          const data = payload.payload;
-          if (AppState.currentChat !== 'geral' && String(data.nint) === AppState.currentChat) {
-            const statusEl = DOM.typingStatus();
-            statusEl.textContent = `${AppState.currentChatName} está a escrever...`;
-            statusEl.style.display = data.isTyping ? 'block' : 'none';
-            if (data.isTyping) ScrollManager.toBottom();
-          }
-        }).subscribe();
-        let typingTimer;
-        const inputEl = DOM.chatInput();
-        inputEl.addEventListener('input', () => {
-          if (AppState.currentChat === 'geral') return;      
-          typingChannel.send({
-            type: 'broadcast',
-            event: 'typing',
-            payload: {nint: String(AppState.currentUserNint), isTyping: true}
-          });      
-          clearTimeout(typingTimer);
-          typingTimer = setTimeout(() => {
-            typingChannel.send({
-              type: 'broadcast',
-              event: 'typing',
-              payload: {nint: String(AppState.currentUserNint), isTyping: false}
-            });
-          }, 2000);
-        });
-        const presenceChannel = supabaseClient.channel('presence-cb360', {
-          config: {presence: {key: String(AppState.currentUserNint)}}
-        });    
-        presenceChannel.on('presence', {event: 'sync'}, () => {
-          const state = presenceChannel.presenceState();      
-          document.querySelectorAll('.status-dot').forEach(dot => dot.classList.remove('online'));      
-          Object.keys(state).forEach((nint) => {
-            const dot = document.querySelector(`.contact[data-nint="${nint}"] .status-dot`);
-            if (dot) dot.classList.add('online');        
-            if (AppState.currentChat !== 'geral' && String(nint) === AppState.currentChat) {
-              document.querySelectorAll('.status-checks.sent').forEach(check => {
-                check.classList.remove('sent');
-                check.classList.add('delivered');
-                check.textContent = 'done_all';
-              });
-            }
-          });
-        }).subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await presenceChannel.track({
-              online_at: new Date().toISOString(),
-              nint: String(AppState.currentUserNint)
-            });
-          }
-        });
-      },  
-      async handleNewMessage(msg) {
-        if (msg.reply_to_message_id) {
-          const {data: replyData} = await supabaseClient
+    }
+    /* =================================================================== */
+    /* ======================== ACTION FUNCTIONS ========================= */
+    /* =================================================================== */
+    /* ========================== ACTION REPLAY ========================== */
+    function actionReply() {
+      if (selectedMessages.length !== 1) return;
+      const msg = selectedMessages[0];
+      replyToMessage(msg.id, msg.abv_name, msg.message);
+      clearSelection();
+    }
+    /* =========================== ACTION STAR =========================== */
+    async function actionStar() {
+      if (selectedMessages.length === 0) return;      
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";      
+      try {
+        for (const msg of selectedMessages) {
+          const { data: msgData, error: fetchError } = await supabaseClient
             .from('chat_messages')
-            .select('id, message, abv_name')
-            .eq('id', msg.reply_to_message_id)
-            .single();      
+            .select('starred_by')
+            .eq('id', msg.id)
+            .single();          
+          if (fetchError) {
+            console.error("Erro ao buscar favoritos:", fetchError);
+            continue;
+          }          
+          let starredBy = msgData?.starred_by || [];
+          const index = starredBy.indexOf(currentUserNint);          
+          if (index > -1) {
+            starredBy.splice(index, 1);
+          } else {
+            starredBy.push(currentUserNint);
+          }          
+          const { error: updateError } = await supabaseClient
+            .from('chat_messages')
+            .update({ starred_by: starredBy })
+            .eq('id', msg.id)
+            .eq('corp_oper_nr', currentCorp);          
+          if (updateError) {
+            console.error("Erro ao atualizar favorito:", updateError);
+          }          
+          const msgIndex = selectedMessages.findIndex(m => m.id === msg.id);
+          if (msgIndex > -1) {
+            selectedMessages[msgIndex].starred_by = starredBy;
+          }
+        }        
+        updateActionBar();
+        setTimeout(() => {
+          clearSelection();
+        }, 300);        
+      } catch (error) {
+        console.error("Erro inesperado em actionStar:", error);
+      }
+    }
+    /* =========================== ACTION COPY =========================== */
+    function actionCopy() {
+      if (selectedMessages.length !== 1) return;
+      const msg = selectedMessages[0];
+      copyMessageText(msg.message);
+      clearSelection();
+    }
+    /* ========================= ACTION FORWARD ========================== */
+    function actionForward() {
+      if (selectedMessages.length === 0) return;
+      messagesToForward = selectedMessages.map(msg => ({
+        message: msg.message
+      }));
+      clearSelection();
+      const messagesEl = document.getElementById("messages");
+      const contactListEl = document.getElementById("contact-list");
+      const contactTitle = document.getElementById("contact-title");
+      const backBtn = document.getElementById("back-header");
+      if (window.innerWidth <= 768) {
+        messagesEl.style.display = 'none';
+        contactListEl.style.display = 'block';
+        contactTitle.style.display = 'block';
+        backBtn.style.display = 'none';
+      }
+      console.log("Modo encaminhar: Selecione o contacto de destino na lista.");
+    }
+    /* ========================== ACTION DELETE ========================== */
+    let confirmResolver = null;
+    async function actionDelete() {
+      if (!selectedMessages || selectedMessages.length === 0) return;
+      const allMine = selectedMessages.every(m => String(m.n_int) === currentUserNint);
+      const choice = await askConfirm(selectedMessages.length, allMine);
+      if (choice === 'cancel') return;
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      for (const msg of selectedMessages) {
+        if (choice === 'todos') {
+          if (String(msg.n_int) === currentUserNint) {
+            await supabaseClient
+              .from('chat_messages')
+              .update({ 
+              deleted_at: new Date().toISOString(),
+              message: 'Mensagem apagada'
+            })
+              .eq('id', msg.id);
+          }
+        } 
+        else if (choice === 'mim') {
+          const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
+          if (msgElement) msgElement.style.display = 'none';
+        }
+      }
+      clearSelection();
+    }
+    function askConfirm(count, allMine) {
+      const modal = document.getElementById('modal-confirm');
+      if (modal) {
+        const textElement = modal.querySelector('.confirm-text');
+        if (textElement) {
+          textElement.innerText = count === 1 ? 'Elimininar mensagem?' : `Elimininar ${count} mensagens?`;
+        }
+        const btnTodos = modal.querySelector('.btn-confirm-action');
+        if (btnTodos) {
+          btnTodos.style.display = allMine ? 'block' : 'none';
+        }
+        modal.style.display = 'flex';
+      }
+      return new Promise(resolve => {
+        confirmResolver = resolve;
+      });
+    }
+    function resConfirm(choice) {
+      const modal = document.getElementById('modal-confirm');
+      if (modal) modal.style.display = 'none'; 
+      if (confirmResolver) {
+        confirmResolver(choice);
+        confirmResolver = null;
+      }
+    }
+    /* =========================== ACTION EDIT =========================== */
+    function actionEdit() {
+      if (selectedMessages.length !== 1) return;
+      const msg = selectedMessages[0];
+      if (String(msg.n_int) !== currentUserNint) return;
+      if (msg.deleted_at) return;
+      currentEditingMessage = {
+        id: msg.id,
+        originalText: msg.message
+      };
+      document.getElementById('edit-text-preview').textContent = msg.message;
+      document.getElementById('edit-bar').style.display = 'block';
+      const inputEl = document.getElementById('chat-input');
+      inputEl.value = msg.message;
+      inputEl.focus();
+      clearSelection();
+    }
+    function cancelEdit() {
+      currentEditingMessage = null;
+      document.getElementById('edit-bar').style.display = 'none';
+      document.getElementById('chat-input').value = '';
+    }
+    /* =================== INITIALIZATION AND REALTIME =================== */
+    document.addEventListener('DOMContentLoaded', async () => {
+      loadCorpInfo();
+      loadTheme();
+      await loadContacts();
+      updateUnreadBadges();
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      supabaseClient.channel('chat_realtime')
+        .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `corp_oper_nr=eq.${currentCorp}`
+      }, async (payload) => {
+        let msg = payload.new;
+        if (msg.reply_to_message_id) {
+          const { data: replyData } = await supabaseClient
+          .from('chat_messages')
+          .select('id, message, abv_name')
+          .eq('id', msg.reply_to_message_id)
+          .single();
           if (replyData) {
             msg.reply_to_message = replyData;
           }
-        }    
-        const involved = [msg.n_int, msg.recipient_nint].map(String);    
-        if (AppState.currentChat === 'geral' && msg.recipient_nint === 'geral') {
-          MessageManager.addToDOM(msg, 'geral');      
-          if (String(msg.n_int) !== AppState.currentUserNint && DOM.messages()?.style.display !== 'none') {
-            const currentCorp = Helpers.getCorpNr();
+        }   
+        const involved = [msg.n_int, msg.recipient_nint].map(String);
+        if (currentChat === 'geral' && msg.recipient_nint === 'geral') {
+          addMessageToDOM(msg, 'geral');
+          if (String(msg.n_int) !== currentUserNint && document.getElementById("messages")?.style.display !== 'none') {
+            const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
             const geralContact = document.querySelector('.contact[data-nint="geral"]');
             const currentBadge = geralContact?.querySelector('.unread-badge');
-            const badgeValue = currentBadge ? currentBadge.textContent : null;        
-            supabaseClient.from('chat_message_reads').insert({message_id: msg.id, n_int: AppState.currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp
-            }).then(() => {
+            const badgeValue = currentBadge ? currentBadge.textContent : null;
+            supabaseClient.from('chat_message_reads').insert({message_id: msg.id, n_int: currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp}).then(() => {
               if (badgeValue && geralContact) {
                 setTimeout(() => {
                   let badge = geralContact.querySelector('.unread-badge');
@@ -2274,128 +1535,64 @@ const MessageSender = {
               }
             });
           }
-        } else if (AppState.currentChat !== 'geral' && involved.includes(AppState.currentUserNint) && involved.includes(AppState.currentChat)) {
-          MessageManager.addToDOM(msg, AppState.currentChat);      
-          if (String(msg.recipient_nint) === AppState.currentUserNint) {
-            setTimeout(() => ReadManager.sendReceipt(AppState.currentChat), 100);
+        } else if (currentChat !== 'geral' && involved.includes(currentUserNint) && involved.includes(currentChat)) {
+          addMessageToDOM(msg, currentChat);
+          if (String(msg.recipient_nint) === currentUserNint) {
+            setTimeout(() => sendReadReceipt(currentChat), 100);
           }
-        }    
-        if (String(msg.n_int) !== AppState.currentUserNint) {
-          BadgeManager.update();
         }
-      },  
-      handleMessageUpdate(msg) {
-        const msgElement = Helpers.getMessageElement(msg.id);
-        if (!msgElement) return;
-        const clearSelectionUI = () => {
-          const sel = window.getSelection?.();
-          if (sel) sel.removeAllRanges();
-          document.querySelectorAll('.message').forEach(m => {
-            m.classList.remove('selected', 'editing', 'active', 'highlight', 'pressing', 'pressed', 'context-open', 'menu-open', 'is-selected');
-            m.removeAttribute('data-selected');
-            m.removeAttribute('aria-selected');
-          });
-          msgElement.querySelectorAll('.selected, .is-selected').forEach(el => el.classList.remove('selected', 'is-selected'));
-          document
-            .querySelectorAll('.context-menu, .message-menu, .message-actions, .msg-actions-bar, .action-sheet, .popover')
-            .forEach(el => el.remove());
-          if (typeof AppState !== 'undefined' && AppState) {
-            const keysToNull = ['editingMessageId', 'selectedMessageId', 'selectedMessage', 'longPressMessageId', 'contextMessageId', 'activeMessageId', 'menuMessageId'];
-            keysToNull.forEach(k => {
-              if (k in AppState) AppState[k] = null;
-            });
-            if ('isSelecting' in AppState) AppState.isSelecting = false;
-            if ('isEditing' in AppState) AppState.isEditing = false;
-          }
-          document.body.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
-          document.body.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
-          document.body.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-          if (document.activeElement && typeof document.activeElement.blur === 'function') {
-            document.activeElement.blur();
-          }
-        };
+        if (String(msg.n_int) !== currentUserNint) {
+          updateUnreadBadges();
+        }
+      })
+        .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `corp_oper_nr=eq.${currentCorp}`
+      }, payload => {
+        const msg = payload.new;
         if (msg.deleted_at) {
-          msgElement.classList.add('deleted');
-          const textContent = msgElement.querySelector('.msg-text-content');
-          if (textContent) {
-            textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
-          }
-          msgElement.querySelector('.message-reactions')?.remove();
-          msgElement.querySelector('.star-icon')?.remove();
-          clearSelectionUI();
-          return;
-        }
-        const timeEl = msgElement.querySelector('.msg-time');
-        const t = msg.edited_at || msg.updated_at || msg.created_at;
-        if (timeEl && t) {
-          timeEl.textContent = Helpers.formatTime(t);
-        }
-        let editTag = msgElement.querySelector('.message-edited-tag');
-        if (msg.edited_at) {
-          if (!editTag) {
-            const metaDiv = msgElement.querySelector('.msg-meta');
-            if (metaDiv) {
-              editTag = document.createElement('span');
-              editTag.className = 'message-edited-tag';
-              editTag.textContent = 'Editada: ';
-              metaDiv.insertBefore(editTag, metaDiv.firstChild);
-            }
-          } else {
-            editTag.style.display = 'inline';
-          }
-        } else if (editTag) {
-          editTag.style.display = 'none';
-        }
-        const textContent = msgElement.querySelector('.msg-text-content');
-        if (textContent) {
-          if (msg.message_type === 'image' && msg.file_url) {
-            let img = textContent.querySelector('img.chat-img');
-            if (!img) {
-              textContent.innerHTML = MessageManager.buildMessageContent(msg, false);
-            } else {
-              img.src = msg.file_url;
-              img.dataset.url = msg.file_url;
-            }      
-            const caption = textContent.querySelector('.img-caption');
-            const newCaption = (msg.message || '').trim();
-            if (newCaption) {
-              if (caption) caption.textContent = newCaption;
-              else textContent.insertAdjacentHTML('beforeend', `<div class="img-caption"></div>`);
-              textContent.querySelector('.img-caption').textContent = newCaption;
-            } else {
-              caption?.remove();
+          const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
+          if (msgElement) {
+            msgElement.classList.add('deleted');
+            const textContent = msgElement.querySelector('.msg-text-content');
+            if (textContent) {
+              textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
             }
           }
-          else if (msg.message_type === 'file') {
-          } else {
-            textContent.textContent = msg.message || '';
-          }
-          textContent.style.transition = "background 0.5s";
-          textContent.style.backgroundColor = "rgba(255, 235, 59, 0.2)";
-          setTimeout(() => (textContent.style.backgroundColor = "transparent"), 1000);
         }
         if (msg.reactions !== undefined) {
-          msgElement.querySelector('.message-reactions')?.remove();      
-          const newReactionsHTML = ReactionManager.render(msg.reactions, msg.id);
-          const anchor = msgElement.querySelector('.msg-text-content');
-          if (newReactionsHTML && anchor) {
-            anchor.insertAdjacentHTML('afterend', newReactionsHTML);
+          const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
+          if (msgElement) {
+            const oldReactions = msgElement.querySelector('.message-reactions');
+            if (oldReactions) oldReactions.remove();
+            const newReactionsHTML = renderReactions(msg.reactions, msg.id);            
+            if (newReactionsHTML) {
+              const textContent = msgElement.querySelector('.msg-text-content');
+              if (textContent) {
+                textContent.insertAdjacentHTML('afterend', newReactionsHTML);
+              }
+            }
           }
-        }
+        }        
         if (msg.starred_by !== undefined) {
-          msgElement.querySelector('.star-icon')?.remove();      
-          const isStarred = msg.starred_by && msg.starred_by.includes(AppState.currentUserNint);
+        const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
+        if (msgElement) {
+          const oldStar = msgElement.querySelector('.star-icon');
+          if (oldStar) oldStar.remove();
+          const isStarred = msg.starred_by && msg.starred_by.includes(currentUserNint);
           if (isStarred) {
-            const anchor = msgElement.querySelector('.msg-text-content');
-            if (anchor) {
-              anchor.insertAdjacentHTML(
-                'afterend',
+            const textContent = msgElement.querySelector('.msg-text-content');
+            if (textContent) {
+              textContent.insertAdjacentHTML('afterend', 
                 '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
               );
             }
           }
         }
-        if (msg.read_at && String(msg.n_int) === AppState.currentUserNint) {
+      }
+        if (msg.read_at && String(msg.n_int) === currentUserNint) {
           const checkEl = document.getElementById(`check-${msg.id}`);
           if (checkEl) {
             checkEl.classList.remove('sent', 'delivered');
@@ -2403,105 +1600,339 @@ const MessageSender = {
             checkEl.textContent = 'done_all';
           }
         }
-        clearSelectionUI();
-      }
-    };
-    /* ========================= EVENT LISTENERS ========================= */
-    const EventListeners = {
-      init() {
-        document.getElementById("chat-send-btn").onclick = () => MessageSender.send();
-        DOM.chatInput().onkeydown = e => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            MessageSender.send();
-          }
-        };
-        DOM.chatInput().addEventListener('focus', () => {
-          if (AppState.currentChat !== 'geral') ReadManager.sendReceipt(AppState.currentChat);
-        });
-        document.addEventListener('touchstart', (e) => {
-          const menu = DOM.reactionMenu();
-          if (menu && menu.style.display === 'flex') {
-            const clicouNoMenu = menu.contains(e.target);
-            const clicouNaMensagem = e.target.closest('.message');
-            const clicouNaBarra = e.target.closest('#action-bar');        
-            if (clicouNaBarra) {
-              menu.style.display = 'none';
-              return;
-            }        
-            if (!clicouNoMenu && !clicouNaMensagem) {
-              menu.style.display = 'none';
-              SelectionManager.clear();
+      }).subscribe();
+      supabaseClient.channel('reads_realtime')
+        .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_message_reads',
+        filter: `corp_oper_nr=eq.${currentCorp}`
+      }, () => {
+        updateUnreadBadges();
+      }).subscribe();    
+      const readReceiptChannel = supabaseClient.channel('read-receipts');
+      readReceiptChannel.on('broadcast', {event: 'read'}, (payload) => {
+        if (String(payload.payload.readerNint) === currentChat) {
+          document.querySelectorAll('.status-checks').forEach(check => {
+            if (!check.classList.contains('read')) {
+              check.classList.remove('sent', 'delivered');
+              check.classList.add('read');
+              check.textContent = 'done_all';
             }
-          }
-        }, {passive: true});
-        document.getElementById('attachment-btn')?.addEventListener('click', () => {
-          if (!Helpers.isChatActive()) return;
-          FileHandler.openPicker();
+          });
+        }
+      }).subscribe();
+      const typingChannel = supabaseClient.channel('typing-status', {config: {broadcast: {ack: true, self: false}}});
+      typingChannel.on('broadcast', {event: 'typing'}, (payload) => {
+        const data = payload.payload;
+        if (currentChat !== 'geral' && String(data.nint) === currentChat) {
+          const statusEl = document.getElementById("typing-status");
+          statusEl.textContent = `${currentChatName} está a escrever...`;
+          statusEl.style.display = data.isTyping ? 'block' : 'none';
+          if (data.isTyping) scrollToBottom();
+        }
+      }).subscribe();
+      window.readReceiptChannel = readReceiptChannel;
+      const presenceChannel = supabaseClient.channel('presence-cb360', {
+        config: {presence: {key: String(currentUserNint)}},
+      });
+      presenceChannel.on('presence', {event: 'sync'}, () => {
+        const state = presenceChannel.presenceState();
+        document.querySelectorAll('.status-dot').forEach(dot => dot.classList.remove('online'));
+        Object.keys(state).forEach((nint) => {
+          const dot = document.querySelector(`.contact[data-nint="${nint}"] .status-dot`);
+          if (dot) dot.classList.add('online');
+        if (currentChat !== 'geral' && String(nint) === currentChat) {
+          document.querySelectorAll('.status-checks.sent').forEach(check => {
+            check.classList.remove('sent');
+            check.classList.add('delivered');
+            check.textContent = 'done_all';
+          });
+        }
         });
-        document.addEventListener('click', (e) => {
-          const menu = DOM.reactionMenu();
-          const picker = DOM.emojiContainer();          
-          if (menu && !menu.contains(e.target) && !picker.contains(e.target) && AppState.selectedMessages.length === 0) {
-            menu.style.display = 'none';
-            picker.style.display = 'none';
+      }).subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({
+            online_at: new Date().toISOString(),
+            nint: String(currentUserNint)
+          });
+        }
+      });
+      let typingTimer;
+      const inputEl = document.getElementById("chat-input");
+      inputEl.addEventListener('input', () => {
+        if (currentChat === 'geral') return;
+        typingChannel.send({type: 'broadcast', event: 'typing', payload: {nint: String(currentUserNint), isTyping: true}});
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+          typingChannel.send({type: 'broadcast', event: 'typing', payload: {nint: String(currentUserNint), isTyping: false}});
+        }, 2000);
+      });    
+      document.getElementById("chat-send-btn").onclick = () => sendMessage();
+      inputEl.onkeydown = e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          sendMessage();
+        }
+      };
+      inputEl.addEventListener('focus', () => {
+        if (currentChat !== 'geral') sendReadReceipt(currentChat);
+      });
+    });
+    /* ======================= MESSAGE INTERACTION ======================= */
+    function setupMessageInteraction(messageElement, messageData) {
+      let pressTimer;
+      let isLongPress = false;
+      messageElement.addEventListener('touchstart', (e) => {
+        isLongPress = false;
+        pressTimer = setTimeout(() => {
+          isLongPress = true;
+          if (navigator.vibrate) navigator.vibrate(50);
+          const menu = document.getElementById('reaction-menu');
+          if (menu) menu.style.display = 'none';
+          toggleMessageSelection(messageElement, messageData);
+          if (selectedMessages.length === 1 && menu) {
+            reactionTargetId = messageData.id;
+            const scrollContainer = menu.querySelector('.emoji-scroll-container');
+            if (scrollContainer) scrollContainer.scrollLeft = 0;
+            menu.style.display = 'flex';
+            const menuWidth = 215; 
+            const menuHeight = 45;
+            const rect = messageElement.getBoundingClientRect();
+            let posX = rect.left + (rect.width / 2) - (menuWidth / 2);
+            if (posX < 10) posX = 10;
+            if (posX + menuWidth > window.innerWidth) {
+              posX = window.innerWidth - menuWidth - 10;
+            }
+            let posY = rect.bottom + 10;
+            if (posY + menuHeight > window.innerHeight - 60) {
+              posY = rect.top - menuHeight - 10;
+            }
+            menu.style.left = posX + 'px';
+            menu.style.top = posY + 'px';
           }
+        }, 500);
+      }, { passive: true });
+      messageElement.addEventListener('touchend', () => clearTimeout(pressTimer));
+      messageElement.addEventListener('touchmove', () => clearTimeout(pressTimer));
+      messageElement.addEventListener('click', (e) => {
+        const menu = document.getElementById('reaction-menu');
+        if (selectedMessages.length > 0) {
+          e.preventDefault();
+          toggleMessageSelection(messageElement, messageData);
+          if (menu) menu.style.display = 'none';
+        }
+      });
+    }
+    document.addEventListener('touchstart', (e) => {
+      const menu = document.getElementById('reaction-menu');
+      if (menu && menu.style.display === 'flex') {
+        const clicouNoMenu = menu.contains(e.target);
+        const clicouNaMensagem = e.target.closest('.message');
+        const clicouNaBarra = e.target.closest('#action-bar');
+        if (clicouNaBarra) {
+          menu.style.display = 'none';
+          return; 
+        }
+        if (!clicouNoMenu && !clicouNaMensagem) {
+          menu.style.display = 'none';
+      clearSelection();
+        }
+      }
+    }, {passive: true});
+    function clearSelection() {
+      selectedMessages = [];
+      document.querySelectorAll('.message.selected').forEach(el => {
+        el.classList.remove('selected');
+      });      
+      const actionBar = document.getElementById('action-bar');
+      if (actionBar) actionBar.classList.remove('show');      
+      const menu = document.getElementById('reaction-menu');
+      if (menu) menu.style.display = 'none';
+      const starBtn = document.getElementById('action-star');
+      if (starBtn) {
+        const starIcon = starBtn.querySelector('.material-icons');
+        if (starIcon) {
+          starIcon.textContent = 'star_border';
+        }
+      }      
+      reactionTargetId = null;
+    }
+    /* ======================== HANDLE REACTION CLICK ======================== */
+    async function handleReactionClick(emoji) {
+      if (!reactionTargetId) {
+        console.warn("Nenhuma mensagem selecionada para reagir.");
+        return;
+      }
+      const targetId = reactionTargetId;
+      const menu = document.getElementById('reaction-menu');
+      if (menu) menu.style.display = 'none';
+      clearSelection();
+      try {
+        const { data: msg, error: fetchError } = await supabaseClient
+        .from('chat_messages')
+        .select('reactions')
+        .eq('id', targetId)
+        .single();
+        if (fetchError) {
+          console.error("Erro ao ler do Supabase:", fetchError);
+          return;
+        }
+        let currentReactions = msg.reactions || {};
+        if (currentReactions[currentUserNint] === emoji) {
+          delete currentReactions[currentUserNint];
+        } else {
+          currentReactions[currentUserNint] = emoji;
+        }
+        const { error: updateError } = await supabaseClient
+        .from('chat_messages')
+        .update({ reactions: currentReactions })
+        .eq('id', targetId);
+        if (updateError) {
+          console.error("Erro ao gravar reação:", updateError);
+        } else {
+          
+        }
+      } catch (err) {
+        console.error("Erro inesperado:", err);
+      }
+    }
+    function openFullEmojiPicker() {
+      const menu = document.getElementById('reaction-menu');
+      const pickerContainer = document.getElementById('full-emoji-picker-container');
+      const picker = pickerContainer.querySelector('emoji-picker');    
+      if (menu) menu.style.display = 'none';
+      pickerContainer.style.display = 'block';
+      if (!picker.dataset.listenerSet) {
+        picker.addEventListener('emoji-click', event => {
+          handleReactionClick(event.detail.unicode);
+          pickerContainer.style.display = 'none';
+        });
+        picker.dataset.listenerSet = "true";
+      }
+    }
+    document.addEventListener('touchstart', (e) => {
+      const menu = document.getElementById('reaction-menu');
+      const picker = document.getElementById('full-emoji-picker-container');
+      if (menu && menu.style.display === 'flex') {
+        if (!menu.contains(e.target) && !picker.contains(e.target)) {
+          setTimeout(() => {
+            if (selectedMessages.length !== 1) {
+              menu.style.display = 'none';
+              picker.style.display = 'none';
+            }
+          }, 50);
+        }
+      }
+    }, {passive: true});    
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('reaction-menu');
+      const picker = document.getElementById('full-emoji-picker-container');
+      
+      if (menu && !menu.contains(e.target) && !picker.contains(e.target) && selectedMessages.length === 0) {
+        menu.style.display = 'none';
+        picker.style.display = 'none';
+      }
+    });
+    /* ======================== REPLY TO MESSAGE ========================= */
+    function replyToMessage(messageId, senderName, messageText) {
+      currentReplyToMessage = {
+        id: messageId,
+        name: senderName,
+        text: messageText
+      };
+      document.getElementById('reply-to-name').textContent = senderName;
+      document.getElementById('reply-to-text').textContent = messageText;
+      document.getElementById('reply-bar').style.display = 'block';
+      document.getElementById('chat-input').focus();      
+    }
+    /* ========================== CANCEL REPLY =========================== */
+    function cancelReply() {
+      currentReplyToMessage = null;
+      document.getElementById('reply-bar').style.display = 'none';
+    }
+    /* ======================== COPY MESSAGE TEXT ======================== */
+    function copyMessageText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('✅ Texto copiado!');
+        }).catch(() => {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    }
+    function fallbackCopy(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        alert('✅ Texto copiado!');
+      } catch (err) {
+        alert('❌ Erro ao copiar texto');
+      }
+      document.body.removeChild(textArea);
+    }
+    /* ========================= DELETE MESSAGE ========================== */
+    async function deleteMessage(messageId) {
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const {error} = await supabaseClient
+      .from('chat_messages')
+      .update({ 
+        deleted_at: new Date().toISOString(),
+        message: 'Mensagem apagada'
+      })
+      .eq('id', messageId)
+      .eq('n_int', currentUserNint)
+      .eq('corp_oper_nr', currentCorp);
+      if (error) {
+        console.error('Erro ao apagar:', error);
+      } else {
+        const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (msgElement) {
+          msgElement.classList.add('deleted');
+          const textContent = msgElement.querySelector('.msg-text-content');
+          if (textContent) {
+            textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
+          }
+        }
+      }
+    }
+    /* ======================== SCROLL TO MESSAGE ======================== */
+    function scrollToMessage(messageId) {
+      const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
+      if (msgElement) {
+        msgElement.scrollIntoView({behavior: 'smooth', block: 'center'});
+        msgElement.style.background = 'rgba(188, 217, 255, 0.5)';
+        setTimeout(() => {
+          msgElement.style.background = '';
+        }, 1500);
+      }
+    }
+    /* ======================= SEND READ RECIPIENT ======================= */
+    async function sendReadReceipt(toNint) {
+      if (toNint === 'geral' || !toNint) return;    
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const {error} = await supabaseClient
+        .from('chat_messages')
+        .update({read_at: new Date().toISOString()})
+        .eq('n_int', toNint)
+        .eq('recipient_nint', currentUserNint)
+        .eq('corp_oper_nr', currentCorp)
+        .is('read_at', null);
+      if (!error && window.readReceiptChannel) {
+        window.readReceiptChannel.send({
+          type: 'broadcast',
+          event: 'read',
+          payload: {readerNint: String(currentUserNint)}
         });
       }
-    };
-    /* ======================== GLOBAL FUNCTIONS ========================= */
-    function goBackToMain() {ChatManager.goBack();}
-    function clearSelection() {SelectionManager.clear();}
-    function actionReply() {MessageActions.reply();}
-    function actionStar() {MessageActions.star();}
-    function actionCopy() {MessageActions.copy();}
-    function actionForward() {MessageActions.forward();}
-    function actionDelete() {MessageActions.delete();}
-    function actionEdit() {MessageActions.edit();}
-    function resConfirm(choice) {MessageActions.confirmResponse(choice);}
-    function cancelReply() {ReplyManager.cancel();}
-    function cancelEdit() {EditManager.cancel();}
-    function scrollToMessage(messageId) {ScrollManager.toMessage(messageId);}
-    function handleReactionClick(emoji) {ReactionManager.handleClick(emoji);}
-    function openFullEmojiPicker() {ReactionManager.openFullPicker();}
-    function toggleAudio(id, btn) {AudioPlayer.toggle(id, btn);}
-    function updateProgress(id) {AudioPlayer.updateProgress(id);}
-    function resetAudioIcon(id) {AudioPlayer.resetIcon(id);}
-    /* ===================== MAIN CONTENT HEIGHT FIX ===================== */
-    function adjustMainContent() {
-      const main = document.querySelector('.main-content');
-      const header = document.querySelector('.header');
-      const footer = document.querySelector('.footer');
-      if (!main) return;    
-      const alturaViewport = window.innerHeight;
-      const headerHeight = header?.offsetHeight || 0;
-      const footerHeight = footer?.offsetHeight || 0;
-      const extra = 100;    
-      const alturaMain = alturaViewport - headerHeight - footerHeight + extra;
-      main.style.height = alturaMain + 'px';
-      main.style.maxHeight = alturaMain + 'px';
     }
-    /* ==================== STARTING THE APPLICATION ===================== */    
-    document.addEventListener('DOMContentLoaded', async () => {
-      adjustMainContent();
-      window.addEventListener('resize', adjustMainContent);
-      window.addEventListener('pageshow', adjustMainContent);
-      await CorpManager.loadInfo();
-      ThemeManager.load();
-      await ContactManager.load();
-      BadgeManager.update();
-      ImageHandler.init();
-      ChatInputHandler.init();
-      TypingIndicator.init();
-      AudioRecorder.init();
-      CameraHandler.init();
-      FileHandler.init();
-      KeyboardHandler.init();
-      EventListeners.init();
-      RealtimeManager.init();
-    });
-  </script>  
+  </script>
 </body>
 </html>
-
-
