@@ -1408,84 +1408,60 @@
     };
     /* ========================= MESSAGE SENDER ========================== */
     const MessageSender = {
-  async send(audioText = null, audioUrl = null) {
-    const inputEl = DOM.chatInput();
-    const sendBtn = document.getElementById("chat-send-btn");
-    const text = audioText || inputEl.value.trim();
-    if (!text && !audioUrl) return;
-    sendBtn.disabled = true;
-    if (typeof EditManager !== 'undefined' && EditManager.editingMessageId && !audioUrl) {
-      try {
-        const {error} = await supabaseClient
-        .from('chat_messages')
-        .update({
-          message: text,
-          edited_at: new Date().toISOString() 
-        })
-        .eq('id', EditManager.editingMessageId);
-        if (error) throw error;
-        inputEl.value = '';
-        inputEl.dispatchEvent(new Event('input', {bubbles: true}));
-        EditManager.finish();
-      } catch (err) {
-        console.error("Erro ao editar:", err);
-      } finally {
+      async send(audioText = null, audioUrl = null) {
+        const inputEl = DOM.chatInput();
+        const sendBtn = document.getElementById("chat-send-btn");
+        const text = audioText || inputEl.value.trim();
+        if (!text && !audioUrl) return;
+        sendBtn.disabled = true;
+        if (typeof EditManager !== 'undefined' && EditManager.editingMessageId && !audioUrl) {
+          try {
+            const {error} = await supabaseClient
+            .from('chat_messages')
+            .update({
+              message: text,
+              edited_at: new Date().toISOString() 
+            })
+            .eq('id', EditManager.editingMessageId);
+            if (error) throw error;
+            inputEl.value = '';
+            inputEl.dispatchEvent(new Event('input', {bubbles: true}));
+            EditManager.finish();
+          } catch (err) {
+            console.error("Erro ao editar:", err);
+          } finally {
+            sendBtn.disabled = false;
+          }
+          return;
+        }
+        if (!audioUrl) {
+          inputEl.value = "";
+          LayoutManager.resetLayout();
+          inputEl.dispatchEvent(new Event('input'));
+        }
+        const currentCorp = Helpers.getCorpNr();
+        const senderName = await UserManager.fetchName();
+        const messageData = {n_int: AppState.currentUserNint, recipient_nint: AppState.currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text, 
+                             file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};
+        if (AppState.currentReplyToMessage) {
+          messageData.reply_to_message_id = AppState.currentReplyToMessage.id;
+        }
+        const { error } = await supabaseClient.from('chat_messages').insert([messageData]);
+        if (!error) {
+          const isGeral = AppState.currentChat === 'geral';
+          fetch('/api/sendPush', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({recipient_nint: AppState.currentChat, corp_nr: Helpers.getCorpNr(), sender_name: senderName, message_text: text || "Enviou um áudio 🎤",
+                                  sender_nint: AppState.currentUserNint})
+          }).catch(err => console.error("Erro no push:", err));
+        }
+        if (AppState.currentReplyToMessage) {
+          ReplyManager.cancel();
+        }    
         sendBtn.disabled = false;
       }
-      return;
-    }
-    if (!audioUrl) {
-      inputEl.value = "";
-      LayoutManager.resetLayout();
-      inputEl.dispatchEvent(new Event('input'));
-    }
-    const currentCorp = Helpers.getCorpNr();
-    const senderName = await UserManager.fetchName();
-    const messageData = {
-      n_int: AppState.currentUserNint, 
-      recipient_nint: AppState.currentChat, 
-      corp_oper_nr: currentCorp, 
-      abv_name: senderName, 
-      message: text, 
-      file_url: audioUrl, 
-      message_type: audioUrl ? 'audio' : 'text',
-      created_at: new Date().toISOString() // 🔥 ADICIONA ISTO
     };
-    if (AppState.currentReplyToMessage) {
-      messageData.reply_to_message_id = AppState.currentReplyToMessage.id;
-    }
-    
-    const { data, error } = await supabaseClient // 🔥 MUDA PARA "data"
-      .from('chat_messages')
-      .insert([messageData])
-      .select() // 🔥 ADICIONA ISTO para receber a mensagem inserida
-      .single(); // 🔥 ADICIONA ISTO
-    
-    // 🔥 ADICIONA ESTE BLOCO COMPLETO
-    if (!error && data) {
-      MessageManager.addToDOM(data, AppState.currentChat);
-    }
-    
-    if (!error) {
-      const isGeral = AppState.currentChat === 'geral';
-      fetch('/api/sendPush', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipient_nint: AppState.currentChat, 
-          corp_nr: Helpers.getCorpNr(), 
-          sender_name: senderName, 
-          message_text: text || "Enviou um áudio 🎤",
-          sender_nint: AppState.currentUserNint
-        })
-      }).catch(err => console.error("Erro no push:", err));
-    }
-    if (AppState.currentReplyToMessage) {
-      ReplyManager.cancel();
-    }    
-    sendBtn.disabled = false;
-  }
-};
     /* ========================== READ MANAGER =========================== */
     const ReadManager = {
       async markGeralAsRead() {
@@ -2540,6 +2516,7 @@
   </script>
 </body>
 </html>
+
 
 
 
