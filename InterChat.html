@@ -701,92 +701,99 @@
       }
     };
     /* ========================= AUDIO RECORDING ========================= */
-    const AudioRecorder = {
-      async start(e) {
-        const iconBtn = document.getElementById('send-icon');
-        if (iconBtn.textContent !== 'mic') return;
-        if (!Helpers.isChatActive()) return;    
-        AppState.recordTimeout = setTimeout(async () => {
-          try {
-            const permission = await navigator.permissions.query({name: 'microphone'});
-            if (permission.state === 'denied') {
-              alert('⚠️ Acesso ao microfone bloqueado!\n\nPor favor, ativa nas definições do browser.');
-              return;
-            }        
-            const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-            AppState.mediaRecorder = new MediaRecorder(stream);
-            AppState.audioChunks = [];        
-            AppState.mediaRecorder.ondataavailable = e => AppState.audioChunks.push(e.data);
-            AppState.mediaRecorder.onstop = async () => {
-              const audioBlob = new Blob(AppState.audioChunks, {type: 'audio/webm'});
-              if (audioBlob.size > 2000) {
-                await this.upload(audioBlob);
-              }
-              stream.getTracks().forEach(t => t.stop());
-            };        
-            AppState.mediaRecorder.start();
-            AppState.isRecording = true;
-            iconBtn.classList.add("recording-pulse");
-            DOM.chatInput().placeholder = "🔴 A gravar... solte para enviar";
-            DOM.inputBar().style.backgroundColor = "#fff5f5";
-          } catch (err) {
-            console.error("Erro ao aceder ao microfone:", err);
-            this.handleError(err);
+// ✅ FUNÇÃO CORRIGIDA - AudioRecorder
+const AudioRecorder = {
+  async start(e) {
+    const iconBtn = document.getElementById('send-icon');
+    if (iconBtn.textContent !== 'mic') return;
+    if (!Helpers.isChatActive()) return;    
+    AppState.recordTimeout = setTimeout(async () => {
+      try {
+        const permission = await navigator.permissions.query({name: 'microphone'});
+        if (permission.state === 'denied') {
+          alert('⚠️ Acesso ao microfone bloqueado!\n\nPor favor, ativa nas definições do browser.');
+          return;
+        }        
+        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+        AppState.mediaRecorder = new MediaRecorder(stream);
+        AppState.audioChunks = [];        
+        AppState.mediaRecorder.ondataavailable = e => AppState.audioChunks.push(e.data);
+        AppState.mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(AppState.audioChunks, {type: 'audio/webm'});
+          if (audioBlob.size > 2000) {
+            await this.upload(audioBlob);
           }
-        }, 250);
-      },  
-      stop() {
-        clearTimeout(AppState.recordTimeout);
-        const iconBtn = document.getElementById('send-icon');
-        const inputBar = DOM.inputBar();
-        const chatInput = DOM.chatInput();    
-        if (AppState.isRecording) {
-          AppState.mediaRecorder.stop();
-          AppState.isRecording = false;
-          iconBtn.classList.remove("recording-pulse");
-          chatInput.placeholder = "Mensagem";
-          inputBar.style.backgroundColor = "";
-        } else {
-          chatInput.placeholder = "Mensagem";
-          inputBar.style.backgroundColor = "";
-        }
-      },  
-      async upload(blob) {
-        const fileName = `audio_${Date.now()}.webm`;
-        const filePath = `${AppState.currentChat}/${fileName}`;    
-        try {
-          const {data, error} = await supabaseClient.storage
-            .from(CONFIG.STORAGE_BUCKET)
-            .upload(filePath, blob);      
-          if (error) throw error;      
-          const {data: {publicUrl}} = supabaseClient.storage
-            .from(CONFIG.STORAGE_BUCKET)
-            .getPublicUrl(filePath);      
-          await MessageSender.send("Enviou um áudio", publicUrl);
-        } catch (err) {
-          console.error("Erro:", err.message);
-        }
-      },  
-      handleError(err) {
-        if (err.name === 'NotAllowedError') {
-          alert('⚠️ Permissão negada!\n\nClica no cadeado ao lado do URL e permite o acesso ao microfone.');
-        } else if (err.name === 'NotFoundError') {
-          alert('⚠️ Microfone não encontrado!\n\nVerifica se tens um microfone ligado.');
-        } else {
-          alert('❌ Erro ao aceder ao microfone: ' + err.message);
-        }
-      },  
-      init() {
-        const iconBtn = document.getElementById('send-icon');    
-        iconBtn.addEventListener('mousedown', () => this.start());
-        window.addEventListener('mouseup', () => this.stop());    
-        iconBtn.addEventListener('touchstart', (e) => {
-          if (iconBtn.textContent === 'mic') e.preventDefault();
-          this.start();
-        }, {passive: false});    
-        window.addEventListener('touchend', () => this.stop());
+          stream.getTracks().forEach(t => t.stop());
+        };        
+        AppState.mediaRecorder.start();
+        AppState.isRecording = true;
+        iconBtn.classList.add("recording-pulse");
+        DOM.chatInput().placeholder = "🔴 A gravar... solte para enviar";
+        DOM.inputBar().style.backgroundColor = "#fff5f5";
+      } catch (err) {
+        console.error("Erro ao aceder ao microfone:", err);
+        this.handleError(err);
       }
-    };
+    }, 250);
+  },  
+  
+  stop() {
+    clearTimeout(AppState.recordTimeout);
+    const iconBtn = document.getElementById('send-icon');
+    const inputBar = DOM.inputBar();
+    const chatInput = DOM.chatInput();    
+    if (AppState.isRecording) {
+      AppState.mediaRecorder.stop();
+      AppState.isRecording = false;
+      iconBtn.classList.remove("recording-pulse");
+      chatInput.placeholder = "Mensagem";
+      inputBar.style.backgroundColor = "";
+    } else {
+      chatInput.placeholder = "Mensagem";
+      inputBar.style.backgroundColor = "";
+    }
+  },  
+  
+  // ✅ CORREÇÃO PRINCIPAL - Enviar string vazia em vez de "Enviou um áudio"
+  async upload(blob) {
+    const fileName = `audio_${Date.now()}.webm`;
+    const filePath = `${AppState.currentChat}/${fileName}`;    
+    try {
+      const {data, error} = await supabaseClient.storage
+        .from(CONFIG.STORAGE_BUCKET)
+        .upload(filePath, blob);      
+      if (error) throw error;      
+      const {data: {publicUrl}} = supabaseClient.storage
+        .from(CONFIG.STORAGE_BUCKET)
+        .getPublicUrl(filePath);      
+      // ✅ MUDANÇA CRÍTICA: "" em vez de "Enviou um áudio"
+      await MessageSender.send("", publicUrl);
+    } catch (err) {
+      console.error("Erro:", err.message);
+    }
+  },  
+  
+  handleError(err) {
+    if (err.name === 'NotAllowedError') {
+      alert('⚠️ Permissão negada!\n\nClica no cadeado ao lado do URL e permite o acesso ao microfone.');
+    } else if (err.name === 'NotFoundError') {
+      alert('⚠️ Microfone não encontrado!\n\nVerifica se tens um microfone ligado.');
+    } else {
+      alert('❌ Erro ao aceder ao microfone: ' + err.message);
+    }
+  },  
+  
+  init() {
+    const iconBtn = document.getElementById('send-icon');    
+    iconBtn.addEventListener('mousedown', () => this.start());
+    window.addEventListener('mouseup', () => this.stop());    
+    iconBtn.addEventListener('touchstart', (e) => {
+      if (iconBtn.textContent === 'mic') e.preventDefault();
+      this.start();
+    }, {passive: false});    
+    window.addEventListener('touchend', () => this.stop());
+  }
+};
     /* ===================== CAMERA & IMAGE HANDLER ====================== */
     const CameraHandler = {
       pendingFile: null,
@@ -1194,165 +1201,216 @@
       }
     };
     /* ========================= MESSAGE MANAGER ========================= */
-    const MessageManager = {
-      async load(chat = AppState.currentChat) {
-        const currentCorp = Helpers.getCorpNr();
-        const messagesEl = DOM.messages();
-        const chatRef = chat || 'geral';    
-        messagesEl.innerHTML = '';
-        AppState.lastDateLabel = "";    
-        let query = supabaseClient
-          .from('chat_messages')
-          .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
-          .eq('corp_oper_nr', currentCorp);    
-        if (chatRef === 'geral') {
-          query = query.eq('recipient_nint', 'geral');
-        } else {
-          query = query.or(`and(n_int.eq.${AppState.currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${AppState.currentUserNint})`);
-        }    
-        try {
-          const {data: msgs, error} = await query.order('created_at', {ascending: true});      
-          if (AppState.currentChat !== chatRef) return;
-          if (error) return console.error(error);      
-          if (!msgs || msgs.length === 0) {
-            this.showEmptyPlaceholder();
-          } else {
-            msgs.forEach(msg => this.addToDOM(msg, chatRef));
-            ScrollManager.toBottom();
-          }
-        } catch (err) {
-          console.error(err);
+// ✅ FUNÇÃO CORRIGIDA - buildMessageContent (parte do MessageManager)
+const MessageManager = {
+  async load(chat = AppState.currentChat) {
+    const currentCorp = Helpers.getCorpNr();
+    const messagesEl = DOM.messages();
+    const chatRef = chat || 'geral';    
+    messagesEl.innerHTML = '';
+    AppState.lastDateLabel = "";    
+    let query = supabaseClient
+      .from('chat_messages')
+      .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
+      .eq('corp_oper_nr', currentCorp);    
+    if (chatRef === 'geral') {
+      query = query.eq('recipient_nint', 'geral');
+    } else {
+      query = query.or(`and(n_int.eq.${AppState.currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${AppState.currentUserNint})`);
+    }    
+    try {
+      const {data: msgs, error} = await query.order('created_at', {ascending: true});      
+      if (AppState.currentChat !== chatRef) return;
+      if (error) return console.error(error);      
+      if (!msgs || msgs.length === 0) {
+        this.showEmptyPlaceholder();
+      } else {
+        msgs.forEach(msg => this.addToDOM(msg, chatRef));
+        ScrollManager.toBottom();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  },  
+  
+  showEmptyPlaceholder() {
+    const messagesEl = DOM.messages();
+    const emptyMsg = document.createElement("div");
+    emptyMsg.className = "empty-chat-placeholder";
+    emptyMsg.innerHTML = `
+      <div style="text-align: center; width: 100%; padding: 20px;">
+        <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
+        <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${AppState.currentChatName || 'este contacto'}</strong></span>
+      </div>
+    `;
+    messagesEl.appendChild(emptyMsg);
+  },  
+  
+  addToDOM(msg, chatRef) {
+    if (!Helpers.isChatActive() || AppState.currentChat !== String(chatRef)) return;    
+    const messagesEl = DOM.messages();
+    if (!messagesEl) return;
+    const msgDate = new Date(msg.created_at);
+    const dateLabel = Helpers.getDateLabel(msgDate);    
+    if (dateLabel !== AppState.lastDateLabel) {
+      const divider = document.createElement("div");
+      divider.className = "date-divider";
+      divider.innerHTML = `<span>${dateLabel}</span>`;
+      messagesEl.appendChild(divider);
+      AppState.lastDateLabel = dateLabel;
+    }    
+    const emptyMsg = messagesEl.querySelector(".empty-chat-placeholder");
+    if (emptyMsg) emptyMsg.remove();    
+    const div = this.createMessageElement(msg, chatRef);
+    messagesEl.appendChild(div);    
+    if (messagesEl.style.display !== 'none') {
+      ScrollManager.toBottom();
+    }
+  },
+  
+  createMessageElement(msg, chatRef) {
+    const time = Helpers.formatTime(msg.edited_at || msg.created_at);
+    const isMe = String(msg.n_int) === AppState.currentUserNint;
+    const isDeleted = msg.deleted_at !== null && msg.deleted_at !== undefined;    
+    const div = document.createElement("div");
+    div.className = "message " + (isMe ? "self" : "other");
+    div.dataset.messageId = msg.id;
+    div.dataset.messageText = msg.message;
+    div.dataset.senderName = msg.abv_name;
+    div.dataset.senderNint = msg.n_int;    
+    if (isDeleted) div.classList.add('deleted');
+    if (msg.is_forwarded) div.classList.add('is-forwarded');    
+    const nameHTML = (chatRef === 'geral' && !isMe) 
+      ? `<div class="msg-sender-name">${msg.abv_name}</div>` 
+      : "";    
+    const replyPreviewHTML = this.buildReplyPreview(msg);
+    const checkHTML = this.buildStatusChecks(msg, isMe, chatRef);
+    const reactionsHTML = ReactionManager.render(msg.reactions, msg.id);
+    const starIcon = (msg.starred_by && msg.starred_by.includes(AppState.currentUserNint))
+      ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
+      : '';    
+    const contentHTML = this.buildMessageContent(msg, isDeleted);    
+    div.innerHTML = `
+      ${nameHTML}
+      ${replyPreviewHTML}
+      <span class="msg-text-content">${contentHTML}</span>${starIcon}
+      ${reactionsHTML}
+      <div class="msg-meta">
+        <span class="msg-time">${time}</span> ${checkHTML}
+      </div>
+    `;    
+    if (!isDeleted && msg.edited_at) {
+      const metaDiv = div.querySelector('.msg-meta');
+      if (metaDiv) {
+        const editTag = document.createElement('span');
+        editTag.className = 'message-edited-tag';
+        editTag.textContent = 'Editada: ';
+        metaDiv.insertBefore(editTag, metaDiv.firstChild);
+      }
+    }    
+    MessageInteraction.setup(div, msg);    
+    return div;
+  },  
+  
+  buildReplyPreview(msg) {
+    if (!msg.reply_to_message_id || !msg.reply_to_message) return '';    
+    const replyMsg = msg.reply_to_message;
+    return `
+      <div class="reply-preview" onclick="scrollToMessage('${msg.reply_to_message_id}')">
+        <div class="reply-preview-name">${replyMsg.abv_name || 'Utilizador'}</div>
+        <div class="reply-preview-text">${replyMsg.message || ''}</div>
+      </div>
+    `;
+  },  
+  
+  buildStatusChecks(msg, isMe, chatRef) {
+    if (!isMe) return '';    
+    let icon = 'done';
+    let checkClass = 'sent';    
+    if (chatRef === 'geral') {
+      const numLeituras = (msg.chat_message_reads && msg.chat_message_reads[0]) 
+        ? msg.chat_message_reads[0].count 
+        : 0;
+      icon = 'done_all';
+      checkClass = (numLeituras >= (AppState.totalTeam - 1) && AppState.totalTeam > 1) 
+        ? 'read' 
+        : 'delivered';
+      const contador = numLeituras > 0 
+        ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` 
+        : '';
+      const msgId = msg.id || 'temp-' + Date.now();
+      return `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>${contador}`;
+    } else {
+      const recipientDot = document.querySelector(`.contact[data-nint="${chatRef}"] .status-dot`);
+      const isOnline = recipientDot && recipientDot.classList.contains('online');      
+      if (msg.read_at) {
+        icon = 'done_all';
+        checkClass = 'read';
+      } else if (isOnline) {
+        icon = 'done_all';
+        checkClass = 'delivered';
+      }      
+      const msgId = msg.id || 'temp-' + Date.now();
+      return `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>`;
+    }
+  },  
+  
+  // ✅ FUNÇÃO CORRIGIDA COM FALLBACK PARA ÁUDIO
+  buildMessageContent(msg, isDeleted) {
+    if (isDeleted) {
+      return '<span class="deleted-icon">🚫</span> Mensagem apagada';
+    }
+    
+    switch(msg.message_type) {
+      case 'image':
+        let html = `<img src="${msg.file_url}" class="chat-img" data-url="${msg.file_url}" alt="imagem">`;
+        if (msg.message) {
+          html += `<div class="img-caption">${msg.message}</div>`;
         }
-      },  
-      showEmptyPlaceholder() {
-        const messagesEl = DOM.messages();
-        const emptyMsg = document.createElement("div");
-        emptyMsg.className = "empty-chat-placeholder";
-        emptyMsg.innerHTML = `
-          <div style="text-align: center; width: 100%; padding: 20px;">
-            <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
-            <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${AppState.currentChatName || 'este contacto'}</strong></span>
-          </div>
-        `;
-        messagesEl.appendChild(emptyMsg);
-      },  
-      addToDOM(msg, chatRef) {
-        if (!Helpers.isChatActive() || AppState.currentChat !== String(chatRef)) return;    
-        const messagesEl = DOM.messages();
-        if (!messagesEl) return;
-        const msgDate = new Date(msg.created_at);
-        const dateLabel = Helpers.getDateLabel(msgDate);    
-        if (dateLabel !== AppState.lastDateLabel) {
-          const divider = document.createElement("div");
-          divider.className = "date-divider";
-          divider.innerHTML = `<span>${dateLabel}</span>`;
-          messagesEl.appendChild(divider);
-          AppState.lastDateLabel = dateLabel;
-        }    
-        const emptyMsg = messagesEl.querySelector(".empty-chat-placeholder");
-        if (emptyMsg) emptyMsg.remove();    
-        const div = this.createMessageElement(msg, chatRef);
-        messagesEl.appendChild(div);    
-        if (messagesEl.style.display !== 'none') {
-          ScrollManager.toBottom();
-        }
-      },
-      createMessageElement(msg, chatRef) {
-        const time = Helpers.formatTime(msg.edited_at || msg.created_at);
-        const isMe = String(msg.n_int) === AppState.currentUserNint;
-        const isDeleted = msg.deleted_at !== null && msg.deleted_at !== undefined;    
-        const div = document.createElement("div");
-        div.className = "message " + (isMe ? "self" : "other");
-        div.dataset.messageId = msg.id;
-        div.dataset.messageText = msg.message;
-        div.dataset.senderName = msg.abv_name;
-        div.dataset.senderNint = msg.n_int;    
-        if (isDeleted) div.classList.add('deleted');
-        if (msg.is_forwarded) div.classList.add('is-forwarded');    
-        const nameHTML = (chatRef === 'geral' && !isMe) 
-          ? `<div class="msg-sender-name">${msg.abv_name}</div>` 
-          : "";    
-        const replyPreviewHTML = this.buildReplyPreview(msg);
-        const checkHTML = this.buildStatusChecks(msg, isMe, chatRef);
-        const reactionsHTML = ReactionManager.render(msg.reactions, msg.id);
-        const starIcon = (msg.starred_by && msg.starred_by.includes(AppState.currentUserNint))
-          ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
-          : '';    
-        const contentHTML = this.buildMessageContent(msg, isDeleted);    
-        div.innerHTML = `
-          ${nameHTML}
-          ${replyPreviewHTML}
-          <span class="msg-text-content">${contentHTML}</span>${starIcon}
-          ${reactionsHTML}
-          <div class="msg-meta">
-            <span class="msg-time">${time}</span> ${checkHTML}
-          </div>
-        `;    
-        if (!isDeleted && msg.edited_at) {
-          const metaDiv = div.querySelector('.msg-meta');
-          if (metaDiv) {
-            const editTag = document.createElement('span');
-            editTag.className = 'message-edited-tag';
-            editTag.textContent = 'Editada: ';
-            metaDiv.insertBefore(editTag, metaDiv.firstChild);
-          }
-        }    
-        MessageInteraction.setup(div, msg);    
-        return div;
-      },  
-      buildReplyPreview(msg) {
-        if (!msg.reply_to_message_id || !msg.reply_to_message) return '';    
-        const replyMsg = msg.reply_to_message;
+        return html;
+      
+      case 'audio':
+        const audioID = `audio-${msg.id || Date.now()}`;
         return `
-          <div class="reply-preview" onclick="scrollToMessage('${msg.reply_to_message_id}')">
-            <div class="reply-preview-name">${replyMsg.abv_name || 'Utilizador'}</div>
-            <div class="reply-preview-text">${replyMsg.message || ''}</div>
+          <div class="audio-bubble">
+            <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
+              <span class="material-icons">play_arrow</span>
+            </div>
+            <div class="audio-progress-container">
+              <div class="audio-progress-bar">
+                <div id="fill-${audioID}" class="audio-progress-fill"></div>
+              </div>
+              <div class="audio-time" id="time-${audioID}">0:00</div>
+            </div>
+            <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
+          </div>`;
+      
+      case 'file':
+        if (msg.preview_url) {
+          return `
+            <img src="${msg.preview_url}"
+              class="chat-img"
+              data-url="${msg.file_url}"
+              alt="PDF preview">
+            <div class="img-caption">${msg.file_name || 'Documento PDF'}</div>
+          `;
+        }
+        return `
+          <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
+            <span class="material-icons">insert_drive_file</span>
+            <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
+              ${msg.file_name || 'Documento'}
+            </a>
           </div>
         `;
-      },  
-      buildStatusChecks(msg, isMe, chatRef) {
-        if (!isMe) return '';    
-        let icon = 'done';
-        let checkClass = 'sent';    
-        if (chatRef === 'geral') {
-          const numLeituras = (msg.chat_message_reads && msg.chat_message_reads[0]) 
-            ? msg.chat_message_reads[0].count 
-            : 0;
-          icon = 'done_all';
-          checkClass = (numLeituras >= (AppState.totalTeam - 1) && AppState.totalTeam > 1) 
-            ? 'read' 
-            : 'delivered';
-          const contador = numLeituras > 0 
-            ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` 
-            : '';
-          const msgId = msg.id || 'temp-' + Date.now();
-          return `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>${contador}`;
-        } else {
-          const recipientDot = document.querySelector(`.contact[data-nint="${chatRef}"] .status-dot`);
-          const isOnline = recipientDot && recipientDot.classList.contains('online');      
-          if (msg.read_at) {
-            icon = 'done_all';
-            checkClass = 'read';
-          } else if (isOnline) {
-            icon = 'done_all';
-            checkClass = 'delivered';
-          }      
-          const msgId = msg.id || 'temp-' + Date.now();
-          return `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>`;
-        }
-      },  
-      buildMessageContent(msg, isDeleted) {
-        if (isDeleted) {
-          return '<span class="deleted-icon">🚫</span> Mensagem apagada';
-        }    
-        switch(msg.message_type) {
-          case 'image':
-            let html = `<img src="${msg.file_url}" class="chat-img" data-url="${msg.file_url}" alt="imagem">`;
-            if (msg.message) {
-              html += `<div class="img-caption">${msg.message}</div>`;
-            }
-            return html;      
-          case 'audio':
+      
+      default:
+        // ✅ FALLBACK CRÍTICO: Se tiver file_url mas message vazio/null, é áudio
+        if (msg.file_url && (!msg.message || msg.message.trim() === '')) {
+          // Verificar se é arquivo de áudio pela extensão
+          const isAudioFile = msg.file_url.match(/\.(webm|mp3|wav|ogg|m4a)$/i);
+          
+          if (isAudioFile) {
             const audioID = `audio-${msg.id || Date.now()}`;
             return `
               <div class="audio-bubble">
@@ -1366,78 +1424,90 @@
                   <div class="audio-time" id="time-${audioID}">0:00</div>
                 </div>
                 <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
-              </div>`;      
-          case 'file':
-            if (msg.preview_url) {
-              return `
-              <img src="${msg.preview_url}"
-                class="chat-img"
-                data-url="${msg.file_url}"
-                alt="PDF preview">
-                <div class="img-caption">${msg.file_name || 'Documento PDF'}</div>
-              `;
-            }
-            return `
-              <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
-                <span class="material-icons">insert_drive_file</span>
-                  <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
-                    ${msg.file_name || 'Documento'}
-                  </a>
-              </div>
-            `;     
-          default:
-            return Helpers.escapeHtml(msg.message);
-        }
-      }
-    };
-    /* ========================= MESSAGE SENDER ========================== */
-    const MessageSender = {
-      async send(audioText = null, audioUrl = null) {
-        const inputEl = DOM.chatInput();
-        const sendBtn = document.getElementById("chat-send-btn");
-        const text = audioText || inputEl.value.trim();        
-        if (!text && !audioUrl) return;
-        sendBtn.disabled = true;
-        if (typeof EditManager !== 'undefined' && EditManager.editingMessageId && !audioUrl) {
-          try {
-            const {error} = await supabaseClient
-              .from('chat_messages')
-              .update({
-                message: text,
-                edited_at: new Date().toISOString() 
-              })
-              .eq('id', EditManager.editingMessageId);    
-            if (error) throw error;
-            inputEl.value = '';
-            inputEl.dispatchEvent(new Event('input', {bubbles: true}));
-            EditManager.finish();
-          } catch (err) {
-            console.error("Erro ao editar:", err);
-          } finally {
-            sendBtn.disabled = false;
+              </div>`;
           }
-          return;
         }
-        if (!audioUrl) {
-          inputEl.value = "";
-          LayoutManager.resetLayout();
-          inputEl.dispatchEvent(new Event('input'));
-        }    
-        const currentCorp = Helpers.getCorpNr();
-        const senderName = await UserManager.fetchName();
-        const messageData = {n_int: AppState.currentUserNint, recipient_nint: AppState.currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text, 
-                             file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};    
-        if (AppState.currentReplyToMessage) {
-          messageData.reply_to_message_id = AppState.currentReplyToMessage.id;
-        }    
-        const {error} = await supabaseClient.from('chat_messages').insert([messageData]);
         
-        if (AppState.currentReplyToMessage) {
-            ReplyManager.cancel();
-        }    
+        // Se tiver mensagem, exibir normalmente
+        return Helpers.escapeHtml(msg.message || '');
+    }
+  }
+};
+    /* ========================= MESSAGE SENDER ========================== */
+// ✅ FUNÇÃO CORRIGIDA - MessageSender
+const MessageSender = {
+  async send(audioText = null, audioUrl = null) {
+    const inputEl = DOM.chatInput();
+    const sendBtn = document.getElementById("chat-send-btn");
+    const text = audioText || inputEl.value.trim();
+    
+    // ✅ Permitir envio mesmo sem texto se houver audioUrl
+    if (!text && !audioUrl) return;
+    
+    sendBtn.disabled = true;
+    
+    // Verificar se está em modo de edição
+    if (typeof EditManager !== 'undefined' && EditManager.editingMessageId && !audioUrl) {
+      try {
+        const {error} = await supabaseClient
+          .from('chat_messages')
+          .update({
+            message: text,
+            edited_at: new Date().toISOString() 
+          })
+          .eq('id', EditManager.editingMessageId);    
+        if (error) throw error;
+        inputEl.value = '';
+        inputEl.dispatchEvent(new Event('input', {bubbles: true}));
+        EditManager.finish();
+      } catch (err) {
+        console.error("Erro ao editar:", err);
+      } finally {
         sendBtn.disabled = false;
       }
-    };
+      return;
+    }
+    
+    // Limpar input apenas se não for áudio
+    if (!audioUrl) {
+      inputEl.value = "";
+      LayoutManager.resetLayout();
+      inputEl.dispatchEvent(new Event('input'));
+    }    
+    const currentCorp = Helpers.getCorpNr();
+    const senderName = await UserManager.fetchName();
+    
+    // ✅ CORREÇÃO: Garantir message vazio e message_type correto
+    const messageData = {
+      n_int: AppState.currentUserNint, 
+      recipient_nint: AppState.currentChat, 
+      corp_oper_nr: currentCorp, 
+      abv_name: senderName, 
+      message: text || "", // ✅ Garantir string vazia se não houver texto
+      file_url: audioUrl || null, 
+      message_type: audioUrl ? 'audio' : 'text' // ✅ Definir tipo correto
+    };    
+    
+    // Adicionar reply se existir
+    if (AppState.currentReplyToMessage) {
+      messageData.reply_to_message_id = AppState.currentReplyToMessage.id;
+    }    
+    
+    const {error} = await supabaseClient.from('chat_messages').insert([messageData]);
+    
+    if (error) {
+      console.error("Erro ao enviar mensagem:", error);
+    }
+    
+    // Cancelar reply após envio
+    if (AppState.currentReplyToMessage) {
+      ReplyManager.cancel();
+    }    
+    
+    sendBtn.disabled = false;
+  }
+};
+
     /* ========================== READ MANAGER =========================== */
     const ReadManager = {
       async markGeralAsRead() {
@@ -2448,3 +2518,4 @@
   </script>
 </body>
 </html>
+
