@@ -762,7 +762,7 @@
             if (thumbBlob) {
               const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.png`;
               const {error: upThumbErr} = await supabaseClient.storage
-              .from('chat-files')
+              .from('cb_files')
               .upload(thumbPath, thumbBlob, {contentType: 'image/png'});
               if (!upThumbErr) {
                 const {data: pubThumb} = supabaseClient.storage.from('cb_files').getPublicUrl(thumbPath);
@@ -774,11 +774,11 @@
           }
         }
         const {error: upErr} = await supabaseClient.storage
-        .from('chat-files')
+        .from('cb_files')
         .upload(basePath, file, {contentType: file.type || 'application/octet-stream'});
         if (upErr) throw upErr;
         const { data: { publicUrl } } = supabaseClient.storage
-        .from('chat-files')
+        .from('cb_files')
         .getPublicUrl(basePath);
         const senderName = await fetchUserName(); 
         const payload = {n_int: currentUserNint, recipient_nint: chatId, message: isImage ? "Enviou uma foto 📷" : (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`), message_type: isImage ? 'image' : 'file',
@@ -1133,11 +1133,17 @@
               </div>`;
             break;
           case 'file':
+            const hasPreview = !!msg.preview_url;
             finalContentHTML = `
-              <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
-                <span class="material-icons">insert_drive_file</span>
-                <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">${msg.file_name || 'Documento'}</a>
-              </div>`;
+              ${hasPreview ? `
+                <img src="${msg.preview_url}" class="chat-img" style="max-width:230px; max-height:100px; border-radius:10px; display:block; margin-bottom:6px; cursor:pointer;" onclick="window.open('${msg.file_url}', '_blank')">` : ''}
+                <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
+                  <span class="material-icons">insert_drive_file</span>
+                  <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
+                    ${msg.file_name || 'Documento'}
+                  </a>
+                </div>
+              `;
             break;
           default:
             const tempSpan = document.createElement('span');
@@ -2164,4 +2170,3 @@
   </script>
 </body>
 </html>
-
