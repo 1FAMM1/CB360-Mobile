@@ -347,8 +347,7 @@
     <div class="input-wrapper">
       <button id="emoji-open-btn" type="button"><span class="material-icons">sentiment_satisfied_alt</span></button>
       <input type="text" id="chat-input" placeholder="Mensagem" autocomplete="off" />    
-      <button id="attachment-btn" type="button"><span class="material-icons">attach_file</span></button>
-      <input type="file" id="doc-file-input" style="display: none;" accept="*/*">      
+      <button id="attachment-btn" type="button"><span class="material-icons">attach_file</span></button>    
       <button id="camera-btn" type="button"><span class="material-icons">photo_camera</span></button>
     </div>
     <button id="chat-send-btn">
@@ -440,13 +439,6 @@
       window.addEventListener('orientationchange', setVH);
       setVH();
     })();
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    if (window['pdfjs-dist/build/pdf']) {
-      window.pdfjsLib = window['pdfjs-dist/build/pdf'];
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
   </script>
   <script> 
     /* ===================== SUPABASE CONFIGURATION ====================== */
@@ -723,76 +715,6 @@
       .from("chat_messages")
       .insert([payload]);
       if (error) throw error;
-    }    
-    /* ======================== ENVIO DE FICHEIROS (VERSÃO PRO) ======================== */
-    async function uploadFile(file) {
-      if (!file) return;
-      const MAX_MB = 25;
-      if (file.size > MAX_MB * 1024 * 1024) {
-        alert(`Ficheiro muito grande (máx. ${MAX_MB}MB).`);
-        return;
-      }
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      const chatId = currentChat;
-      const now = Date.now();
-      const safeName = file.name.replace(/[^\w.\-() ]+/g, '_');
-      const rand = (crypto.randomUUID?.() || Math.random().toString(16).slice(2));
-      const basePath = `${chatId}/${now}_${rand}_${safeName}`;
-      try {
-        let previewUrl = null;
-        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-        const isImage = file.type.startsWith('image/');
-        if (isPdf && window.pdfjsLib) {
-          try {
-            const thumbBlob = await renderPdfFirstPageToBlob(file);
-            if (thumbBlob) {
-              const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.png`;
-              const { error: upThumbErr } = await supabaseClient.storage
-              .from('chat-files')
-              .upload(thumbPath, thumbBlob, { contentType: 'image/png' });
-              if (!upThumbErr) {
-                const { data: pubThumb } = supabaseClient.storage.from('chat-files').getPublicUrl(thumbPath);
-                previewUrl = pubThumb?.publicUrl;
-              }
-            }
-          } catch (e) {
-            console.warn("Falha ao gerar preview do PDF, continuando apenas com o ficheiro.");
-          }
-        }
-        const { error: upErr } = await supabaseClient.storage
-        .from('chat-files')
-        .upload(basePath, file, { contentType: file.type || 'application/octet-stream' });
-        if (upErr) throw upErr;
-        const { data: { publicUrl } } = supabaseClient.storage
-        .from('chat-files')
-        .getPublicUrl(basePath);
-        const senderName = await fetchUserName(); 
-        const payload = {n_int: currentUserNint, recipient_nint: chatId, message: isImage ? "Enviou uma foto 📷" : (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`), message_type: isImage ? 'image' : 'file',
-                         file_url: publicUrl, file_name: file.name, preview_url: previewUrl, corp_oper_nr: currentCorp, abv_name: senderName, created_at: new Date().toISOString()};
-        const { error: insertError } = await supabaseClient.from('chat_messages').insert([payload]);
-        if (!insertError) {
-          fetch('/api/sendPush', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({recipient_nint: chatId, corp_nr: currentCorp, sender_name: senderName, message_text: isImage ? "📷 Foto" : `📄 ${file.name}`, sender_nint: currentUserNint})
-            }).catch(err => console.error("Erro no push:", err));
-        }
-      } catch (err) {
-        console.error("Erro no envio:", err);
-        alert("Erro ao enviar ficheiro.");
-      }
-    }
-    async function renderPdfFirstPageToBlob(file) {
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const page = await pdf.getPage(1);
-      const viewport = page.getViewport({ scale: 0.8 });
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      await page.render({ canvasContext: ctx, viewport }).promise;
-      return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
     }
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
@@ -1664,219 +1586,196 @@
       window.forceRestoreKeyboard = onKeyboardClose;
     })();
     /* =================== INITIALIZATION AND REALTIME =================== */
-document.addEventListener('DOMContentLoaded', async () => {
-    loadCorpInfo();
-    loadTheme();
-    await loadContacts();
-    updateUnreadBadges();
-    
-    const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-
-    // --- 1. CONFIGURAÇÃO DE INPUTS DE FICHEIROS (ADICIONADO) ---
-    const attachmentBtn = document.getElementById('attachment-btn');
-    const docInput = document.getElementById('doc-file-input');
-    const cameraBtn = document.getElementById('camera-btn');
-    const cameraInput = document.getElementById('camera-file-input');
-
-    if (attachmentBtn && docInput) {
-        attachmentBtn.onclick = () => docInput.click();
-        docInput.onchange = async (e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-                if (!currentChat) return alert("Selecione um chat primeiro.");
-                await uploadFile(file);
-                e.target.value = ''; 
-            }
-        };
-    }
-
-    if (cameraBtn && cameraInput) {
-        cameraBtn.onclick = () => cameraInput.click();
-        cameraInput.onchange = async (e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-                await uploadFile(file);
-                e.target.value = '';
-            }
-        };
-    }
-
-    // --- 2. CANAL REALTIME: MENSAGENS (INSERT) ---
-    supabaseClient.channel('chat_realtime')
+    document.addEventListener('DOMContentLoaded', async () => {
+      loadCorpInfo();
+      loadTheme();
+      await loadContacts();
+      updateUnreadBadges();
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      supabaseClient.channel('chat_realtime')
         .on('postgres_changes', {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'chat_messages',
-            filter: `corp_oper_nr=eq.${currentCorp}`
-        }, async (payload) => {
-            let msg = payload.new;
-            if (msg.reply_to_message_id) {
-                const { data: replyData } = await supabaseClient
-                    .from('chat_messages')
-                    .select('id, message, abv_name')
-                    .eq('id', msg.reply_to_message_id)
-                    .single();
-                if (replyData) msg.reply_to_message = replyData;
-            }
-
-            const involved = [msg.n_int, msg.recipient_nint].map(String);
-            
-            if (currentChat === 'geral' && msg.recipient_nint === 'geral') {
-                addMessageToDOM(msg, 'geral');
-                if (String(msg.n_int) !== currentUserNint && document.getElementById("messages")?.style.display !== 'none') {
-                    const geralContact = document.querySelector('.contact[data-nint="geral"]');
-                    const currentBadge = geralContact?.querySelector('.unread-badge');
-                    const badgeValue = currentBadge ? currentBadge.textContent : null;
-                    
-                    supabaseClient.from('chat_message_reads').insert({
-                        message_id: msg.id, 
-                        n_int: currentUserNint, 
-                        read_at: new Date().toISOString(), 
-                        corp_oper_nr: currentCorp
-                    }).then(() => {
-                        if (badgeValue && geralContact) {
-                            setTimeout(() => {
-                                let badge = geralContact.querySelector('.unread-badge');
-                                if (!badge) {
-                                    badge = document.createElement('div');
-                                    badge.className = 'unread-badge';
-                                    geralContact.appendChild(badge);
-                                }
-                                badge.textContent = badgeValue;
-                            }, 100);
-                        }
-                    });
-                }
-            } else if (currentChat !== 'geral' && involved.includes(currentUserNint) && involved.includes(currentChat)) {
-                addMessageToDOM(msg, currentChat);
-                if (String(msg.recipient_nint) === currentUserNint) {
-                    setTimeout(() => sendReadReceipt(currentChat), 100);
-                }
-            }
-            if (String(msg.n_int) !== currentUserNint) updateUnreadBadges();
-        })
-        // --- 3. CANAL REALTIME: ATUALIZAÇÕES (UPDATE/REACTION/DELETE) ---
-        .on('postgres_changes', {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'chat_messages',
-            filter: `corp_oper_nr=eq.${currentCorp}`
-        }, payload => {
-            const msg = payload.new;
-            const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
-            if (!msgElement) return;
-
-            // Mensagem Apagada
-            if (msg.deleted_at) {
-                msgElement.classList.add('deleted');
-                const textContent = msgElement.querySelector('.msg-text-content');
-                if (textContent) textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
-            }
-            // Reações
-            if (msg.reactions !== undefined) {
-                const oldReactions = msgElement.querySelector('.message-reactions');
-                if (oldReactions) oldReactions.remove();
-                const newReactionsHTML = renderReactions(msg.reactions, msg.id);
-                if (newReactionsHTML) {
-                    const textContent = msgElement.querySelector('.msg-text-content');
-                    if (textContent) textContent.insertAdjacentHTML('afterend', newReactionsHTML);
-                }
-            }
-            // Estrelas (Starred)
-            if (msg.starred_by !== undefined) {
-                const oldStar = msgElement.querySelector('.star-icon');
-                if (oldStar) oldStar.remove();
-                if (msg.starred_by && msg.starred_by.includes(currentUserNint)) {
-                    const textContent = msgElement.querySelector('.msg-text-content');
-                    if (textContent) textContent.insertAdjacentHTML('afterend', '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>');
-                }
-            }
-            // Checkmarks de leitura
-            if (msg.read_at && String(msg.n_int) === currentUserNint) {
-                const checkEl = document.getElementById(`check-${msg.id}`);
-                if (checkEl) {
-                    checkEl.classList.remove('sent', 'delivered');
-                    checkEl.classList.add('read');
-                    checkEl.textContent = 'done_all';
-                }
-            }
-        }).subscribe();
-
-    // --- 4. OUTROS CANAIS (READS, BROADCAST, PRESENCE) ---
-    supabaseClient.channel('reads_realtime').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_message_reads', filter: `corp_oper_nr=eq.${currentCorp}` }, () => updateUnreadBadges()).subscribe();
-
-    const readReceiptChannel = supabaseClient.channel('read-receipts');
-    readReceiptChannel.on('broadcast', {event: 'read'}, (payload) => {
-        if (String(payload.payload.readerNint) === currentChat) {
-            document.querySelectorAll('.status-checks').forEach(check => {
-                if (!check.classList.contains('read')) {
-                    check.classList.remove('sent', 'delivered');
-                    check.classList.add('read');
-                    check.textContent = 'done_all';
-                }
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `corp_oper_nr=eq.${currentCorp}`
+      }, async (payload) => {
+        let msg = payload.new;
+        if (msg.reply_to_message_id) {
+          const { data: replyData } = await supabaseClient
+          .from('chat_messages')
+          .select('id, message, abv_name')
+          .eq('id', msg.reply_to_message_id)
+          .single();
+          if (replyData) {
+            msg.reply_to_message = replyData;
+          }
+        }   
+        const involved = [msg.n_int, msg.recipient_nint].map(String);
+        if (currentChat === 'geral' && msg.recipient_nint === 'geral') {
+          addMessageToDOM(msg, 'geral');
+          if (String(msg.n_int) !== currentUserNint && document.getElementById("messages")?.style.display !== 'none') {
+            const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+            const geralContact = document.querySelector('.contact[data-nint="geral"]');
+            const currentBadge = geralContact?.querySelector('.unread-badge');
+            const badgeValue = currentBadge ? currentBadge.textContent : null;
+            supabaseClient.from('chat_message_reads').insert({message_id: msg.id, n_int: currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp}).then(() => {
+              if (badgeValue && geralContact) {
+                setTimeout(() => {
+                  let badge = geralContact.querySelector('.unread-badge');
+                  if (!badge) {
+                    badge = document.createElement('div');
+                    badge.className = 'unread-badge';
+                    geralContact.appendChild(badge);
+                  }
+                  badge.textContent = badgeValue;
+                }, 100);
+              }
             });
+          }
+        } else if (currentChat !== 'geral' && involved.includes(currentUserNint) && involved.includes(currentChat)) {
+          addMessageToDOM(msg, currentChat);
+          if (String(msg.recipient_nint) === currentUserNint) {
+            setTimeout(() => sendReadReceipt(currentChat), 100);
+          }
         }
-    }).subscribe();
-
-    const typingChannel = supabaseClient.channel('typing-status', {config: {broadcast: {ack: true, self: false}}});
-    typingChannel.on('broadcast', {event: 'typing'}, (payload) => {
+        if (String(msg.n_int) !== currentUserNint) {
+          updateUnreadBadges();
+        }
+      })
+        .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `corp_oper_nr=eq.${currentCorp}`
+      }, payload => {
+        const msg = payload.new;
+        if (msg.deleted_at) {
+          const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
+          if (msgElement) {
+            msgElement.classList.add('deleted');
+            const textContent = msgElement.querySelector('.msg-text-content');
+            if (textContent) {
+              textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
+            }
+          }
+        }
+        if (msg.reactions !== undefined) {
+          const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
+          if (msgElement) {
+            const oldReactions = msgElement.querySelector('.message-reactions');
+            if (oldReactions) oldReactions.remove();
+            const newReactionsHTML = renderReactions(msg.reactions, msg.id);            
+            if (newReactionsHTML) {
+              const textContent = msgElement.querySelector('.msg-text-content');
+              if (textContent) {
+                textContent.insertAdjacentHTML('afterend', newReactionsHTML);
+              }
+            }
+          }
+        }        
+        if (msg.starred_by !== undefined) {
+        const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
+        if (msgElement) {
+          const oldStar = msgElement.querySelector('.star-icon');
+          if (oldStar) oldStar.remove();
+          const isStarred = msg.starred_by && msg.starred_by.includes(currentUserNint);
+          if (isStarred) {
+            const textContent = msgElement.querySelector('.msg-text-content');
+            if (textContent) {
+              textContent.insertAdjacentHTML('afterend', 
+                '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
+              );
+            }
+          }
+        }
+      }
+        if (msg.read_at && String(msg.n_int) === currentUserNint) {
+          const checkEl = document.getElementById(`check-${msg.id}`);
+          if (checkEl) {
+            checkEl.classList.remove('sent', 'delivered');
+            checkEl.classList.add('read');
+            checkEl.textContent = 'done_all';
+          }
+        }
+      }).subscribe();
+      supabaseClient.channel('reads_realtime')
+        .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_message_reads',
+        filter: `corp_oper_nr=eq.${currentCorp}`
+      }, () => {
+        updateUnreadBadges();
+      }).subscribe();    
+      const readReceiptChannel = supabaseClient.channel('read-receipts');
+      readReceiptChannel.on('broadcast', {event: 'read'}, (payload) => {
+        if (String(payload.payload.readerNint) === currentChat) {
+          document.querySelectorAll('.status-checks').forEach(check => {
+            if (!check.classList.contains('read')) {
+              check.classList.remove('sent', 'delivered');
+              check.classList.add('read');
+              check.textContent = 'done_all';
+            }
+          });
+        }
+      }).subscribe();
+      const typingChannel = supabaseClient.channel('typing-status', {config: {broadcast: {ack: true, self: false}}});
+      typingChannel.on('broadcast', {event: 'typing'}, (payload) => {
         const data = payload.payload;
         if (currentChat !== 'geral' && String(data.nint) === currentChat) {
-            const statusEl = document.getElementById("typing-status");
-            if(statusEl) {
-                statusEl.textContent = `${currentChatName} está a escrever...`;
-                statusEl.style.display = data.isTyping ? 'block' : 'none';
-                if (data.isTyping) scrollToBottom();
-            }
+          const statusEl = document.getElementById("typing-status");
+          statusEl.textContent = `${currentChatName} está a escrever...`;
+          statusEl.style.display = data.isTyping ? 'block' : 'none';
+          if (data.isTyping) scrollToBottom();
         }
-    }).subscribe();
-
-    const presenceChannel = supabaseClient.channel('presence-cb360', { config: {presence: {key: String(currentUserNint)}} });
-    presenceChannel.on('presence', {event: 'sync'}, () => {
+      }).subscribe();
+      window.readReceiptChannel = readReceiptChannel;
+      const presenceChannel = supabaseClient.channel('presence-cb360', {
+        config: {presence: {key: String(currentUserNint)}},
+      });
+      presenceChannel.on('presence', {event: 'sync'}, () => {
         const state = presenceChannel.presenceState();
         document.querySelectorAll('.status-dot').forEach(dot => dot.classList.remove('online'));
         Object.keys(state).forEach((nint) => {
-            const dot = document.querySelector(`.contact[data-nint="${nint}"] .status-dot`);
-            if (dot) dot.classList.add('online');
-            if (currentChat !== 'geral' && String(nint) === currentChat) {
-                document.querySelectorAll('.status-checks.sent').forEach(check => {
-                    check.classList.remove('sent');
-                    check.classList.add('delivered');
-                    check.textContent = 'done_all';
-                });
-            }
+          const dot = document.querySelector(`.contact[data-nint="${nint}"] .status-dot`);
+          if (dot) dot.classList.add('online');
+        if (currentChat !== 'geral' && String(nint) === currentChat) {
+          document.querySelectorAll('.status-checks.sent').forEach(check => {
+            check.classList.remove('sent');
+            check.classList.add('delivered');
+            check.textContent = 'done_all';
+          });
+        }
         });
-    }).subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') await presenceChannel.track({ online_at: new Date().toISOString(), nint: String(currentUserNint) });
-    });
-
-    // --- 5. EVENTOS DE INTERFACE (INPUT, ENVIAR) ---
-    let typingTimer;
-    const inputEl = document.getElementById("chat-input");
-    inputEl.addEventListener('input', () => {
-        if (currentChat === 'geral' || !currentChat) return;
+      }).subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({
+            online_at: new Date().toISOString(),
+            nint: String(currentUserNint)
+          });
+        }
+      });
+      let typingTimer;
+      const inputEl = document.getElementById("chat-input");
+      inputEl.addEventListener('input', () => {
+        if (currentChat === 'geral') return;
         typingChannel.send({type: 'broadcast', event: 'typing', payload: {nint: String(currentUserNint), isTyping: true}});
         clearTimeout(typingTimer);
         typingTimer = setTimeout(() => {
-            typingChannel.send({type: 'broadcast', event: 'typing', payload: {nint: String(currentUserNint), isTyping: false}});
+          typingChannel.send({type: 'broadcast', event: 'typing', payload: {nint: String(currentUserNint), isTyping: false}});
         }, 2000);
-    });
-
-    document.getElementById("chat-send-btn").onclick = () => sendMessage();
-    inputEl.onkeydown = e => {
+      });    
+      document.getElementById("chat-send-btn").onclick = () => sendMessage();
+      inputEl.onkeydown = e => {
         if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
+          e.preventDefault();
+          sendMessage();
         }
-    };
-    inputEl.addEventListener('focus', () => {
-        if (currentChat && currentChat !== 'geral') sendReadReceipt(currentChat);
+      };
+      inputEl.addEventListener('focus', () => {
+        if (currentChat !== 'geral') sendReadReceipt(currentChat);
+      });
     });
-
-    // Globais para acesso externo se necessário
-    window.readReceiptChannel = readReceiptChannel;
-    window.typingChannel = typingChannel;
-});
     /* ======================= MESSAGE INTERACTION ======================= */
     function setupMessageInteraction(messageElement, messageData) {
       let pressTimer;
