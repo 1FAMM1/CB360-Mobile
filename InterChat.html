@@ -81,6 +81,23 @@
     .dark-mode .confirm-text {color: #eee;}
     .dark-mode .btn-confirm-action:active {background-color: rgba(255, 255, 255, 0.05);}
     .dark-mode .draft-preview {color: #aaa !important;}
+    .dark-mode .attach-modal {background: rgba(0,0,0,0.92);}
+    .dark-mode .attach-card {background: #2b2b2b; color: #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.6);}
+    .dark-mode .attach-header {color: #f9a825; border-bottom: 1px solid rgba(255,255,255,0.08);}
+    .dark-mode .attach-x {color: #ddd;}
+    .dark-mode .attach-x:hover {color: #fff; background: rgba(255,255,255,0.08); border-radius: 6px;}
+    .dark-mode .attach-preview {background: #000;}
+    .dark-mode .attach-preview img {background: #000;}
+    .dark-mode #attach-caption {background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff;}
+    .dark-mode #attach-caption::placeholder {color: #aaa;}
+    .dark-mode #attach-send {background: #f9a825; color: #1a1a1a;}
+    .dark-mode #attach-send:hover {background: #ffb300;}
+    .dark-mode #attach-send:disabled {opacity: 0.6;}
+    .dark-mode .attach-loading {background: rgba(0,0,0,0.7); color: #fff;}
+    .dark-mode .attach-file-card {background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12);}
+    .dark-mode .attach-file-card .material-icons {color: #f9a825;}
+    .dark-mode .attach-file-name {color: #fff;}
+    .dark-mode .attach-file-type {color: #bbb;}
     /* ==================== PWA KEYBOARD FIX ==================== */
     :root {--kb: 0px; --footer-h: 60px; --gap: 10px; --safe: env(safe-area-inset-bottom, 0px);}
     .message-container{overflow-y:auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--footer-h) + 80px + var(--kb) + var(--safe));}
@@ -292,6 +309,12 @@
     #attach-caption{flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;}
     #attach-send{background:#00a884;color:#fff;border:none;border-radius:8px;padding:0 15px;font-weight:700;}
     .attach-loading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);color:#fff;font-weight:700;}
+    .attach-file-card{display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; background: rgba(255,255,255,0.08); color:#fff; max-width: 90%;}
+    .attach-file-card .material-icons{font-size: 32px;}
+    .attach-file-meta{overflow:hidden;}
+    .attach-file-name{font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+    .attach-file-type{font-size:12px; opacity:0.8;}
+    .file-caption{margin-top: 6px; font-size: 12px; opacity: 0.85; line-height: 1.2;}
     @keyframes slideUp {from {transform: translateY(100%); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     @keyframes popScale {0% {transform: scale(0.85); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}    
     @keyframes pulse-green {0% {transform: scale(1); box-shadow: 0 0 5px #00ff00;} 50% {transform: scale(1.15); box-shadow: 0 0 12px #00ff00;} 100% {transform: scale(1); box-shadow: 0 0 5px #00ff00;}}
@@ -431,8 +454,15 @@
         <button id="attach-cancel" class="attach-x" type="button">✕</button>
       </div>
       <div class="attach-preview">
-        <img id="attach-preview-img" src="" alt="preview" />
-        <div id="attach-loading" class="attach-loading">A enviar...</div>
+        <img id="attach-preview-img" src="" alt="preview" style="display:none;" />
+        <div id="attach-file-card" class="attach-file-card" style="display:none;">
+          <span class="material-icons" id="attach-file-icon">insert_drive_file</span>
+          <div class="attach-file-meta">
+            <div id="attach-file-name" class="attach-file-name"></div>
+            <div id="attach-file-type" class="attach-file-type"></div>
+          </div>
+        </div>
+        <div id="attach-loading" class="attach-loading" style="display:none;">A enviar...</div>
       </div>
       <div class="attach-footer">
         <input id="attach-caption" type="text" placeholder="Adicione uma legenda..." autocomplete="off" />
@@ -456,12 +486,12 @@
     })();
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-  if (window.pdfjsLib) {
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-  }
-</script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+  </script>
   <script> 
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
@@ -482,7 +512,7 @@
     let isRecording = false;
     let recordTimeout;
     let recordingTimer;
-    const currentUserNint = String(localStorage.getItem("currentCorpNint") || "205");
+    const currentUserNint = String(localStorage.getItem("currentCorpNint") || "103");
     function getSupabaseHeaders(options = {}) {
       const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
       const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
@@ -490,7 +520,7 @@
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json',
-        'x-my-corpo': corp,
+        'x-my-corpo': corp,        
         'x-my-nint': nint
       };
       if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
@@ -657,11 +687,12 @@
         console.error("Erro:", err.message);
       }
     }
-    /* ===================== CAMERA & IMAGE HANDLER ====================== */
+    /* ================== CAMERA, FILE & IMAGE HANDLER =================== */
     const cameraBtn = document.getElementById("camera-btn");
     const cameraInput = document.getElementById("camera-file-input");
     const attachModal   = document.getElementById("attach-modal");
     const attachImg     = document.getElementById("attach-preview-img");
+    const attachFileCard = document.getElementById("attach-file-card");
     const attachCaption = document.getElementById("attach-caption");
     const attachSend    = document.getElementById("attach-send");
     const attachCancel  = document.getElementById("attach-cancel");
@@ -681,29 +712,51 @@
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       previewUrl = URL.createObjectURL(file);
       attachImg.src = previewUrl;
+      attachImg.style.display = "block";
+      if (attachFileCard) attachFileCard.style.display = "none";
       attachCaption.value = "";
       attachModal.style.display = "flex";
       setTimeout(() => attachCaption.focus(), 150);
     });
-    function fecharModalFoto() {
+    function fecharModalFileAndFoto() {
       attachModal.style.display = "none";
       attachLoading.style.display = "none";
       attachSend.disabled = false;
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       previewUrl = null;
       pendingFile = null;
+      window.pendingAttachFile = null;
+      window.attachMode = null;
+      attachImg.src = "";
+      attachImg.style.display = "none";
+      if (attachFileCard) attachFileCard.style.display = "none";
+      attachCaption.value = "";
       cameraInput.value = "";
     }
-    attachCancel.addEventListener("click", fecharModalFoto);
+    attachCancel.addEventListener("click", fecharModalFileAndFoto);
     attachSend.addEventListener("click", async () => {
-      if (!pendingFile) return;
       const caption = (attachCaption.value || "").trim();
+      if (window.attachMode === "file" && window.pendingAttachFile) {
+        try {
+          attachLoading.style.display = "block";
+          attachSend.disabled = true;
+          await uploadFile(window.pendingAttachFile, caption);
+          fecharModalFileAndFoto();
+        } catch (err) {
+          console.error("Erro ao enviar anexo:", err);
+          alert("Não foi possível enviar o anexo.");
+          attachLoading.style.display = "none";
+          attachSend.disabled = false;
+        }
+        return;
+      }
+      if (!pendingFile) return;
       try {
         attachLoading.style.display = "block";
         attachSend.disabled = true;
         const publicUrl = await uploadImageToSupabase(pendingFile);
         await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
-        fecharModalFoto();
+        fecharModalFileAndFoto();
       } catch (err) {
         console.error("Erro ao enviar foto:", err);
         alert("Não foi possível enviar a foto.");
@@ -771,7 +824,8 @@
       const outName = `${baseName}_opt.${ext}`;
       return new File([blob], outName, { type: mimeType });
     }
-    async function uploadFile(file) {
+    /* ====================== UPLOAD FILES & IMAGES ====================== */    
+    async function uploadFile(file, caption = "") {
       if (!file) return;
       const MAX_MB = 25;
       if (file.size > MAX_MB * 1024 * 1024) {
@@ -802,12 +856,12 @@
             if (thumbBlob) {
               const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.jpg`;
               const { error: upThumbErr } = await supabaseClient.storage
-                .from('cb_files')
-                .upload(thumbPath, thumbBlob, { contentType: 'image/jpeg' });
+              .from('cb_files')
+              .upload(thumbPath, thumbBlob, { contentType: 'image/jpeg' });
               if (!upThumbErr) {
                 const { data: pubThumb } = supabaseClient.storage
-                  .from('cb_files')
-                  .getPublicUrl(thumbPath);
+                .from('cb_files')
+                .getPublicUrl(thumbPath);
                 previewUrl = pubThumb?.publicUrl || null;
               }
             }
@@ -816,26 +870,32 @@
           }
         }
         const { error: upErr } = await supabaseClient.storage
-          .from('cb_files')
-          .upload(basePath, file, { contentType: file.type || 'application/octet-stream' });
+        .from('cb_files')
+        .upload(basePath, file, { contentType: file.type || 'application/octet-stream' });
         if (upErr) throw upErr;
         const { data: pubFile } = supabaseClient.storage
-          .from('cb_files')
-          .getPublicUrl(basePath);
+        .from('cb_files')
+        .getPublicUrl(basePath);
         const publicUrl = pubFile?.publicUrl;
         if (!publicUrl) throw new Error("Sem URL público do ficheiro.");
         const senderName = await fetchUserName();
-        const payload = {n_int: currentUserNint, recipient_nint: chatId, corp_oper_nr: currentCorp, abv_name: senderName, created_at: new Date().toISOString(),
-                         message_type: isImage ? 'image' : 'file', file_url: publicUrl, file_name: file.name || safeName, preview_url: previewUrl, 
-                         message: isImage ? "Enviou uma foto 📷" : (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`)};
+        const defaultMsg = isImage
+        ? "Enviou uma foto 📷"
+        : (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`);
+        const finalMsg = (caption || "").trim() || defaultMsg;
+        const payload = {n_int: currentUserNint, recipient_nint: chatId, corp_oper_nr: currentCorp, abv_name: senderName, created_at: new Date().toISOString(), message_type: isImage ? 'image' : 'file',
+                         file_url: publicUrl, file_name: file.name || safeName, preview_url: previewUrl, message: finalMsg};
         const { error: insertError } = await supabaseClient
-          .from('chat_messages')
-          .insert([payload]);
+        .from('chat_messages')
+        .insert([payload]);
         if (insertError) throw insertError;
+        const pushText = isImage
+        ? ((caption || "").trim() ? `📷 ${(caption || "").trim()}` : "📷 Foto")
+        : ((caption || "").trim() ? `📎 ${(caption || "").trim()}` : `📄 ${file.name}`);
         fetch('/api/sendPush', {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({recipient_nint: chatId, corp_nr: currentCorp, sender_name: senderName, message_text: isImage ? "📷 Foto" : `📄 ${file.name}`, sender_nint: currentUserNint})
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({recipient_nint: chatId, corp_nr: currentCorp, sender_name: senderName, message_text: pushText, sender_nint: currentUserNint})
         }).catch(err => console.error("Erro no push:", err));
       } catch (err) {
         console.error("Erro no envio (detalhes):", err);
@@ -1160,7 +1220,8 @@
       } else {
         switch(msg.message_type) {
           case 'image':
-            finalContentHTML = `<img src="${msg.file_url}" class="chat-img" style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${msg.file_url}', '_blank')">`;
+            finalContentHTML = `<img src="${msg.file_url}" class="chat-img" style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" 
+                                 onclick="window.open('${msg.file_url}', '_blank')">`;
             if (msg.message) finalContentHTML += `<div class="img-caption">${msg.message}</div>`;
             break;          
           case 'audio':
@@ -1179,23 +1240,38 @@
                 <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
               </div>`;
             break;
-          case 'file':
+          case 'file': {
             const hasPreview = !!msg.preview_url;
+            const fileName = msg.file_name || '';
+            const isPdf = (fileName || '').toLowerCase().endsWith('.pdf');
+            const defaultMsg1 = `Ficheiro: ${fileName}`;
+            const defaultMsg2 = `Documento PDF: ${fileName}`;
+            const rawCaption = (msg.message || '').trim();
+            const shouldShowCaption = rawCaption && rawCaption !== defaultMsg1 && rawCaption !== defaultMsg2;
+            let captionHTML = '';
+            if (shouldShowCaption) {
+              const capSpan = document.createElement('span');
+              capSpan.textContent = rawCaption;
+              captionHTML = `<div class="img-caption">${capSpan.innerHTML}</div>`;}
             finalContentHTML = `
               ${hasPreview ? `
-                <img src="${msg.preview_url}" class="chat-img" style="max-width:230px; max-height:100px; border-radius:10px; display:block; margin-bottom:6px; cursor:pointer;" onclick="window.open('${msg.file_url}', '_blank')">` : ''}
+                <img src="${msg.preview_url}" class="chat-img" style="max-width:230px; max-height:140px; border-radius:10px; display:block; margin-bottom:6px; 
+                object-fit:contain; cursor:pointer;" onclick="window.open('${msg.file_url}', '_blank')">` : ''}
                 <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
-                  <span class="material-icons">insert_drive_file</span>
-                  <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
-                    ${msg.file_name || 'Documento'}
-                  </a>
+                  <span class="material-icons">${isPdf ? 'picture_as_pdf' : 'insert_drive_file'}</span>
+                    <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
+                      ${fileName || 'Documento'}
+                    </a>
                 </div>
+                ${captionHTML}
               `;
             break;
+          }
           default:
             const tempSpan = document.createElement('span');
             tempSpan.textContent = msg.message;
             finalContentHTML = tempSpan.innerHTML;
+            break;
         }
       }
       div.innerHTML = `
@@ -1948,12 +2024,48 @@
           e.preventDefault();
           docInput.click();
         };
-        docInput.onchange = async (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            await uploadFile(file); 
-            e.target.value = ''; 
+        docInput.onchange = (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          window.pendingAttachFile = file;
+          window.attachMode = 'file';
+          const attachModal   = document.getElementById("attach-modal");
+          const attachImg     = document.getElementById("attach-preview-img");
+          const attachCaption = document.getElementById("attach-caption");
+          const attachFileCard = document.getElementById("attach-file-card");
+          const attachFileName = document.getElementById("attach-file-name");
+          const attachFileType = document.getElementById("attach-file-type");
+          const attachFileIcon = document.getElementById("attach-file-icon");
+          if (window.previewUrl) URL.revokeObjectURL(window.previewUrl);
+          window.previewUrl = null;
+          const isImage = file.type?.startsWith("image/");
+          if (isImage) {
+            window.previewUrl = URL.createObjectURL(file);
+            attachImg.src = window.previewUrl;
+            attachImg.style.display = "block";
+            if (attachFileCard) attachFileCard.style.display = "none";
+          } else {
+            if (attachImg) attachImg.style.display = "none";
+            if (attachFileCard && attachFileName && attachFileType && attachFileIcon) {
+              const name = file.name || "Ficheiro";
+              const ext = (name.split(".").pop() || "").toUpperCase();
+              const extLow = ext.toLowerCase();
+              attachFileName.textContent = name;
+              attachFileType.textContent = ext ? ext : "FICHEIRO";
+              attachFileIcon.textContent =
+                extLow === "pdf" ? "picture_as_pdf" :
+              (["doc","docx","odt","rtf"].includes(extLow) ? "description" :
+               (["xls","xlsx","csv","ods"].includes(extLow) ? "table_chart" :
+                (["ppt","pptx","odp"].includes(extLow) ? "slideshow" :
+                 (["zip","rar","7z","tar","gz"].includes(extLow) ? "folder_zip" :
+                  "insert_drive_file"))));
+              attachFileCard.style.display = "flex";
+            }
           }
+          if (attachCaption) attachCaption.value = "";
+          if (attachModal) attachModal.style.display = "flex";
+          setTimeout(() => attachCaption?.focus(), 150);
+          e.target.value = "";
         };
       }
     });
