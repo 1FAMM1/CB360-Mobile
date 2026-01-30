@@ -1905,6 +1905,14 @@ function initChatBatchViewerHandlers() {
       if (typeof messagesToForward !== 'undefined' && messagesToForward.length > 0) {
         const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
         const senderName = await fetchUserName();
+        
+        // Se houver múltiplas mensagens de imagem/ficheiro, gerar novo batch_id
+        const hasMultipleMedia = messagesToForward.filter(m => 
+          m.message_type === 'image' || m.message_type === 'file'
+        ).length > 1;
+        
+        const forwardBatchId = hasMultipleMedia ? crypto.randomUUID() : null;
+        
         for (const msg of messagesToForward) {
           const payload = {
             n_int: currentUserNint, 
@@ -1921,6 +1929,11 @@ function initChatBatchViewerHandlers() {
             payload.file_url = msg.file_url;
             payload.file_name = msg.file_name;
             if (msg.preview_url) payload.preview_url = msg.preview_url;
+            
+            // Se houver batch_id de forward, usar
+            if (forwardBatchId) {
+              payload.batch_id = forwardBatchId;
+            }
           }
           
           const { error } = await supabaseClient.from('chat_messages').insert([payload]);
