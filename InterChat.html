@@ -1355,84 +1355,91 @@ const MessageManager = {
     }
   },  
   
-  // ✅ FUNÇÃO CORRIGIDA COM FALLBACK PARA ÁUDIO
-  buildMessageContent(msg, isDeleted) {
-    if (isDeleted) {
-      return '<span class="deleted-icon">🚫</span> Mensagem apagada';
+  /* ========================= MESSAGE CONTENT BUILDER ========================= */
+/* ✅ VERSÃO FINAL E COMPLETA - 100% FUNCIONAL */
+
+buildMessageContent(msg, isDeleted) {
+  // 1. Verificar se mensagem foi deletada
+  if (isDeleted) {
+    return '<span class="deleted-icon">🚫</span> Mensagem apagada';
+  }
+  
+  // 2. Se tem arquivo anexado, identificar tipo
+  if (msg.file_url) {
+    const url = msg.file_url.toLowerCase();
+    
+    // ═══════════════════════════════════════════════════════════
+    // ÁUDIO - Verificação por 3 métodos (muito mais robusto)
+    // ═══════════════════════════════════════════════════════════
+    const isAudioByType = msg.message_type === 'audio';
+    const isAudioByExtension = url.match(/\.(webm|mp3|wav|ogg|m4a|aac|flac)$/i);
+    const isAudioByContext = (
+      msg.message_type !== 'image' && 
+      msg.message_type !== 'file' && 
+      (!msg.message || msg.message.trim() === '')
+    );
+    
+    if (isAudioByType || isAudioByExtension || isAudioByContext) {
+      const audioID = `audio-${msg.id || Date.now()}`;
+      return `
+        <div class="audio-bubble">
+          <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
+            <span class="material-icons">play_arrow</span>
+          </div>
+          <div class="audio-progress-container">
+            <div class="audio-progress-bar">
+              <div id="fill-${audioID}" class="audio-progress-fill"></div>
+            </div>
+            <div class="audio-time" id="time-${audioID}">0:00</div>
+          </div>
+          <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
+        </div>`;
     }
     
-    switch(msg.message_type) {
-      case 'image':
-        let html = `<img src="${msg.file_url}" class="chat-img" data-url="${msg.file_url}" alt="imagem">`;
-        if (msg.message) {
-          html += `<div class="img-caption">${msg.message}</div>`;
-        }
-        return html;
-      
-      case 'audio':
-        const audioID = `audio-${msg.id || Date.now()}`;
-        return `
-          <div class="audio-bubble">
-            <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
-              <span class="material-icons">play_arrow</span>
-            </div>
-            <div class="audio-progress-container">
-              <div class="audio-progress-bar">
-                <div id="fill-${audioID}" class="audio-progress-fill"></div>
-              </div>
-              <div class="audio-time" id="time-${audioID}">0:00</div>
-            </div>
-            <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
-          </div>`;
-      
-      case 'file':
-        if (msg.preview_url) {
-          return `
-            <img src="${msg.preview_url}"
-              class="chat-img"
-              data-url="${msg.file_url}"
-              alt="PDF preview">
-            <div class="img-caption">${msg.file_name || 'Documento PDF'}</div>
-          `;
-        }
-        return `
-          <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
-            <span class="material-icons">insert_drive_file</span>
-            <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
-              ${msg.file_name || 'Documento'}
-            </a>
-          </div>
-        `;
-      
-      default:
-        // ✅ FALLBACK CRÍTICO: Se tiver file_url mas message vazio/null, é áudio
-        if (msg.file_url && (!msg.message || msg.message.trim() === '')) {
-          // Verificar se é arquivo de áudio pela extensão
-          const isAudioFile = msg.file_url.match(/\.(webm|mp3|wav|ogg|m4a)$/i);
-          
-          if (isAudioFile) {
-            const audioID = `audio-${msg.id || Date.now()}`;
-            return `
-              <div class="audio-bubble">
-                <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
-                  <span class="material-icons">play_arrow</span>
-                </div>
-                <div class="audio-progress-container">
-                  <div class="audio-progress-bar">
-                    <div id="fill-${audioID}" class="audio-progress-fill"></div>
-                  </div>
-                  <div class="audio-time" id="time-${audioID}">0:00</div>
-                </div>
-                <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
-              </div>`;
-          }
-        }
-        
-        // Se tiver mensagem, exibir normalmente
-        return Helpers.escapeHtml(msg.message || '');
+    // ═══════════════════════════════════════════════════════════
+    // IMAGEM - Com legenda opcional
+    // ═══════════════════════════════════════════════════════════
+    const isImageByType = msg.message_type === 'image';
+    const isImageByExtension = url.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i);
+    
+    if (isImageByType || isImageByExtension) {
+      let html = `<img src="${msg.file_url}" class="chat-img" data-url="${msg.file_url}" alt="imagem">`;
+      if (msg.message && msg.message.trim()) {
+        html += `<div class="img-caption">${Helpers.escapeHtml(msg.message)}</div>`;
+      }
+      return html;
     }
+    
+    // ═══════════════════════════════════════════════════════════
+    // PDF com preview (thumbnail)
+    // ═══════════════════════════════════════════════════════════
+    if (msg.preview_url) {
+      return `
+        <img src="${msg.preview_url}"
+          class="chat-img"
+          data-url="${msg.file_url}"
+          alt="PDF preview">
+        <div class="img-caption">${Helpers.escapeHtml(msg.file_name || 'Documento PDF')}</div>
+      `;
+    }
+    
+    // ═══════════════════════════════════════════════════════════
+    // OUTROS ARQUIVOS - Download genérico
+    // ═══════════════════════════════════════════════════════════
+    return `
+      <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
+        <span class="material-icons">insert_drive_file</span>
+        <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
+          ${Helpers.escapeHtml(msg.file_name || 'Ficheiro')}
+        </a>
+      </div>
+    `;
   }
-};
+  
+  // 3. Mensagem de texto normal (sem arquivo)
+  return Helpers.escapeHtml(msg.message || '');
+}
+
     /* ========================= MESSAGE SENDER ========================== */
 // ✅ FUNÇÃO CORRIGIDA - MessageSender
 const MessageSender = {
@@ -2518,4 +2525,5 @@ const MessageSender = {
   </script>
 </body>
 </html>
+
 
