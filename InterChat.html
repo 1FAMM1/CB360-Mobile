@@ -1301,16 +1301,21 @@
       loadContacts();
     }
     /* ======================== SCROLL TO BOTTOM ========================= */
-    function scrollToBottom() {
+    function scrollToBottom(forceImmediate = false) {
       const messagesEl = document.getElementById("messages");
-      if (messagesEl && messagesEl.style.display !== 'none') {
-        setTimeout(() => {
-          messagesEl.scrollTo({
-            top: messagesEl.scrollHeight,
-            behavior: 'smooth'
-          });
-        }, 50);
-      }
+      if (!messagesEl || messagesEl.style.display === 'none') return;
+      
+      const doScroll = () => {
+        messagesEl.scrollTo({
+          top: messagesEl.scrollHeight,
+          behavior: forceImmediate ? 'auto' : 'smooth'
+        });
+      };
+      
+      // Scroll imediato + outro após render
+      doScroll();
+      setTimeout(doScroll, 100);
+      setTimeout(doScroll, 300); // Extra para garantir após batch render
     }
     /* ========================= FETCH USER NAME ========================= */
     async function fetchUserName() {
@@ -1605,6 +1610,10 @@
       window.batchRenderTimers[batchId] = setTimeout(() => {
         renderBatchBubble(bubble);
         delete window.batchRenderTimers[batchId];
+        // Scroll após batch renderizado
+        if (document.getElementById("messages").style.display !== 'none') {
+          scrollToBottom();
+        }
       }, 300);
       
       const meta = bubble.querySelector(".msg-meta");
@@ -1941,6 +1950,9 @@ function initChatBatchViewerHandlers() {
         }
         messagesToForward = [];
         await new Promise(resolve => setTimeout(resolve, 150));
+        
+        // Scroll para baixo após reencaminhar
+        scrollToBottom(true);
       }
       currentChat = String(n_int);
       currentChatName = name;
@@ -2008,7 +2020,9 @@ function initChatBatchViewerHandlers() {
           messagesEl.appendChild(emptyMsg);
         } else {
           msgs.forEach(msg => addMessageToDOM(msg, chatRef)); 
-          scrollToBottom();
+          // Scroll imediato + delay extra para batch render
+          scrollToBottom(true);
+          setTimeout(() => scrollToBottom(), 500);
         } 
       } catch (err) {
         console.error(err);
@@ -2081,8 +2095,7 @@ function initChatBatchViewerHandlers() {
         }).catch(err => console.error("Erro no push:", err));
         cancelReply();
         clearSelection();
-        const messageContainer = document.querySelector('.message-container');
-        messageContainer.scrollTop = messageContainer.scrollHeight;
+        scrollToBottom(true);
       }
     }
     /* ==================== TOOGLE MESSAGE SELECTION ===================== */
