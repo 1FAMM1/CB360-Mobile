@@ -221,7 +221,9 @@
     .edit-cancel:active {transform: scale(0.9);}   
     .message-edited-tag {font-size: 10px; color: rgba(255, 255, 255, 0.5); font-style: italic; margin-left: 5px;}
     .message.other .message-edited-tag {color: rgba(0, 0, 0, 0.4);}
-    .chat-img{max-width: 230px; width: 100%; height: auto; border-radius: 10px; display: block; cursor: pointer;}
+    .chat-img{max-width: 230px; width: 100%; height: auto; border-radius: 10px; display: block; cursor: pointer; 
+              -webkit-touch-callout: none !important; -webkit-user-select: none !important; -moz-user-select: none !important; 
+              -ms-user-select: none !important; user-select: none !important; pointer-events: auto; -webkit-user-drag: none !important;}
     .img-caption{line-height: 1.35; opacity: 0.95; word-wrap: break-word;}
     .reply-bar {position: fixed; bottom: 100px; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); border-top: 1px solid #ddd; padding: 10px 15px; z-index: 5000; display: none;
                 box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); backdrop-filter: blur(10px);}
@@ -330,6 +332,11 @@
     .attach-viewer-nav.next{right:10px;}
     .attach-viewer-count{position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: #fff; font-weight: 700; font-size: 12px;
                          background: rgba(255,255,255,0.12); padding: 6px 10px; border-radius: 999px;}
+    .batch-cell {-webkit-touch-callout: none !important; -webkit-user-select: none !important; -moz-user-select: none !important; 
+                 -ms-user-select: none !important; user-select: none !important; -webkit-user-drag: none !important;}
+    .batch-cell img {-webkit-touch-callout: none !important; -webkit-user-select: none !important; -moz-user-select: none !important; 
+                     -ms-user-select: none !important; user-select: none !important; -webkit-user-drag: none !important; pointer-events: none;}
+    .batch-grid-2x2 {-webkit-touch-callout: none !important; -webkit-user-select: none !important;}
     @keyframes slideUp {from {transform: translateY(100%); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     @keyframes popScale {0% {transform: scale(0.85); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}    
     @keyframes pulse-green {0% {transform: scale(1); box-shadow: 0 0 5px #00ff00;} 50% {transform: scale(1.15); box-shadow: 0 0 12px #00ff00;} 100% {transform: scale(1); box-shadow: 0 0 5px #00ff00;}}
@@ -2636,6 +2643,25 @@ function initChatBatchViewerHandlers() {
       }
       initAttachViewerHandlers();
       initChatBatchViewerHandlers();
+      
+      // Prevenir menu de contexto nativo em todas as imagens do chat
+      document.addEventListener('contextmenu', (e) => {
+        if (e.target.classList.contains('chat-img') || 
+            e.target.closest('.batch-cell') || 
+            e.target.closest('.batch-grid')) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+      
+      // Prevenir long press nativo em imagens (iOS/Android)
+      document.addEventListener('touchstart', (e) => {
+        if (e.target.classList.contains('chat-img') || 
+            e.target.closest('.batch-cell')) {
+          e.target.style.webkitTouchCallout = 'none';
+        }
+      }, {passive: true});
     });
     /* ======================= MESSAGE INTERACTION ======================= */
     function setupMessageInteraction(messageElement, messageData) {
