@@ -765,7 +765,7 @@
               .from('chat-files')
               .upload(thumbPath, thumbBlob, {contentType: 'image/png'});
               if (!upThumbErr) {
-                const {data: pubThumb} = supabaseClient.storage.from('cb-files').getPublicUrl(thumbPath);
+                const {data: pubThumb} = supabaseClient.storage.from('cb_files').getPublicUrl(thumbPath);
                 previewUrl = pubThumb?.publicUrl;
               }
             }
@@ -2164,3 +2164,4 @@
   </script>
 </body>
 </html>
+
