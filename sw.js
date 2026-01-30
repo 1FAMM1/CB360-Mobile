@@ -1,6 +1,6 @@
 /* =========================================================
-    CB360 Mobile - Service Worker Completo
-    Otimizado para: Notificações Push + Navegação sem Barra
+    CB360 Mobile - Complete Service Worker
+    Optimized for: Push Notifications + Bar-Free Navigation
     ========================================================= */
     const CACHE_NAME = 'cb360-cache-v2.5';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', 
