@@ -360,7 +360,9 @@
     <div class="input-wrapper">
       <button id="emoji-open-btn" type="button"><span class="material-icons">sentiment_satisfied_alt</span></button>
       <input type="text" id="chat-input" placeholder="Mensagem" autocomplete="off" />    
-      <button id="attachment-btn" type="button"><span class="material-icons">attach_file</span></button>    
+      <button id="attachment-btn" type="button"><span class="material-icons">attach_file</span></button>
+      <input type="file" id="doc-file-input" accept="*/*"
+       style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
       <button id="camera-btn" type="button"><span class="material-icons">photo_camera</span></button>
     </div>
     <button id="chat-send-btn">
@@ -2070,6 +2072,7 @@
   </script>
 </body>
 </html>
+
 
 
 
