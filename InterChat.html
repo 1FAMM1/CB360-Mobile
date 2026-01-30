@@ -315,6 +315,21 @@
     .attach-file-name{font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
     .attach-file-type{font-size:12px; opacity:0.8;}
     .file-caption{margin-top: 6px; font-size: 12px; opacity: 0.85; line-height: 1.2;}
+    .attach-grid{width: 100%; max-height: 65vh; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; padding: 10px; box-sizing: border-box;}
+    .attach-grid-cell{position:relative; background:#111; border-radius:12px; overflow:hidden; min-height:120px; cursor:pointer;}
+    .attach-grid-cell img{width: 100%; height: 100%; object-fit: cover; display :block;}
+    .attach-grid-more{position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.55); color: #fff; 
+                      font-weight: 800; font-size: 26px;}
+    .attach-viewer{position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 9999999;}
+    .attach-viewer-img{max-width: 96%; max-height: 86vh; object-fit: contain; user-select: none; -webkit-user-drag: none;}
+    .attach-viewer-close{position: absolute; top: 10px; right: 10px; border: none; background: rgba(255,255,255,0.12); color: #fff; font-size: 18px; padding: 10px 12px;
+                         border-radius: 10px;}
+    .attach-viewer-nav{position: absolute; top: 50%; transform: translateY(-50%); border: none; background: rgba(255,255,255,0.12); color: #fff; font-size: 34px;
+                       width: 44px; height: 60px; border-radius: 12px;}
+    .attach-viewer-nav.prev{left: 10px;}
+    .attach-viewer-nav.next{right:10px;}
+    .attach-viewer-count{position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: #fff; font-weight: 700; font-size: 12px;
+                         background: rgba(255,255,255,0.12); padding: 6px 10px; border-radius: 999px;}
     @keyframes slideUp {from {transform: translateY(100%); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     @keyframes popScale {0% {transform: scale(0.85); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}    
     @keyframes pulse-green {0% {transform: scale(1); box-shadow: 0 0 5px #00ff00;} 50% {transform: scale(1.15); box-shadow: 0 0 12px #00ff00;} 100% {transform: scale(1); box-shadow: 0 0 5px #00ff00;}}
@@ -385,7 +400,7 @@
       <button id="emoji-open-btn" type="button"><span class="material-icons">sentiment_satisfied_alt</span></button>
       <input type="text" id="chat-input" placeholder="Mensagem" autocomplete="off" />    
       <button id="attachment-btn" type="button"><span class="material-icons">attach_file</span></button>
-      <input type="file" id="doc-file-input" accept="*/*" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
+      <input type="file" id="doc-file-input" accept="*/*" multiple style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
       <button id="camera-btn" type="button"><span class="material-icons">photo_camera</span></button>
     </div>
     <button id="chat-send-btn">
@@ -455,6 +470,17 @@
       </div>
       <div class="attach-preview">
         <img id="attach-preview-img" src="" alt="preview" style="display:none;" />
+        
+        <div id="attach-grid" class="attach-grid" style="display:none;">
+          <div class="attach-grid-cell" data-idx="0"><img id="attach-grid-img-0" alt="thumb0"></div>
+          <div class="attach-grid-cell" data-idx="1"><img id="attach-grid-img-1" alt="thumb1"></div>
+          <div class="attach-grid-cell" data-idx="2"><img id="attach-grid-img-2" alt="thumb2"></div>
+          <div class="attach-grid-cell attach-grid-last" data-idx="3">
+            <img id="attach-grid-img-3" alt="thumb3">
+            <div id="attach-grid-more" class="attach-grid-more" style="display:none;"></div>              
+          </div>
+        </div>
+        
         <div id="attach-file-card" class="attach-file-card" style="display:none;">
           <span class="material-icons" id="attach-file-icon">insert_drive_file</span>
           <div class="attach-file-meta">
@@ -463,6 +489,13 @@
           </div>
         </div>
         <div id="attach-loading" class="attach-loading" style="display:none;">A enviar...</div>
+        <div id="attach-viewer" class="attach-viewer" style="display:none;">
+          <button id="attach-viewer-close" class="attach-viewer-close" type="button">✕</button>
+          <button id="attach-viewer-prev" class="attach-viewer-nav prev" type="button">‹</button>
+          <img id="attach-viewer-img" class="attach-viewer-img" alt="viewer">
+          <button id="attach-viewer-next" class="attach-viewer-nav next" type="button">›</button>
+          <div id="attach-viewer-count" class="attach-viewer-count"></div>
+        </div>
       </div>
       <div class="attach-footer">
         <input id="attach-caption" type="text" placeholder="Adicione uma legenda..." autocomplete="off" />
@@ -687,6 +720,116 @@
         console.error("Erro:", err.message);
       }
     }
+    
+    
+    
+    
+    function clearAttachGridPreviews() {
+      if (window.gridPreviewUrls && Array.isArray(window.gridPreviewUrls)) {
+        window.gridPreviewUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch(e){} });
+      }
+      window.gridPreviewUrls = [];
+    }
+    function renderAttachGrid(files) {
+      const grid = document.getElementById("attach-grid");
+      const imgMain = document.getElementById("attach-preview-img");
+      const more = document.getElementById("attach-grid-more");
+      if (!grid || !imgMain) return;
+      clearAttachGridPreviews();
+      if (!files || files.length < 2) {
+        grid.style.display = "none";
+        if (more) more.style.display = "none";
+        return;
+      }
+      imgMain.style.display = "none";
+      grid.style.display = "grid";
+      for (let i = 0; i < 4; i++) {
+        const imgEl = document.getElementById(`attach-grid-img-${i}`);
+        if (!imgEl) continue;
+        const f = files[i];
+        if (f && f.type?.startsWith("image/")) {
+          const url = URL.createObjectURL(f);
+          window.gridPreviewUrls.push(url);
+          imgEl.src = url;
+          imgEl.style.display = "block";
+        } else {
+          imgEl.src = "";
+          imgEl.style.display = "none";
+        }
+      }
+      const extra = files.length - 4;
+      if (more) {
+        if (extra > 0) {
+          more.textContent = `+${extra}`;
+          more.style.display = "flex";
+        } else {
+          more.style.display = "none";
+        }
+      }
+    }
+    function openAttachViewer(startIndex = 0) {
+      const viewer = document.getElementById("attach-viewer");
+      const img = document.getElementById("attach-viewer-img");
+      const count = document.getElementById("attach-viewer-count");
+      const prevBtn = document.getElementById("attach-viewer-prev");
+      const nextBtn = document.getElementById("attach-viewer-next");
+      const files = window.pendingAttachFiles || [];
+      if (!viewer || !img || !count || !files.length) return;
+      window.viewerIndex = Math.max(0, Math.min(startIndex, files.length - 1));
+      if (window.viewerUrl) { try {URL.revokeObjectURL(window.viewerUrl); } catch(e){}}
+      window.viewerUrl = null;
+      const f = files[window.viewerIndex];
+      if (!f || !f.type?.startsWith("image/")) return;
+      window.viewerUrl = URL.createObjectURL(f);
+      img.src = window.viewerUrl;
+      count.textContent = `${window.viewerIndex + 1} / ${files.length}`;
+      prevBtn.style.display = files.length > 1 ? "block" : "none";
+      nextBtn.style.display = files.length > 1 ? "block" : "none";
+      viewer.style.display = "flex";
+    }
+    function closeAttachViewer() {
+      const viewer = document.getElementById("attach-viewer");
+      if (viewer) viewer.style.display = "none";
+      if (window.viewerUrl) {try {URL.revokeObjectURL(window.viewerUrl);} catch(e){}}
+      window.viewerUrl = null;
+    }
+    function viewerGo(delta) {
+      const files = window.pendingAttachFiles || [];
+      if (!files.length) return;
+      let idx = (window.viewerIndex ?? 0) + delta;
+      if (idx < 0) idx = files.length - 1;
+      if (idx >= files.length) idx = 0;
+      openAttachViewer(idx);
+    }
+    function initAttachViewerHandlers() {
+      const closeBtn = document.getElementById("attach-viewer-close");
+      const prevBtn = document.getElementById("attach-viewer-prev");
+      const nextBtn = document.getElementById("attach-viewer-next");
+      const viewer = document.getElementById("attach-viewer");
+      const img = document.getElementById("attach-viewer-img");
+      closeBtn?.addEventListener("click", closeAttachViewer);
+      prevBtn?.addEventListener("click", () => viewerGo(-1));
+      nextBtn?.addEventListener("click", () => viewerGo(+1));
+      viewer?.addEventListener("click", (e) => {
+        if (e.target === viewer) closeAttachViewer();
+      });
+      let startX = 0;
+      let isDown = false;
+      const onDown = (x) => {startX = x; isDown = true;};
+      const onUp = (x) => {
+        if (!isDown) return;
+        isDown = false;
+        const dx = x - startX;
+        if (Math.abs(dx) > 40) {
+          if (dx < 0) viewerGo(+1);
+          else viewerGo(-1);
+        }
+      };
+      img?.addEventListener("touchstart", (e) => onDown(e.touches[0].clientX), {passive:true});
+      img?.addEventListener("touchend", (e) => onUp(e.changedTouches[0].clientX), {passive:true});
+      img?.addEventListener("mousedown", (e) => onDown(e.clientX));
+      window.addEventListener("mouseup", (e) => onUp(e.clientX));
+    }
     /* ================== CAMERA, FILE & IMAGE HANDLER =================== */
     const cameraBtn = document.getElementById("camera-btn");
     const cameraInput = document.getElementById("camera-file-input");
@@ -727,6 +870,7 @@
       pendingFile = null;
       window.pendingAttachFile = null;
       window.attachMode = null;
+      
       attachImg.src = "";
       attachImg.style.display = "none";
       if (attachFileCard) attachFileCard.style.display = "none";
@@ -735,35 +879,61 @@
     }
     attachCancel.addEventListener("click", fecharModalFileAndFoto);
     attachSend.addEventListener("click", async () => {
-      const caption = (attachCaption.value || "").trim();
-      if (window.attachMode === "file" && window.pendingAttachFile) {
-        try {
-          attachLoading.style.display = "block";
-          attachSend.disabled = true;
-          await uploadFile(window.pendingAttachFile, caption);
-          fecharModalFileAndFoto();
-        } catch (err) {
-          console.error("Erro ao enviar anexo:", err);
-          alert("Não foi possível enviar o anexo.");
-          attachLoading.style.display = "none";
-          attachSend.disabled = false;
-        }
-        return;
+  const caption = (attachCaption.value || "").trim();
+
+  // ✅ MULTI-IMAGENS (grelha/album no modal)
+  if (window.attachMode === "files" && Array.isArray(window.pendingAttachFiles) && window.pendingAttachFiles.length) {
+    const batchId = crypto.randomUUID();
+    try {
+      attachLoading.style.display = "block";
+      attachSend.disabled = true;
+
+      for (const f of window.pendingAttachFiles) {
+        await uploadFile(f, caption, { batchId });
       }
-      if (!pendingFile) return;
-      try {
-        attachLoading.style.display = "block";
-        attachSend.disabled = true;
-        const publicUrl = await uploadImageToSupabase(pendingFile);
-        await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
-        fecharModalFileAndFoto();
-      } catch (err) {
-        console.error("Erro ao enviar foto:", err);
-        alert("Não foi possível enviar a foto.");
-        attachLoading.style.display = "none";
-        attachSend.disabled = false;
-      }
-    });
+
+      fecharModalFileAndFoto();
+    } catch (err) {
+      console.error("Erro ao enviar album:", err);
+      alert("Não foi possível enviar as fotos.");
+      attachLoading.style.display = "none";
+      attachSend.disabled = false;
+    }
+    return;
+  }
+
+  // ✅ 1 ficheiro (clip)
+  if (window.attachMode === "file" && window.pendingAttachFile) {
+    try {
+      attachLoading.style.display = "block";
+      attachSend.disabled = true;
+      await uploadFile(window.pendingAttachFile, caption);
+      fecharModalFileAndFoto();
+    } catch (err) {
+      console.error("Erro ao enviar anexo:", err);
+      alert("Não foi possível enviar o anexo.");
+      attachLoading.style.display = "none";
+      attachSend.disabled = false;
+    }
+    return;
+  }
+
+  // ✅ Foto da câmara
+  if (!pendingFile) return;
+  try {
+    attachLoading.style.display = "block";
+    attachSend.disabled = true;
+    const publicUrl = await uploadImageToSupabase(pendingFile);
+    await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
+    fecharModalFileAndFoto();
+  } catch (err) {
+    console.error("Erro ao enviar foto:", err);
+    alert("Não foi possível enviar a foto.");
+    attachLoading.style.display = "none";
+    attachSend.disabled = false;
+  }
+});
+
     async function uploadImageToSupabase(file) {
       if (file.type && !file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
       const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
@@ -784,8 +954,8 @@
     async function sendImageMessage(imageUrl, fileName, caption = "") {
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
       const senderName = await fetchUserName();
-      const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl, file_name: fileName,
-                       message: caption};
+      const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl,
+                       file_name: fileName, message: caption};
       const { error } = await supabaseClient
       .from("chat_messages")
       .insert([payload]);
@@ -2025,12 +2195,14 @@
           docInput.click();
         };
         docInput.onchange = (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          window.pendingAttachFile = file;
-          window.attachMode = 'file';
-          const attachModal   = document.getElementById("attach-modal");
-          const attachImg     = document.getElementById("attach-preview-img");
+          const files = Array.from(e.target.files || []);
+          if (!files.length) return;
+          console.log("Selecionados:", files.length, files.map(f => f.name));
+          window.attachMode = files.length >= 4 ? "files" : "file";
+          window.pendingAttachFiles = files;
+          const file = files[0];
+          const attachModal = document.getElementById("attach-modal");
+          const attachImg = document.getElementById("attach-preview-img");
           const attachCaption = document.getElementById("attach-caption");
           const attachFileCard = document.getElementById("attach-file-card");
           const attachFileName = document.getElementById("attach-file-name");
@@ -2039,6 +2211,28 @@
           if (window.previewUrl) URL.revokeObjectURL(window.previewUrl);
           window.previewUrl = null;
           const isImage = file.type?.startsWith("image/");
+          const attachGrid = document.getElementById("attach-grid");
+          const allImages = files.every(f => f.type?.startsWith("image/"));
+          if (allImages && files.length >= 2) {
+            if (attachImg) {attachImg.src = ""; attachImg.style.display = "none";}
+            if (attachFileCard) attachFileCard.style.display = "none";
+            renderAttachGrid(files);
+            if (attachGrid) {
+              attachGrid.querySelectorAll(".attach-grid-cell").forEach(cell => {
+                cell.onclick = () => {
+                  const idx = parseInt(cell.getAttribute("data-idx") || "0", 10);
+                  if (idx < files.length) openAttachViewer(idx);
+                };
+              });
+            }
+            if (attachCaption) attachCaption.value = "";
+            if (attachModal) attachModal.style.display = "flex";
+            setTimeout(() => attachCaption?.focus(), 150);
+            e.target.value = "";
+            return;
+          } else {
+            if (attachGrid) attachGrid.style.display = "none";
+          }
           if (isImage) {
             window.previewUrl = URL.createObjectURL(file);
             attachImg.src = window.previewUrl;
@@ -2047,18 +2241,28 @@
           } else {
             if (attachImg) attachImg.style.display = "none";
             if (attachFileCard && attachFileName && attachFileType && attachFileIcon) {
-              const name = file.name || "Ficheiro";
-              const ext = (name.split(".").pop() || "").toUpperCase();
-              const extLow = ext.toLowerCase();
-              attachFileName.textContent = name;
-              attachFileType.textContent = ext ? ext : "FICHEIRO";
-              attachFileIcon.textContent =
-                extLow === "pdf" ? "picture_as_pdf" :
-              (["doc","docx","odt","rtf"].includes(extLow) ? "description" :
-               (["xls","xlsx","csv","ods"].includes(extLow) ? "table_chart" :
-                (["ppt","pptx","odp"].includes(extLow) ? "slideshow" :
-                 (["zip","rar","7z","tar","gz"].includes(extLow) ? "folder_zip" :
-                  "insert_drive_file"))));
+              if (files.length >= 4) {
+                attachFileIcon.textContent = "attach_file";
+                attachFileName.textContent = `${files.length} ficheiro(s) selecionado(s)`;
+                attachFileType.textContent = "ALBUM";
+              } else if (files.length > 1) {
+                attachFileIcon.textContent = "attach_file";
+                attachFileName.textContent = `${files.length} ficheiro(s) selecionado(s)`;
+                attachFileType.textContent = "MULTI";
+              } else {
+                const name = file.name || "Ficheiro";
+                const ext = (name.split(".").pop() || "").toUpperCase();
+                const extLow = ext.toLowerCase();
+                attachFileName.textContent = name;
+                attachFileType.textContent = ext ? ext : "FICHEIRO";
+                attachFileIcon.textContent =
+                  extLow === "pdf" ? "picture_as_pdf" :
+                (["doc","docx","odt","rtf"].includes(extLow) ? "description" :
+                 (["xls","xlsx","csv","ods"].includes(extLow) ? "table_chart" :
+                  (["ppt","pptx","odp"].includes(extLow) ? "slideshow" :
+                   (["zip","rar","7z","tar","gz"].includes(extLow) ? "folder_zip" :
+                    "insert_drive_file"))));
+              }
               attachFileCard.style.display = "flex";
             }
           }
@@ -2068,6 +2272,7 @@
           e.target.value = "";
         };
       }
+      initAttachViewerHandlers();
     });
     /* ======================= MESSAGE INTERACTION ======================= */
     function setupMessageInteraction(messageElement, messageData) {
