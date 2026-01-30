@@ -469,8 +469,7 @@
         <button id="attach-cancel" class="attach-x" type="button">✕</button>
       </div>
       <div class="attach-preview">
-        <img id="attach-preview-img" src="" alt="preview" style="display:none;" />
-        
+        <img id="attach-preview-img" src="" alt="preview" style="display:none;" />        
         <div id="attach-grid" class="attach-grid" style="display:none;">
           <div class="attach-grid-cell" data-idx="0"><img id="attach-grid-img-0" alt="thumb0"></div>
           <div class="attach-grid-cell" data-idx="1"><img id="attach-grid-img-1" alt="thumb1"></div>
@@ -479,8 +478,7 @@
             <img id="attach-grid-img-3" alt="thumb3">
             <div id="attach-grid-more" class="attach-grid-more" style="display:none;"></div>              
           </div>
-        </div>
-        
+        </div>        
         <div id="attach-file-card" class="attach-file-card" style="display:none;">
           <span class="material-icons" id="attach-file-icon">insert_drive_file</span>
           <div class="attach-file-meta">
@@ -503,6 +501,27 @@
       </div>
     </div>
   </div>
+  <div id="chat-batch-viewer" class="attach-viewer" style="display:none;">
+  <button id="chat-batch-viewer-close" class="attach-viewer-close" type="button">✕</button>
+  <button id="chat-batch-viewer-prev" class="attach-viewer-nav prev" type="button">‹</button>
+
+  <img id="chat-batch-viewer-img" class="attach-viewer-img" alt="viewer" style="display:none;">
+
+  <div id="chat-batch-viewer-file" class="attach-file-card" style="display:none; max-width:90%;">
+    <span class="material-icons" id="chat-batch-file-icon">insert_drive_file</span>
+    <div class="attach-file-meta">
+      <div id="chat-batch-file-name" class="attach-file-name"></div>
+      <div id="chat-batch-file-type" class="attach-file-type"></div>
+      <a id="chat-batch-file-open" target="_blank" style="margin-top:6px; display:inline-block; text-decoration:none;">
+        Abrir
+      </a>
+    </div>
+  </div>
+
+  <button id="chat-batch-viewer-next" class="attach-viewer-nav next" type="button">›</button>
+  <div id="chat-batch-viewer-count" class="attach-viewer-count"></div>
+</div>
+
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -719,11 +738,9 @@
       } catch (err) {
         console.error("Erro:", err.message);
       }
-    }
-    
-    
-    
-    
+    }    
+    /* ================== CAMERA, FILE & IMAGE HANDLER =================== */
+    window.attachState = window.attachState || {mode: null, files: [], previewUrl: null};
     function clearAttachGridPreviews() {
       if (window.gridPreviewUrls && Array.isArray(window.gridPreviewUrls)) {
         window.gridPreviewUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch(e){} });
@@ -743,6 +760,7 @@
       }
       imgMain.style.display = "none";
       grid.style.display = "grid";
+      window.gridPreviewUrls = window.gridPreviewUrls || [];
       for (let i = 0; i < 4; i++) {
         const imgEl = document.getElementById(`attach-grid-img-${i}`);
         if (!imgEl) continue;
@@ -773,7 +791,8 @@
       const count = document.getElementById("attach-viewer-count");
       const prevBtn = document.getElementById("attach-viewer-prev");
       const nextBtn = document.getElementById("attach-viewer-next");
-      const files = window.pendingAttachFiles || [];
+      const files = (Array.isArray(window.pendingAttachFiles) && window.pendingAttachFiles.length ? window.pendingAttachFiles :
+                    (Array.isArray(window.attachState?.files) && window.attachState.files.length ? window.attachState.files : []));
       if (!viewer || !img || !count || !files.length) return;
       window.viewerIndex = Math.max(0, Math.min(startIndex, files.length - 1));
       if (window.viewerUrl) { try {URL.revokeObjectURL(window.viewerUrl); } catch(e){}}
@@ -794,7 +813,8 @@
       window.viewerUrl = null;
     }
     function viewerGo(delta) {
-      const files = window.pendingAttachFiles || [];
+      const files = (Array.isArray(window.pendingAttachFiles) && window.pendingAttachFiles.length ? window.pendingAttachFiles :
+                    (Array.isArray(window.attachState?.files) && window.attachState.files.length ? window.attachState.files : []));
       if (!files.length) return;
       let idx = (window.viewerIndex ?? 0) + delta;
       if (idx < 0) idx = files.length - 1;
@@ -829,111 +849,142 @@
       img?.addEventListener("touchend", (e) => onUp(e.changedTouches[0].clientX), {passive:true});
       img?.addEventListener("mousedown", (e) => onDown(e.clientX));
       window.addEventListener("mouseup", (e) => onUp(e.clientX));
-    }
-    /* ================== CAMERA, FILE & IMAGE HANDLER =================== */
+    }    
     const cameraBtn = document.getElementById("camera-btn");
     const cameraInput = document.getElementById("camera-file-input");
-    const attachModal   = document.getElementById("attach-modal");
-    const attachImg     = document.getElementById("attach-preview-img");
+    const attachModal = document.getElementById("attach-modal");
+    const attachImg = document.getElementById("attach-preview-img");
     const attachFileCard = document.getElementById("attach-file-card");
     const attachCaption = document.getElementById("attach-caption");
-    const attachSend    = document.getElementById("attach-send");
-    const attachCancel  = document.getElementById("attach-cancel");
+    const attachSend = document.getElementById("attach-send");
+    const attachCancel = document.getElementById("attach-cancel");
     const attachLoading = document.getElementById("attach-loading");
     let pendingFile = null;
-    let previewUrl = null;
+    window.previewUrl = window.previewUrl || null;
     cameraBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      if (currentChat === "null") return;
+      if (!currentChat || currentChat === "null") return;
       cameraInput.value = "";
       cameraInput.click();
     });
     cameraInput.addEventListener("change", () => {
       const file = cameraInput.files?.[0];
-      if (!file) return;
+      if (!file) return;    
       pendingFile = file;
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      previewUrl = URL.createObjectURL(file);
-      attachImg.src = previewUrl;
+      window.attachMode = "camera";
+      window.pendingAttachFile = null;
+      window.pendingAttachFiles = null;    
+      closeAttachViewer?.();
+      clearAttachGridPreviews?.();
+      const grid = document.getElementById("attach-grid");
+      if (grid) grid.style.display = "none";
+      const more = document.getElementById("attach-grid-more");
+      if (more) more.style.display = "none";    
+      if (window.previewUrl) URL.revokeObjectURL(window.previewUrl);
+      window.previewUrl = URL.createObjectURL(file);    
+      attachImg.src = window.previewUrl;
       attachImg.style.display = "block";
-      if (attachFileCard) attachFileCard.style.display = "none";
+      if (attachFileCard) attachFileCard.style.display = "none";    
       attachCaption.value = "";
       attachModal.style.display = "flex";
       setTimeout(() => attachCaption.focus(), 150);
     });
-    function fecharModalFileAndFoto() {
+    function closeModalFileAndFoto() {
       attachModal.style.display = "none";
       attachLoading.style.display = "none";
       attachSend.disabled = false;
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      previewUrl = null;
+      if (window.previewUrl) URL.revokeObjectURL(window.previewUrl);
+      window.previewUrl = null;
+      if (window.viewerUrl) {try {URL.revokeObjectURL(window.viewerUrl);} catch(e) {}}
+      window.viewerUrl = null;
+      window.viewerIndex = 0;
       pendingFile = null;
       window.pendingAttachFile = null;
+      window.pendingAttachFiles = null;
       window.attachMode = null;
-      
       attachImg.src = "";
       attachImg.style.display = "none";
       if (attachFileCard) attachFileCard.style.display = "none";
       attachCaption.value = "";
       cameraInput.value = "";
-    }
-    attachCancel.addEventListener("click", fecharModalFileAndFoto);
-    attachSend.addEventListener("click", async () => {
-  const caption = (attachCaption.value || "").trim();
-
-  // ✅ MULTI-IMAGENS (grelha/album no modal)
-  if (window.attachMode === "files" && Array.isArray(window.pendingAttachFiles) && window.pendingAttachFiles.length) {
-    const batchId = crypto.randomUUID();
-    try {
-      attachLoading.style.display = "block";
-      attachSend.disabled = true;
-
-      for (const f of window.pendingAttachFiles) {
-        await uploadFile(f, caption, { batchId });
+      const docInput = document.getElementById("doc-file-input");
+      if (docInput) docInput.value = "";
+      closeAttachViewer?.();
+      clearAttachGridPreviews?.();
+      const grid = document.getElementById("attach-grid");
+      if (grid) {
+        grid.style.display = "none";
+        grid.querySelectorAll(".attach-grid-cell").forEach(cell => cell.onclick = null);
       }
-
-      fecharModalFileAndFoto();
-    } catch (err) {
-      console.error("Erro ao enviar album:", err);
-      alert("Não foi possível enviar as fotos.");
-      attachLoading.style.display = "none";
-      attachSend.disabled = false;
+      const more = document.getElementById("attach-grid-more");
+      if (more) more.style.display = "none";
     }
-    return;
-  }
-
-  // ✅ 1 ficheiro (clip)
-  if (window.attachMode === "file" && window.pendingAttachFile) {
-    try {
-      attachLoading.style.display = "block";
-      attachSend.disabled = true;
-      await uploadFile(window.pendingAttachFile, caption);
-      fecharModalFileAndFoto();
-    } catch (err) {
-      console.error("Erro ao enviar anexo:", err);
-      alert("Não foi possível enviar o anexo.");
-      attachLoading.style.display = "none";
-      attachSend.disabled = false;
-    }
-    return;
-  }
-
-  // ✅ Foto da câmara
-  if (!pendingFile) return;
-  try {
-    attachLoading.style.display = "block";
-    attachSend.disabled = true;
-    const publicUrl = await uploadImageToSupabase(pendingFile);
-    await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
-    fecharModalFileAndFoto();
-  } catch (err) {
-    console.error("Erro ao enviar foto:", err);
-    alert("Não foi possível enviar a foto.");
-    attachLoading.style.display = "none";
-    attachSend.disabled = false;
-  }
-});
-
+    attachCancel.addEventListener("click", closeModalFileAndFoto);
+    attachSend.addEventListener("click", async () => {
+      const caption = (attachCaption.value || "").trim();
+      if (window.attachMode === "files" && Array.isArray(window.pendingAttachFiles) && window.pendingAttachFiles.length) {
+        const batchId = crypto.randomUUID();
+        try {
+          attachLoading.style.display = "block";
+          attachSend.disabled = true;
+          for (const f of window.pendingAttachFiles) {
+            await uploadFile(f, caption, {batchId});
+          }
+          closeModalFileAndFoto();
+        } catch (err) {
+          console.error("Erro ao enviar album:", err);
+          alert("Não foi possível enviar as fotos.");
+          attachLoading.style.display = "none";
+          attachSend.disabled = false;
+        }
+        return;
+      }
+      if (window.attachMode === "multi" && Array.isArray(window.pendingAttachFiles) && window.pendingAttachFiles.length) {
+        const batchId = crypto.randomUUID();
+        try {
+          attachLoading.style.display = "block";
+          attachSend.disabled = true;
+          for (const f of window.pendingAttachFiles) {
+            await uploadFile(f, caption, {batchId});
+          }
+          closeModalFileAndFoto();
+        } catch (err) {
+          console.error("Erro ao enviar multi:", err);
+          alert("Não foi possível enviar os ficheiros.");
+          attachLoading.style.display = "none";
+          attachSend.disabled = false;
+        }
+        return;
+      }
+      if (window.attachMode === "file" && window.pendingAttachFile) {
+        try {
+          attachLoading.style.display = "block";
+          attachSend.disabled = true;
+          await uploadFile(window.pendingAttachFile, caption);
+          closeModalFileAndFoto();
+        } catch (err) {
+          console.error("Erro ao enviar anexo:", err);
+          alert("Não foi possível enviar o anexo.");
+          attachLoading.style.display = "none";
+          attachSend.disabled = false;
+        }
+        return;
+      }
+      if (window.attachMode !== "camera") return;
+      if (!pendingFile) return;
+      try {
+        attachLoading.style.display = "block";
+        attachSend.disabled = true;
+        const publicUrl = await uploadImageToSupabase(pendingFile);
+        await sendImageMessage(publicUrl, pendingFile.name || `foto_${Date.now()}.jpg`, caption);
+        closeModalFileAndFoto();
+      } catch (err) {
+        console.error("Erro ao enviar foto:", err);
+        alert("Não foi possível enviar a foto.");
+        attachLoading.style.display = "none";
+        attachSend.disabled = false;
+      }
+    });  
     async function uploadImageToSupabase(file) {
       if (file.type && !file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
       const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
@@ -995,7 +1046,7 @@
       return new File([blob], outName, { type: mimeType });
     }
     /* ====================== UPLOAD FILES & IMAGES ====================== */    
-    async function uploadFile(file, caption = "") {
+    async function uploadFile(file, caption = "", opts = {}) {
       if (!file) return;
       const MAX_MB = 25;
       if (file.size > MAX_MB * 1024 * 1024) {
@@ -1007,7 +1058,9 @@
       const chatId = String(currentChat);
       if (file.type?.startsWith('image/')) {
         try {
-          file = await compressImage(file, {maxWidth: 1280, maxHeight: 1280, quality: 0.7, mimeType: 'image/jpeg'});
+          file = await compressImage(file, {
+            maxWidth: 1280, maxHeight: 1280, quality: 0.7, mimeType: 'image/jpeg'
+          });
         } catch (e) {
           console.warn("Falha a comprimir imagem, enviando original.", e);
         }
@@ -1025,11 +1078,11 @@
             const thumbBlob = await renderPdfFirstPageToBlob(file, { scale: 0.35, quality: 0.7 });
             if (thumbBlob) {
               const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.jpg`;
-              const { error: upThumbErr } = await supabaseClient.storage
+              const {error: upThumbErr} = await supabaseClient.storage
               .from('cb_files')
-              .upload(thumbPath, thumbBlob, { contentType: 'image/jpeg' });
+              .upload(thumbPath, thumbBlob, {contentType: 'image/jpeg'});
               if (!upThumbErr) {
-                const { data: pubThumb } = supabaseClient.storage
+                const {data: pubThumb} = supabaseClient.storage
                 .from('cb_files')
                 .getPublicUrl(thumbPath);
                 previewUrl = pubThumb?.publicUrl || null;
@@ -1039,9 +1092,9 @@
             console.warn("Falha ao gerar preview do PDF, continuando apenas com o ficheiro.", e);
           }
         }
-        const { error: upErr } = await supabaseClient.storage
+        const {error: upErr} = await supabaseClient.storage
         .from('cb_files')
-        .upload(basePath, file, { contentType: file.type || 'application/octet-stream' });
+        .upload(basePath, file, {contentType: file.type || 'application/octet-stream'});
         if (upErr) throw upErr;
         const { data: pubFile } = supabaseClient.storage
         .from('cb_files')
@@ -1054,17 +1107,18 @@
         : (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`);
         const finalMsg = (caption || "").trim() || defaultMsg;
         const payload = {n_int: currentUserNint, recipient_nint: chatId, corp_oper_nr: currentCorp, abv_name: senderName, created_at: new Date().toISOString(), message_type: isImage ? 'image' : 'file',
-                         file_url: publicUrl, file_name: file.name || safeName, preview_url: previewUrl, message: finalMsg};
+                         file_url: publicUrl, file_name: file.name || safeName, preview_url: previewUrl, message: finalMsg, batch_id: opts?.batchId || null};
         const { error: insertError } = await supabaseClient
         .from('chat_messages')
         .insert([payload]);
         if (insertError) throw insertError;
+        const hasBatch = !!opts?.batchId;
         const pushText = isImage
-        ? ((caption || "").trim() ? `📷 ${(caption || "").trim()}` : "📷 Foto")
-        : ((caption || "").trim() ? `📎 ${(caption || "").trim()}` : `📄 ${file.name}`);
+        ? (hasBatch ? "📷 Álbum" : ((caption || "").trim() ? `📷 ${(caption || "").trim()}` : "📷 Foto"))
+        : (hasBatch ? "📎 Ficheiros" : ((caption || "").trim() ? `📎 ${(caption || "").trim()}` : `📄 ${file.name}`));
         fetch('/api/sendPush', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({recipient_nint: chatId, corp_nr: currentCorp, sender_name: senderName, message_text: pushText, sender_nint: currentUserNint})
         }).catch(err => console.error("Erro no push:", err));
       } catch (err) {
@@ -1318,6 +1372,7 @@
     }
     /* ======================= ADD MESSAGE TO DOM ======================== */
     function addMessageToDOM(msg, chatRef) {
+      registerBatchMessage(msg, chatRef);
       if (!currentChat || currentChat !== String(chatRef)) return;
       const messagesEl = document.getElementById("messages");
       if (!messagesEl) return;
@@ -1334,31 +1389,36 @@
       if (emptyMsg) emptyMsg.remove();
       let time = "";
       if (msg.edited_at) {
-        time = new Date(msg.edited_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        time = new Date(msg.edited_at).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
       } else if (msg.created_at) {
-        time = new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        time = new Date(msg.created_at).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+      }
+      if (msg.batch_id) {
+        addOrUpdateBatchBubble(msg, chatRef, {time});
+        if (messagesEl.style.display !== "none") scrollToBottom();
+        return;
       }
       const isMe = String(msg.n_int) === currentUserNint;
-      let checkHTML = '';
+      let checkHTML = "";
       if (isMe) {
-        let icon = 'done';
-        let checkClass = 'sent';
-        if (chatRef === 'geral') {
+        let icon = "done";
+        let checkClass = "sent";
+        if (chatRef === "geral") {
           const numLeituras = (msg.chat_message_reads && msg.chat_message_reads[0]) ? msg.chat_message_reads[0].count : 0;
-          icon = 'done_all';
-          checkClass = (numLeituras >= (totalTeam - 1) && totalTeam > 1) ? 'read' : 'delivered';
-          const contador = numLeituras > 0 ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` : '';
-          const msgId = msg.id || 'temp-' + Date.now();
+          icon = "done_all";
+          checkClass = (numLeituras >= (totalTeam - 1) && totalTeam > 1) ? "read" : "delivered";
+          const contador = numLeituras > 0 ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` : "";
+          const msgId = msg.id || "temp-" + Date.now();
           checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>${contador}`;
         } else {
           const recipientDot = document.querySelector(`.contact[data-nint="${chatRef}"] .status-dot`);
-          const isOnline = recipientDot && recipientDot.classList.contains('online');
+          const isOnline = recipientDot && recipientDot.classList.contains("online");
           if (msg.read_at) {
-            icon = 'done_all'; checkClass = 'read';
+            icon = "done_all"; checkClass = "read";
           } else if (isOnline) {
-            icon = 'done_all'; checkClass = 'delivered';
+            icon = "done_all"; checkClass = "delivered";
           }
-          const msgId = msg.id || 'temp-' + Date.now();
+          const msgId = msg.id || "temp-" + Date.now();
           checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>`;
         }
       }
@@ -1369,32 +1429,40 @@
       div.dataset.senderName = msg.abv_name;
       div.dataset.senderNint = msg.n_int;
       const isDeleted = msg.deleted_at !== null && msg.deleted_at !== undefined;
-      if (isDeleted) div.classList.add('deleted');
-      const nameHTML = (chatRef === 'geral' && !isMe) ? `<div class="msg-sender-name">${msg.abv_name}</div>` : "";
-      let replyPreviewHTML = '';
+      if (isDeleted) div.classList.add("deleted");
+      const nameHTML = (chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${msg.abv_name}</div>` : "";
+      let replyPreviewHTML = "";
       if (msg.reply_to_message_id && msg.reply_to_message) {
         const replyMsg = msg.reply_to_message;
         replyPreviewHTML = `
           <div class="reply-preview" onclick="scrollToMessage('${msg.reply_to_message_id}')">
-            <div class="reply-preview-name">${replyMsg.abv_name || 'Utilizador'}</div>
-            <div class="reply-preview-text">${replyMsg.message || ''}</div>
+            <div class="reply-preview-name">${replyMsg.abv_name || "Utilizador"}</div>
+            <div class="reply-preview-text">${replyMsg.message || ""}</div>
           </div>
         `;
       }
       const reactionsHTML = renderReactions(msg.reactions, msg.id);
       const isStarred = msg.starred_by && msg.starred_by.includes(currentUserNint);
-      const starIcon = isStarred ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>' : '';
+      const starIcon = isStarred
+        ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>'
+        : "";
       let finalContentHTML = "";
       if (isDeleted) {
         finalContentHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
       } else {
-        switch(msg.message_type) {
-          case 'image':
-            finalContentHTML = `<img src="${msg.file_url}" class="chat-img" style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" 
-                                 onclick="window.open('${msg.file_url}', '_blank')">`;
-            if (msg.message) finalContentHTML += `<div class="img-caption">${msg.message}</div>`;
-            break;          
-          case 'audio':
+        switch (msg.message_type) {
+          case "image": {
+            const batchKey = msg.batch_id || `single-${msg.id}`;          
+            finalContentHTML = `
+              <img src="${msg.file_url}" class="chat-img"
+                style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;"
+                onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">`;      
+            if (msg.message) {
+              finalContentHTML += `<div class="img-caption">${escapeHTML(msg.message)}</div>`;
+            }
+            break;
+          }
+          case "audio": {
             const audioID = `audio-${msg.id || Date.now()}`;
             finalContentHTML = `
               <div class="audio-bubble">
@@ -1407,68 +1475,339 @@
                   </div>
                   <div class="audio-time" id="time-${audioID}">0:00</div>
                 </div>
-                <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
+                <audio id="${audioID}" src="${msg.file_url}"
+                  ontimeupdate="updateProgress('${audioID}')"
+                  onended="resetAudioIcon('${audioID}')"></audio>
               </div>`;
             break;
-          case 'file': {
+          }
+          case "file": {
             const hasPreview = !!msg.preview_url;
-            const fileName = msg.file_name || '';
-            const isPdf = (fileName || '').toLowerCase().endsWith('.pdf');
+            const fileName = msg.file_name || "";
+            const isPdf = (fileName || "").toLowerCase().endsWith(".pdf");
             const defaultMsg1 = `Ficheiro: ${fileName}`;
             const defaultMsg2 = `Documento PDF: ${fileName}`;
-            const rawCaption = (msg.message || '').trim();
+            const rawCaption = (msg.message || "").trim();
             const shouldShowCaption = rawCaption && rawCaption !== defaultMsg1 && rawCaption !== defaultMsg2;
-            let captionHTML = '';
-            if (shouldShowCaption) {
-              const capSpan = document.createElement('span');
-              capSpan.textContent = rawCaption;
-              captionHTML = `<div class="img-caption">${capSpan.innerHTML}</div>`;}
+            const captionHTML = shouldShowCaption
+              ? `<div class="img-caption">${escapeHTML(rawCaption)}</div>`
+              : "";
+            const batchKey = msg.batch_id || `single-${msg.id}`;
             finalContentHTML = `
               ${hasPreview ? `
-                <img src="${msg.preview_url}" class="chat-img" style="max-width:230px; max-height:140px; border-radius:10px; display:block; margin-bottom:6px; 
-                object-fit:contain; cursor:pointer;" onclick="window.open('${msg.file_url}', '_blank')">` : ''}
-                <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px;">
-                  <span class="material-icons">${isPdf ? 'picture_as_pdf' : 'insert_drive_file'}</span>
-                    <a href="${msg.file_url}" target="_blank" style="font-size:13px; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis;">
-                      ${fileName || 'Documento'}
-                    </a>
+                <img src="${msg.preview_url}" class="chat-img"
+                  style="max-width:230px; max-height:140px; border-radius:10px; display:block; margin-bottom:6px; object-fit:contain; cursor:pointer;"
+                  onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">
+              ` : ""}
+              <div class="file-msg"
+                style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px; cursor:pointer;"
+                onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">      
+                <span class="material-icons">${isPdf ? "picture_as_pdf" : "insert_drive_file"}</span>
+                <div style="font-size:13px; overflow:hidden; text-overflow:ellipsis;">
+                  ${escapeHTML(fileName || "Documento")}
                 </div>
-                ${captionHTML}
-              `;
+              </div>          
+              ${captionHTML}
+            `;
+            break;
+          }    
+          default: {
+            finalContentHTML = escapeHTML(msg.message || "");
             break;
           }
-          default:
-            const tempSpan = document.createElement('span');
-            tempSpan.textContent = msg.message;
-            finalContentHTML = tempSpan.innerHTML;
-            break;
         }
       }
       div.innerHTML = `
         ${nameHTML}
         ${replyPreviewHTML}
-        <span class="msg-text-content">${finalContentHTML}</span>${starIcon}
-        ${reactionsHTML}
-        <div class="msg-meta">
-          ${time} ${checkHTML}
-        </div>
-      `;
+          <span class="msg-text-content">${finalContentHTML}</span>${starIcon}
+          ${reactionsHTML}
+          <div class="msg-meta">
+            ${time} ${checkHTML}
+          </div>
+        `;
       if (!isDeleted && msg.edited_at) {
-        const metaDiv = div.querySelector('.msg-meta');
+        const metaDiv = div.querySelector(".msg-meta");
         if (metaDiv) {
-          const editTag = document.createElement('span');
-          editTag.className = 'message-edited-tag';
-          editTag.textContent = 'editada';
+          const editTag = document.createElement("span");
+          editTag.className = "message-edited-tag";
+          editTag.textContent = "editada";
           metaDiv.insertBefore(editTag, metaDiv.firstChild);
         }
       }
-      if (msg.is_forwarded) div.classList.add('is-forwarded');
+      if (msg.is_forwarded) div.classList.add("is-forwarded");
       setupMessageInteraction(div, msg);
-      messagesEl.appendChild(div);      
-      if (messagesEl.style.display !== 'none') {
+      messagesEl.appendChild(div);
+      if (messagesEl.style.display !== "none") {
         scrollToBottom();
       }
     }
+    /* ============================= HELPERS ============================= */
+    function escapeHTML(str) {
+      const s = document.createElement("span");
+      s.textContent = String(str ?? "");
+      return s.innerHTML;
+    }
+    /* ========================== BATCH BUBBLE =========================== */
+    function addOrUpdateBatchBubble(msg, chatRef, {time}) {
+      const messagesEl = document.getElementById("messages");
+      if (!messagesEl) return;
+      const batchId = msg.batch_id;
+      const isMe = String(msg.n_int) === currentUserNint;
+      let bubble = messagesEl.querySelector(`.message.batch-bubble[data-batch-id="${batchId}"]`);
+      if (!bubble) {
+        bubble = document.createElement("div");
+        bubble.className = `message ${isMe ? "self" : "other"} batch-bubble`;
+        bubble.dataset.batchId = batchId;
+        bubble.dataset.senderNint = msg.n_int;
+        bubble.dataset.senderName = msg.abv_name;
+        bubble.innerHTML = `
+          ${(chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${escapeHTML(msg.abv_name)}</div>` : ""}
+          <div class="msg-text-content">
+            <div class="batch-grid" data-batch-grid="1"></div>
+            <div class="batch-caption" style="display:none;"></div>
+          </div>
+          <div class="msg-meta">${time || ""}</div>
+        `;
+        bubble._batchItems = [];
+        messagesEl.appendChild(bubble);
+      }
+      const item = {id: msg.id, type: msg.message_type, url: msg.file_url, preview: msg.preview_url || null, name: msg.file_name || "", 
+                    caption: (msg.message || "").trim() || ""};
+      bubble._batchItems = bubble._batchItems || [];
+      if (bubble._batchItems.some(x => String(x.id) === String(item.id))) return;
+      bubble._batchItems.push(item);
+      renderBatchBubble(bubble);
+      const meta = bubble.querySelector(".msg-meta");
+      if (meta) meta.textContent = time || meta.textContent || "";
+    }
+    function renderBatchBubble(bubble) {
+      const items = bubble._batchItems || [];
+      const grid = bubble.querySelector(".batch-grid");
+      const captionEl = bubble.querySelector(".batch-caption");
+      if (!grid) return;
+      const previews = items.slice(0, 4);
+      grid.innerHTML = `
+        <div class="batch-grid-2x2">
+          ${previews.map((it, idx) => {
+            const src = it.preview || it.url;
+            const isImg = (it.type === "image") || (src && /\.(png|jpg|jpeg|webp|gif)$/i.test(src));
+            return `
+              <div class="batch-cell" data-idx="${idx}" style="position:relative; overflow:hidden; border-radius:10px; cursor:pointer;">
+                ${isImg
+                  ? `<img src="${src}" style="width:100%; height:100%; object-fit:cover; display:block;">`
+                  : `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.06);">
+                       <span class="material-icons">insert_drive_file</span>
+                     </div>`
+                }
+              </div>
+            `;
+          }).join("")}
+        </div>
+        ${items.length > 4 ? `<div class="batch-more" style="position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,0.55); color:white; 
+                                                             font-size:12px; padding:6px 8px; border-radius:999px;">+${items.length - 4} </div>` : ""}`;
+      const grid2 = grid.querySelector(".batch-grid-2x2");
+      if (grid2) {
+        grid2.style.display = "grid";
+        grid2.style.gridTemplateColumns = "1fr 1fr";
+        grid2.style.gap = "4px";
+        grid2.style.width = "230px";
+        grid2.style.height = "230px";
+        grid2.style.position = "relative";
+      }
+      grid.style.position = "relative";
+      grid.style.marginBottom = "6px";
+      const lastCaption = [...items].reverse().find(it => it.caption && it.caption.length);
+      if (captionEl) {
+        if (lastCaption && lastCaption.caption) {
+          captionEl.style.display = "block";
+          captionEl.className = "batch-caption img-caption";
+          captionEl.innerHTML = escapeHTML(lastCaption.caption);
+        } else {
+          captionEl.style.display = "none";
+          captionEl.innerHTML = "";
+        }
+      }
+      grid.querySelectorAll(".batch-cell").forEach(cell => {
+        cell.onclick = () => {
+          const idx = parseInt(cell.getAttribute("data-idx") || "0", 10);
+          if (typeof openBatchViewer === "function") {
+            openBatchViewer(bubble.dataset.batchId, idx);
+          } else {
+            const it = items[idx];
+            if (it?.url) window.open(it.url, "_blank");
+          }
+        };
+      });
+    }
+    
+    
+    
+    
+    // ======= STORE DO BATCH (por chat) =======
+window.batchStore = window.batchStore || new Map();
+// batchStore: key = `${chatRef}::${batchId}` -> array de msgs
+
+function registerBatchMessage(msg, chatRef) {
+  if (!msg?.batch_id) return;
+  const key = `${String(chatRef)}::${String(msg.batch_id)}`;
+  const arr = window.batchStore.get(key) || [];
+  // evita duplicados
+  if (!arr.some(m => String(m.id) === String(msg.id))) arr.push(msg);
+
+  // ordenar por created_at (ou id se preferires)
+  arr.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+  window.batchStore.set(key, arr);
+}
+
+function getBatchItems(chatRef, batchId) {
+  const key = `${String(chatRef)}::${String(batchId)}`;
+  return window.batchStore.get(key) || [];
+}
+
+// ======= VIEWER DO CHAT =======
+window.chatBatchViewerIndex = 0;
+window.chatBatchViewerUrl = null;
+
+function openChatBatchViewer(chatRef, batchId, startIndex = 0) {
+  const viewer = document.getElementById("chat-batch-viewer");
+  const imgEl  = document.getElementById("chat-batch-viewer-img");
+  const fileCard = document.getElementById("chat-batch-viewer-file");
+  const countEl = document.getElementById("chat-batch-viewer-count");
+  const prevBtn = document.getElementById("chat-batch-viewer-prev");
+  const nextBtn = document.getElementById("chat-batch-viewer-next");
+
+  if (!viewer || !countEl || !prevBtn || !nextBtn) return;
+
+  const items = getBatchItems(chatRef, batchId);
+  if (!items.length) return;
+
+  window.chatBatchViewerIndex = Math.max(0, Math.min(startIndex, items.length - 1));
+
+  // limpar url anterior
+  if (window.chatBatchViewerUrl) {
+    try { URL.revokeObjectURL(window.chatBatchViewerUrl); } catch(e) {}
+  }
+  window.chatBatchViewerUrl = null;
+
+  const item = items[window.chatBatchViewerIndex];
+  const isImage = item.message_type === "image" || (item.file_url && (item.file_name || "").match(/\.(png|jpe?g|gif|webp)$/i));
+
+  // mostrar imagem vs ficheiro
+  if (isImage) {
+    if (fileCard) fileCard.style.display = "none";
+    if (imgEl) {
+      imgEl.style.display = "block";
+      imgEl.src = item.file_url; // URL pública -> não precisa blob
+    }
+  } else {
+    if (imgEl) imgEl.style.display = "none";
+    if (fileCard) {
+      const nameEl = document.getElementById("chat-batch-file-name");
+      const typeEl = document.getElementById("chat-batch-file-type");
+      const iconEl = document.getElementById("chat-batch-file-icon");
+      const openEl = document.getElementById("chat-batch-file-open");
+
+      const name = item.file_name || "Ficheiro";
+      const ext = (name.split(".").pop() || "").toUpperCase();
+      const extLow = ext.toLowerCase();
+
+      if (nameEl) nameEl.textContent = name;
+      if (typeEl) typeEl.textContent = ext ? ext : "FICHEIRO";
+      if (openEl) openEl.href = item.file_url || "#";
+
+      if (iconEl) {
+        iconEl.textContent =
+          extLow === "pdf" ? "picture_as_pdf" :
+          (["doc","docx","odt","rtf"].includes(extLow) ? "description" :
+          (["xls","xlsx","csv","ods"].includes(extLow) ? "table_chart" :
+          (["ppt","pptx","odp"].includes(extLow) ? "slideshow" :
+          (["zip","rar","7z","tar","gz"].includes(extLow) ? "folder_zip" :
+          "insert_drive_file"))));
+      }
+
+      fileCard.style.display = "flex";
+    }
+  }
+
+  countEl.textContent = `${window.chatBatchViewerIndex + 1} / ${items.length}`;
+  prevBtn.style.display = items.length > 1 ? "block" : "none";
+  nextBtn.style.display = items.length > 1 ? "block" : "none";
+  viewer.style.display = "flex";
+
+  // guardar batch atual no viewer
+  viewer.dataset.chatRef = String(chatRef);
+  viewer.dataset.batchId = String(batchId);
+}
+
+function closeChatBatchViewer() {
+  const viewer = document.getElementById("chat-batch-viewer");
+  if (viewer) viewer.style.display = "none";
+  const imgEl = document.getElementById("chat-batch-viewer-img");
+  if (imgEl) imgEl.src = "";
+}
+
+function chatBatchViewerGo(delta) {
+  const viewer = document.getElementById("chat-batch-viewer");
+  if (!viewer) return;
+  const chatRef = viewer.dataset.chatRef;
+  const batchId = viewer.dataset.batchId;
+  const items = getBatchItems(chatRef, batchId);
+  if (!items.length) return;
+
+  let idx = (window.chatBatchViewerIndex ?? 0) + delta;
+  if (idx < 0) idx = items.length - 1;
+  if (idx >= items.length) idx = 0;
+
+  openChatBatchViewer(chatRef, batchId, idx);
+}
+
+function initChatBatchViewerHandlers() {
+  const viewer = document.getElementById("chat-batch-viewer");
+  const closeBtn = document.getElementById("chat-batch-viewer-close");
+  const prevBtn = document.getElementById("chat-batch-viewer-prev");
+  const nextBtn = document.getElementById("chat-batch-viewer-next");
+  const imgEl = document.getElementById("chat-batch-viewer-img");
+
+  closeBtn?.addEventListener("click", closeChatBatchViewer);
+  prevBtn?.addEventListener("click", () => chatBatchViewerGo(-1));
+  nextBtn?.addEventListener("click", () => chatBatchViewerGo(+1));
+
+  viewer?.addEventListener("click", (e) => {
+    if (e.target === viewer) closeChatBatchViewer();
+  });
+
+  // swipe
+  let startX = 0;
+  let isDown = false;
+  const onDown = (x) => { startX = x; isDown = true; };
+  const onUp = (x) => {
+    if (!isDown) return;
+    isDown = false;
+    const dx = x - startX;
+    if (Math.abs(dx) > 40) {
+      if (dx < 0) chatBatchViewerGo(+1);
+      else chatBatchViewerGo(-1);
+    }
+  };
+
+  imgEl?.addEventListener("touchstart", (e) => onDown(e.touches[0].clientX), {passive:true});
+  imgEl?.addEventListener("touchend", (e) => onUp(e.changedTouches[0].clientX), {passive:true});
+  imgEl?.addEventListener("mousedown", (e) => onDown(e.clientX));
+  window.addEventListener("mouseup", (e) => onUp(e.clientX));
+}
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     /* ======================== GET MESSAGE DATE  ======================== */
     function getDateLabel(date) {
       const today = new Date();
@@ -2197,9 +2536,12 @@
         docInput.onchange = (e) => {
           const files = Array.from(e.target.files || []);
           if (!files.length) return;
-          console.log("Selecionados:", files.length, files.map(f => f.name));
-          window.attachMode = files.length >= 4 ? "files" : "file";
+          const allImages = files.every(f => f.type?.startsWith("image/"));
+          window.attachMode =
+            (files.length >= 2 && allImages) ? "files" :
+            (files.length >= 2) ? "multi" : "file";
           window.pendingAttachFiles = files;
+          window.pendingAttachFile = (window.attachMode === "file") ? files[0] : null;
           const file = files[0];
           const attachModal = document.getElementById("attach-modal");
           const attachImg = document.getElementById("attach-preview-img");
@@ -2208,12 +2550,10 @@
           const attachFileName = document.getElementById("attach-file-name");
           const attachFileType = document.getElementById("attach-file-type");
           const attachFileIcon = document.getElementById("attach-file-icon");
+          const attachGrid = document.getElementById("attach-grid");
           if (window.previewUrl) URL.revokeObjectURL(window.previewUrl);
           window.previewUrl = null;
-          const isImage = file.type?.startsWith("image/");
-          const attachGrid = document.getElementById("attach-grid");
-          const allImages = files.every(f => f.type?.startsWith("image/"));
-          if (allImages && files.length >= 2) {
+          if (window.attachMode === "files") {
             if (attachImg) {attachImg.src = ""; attachImg.style.display = "none";}
             if (attachFileCard) attachFileCard.style.display = "none";
             renderAttachGrid(files);
@@ -2230,10 +2570,10 @@
             setTimeout(() => attachCaption?.focus(), 150);
             e.target.value = "";
             return;
-          } else {
-            if (attachGrid) attachGrid.style.display = "none";
           }
-          if (isImage) {
+          if (attachGrid) attachGrid.style.display = "none";
+          const isImage = file.type?.startsWith("image/");
+          if (isImage && files.length === 1) {
             window.previewUrl = URL.createObjectURL(file);
             attachImg.src = window.previewUrl;
             attachImg.style.display = "block";
@@ -2241,11 +2581,7 @@
           } else {
             if (attachImg) attachImg.style.display = "none";
             if (attachFileCard && attachFileName && attachFileType && attachFileIcon) {
-              if (files.length >= 4) {
-                attachFileIcon.textContent = "attach_file";
-                attachFileName.textContent = `${files.length} ficheiro(s) selecionado(s)`;
-                attachFileType.textContent = "ALBUM";
-              } else if (files.length > 1) {
+              if (files.length > 1) {
                 attachFileIcon.textContent = "attach_file";
                 attachFileName.textContent = `${files.length} ficheiro(s) selecionado(s)`;
                 attachFileType.textContent = "MULTI";
@@ -2257,11 +2593,11 @@
                 attachFileType.textContent = ext ? ext : "FICHEIRO";
                 attachFileIcon.textContent =
                   extLow === "pdf" ? "picture_as_pdf" :
-                (["doc","docx","odt","rtf"].includes(extLow) ? "description" :
-                 (["xls","xlsx","csv","ods"].includes(extLow) ? "table_chart" :
-                  (["ppt","pptx","odp"].includes(extLow) ? "slideshow" :
-                   (["zip","rar","7z","tar","gz"].includes(extLow) ? "folder_zip" :
-                    "insert_drive_file"))));
+                    (["doc","docx","odt","rtf"].includes(extLow) ? "description" :
+                    (["xls","xlsx","csv","ods"].includes(extLow) ? "table_chart" :
+                    (["ppt","pptx","odp"].includes(extLow) ? "slideshow" :
+                    (["zip","rar","7z","tar","gz"].includes(extLow) ? "folder_zip" :
+                     "insert_drive_file"))));
               }
               attachFileCard.style.display = "flex";
             }
