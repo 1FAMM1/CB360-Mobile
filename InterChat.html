@@ -1452,16 +1452,19 @@
       } else {
         switch (msg.message_type) {
           case "image": {
-            const batchKey = msg.batch_id || `single-${msg.id}`;          
-            finalContentHTML = `
-              <img src="${msg.file_url}" class="chat-img"
-                style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;"
-                onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">`;      
-            if (msg.message) {
-              finalContentHTML += `<div class="img-caption">${escapeHTML(msg.message)}</div>`;
-            }
-            break;
-          }
+  const batchKey = msg.batch_id || `single-${msg.id}`;
+
+  finalContentHTML = `
+    <img src="${msg.file_url}" class="chat-img"
+      style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;"
+      onclick="event.preventDefault(); event.stopPropagation(); openChatBatchViewer('${chatRef}','${batchKey}',0); return false;">
+  `;
+
+  if (msg.message) {
+    finalContentHTML += `<div class="img-caption">${escapeHTML(msg.message)}</div>`;
+  }
+  break;
+}
           case "audio": {
             const audioID = `audio-${msg.id || Date.now()}`;
             finalContentHTML = `
@@ -1549,6 +1552,9 @@
       return s.innerHTML;
     }
     /* ========================== BATCH BUBBLE =========================== */
+    // Debounce timers para cada batch
+    window.batchRenderTimers = window.batchRenderTimers || {};
+    
     function addOrUpdateBatchBubble(msg, chatRef, {time}) {
       const messagesEl = document.getElementById("messages");
       if (!messagesEl) return;
@@ -1559,6 +1565,7 @@
         bubble = document.createElement("div");
         bubble.className = `message ${isMe ? "self" : "other"} batch-bubble`;
         bubble.dataset.batchId = batchId;
+        bubble.dataset.chatRef = chatRef;
         bubble.dataset.senderNint = msg.n_int;
         bubble.dataset.senderName = msg.abv_name;
         bubble.innerHTML = `
@@ -1577,7 +1584,16 @@
       bubble._batchItems = bubble._batchItems || [];
       if (bubble._batchItems.some(x => String(x.id) === String(item.id))) return;
       bubble._batchItems.push(item);
-      renderBatchBubble(bubble);
+      
+      // Debounce: espera 300ms após última mensagem do batch antes de renderizar
+      if (window.batchRenderTimers[batchId]) {
+        clearTimeout(window.batchRenderTimers[batchId]);
+      }
+      window.batchRenderTimers[batchId] = setTimeout(() => {
+        renderBatchBubble(bubble);
+        delete window.batchRenderTimers[batchId];
+      }, 300);
+      
       const meta = bubble.querySelector(".msg-meta");
       if (meta) meta.textContent = time || meta.textContent || "";
     }
@@ -1631,8 +1647,10 @@
       grid.querySelectorAll(".batch-cell").forEach(cell => {
         cell.onclick = () => {
           const idx = parseInt(cell.getAttribute("data-idx") || "0", 10);
-          if (typeof openBatchViewer === "function") {
-            openBatchViewer(bubble.dataset.batchId, idx);
+          const chatRef = bubble.dataset.chatRef || currentChat;
+          const batchId = bubble.dataset.batchId;
+          if (batchId) {
+            openChatBatchViewer(chatRef, batchId, idx);
           } else {
             const it = items[idx];
             if (it?.url) window.open(it.url, "_blank");
@@ -1649,7 +1667,15 @@ window.batchStore = window.batchStore || new Map();
 // batchStore: key = `${chatRef}::${batchId}` -> array de msgs
 
 function registerBatchMessage(msg, chatRef) {
-  if (!msg?.batch_id) return;
+  if (!msg?.batch_id) {
+    // Mensagens individuais de imagem/ficheiro também devem ser registadas
+    if (msg.message_type === 'image' || msg.message_type === 'file') {
+      const singleKey = `single-${msg.id}`;
+      const key = `${String(chatRef)}::${singleKey}`;
+      window.batchStore.set(key, [msg]);
+    }
+    return;
+  }
   const key = `${String(chatRef)}::${String(msg.batch_id)}`;
   const arr = window.batchStore.get(key) || [];
   // evita duplicados
@@ -2609,6 +2635,7 @@ function initChatBatchViewerHandlers() {
         };
       }
       initAttachViewerHandlers();
+      initChatBatchViewerHandlers();
     });
     /* ======================= MESSAGE INTERACTION ======================= */
     function setupMessageInteraction(messageElement, messageData) {
