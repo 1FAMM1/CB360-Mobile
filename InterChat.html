@@ -1789,6 +1789,31 @@
         if (currentChat !== 'geral') sendReadReceipt(currentChat);
       });
     });
+
+    /* === ADICIONA ISTO AQUI === */
+      const attachmentBtn = document.getElementById('attachment-btn');
+      const docInput = document.getElementById('doc-file-input');
+      
+      if (attachmentBtn && docInput) {
+          attachmentBtn.onclick = (e) => {
+              e.preventDefault();
+              console.log("Botão anexo clicado");
+              docInput.click();
+          };
+
+          docInput.onchange = async (e) => {
+              const file = e.target.files[0];
+              if (file) {
+                  console.log("Ficheiro selecionado:", file.name);
+                  await uploadFile(file); 
+                  e.target.value = ''; 
+              }
+          };
+      }
+      /* === ATÉ AQUI === */
+
+     // Fim do DOMContentLoaded
+    });
     /* ======================= MESSAGE INTERACTION ======================= */
     function setupMessageInteraction(messageElement, messageData) {
       let pressTimer;
@@ -2046,4 +2071,5 @@
   </script>
 </body>
 </html>
+
 
