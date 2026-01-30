@@ -738,64 +738,173 @@
       .insert([payload]);
       if (error) throw error;
     }
+    
+    
+    async function compressImage(file, {
+  maxWidth = 1280,
+  maxHeight = 1280,
+  quality = 0.7,
+  mimeType = 'image/jpeg'
+} = {}) {
+  if (!file || !file.type?.startsWith('image/')) return file;
+
+  // createImageBitmap é rápido e bom em mobile
+  const bitmap = await createImageBitmap(file);
+
+  const srcW = bitmap.width;
+  const srcH = bitmap.height;
+
+  const scale = Math.min(maxWidth / srcW, maxHeight / srcH, 1);
+  const dstW = Math.max(1, Math.round(srcW * scale));
+  const dstH = Math.max(1, Math.round(srcH * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = dstW;
+  canvas.height = dstH;
+
+  const ctx = canvas.getContext('2d', { alpha: true });
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(bitmap, 0, 0, dstW, dstH);
+
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
+  if (!blob) return file;
+
+  const baseName = (file.name || 'imagem').replace(/\.[^.]+$/, '');
+  const ext = mimeType === 'image/png' ? 'png' : 'jpg';
+  const outName = `${baseName}_opt.${ext}`;
+
+  return new File([blob], outName, { type: mimeType });
+}
+    
+    
+    
+    
+    
     /* ========================== FILE HANDLER =========================== */
     async function uploadFile(file) {
-      if (!file) return;
-      const MAX_MB = 25;
-      if (file.size > MAX_MB * 1024 * 1024) {
-        alert(`Ficheiro muito grande (máx. ${MAX_MB}MB).`);
-        return;
-      }
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      const chatId = currentChat;
-      const now = Date.now();
-      const safeName = file.name.replace(/[^\w.\-() ]+/g, '_');
-      const rand = (crypto.randomUUID?.() || Math.random().toString(16).slice(2));
-      const basePath = `${chatId}/${now}_${rand}_${safeName}`;
+  if (!file) return;
+
+  const MAX_MB = 25;
+  if (file.size > MAX_MB * 1024 * 1024) {
+    alert(`Ficheiro muito grande (máx. ${MAX_MB}MB).`);
+    return;
+  }
+
+  // Tem de existir chat selecionado
+  if (!currentChat || currentChat === "null") return;
+
+  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+  const chatId = String(currentChat);
+
+  // 1) Se for imagem, comprimir para mobile antes do upload
+  if (file.type?.startsWith('image/')) {
+    try {
+      file = await compressImage(file, {
+        maxWidth: 1280,
+        maxHeight: 1280,
+        quality: 0.7,
+        mimeType: 'image/jpeg'
+      });
+    } catch (e) {
+      console.warn("Falha a comprimir imagem, enviando original.", e);
+    }
+  }
+
+  const now = Date.now();
+  const safeName = (file.name || 'ficheiro').replace(/[^\w.\-() ]+/g, '_');
+  const rand = (crypto.randomUUID?.() || Math.random().toString(16).slice(2));
+  const basePath = `${chatId}/${now}_${rand}_${safeName}`;
+
+  try {
+    let previewUrl = null;
+
+    const isPdf = file.type === 'application/pdf' || (file.name || '').toLowerCase().endsWith('.pdf');
+    const isImage = file.type?.startsWith('image/');
+
+    // 2) Se for PDF, tenta gerar thumb (sem bloquear se falhar)
+    if (isPdf && window.pdfjsLib) {
       try {
-        let previewUrl = null;
-        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-        const isImage = file.type.startsWith('image/');
-        if (isPdf && window.pdfjsLib) {
-          try {
-            const thumbBlob = await renderPdfFirstPageToBlob(file);
-            if (thumbBlob) {
-              const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.png`;
-              const {error: upThumbErr} = await supabaseClient.storage
+        const thumbBlob = await renderPdfFirstPageToBlob(file, { scale: 0.35, quality: 0.7 });
+        if (thumbBlob) {
+          const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.jpg`;
+
+          const { error: upThumbErr } = await supabaseClient.storage
+            .from('cb_files')
+            .upload(thumbPath, thumbBlob, { contentType: 'image/jpeg' });
+
+          if (!upThumbErr) {
+            const { data: pubThumb } = supabaseClient.storage
               .from('cb_files')
-              .upload(thumbPath, thumbBlob, {contentType: 'image/png'});
-              if (!upThumbErr) {
-                const {data: pubThumb} = supabaseClient.storage.from('cb_files').getPublicUrl(thumbPath);
-                previewUrl = pubThumb?.publicUrl;
-              }
-            }
-          } catch (e) {
-            console.warn("Falha ao gerar preview do PDF, continuando apenas com o ficheiro.");
+              .getPublicUrl(thumbPath);
+
+            previewUrl = pubThumb?.publicUrl || null;
           }
         }
-        const {error: upErr} = await supabaseClient.storage
-        .from('cb_files')
-        .upload(basePath, file, {contentType: file.type || 'application/octet-stream'});
-        if (upErr) throw upErr;
-        const { data: { publicUrl } } = supabaseClient.storage
-        .from('cb_files')
-        .getPublicUrl(basePath);
-        const senderName = await fetchUserName(); 
-        const payload = {n_int: currentUserNint, recipient_nint: chatId, message: isImage ? "Enviou uma foto 📷" : (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`), message_type: isImage ? 'image' : 'file',
-                         file_url: publicUrl, file_name: file.name, preview_url: previewUrl, corp_oper_nr: currentCorp, abv_name: senderName, created_at: new Date().toISOString()};
-        const { error: insertError } = await supabaseClient.from('chat_messages').insert([payload]);
-        if (!insertError) {
-          fetch('/api/sendPush', {
-            method: 'POST', 
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({recipient_nint: chatId, corp_nr: currentCorp, sender_name: senderName, message_text: isImage ? "📷 Foto" : `📄 ${file.name}`, sender_nint: currentUserNint})
-          }).catch(err => console.error("Erro no push:", err));
-        }
-      } catch (err) {
-        console.error("Erro no envio:", err);
-        alert("Erro ao enviar ficheiro.");
+      } catch (e) {
+        console.warn("Falha ao gerar preview do PDF, continuando apenas com o ficheiro.", e);
       }
     }
+
+    // 3) Upload do ficheiro
+    const { error: upErr } = await supabaseClient.storage
+      .from('cb_files')
+      .upload(basePath, file, { contentType: file.type || 'application/octet-stream' });
+
+    if (upErr) throw upErr;
+
+    // 4) URL público do ficheiro (MESMO bucket cb_files)
+    const { data: pubFile } = supabaseClient.storage
+      .from('cb_files')
+      .getPublicUrl(basePath);
+
+    const publicUrl = pubFile?.publicUrl;
+    if (!publicUrl) throw new Error("Sem URL público do ficheiro.");
+
+    // 5) Inserir mensagem
+    const senderName = await fetchUserName();
+
+    const payload = {
+      n_int: currentUserNint,
+      recipient_nint: chatId,
+      corp_oper_nr: currentCorp,
+      abv_name: senderName,
+      created_at: new Date().toISOString(),
+
+      message_type: isImage ? 'image' : 'file',
+      file_url: publicUrl,
+      file_name: file.name || safeName,
+      preview_url: previewUrl,
+
+      message: isImage
+        ? "Enviou uma foto 📷"
+        : (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`)
+    };
+
+    const { error: insertError } = await supabaseClient
+      .from('chat_messages')
+      .insert([payload]);
+
+    if (insertError) throw insertError;
+
+    // 6) Push (não bloqueia)
+    fetch('/api/sendPush', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipient_nint: chatId,
+        corp_nr: currentCorp,
+        sender_name: senderName,
+        message_text: isImage ? "📷 Foto" : `📄 ${file.name}`,
+        sender_nint: currentUserNint
+      })
+    }).catch(err => console.error("Erro no push:", err));
+
+  } catch (err) {
+    console.error("Erro no envio (detalhes):", err);
+    alert("Erro ao enviar ficheiro: " + (err?.message || "desconhecido"));
+  }
+}
     async function renderPdfFirstPageToBlob(file) {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -2171,4 +2280,3 @@
   </script>
 </body>
 </html>
-
