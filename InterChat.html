@@ -1568,6 +1568,7 @@
       const batchId = msg.batch_id;
       const isMe = String(msg.n_int) === currentUserNint;
       let bubble = messagesEl.querySelector(`.message.batch-bubble[data-batch-id="${batchId}"]`);
+      const isNewBubble = !bubble;
       if (!bubble) {
         bubble = document.createElement("div");
         bubble.className = `message ${isMe ? "self" : "other"} batch-bubble`;
@@ -1575,6 +1576,8 @@
         bubble.dataset.chatRef = chatRef;
         bubble.dataset.senderNint = msg.n_int;
         bubble.dataset.senderName = msg.abv_name;
+        bubble.dataset.messageId = msg.id; // Para compatibilidade com setupMessageInteraction
+        bubble.dataset.messageText = msg.message || "";
         bubble.innerHTML = `
           ${(chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${escapeHTML(msg.abv_name)}</div>` : ""}
           <div class="msg-text-content">
@@ -1585,6 +1588,9 @@
         `;
         bubble._batchItems = [];
         messagesEl.appendChild(bubble);
+        
+        // Setup interaction para batch bubble
+        setupMessageInteraction(bubble, msg);
       }
       const item = {id: msg.id, type: msg.message_type, url: msg.file_url, preview: msg.preview_url || null, name: msg.file_name || "", 
                     caption: (msg.message || "").trim() || ""};
@@ -1900,8 +1906,24 @@ function initChatBatchViewerHandlers() {
         const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
         const senderName = await fetchUserName();
         for (const msg of messagesToForward) {
-          const { error } = await supabaseClient.from('chat_messages').insert([{n_int: currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName,
-                                                                                message: msg.message, is_forwarded: true}]);
+          const payload = {
+            n_int: currentUserNint, 
+            recipient_nint: String(n_int), 
+            corp_oper_nr: currentCorp, 
+            abv_name: senderName,
+            message: msg.message, 
+            is_forwarded: true,
+            message_type: msg.message_type || 'text'
+          };
+          
+          // Se for imagem ou ficheiro, incluir URLs
+          if (msg.message_type === 'image' || msg.message_type === 'file') {
+            payload.file_url = msg.file_url;
+            payload.file_name = msg.file_name;
+            if (msg.preview_url) payload.preview_url = msg.preview_url;
+          }
+          
+          const { error } = await supabaseClient.from('chat_messages').insert([payload]);
           if (error) console.error("Erro ao encaminhar mensagem:", error);
         }
         messagesToForward = [];
@@ -2052,15 +2074,46 @@ function initChatBatchViewerHandlers() {
     }
     /* ==================== TOOGLE MESSAGE SELECTION ===================== */
     function toggleMessageSelection(messageElement, messageData) {
-      const messageId = messageData.id;
-      const index = selectedMessages.findIndex(m => m.id === messageId);
-      if (index > -1) {
-        selectedMessages.splice(index, 1);
-        messageElement.classList.remove('selected');
+      // Verificar se é batch bubble
+      const isBatchBubble = messageElement.classList.contains('batch-bubble');
+      
+      if (isBatchBubble) {
+        const batchId = messageElement.dataset.batchId;
+        const chatRef = messageElement.dataset.chatRef || currentChat;
+        const batchItems = getBatchItems(chatRef, batchId);
+        
+        // Verificar se batch já está selecionado
+        const firstItemId = batchItems[0]?.id;
+        const index = selectedMessages.findIndex(m => m.id === firstItemId);
+        
+        if (index > -1) {
+          // Desselecionar: remover todos os items do batch
+          selectedMessages = selectedMessages.filter(m => 
+            !batchItems.some(bi => bi.id === m.id)
+          );
+          messageElement.classList.remove('selected');
+        } else {
+          // Selecionar: adicionar todos os items do batch
+          batchItems.forEach(item => {
+            if (!selectedMessages.some(m => m.id === item.id)) {
+              selectedMessages.push(item);
+            }
+          });
+          messageElement.classList.add('selected');
+        }
       } else {
-        selectedMessages.push(messageData);
-        messageElement.classList.add('selected');
+        // Mensagem individual normal
+        const messageId = messageData.id;
+        const index = selectedMessages.findIndex(m => m.id === messageId);
+        if (index > -1) {
+          selectedMessages.splice(index, 1);
+          messageElement.classList.remove('selected');
+        } else {
+          selectedMessages.push(messageData);
+          messageElement.classList.add('selected');
+        }
       }
+      
       const menu = document.getElementById('reaction-menu');
       if (menu) {
         if (selectedMessages.length === 1) {          
@@ -2188,7 +2241,11 @@ function initChatBatchViewerHandlers() {
     function actionForward() {
       if (selectedMessages.length === 0) return;
       messagesToForward = selectedMessages.map(msg => ({
-        message: msg.message
+        message: msg.message,
+        message_type: msg.message_type || 'text',
+        file_url: msg.file_url || null,
+        file_name: msg.file_name || null,
+        preview_url: msg.preview_url || null
       }));
       clearSelection();
       const messagesEl = document.getElementById("messages");
