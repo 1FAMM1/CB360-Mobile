@@ -731,180 +731,117 @@
     async function sendImageMessage(imageUrl, fileName, caption = "") {
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
       const senderName = await fetchUserName();
-      const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl,
-                       file_name: fileName, message: caption};
+      const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl, file_name: fileName,
+                       message: caption};
       const { error } = await supabaseClient
       .from("chat_messages")
       .insert([payload]);
       if (error) throw error;
+      fetch('/api/sendPush', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({recipient_nint: String(currentChat), corp_nr: currentCorp, sender_name: senderName, message_text: caption?.trim() ? `📷 ${caption.trim()}` : "📷 Foto", 
+                              sender_nint: currentUserNint})
+      }).catch(err => console.error("Erro no push:", err));
     }
-    
-    
-    async function compressImage(file, {
-  maxWidth = 1280,
-  maxHeight = 1280,
-  quality = 0.7,
-  mimeType = 'image/jpeg'
-} = {}) {
-  if (!file || !file.type?.startsWith('image/')) return file;
-
-  // createImageBitmap é rápido e bom em mobile
-  const bitmap = await createImageBitmap(file);
-
-  const srcW = bitmap.width;
-  const srcH = bitmap.height;
-
-  const scale = Math.min(maxWidth / srcW, maxHeight / srcH, 1);
-  const dstW = Math.max(1, Math.round(srcW * scale));
-  const dstH = Math.max(1, Math.round(srcH * scale));
-
-  const canvas = document.createElement('canvas');
-  canvas.width = dstW;
-  canvas.height = dstH;
-
-  const ctx = canvas.getContext('2d', { alpha: true });
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(bitmap, 0, 0, dstW, dstH);
-
-  const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
-  if (!blob) return file;
-
-  const baseName = (file.name || 'imagem').replace(/\.[^.]+$/, '');
-  const ext = mimeType === 'image/png' ? 'png' : 'jpg';
-  const outName = `${baseName}_opt.${ext}`;
-
-  return new File([blob], outName, { type: mimeType });
-}
-    
-    
-    
-    
-    
     /* ========================== FILE HANDLER =========================== */
-    async function uploadFile(file) {
-  if (!file) return;
-
-  const MAX_MB = 25;
-  if (file.size > MAX_MB * 1024 * 1024) {
-    alert(`Ficheiro muito grande (máx. ${MAX_MB}MB).`);
-    return;
-  }
-
-  // Tem de existir chat selecionado
-  if (!currentChat || currentChat === "null") return;
-
-  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-  const chatId = String(currentChat);
-
-  // 1) Se for imagem, comprimir para mobile antes do upload
-  if (file.type?.startsWith('image/')) {
-    try {
-      file = await compressImage(file, {
-        maxWidth: 1280,
-        maxHeight: 1280,
-        quality: 0.7,
-        mimeType: 'image/jpeg'
-      });
-    } catch (e) {
-      console.warn("Falha a comprimir imagem, enviando original.", e);
+    async function compressImage(file, {
+      maxWidth = 1280,
+      maxHeight = 1280,
+      quality = 0.7,
+      mimeType = 'image/jpeg'} = {}) {
+      if (!file || !file.type?.startsWith('image/')) return file;
+      const bitmap = await createImageBitmap(file);
+      const srcW = bitmap.width;
+      const srcH = bitmap.height;
+      const scale = Math.min(maxWidth / srcW, maxHeight / srcH, 1);
+      const dstW = Math.max(1, Math.round(srcW * scale));
+      const dstH = Math.max(1, Math.round(srcH * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = dstW;
+      canvas.height = dstH;
+      const ctx = canvas.getContext('2d', { alpha: true });
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(bitmap, 0, 0, dstW, dstH);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
+      if (!blob) return file;
+      const baseName = (file.name || 'imagem').replace(/\.[^.]+$/, '');
+      const ext = mimeType === 'image/png' ? 'png' : 'jpg';
+      const outName = `${baseName}_opt.${ext}`;
+      return new File([blob], outName, { type: mimeType });
     }
-  }
-
-  const now = Date.now();
-  const safeName = (file.name || 'ficheiro').replace(/[^\w.\-() ]+/g, '_');
-  const rand = (crypto.randomUUID?.() || Math.random().toString(16).slice(2));
-  const basePath = `${chatId}/${now}_${rand}_${safeName}`;
-
-  try {
-    let previewUrl = null;
-
-    const isPdf = file.type === 'application/pdf' || (file.name || '').toLowerCase().endsWith('.pdf');
-    const isImage = file.type?.startsWith('image/');
-
-    // 2) Se for PDF, tenta gerar thumb (sem bloquear se falhar)
-    if (isPdf && window.pdfjsLib) {
+    async function uploadFile(file) {
+      if (!file) return;
+      const MAX_MB = 25;
+      if (file.size > MAX_MB * 1024 * 1024) {
+        alert(`Ficheiro muito grande (máx. ${MAX_MB}MB).`);
+        return;
+      }
+      if (!currentChat || currentChat === "null") return;
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const chatId = String(currentChat);
+      if (file.type?.startsWith('image/')) {
+        try {
+          file = await compressImage(file, {maxWidth: 1280, maxHeight: 1280, quality: 0.7, mimeType: 'image/jpeg'});
+        } catch (e) {
+          console.warn("Falha a comprimir imagem, enviando original.", e);
+        }
+      }
+      const now = Date.now();
+      const safeName = (file.name || 'ficheiro').replace(/[^\w.\-() ]+/g, '_');
+      const rand = (crypto.randomUUID?.() || Math.random().toString(16).slice(2));
+      const basePath = `${chatId}/${now}_${rand}_${safeName}`;
       try {
-        const thumbBlob = await renderPdfFirstPageToBlob(file, { scale: 0.35, quality: 0.7 });
-        if (thumbBlob) {
-          const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.jpg`;
-
-          const { error: upThumbErr } = await supabaseClient.storage
-            .from('cb_files')
-            .upload(thumbPath, thumbBlob, { contentType: 'image/jpeg' });
-
-          if (!upThumbErr) {
-            const { data: pubThumb } = supabaseClient.storage
-              .from('cb_files')
-              .getPublicUrl(thumbPath);
-
-            previewUrl = pubThumb?.publicUrl || null;
+        let previewUrl = null;
+        const isPdf = file.type === 'application/pdf' || (file.name || '').toLowerCase().endsWith('.pdf');
+        const isImage = file.type?.startsWith('image/');
+        if (isPdf && window.pdfjsLib) {
+          try {
+            const thumbBlob = await renderPdfFirstPageToBlob(file, { scale: 0.35, quality: 0.7 });
+            if (thumbBlob) {
+              const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.jpg`;
+              const { error: upThumbErr } = await supabaseClient.storage
+                .from('cb_files')
+                .upload(thumbPath, thumbBlob, { contentType: 'image/jpeg' });
+              if (!upThumbErr) {
+                const { data: pubThumb } = supabaseClient.storage
+                  .from('cb_files')
+                  .getPublicUrl(thumbPath);
+                previewUrl = pubThumb?.publicUrl || null;
+              }
+            }
+          } catch (e) {
+            console.warn("Falha ao gerar preview do PDF, continuando apenas com o ficheiro.", e);
           }
         }
-      } catch (e) {
-        console.warn("Falha ao gerar preview do PDF, continuando apenas com o ficheiro.", e);
+        const { error: upErr } = await supabaseClient.storage
+          .from('cb_files')
+          .upload(basePath, file, { contentType: file.type || 'application/octet-stream' });
+        if (upErr) throw upErr;
+        const { data: pubFile } = supabaseClient.storage
+          .from('cb_files')
+          .getPublicUrl(basePath);
+        const publicUrl = pubFile?.publicUrl;
+        if (!publicUrl) throw new Error("Sem URL público do ficheiro.");
+        const senderName = await fetchUserName();
+        const payload = {n_int: currentUserNint, recipient_nint: chatId, corp_oper_nr: currentCorp, abv_name: senderName, created_at: new Date().toISOString(),
+                         message_type: isImage ? 'image' : 'file', file_url: publicUrl, file_name: file.name || safeName, preview_url: previewUrl, 
+                         message: isImage ? "Enviou uma foto 📷" : (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`)};
+        const { error: insertError } = await supabaseClient
+          .from('chat_messages')
+          .insert([payload]);
+        if (insertError) throw insertError;
+        fetch('/api/sendPush', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({recipient_nint: chatId, corp_nr: currentCorp, sender_name: senderName, message_text: isImage ? "📷 Foto" : `📄 ${file.name}`, sender_nint: currentUserNint})
+        }).catch(err => console.error("Erro no push:", err));
+      } catch (err) {
+        console.error("Erro no envio (detalhes):", err);
+        alert("Erro ao enviar ficheiro: " + (err?.message || "desconhecido"));
       }
     }
-
-    // 3) Upload do ficheiro
-    const { error: upErr } = await supabaseClient.storage
-      .from('cb_files')
-      .upload(basePath, file, { contentType: file.type || 'application/octet-stream' });
-
-    if (upErr) throw upErr;
-
-    // 4) URL público do ficheiro (MESMO bucket cb_files)
-    const { data: pubFile } = supabaseClient.storage
-      .from('cb_files')
-      .getPublicUrl(basePath);
-
-    const publicUrl = pubFile?.publicUrl;
-    if (!publicUrl) throw new Error("Sem URL público do ficheiro.");
-
-    // 5) Inserir mensagem
-    const senderName = await fetchUserName();
-
-    const payload = {
-      n_int: currentUserNint,
-      recipient_nint: chatId,
-      corp_oper_nr: currentCorp,
-      abv_name: senderName,
-      created_at: new Date().toISOString(),
-
-      message_type: isImage ? 'image' : 'file',
-      file_url: publicUrl,
-      file_name: file.name || safeName,
-      preview_url: previewUrl,
-
-      message: isImage
-        ? "Enviou uma foto 📷"
-        : (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`)
-    };
-
-    const { error: insertError } = await supabaseClient
-      .from('chat_messages')
-      .insert([payload]);
-
-    if (insertError) throw insertError;
-
-    // 6) Push (não bloqueia)
-    fetch('/api/sendPush', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        recipient_nint: chatId,
-        corp_nr: currentCorp,
-        sender_name: senderName,
-        message_text: isImage ? "📷 Foto" : `📄 ${file.name}`,
-        sender_nint: currentUserNint
-      })
-    }).catch(err => console.error("Erro no push:", err));
-
-  } catch (err) {
-    console.error("Erro no envio (detalhes):", err);
-    alert("Erro ao enviar ficheiro: " + (err?.message || "desconhecido"));
-  }
-}
     async function renderPdfFirstPageToBlob(file) {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -1457,31 +1394,38 @@
       const inputEl = document.getElementById("chat-input");
       const sendBtn = document.getElementById("chat-send-btn");
       const text = audioText || inputEl.value.trim();
-      if (!text && !audioUrl) return;    
+      if (!text && !audioUrl) return;
       sendBtn.disabled = true;
       if (!audioUrl) {
         inputEl.value = "";
         resetLayout();
         inputEl.dispatchEvent(new Event('input'));
-      }    
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";  
+      }
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
       if (currentEditingMessage && !audioUrl) {
+        sendBtn.disabled = false;
         return;
-      }    
+      }
       const senderName = await fetchUserName();
-      const messageData = {n_int: currentUserNint, recipient_nint: currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text,file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};    
+      const messageData = {n_int: currentUserNint, recipient_nint: currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text, file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};
       if (currentReplyToMessage) {
         messageData.reply_to_message_id = currentReplyToMessage.id;
-      }    
-      const { error } = await supabaseClient.from('chat_messages').insert([messageData]);    
-      sendBtn.disabled = false;    
+      }
+      const { error } = await supabaseClient.from('chat_messages').insert([messageData]);
+      sendBtn.disabled = false;
       if (error) {
-        console.error(error); 
+        console.error(error);
         if (!audioUrl) {
           inputEl.value = text;
           inputEl.dispatchEvent(new Event('input'));
         }
       } else {
+        const pushText = audioUrl ? "🎤 Enviou um Áudio." : text;
+        fetch('/api/sendPush', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({recipient_nint: String(currentChat), corp_nr: currentCorp, sender_name: senderName, message_text: pushText, sender_nint: currentUserNint})
+        }).catch(err => console.error("Erro no push:", err));
         cancelReply();
         clearSelection();
         const messageContainer = document.querySelector('.message-container');
@@ -1997,31 +1941,21 @@
       inputEl.addEventListener('focus', () => {
         if (currentChat !== 'geral') sendReadReceipt(currentChat);
       });
-      
-
-      /* === ADICIONA ISTO AQUI === */
       const attachmentBtn = document.getElementById('attachment-btn');
       const docInput = document.getElementById('doc-file-input');
-      
       if (attachmentBtn && docInput) {
-          attachmentBtn.onclick = (e) => {
-              e.preventDefault();
-              console.log("Botão anexo clicado");
-              docInput.click();
-          };
-
-          docInput.onchange = async (e) => {
-              const file = e.target.files[0];
-              if (file) {
-                  console.log("Ficheiro selecionado:", file.name);
-                  await uploadFile(file); 
-                  e.target.value = ''; 
-              }
-          };
+        attachmentBtn.onclick = (e) => {
+          e.preventDefault();
+          docInput.click();
+        };
+        docInput.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            await uploadFile(file); 
+            e.target.value = ''; 
+          }
+        };
       }
-      /* === ATÉ AQUI === */
-
-     // Fim do DOMContentLoaded
     });
     /* ======================= MESSAGE INTERACTION ======================= */
     function setupMessageInteraction(messageElement, messageData) {
@@ -2280,4 +2214,3 @@
   </script>
 </body>
 </html>
-
