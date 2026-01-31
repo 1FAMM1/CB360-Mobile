@@ -3135,7 +3135,7 @@
         }
       }
     }    
-    /* ======================= CLEAR CONVERSATION ======================== */    
+    /* ======================= CLEAR CONVERSATION (LÓGICA HIDDEN) ======================== */    
 async function clearConversation() {
   if (!currentContactMenuTarget) return;
 
@@ -3148,35 +3148,32 @@ async function clearConversation() {
   if (!confirmed) return;
 
   try {
-    // Usamos 'exact' para forçar o banco de dados a contar as linhas afetadas
-    const { error, count } = await supabaseClient
+    // 1. Em vez de DELETE, usamos UPDATE
+    // O objetivo é adicionar o TEU nint à lista de quem escondeu a conversa
+    const { error } = await supabaseClient
       .from('chat_messages')
-      .delete({ count: 'exact' }) 
+      .update({ 
+        // Nota: Esta sintaxe depende de como geres o array, 
+        // mas o ideal é marcar que foi escondido por ti.
+        hidden_for: [myNint] 
+      })
       .eq('corp_oper_nr', currentCorp) 
       .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`);
 
     if (error) throw error;
 
-    // FECHAR O MENU SEMPRE (para não ficar aberto no vácuo)
     closeContactMenu();
-
-    // AGORA A LÓGICA DE PRECISÃO:
-    if (count > 0) {
-      // Se realmente apagou mensagens
-      showSystemWarning('sucesso_limpeza', 'Mensagens Eliminadas', `Sucesso! Foram removidas ${count} mensagens.`);
-      
-      if (currentChat === targetNint) {
-        const container = document.getElementById('message-container');
-        if (container) container.innerHTML = ''; 
-      }
-    } else {
-      // Se o comando correu bem, mas não havia nada para apagar
-      showSystemWarning('permissao_negada_limpeza', 'Nada a Limpar', 'Esta conversa já se encontra vazia na base de dados.');
+    showSystemWarning('sucesso_limpeza', 'Conversa Ocultada', `A conversa foi limpa do teu histórico.`);
+    
+    // 2. Limpa o ecrã visualmente
+    if (currentChat === targetNint) {
+      const messagesEl = document.getElementById("messages"); // O teu container real
+      if (messagesEl) messagesEl.innerHTML = ''; 
     }
 
   } catch (error) {
-    console.error('Erro detalhado no delete:', error);
-    showSystemWarning('erro_eliminar_tecnico', 'Erro de Sistema', 'Não foi possível processar o pedido.');
+    console.error('Erro no update/hidden:', error);
+    showSystemWarning('erro_eliminar_tecnico', 'Erro', 'Não foi possível ocultar a conversa.');
   }
 }
     /* ======================== ADVISORS MANAGER ========================= */  
