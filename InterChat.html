@@ -1960,58 +1960,74 @@ function addMessageToDOM(msg, chatRef) {
       }
       await loadMessages(currentChat);
     }
-    /* ======================== LOADING MESSAGES ========================= */
-    async function loadMessages(chat = currentChat) {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      const messagesEl = document.getElementById("messages");
-      const chatRef = chat || 'geral';
-      messagesEl.innerHTML = '';
-      lastDateLabel = "";
-      let query = supabaseClient
-      .from('chat_messages')
-      .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
-      .eq('corp_oper_nr', currentCorp);
-      if (chatRef === 'geral') {
-        query = query.eq('recipient_nint', 'geral');
-      } else {
-        query = query.or(`and(n_int.eq.${currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${currentUserNint})`);
-      }      
-      try {
-        const {data: msgs, error} = await query.order('created_at', {ascending: true});
-        if (currentChat !== chatRef) return;    
-        if (error) return console.error(error);
-        let filteredMsgs = msgs || [];
-        if (filteredMsgs.length > 0 && chatRef !== 'geral') {
-          const {data: myBlocks} = await supabaseClient
-            .from('user_blocks')
-            .select('blocked_nint')
-            .eq('blocker_nint', currentUserNint)
-            .eq('corp_oper_nr', currentCorp);
-          
-          if (myBlocks && myBlocks.length > 0) {
-            const blockedList = myBlocks.map(b => b.blocked_nint);
-            filteredMsgs = filteredMsgs.filter(m => !blockedList.includes(String(m.n_int)));
-          }
-        }        
-        if (!filteredMsgs || filteredMsgs.length === 0) {
-          const emptyMsg = document.createElement("div");
-          emptyMsg.className = "empty-chat-placeholder";
-          emptyMsg.innerHTML = `
-            <div style="text-align: center; width: 100%; padding: 20px;">
-              <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
-              <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${currentChatName || 'este contacto'}</strong></span>
-            </div>
-          `;
-          messagesEl.appendChild(emptyMsg);
-        } else {
-          filteredMsgs.forEach(msg => addMessageToDOM(msg, chatRef)); 
-          setTimeout(() => scrollToBottom(), 100);
-          setTimeout(() => scrollToBottom(), 500);
-        } 
-      } catch (err) {
-        console.error(err);
+    /* ======================== LOADING MESSAGES (FIXED) ========================= */
+async function loadMessages(chat = currentChat) {
+  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+  const messagesEl = document.getElementById("messages");
+  const chatRef = chat || 'geral';
+  messagesEl.innerHTML = '';
+  lastDateLabel = "";
+
+  let query = supabaseClient
+    .from('chat_messages')
+    .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
+    .eq('corp_oper_nr', currentCorp);
+
+  if (chatRef === 'geral') {
+    query = query.eq('recipient_nint', 'geral');
+  } else {
+    query = query.or(`and(n_int.eq.${currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${currentUserNint})`);
+  }
+
+  try {
+    const { data: msgs, error } = await query.order('created_at', { ascending: true });
+    if (currentChat !== chatRef) return;
+    if (error) return console.error(error);
+
+    let filteredMsgs = msgs || [];
+
+    // 1. Filtro de Bloqueios (Teu código original)
+    if (filteredMsgs.length > 0 && chatRef !== 'geral') {
+      const { data: myBlocks } = await supabaseClient
+        .from('user_blocks')
+        .select('blocked_nint')
+        .eq('blocker_nint', currentUserNint)
+        .eq('corp_oper_nr', currentCorp);
+
+      if (myBlocks && myBlocks.length > 0) {
+        const blockedList = myBlocks.map(b => b.blocked_nint);
+        filteredMsgs = filteredMsgs.filter(m => !blockedList.includes(String(m.n_int)));
       }
     }
+
+    // --- 2. NOVO FILTRO DE REALISMO (HIDDEN FOR ME) ---
+    // Filtramos as mensagens antes de contar o tamanho da lista
+    filteredMsgs = filteredMsgs.filter(m => {
+      const hiddenList = m.hidden_for || [];
+      return !hiddenList.includes(currentUserNint);
+    });
+
+    // 3. DECISÃO FINAL: Mostrar mensagens ou placeholder
+    if (!filteredMsgs || filteredMsgs.length === 0) {
+      const emptyMsg = document.createElement("div");
+      emptyMsg.className = "empty-chat-placeholder";
+      emptyMsg.innerHTML = `
+        <div style="text-align: center; width: 100%; padding: 20px;">
+          <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
+          <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${currentChatName || 'este contacto'}</strong></span>
+        </div>
+      `;
+      messagesEl.appendChild(emptyMsg);
+    } else {
+      // Aqui as mensagens já vêm limpas, o addMessageToDOM vai desenhá-las todas
+      filteredMsgs.forEach(msg => addMessageToDOM(msg, chatRef));
+      setTimeout(() => scrollToBottom(), 100);
+      setTimeout(() => scrollToBottom(), 500);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
     /* ====================== MARK MESSAGE AS READ ======================= */    
     async function markGeralAsRead() {
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
@@ -3302,4 +3318,5 @@ async function clearConversation() {
   </script>
 </body>
 </html>
+
 
