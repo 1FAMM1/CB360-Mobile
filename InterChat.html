@@ -2169,12 +2169,25 @@ function initChatBatchViewerHandlers() {
           inputEl.dispatchEvent(new Event('input'));
         }
       } else {
-        const pushText = audioUrl ? "🎤 Enviou um Áudio." : text;
-        fetch('/api/sendPush', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({recipient_nint: String(currentChat), corp_nr: currentCorp, sender_name: senderName, message_text: pushText, sender_nint: currentUserNint})
-        }).catch(err => console.error("Erro no push:", err));
+        // Verificar se o destinatário silenciou o remetente
+        const {data: isMuted} = await supabaseClient
+          .from('user_mutes')
+          .select('id')
+          .eq('muter_nint', currentChat)
+          .eq('muted_nint', currentUserNint)
+          .eq('corp_oper_nr', currentCorp)
+          .maybeSingle();
+        
+        // Só enviar push se NÃO estiver silenciado
+        if (!isMuted) {
+          const pushText = audioUrl ? "🎤 Enviou um Áudio." : text;
+          fetch('/api/sendPush', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({recipient_nint: String(currentChat), corp_nr: currentCorp, sender_name: senderName, message_text: pushText, sender_nint: currentUserNint})
+          }).catch(err => console.error("Erro no push:", err));
+        }
+        
         cancelReply();
         clearSelection();
         scrollToBottom(true);
@@ -3266,14 +3279,27 @@ function initChatBatchViewerHandlers() {
       
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
       
-      // Eliminar TODAS as mensagens entre os 2 utilizadores
-      const {error} = await supabaseClient
-        .from('chat_messages')
-        .delete()
-        .eq('corp_oper_nr', currentCorp)
-        .or(`and(n_int.eq.${currentUserNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${currentUserNint})`);
-      
-      if (!error) {
+      try {
+        // Método 1: Apagar mensagens que EU enviei para o TARGET
+        const {error: error1} = await supabaseClient
+          .from('chat_messages')
+          .delete()
+          .eq('corp_oper_nr', currentCorp)
+          .eq('n_int', currentUserNint)
+          .eq('recipient_nint', targetNint);
+        
+        if (error1) throw error1;
+        
+        // Método 2: Apagar mensagens que o TARGET enviou para MIM
+        const {error: error2} = await supabaseClient
+          .from('chat_messages')
+          .delete()
+          .eq('corp_oper_nr', currentCorp)
+          .eq('n_int', targetNint)
+          .eq('recipient_nint', currentUserNint);
+        
+        if (error2) throw error2;
+        
         closeContactMenu();
         alert(`✅ Conversa com ${targetName} eliminada!`);
         
@@ -3281,9 +3307,9 @@ function initChatBatchViewerHandlers() {
         if (currentChat === targetNint) {
           await loadMessages(currentChat);
         }
-      } else {
+      } catch (error) {
         alert('❌ Erro ao limpar conversa');
-        console.error(error);
+        console.error('Erro detalhado:', error);
       }
     }
   </script>
