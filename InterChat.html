@@ -3138,43 +3138,44 @@
     /* ======================= CLEAR CONVERSATION ======================== */    
 async function clearConversation() {
   if (!currentContactMenuTarget) return;
+
   const targetNint = currentContactMenuTarget.nint;
   const targetName = currentContactMenuTarget.name;
   const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
   const myNint = localStorage.getItem("currentUserNint") || currentUserNint; 
 
+  // 1. Abre o modal e espera pela confirmação
   const confirmed = await confirmCriticalAction(targetName);
   if (!confirmed) return;
 
   try {
-    // ADICIONAMOS O .select() para ele reportar o que foi feito
-    const { error, count } = await supabaseClient
+    // 2. Tenta apagar no Supabase
+    const { error } = await supabaseClient
       .from('chat_messages')
-      .delete({ count: 'exact' }) // Mudamos para 'exact' para maior precisão
+      .delete() // Removemos o count:planned/exact daqui para evitar bugs de retorno
       .eq('corp_oper_nr', currentCorp) 
-      .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`)
-      .select(); // <--- ISTO É FUNDAMENTAL para o count não ser zero/null
+      .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`);
 
+    // 3. Se o Supabase responder com erro (ex: sem net ou erro de sintaxe)
     if (error) throw error;
 
-    // Se eliminou (count > 0) OU se o pedido foi um sucesso (mesmo que a lista já estivesse vazia)
-    if (count && count.length >= 0) { 
-      const totalEliminadas = count.length;
-      
-      closeContactMenu();
-      showSystemWarning('sucesso_limpeza', 'Mensagens Eliminadas', `Sucesso! A conversa foi limpa da base de dados.`);
-      
-      if (currentChat === targetNint) {
-        const container = document.getElementById('message-container');
-        if (container) container.innerHTML = ''; 
-      }
-    } else {
-      // Este else agora só dispara se realmente algo falhou na lógica
-      showSystemWarning('permissao_negada_limpeza', 'Aviso', 'A conversa já parece estar limpa ou não foram encontradas mensagens.');
+    // 4. SE CHEGOU AQUI SEM ERRO = SUCESSO!
+    // Fechamos o menu de contexto antes de mostrar o balão
+    closeContactMenu();
+
+    // Dispara o balão verde (sucesso_limpeza)
+    showSystemWarning('sucesso_limpeza', 'Mensagens Eliminadas', `A conversa com ${targetName} foi limpa com sucesso.`);
+    
+    // 5. Limpa o ecrã visualmente se estiveres a olhar para essa conversa
+    if (currentChat === targetNint) {
+      const container = document.getElementById('message-container');
+      if (container) container.innerHTML = ''; 
     }
+
   } catch (error) {
     console.error('Erro detalhado no delete:', error);
-    showSystemWarning('erro_eliminar_tecnico', 'Erro de Sistema', 'Não conseguimos processar a eliminação.');
+    // Se cair aqui, mostra o balão de erro
+    showSystemWarning('erro_eliminar_tecnico', 'Erro de Sistema', 'Não foi possível completar a limpeza devido a um erro de ligação.');
   }
 }
     /* ======================== ADVISORS MANAGER ========================= */  
@@ -3306,3 +3307,4 @@ async function clearConversation() {
   </script>
 </body>
 </html>
+
