@@ -1581,8 +1581,14 @@
         bubble.dataset.chatRef = chatRef;
         bubble.dataset.senderNint = msg.n_int;
         bubble.dataset.senderName = msg.abv_name;
-        bubble.dataset.messageId = msg.id; // Para compatibilidade com setupMessageInteraction
+        bubble.dataset.messageId = msg.id;
         bubble.dataset.messageText = msg.message || "";
+        
+        // Adicionar classe is-forwarded se for reencaminhado
+        if (msg.is_forwarded) {
+          bubble.classList.add('is-forwarded');
+        }
+        
         bubble.innerHTML = `
           ${(chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${escapeHTML(msg.abv_name)}</div>` : ""}
           <div class="msg-text-content">
@@ -1951,8 +1957,8 @@ function initChatBatchViewerHandlers() {
         messagesToForward = [];
         await new Promise(resolve => setTimeout(resolve, 150));
         
-        // Scroll para baixo após reencaminhar
-        scrollToBottom(true);
+        // Scroll suave após reencaminhar
+        setTimeout(() => scrollToBottom(), 200);
       }
       currentChat = String(n_int);
       currentChatName = name;
@@ -2020,8 +2026,8 @@ function initChatBatchViewerHandlers() {
           messagesEl.appendChild(emptyMsg);
         } else {
           msgs.forEach(msg => addMessageToDOM(msg, chatRef)); 
-          // Scroll imediato + delay extra para batch render
-          scrollToBottom(true);
+          // Scroll suave ao abrir chat + delay para batch render
+          setTimeout(() => scrollToBottom(), 100);
           setTimeout(() => scrollToBottom(), 500);
         } 
       } catch (err) {
