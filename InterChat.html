@@ -3136,36 +3136,47 @@
       }
     }    
     /* ======================= CLEAR CONVERSATION ======================== */    
-    async function clearConversation() {
-      if (!currentContactMenuTarget) return;
-      const targetNint = currentContactMenuTarget.nint;
-      const targetName = currentContactMenuTarget.name;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      const myNint = localStorage.getItem("currentUserNint") || currentUserNint; 
-      const confirmed = await confirmCriticalAction(targetName);
-      if (!confirmed) return;
-      try {
-        const { error, count } = await supabaseClient
-        .from('chat_messages')
-        .delete({count: 'planned'}) 
-        .eq('corp_oper_nr', currentCorp) 
-        .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`);
-        if (error) throw error;
-        if (count > 0) {
-          closeContactMenu();
-          showSystemWarning('sucesso_limpeza', 'Mensagens Eliminadas', `Sucesso! Foram removidas ${count} mensagens desta conversa.`);
-          if (currentChat === targetNint) {
-            const container = document.getElementById('message-container');
-            if (container) container.innerHTML = ''; 
-          }
-        } else {
-          showSystemWarning('permissao_negada_limpeza', 'Permissão Insuficiente', 'Não foi possível eliminar as mensagens. Verifica se tens os privilégios necessários.');
-        }
-      } catch (error) {
-        console.error('Erro detalhado no delete:', error);
-        showSystemWarning('erro_eliminar_tecnico', 'Erro de Sistema', 'Não conseguimos processar o teu pedido de eliminação devido a um erro técnico.');
+async function clearConversation() {
+  if (!currentContactMenuTarget) return;
+  const targetNint = currentContactMenuTarget.nint;
+  const targetName = currentContactMenuTarget.name;
+  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+  const myNint = localStorage.getItem("currentUserNint") || currentUserNint; 
+
+  const confirmed = await confirmCriticalAction(targetName);
+  if (!confirmed) return;
+
+  try {
+    // ADICIONAMOS O .select() para ele reportar o que foi feito
+    const { error, count } = await supabaseClient
+      .from('chat_messages')
+      .delete({ count: 'exact' }) // Mudamos para 'exact' para maior precisão
+      .eq('corp_oper_nr', currentCorp) 
+      .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`)
+      .select(); // <--- ISTO É FUNDAMENTAL para o count não ser zero/null
+
+    if (error) throw error;
+
+    // Se eliminou (count > 0) OU se o pedido foi um sucesso (mesmo que a lista já estivesse vazia)
+    if (count && count.length >= 0) { 
+      const totalEliminadas = count.length;
+      
+      closeContactMenu();
+      showSystemWarning('sucesso_limpeza', 'Mensagens Eliminadas', `Sucesso! A conversa foi limpa da base de dados.`);
+      
+      if (currentChat === targetNint) {
+        const container = document.getElementById('message-container');
+        if (container) container.innerHTML = ''; 
       }
+    } else {
+      // Este else agora só dispara se realmente algo falhou na lógica
+      showSystemWarning('permissao_negada_limpeza', 'Aviso', 'A conversa já parece estar limpa ou não foram encontradas mensagens.');
     }
+  } catch (error) {
+    console.error('Erro detalhado no delete:', error);
+    showSystemWarning('erro_eliminar_tecnico', 'Erro de Sistema', 'Não conseguimos processar a eliminação.');
+  }
+}
     /* ======================== ADVISORS MANAGER ========================= */  
     function showSystemWarning(tipo, tituloCustom = '', mensagemCustom = '') {
       const modal = document.getElementById('modal-alert-system');
