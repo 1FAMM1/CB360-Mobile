@@ -337,6 +337,10 @@
     .batch-cell img {-webkit-touch-callout: none !important; -webkit-user-select: none !important; -moz-user-select: none !important; 
                      -ms-user-select: none !important; user-select: none !important; -webkit-user-drag: none !important; pointer-events: none;}
     .batch-grid-2x2 {-webkit-touch-callout: none !important; -webkit-user-select: none !important;}
+    
+    
+   
+    
     @keyframes slideUp {from {transform: translateY(100%); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     @keyframes popScale {0% {transform: scale(0.85); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}    
     @keyframes pulse-green {0% {transform: scale(1); box-shadow: 0 0 5px #00ff00;} 50% {transform: scale(1.15); box-shadow: 0 0 12px #00ff00;} 100% {transform: scale(1); box-shadow: 0 0 5px #00ff00;}}
@@ -369,7 +373,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" src="...">
     <h1>CHAT INTERNO</h1>
     <div class="header-subtitle">CHAT DE CONVERSAÇÃO INTERNA</div>
   </header> 
@@ -459,15 +463,37 @@
       </div>
     </div>
   </div>
+  <div id="modal-alert-system" class="custom-confirm-overlay" style="display: none;">
+    <div class="custom-confirm-card">
+      <span id="alerta-icon" class="material-icons" style="font-size: 48px; margin-bottom: 10px;"></span>
+      <h3 id="alerta-titulo" style="margin: 0 0 10px 0; font-size: 1.2rem;"></h3>
+      <p id="alerta-mensagem" class="confirm-text"></p>
+      <div class="confirm-buttons-stack">
+        <button onclick="closeAlertSystem()" class="btn-confirm-action">OK</button>
+      </div>
+    </div>
+  </div>
+  <div id="modal-confirm-critical" class="custom-confirm-overlay" style="display:none;">
+    <div class="custom-confirm-card">
+      <span class="material-icons" style="font-size: 48px; color: #ef4444;">warning</span>
+      <h3 style="color: #ef4444; margin: 10px 0;">ATENÇÃO!</h3>
+      <p id="critical-message" class="confirm-text"></p>
+      <div class="confirm-buttons-stack">
+        <button id="btn-confirm-delete" class="btn-confirm-action" style="background: #ef4444;">Sim, Eliminar Tudo</button>
+        <button onclick="closeConfirmCritical()" class="btn-confirm-cancel">Cancelar</button>
+        </div>
+    </div>
+  </div>
   
   <!-- MENU DE OPÇÕES DO CONTACTO -->
   <div id="contact-menu-overlay" class="custom-confirm-overlay" style="display:none;">
     <div class="custom-confirm-card">
       <p class="confirm-text" id="contact-menu-title">Opções</p>
       <div class="confirm-buttons-stack">
-        <button id="contact-menu-block" class="btn-confirm-action">🚫 Bloquear</button>
-        <button id="contact-menu-mute" class="btn-confirm-action">🔕 Silenciar</button>
-        <button id="contact-menu-clear" class="btn-confirm-action" style="color:#f44336;">🗑️ Limpar conversa</button>
+        <button id="contact-menu-block" class="btn-confirm-action" style="color:#ccc;"><span class="material-icons">block</span>Bloquear</button>
+        <button id="contact-menu-mute" class="btn-confirm-action" style="color:#ccc;"><span class="material-icons">notifications_active</span>Silenciar</button>
+        <button id="contact-menu-clear" class="btn-confirm-action" style="color: #ccc;">
+          <span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">delete</span>Limpar Conversa</button>
         <button onclick="closeContactMenu()" class="btn-confirm-cancel">Cancelar</button>
       </div>
     </div>
@@ -490,7 +516,7 @@
         <button id="attach-cancel" class="attach-x" type="button">✕</button>
       </div>
       <div class="attach-preview">
-        <img id="attach-preview-img" src="" alt="preview" style="display:none;" />        
+        <img id="attach-preview-img" src="..." alt="preview" style="display:none;" />        
         <div id="attach-grid" class="attach-grid" style="display:none;">
           <div class="attach-grid-cell" data-idx="0"><img id="attach-grid-img-0" alt="thumb0"></div>
           <div class="attach-grid-cell" data-idx="1"><img id="attach-grid-img-1" alt="thumb1"></div>
@@ -523,25 +549,23 @@
     </div>
   </div>
   <div id="chat-batch-viewer" class="attach-viewer" style="display:none;">
-  <button id="chat-batch-viewer-close" class="attach-viewer-close" type="button">✕</button>
-  <button id="chat-batch-viewer-prev" class="attach-viewer-nav prev" type="button">‹</button>
+    <button id="chat-batch-viewer-close" class="attach-viewer-close" type="button">✕</button>
+    <button id="chat-batch-viewer-prev" class="attach-viewer-nav prev" type="button">‹</button>
 
-  <img id="chat-batch-viewer-img" class="attach-viewer-img" alt="viewer" style="display:none;">
+    <img id="chat-batch-viewer-img" class="attach-viewer-img" alt="viewer" style="display:none;">
 
-  <div id="chat-batch-viewer-file" class="attach-file-card" style="display:none; max-width:90%;">
-    <span class="material-icons" id="chat-batch-file-icon">insert_drive_file</span>
-    <div class="attach-file-meta">
-      <div id="chat-batch-file-name" class="attach-file-name"></div>
-      <div id="chat-batch-file-type" class="attach-file-type"></div>
-      <a id="chat-batch-file-open" target="_blank" style="margin-top:6px; display:inline-block; text-decoration:none;">
-        Abrir
-      </a>
+    <div id="chat-batch-viewer-file" class="attach-file-card" style="display:none; max-width:90%;">
+      <span class="material-icons" id="chat-batch-file-icon">insert_drive_file</span>
+      <div class="attach-file-meta">
+        <div id="chat-batch-file-name" class="attach-file-name"></div>
+        <div id="chat-batch-file-type" class="attach-file-type"></div>
+        <a id="chat-batch-file-open" target="_blank" style="margin-top:6px; display:inline-block; text-decoration:none;">Abrir</a>
+      </div>
     </div>
-  </div>
 
-  <button id="chat-batch-viewer-next" class="attach-viewer-nav next" type="button">›</button>
-  <div id="chat-batch-viewer-count" class="attach-viewer-count"></div>
-</div>
+    <button id="chat-batch-viewer-next" class="attach-viewer-nav next" type="button">›</button>
+    <div id="chat-batch-viewer-count" class="attach-viewer-count"></div>
+  </div>
 
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -693,7 +717,7 @@
         try {
           const permission = await navigator.permissions.query({ name: 'microphone' });
           if (permission.state === 'denied') {
-            alert('⚠️ Acesso ao microfone bloqueado!\n\nPor favor, ativa nas definições do browser.');
+            showSystemWarning('microfone', 'Acesso Negado', 'Ativa o microfone nas definições para enviares áudios.');
             return;
           }
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -715,11 +739,11 @@
         } catch (err) {
           console.error("Erro ao aceder ao microfone:", err);
           if (err.name === 'NotAllowedError') {
-            alert('⚠️ Permissão negada!\n\nClica no cadeado ao lado do URL e permite o acesso ao microfone.');
+            showSystemWarning('configuracao', 'Ajuste Necessário', 'Clica no ícone do cadeado ao lado do URL (barra de endereço) e permite o acesso ao microfone para poderes gravar.');
           } else if (err.name === 'NotFoundError') {
-            alert('⚠️ Microfone não encontrado!\n\nVerifica se tens um microfone ligado.');
+            showSystemWarning('hardware_error', 'Microfone não detetado', 'Verifica se tens um microfone ligado ao dispositivo ou se o mesmo está funcional.');
           } else {
-            alert('❌ Erro ao aceder ao microfone: ' + err.message);
+            showSystemWarning('sistema_erro', 'Erro de Sistema', 'Houve um problema técnico ao tentar aceder ao áudio: ' + err.message);
           }
         }
       }, 250);
@@ -954,7 +978,7 @@
           closeModalFileAndFoto();
         } catch (err) {
           console.error("Erro ao enviar album:", err);
-          alert("Não foi possível enviar as fotos.");
+          showSystemWarning('upload_error', 'Falha no Envio', 'Não foi possível enviar as fotos. Por favor, verifica a tua ligação.');
           attachLoading.style.display = "none";
           attachSend.disabled = false;
         }
@@ -971,7 +995,7 @@
           closeModalFileAndFoto();
         } catch (err) {
           console.error("Erro ao enviar multi:", err);
-          alert("Não foi possível enviar os ficheiros.");
+          showSystemWarning('file_error', 'Erro no Upload', 'Não foi possível enviar os ficheiros. Tenta novamente em alguns instantes.');
           attachLoading.style.display = "none";
           attachSend.disabled = false;
         }
@@ -985,7 +1009,7 @@
           closeModalFileAndFoto();
         } catch (err) {
           console.error("Erro ao enviar anexo:", err);
-          alert("Não foi possível enviar o anexo.");
+          showSystemWarning('anexo_error', 'Erro no Anexo', 'Não foi possível enviar o anexo. Por favor, tenta carregar o ficheiro novamente.');
           attachLoading.style.display = "none";
           attachSend.disabled = false;
         }
@@ -1001,7 +1025,7 @@
         closeModalFileAndFoto();
       } catch (err) {
         console.error("Erro ao enviar foto:", err);
-        alert("Não foi possível enviar a foto.");
+        showSystemWarning('foto_error',  'Erro na Imagem', 'Não foi possível enviar a foto. Por favor, tenta novamente.');
         attachLoading.style.display = "none";
         attachSend.disabled = false;
       }
@@ -1071,7 +1095,7 @@
       if (!file) return;
       const MAX_MB = 25;
       if (file.size > MAX_MB * 1024 * 1024) {
-        alert(`Ficheiro muito grande (máx. ${MAX_MB}MB).`);
+        showSystemWarning('limite_tamanho',  'Ficheiro muito grande', `O ficheiro que selecionaste é demasiado pesado. O limite máximo é de ${MAX_MB}MB.`);
         return;
       }
       if (!currentChat || currentChat === "null") return;
@@ -1144,7 +1168,7 @@
         }).catch(err => console.error("Erro no push:", err));
       } catch (err) {
         console.error("Erro no envio (detalhes):", err);
-        alert("Erro ao enviar ficheiro: " + (err?.message || "desconhecido"));
+        showSystemWarning('upload_falha_tecnica', 'Erro de Transferência', "Não foi possível completar o envio: " + (err?.message || "erro desconhecido"));
       }
     }
     async function renderPdfFirstPageToBlob(file) {
@@ -1234,30 +1258,23 @@
         div.className = "contact";
         div.setAttribute('data-nint', contactId);
         div.onclick = () => openChat(user.n_int, user.abv_name);
-        
-        // Long press para abrir menu de opções
         let pressTimer;
         div.addEventListener('touchstart', (e) => {
           pressTimer = setTimeout(() => {
             if (navigator.vibrate) navigator.vibrate(50);
             openContactMenu(user.n_int, user.abv_name);
           }, 500);
-        }, {passive: true});
-        
+        }, {passive: true});        
         div.addEventListener('touchend', () => {
           clearTimeout(pressTimer);
-        });
-        
+        });        
         div.addEventListener('touchmove', () => {
           clearTimeout(pressTimer);
         });
-        
-        // Desktop: contextmenu (right-click)
         div.addEventListener('contextmenu', (e) => {
           e.preventDefault();
           openContactMenu(user.n_int, user.abv_name);
-        });
-        
+        });        
         const avatarContent = user.photo_url ? `<img src="${user.photo_url}">` : firstLetter;        
         div.innerHTML = `
           <div class="contact-avatar" style="background-color: ${user.photo_url ? 'transparent' : avatarColor};">
@@ -1341,19 +1358,16 @@
     /* ======================== SCROLL TO BOTTOM ========================= */
     function scrollToBottom(forceImmediate = false) {
       const messagesEl = document.getElementById("messages");
-      if (!messagesEl || messagesEl.style.display === 'none') return;
-      
+      if (!messagesEl || messagesEl.style.display === 'none') return;      
       const doScroll = () => {
         messagesEl.scrollTo({
           top: messagesEl.scrollHeight,
           behavior: forceImmediate ? 'auto' : 'smooth'
         });
       };
-      
-      // Scroll imediato + outro após render
       doScroll();
       setTimeout(doScroll, 100);
-      setTimeout(doScroll, 300); // Extra para garantir após batch render
+      setTimeout(doScroll, 300);
     }
     /* ========================= FETCH USER NAME ========================= */
     async function fetchUserName() {
@@ -1502,19 +1516,17 @@
       } else {
         switch (msg.message_type) {
           case "image": {
-  const batchKey = msg.batch_id || `single-${msg.id}`;
-
-  finalContentHTML = `
-    <img src="${msg.file_url}" class="chat-img"
-      style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;"
-      onclick="event.preventDefault(); event.stopPropagation(); openChatBatchViewer('${chatRef}','${batchKey}',0); return false;">
-  `;
-
-  if (msg.message) {
-    finalContentHTML += `<div class="img-caption">${escapeHTML(msg.message)}</div>`;
-  }
-  break;
-}
+            const batchKey = msg.batch_id || `single-${msg.id}`;
+            finalContentHTML = `
+              <img src="${msg.file_url}" class="chat-img"
+                style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;"
+                onclick="event.preventDefault(); event.stopPropagation(); openChatBatchViewer('${chatRef}','${batchKey}',0); return false;">
+            `;
+            if (msg.message) {
+              finalContentHTML += `<div class="img-caption">${escapeHTML(msg.message)}</div>`;
+            }
+            break;
+          }
           case "audio": {
             const audioID = `audio-${msg.id || Date.now()}`;
             finalContentHTML = `
@@ -1602,9 +1614,7 @@
       return s.innerHTML;
     }
     /* ========================== BATCH BUBBLE =========================== */
-    // Debounce timers para cada batch
-    window.batchRenderTimers = window.batchRenderTimers || {};
-    
+    window.batchRenderTimers = window.batchRenderTimers || {};    
     function addOrUpdateBatchBubble(msg, chatRef, {time}) {
       const messagesEl = document.getElementById("messages");
       if (!messagesEl) return;
@@ -1621,12 +1631,9 @@
         bubble.dataset.senderName = msg.abv_name;
         bubble.dataset.messageId = msg.id;
         bubble.dataset.messageText = msg.message || "";
-        
-        // Adicionar classe is-forwarded se for reencaminhado
         if (msg.is_forwarded) {
           bubble.classList.add('is-forwarded');
-        }
-        
+        }        
         bubble.innerHTML = `
           ${(chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${escapeHTML(msg.abv_name)}</div>` : ""}
           <div class="msg-text-content">
@@ -1637,8 +1644,6 @@
         `;
         bubble._batchItems = [];
         messagesEl.appendChild(bubble);
-        
-        // Setup interaction para batch bubble
         setupMessageInteraction(bubble, msg);
       }
       const item = {id: msg.id, type: msg.message_type, url: msg.file_url, preview: msg.preview_url || null, name: msg.file_name || "", 
@@ -1646,20 +1651,16 @@
       bubble._batchItems = bubble._batchItems || [];
       if (bubble._batchItems.some(x => String(x.id) === String(item.id))) return;
       bubble._batchItems.push(item);
-      
-      // Debounce: espera 300ms após última mensagem do batch antes de renderizar
       if (window.batchRenderTimers[batchId]) {
         clearTimeout(window.batchRenderTimers[batchId]);
       }
       window.batchRenderTimers[batchId] = setTimeout(() => {
         renderBatchBubble(bubble);
         delete window.batchRenderTimers[batchId];
-        // Scroll após batch renderizado
         if (document.getElementById("messages").style.display !== 'none') {
           scrollToBottom();
         }
-      }, 300);
-      
+      }, 300);      
       const meta = bubble.querySelector(".msg-meta");
       if (meta) meta.textContent = time || meta.textContent || "";
     }
@@ -1724,182 +1725,130 @@
         };
       });
     }
-    
-    
-    
-    
-    // ======= STORE DO BATCH (por chat) =======
-window.batchStore = window.batchStore || new Map();
-// batchStore: key = `${chatRef}::${batchId}` -> array de msgs
-
-function registerBatchMessage(msg, chatRef) {
-  if (!msg?.batch_id) {
-    // Mensagens individuais de imagem/ficheiro também devem ser registadas
-    if (msg.message_type === 'image' || msg.message_type === 'file') {
-      const singleKey = `single-${msg.id}`;
-      const key = `${String(chatRef)}::${singleKey}`;
-      window.batchStore.set(key, [msg]);
-    }
-    return;
-  }
-  const key = `${String(chatRef)}::${String(msg.batch_id)}`;
-  const arr = window.batchStore.get(key) || [];
-  // evita duplicados
-  if (!arr.some(m => String(m.id) === String(msg.id))) arr.push(msg);
-
-  // ordenar por created_at (ou id se preferires)
-  arr.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-  window.batchStore.set(key, arr);
-}
-
-function getBatchItems(chatRef, batchId) {
-  const key = `${String(chatRef)}::${String(batchId)}`;
-  return window.batchStore.get(key) || [];
-}
-
-// ======= VIEWER DO CHAT =======
-window.chatBatchViewerIndex = 0;
-window.chatBatchViewerUrl = null;
-
-function openChatBatchViewer(chatRef, batchId, startIndex = 0) {
-  const viewer = document.getElementById("chat-batch-viewer");
-  const imgEl  = document.getElementById("chat-batch-viewer-img");
-  const fileCard = document.getElementById("chat-batch-viewer-file");
-  const countEl = document.getElementById("chat-batch-viewer-count");
-  const prevBtn = document.getElementById("chat-batch-viewer-prev");
-  const nextBtn = document.getElementById("chat-batch-viewer-next");
-
-  if (!viewer || !countEl || !prevBtn || !nextBtn) return;
-
-  const items = getBatchItems(chatRef, batchId);
-  if (!items.length) return;
-
-  window.chatBatchViewerIndex = Math.max(0, Math.min(startIndex, items.length - 1));
-
-  // limpar url anterior
-  if (window.chatBatchViewerUrl) {
-    try { URL.revokeObjectURL(window.chatBatchViewerUrl); } catch(e) {}
-  }
-  window.chatBatchViewerUrl = null;
-
-  const item = items[window.chatBatchViewerIndex];
-  const isImage = item.message_type === "image" || (item.file_url && (item.file_name || "").match(/\.(png|jpe?g|gif|webp)$/i));
-
-  // mostrar imagem vs ficheiro
-  if (isImage) {
-    if (fileCard) fileCard.style.display = "none";
-    if (imgEl) {
-      imgEl.style.display = "block";
-      imgEl.src = item.file_url; // URL pública -> não precisa blob
-    }
-  } else {
-    if (imgEl) imgEl.style.display = "none";
-    if (fileCard) {
-      const nameEl = document.getElementById("chat-batch-file-name");
-      const typeEl = document.getElementById("chat-batch-file-type");
-      const iconEl = document.getElementById("chat-batch-file-icon");
-      const openEl = document.getElementById("chat-batch-file-open");
-
-      const name = item.file_name || "Ficheiro";
-      const ext = (name.split(".").pop() || "").toUpperCase();
-      const extLow = ext.toLowerCase();
-
-      if (nameEl) nameEl.textContent = name;
-      if (typeEl) typeEl.textContent = ext ? ext : "FICHEIRO";
-      if (openEl) openEl.href = item.file_url || "#";
-
-      if (iconEl) {
-        iconEl.textContent =
-          extLow === "pdf" ? "picture_as_pdf" :
-          (["doc","docx","odt","rtf"].includes(extLow) ? "description" :
-          (["xls","xlsx","csv","ods"].includes(extLow) ? "table_chart" :
-          (["ppt","pptx","odp"].includes(extLow) ? "slideshow" :
-          (["zip","rar","7z","tar","gz"].includes(extLow) ? "folder_zip" :
-          "insert_drive_file"))));
+    window.batchStore = window.batchStore || new Map();
+    function registerBatchMessage(msg, chatRef) {
+      if (!msg?.batch_id) {
+        if (msg.message_type === 'image' || msg.message_type === 'file') {
+          const singleKey = `single-${msg.id}`;
+          const key = `${String(chatRef)}::${singleKey}`;
+          window.batchStore.set(key, [msg]);
+        }
+        return;
       }
-
-      fileCard.style.display = "flex";
+      const key = `${String(chatRef)}::${String(msg.batch_id)}`;
+      const arr = window.batchStore.get(key) || [];
+      if (!arr.some(m => String(m.id) === String(msg.id))) arr.push(msg);
+      arr.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+      window.batchStore.set(key, arr);
     }
-  }
-
-  countEl.textContent = `${window.chatBatchViewerIndex + 1} / ${items.length}`;
-  prevBtn.style.display = items.length > 1 ? "block" : "none";
-  nextBtn.style.display = items.length > 1 ? "block" : "none";
-  viewer.style.display = "flex";
-
-  // guardar batch atual no viewer
-  viewer.dataset.chatRef = String(chatRef);
-  viewer.dataset.batchId = String(batchId);
-}
-
-function closeChatBatchViewer() {
-  const viewer = document.getElementById("chat-batch-viewer");
-  if (viewer) viewer.style.display = "none";
-  const imgEl = document.getElementById("chat-batch-viewer-img");
-  if (imgEl) imgEl.src = "";
-}
-
-function chatBatchViewerGo(delta) {
-  const viewer = document.getElementById("chat-batch-viewer");
-  if (!viewer) return;
-  const chatRef = viewer.dataset.chatRef;
-  const batchId = viewer.dataset.batchId;
-  const items = getBatchItems(chatRef, batchId);
-  if (!items.length) return;
-
-  let idx = (window.chatBatchViewerIndex ?? 0) + delta;
-  if (idx < 0) idx = items.length - 1;
-  if (idx >= items.length) idx = 0;
-
-  openChatBatchViewer(chatRef, batchId, idx);
-}
-
-function initChatBatchViewerHandlers() {
-  const viewer = document.getElementById("chat-batch-viewer");
-  const closeBtn = document.getElementById("chat-batch-viewer-close");
-  const prevBtn = document.getElementById("chat-batch-viewer-prev");
-  const nextBtn = document.getElementById("chat-batch-viewer-next");
-  const imgEl = document.getElementById("chat-batch-viewer-img");
-
-  closeBtn?.addEventListener("click", closeChatBatchViewer);
-  prevBtn?.addEventListener("click", () => chatBatchViewerGo(-1));
-  nextBtn?.addEventListener("click", () => chatBatchViewerGo(+1));
-
-  viewer?.addEventListener("click", (e) => {
-    if (e.target === viewer) closeChatBatchViewer();
-  });
-
-  // swipe
-  let startX = 0;
-  let isDown = false;
-  const onDown = (x) => { startX = x; isDown = true; };
-  const onUp = (x) => {
-    if (!isDown) return;
-    isDown = false;
-    const dx = x - startX;
-    if (Math.abs(dx) > 40) {
-      if (dx < 0) chatBatchViewerGo(+1);
-      else chatBatchViewerGo(-1);
+    function getBatchItems(chatRef, batchId) {
+      const key = `${String(chatRef)}::${String(batchId)}`;
+      return window.batchStore.get(key) || [];
     }
-  };
-
-  imgEl?.addEventListener("touchstart", (e) => onDown(e.touches[0].clientX), {passive:true});
-  imgEl?.addEventListener("touchend", (e) => onUp(e.changedTouches[0].clientX), {passive:true});
-  imgEl?.addEventListener("mousedown", (e) => onDown(e.clientX));
-  window.addEventListener("mouseup", (e) => onUp(e.clientX));
-}
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    window.chatBatchViewerIndex = 0;
+    window.chatBatchViewerUrl = null;
+    function openChatBatchViewer(chatRef, batchId, startIndex = 0) {
+      const viewer = document.getElementById("chat-batch-viewer");
+      const imgEl  = document.getElementById("chat-batch-viewer-img");
+      const fileCard = document.getElementById("chat-batch-viewer-file");
+      const countEl = document.getElementById("chat-batch-viewer-count");
+      const prevBtn = document.getElementById("chat-batch-viewer-prev");
+      const nextBtn = document.getElementById("chat-batch-viewer-next");
+      if (!viewer || !countEl || !prevBtn || !nextBtn) return;
+      const items = getBatchItems(chatRef, batchId);
+      if (!items.length) return;
+      window.chatBatchViewerIndex = Math.max(0, Math.min(startIndex, items.length - 1));
+      if (window.chatBatchViewerUrl) {
+        try { URL.revokeObjectURL(window.chatBatchViewerUrl); } catch(e) {}
+      }
+      window.chatBatchViewerUrl = null;
+      const item = items[window.chatBatchViewerIndex];
+      const isImage = item.message_type === "image" || (item.file_url && (item.file_name || "").match(/\.(png|jpe?g|gif|webp)$/i));
+      if (isImage) {
+        if (fileCard) fileCard.style.display = "none";
+        if (imgEl) {
+          imgEl.style.display = "block";
+          imgEl.src = item.file_url;
+        }
+      } else {
+        if (imgEl) imgEl.style.display = "none";
+        if (fileCard) {
+          const nameEl = document.getElementById("chat-batch-file-name");
+          const typeEl = document.getElementById("chat-batch-file-type");
+          const iconEl = document.getElementById("chat-batch-file-icon");
+          const openEl = document.getElementById("chat-batch-file-open");
+          const name = item.file_name || "Ficheiro";
+          const ext = (name.split(".").pop() || "").toUpperCase();
+          const extLow = ext.toLowerCase();
+          if (nameEl) nameEl.textContent = name;
+          if (typeEl) typeEl.textContent = ext ? ext : "FICHEIRO";
+          if (openEl) openEl.href = item.file_url || "#";
+          if (iconEl) {
+            iconEl.textContent =
+              extLow === "pdf" ? "picture_as_pdf" :
+              (["doc","docx","odt","rtf"].includes(extLow) ? "description" :
+              (["xls","xlsx","csv","ods"].includes(extLow) ? "table_chart" :
+              (["ppt","pptx","odp"].includes(extLow) ? "slideshow" :
+              (["zip","rar","7z","tar","gz"].includes(extLow) ? "folder_zip" :
+              "insert_drive_file"))));
+          }
+          fileCard.style.display = "flex";
+        }
+      }
+      countEl.textContent = `${window.chatBatchViewerIndex + 1} / ${items.length}`;
+      prevBtn.style.display = items.length > 1 ? "block" : "none";
+      nextBtn.style.display = items.length > 1 ? "block" : "none";
+      viewer.style.display = "flex";
+      viewer.dataset.chatRef = String(chatRef);
+      viewer.dataset.batchId = String(batchId);
+    }
+    function closeChatBatchViewer() {
+      const viewer = document.getElementById("chat-batch-viewer");
+      if (viewer) viewer.style.display = "none";
+      const imgEl = document.getElementById("chat-batch-viewer-img");
+      if (imgEl) imgEl.src = "";
+    }
+    function chatBatchViewerGo(delta) {
+      const viewer = document.getElementById("chat-batch-viewer");
+      if (!viewer) return;
+      const chatRef = viewer.dataset.chatRef;
+      const batchId = viewer.dataset.batchId;
+      const items = getBatchItems(chatRef, batchId);
+      if (!items.length) return;
+      let idx = (window.chatBatchViewerIndex ?? 0) + delta;
+      if (idx < 0) idx = items.length - 1;
+      if (idx >= items.length) idx = 0;
+      openChatBatchViewer(chatRef, batchId, idx);
+    }
+    function initChatBatchViewerHandlers() {
+      const viewer = document.getElementById("chat-batch-viewer");
+      const closeBtn = document.getElementById("chat-batch-viewer-close");
+      const prevBtn = document.getElementById("chat-batch-viewer-prev");
+      const nextBtn = document.getElementById("chat-batch-viewer-next");
+      const imgEl = document.getElementById("chat-batch-viewer-img");
+      closeBtn?.addEventListener("click", closeChatBatchViewer);
+      prevBtn?.addEventListener("click", () => chatBatchViewerGo(-1));
+      nextBtn?.addEventListener("click", () => chatBatchViewerGo(+1));
+      viewer?.addEventListener("click", (e) => {
+        if (e.target === viewer) closeChatBatchViewer();
+      });
+      let startX = 0;
+      let isDown = false;
+      const onDown = (x) => { startX = x; isDown = true; };
+      const onUp = (x) => {
+        if (!isDown) return;
+        isDown = false;
+        const dx = x - startX;
+        if (Math.abs(dx) > 40) {
+          if (dx < 0) chatBatchViewerGo(+1);
+          else chatBatchViewerGo(-1);
+        }
+      };
+      imgEl?.addEventListener("touchstart", (e) => onDown(e.touches[0].clientX), {passive:true});
+      imgEl?.addEventListener("touchend", (e) => onUp(e.changedTouches[0].clientX), {passive:true});
+      imgEl?.addEventListener("mousedown", (e) => onDown(e.clientX));
+      window.addEventListener("mouseup", (e) => onUp(e.clientX));
+    }
     /* ======================== GET MESSAGE DATE  ======================== */
     function getDateLabel(date) {
       const today = new Date();
@@ -1958,44 +1907,26 @@ function initChatBatchViewerHandlers() {
       if (typeof messagesToForward !== 'undefined' && messagesToForward.length > 0) {
         const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
         const senderName = await fetchUserName();
-        
-        // Se houver múltiplas mensagens de imagem/ficheiro, gerar novo batch_id
         const hasMultipleMedia = messagesToForward.filter(m => 
           m.message_type === 'image' || m.message_type === 'file'
-        ).length > 1;
-        
-        const forwardBatchId = hasMultipleMedia ? crypto.randomUUID() : null;
-        
+        ).length > 1;        
+        const forwardBatchId = hasMultipleMedia ? crypto.randomUUID() : null;        
         for (const msg of messagesToForward) {
-          const payload = {
-            n_int: currentUserNint, 
-            recipient_nint: String(n_int), 
-            corp_oper_nr: currentCorp, 
-            abv_name: senderName,
-            message: msg.message, 
-            is_forwarded: true,
-            message_type: msg.message_type || 'text'
-          };
-          
-          // Se for imagem ou ficheiro, incluir URLs
+          const payload = {n_int: currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName, message: msg.message, is_forwarded: true,
+                           message_type: msg.message_type || 'text'};
           if (msg.message_type === 'image' || msg.message_type === 'file') {
             payload.file_url = msg.file_url;
             payload.file_name = msg.file_name;
             if (msg.preview_url) payload.preview_url = msg.preview_url;
-            
-            // Se houver batch_id de forward, usar
             if (forwardBatchId) {
               payload.batch_id = forwardBatchId;
             }
-          }
-          
+          }          
           const { error } = await supabaseClient.from('chat_messages').insert([payload]);
           if (error) console.error("Erro ao encaminhar mensagem:", error);
         }
         messagesToForward = [];
-        await new Promise(resolve => setTimeout(resolve, 150));
-        
-        // Scroll suave após reencaminhar
+        await new Promise(resolve => setTimeout(resolve, 150));        
         setTimeout(() => scrollToBottom(), 200);
       }
       currentChat = String(n_int);
@@ -2052,8 +1983,6 @@ function initChatBatchViewerHandlers() {
         const {data: msgs, error} = await query.order('created_at', {ascending: true});
         if (currentChat !== chatRef) return;    
         if (error) return console.error(error);
-        
-        // Filtrar mensagens de utilizadores bloqueados
         let filteredMsgs = msgs || [];
         if (filteredMsgs.length > 0 && chatRef !== 'geral') {
           const {data: myBlocks} = await supabaseClient
@@ -2066,8 +1995,7 @@ function initChatBatchViewerHandlers() {
             const blockedList = myBlocks.map(b => b.blocked_nint);
             filteredMsgs = filteredMsgs.filter(m => !blockedList.includes(String(m.n_int)));
           }
-        }
-        
+        }        
         if (!filteredMsgs || filteredMsgs.length === 0) {
           const emptyMsg = document.createElement("div");
           emptyMsg.className = "empty-chat-placeholder";
@@ -2080,7 +2008,6 @@ function initChatBatchViewerHandlers() {
           messagesEl.appendChild(emptyMsg);
         } else {
           filteredMsgs.forEach(msg => addMessageToDOM(msg, chatRef)); 
-          // Scroll suave ao abrir chat + delay para batch render
           setTimeout(() => scrollToBottom(), 100);
           setTimeout(() => scrollToBottom(), 500);
         } 
@@ -2133,8 +2060,6 @@ function initChatBatchViewerHandlers() {
         sendBtn.disabled = false;
         return;
       }
-      
-      // Verificar se o destinatário bloqueou o remetente
       if (currentChat !== 'geral') {
         const {data: amIBlocked} = await supabaseClient
           .from('user_blocks')
@@ -2150,11 +2075,10 @@ function initChatBatchViewerHandlers() {
             inputEl.value = text;
             inputEl.dispatchEvent(new Event('input'));
           }
-          alert('❌ Não podes enviar mensagens a este utilizador.\n\nEste contacto bloqueou-te.');
+          showSystemWarning('contacto_bloqueado', 'Mensagem Não Enviada', 'Não podes enviar mensagens a este utilizador. Este contacto bloqueou-te.');
           return;
         }
-      }
-      
+      }      
       const senderName = await fetchUserName();
       const messageData = {n_int: currentUserNint, recipient_nint: currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text, file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};
       if (currentReplyToMessage) {
@@ -2169,7 +2093,6 @@ function initChatBatchViewerHandlers() {
           inputEl.dispatchEvent(new Event('input'));
         }
       } else {
-        // Verificar se o destinatário silenciou o remetente
         const {data: isMuted} = await supabaseClient
           .from('user_mutes')
           .select('id')
@@ -2177,8 +2100,6 @@ function initChatBatchViewerHandlers() {
           .eq('muted_nint', currentUserNint)
           .eq('corp_oper_nr', currentCorp)
           .maybeSingle();
-        
-        // Só enviar push se NÃO estiver silenciado
         if (!isMuted) {
           const pushText = audioUrl ? "🎤 Enviou um Áudio." : text;
           fetch('/api/sendPush', {
@@ -2186,8 +2107,7 @@ function initChatBatchViewerHandlers() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({recipient_nint: String(currentChat), corp_nr: currentCorp, sender_name: senderName, message_text: pushText, sender_nint: currentUserNint})
           }).catch(err => console.error("Erro no push:", err));
-        }
-        
+        }        
         cancelReply();
         clearSelection();
         scrollToBottom(true);
@@ -2195,26 +2115,19 @@ function initChatBatchViewerHandlers() {
     }
     /* ==================== TOOGLE MESSAGE SELECTION ===================== */
     function toggleMessageSelection(messageElement, messageData) {
-      // Verificar se é batch bubble
-      const isBatchBubble = messageElement.classList.contains('batch-bubble');
-      
+      const isBatchBubble = messageElement.classList.contains('batch-bubble');      
       if (isBatchBubble) {
         const batchId = messageElement.dataset.batchId;
         const chatRef = messageElement.dataset.chatRef || currentChat;
         const batchItems = getBatchItems(chatRef, batchId);
-        
-        // Verificar se batch já está selecionado
         const firstItemId = batchItems[0]?.id;
-        const index = selectedMessages.findIndex(m => m.id === firstItemId);
-        
+        const index = selectedMessages.findIndex(m => m.id === firstItemId);        
         if (index > -1) {
-          // Desselecionar: remover todos os items do batch
           selectedMessages = selectedMessages.filter(m => 
             !batchItems.some(bi => bi.id === m.id)
           );
           messageElement.classList.remove('selected');
         } else {
-          // Selecionar: adicionar todos os items do batch
           batchItems.forEach(item => {
             if (!selectedMessages.some(m => m.id === item.id)) {
               selectedMessages.push(item);
@@ -2223,7 +2136,6 @@ function initChatBatchViewerHandlers() {
           messageElement.classList.add('selected');
         }
       } else {
-        // Mensagem individual normal
         const messageId = messageData.id;
         const index = selectedMessages.findIndex(m => m.id === messageId);
         if (index > -1) {
@@ -2233,8 +2145,7 @@ function initChatBatchViewerHandlers() {
           selectedMessages.push(messageData);
           messageElement.classList.add('selected');
         }
-      }
-      
+      }      
       const menu = document.getElementById('reaction-menu');
       if (menu) {
         if (selectedMessages.length === 1) {          
@@ -2821,8 +2732,6 @@ function initChatBatchViewerHandlers() {
       }
       initAttachViewerHandlers();
       initChatBatchViewerHandlers();
-      
-      // Prevenir menu de contexto nativo em todas as imagens do chat
       document.addEventListener('contextmenu', (e) => {
         if (e.target.classList.contains('chat-img') || 
             e.target.closest('.batch-cell') || 
@@ -2832,8 +2741,6 @@ function initChatBatchViewerHandlers() {
           return false;
         }
       });
-      
-      // Prevenir long press nativo em imagens (iOS/Android)
       document.addEventListener('touchstart', (e) => {
         if (e.target.classList.contains('chat-img') || 
             e.target.closest('.batch-cell')) {
@@ -3017,7 +2924,7 @@ function initChatBatchViewerHandlers() {
     function copyMessageText(text) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-          alert('✅ Texto copiado!');
+          showSystemWarning('sucesso_copiar', 'Copiado!', 'O texto já está na tua área de transferência.');
         }).catch(() => {
           fallbackCopy(text);
         });
@@ -3034,9 +2941,9 @@ function initChatBatchViewerHandlers() {
       textArea.select();
       try {
         document.execCommand('copy');
-        alert('✅ Texto copiado!');
+        showSystemWarning('sucesso_copiar', 'Copiado!', 'O texto já está na tua área de transferência.');
       } catch (err) {
-        alert('❌ Erro ao copiar texto');
+        showSystemWarning('erro_copiar', 'Erro ao Copiar', 'Ocorreu um problema ao tentar copiar o texto automaticamente.');
       }
       document.body.removeChild(textArea);
     }
@@ -3094,18 +3001,14 @@ function initChatBatchViewerHandlers() {
           payload: {readerNint: String(currentUserNint)}
         });
       }
-    }
-    
+    }    
     /* ==================== CONTACT MENU FUNCTIONS ======================= */
     let currentContactMenuTarget = null;
     
     async function openContactMenu(contactNint, contactName) {
-      if (contactNint === 'geral') return; // Não permitir para chat geral
-      
+      if (contactNint === 'geral') return;      
       currentContactMenuTarget = {nint: contactNint, name: contactName};
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      
-      // Verificar se está bloqueado
       const {data: blockData} = await supabaseClient
         .from('user_blocks')
         .select('id')
@@ -3113,8 +3016,6 @@ function initChatBatchViewerHandlers() {
         .eq('blocked_nint', contactNint)
         .eq('corp_oper_nr', currentCorp)
         .maybeSingle();
-      
-      // Verificar se está silenciado
       const {data: muteData} = await supabaseClient
         .from('user_mutes')
         .select('id')
@@ -3122,194 +3023,273 @@ function initChatBatchViewerHandlers() {
         .eq('muted_nint', contactNint)
         .eq('corp_oper_nr', currentCorp)
         .maybeSingle();
-      
-      // Atualizar UI do menu
-      document.getElementById('contact-menu-title').textContent = contactName;
-      
+      document.getElementById('contact-menu-title').textContent = contactName;      
       const blockBtn = document.getElementById('contact-menu-block');
-      const muteBtn = document.getElementById('contact-menu-mute');
-      
+      const muteBtn = document.getElementById('contact-menu-mute');      
       if (blockData) {
-        blockBtn.innerHTML = '✅ Desbloquear';
-        blockBtn.style.color = '#4caf50';
+        blockBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">lock_open</span>Desbloquear';
+        blockBtn.style.color = '#ccc';
       } else {
-        blockBtn.innerHTML = '🚫 Bloquear';
-        blockBtn.style.color = '#f44336';
+        blockBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">block</span>Bloquear';
+        blockBtn.style.color = '#ccc';
       }
-      
       if (muteData) {
-        muteBtn.innerHTML = '🔔 Ativar notificações';
-        muteBtn.style.color = '#4caf50';
+        muteBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">notifications_active</span>Ativar notificações';
+        muteBtn.style.color = '#ccc';
       } else {
-        muteBtn.innerHTML = '🔕 Silenciar';
-        muteBtn.style.color = '#ff9800';
+        muteBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">notifications_off</span>Silenciar';
+        muteBtn.style.color = '#ccc';
       }
-      
-      // Configurar event listeners
       blockBtn.onclick = () => toggleBlockUser();
       muteBtn.onclick = () => toggleMuteUser();
       document.getElementById('contact-menu-clear').onclick = () => clearConversation();
-      
-      // Mostrar menu
       document.getElementById('contact-menu-overlay').style.display = 'flex';
-    }
-    
+    }    
     function closeContactMenu() {
       document.getElementById('contact-menu-overlay').style.display = 'none';
       currentContactMenuTarget = null;
-    }
-    
+    }    
     /* ======================== TOGGLE BLOCK USER ======================== */
     async function toggleBlockUser() {
-      if (!currentContactMenuTarget) return;
-      
+      if (!currentContactMenuTarget) return;      
       const targetNint = currentContactMenuTarget.nint;
       const targetName = currentContactMenuTarget.name;
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      
-      // Verificar estado atual
       const {data: existing} = await supabaseClient
         .from('user_blocks')
         .select('id')
         .eq('blocker_nint', currentUserNint)
         .eq('blocked_nint', targetNint)
         .eq('corp_oper_nr', currentCorp)
-        .maybeSingle();
-      
+        .maybeSingle();      
       if (existing) {
-        // DESBLOQUEAR
         const {error} = await supabaseClient
           .from('user_blocks')
           .delete()
-          .eq('id', existing.id);
-        
+          .eq('id', existing.id);        
         if (!error) {
           closeContactMenu();
-          alert(`✅ ${targetName} foi desbloqueado!`);
-          // Recarregar mensagens se estiver no chat
+          showSystemWarning('sucesso_desbloqueio', 'Contacto Disponível', `${targetName} foi desbloqueado com sucesso!`);
           if (currentChat === targetNint) {
             await loadMessages(currentChat);
           }
         } else {
-          alert('❌ Erro ao desbloquear utilizador');
+          showSystemWarning('erro_desbloqueio', 'Ação Falhou', 'Ocorreu um erro técnico ao tentar desbloquear o contacto. Tenta novamente.');
         }
       } else {
-        // BLOQUEAR
         const {error} = await supabaseClient
           .from('user_blocks')
           .insert([{
             blocker_nint: currentUserNint,
             blocked_nint: targetNint,
             corp_oper_nr: currentCorp
-          }]);
-        
+          }]);        
         if (!error) {
           closeContactMenu();
-          alert(`🚫 ${targetName} foi bloqueado!\n\nNão verás mais mensagens deste utilizador.`);
-          // Recarregar mensagens se estiver no chat
+          showSystemWarning('sucesso_bloqueio', 'Contacto Bloqueado', `${targetName} foi bloqueado com sucesso. Não verás mais mensagens deste utilizador.`);
           if (currentChat === targetNint) {
             await loadMessages(currentChat);
           }
         } else {
-          alert('❌ Erro ao bloquear utilizador');
+          showSystemWarning('erro_bloqueio_tecnico', 'Erro de Segurança', 'Ocorreu um problema ao tentar processar o bloqueio. O contacto ainda está ativo.');
         }
       }
-    }
-    
+    }    
     /* ========================= TOGGLE MUTE USER ======================== */
     async function toggleMuteUser() {
-      if (!currentContactMenuTarget) return;
-      
+      if (!currentContactMenuTarget) return;      
       const targetNint = currentContactMenuTarget.nint;
       const targetName = currentContactMenuTarget.name;
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      
-      // Verificar estado atual
       const {data: existing} = await supabaseClient
         .from('user_mutes')
         .select('id')
         .eq('muter_nint', currentUserNint)
         .eq('muted_nint', targetNint)
         .eq('corp_oper_nr', currentCorp)
-        .maybeSingle();
-      
+        .maybeSingle();      
       if (existing) {
-        // ATIVAR NOTIFICAÇÕES
         const {error} = await supabaseClient
           .from('user_mutes')
           .delete()
-          .eq('id', existing.id);
-        
+          .eq('id', existing.id);        
         if (!error) {
           closeContactMenu();
-          alert(`🔔 Notificações de ${targetName} ativadas!`);
+          showSystemWarning('sucesso_notificacoes', 'Notificações Ativas', `Voltaste a ativar os alertas para ${targetName}.`);
         } else {
-          alert('❌ Erro ao ativar notificações');
+          showSystemWarning('erro_ativar_som', 'Falha na Configuração', 'Ocorreu um erro ao tentar ligar o som das notificações.');
         }
       } else {
-        // SILENCIAR
         const {error} = await supabaseClient
           .from('user_mutes')
           .insert([{
             muter_nint: currentUserNint,
             muted_nint: targetNint,
             corp_oper_nr: currentCorp
-          }]);
-        
+          }]);        
         if (!error) {
           closeContactMenu();
-          alert(`🔕 ${targetName} foi silenciado!\n\nNão receberás notificações push deste utilizador.`);
+          showSystemWarning('sucesso_silenciamento', 'Contacto Silenciado', `${targetName} foi silenciado. Não receberás notificações desta conversa.`);
         } else {
-          alert('❌ Erro ao silenciar utilizador');
+          showSystemWarning('erro_silenciar_tecnico', 'Ação Falhou', 'Ocorreu um problema ao tentar silenciar as notificações deste contacto.');
         }
       }
-    }
-    
-    /* ======================= CLEAR CONVERSATION ======================== */
+    }    
+    /* ======================= CLEAR CONVERSATION ======================== */    
     async function clearConversation() {
       if (!currentContactMenuTarget) return;
-      
       const targetNint = currentContactMenuTarget.nint;
       const targetName = currentContactMenuTarget.name;
-      
-      // Confirmação
-      const confirmed = confirm(`🗑️ ATENÇÃO!\n\nIsto irá eliminar TODA a conversa com ${targetName} da base de dados.\n\nEsta ação NÃO PODE ser desfeita!\n\nTens a certeza?`);
-      
-      if (!confirmed) return;
-      
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      
+      const myNint = localStorage.getItem("currentUserNint") || currentUserNint; 
+      const confirmed = await confirmCriticalAction(targetName);
+      if (!confirmed) return;
       try {
-        // Método 1: Apagar mensagens que EU enviei para o TARGET
-        const {error: error1} = await supabaseClient
-          .from('chat_messages')
-          .delete()
-          .eq('corp_oper_nr', currentCorp)
-          .eq('n_int', currentUserNint)
-          .eq('recipient_nint', targetNint);
-        
-        if (error1) throw error1;
-        
-        // Método 2: Apagar mensagens que o TARGET enviou para MIM
-        const {error: error2} = await supabaseClient
-          .from('chat_messages')
-          .delete()
-          .eq('corp_oper_nr', currentCorp)
-          .eq('n_int', targetNint)
-          .eq('recipient_nint', currentUserNint);
-        
-        if (error2) throw error2;
-        
-        closeContactMenu();
-        alert(`✅ Conversa com ${targetName} eliminada!`);
-        
-        // Se estiver no chat, recarregar (vai mostrar vazio)
-        if (currentChat === targetNint) {
-          await loadMessages(currentChat);
+        const { error, count } = await supabaseClient
+        .from('chat_messages')
+        .delete({count: 'planned'}) 
+        .eq('corp_oper_nr', currentCorp) 
+        .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`);
+        if (error) throw error;
+        if (count > 0) {
+          closeContactMenu();
+          showSystemWarning('sucesso_limpeza', 'Mensagens Eliminadas', `Sucesso! Foram removidas ${count} mensagens desta conversa.`);
+          if (currentChat === targetNint) {
+            const container = document.getElementById('message-container');
+            if (container) container.innerHTML = ''; 
+          }
+        } else {
+          showSystemWarning('permissao_negada_limpeza', 'Permissão Insuficiente', 'Não foi possível eliminar as mensagens. Verifica se tens os privilégios necessários.');
         }
       } catch (error) {
-        alert('❌ Erro ao limpar conversa');
-        console.error('Erro detalhado:', error);
+        console.error('Erro detalhado no delete:', error);
+        showSystemWarning('erro_eliminar_tecnico', 'Erro de Sistema', 'Não conseguimos processar o teu pedido de eliminação devido a um erro técnico.');
+      }
+    }
+    /* ======================== ADVISORS MANAGER ========================= */  
+    function showSystemWarning(tipo, tituloCustom = '', mensagemCustom = '') {
+      const modal = document.getElementById('modal-alert-system');
+      const mIcon = document.getElementById('alerta-icon');
+      const mTitle = document.getElementById('alerta-titulo');
+      const mMessage = document.getElementById('alerta-mensagem');
+      if (!modal || !mIcon || !mTitle || !mMessage) return;
+      let iconName = 'info';
+      let iconColor = '#64748b';
+      let titulo = tituloCustom || 'Aviso';
+      let mensagem = mensagemCustom || 'Ocorreu uma atualização no sistema.';
+      switch (tipo) {
+        case 'mic_bloqueado':
+          iconName = 'mic_off'; iconColor = '#ef4444';
+          titulo = tituloCustom || 'Microfone Bloqueado';
+          break;
+        case 'mic_nao_encontrado':
+          iconName = 'settings_voice'; iconColor = '#ffb300';
+          titulo = tituloCustom || 'Hardware não detetado';
+          break;
+        case 'limite_tamanho':
+          iconName = 'error_outline'; iconColor = '#ffb300';
+          titulo = tituloCustom || 'Ficheiro muito grande';
+          break;
+        case 'upload_falha_tecnica':
+          iconName = 'cloud_off'; iconColor = '#ef4444';
+          titulo = tituloCustom || 'Erro de Transferência';
+          break;
+        case 'contacto_bloqueado':
+          iconName = 'person_off'; iconColor = '#64748b';
+          titulo = tituloCustom || 'Mensagem Não Enviada';
+          break;
+        case 'sucesso_bloqueio':
+          iconName = 'block'; iconColor = '#ef4444';
+          titulo = tituloCustom || 'Contacto Bloqueado';
+          break;
+        case 'erro_bloqueio_tecnico':
+          iconName = 'gpp_bad'; iconColor = '#ef4444';
+          titulo = tituloCustom || 'Erro de Segurança';
+          break;
+        case 'sucesso_desbloqueio':
+          iconName = 'lock_open'; iconColor = '#22c55e';
+          titulo = tituloCustom || 'Contacto Disponível';
+          break;
+        case 'erro_desbloqueio':
+          iconName = 'lock'; iconColor = '#ef4444';
+          titulo = tituloCustom || 'Ação Falhou';
+          break;
+        case 'sucesso_notificacoes':
+          iconName = 'notifications_active'; iconColor = '#22c55e';
+          titulo = tituloCustom || 'Notificações Ativas';
+          break;
+        case 'erro_ativar_som':
+          iconName = 'notification_important'; iconColor = '#ef4444';
+          titulo = tituloCustom || 'Erro nas Notificações';
+          break;
+        case 'sucesso_silenciamento':
+          iconName = 'notifications_off'; iconColor = '#64748b';
+          titulo = tituloCustom || 'Contacto Silenciado';
+          break;
+        case 'erro_silenciar_tecnico':
+          iconName = 'notifications_active'; iconColor = '#ef4444';
+          titulo = tituloCustom || 'Erro ao Silenciar';
+          break;
+        case 'sucesso_copiar':
+          iconName = 'check_circle'; iconColor = '#22c55e';
+          titulo = tituloCustom || 'Copiado!';
+          break;
+        case 'erro_copiar':
+          iconName = 'content_paste_off'; iconColor = '#ef4444';
+          titulo = tituloCustom || 'Erro ao Copiar';
+          break;
+        case 'sucesso_limpeza':
+          iconName = 'delete_sweep'; iconColor = '#22c55e';
+          titulo = tituloCustom || 'Limpeza Concluída';
+          break;
+        case 'permissao_negada_limpeza':
+          iconName = 'admin_panel_settings'; iconColor = '#ffb300';
+          titulo = tituloCustom || 'Ação Restrita';
+          break;
+        case 'erro_eliminar_tecnico':
+          iconName = 'dangerous'; iconColor = '#ef4444';
+          titulo = tituloCustom || 'Erro de Sistema';
+          break;
+      }
+      mIcon.innerText = iconName;
+      mIcon.style.color = iconColor;
+      mTitle.innerText = titulo;
+      mMessage.innerText = mensagem;
+      modal.style.display = 'flex';
+    }
+    function closeAlertSystem() {
+      document.getElementById('modal-alert-system').style.display = 'none';
+    }
+    function confirmCriticalAction(userName) {
+      return new Promise((resolve) => {
+        const modalSistema = document.getElementById('contact-menu-overlay');
+        const criticalModal = document.getElementById('modal-confirm-critical');
+        const mensagem = document.getElementById('critical-message');
+        const btnEliminar = document.getElementById('btn-confirm-delete');
+        if (modalSistema) {
+          modalSistema.style.display = 'none';
+        }
+        mensagem.innerHTML = `Isto irá eliminar <b>TODA</b> a conversa com <strong>${userName}</strong> da base de dados.<br><br><span style="color: #ef4444;">Esta ação NÃO PODE ser desfeita!</span>`;
+        criticalModal.style.display = 'flex';
+        btnEliminar.onclick = () => {
+          criticalModal.style.display = 'none';
+          resolve(true);
+        };
+        window.closeConfirmCritical = () => {
+          criticalModal.style.display = 'none';
+          resolve(false);
+        };
+        criticalModal.onclick = (e) => {
+          if (e.target === criticalModal) closeConfirmCritical();
+        };
+      });
+    }
+    async function handleEliminarConversa() {
+      const confirmed = await confirmCriticalAction(targetName);
+      if (confirmed) {
+        console.log("A iniciar limpeza pesada na base de dados...");
+      } else {
+        console.log("Eliminação cancelada pelo utilizador.");
       }
     }
   </script>
