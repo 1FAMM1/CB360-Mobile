@@ -3144,38 +3144,39 @@ async function clearConversation() {
   const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
   const myNint = localStorage.getItem("currentUserNint") || currentUserNint; 
 
-  // 1. Abre o modal e espera pela confirmação
   const confirmed = await confirmCriticalAction(targetName);
   if (!confirmed) return;
 
   try {
-    // 2. Tenta apagar no Supabase
-    const { error } = await supabaseClient
+    // Usamos 'exact' para forçar o banco de dados a contar as linhas afetadas
+    const { error, count } = await supabaseClient
       .from('chat_messages')
-      .delete() // Removemos o count:planned/exact daqui para evitar bugs de retorno
+      .delete({ count: 'exact' }) 
       .eq('corp_oper_nr', currentCorp) 
       .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`);
 
-    // 3. Se o Supabase responder com erro (ex: sem net ou erro de sintaxe)
     if (error) throw error;
 
-    // 4. SE CHEGOU AQUI SEM ERRO = SUCESSO!
-    // Fechamos o menu de contexto antes de mostrar o balão
+    // FECHAR O MENU SEMPRE (para não ficar aberto no vácuo)
     closeContactMenu();
 
-    // Dispara o balão verde (sucesso_limpeza)
-    showSystemWarning('sucesso_limpeza', 'Mensagens Eliminadas', `A conversa com ${targetName} foi limpa com sucesso.`);
-    
-    // 5. Limpa o ecrã visualmente se estiveres a olhar para essa conversa
-    if (currentChat === targetNint) {
-      const container = document.getElementById('message-container');
-      if (container) container.innerHTML = ''; 
+    // AGORA A LÓGICA DE PRECISÃO:
+    if (count > 0) {
+      // Se realmente apagou mensagens
+      showSystemWarning('sucesso_limpeza', 'Mensagens Eliminadas', `Sucesso! Foram removidas ${count} mensagens.`);
+      
+      if (currentChat === targetNint) {
+        const container = document.getElementById('message-container');
+        if (container) container.innerHTML = ''; 
+      }
+    } else {
+      // Se o comando correu bem, mas não havia nada para apagar
+      showSystemWarning('permissao_negada_limpeza', 'Nada a Limpar', 'Esta conversa já se encontra vazia na base de dados.');
     }
 
   } catch (error) {
     console.error('Erro detalhado no delete:', error);
-    // Se cair aqui, mostra o balão de erro
-    showSystemWarning('erro_eliminar_tecnico', 'Erro de Sistema', 'Não foi possível completar a limpeza devido a um erro de ligação.');
+    showSystemWarning('erro_eliminar_tecnico', 'Erro de Sistema', 'Não foi possível processar o pedido.');
   }
 }
     /* ======================== ADVISORS MANAGER ========================= */  
@@ -3307,4 +3308,3 @@ async function clearConversation() {
   </script>
 </body>
 </html>
-
