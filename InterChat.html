@@ -2308,33 +2308,57 @@ async function loadMessages(chat = currentChat) {
         chatIdInfo.style.display = 'none';
       }
     }
-    /* ========================== ACTION DELETE ========================== */
-    let confirmResolver = null;
-    async function actionDelete() {
-      if (!selectedMessages || selectedMessages.length === 0) return;
-      const allMine = selectedMessages.every(m => String(m.n_int) === currentUserNint);
-      const choice = await askConfirm(selectedMessages.length, allMine);
-      if (choice === 'cancel') return;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      for (const msg of selectedMessages) {
-        if (choice === 'todos') {
-          if (String(msg.n_int) === currentUserNint) {
-            await supabaseClient
-              .from('chat_messages')
-              .update({ 
-              deleted_at: new Date().toISOString(),
-              message: 'Mensagem apagada'
-            })
-              .eq('id', msg.id);
-          }
-        } 
-        else if (choice === 'mim') {
-          const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
-          if (msgElement) msgElement.style.display = 'none';
-        }
+    /* ========================== ACTION DELETE (FIXED) ========================== */
+let confirmResolver = null;
+async function actionDelete() {
+  if (!selectedMessages || selectedMessages.length === 0) return;
+  
+  const allMine = selectedMessages.every(m => String(m.n_int) === currentUserNint);
+  const choice = await askConfirm(selectedMessages.length, allMine);
+  if (choice === 'cancel') return;
+
+  const myNint = currentUserNint;
+
+  for (const msg of selectedMessages) {
+    if (choice === 'todos') {
+      // APAGAR PARA TODOS: Substitui o texto e marca a data (Só se for minha)
+      if (String(msg.n_int) === currentUserNint) {
+        await supabaseClient
+          .from('chat_messages')
+          .update({ 
+            deleted_at: new Date().toISOString(),
+            message: 'Mensagem apagada'
+          })
+          .eq('id', msg.id);
       }
-      clearSelection();
+    } 
+    else if (choice === 'mim') {
+      // APAGAR SÓ PARA MIM: Adiciona o meu NINT ao array hidden_for
+      // Nota: Buscamos o array atual ou inicializamos vazio
+      const currentHidden = msg.hidden_for || [];
+      if (!currentHidden.includes(myNint)) {
+        const newHidden = [...currentHidden, myNint];
+        
+        await supabaseClient
+          .from('chat_messages')
+          .update({ hidden_for: newHidden })
+          .eq('id', msg.id);
+      }
+
+      // Remove visualmente de imediato
+      const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
+      if (msgElement) msgElement.remove(); // .remove() é melhor que .display = 'none'
     }
+  }
+
+  // Se após apagar não sobrarem mensagens visíveis, mostra o placeholder
+  const messagesEl = document.getElementById("messages");
+  if (messagesEl && messagesEl.querySelectorAll('.message').length === 0) {
+      loadMessages(currentChat); // Recarrega para forçar o placeholder
+  }
+
+  clearSelection();
+}
     function askConfirm(count, allMine) {
       const modal = document.getElementById('modal-confirm');
       if (modal) {
@@ -3318,5 +3342,6 @@ async function clearConversation() {
   </script>
 </body>
 </html>
+
 
 
