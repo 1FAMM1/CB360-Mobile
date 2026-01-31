@@ -459,6 +459,20 @@
       </div>
     </div>
   </div>
+  
+  <!-- MENU DE OPÇÕES DO CONTACTO -->
+  <div id="contact-menu-overlay" class="custom-confirm-overlay" style="display:none;">
+    <div class="custom-confirm-card">
+      <p class="confirm-text" id="contact-menu-title">Opções</p>
+      <div class="confirm-buttons-stack">
+        <button id="contact-menu-block" class="btn-confirm-action">🚫 Bloquear</button>
+        <button id="contact-menu-mute" class="btn-confirm-action">🔕 Silenciar</button>
+        <button id="contact-menu-clear" class="btn-confirm-action" style="color:#f44336;">🗑️ Limpar conversa</button>
+        <button onclick="closeContactMenu()" class="btn-confirm-cancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  
   <div class="footer">
     <div class="footer-content">
       <div class="powered-by"><strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360</div>
@@ -1219,7 +1233,31 @@
         const div = document.createElement("div");
         div.className = "contact";
         div.setAttribute('data-nint', contactId);
-        div.onclick = () => openChat(user.n_int, user.abv_name);        
+        div.onclick = () => openChat(user.n_int, user.abv_name);
+        
+        // Long press para abrir menu de opções
+        let pressTimer;
+        div.addEventListener('touchstart', (e) => {
+          pressTimer = setTimeout(() => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            openContactMenu(user.n_int, user.abv_name);
+          }, 500);
+        }, {passive: true});
+        
+        div.addEventListener('touchend', () => {
+          clearTimeout(pressTimer);
+        });
+        
+        div.addEventListener('touchmove', () => {
+          clearTimeout(pressTimer);
+        });
+        
+        // Desktop: contextmenu (right-click)
+        div.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          openContactMenu(user.n_int, user.abv_name);
+        });
+        
         const avatarContent = user.photo_url ? `<img src="${user.photo_url}">` : firstLetter;        
         div.innerHTML = `
           <div class="contact-avatar" style="background-color: ${user.photo_url ? 'transparent' : avatarColor};">
@@ -2014,7 +2052,23 @@ function initChatBatchViewerHandlers() {
         const {data: msgs, error} = await query.order('created_at', {ascending: true});
         if (currentChat !== chatRef) return;    
         if (error) return console.error(error);
-        if (!msgs || msgs.length === 0) {
+        
+        // Filtrar mensagens de utilizadores bloqueados
+        let filteredMsgs = msgs || [];
+        if (filteredMsgs.length > 0 && chatRef !== 'geral') {
+          const {data: myBlocks} = await supabaseClient
+            .from('user_blocks')
+            .select('blocked_nint')
+            .eq('blocker_nint', currentUserNint)
+            .eq('corp_oper_nr', currentCorp);
+          
+          if (myBlocks && myBlocks.length > 0) {
+            const blockedList = myBlocks.map(b => b.blocked_nint);
+            filteredMsgs = filteredMsgs.filter(m => !blockedList.includes(String(m.n_int)));
+          }
+        }
+        
+        if (!filteredMsgs || filteredMsgs.length === 0) {
           const emptyMsg = document.createElement("div");
           emptyMsg.className = "empty-chat-placeholder";
           emptyMsg.innerHTML = `
@@ -2025,7 +2079,7 @@ function initChatBatchViewerHandlers() {
           `;
           messagesEl.appendChild(emptyMsg);
         } else {
-          msgs.forEach(msg => addMessageToDOM(msg, chatRef)); 
+          filteredMsgs.forEach(msg => addMessageToDOM(msg, chatRef)); 
           // Scroll suave ao abrir chat + delay para batch render
           setTimeout(() => scrollToBottom(), 100);
           setTimeout(() => scrollToBottom(), 500);
@@ -2079,6 +2133,28 @@ function initChatBatchViewerHandlers() {
         sendBtn.disabled = false;
         return;
       }
+      
+      // Verificar se o destinatário bloqueou o remetente
+      if (currentChat !== 'geral') {
+        const {data: amIBlocked} = await supabaseClient
+          .from('user_blocks')
+          .select('id')
+          .eq('blocker_nint', currentChat)
+          .eq('blocked_nint', currentUserNint)
+          .eq('corp_oper_nr', currentCorp)
+          .maybeSingle();
+        
+        if (amIBlocked) {
+          sendBtn.disabled = false;
+          if (!audioUrl) {
+            inputEl.value = text;
+            inputEl.dispatchEvent(new Event('input'));
+          }
+          alert('❌ Não podes enviar mensagens a este utilizador.\n\nEste contacto bloqueou-te.');
+          return;
+        }
+      }
+      
       const senderName = await fetchUserName();
       const messageData = {n_int: currentUserNint, recipient_nint: currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text, file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};
       if (currentReplyToMessage) {
@@ -3004,6 +3080,210 @@ function initChatBatchViewerHandlers() {
           event: 'read',
           payload: {readerNint: String(currentUserNint)}
         });
+      }
+    }
+    
+    /* ==================== CONTACT MENU FUNCTIONS ======================= */
+    let currentContactMenuTarget = null;
+    
+    async function openContactMenu(contactNint, contactName) {
+      if (contactNint === 'geral') return; // Não permitir para chat geral
+      
+      currentContactMenuTarget = {nint: contactNint, name: contactName};
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      
+      // Verificar se está bloqueado
+      const {data: blockData} = await supabaseClient
+        .from('user_blocks')
+        .select('id')
+        .eq('blocker_nint', currentUserNint)
+        .eq('blocked_nint', contactNint)
+        .eq('corp_oper_nr', currentCorp)
+        .maybeSingle();
+      
+      // Verificar se está silenciado
+      const {data: muteData} = await supabaseClient
+        .from('user_mutes')
+        .select('id')
+        .eq('muter_nint', currentUserNint)
+        .eq('muted_nint', contactNint)
+        .eq('corp_oper_nr', currentCorp)
+        .maybeSingle();
+      
+      // Atualizar UI do menu
+      document.getElementById('contact-menu-title').textContent = contactName;
+      
+      const blockBtn = document.getElementById('contact-menu-block');
+      const muteBtn = document.getElementById('contact-menu-mute');
+      
+      if (blockData) {
+        blockBtn.innerHTML = '✅ Desbloquear';
+        blockBtn.style.color = '#4caf50';
+      } else {
+        blockBtn.innerHTML = '🚫 Bloquear';
+        blockBtn.style.color = '#f44336';
+      }
+      
+      if (muteData) {
+        muteBtn.innerHTML = '🔔 Ativar notificações';
+        muteBtn.style.color = '#4caf50';
+      } else {
+        muteBtn.innerHTML = '🔕 Silenciar';
+        muteBtn.style.color = '#ff9800';
+      }
+      
+      // Configurar event listeners
+      blockBtn.onclick = () => toggleBlockUser();
+      muteBtn.onclick = () => toggleMuteUser();
+      document.getElementById('contact-menu-clear').onclick = () => clearConversation();
+      
+      // Mostrar menu
+      document.getElementById('contact-menu-overlay').style.display = 'flex';
+    }
+    
+    function closeContactMenu() {
+      document.getElementById('contact-menu-overlay').style.display = 'none';
+      currentContactMenuTarget = null;
+    }
+    
+    /* ======================== TOGGLE BLOCK USER ======================== */
+    async function toggleBlockUser() {
+      if (!currentContactMenuTarget) return;
+      
+      const targetNint = currentContactMenuTarget.nint;
+      const targetName = currentContactMenuTarget.name;
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      
+      // Verificar estado atual
+      const {data: existing} = await supabaseClient
+        .from('user_blocks')
+        .select('id')
+        .eq('blocker_nint', currentUserNint)
+        .eq('blocked_nint', targetNint)
+        .eq('corp_oper_nr', currentCorp)
+        .maybeSingle();
+      
+      if (existing) {
+        // DESBLOQUEAR
+        const {error} = await supabaseClient
+          .from('user_blocks')
+          .delete()
+          .eq('id', existing.id);
+        
+        if (!error) {
+          closeContactMenu();
+          alert(`✅ ${targetName} foi desbloqueado!`);
+          // Recarregar mensagens se estiver no chat
+          if (currentChat === targetNint) {
+            await loadMessages(currentChat);
+          }
+        } else {
+          alert('❌ Erro ao desbloquear utilizador');
+        }
+      } else {
+        // BLOQUEAR
+        const {error} = await supabaseClient
+          .from('user_blocks')
+          .insert([{
+            blocker_nint: currentUserNint,
+            blocked_nint: targetNint,
+            corp_oper_nr: currentCorp
+          }]);
+        
+        if (!error) {
+          closeContactMenu();
+          alert(`🚫 ${targetName} foi bloqueado!\n\nNão verás mais mensagens deste utilizador.`);
+          // Recarregar mensagens se estiver no chat
+          if (currentChat === targetNint) {
+            await loadMessages(currentChat);
+          }
+        } else {
+          alert('❌ Erro ao bloquear utilizador');
+        }
+      }
+    }
+    
+    /* ========================= TOGGLE MUTE USER ======================== */
+    async function toggleMuteUser() {
+      if (!currentContactMenuTarget) return;
+      
+      const targetNint = currentContactMenuTarget.nint;
+      const targetName = currentContactMenuTarget.name;
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      
+      // Verificar estado atual
+      const {data: existing} = await supabaseClient
+        .from('user_mutes')
+        .select('id')
+        .eq('muter_nint', currentUserNint)
+        .eq('muted_nint', targetNint)
+        .eq('corp_oper_nr', currentCorp)
+        .maybeSingle();
+      
+      if (existing) {
+        // ATIVAR NOTIFICAÇÕES
+        const {error} = await supabaseClient
+          .from('user_mutes')
+          .delete()
+          .eq('id', existing.id);
+        
+        if (!error) {
+          closeContactMenu();
+          alert(`🔔 Notificações de ${targetName} ativadas!`);
+        } else {
+          alert('❌ Erro ao ativar notificações');
+        }
+      } else {
+        // SILENCIAR
+        const {error} = await supabaseClient
+          .from('user_mutes')
+          .insert([{
+            muter_nint: currentUserNint,
+            muted_nint: targetNint,
+            corp_oper_nr: currentCorp
+          }]);
+        
+        if (!error) {
+          closeContactMenu();
+          alert(`🔕 ${targetName} foi silenciado!\n\nNão receberás notificações push deste utilizador.`);
+        } else {
+          alert('❌ Erro ao silenciar utilizador');
+        }
+      }
+    }
+    
+    /* ======================= CLEAR CONVERSATION ======================== */
+    async function clearConversation() {
+      if (!currentContactMenuTarget) return;
+      
+      const targetNint = currentContactMenuTarget.nint;
+      const targetName = currentContactMenuTarget.name;
+      
+      // Confirmação
+      const confirmed = confirm(`🗑️ ATENÇÃO!\n\nIsto irá eliminar TODA a conversa com ${targetName} da base de dados.\n\nEsta ação NÃO PODE ser desfeita!\n\nTens a certeza?`);
+      
+      if (!confirmed) return;
+      
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      
+      // Eliminar TODAS as mensagens entre os 2 utilizadores
+      const {error} = await supabaseClient
+        .from('chat_messages')
+        .delete()
+        .eq('corp_oper_nr', currentCorp)
+        .or(`and(n_int.eq.${currentUserNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${currentUserNint})`);
+      
+      if (!error) {
+        closeContactMenu();
+        alert(`✅ Conversa com ${targetName} eliminada!`);
+        
+        // Se estiver no chat, recarregar (vai mostrar vazio)
+        if (currentChat === targetNint) {
+          await loadMessages(currentChat);
+        }
+      } else {
+        alert('❌ Erro ao limpar conversa');
+        console.error(error);
       }
     }
   </script>
