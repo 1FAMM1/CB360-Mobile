@@ -2,7 +2,7 @@
     CB360 Mobile - Complete Service Worker
     Optimized for: Push Notifications + Bar-Free Navigation
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v2.6.8';
+    const CACHE_NAME = 'cb360-cache-v2.6.9';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', 
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', 
                              '/MissReport.html', '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', 
