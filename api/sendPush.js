@@ -31,6 +31,9 @@ export default async function handler(req, res) {
     const payload = JSON.stringify({
       title: recipient_nint === 'geral' ? `Geral: ${sender_name}` : sender_name,
       message: message_text
+      // ESTES CAMPOS SÃO VITAIS:
+      chatId: String(sender_nint), // Quem enviou (para o SW silenciar se o ID for igual)
+      url: `/InterChat.html?chatId=${sender_nint}`
     });
     const envios = subs.map(dispositivo => {
       const config = {
