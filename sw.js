@@ -2,7 +2,7 @@
 CB360 Mobile - Complete Service Worker (v2.8.2)
 Optimized for: Smart Push Filtering + Offline Cache
 ========================================================= */
-const CACHE_NAME = 'cb360-cache-v2.8.2';
+const CACHE_NAME = 'cb360-cache-v2.8.3';
 const ASSETS_TO_CACHE = [
   '/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', 
   '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/ExtDisp.html', 
@@ -58,56 +58,40 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
-/* ============================ PUSH INTELIGENTE ============================ */
+/* ============================ PUSH INTELIGENTE (v2.8.3) ============================ */
 self.addEventListener('push', function(event) {
-  let data = { title: 'CB360 Mobile', message: 'Nova atualização no sistema!' };
-  
+  let data = { title: 'CB360 Mobile', message: 'Nova atualização!' };
   try {
-    if (event.data) {
-      data = event.data.json();
-    }
+    if (event.data) { data = event.data.json(); }
   } catch (err) {
     data.message = event.data.text();
   }
 
-  // Pegamos o ID de quem enviou e garantimos que é String e não tem espaços
-  const pushChatId = data.chatId ? String(data.chatId).trim() : null; 
+  const pushChatId = data.chatId ? String(data.chatId).trim() : null;
 
   const promise = clients.matchAll({ type: 'window', includeUncontrolled: true })
     .then(windowClients => {
-      // 1. Procurar janela de chat focada
-      const activeChatWindow = windowClients.find(client => 
-        client.url.indexOf('InterChat.html') !== -1 && client.focused
+      // PROCURA QUALQUER JANELA DO CHAT, MESMO QUE NÃO ESTEJA FOCADA (Background)
+      const chatWindow = windowClients.find(client => 
+        client.url.indexOf('InterChat.html') !== -1
       );
 
-      if (activeChatWindow && pushChatId) {
-        // Tentativa 1: Via searchParams
-        const urlObj = new URL(activeChatWindow.url);
-        let activeIdInUrl = urlObj.searchParams.get('chatId');
+      if (chatWindow && pushChatId) {
+        const urlObj = new URL(chatWindow.url);
+        const activeIdInUrl = urlObj.searchParams.get('chatId');
 
-        // Tentativa 2: Se o searchParams falhar (comum em PWAs), tentamos regex na URL
-        if (!activeIdInUrl) {
-          const match = activeChatWindow.url.match(/[?&]chatId=([^&]+)/);
-          if (match) activeIdInUrl = match[1];
-        }
-
-        if (activeIdInUrl) {
-          const cleanActiveId = String(activeIdInUrl).trim();
-          
-          console.log(`SW: Comparando Ativo(${cleanActiveId}) com Push(${pushChatId})`);
-
-          if (cleanActiveId === pushChatId) {
-            console.log("SW: IDs Iguais. Bloqueando notificação.");
-            return; // PARA AQUI
-          }
+        // Se a janela estiver aberta no ID certo, CANCELA o push
+        if (activeIdInUrl === pushChatId) {
+          console.log("SW: Janela aberta no chat " + pushChatId + ". Silenciando.");
+          return; 
         }
       }
 
-      // 2. Se não for igual, mostra a notificação
+      // Caso contrário, mostra a notificação
       const options = {
-        body: data.message || data.body || 'Tens uma nova mensagem.',
+        body: data.message || data.body || 'Nova mensagem.',
         icon: '/icon-192.png',
-        vibrate: [200, 100, 200, 100, 200],
+        vibrate: [200, 100, 200],
         data: { url: data.url || '/InterChat.html' },
         tag: 'cb360-notification',
         renotify: true
