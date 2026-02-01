@@ -337,10 +337,12 @@
     .batch-cell img {-webkit-touch-callout: none !important; -webkit-user-select: none !important; -moz-user-select: none !important; 
                      -ms-user-select: none !important; user-select: none !important; -webkit-user-drag: none !important; pointer-events: none;}
     .batch-grid-2x2 {-webkit-touch-callout: none !important; -webkit-user-select: none !important;}
-    
-    
-   
-    
+    .contact{display: flex; align-items: center;}
+    .contact-info{flex: 1; min-width: 0;}
+    .contact-right{display: flex; align-items: center; gap: 8px; margin-left: 8px;}
+    .contact-status{display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.85;}
+    .unread-slot {order: 1;}
+    .contact-status {order: 2;}
     @keyframes slideUp {from {transform: translateY(100%); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     @keyframes popScale {0% {transform: scale(0.85); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}    
     @keyframes pulse-green {0% {transform: scale(1); box-shadow: 0 0 5px #00ff00;} 50% {transform: scale(1.15); box-shadow: 0 0 12px #00ff00;} 100% {transform: scale(1); box-shadow: 0 0 5px #00ff00;}}
@@ -483,9 +485,7 @@
         <button onclick="closeConfirmCritical()" class="btn-confirm-cancel">Cancelar</button>
         </div>
     </div>
-  </div>
-  
-  <!-- MENU DE OPÇÕES DO CONTACTO -->
+  </div>  
   <div id="contact-menu-overlay" class="custom-confirm-overlay" style="display:none;">
     <div class="custom-confirm-card">
       <p class="confirm-text" id="contact-menu-title">Opções</p>
@@ -493,12 +493,12 @@
         <button id="contact-menu-block" class="btn-confirm-action" style="color:#ccc;"><span class="material-icons">block</span>Bloquear</button>
         <button id="contact-menu-mute" class="btn-confirm-action" style="color:#ccc;"><span class="material-icons">notifications_active</span>Silenciar</button>
         <button id="contact-menu-clear" class="btn-confirm-action" style="color: #ccc;">
-          <span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">delete</span>Limpar Conversa</button>
+          <span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">delete</span>Limpar Conversa
+        </button>
         <button onclick="closeContactMenu()" class="btn-confirm-cancel">Cancelar</button>
       </div>
     </div>
-  </div>
-  
+  </div>  
   <div class="footer">
     <div class="footer-content">
       <div class="powered-by"><strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360</div>
@@ -551,9 +551,7 @@
   <div id="chat-batch-viewer" class="attach-viewer" style="display:none;">
     <button id="chat-batch-viewer-close" class="attach-viewer-close" type="button">✕</button>
     <button id="chat-batch-viewer-prev" class="attach-viewer-nav prev" type="button">‹</button>
-
     <img id="chat-batch-viewer-img" class="attach-viewer-img" alt="viewer" style="display:none;">
-
     <div id="chat-batch-viewer-file" class="attach-file-card" style="display:none; max-width:90%;">
       <span class="material-icons" id="chat-batch-file-icon">insert_drive_file</span>
       <div class="attach-file-meta">
@@ -562,11 +560,9 @@
         <a id="chat-batch-file-open" target="_blank" style="margin-top:6px; display:inline-block; text-decoration:none;">Abrir</a>
       </div>
     </div>
-
     <button id="chat-batch-viewer-next" class="attach-viewer-nav next" type="button">›</button>
     <div id="chat-batch-viewer-count" class="attach-viewer-count"></div>
   </div>
-
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -585,8 +581,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
     if (window.pdfjsLib) {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
     }
   </script>
   <script> 
@@ -715,17 +710,17 @@
       if (currentChat === 'null') return;
       recordTimeout = setTimeout(async () => {
         try {
-          const permission = await navigator.permissions.query({ name: 'microphone' });
+          const permission = await navigator.permissions.query({name: 'microphone'});
           if (permission.state === 'denied') {
             showSystemWarning('microfone', 'Acesso Negado', 'Ativa o microfone nas definições para enviares áudios.');
             return;
           }
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const stream = await navigator.mediaDevices.getUserMedia({audio: true});
           mediaRecorder = new MediaRecorder(stream);
           audioChunks = [];
           mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
           mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const audioBlob = new Blob(audioChunks, {type: 'audio/webm'});
             if (audioBlob.size > 2000) {
               await uploadAudioToSupabase(audioBlob);
             }
@@ -772,11 +767,11 @@
       const fileName = `audio_${Date.now()}.webm`;
       const filePath = `${currentChat}/${fileName}`;
       try {
-        const { data, error } = await supabaseClient.storage
+        const {data, error} = await supabaseClient.storage
         .from('cb_files')
         .upload(filePath, blob);
         if (error) throw error;
-        const { data: { publicUrl } } = supabaseClient.storage
+        const {data: {publicUrl}} = supabaseClient.storage
         .from('cb_files')
         .getPublicUrl(filePath);
         await sendMessage("Enviou um áudio", publicUrl); 
@@ -788,7 +783,7 @@
     window.attachState = window.attachState || {mode: null, files: [], previewUrl: null};
     function clearAttachGridPreviews() {
       if (window.gridPreviewUrls && Array.isArray(window.gridPreviewUrls)) {
-        window.gridPreviewUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch(e){} });
+        window.gridPreviewUrls.forEach(u => {try {URL.revokeObjectURL(u);} catch(e){}});
       }
       window.gridPreviewUrls = [];
     }
@@ -840,7 +835,7 @@
                     (Array.isArray(window.attachState?.files) && window.attachState.files.length ? window.attachState.files : []));
       if (!viewer || !img || !count || !files.length) return;
       window.viewerIndex = Math.max(0, Math.min(startIndex, files.length - 1));
-      if (window.viewerUrl) { try {URL.revokeObjectURL(window.viewerUrl); } catch(e){}}
+      if (window.viewerUrl) {try {URL.revokeObjectURL(window.viewerUrl);} catch(e){}}
       window.viewerUrl = null;
       const f = files[window.viewerIndex];
       if (!f || !f.type?.startsWith("image/")) return;
@@ -1035,12 +1030,12 @@
       const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
       const fileName = `photo_${Date.now()}.${ext}`;
       const filePath = `${currentChat}/${fileName}`;
-      const { error } = await supabaseClient
+      const {error} = await supabaseClient
       .storage
       .from("cb_files")
-      .upload(filePath, file, { contentType: file.type || "image/jpeg" });
+      .upload(filePath, file, {contentType: file.type || "image/jpeg"});
       if (error) throw error;
-      const { data: { publicUrl } } = supabaseClient
+      const {data: {publicUrl}} = supabaseClient
       .storage
       .from("cb_files")
       .getPublicUrl(filePath);
@@ -1052,13 +1047,13 @@
       const senderName = await fetchUserName();
       const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl,
                        file_name: fileName, message: caption};
-      const { error } = await supabaseClient
+      const {error} = await supabaseClient
       .from("chat_messages")
       .insert([payload]);
       if (error) throw error;
       fetch('/api/sendPush', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({recipient_nint: String(currentChat), corp_nr: currentCorp, sender_name: senderName, message_text: caption?.trim() ? `📷 ${caption.trim()}` : "📷 Foto", 
                               sender_nint: currentUserNint})
       }).catch(err => console.error("Erro no push:", err));
@@ -1079,7 +1074,7 @@
       const canvas = document.createElement('canvas');
       canvas.width = dstW;
       canvas.height = dstH;
-      const ctx = canvas.getContext('2d', { alpha: true });
+      const ctx = canvas.getContext('2d', {alpha: true});
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(bitmap, 0, 0, dstW, dstH);
@@ -1088,7 +1083,7 @@
       const baseName = (file.name || 'imagem').replace(/\.[^.]+$/, '');
       const ext = mimeType === 'image/png' ? 'png' : 'jpg';
       const outName = `${baseName}_opt.${ext}`;
-      return new File([blob], outName, { type: mimeType });
+      return new File([blob], outName, {type: mimeType});
     }
     /* ====================== UPLOAD FILES & IMAGES ====================== */    
     async function uploadFile(file, caption = "", opts = {}) {
@@ -1120,7 +1115,7 @@
         const isImage = file.type?.startsWith('image/');
         if (isPdf && window.pdfjsLib) {
           try {
-            const thumbBlob = await renderPdfFirstPageToBlob(file, { scale: 0.35, quality: 0.7 });
+            const thumbBlob = await renderPdfFirstPageToBlob(file, {scale: 0.35, quality: 0.7});
             if (thumbBlob) {
               const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.jpg`;
               const {error: upThumbErr} = await supabaseClient.storage
@@ -1141,7 +1136,7 @@
         .from('cb_files')
         .upload(basePath, file, {contentType: file.type || 'application/octet-stream'});
         if (upErr) throw upErr;
-        const { data: pubFile } = supabaseClient.storage
+        const {data: pubFile} = supabaseClient.storage
         .from('cb_files')
         .getPublicUrl(basePath);
         const publicUrl = pubFile?.publicUrl;
@@ -1153,7 +1148,7 @@
         const finalMsg = (caption || "").trim() || defaultMsg;
         const payload = {n_int: currentUserNint, recipient_nint: chatId, corp_oper_nr: currentCorp, abv_name: senderName, created_at: new Date().toISOString(), message_type: isImage ? 'image' : 'file',
                          file_url: publicUrl, file_name: file.name || safeName, preview_url: previewUrl, message: finalMsg, batch_id: opts?.batchId || null};
-        const { error: insertError } = await supabaseClient
+        const {error: insertError} = await supabaseClient
         .from('chat_messages')
         .insert([payload]);
         if (insertError) throw insertError;
@@ -1173,14 +1168,14 @@
     }
     async function renderPdfFirstPageToBlob(file) {
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
       const page = await pdf.getPage(1);
       const viewport = page.getViewport({scale: 0.4});
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = viewport.width;
       canvas.height = viewport.height;
-      await page.render({ canvasContext: ctx, viewport }).promise;
+      await page.render({canvasContext: ctx, viewport}).promise;
       return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
     }
     /* ==================== LOADING CORPORATION DATA ===================== */
@@ -1217,6 +1212,9 @@
       if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
     }
     /* ======================== LOADING CONTACTS ========================= */
+    let blockedSetCache = new Set();
+    let mutedSetCache = new Set();
+    let muteGeralCache = false;
     async function loadContacts() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const colors = {'A': '#f44336','B': '#e91e63','C': '#9c27b0','D': '#673ab7','E': '#3f51b5','F': '#2196f3','G': '#03a9f4',
@@ -1236,6 +1234,19 @@
       geral.className = "contact";
       geral.dataset.nint = 'geral';
       geral.onclick = () => openChat('geral', 'Chat Geral');
+      let pressTimerGeral;
+      geral.addEventListener('touchstart', (e) => {
+        pressTimerGeral = setTimeout(() => {
+          if (navigator.vibrate) navigator.vibrate(50);
+          openContactMenu('geral', 'Chat Geral');
+        }, 500);
+      }, {passive: true});
+      geral.addEventListener('touchend', () => clearTimeout(pressTimerGeral));
+      geral.addEventListener('touchmove', () => clearTimeout(pressTimerGeral));
+      geral.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        openContactMenu('geral', 'Chat Geral');
+      });
       const draftGeral = localStorage.getItem("draft_geral");
       const subTextGeral = draftGeral ? `<div class="draft-preview">Rascunho: ${draftGeral}</div>` : `<div class="nint">Broadcast</div>`;    
       geral.innerHTML = `
@@ -1243,6 +1254,10 @@
         <div class="contact-info">
           <div class="name">Chat Geral</div>
           ${subTextGeral}
+        </div>
+        <div class="contact-right">
+          <div class="unread-slot"></div>
+          <div class="contact-status" id="status-geral"></div>
         </div>`;
       listEl.appendChild(geral);
       users.forEach(user => {
@@ -1284,26 +1299,101 @@
           <div class="contact-info">
             <div class="name">${user.abv_name}</div>
             ${subText}
-          </div>`;
+          </div>
+          <div class="contact-right">
+            <div class="contact-status" id="status-${contactId}"></div>
+            <div class="unread-slot"></div>
+          </div>`;      
         listEl.appendChild(div);
+        });
+      const contactNints = users
+      .filter(u => String(u.n_int) !== currentUserNint)
+      .map(u => (u.n_int));
+      const {blockedSet, mutedSet} = await loadBlockMuteSets(contactNints, corpOperNr);
+      const muteGeral = await isGeralMuted(corpOperNr);
+      renderContactStatus('geral', {
+        blocked: false,
+        muted: muteGeral
       });
+      contactNints.forEach(nint => {
+        renderContactStatus(nint, {
+          blocked: blockedSet.has(nint),
+          muted: mutedSet.has(nint)
+        });
+      });
+      blockedSetCache = blockedSet;
+      mutedSetCache   = mutedSet;
+      muteGeralCache  = muteGeral;
+    }
+    function renderContactStatus(nint, {blocked, muted}) {
+      const el = document.getElementById(`status-${nint}`);
+      if (!el) return;
+      el.innerHTML = '';
+      if (blocked) {
+        const s = document.createElement('span');
+        s.className = 'material-icons';
+        s.title = 'Bloqueado';
+        s.textContent = 'block';
+        s.style.color = '#ccc';
+        s.style.fontSize = '18px';
+        el.appendChild(s);
+      }
+      if (muted) {
+        const s = document.createElement('span');
+        s.className = 'material-icons';
+        s.title = 'Silenciado';
+        s.textContent = 'notifications_off';
+        s.style.color = '#ccc';
+        s.style.fontSize = '18px';
+        el.appendChild(s);
+      }
+    }
+    async function loadBlockMuteSets(contactNints, corpOperNr) {
+      const {data: blocks, error: e1} = await supabaseClient
+      .from('user_blocks')
+      .select('blocked_nint')
+      .eq('blocker_nint', currentUserNint)
+      .eq('corp_oper_nr', corpOperNr)
+      .in('blocked_nint', contactNints);
+      if (e1) console.error('blocks error', e1);
+      const {data: mutes, error: e2} = await supabaseClient
+      .from('user_mutes')
+      .select('muted_nint')
+      .eq('muter_nint', currentUserNint)
+      .eq('corp_oper_nr', corpOperNr)
+      .in('muted_nint', contactNints);
+      if (e2) console.error('mutes error', e2);
+      const blockedSet = new Set((blocks || []).map(r => String(r.blocked_nint)));
+      const mutedSet   = new Set((mutes  || []).map(r => String(r.muted_nint)));
+      return {blockedSet, mutedSet};
+    }
+    async function isGeralMuted(corpOperNr) {
+      const {data, error} = await supabaseClient
+      .from('user_mutes')
+      .select('id')
+      .eq('muter_nint', currentUserNint)
+      .eq('muted_nint', 'geral')
+      .eq('corp_oper_nr', corpOperNr)
+      .maybeSingle();  
+      if (error) console.error('mute geral error', error);
+      return !!data;
     }
     /* ========================== UPDATE BADGES ========================== */
     async function updateUnreadBadges() {
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      const { count: totalGeral } = await supabaseClient
+      const {count: totalGeral} = await supabaseClient
       .from('chat_messages')
-      .select('*', { count: 'exact', head: true })
+      .select('*', {count: 'exact', head: true})
       .eq('recipient_nint', 'geral')
       .eq('corp_oper_nr', currentCorp)
       .neq('n_int', currentUserNint);
-      const { count: lidasGeral } = await supabaseClient
+      const {count: lidasGeral} = await supabaseClient
       .from('chat_message_reads')
-      .select('*', { count: 'exact', head: true })
+      .select('*', {count: 'exact', head: true})
       .eq('n_int', currentUserNint)
       .eq('corp_oper_nr', currentCorp);
       const unreadGeral = Math.max(0, (totalGeral || 0) - (lidasGeral || 0));
-      const { data: privData } = await supabaseClient
+      const {data: privData} = await supabaseClient
       .from('chat_messages')
       .select('n_int')
       .eq('recipient_nint', currentUserNint)
@@ -1319,11 +1409,12 @@
         const nint = contactEl.getAttribute('data-nint');
         let finalCount = (nint === 'geral') ? unreadGeral : (privCounts[nint] || 0);
         let badge = contactEl.querySelector('.unread-badge');
+        const slot = contactEl.querySelector('.unread-slot');
         if (finalCount > 0) {
           if (!badge) {
             badge = document.createElement('div');
             badge.className = 'unread-badge';
-            contactEl.appendChild(badge);
+            (slot || contactEl).appendChild(badge);
           }
           badge.textContent = finalCount > 99 ? '99+' : finalCount;
         } else {
@@ -1404,7 +1495,7 @@
     }
     /* ======================= TOGGLE REACTIONS ========================== */
     async function toggleReaction(messageId, emoji) {
-      const { data: msg, error: fetchError } = await supabaseClient
+      const {data: msg, error: fetchError} = await supabaseClient
       .from('chat_messages')
       .select('reactions')
       .eq('id', messageId)
@@ -1426,184 +1517,166 @@
           delete currentReactions[emoji];
         }
       }
-      const { error: updateError } = await supabaseClient
+      const {error: updateError} = await supabaseClient
       .from('chat_messages')
-      .update({ reactions: currentReactions })
+      .update({reactions: currentReactions})
       .eq('id', messageId);
       if (updateError) {
         console.error("Erro ao atualizar reação:", updateError);
       }
     }
     /* ======================= ADD MESSAGE TO DOM ======================== */
-function addMessageToDOM(msg, chatRef) {
-    // --- FILTRO DE REALISMO (HIDDEN FOR ME) ---
-    // Se o meu nint estiver na lista de quem ocultou esta mensagem, saímos imediatamente.
-    if (msg.hidden_for && Array.isArray(msg.hidden_for)) {
+    function addMessageToDOM(msg, chatRef) {
+      if (msg.hidden_for && Array.isArray(msg.hidden_for)) {
         if (msg.hidden_for.includes(currentUserNint)) {
-            return; 
+          return; 
         }
-    }
-
-    registerBatchMessage(msg, chatRef);
-    if (!currentChat || currentChat !== String(chatRef)) return;
-    
-    const messagesEl = document.getElementById("messages");
-    if (!messagesEl) return;
-
-    const msgDate = new Date(msg.created_at);
-    const dateLabel = getDateLabel(msgDate);
-    if (dateLabel !== lastDateLabel) {
+      }
+      registerBatchMessage(msg, chatRef);
+      if (!currentChat || currentChat !== String(chatRef)) return;
+      const messagesEl = document.getElementById("messages");
+      if (!messagesEl) return;
+      const msgDate = new Date(msg.created_at);
+      const dateLabel = getDateLabel(msgDate);
+      if (dateLabel !== lastDateLabel) {
         const divider = document.createElement("div");
         divider.className = "date-divider";
         divider.innerHTML = `<span>${dateLabel}</span>`;
         messagesEl.appendChild(divider);
         lastDateLabel = dateLabel;
-    }
-
-    const emptyMsg = messagesEl.querySelector(".empty-chat-placeholder");
-    if (emptyMsg) emptyMsg.remove();
-
-    let time = "";
-    if (msg.edited_at) {
+      }
+      const emptyMsg = messagesEl.querySelector(".empty-chat-placeholder");
+      if (emptyMsg) emptyMsg.remove();
+      let time = "";
+      if (msg.edited_at) {
         time = new Date(msg.edited_at).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
-    } else if (msg.created_at) {
+      } else if (msg.created_at) {
         time = new Date(msg.created_at).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
-    }
-
-    if (msg.batch_id) {
+      }
+      if (msg.batch_id) {
         addOrUpdateBatchBubble(msg, chatRef, {time});
         if (messagesEl.style.display !== "none") scrollToBottom();
         return;
-    }
-
-    const isMe = String(msg.n_int) === currentUserNint;
-    let checkHTML = "";
-    if (isMe) {
+      }
+      const isMe = String(msg.n_int) === currentUserNint;
+      let checkHTML = "";
+      if (isMe) {
         let icon = "done";
         let checkClass = "sent";
         if (chatRef === "geral") {
-            const numLeituras = (msg.chat_message_reads && msg.chat_message_reads[0]) ? msg.chat_message_reads[0].count : 0;
-            icon = "done_all";
-            checkClass = (numLeituras >= (totalTeam - 1) && totalTeam > 1) ? "read" : "delivered";
-            const contador = numLeituras > 0 ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` : "";
-            const msgId = msg.id || "temp-" + Date.now();
-            checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>${contador}`;
+          const numLeituras = (msg.chat_message_reads && msg.chat_message_reads[0]) ? msg.chat_message_reads[0].count : 0;
+          icon = "done_all";
+          checkClass = (numLeituras >= (totalTeam - 1) && totalTeam > 1) ? "read" : "delivered";
+          const contador = numLeituras > 0 ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` : "";
+          const msgId = msg.id || "temp-" + Date.now();
+          checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>${contador}`;
         } else {
-            const recipientDot = document.querySelector(`.contact[data-nint="${chatRef}"] .status-dot`);
-            const isOnline = recipientDot && recipientDot.classList.contains("online");
-            if (msg.read_at) {
-                icon = "done_all"; checkClass = "read";
-            } else if (isOnline) {
-                icon = "done_all"; checkClass = "delivered";
-            }
-            const msgId = msg.id || "temp-" + Date.now();
-            checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>`;
+          const recipientDot = document.querySelector(`.contact[data-nint="${chatRef}"] .status-dot`);
+          const isOnline = recipientDot && recipientDot.classList.contains("online");
+          if (msg.read_at) {
+            icon = "done_all"; checkClass = "read";
+          } else if (isOnline) {
+            icon = "done_all"; checkClass = "delivered";
+          }
+          const msgId = msg.id || "temp-" + Date.now();
+          checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>`;
         }
-    }
-
-    const div = document.createElement("div");
-    div.className = "message " + (isMe ? "self" : "other");
-    div.dataset.messageId = msg.id;
-    div.dataset.messageText = msg.message;
-    div.dataset.senderName = msg.abv_name;
-    div.dataset.senderNint = msg.n_int;
-
-    const isDeleted = msg.deleted_at !== null && msg.deleted_at !== undefined;
-    if (isDeleted) div.classList.add("deleted");
-
-    const nameHTML = (chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${msg.abv_name}</div>` : "";
-    
-    let replyPreviewHTML = "";
-    if (msg.reply_to_message_id && msg.reply_to_message) {
+      }
+      const div = document.createElement("div");
+      div.className = "message " + (isMe ? "self" : "other");
+      div.dataset.messageId = msg.id;
+      div.dataset.messageText = msg.message;
+      div.dataset.senderName = msg.abv_name;
+      div.dataset.senderNint = msg.n_int;
+      const isDeleted = msg.deleted_at !== null && msg.deleted_at !== undefined;
+      if (isDeleted) div.classList.add("deleted");
+      const nameHTML = (chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${msg.abv_name}</div>` : "";
+      let replyPreviewHTML = "";
+      if (msg.reply_to_message_id && msg.reply_to_message) {
         const replyMsg = msg.reply_to_message;
         replyPreviewHTML = `
-            <div class="reply-preview" onclick="scrollToMessage('${msg.reply_to_message_id}')">
-                <div class="reply-preview-name">${replyMsg.abv_name || "Utilizador"}</div>
-                <div class="reply-preview-text">${replyMsg.message || ""}</div>
-            </div>
+          <div class="reply-preview" onclick="scrollToMessage('${msg.reply_to_message_id}')">
+            <div class="reply-preview-name">${replyMsg.abv_name || "Utilizador"}</div>
+            <div class="reply-preview-text">${replyMsg.message || ""}</div>
+          </div>
         `;
-    }
-
-    const reactionsHTML = renderReactions(msg.reactions, msg.id);
-    const isStarred = msg.starred_by && msg.starred_by.includes(currentUserNint);
-    const starIcon = isStarred ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>' : "";
-
-    let finalContentHTML = "";
-    if (isDeleted) {
-        finalContentHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
-    } else {
+      }
+      const reactionsHTML = renderReactions(msg.reactions, msg.id);
+      const isStarred = msg.starred_by && msg.starred_by.includes(currentUserNint);
+      const starIcon = isStarred ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>' : "";
+      let finalContentHTML = "";
+      if (isDeleted) {
+        finalContentHTML = '<span class="material-icons" style="font-size: 15px;">block</span> Mensagem apagada';
+        
+      } else {
         switch (msg.message_type) {
-            case "image": {
-                const batchKey = msg.batch_id || `single-${msg.id}`;
-                finalContentHTML = `
-                    <img src="${msg.file_url}" class="chat-img" 
-                         style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;"
-                         onclick="event.preventDefault(); event.stopPropagation(); openChatBatchViewer('${chatRef}','${batchKey}',0); return false;">
-                `;
-                if (msg.message) finalContentHTML += `<div class="img-caption">${escapeHTML(msg.message)}</div>`;
-                break;
-            }
-            case "audio": {
-                const audioID = `audio-${msg.id || Date.now()}`;
-                finalContentHTML = `
-                    <div class="audio-bubble">
-                        <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
-                            <span class="material-icons">play_arrow</span>
-                        </div>
-                        <div class="audio-progress-container">
-                            <div class="audio-progress-bar">
-                                <div id="fill-${audioID}" class="audio-progress-fill"></div>
-                            </div>
-                            <div class="audio-time" id="time-${audioID}">0:00</div>
-                        </div>
-                        <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
-                    </div>`;
-                break;
-            }
-            case "file": {
-                const fileName = msg.file_name || "";
-                const isPdf = fileName.toLowerCase().endsWith(".pdf");
-                const batchKey = msg.batch_id || `single-${msg.id}`;
-                finalContentHTML = `
-                    ${msg.preview_url ? `<img src="${msg.preview_url}" class="chat-img" style="max-width:230px; max-height:140px; border-radius:10px; display:block; margin-bottom:6px; object-fit:contain; cursor:pointer;" onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">` : ""}
-                    <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px; cursor:pointer;" onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">      
-                        <span class="material-icons">${isPdf ? "picture_as_pdf" : "insert_drive_file"}</span>
-                        <div style="font-size:13px; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(fileName || "Documento")}</div>
-                    </div>          
-                    ${(msg.message && !msg.message.startsWith("Ficheiro:")) ? `<div class="img-caption">${escapeHTML(msg.message)}</div>` : ""}
-                `;
-                break;
-            }    
-            default:
-                finalContentHTML = escapeHTML(msg.message || "");
-                break;
+          case "image": {
+            const batchKey = msg.batch_id || `single-${msg.id}`;
+            finalContentHTML = `
+              <img src="${msg.file_url}" class="chat-img" style="max-width:230px; border-radius:10px; display:block; 
+                        margin-bottom:5px; cursor:pointer;" onclick="event.preventDefault(); event.stopPropagation(); 
+                        openChatBatchViewer('${chatRef}','${batchKey}',0); return false;">`;
+            if (msg.message) finalContentHTML += `<div class="img-caption">${escapeHTML(msg.message)}</div>`;
+            break;
+          }
+          case "audio": {
+            const audioID = `audio-${msg.id || Date.now()}`;
+            finalContentHTML = `
+              <div class="audio-bubble">
+                <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
+                  <span class="material-icons">play_arrow</span>
+                </div>
+                <div class="audio-progress-container">
+                  <div class="audio-progress-bar">
+                    <div id="fill-${audioID}" class="audio-progress-fill"></div>
+                  </div>
+                  <div class="audio-time" id="time-${audioID}">0:00</div>
+                </div>
+                <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
+              </div>`;
+            break;
+          }
+          case "file": {
+            const fileName = msg.file_name || "";
+            const isPdf = fileName.toLowerCase().endsWith(".pdf");
+            const batchKey = msg.batch_id || `single-${msg.id}`;
+            finalContentHTML = `${msg.preview_url ? `<img src="${msg.preview_url}" class="chat-img" style="max-width:230px; max-height:140px; 
+                               border-radius:10px; display:block; margin-bottom:6px; object-fit:contain; cursor:pointer;"
+                               onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">` : ""}
+                               <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; 
+                                           border-radius: 8px; cursor:pointer;" onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">
+                                 <span class="material-icons">${isPdf ? "picture_as_pdf" : "insert_drive_file"}</span>
+                                 <div style="font-size:13px; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(fileName || "Documento")}</div>
+                               </div>
+                               ${(msg.message && !msg.message.startsWith("Ficheiro:")) ? `<div class="img-caption">${escapeHTML(msg.message)}</div>` : ""}`;
+            break;
+          }    
+          default:
+            finalContentHTML = escapeHTML(msg.message || "");
+            break;
         }
-    }
-
-    div.innerHTML = `
+      }
+      div.innerHTML = `
         ${nameHTML}
         ${replyPreviewHTML}
         <span class="msg-text-content">${finalContentHTML}</span>${starIcon}
         ${reactionsHTML}
         <div class="msg-meta">${time} ${checkHTML}</div>
-    `;
-
-    if (!isDeleted && msg.edited_at) {
+      `;
+      if (!isDeleted && msg.edited_at) {
         const metaDiv = div.querySelector(".msg-meta");
         if (metaDiv) {
-            const editTag = document.createElement("span");
-            editTag.className = "message-edited-tag";
-            editTag.textContent = "editada";
-            metaDiv.insertBefore(editTag, metaDiv.firstChild);
+          const editTag = document.createElement("span");
+          editTag.className = "message-edited-tag";
+          editTag.textContent = "editada";
+          metaDiv.insertBefore(editTag, metaDiv.firstChild);
         }
+      }
+      if (msg.is_forwarded) div.classList.add("is-forwarded");
+      setupMessageInteraction(div, msg);
+      messagesEl.appendChild(div);
+      if (messagesEl.style.display !== "none") scrollToBottom();
     }
-
-    if (msg.is_forwarded) div.classList.add("is-forwarded");
-    
-    setupMessageInteraction(div, msg);
-    messagesEl.appendChild(div);
-    if (messagesEl.style.display !== "none") scrollToBottom();
-}
     /* ============================= HELPERS ============================= */
     function escapeHTML(str) {
       const s = document.createElement("span");
@@ -1756,7 +1829,7 @@ function addMessageToDOM(msg, chatRef) {
       if (!items.length) return;
       window.chatBatchViewerIndex = Math.max(0, Math.min(startIndex, items.length - 1));
       if (window.chatBatchViewerUrl) {
-        try { URL.revokeObjectURL(window.chatBatchViewerUrl); } catch(e) {}
+        try {URL.revokeObjectURL(window.chatBatchViewerUrl);} catch(e) {}
       }
       window.chatBatchViewerUrl = null;
       const item = items[window.chatBatchViewerIndex];
@@ -1831,7 +1904,7 @@ function addMessageToDOM(msg, chatRef) {
       });
       let startX = 0;
       let isDown = false;
-      const onDown = (x) => { startX = x; isDown = true; };
+      const onDown = (x) => {startX = x; isDown = true;};
       const onUp = (x) => {
         if (!isDown) return;
         isDown = false;
@@ -1919,7 +1992,7 @@ function addMessageToDOM(msg, chatRef) {
               payload.batch_id = forwardBatchId;
             }
           }          
-          const { error } = await supabaseClient.from('chat_messages').insert([payload]);
+          const {error} = await supabaseClient.from('chat_messages').insert([payload]);
           if (error) console.error("Erro ao encaminhar mensagem:", error);
         }
         messagesToForward = [];
@@ -1947,7 +2020,7 @@ function addMessageToDOM(msg, chatRef) {
       if (currentChat === 'geral') {
         pinnedEl.style.display = 'flex';
         document.getElementById("pinned-text-content").textContent = "ATENÇÃO! Este chat é supervisionado por IA. Qualquer mensagem que viole normas éticas será imediatamente bloqueada.";
-      } else { 
+      } else {
         pinnedEl.style.display = 'none';
       }
       const savedDraft = localStorage.getItem(`draft_${currentChat}`);
@@ -1961,84 +2034,71 @@ function addMessageToDOM(msg, chatRef) {
       await loadMessages(currentChat);
     }
     /* ======================== LOADING MESSAGES (FIXED) ========================= */
-async function loadMessages(chat = currentChat) {
-  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-  const messagesEl = document.getElementById("messages");
-  const chatRef = chat || 'geral';
-  messagesEl.innerHTML = '';
-  lastDateLabel = "";
-
-  let query = supabaseClient
-    .from('chat_messages')
-    .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
-    .eq('corp_oper_nr', currentCorp);
-
-  if (chatRef === 'geral') {
-    query = query.eq('recipient_nint', 'geral');
-  } else {
-    query = query.or(`and(n_int.eq.${currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${currentUserNint})`);
-  }
-
-  try {
-    const { data: msgs, error } = await query.order('created_at', { ascending: true });
-    if (currentChat !== chatRef) return;
-    if (error) return console.error(error);
-
-    let filteredMsgs = msgs || [];
-
-    // 1. Filtro de Bloqueios (Teu código original)
-    if (filteredMsgs.length > 0 && chatRef !== 'geral') {
-      const { data: myBlocks } = await supabaseClient
-        .from('user_blocks')
-        .select('blocked_nint')
-        .eq('blocker_nint', currentUserNint)
+    async function loadMessages(chat = currentChat) {
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const messagesEl = document.getElementById("messages");
+      const chatRef = chat || 'geral';
+      messagesEl.innerHTML = '';
+      lastDateLabel = "";
+      let query = supabaseClient
+        .from('chat_messages')
+        .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
         .eq('corp_oper_nr', currentCorp);
-
-      if (myBlocks && myBlocks.length > 0) {
-        const blockedList = myBlocks.map(b => b.blocked_nint);
-        filteredMsgs = filteredMsgs.filter(m => !blockedList.includes(String(m.n_int)));
+      if (chatRef === 'geral') {
+        query = query.eq('recipient_nint', 'geral');
+      } else {
+        query = query.or(`and(n_int.eq.${currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${currentUserNint})`);
+      }
+      try {
+        const {data: msgs, error} = await query.order('created_at', {ascending: true});
+        if (currentChat !== chatRef) return;
+        if (error) return console.error(error);
+        let filteredMsgs = msgs || [];    
+        if (filteredMsgs.length > 0 && chatRef !== 'geral') {
+          const {data: myBlocks} = await supabaseClient
+            .from('user_blocks')
+            .select('blocked_nint')
+            .eq('blocker_nint', currentUserNint)
+            .eq('corp_oper_nr', currentCorp);    
+          if (myBlocks && myBlocks.length > 0) {
+            const blockedList = myBlocks.map(b => b.blocked_nint);
+            filteredMsgs = filteredMsgs.filter(m => !blockedList.includes(String(m.n_int)));
+          }
+        }
+        filteredMsgs = filteredMsgs.filter(m => {
+          const hiddenList = m.hidden_for || [];
+          return !hiddenList.includes(currentUserNint);
+        });
+        if (!filteredMsgs || filteredMsgs.length === 0) {
+          const emptyMsg = document.createElement("div");
+          emptyMsg.className = "empty-chat-placeholder";
+          emptyMsg.innerHTML = `
+            <div style="text-align: center; width: 100%; padding: 20px;">
+              <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
+              <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${currentChatName || 'este contacto'}</strong></span>
+            </div>
+          `;
+          messagesEl.appendChild(emptyMsg);
+        } else {
+          filteredMsgs.forEach(msg => addMessageToDOM(msg, chatRef));
+          setTimeout(() => scrollToBottom(), 100);
+          setTimeout(() => scrollToBottom(), 500);
+        }
+      } catch (err) {
+        console.error(err);
       }
     }
-
-    // --- 2. NOVO FILTRO DE REALISMO (HIDDEN FOR ME) ---
-    // Filtramos as mensagens antes de contar o tamanho da lista
-    filteredMsgs = filteredMsgs.filter(m => {
-      const hiddenList = m.hidden_for || [];
-      return !hiddenList.includes(currentUserNint);
-    });
-
-    // 3. DECISÃO FINAL: Mostrar mensagens ou placeholder
-    if (!filteredMsgs || filteredMsgs.length === 0) {
-      const emptyMsg = document.createElement("div");
-      emptyMsg.className = "empty-chat-placeholder";
-      emptyMsg.innerHTML = `
-        <div style="text-align: center; width: 100%; padding: 20px;">
-          <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
-          <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${currentChatName || 'este contacto'}</strong></span>
-        </div>
-      `;
-      messagesEl.appendChild(emptyMsg);
-    } else {
-      // Aqui as mensagens já vêm limpas, o addMessageToDOM vai desenhá-las todas
-      filteredMsgs.forEach(msg => addMessageToDOM(msg, chatRef));
-      setTimeout(() => scrollToBottom(), 100);
-      setTimeout(() => scrollToBottom(), 500);
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
     /* ====================== MARK MESSAGE AS READ ======================= */    
     async function markGeralAsRead() {
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-      const { data: messages } = await supabaseClient
+      const {data: messages} = await supabaseClient
       .from('chat_messages')
       .select('id')
       .eq('recipient_nint', 'geral')
       .eq('corp_oper_nr', currentCorp)
       .neq('n_int', currentUserNint);
       if (!messages || messages.length === 0) return;
-      const { data: alreadyRead } = await supabaseClient
+      const {data: alreadyRead} = await supabaseClient
       .from('chat_message_reads')
       .select('message_id')
       .eq('n_int', currentUserNint);
@@ -2047,7 +2107,7 @@ async function loadMessages(chat = currentChat) {
       .filter(m => !readIds.has(m.id))
       .map(m => ({message_id: m.id, n_int: currentUserNint, read_at: new Date().toISOString(), corp_oper_nr: currentCorp}));
       if (toInsert.length === 0) return;
-      const { error } = await supabaseClient
+      const {error} = await supabaseClient
       .from('chat_message_reads')
       .insert(toInsert);
       if (error) {
@@ -2080,15 +2140,14 @@ async function loadMessages(chat = currentChat) {
           .eq('blocker_nint', currentChat)
           .eq('blocked_nint', currentUserNint)
           .eq('corp_oper_nr', currentCorp)
-          .maybeSingle();
-        
+          .maybeSingle();        
         if (amIBlocked) {
           sendBtn.disabled = false;
           if (!audioUrl) {
             inputEl.value = text;
             inputEl.dispatchEvent(new Event('input'));
           }
-          showSystemWarning('contacto_bloqueado', 'Mensagem Não Enviada', 'Não podes enviar mensagens a este utilizador. Este contacto bloqueou-te.');
+          showSystemWarning('contacto_bloqueado', 'Mensagem Não Enviada', 'Não podes enviar mensagens a este utilizador. Este utilizador bloqueou-te.');
           return;
         }
       }      
@@ -2097,7 +2156,7 @@ async function loadMessages(chat = currentChat) {
       if (currentReplyToMessage) {
         messageData.reply_to_message_id = currentReplyToMessage.id;
       }
-      const { error } = await supabaseClient.from('chat_messages').insert([messageData]);
+      const {error} = await supabaseClient.from('chat_messages').insert([messageData]);
       sendBtn.disabled = false;
       if (error) {
         console.error(error);
@@ -2117,7 +2176,7 @@ async function loadMessages(chat = currentChat) {
           const pushText = audioUrl ? "🎤 Enviou um Áudio." : text;
           fetch('/api/sendPush', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({recipient_nint: String(currentChat), corp_nr: currentCorp, sender_name: senderName, message_text: pushText, sender_nint: currentUserNint})
           }).catch(err => console.error("Erro no push:", err));
         }        
@@ -2161,7 +2220,7 @@ async function loadMessages(chat = currentChat) {
       }      
       const menu = document.getElementById('reaction-menu');
       if (menu) {
-        if (selectedMessages.length === 1) {          
+        if (selectedMessages.length === 1) {
         } else {
           menu.style.display = 'none';
         }
@@ -2238,7 +2297,7 @@ async function loadMessages(chat = currentChat) {
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";      
       try {
         for (const msg of selectedMessages) {
-          const { data: msgData, error: fetchError } = await supabaseClient
+          const {data: msgData, error: fetchError} = await supabaseClient
             .from('chat_messages')
             .select('starred_by')
             .eq('id', msg.id)
@@ -2254,9 +2313,9 @@ async function loadMessages(chat = currentChat) {
           } else {
             starredBy.push(currentUserNint);
           }          
-          const { error: updateError } = await supabaseClient
+          const {error: updateError} = await supabaseClient
             .from('chat_messages')
-            .update({ starred_by: starredBy })
+            .update({starred_by: starredBy})
             .eq('id', msg.id)
             .eq('corp_oper_nr', currentCorp);          
           if (updateError) {
@@ -2308,57 +2367,45 @@ async function loadMessages(chat = currentChat) {
         chatIdInfo.style.display = 'none';
       }
     }
-    /* ========================== ACTION DELETE (FIXED) ========================== */
-let confirmResolver = null;
-async function actionDelete() {
-  if (!selectedMessages || selectedMessages.length === 0) return;
-  
-  const allMine = selectedMessages.every(m => String(m.n_int) === currentUserNint);
-  const choice = await askConfirm(selectedMessages.length, allMine);
-  if (choice === 'cancel') return;
-
-  const myNint = currentUserNint;
-
-  for (const msg of selectedMessages) {
-    if (choice === 'todos') {
-      // APAGAR PARA TODOS: Substitui o texto e marca a data (Só se for minha)
-      if (String(msg.n_int) === currentUserNint) {
-        await supabaseClient
-          .from('chat_messages')
-          .update({ 
-            deleted_at: new Date().toISOString(),
-            message: 'Mensagem apagada'
-          })
-          .eq('id', msg.id);
+    /* ========================== ACTION DELETE ========================== */
+    let confirmResolver = null;
+    async function actionDelete() {
+      if (!selectedMessages || selectedMessages.length === 0) return;
+      const allMine = selectedMessages.every(m => String(m.n_int) === currentUserNint);
+      const choice = await askConfirm(selectedMessages.length, allMine);
+      if (choice === 'cancel') return;
+      const myNint = currentUserNint;
+      for (const msg of selectedMessages) {
+        if (choice === 'todos') {
+          if (String(msg.n_int) === currentUserNint) {
+            await supabaseClient
+              .from('chat_messages')
+              .update({
+              deleted_at: new Date().toISOString(),
+              message: 'Mensagem apagada'
+            })
+              .eq('id', msg.id);
+          }
+        } 
+        else if (choice === 'mim') {
+          const currentHidden = msg.hidden_for || [];
+          if (!currentHidden.includes(myNint)) {
+            const newHidden = [...currentHidden, myNint];
+            await supabaseClient
+              .from('chat_messages')
+              .update({hidden_for: newHidden})
+              .eq('id', msg.id);
+          }
+          const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
+          if (msgElement) msgElement.remove();
+        }
       }
-    } 
-    else if (choice === 'mim') {
-      // APAGAR SÓ PARA MIM: Adiciona o meu NINT ao array hidden_for
-      // Nota: Buscamos o array atual ou inicializamos vazio
-      const currentHidden = msg.hidden_for || [];
-      if (!currentHidden.includes(myNint)) {
-        const newHidden = [...currentHidden, myNint];
-        
-        await supabaseClient
-          .from('chat_messages')
-          .update({ hidden_for: newHidden })
-          .eq('id', msg.id);
+      const messagesEl = document.getElementById("messages");
+      if (messagesEl && messagesEl.querySelectorAll('.message').length === 0) {
+        loadMessages(currentChat);
       }
-
-      // Remove visualmente de imediato
-      const msgElement = document.querySelector(`[data-message-id="${msg.id}"]`);
-      if (msgElement) msgElement.remove(); // .remove() é melhor que .display = 'none'
+      clearSelection();
     }
-  }
-
-  // Se após apagar não sobrarem mensagens visíveis, mostra o placeholder
-  const messagesEl = document.getElementById("messages");
-  if (messagesEl && messagesEl.querySelectorAll('.message').length === 0) {
-      loadMessages(currentChat); // Recarrega para forçar o placeholder
-  }
-
-  clearSelection();
-}
     function askConfirm(count, allMine) {
       const modal = document.getElementById('modal-confirm');
       if (modal) {
@@ -2511,7 +2558,7 @@ async function actionDelete() {
       }, async (payload) => {
         let msg = payload.new;
         if (msg.reply_to_message_id) {
-          const { data: replyData } = await supabaseClient
+          const {data: replyData} = await supabaseClient
           .from('chat_messages')
           .select('id, message, abv_name')
           .eq('id', msg.reply_to_message_id)
@@ -2565,7 +2612,7 @@ async function actionDelete() {
             msgElement.classList.add('deleted');
             const textContent = msgElement.querySelector('.msg-text-content');
             if (textContent) {
-              textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
+              textContent.innerHTML = '<span class="material-icons" style="font-size: 15px;">block</span> Mensagem apagada';
             }
           }
         }
@@ -2818,7 +2865,7 @@ async function actionDelete() {
             menu.style.top = posY + 'px';
           }
         }, 500);
-      }, { passive: true });
+      }, {passive: true});
       messageElement.addEventListener('touchend', () => clearTimeout(pressTimer));
       messageElement.addEventListener('touchmove', () => clearTimeout(pressTimer));
       messageElement.addEventListener('click', (e) => {
@@ -2875,7 +2922,7 @@ async function actionDelete() {
       if (menu) menu.style.display = 'none';
       clearSelection();
       try {
-        const { data: msg, error: fetchError } = await supabaseClient
+        const {data: msg, error: fetchError} = await supabaseClient
         .from('chat_messages')
         .select('reactions')
         .eq('id', targetId)
@@ -2890,9 +2937,9 @@ async function actionDelete() {
         } else {
           currentReactions[currentUserNint] = emoji;
         }
-        const { error: updateError } = await supabaseClient
+        const {error: updateError} = await supabaseClient
         .from('chat_messages')
-        .update({ reactions: currentReactions })
+        .update({reactions: currentReactions})
         .eq('id', targetId);
         if (updateError) {
           console.error("Erro ao gravar reação:", updateError);
@@ -2933,8 +2980,7 @@ async function actionDelete() {
     }, {passive: true});    
     document.addEventListener('click', (e) => {
       const menu = document.getElementById('reaction-menu');
-      const picker = document.getElementById('full-emoji-picker-container');
-      
+      const picker = document.getElementById('full-emoji-picker-container');      
       if (menu && !menu.contains(e.target) && !picker.contains(e.target) && selectedMessages.length === 0) {
         menu.style.display = 'none';
         picker.style.display = 'none';
@@ -2989,7 +3035,7 @@ async function actionDelete() {
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
       const {error} = await supabaseClient
       .from('chat_messages')
-      .update({ 
+      .update({
         deleted_at: new Date().toISOString(),
         message: 'Mensagem apagada'
       })
@@ -3004,7 +3050,7 @@ async function actionDelete() {
           msgElement.classList.add('deleted');
           const textContent = msgElement.querySelector('.msg-text-content');
           if (textContent) {
-            textContent.innerHTML = '<span class="deleted-icon">🚫</span> Mensagem apagada';
+            textContent.innerHTML = '<span class="material-icons" style="font-size: 15px;">block</span> Mensagem apagada';
           }
         }
       }
@@ -3041,52 +3087,61 @@ async function actionDelete() {
     }    
     /* ==================== CONTACT MENU FUNCTIONS ======================= */
     let currentContactMenuTarget = null;
-    
     async function openContactMenu(contactNint, contactName) {
-      if (contactNint === 'geral') return;      
       currentContactMenuTarget = {nint: contactNint, name: contactName};
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
       const {data: blockData} = await supabaseClient
-        .from('user_blocks')
-        .select('id')
-        .eq('blocker_nint', currentUserNint)
-        .eq('blocked_nint', contactNint)
-        .eq('corp_oper_nr', currentCorp)
-        .maybeSingle();
+      .from('user_blocks')
+      .select('id')
+      .eq('blocker_nint', currentUserNint)
+      .eq('blocked_nint', contactNint)
+      .eq('corp_oper_nr', currentCorp) 
+      .maybeSingle();
       const {data: muteData} = await supabaseClient
-        .from('user_mutes')
-        .select('id')
-        .eq('muter_nint', currentUserNint)
-        .eq('muted_nint', contactNint)
-        .eq('corp_oper_nr', currentCorp)
-        .maybeSingle();
-      document.getElementById('contact-menu-title').textContent = contactName;      
+      .from('user_mutes') .select('id')
+      .eq('muter_nint', currentUserNint)
+      .eq('muted_nint', contactNint)
+      .eq('corp_oper_nr', currentCorp)
+      .maybeSingle(); 
+      document.getElementById('contact-menu-title').textContent = contactName;
       const blockBtn = document.getElementById('contact-menu-block');
-      const muteBtn = document.getElementById('contact-menu-mute');      
+      const muteBtn = document.getElementById('contact-menu-mute');
+      const clearBtn = document.getElementById('contact-menu-clear');
       if (blockData) {
         blockBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">lock_open</span>Desbloquear';
-        blockBtn.style.color = '#ccc';
+        blockBtn.style.color = '#ccc'; 
       } else {
         blockBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">block</span>Bloquear';
-        blockBtn.style.color = '#ccc';
-      }
+        blockBtn.style.color = '#ccc'; 
+      } 
       if (muteData) {
-        muteBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">notifications_active</span>Ativar notificações';
+        muteBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">notifications_active</span>Ativar notificações'; 
         muteBtn.style.color = '#ccc';
       } else {
-        muteBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">notifications_off</span>Silenciar';
-        muteBtn.style.color = '#ccc';
+        muteBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">notifications_off</span>Silenciar'; 
+        muteBtn.style.color = '#ccc'; 
       }
+      if (String(contactNint) === 'geral') {
+        document.getElementById('contact-menu-overlay').style.display = 'flex';
+        blockBtn.style.display = 'none';
+        clearBtn.style.display = 'none';
+        muteBtn.onclick = () => toggleMuteUser();
+        return;
+      }
+      blockBtn.style.display = 'block';
+      muteBtn.style.display = 'block';
+      clearBtn.style.display = 'block';
       blockBtn.onclick = () => toggleBlockUser();
       muteBtn.onclick = () => toggleMuteUser();
       document.getElementById('contact-menu-clear').onclick = () => clearConversation();
       document.getElementById('contact-menu-overlay').style.display = 'flex';
-    }    
+    } 
     function closeContactMenu() {
       document.getElementById('contact-menu-overlay').style.display = 'none';
       currentContactMenuTarget = null;
-    }    
+    }
     /* ======================== TOGGLE BLOCK USER ======================== */
+  
     async function toggleBlockUser() {
       if (!currentContactMenuTarget) return;      
       const targetNint = currentContactMenuTarget.nint;
@@ -3116,11 +3171,7 @@ async function actionDelete() {
       } else {
         const {error} = await supabaseClient
           .from('user_blocks')
-          .insert([{
-            blocker_nint: currentUserNint,
-            blocked_nint: targetNint,
-            corp_oper_nr: currentCorp
-          }]);        
+          .insert([{blocker_nint: currentUserNint, blocked_nint: targetNint, corp_oper_nr: currentCorp}]);        
         if (!error) {
           closeContactMenu();
           showSystemWarning('sucesso_bloqueio', 'Contacto Bloqueado', `${targetName} foi bloqueado com sucesso. Não verás mais mensagens deste utilizador.`);
@@ -3131,6 +3182,13 @@ async function actionDelete() {
           showSystemWarning('erro_bloqueio_tecnico', 'Erro de Segurança', 'Ocorreu um problema ao tentar processar o bloqueio. O contacto ainda está ativo.');
         }
       }
+      const id = String(targetNint);
+      if (existing) blockedSetCache.delete(id);
+      else blockedSetCache.add(id);
+      renderContactStatus(id, {
+        blocked: blockedSetCache.has(id),
+        muted: mutedSetCache.has(id)
+      });
     }    
     /* ========================= TOGGLE MUTE USER ======================== */
     async function toggleMuteUser() {
@@ -3159,11 +3217,7 @@ async function actionDelete() {
       } else {
         const {error} = await supabaseClient
           .from('user_mutes')
-          .insert([{
-            muter_nint: currentUserNint,
-            muted_nint: targetNint,
-            corp_oper_nr: currentCorp
-          }]);        
+          .insert([{muter_nint: currentUserNint, muted_nint: targetNint, corp_oper_nr: currentCorp}]);        
         if (!error) {
           closeContactMenu();
           showSystemWarning('sucesso_silenciamento', 'Contacto Silenciado', `${targetName} foi silenciado. Não receberás notificações desta conversa.`);
@@ -3171,48 +3225,46 @@ async function actionDelete() {
           showSystemWarning('erro_silenciar_tecnico', 'Ação Falhou', 'Ocorreu um problema ao tentar silenciar as notificações deste contacto.');
         }
       }
-    }    
-    /* ======================= CLEAR CONVERSATION (LÓGICA HIDDEN) ======================== */    
-async function clearConversation() {
-  if (!currentContactMenuTarget) return;
-
-  const targetNint = currentContactMenuTarget.nint;
-  const targetName = currentContactMenuTarget.name;
-  const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
-  const myNint = localStorage.getItem("currentUserNint") || currentUserNint; 
-
-  const confirmed = await confirmCriticalAction(targetName);
-  if (!confirmed) return;
-
-  try {
-    // 1. Em vez de DELETE, usamos UPDATE
-    // O objetivo é adicionar o TEU nint à lista de quem escondeu a conversa
-    const { error } = await supabaseClient
-      .from('chat_messages')
-      .update({ 
-        // Nota: Esta sintaxe depende de como geres o array, 
-        // mas o ideal é marcar que foi escondido por ti.
-        hidden_for: [myNint] 
-      })
-      .eq('corp_oper_nr', currentCorp) 
-      .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`);
-
-    if (error) throw error;
-
-    closeContactMenu();
-    showSystemWarning('sucesso_limpeza', 'Conversa Ocultada', `A conversa foi limpa do teu histórico.`);
-    
-    // 2. Limpa o ecrã visualmente
-    if (currentChat === targetNint) {
-      const messagesEl = document.getElementById("messages"); // O teu container real
-      if (messagesEl) messagesEl.innerHTML = ''; 
+      const id = String(targetNint);
+      if (id === 'geral') {
+        muteGeralCache = !existing;
+        renderContactStatus('geral', {blocked: false, muted: muteGeralCache});
+      } else {
+        if (existing) mutedSetCache.delete(id);
+        else mutedSetCache.add(id);
+        renderContactStatus(id, {
+          blocked: blockedSetCache.has(id),
+          muted: mutedSetCache.has(id)
+        });
+      }
     }
-
-  } catch (error) {
-    console.error('Erro no update/hidden:', error);
-    showSystemWarning('erro_eliminar_tecnico', 'Erro', 'Não foi possível ocultar a conversa.');
-  }
-}
+    /* ======================= CLEAR CONVERSATION (LÓGICA HIDDEN) ======================== */
+    async function clearConversation() {
+      if (!currentContactMenuTarget) return;
+      const targetNint = currentContactMenuTarget.nint;
+      const targetName = currentContactMenuTarget.name;
+      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const myNint = localStorage.getItem("currentUserNint") || currentUserNint; 
+      const confirmed = await confirmCriticalAction(targetName);
+      if (!confirmed) return;
+      try {
+        const {error} = await supabaseClient
+        .from('chat_messages')
+        .update({hidden_for: [myNint]})
+        .eq('corp_oper_nr', currentCorp) 
+        .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`);
+        if (error) throw error;
+        closeContactMenu();
+        showSystemWarning('sucesso_limpeza', 'Conversa Eliminada.', `A conversa foi eliminada do teu histórico.`);
+        if (currentChat === targetNint) {
+          const messagesEl = document.getElementById("messages");
+          if (messagesEl) messagesEl.innerHTML = '';
+        }
+      } catch (error) {
+        console.error('Erro no update/hidden:', error);        
+        showSystemWarning('erro_eliminar_tecnico', 'Erro', 'Não foi possível ocultar a conversa.');
+      }
+    }
     /* ======================== ADVISORS MANAGER ========================= */  
     function showSystemWarning(tipo, tituloCustom = '', mensagemCustom = '') {
       const modal = document.getElementById('modal-alert-system');
@@ -3242,7 +3294,7 @@ async function clearConversation() {
           titulo = tituloCustom || 'Erro de Transferência';
           break;
         case 'contacto_bloqueado':
-          iconName = 'person_off'; iconColor = '#64748b';
+          iconName = 'person_off'; iconColor = '#ef4444';
           titulo = tituloCustom || 'Mensagem Não Enviada';
           break;
         case 'sucesso_bloqueio':
@@ -3270,7 +3322,7 @@ async function clearConversation() {
           titulo = tituloCustom || 'Erro nas Notificações';
           break;
         case 'sucesso_silenciamento':
-          iconName = 'notifications_off'; iconColor = '#64748b';
+          iconName = 'notifications_off'; iconColor = '#ef4444';
           titulo = tituloCustom || 'Contacto Silenciado';
           break;
         case 'erro_silenciar_tecnico':
@@ -3286,7 +3338,7 @@ async function clearConversation() {
           titulo = tituloCustom || 'Erro ao Copiar';
           break;
         case 'sucesso_limpeza':
-          iconName = 'delete_sweep'; iconColor = '#22c55e';
+          iconName = 'delete_sweep'; iconColor = '#ef4444';
           titulo = tituloCustom || 'Limpeza Concluída';
           break;
         case 'permissao_negada_limpeza':
@@ -3316,7 +3368,8 @@ async function clearConversation() {
         if (modalSistema) {
           modalSistema.style.display = 'none';
         }
-        mensagem.innerHTML = `Isto irá eliminar <b>TODA</b> a conversa com <strong>${userName}</strong> da base de dados.<br><br><span style="color: #ef4444;">Esta ação NÃO PODE ser desfeita!</span>`;
+        mensagem.innerHTML = `Isto irá eliminar <b>TODA</b> a conversa com <strong>${userName}</strong>.<br><br><span style="color: #ef4444;">
+                              Esta ação NÃO PODE ser desfeita!</span>`;
         criticalModal.style.display = 'flex';
         btnEliminar.onclick = () => {
           criticalModal.style.display = 'none';
@@ -3342,6 +3395,3 @@ async function clearConversation() {
   </script>
 </body>
 </html>
-
-
-
