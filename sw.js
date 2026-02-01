@@ -61,27 +61,49 @@ self.addEventListener('fetch', (event) => {
 /* ============================ PUSH INTELIGENTE ============================ */
 self.addEventListener('push', function(event) {
   let data = { title: 'CB360 Mobile', message: 'Nova atualização no sistema!' };
-    try {
+  
+  try {
     if (event.data) {
       data = event.data.json();
     }
   } catch (err) {
     data.message = event.data.text();
   }
-  const pushChatId = data.chatId; 
+
+  // Pegamos o ID de quem enviou e garantimos que é String e não tem espaços
+  const pushChatId = data.chatId ? String(data.chatId).trim() : null; 
+
   const promise = clients.matchAll({ type: 'window', includeUncontrolled: true })
     .then(windowClients => {
+      // 1. Procurar janela de chat focada
       const activeChatWindow = windowClients.find(client => 
-        client.url.includes('InterChat.html') && client.focused
+        client.url.indexOf('InterChat.html') !== -1 && client.focused
       );
+
       if (activeChatWindow && pushChatId) {
-        const url = new URL(activeChatWindow.url);
-        const activeIdInUrl = url.searchParams.get('chatId')
-        if (activeIdInUrl === String(pushChatId)) {
-          console.log("SW: Utilizador já está a ler esta conversa. Silenciando...");
-          return; 
+        // Tentativa 1: Via searchParams
+        const urlObj = new URL(activeChatWindow.url);
+        let activeIdInUrl = urlObj.searchParams.get('chatId');
+
+        // Tentativa 2: Se o searchParams falhar (comum em PWAs), tentamos regex na URL
+        if (!activeIdInUrl) {
+          const match = activeChatWindow.url.match(/[?&]chatId=([^&]+)/);
+          if (match) activeIdInUrl = match[1];
+        }
+
+        if (activeIdInUrl) {
+          const cleanActiveId = String(activeIdInUrl).trim();
+          
+          console.log(`SW: Comparando Ativo(${cleanActiveId}) com Push(${pushChatId})`);
+
+          if (cleanActiveId === pushChatId) {
+            console.log("SW: IDs Iguais. Bloqueando notificação.");
+            return; // PARA AQUI
+          }
         }
       }
+
+      // 2. Se não for igual, mostra a notificação
       const options = {
         body: data.message || data.body || 'Tens uma nova mensagem.',
         icon: '/icon-192.png',
@@ -90,8 +112,10 @@ self.addEventListener('push', function(event) {
         tag: 'cb360-notification',
         renotify: true
       };
+
       return self.registration.showNotification(data.title || 'CB360 Mobile', options);
     });
+
   event.waitUntil(promise);
 });
 self.addEventListener('notificationclick', function(event) {
