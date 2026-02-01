@@ -3401,8 +3401,52 @@
         console.log("Eliminação cancelada pelo utilizador.");
       }
     }
+    /* ============= EVENT LISTENERS PARA CHAT TRACKING ============= */
+
+// Quando tab fica escondida
+document.addEventListener('visibilitychange', () => {
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+  
+  if (document.hidden) {
+    // Tab escondida → limpar chat ativo
+    navigator.serviceWorker.controller.postMessage({
+      type: 'CLEAR_ACTIVE_CHAT'
+    });
+    console.log("SW avisado: Tab escondida, chat limpo");
+  } else {
+    // Tab voltou → re-registar chat se houver um ativo
+    if (currentChat) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SET_ACTIVE_CHAT',
+        chatId: currentChat
+      });
+      console.log("SW avisado: Tab voltou, chat ativo é " + currentChat);
+    }
+  }
+});
+
+// Cleanup ao fechar tab
+window.addEventListener('beforeunload', () => {
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: 'CLEANUP'
+    });
+  }
+});
+
+// Receber mensagem do SW para abrir chat
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data.type === 'OPEN_CHAT' && event.data.chatNint) {
+      const contact = users.find(u => String(u.n_int) === String(event.data.chatNint));
+      if (contact) {
+        openChat(contact.n_int, contact.abv_name);
+      } else if (event.data.chatNint === 'geral') {
+        openChat('geral', 'Chat Geral');
+      }
+    }
+  });
+}
   </script>
 </body>
 </html>
-
-
