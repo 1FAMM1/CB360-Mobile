@@ -2,7 +2,7 @@
 CB360 Mobile - Complete Service Worker (v2.8.2)
 Optimized for: Smart Push Filtering + Offline Cache
 ========================================================= */
-const CACHE_NAME = 'cb360-cache-v2.8.4';
+const CACHE_NAME = 'cb360-cache-v2.8.7';
 const ASSETS_TO_CACHE = [
   '/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', 
   '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/ExtDisp.html', 
@@ -58,57 +58,40 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
-/* ============================ PUSH INTELIGENTE (Versão Blindada) ============================ */
+/* ============================ PUSH v2.8.7 ============================ */
 self.addEventListener('push', function(event) {
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { message: event.data ? event.data.text() : 'Nova mensagem' };
+    data = { message: event.data.text() };
   }
 
-  // 1. Pegamos o ID de quem enviou (do payload do servidor)
-  // Garantimos que é uma string limpa
-  const remetenteID = data.chatId ? String(data.chatId).trim() : "null";
+  // O ID de quem enviou (neste caso, o 103)
+  const idDoRemetente = data.chatId ? String(data.chatId).trim() : null;
 
   const promise = clients.matchAll({ type: 'window', includeUncontrolled: true })
     .then(windowClients => {
-      
-      // 2. Procuramos a janela do chat
-      // Usamos .some() para verificar se existe ALGUMA janela que cumpra o critério
-      const jaEstaNoChat = windowClients.some(client => {
-        // Se não for a página do chat, ignora
-        if (!client.url.includes('InterChat.html')) return false;
-
-        // Extraímos o chatId da URL manualmente (mais seguro que URLSearchParams no Android)
-        const urlParts = client.url.split('chatId=');
-        if (urlParts.length > 1) {
-          const idNaUrl = urlParts[1].split('&')[0]; // Pega o ID e ignora o resto
-          
-          // COMPARAÇÃO REAL:
-          // Se o ID da Janela aberta for igual ao ID de quem enviou o Push...
-          return String(idNaUrl).trim() === remetenteID;
-        }
-        return false;
+      // Procuramos se existe alguma janela que tenha o ID do remetente na URL
+      const utilizadorJaEstaAVer = windowClients.some(client => {
+        // Verifica se é a página do chat E se o ID do remetente está na URL
+        return client.url.includes('InterChat.html') && 
+               client.url.includes('chatId=' + idDoRemetente);
       });
 
-      // 3. SE já estiver no chat, RETORNAMOS aqui e não mostramos a notificação
-      if (jaEstaNoChat) {
-        console.log("Filtro Ativo: Utilizador já está a ler o chat " + remetenteID);
-        return; 
+      if (utilizadorJaEstaAVer) {
+        console.log("Silenciando: O utilizador já tem o chat do " + idDoRemetente + " aberto.");
+        return; // MATA A NOTIFICAÇÃO AQUI
       }
 
-      // 4. Caso contrário, mostra a notificação normal
-      const options = {
-        body: data.message || data.body || 'Tens uma nova mensagem.',
+      // Se não estiver aberto, mostra a notificação
+      return self.registration.showNotification(data.title || 'CB360 Mobile', {
+        body: data.message || data.body || 'Nova mensagem',
         icon: '/icon-192.png',
-        vibrate: [200, 100, 200],
-        tag: 'chat-group', // Importante para não duplicar alertas
+        tag: 'chat-group',
         renotify: true,
         data: { url: data.url || '/InterChat.html' }
-      };
-
-      return self.registration.showNotification(data.title || 'CB360 Mobile', options);
+      });
     });
 
   event.waitUntil(promise);
