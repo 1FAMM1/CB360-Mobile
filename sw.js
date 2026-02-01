@@ -1,8 +1,8 @@
 /* =========================================================
-CB360 Mobile - Service Worker (v2.8.8)
-Filtro por Comunicação Direta (postMessage)
+CB360 Mobile - Service Worker (v2.9.1)
+Correção: Filtro de Notificações ultra-preciso
 ========================================================= */
-const CACHE_NAME = 'cb360-cache-v2.8.8'; // Atualizado para v2.8.8
+const CACHE_NAME = 'cb360-cache-v2.9.1';
 const ASSETS_TO_CACHE = [
   '/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', 
   '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/ExtDisp.html', 
@@ -13,14 +13,15 @@ const ASSETS_TO_CACHE = [
   '/DecirTeam.html', '/InterChat.html', '/manifest.json',
 ];
 
-// VARIÁVEL GLOBAL NO SW PARA GUARDAR O CHAT ABERTO
+/* =========================================================
+CB360 Mobile - Service Worker (v2.9.1)
+Correção: Filtro de Notificações ultra-preciso
+========================================================= */
+// OUVIR MENSAGENS (Opcional, mas mantemos para compatibilidade)
 let activeChatId = null;
-
-// ESCUTAR MENSAGENS DO INTERCHAT.HTML
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SET_ACTIVE_CHAT') {
     activeChatId = event.data.chatId ? String(event.data.chatId).trim() : null;
-    console.log("SW: Chat ativo na UI agora é:", activeChatId);
   }
 });
 
@@ -33,46 +34,48 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) return caches.delete(cache);
-        })
-      );
-    }).then(() => clients.claim())
+    caches.keys().then((keys) => Promise.all(
+      keys.map((key) => { if (key !== CACHE_NAME) return caches.delete(key); })
+    )).then(() => self.clients.claim())
   );
 });
-
-/* ============================ PUSH v2.8.8 ============================ */
+/* ============================ PUSH CORRIGIDO ============================ */
 self.addEventListener('push', function(event) {
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { message: event.data.text() };
+    data = { message: event.data ? event.data.text() : 'Nova mensagem' };
   }
 
   const idDoRemetente = data.chatId ? String(data.chatId).trim() : null;
 
-  // VERIFICAÇÃO DUPLA: Pela variável global OU pela URL (segurança extra)
   const promise = clients.matchAll({ type: 'window', includeUncontrolled: true })
     .then(windowClients => {
       
-      const jaEstaAVer = windowClients.some(client => {
-        const urlMatch = client.url.includes('chatId=' + idDoRemetente);
-        const msgMatch = (activeChatId === idDoRemetente);
-        return (urlMatch || msgMatch);
-      });
+      // 1. Procuramos APENAS a janela que o utilizador está a usar agora (focused: true)
+      const janelaAtiva = windowClients.find(c => c.focused === true);
 
-      if (jaEstaAVer && idDoRemetente) {
-        console.log("SW: Bloqueando notificação. Chat " + idDoRemetente + " está aberto.");
-        return; 
+      if (janelaAtiva && idDoRemetente) {
+        // Se a janela ativa for o InterChat, verificamos o ID na URL
+        if (janelaAtiva.url.includes('InterChat.html')) {
+          const urlObj = new URL(janelaAtiva.url);
+          const idNaUrl = urlObj.searchParams.get('chatId');
+
+          // BLOQUEIO: Só se estiver no chat da mesma pessoa que enviou
+          if (idNaUrl === idDoRemetente) {
+            console.log("SW: Silenciando push porque já estás a ler esta conversa.");
+            return; 
+          }
+        }
       }
 
+      // 2. MOSTRAR NOTIFICAÇÃO (Se a app estiver fechada, em segundo plano, ou noutro chat)
       return self.registration.showNotification(data.title || 'CB360 Mobile', {
         body: data.message || data.body || 'Nova mensagem',
         icon: '/icon-192.png',
-        tag: 'chat-group',
+        // 'tag' única por chat permite que mensagens de pessoas diferentes não se apaguem
+        tag: idDoRemetente ? `chat-${idDoRemetente}` : 'geral',
         renotify: true,
         data: { url: data.url || '/InterChat.html' }
       });
@@ -88,7 +91,7 @@ self.addEventListener('notificationclick', function(event) {
       for (const client of clientList) {
         if (client.url.includes('InterChat.html') && 'focus' in client) return client.focus();
       }
-      if (clients.openWindow) return clients.openWindow(event.notification.data.url || '/');
+      if (clients.openWindow) return clients.openWindow(event.notification.data.url || '/InterChat.html');
     })
   );
 });
