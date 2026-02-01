@@ -1444,6 +1444,7 @@
       document.getElementById("contact-list").style.display = 'flex';
       document.getElementById("contact-title").style.display = 'block';
       currentChat = 'null';
+      history.pushState(null, '', `InterChat.html`);
       loadContacts();
     }
     /* ======================== SCROLL TO BOTTOM ========================= */
@@ -3396,3 +3397,4 @@
   </script>
 </body>
 </html>
+
