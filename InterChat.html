@@ -15,7 +15,7 @@
       } catch (e) {}
     })();
   </script>
-  <title>CB360_CHAT_INTERNO</title>
+  <title>CB360 Mobile - Chat Interno</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <style>
@@ -604,10 +604,10 @@
     let isRecording = false;
     let recordTimeout;
     let recordingTimer;
-    const currentUserNint = String(localStorage.getItem("currentCorpNint") || "103");
+    const currentUserNint = String(localStorage.getItem("currentCorpNint"));
     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const corp = localStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -1043,7 +1043,7 @@
       return publicUrl;
     }
     async function sendImageMessage(imageUrl, fileName, caption = "") {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const senderName = await fetchUserName();
       const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl,
                        file_name: fileName, message: caption};
@@ -1094,7 +1094,7 @@
         return;
       }
       if (!currentChat || currentChat === "null") return;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const chatId = String(currentChat);
       if (file.type?.startsWith('image/')) {
         try {
@@ -1216,7 +1216,7 @@
     let mutedSetCache = new Set();
     let muteGeralCache = false;
     async function loadContacts() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const colors = {'A': '#f44336','B': '#e91e63','C': '#9c27b0','D': '#673ab7','E': '#3f51b5','F': '#2196f3','G': '#03a9f4',
                       'H': '#00bcd4','I': '#009688','J': '#4caf50','K': '#8bc34a','L': '#cddc39','M': '#ffeb3b','N': '#ffc107',
                       'O': '#ff9800','P': '#ff5722','Q': '#795548','R': '#9e9e9e','S': '#60727b','T': '#333333','U': '#ff4081',
@@ -1380,7 +1380,7 @@
     }
     /* ========================== UPDATE BADGES ========================== */
     async function updateUnreadBadges() {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {count: totalGeral} = await supabaseClient
       .from('chat_messages')
       .select('*', {count: 'exact', head: true})
@@ -1975,7 +1975,7 @@
       const typingStatusEl = document.getElementById("typing-status");
       messagesEl.innerHTML = '';
       if (typeof messagesToForward !== 'undefined' && messagesToForward.length > 0) {
-        const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+        const currentCorp = localStorage.getItem("currentCorpOperNr");
         const senderName = await fetchUserName();
         const hasMultipleMedia = messagesToForward.filter(m => 
           m.message_type === 'image' || m.message_type === 'file'
@@ -2001,6 +2001,7 @@
       }
       currentChat = String(n_int);
       currentChatName = name;
+      history.pushState(null, '', `?chatId=${currentChat}`);
       if (currentChat === 'geral') {
         await markGeralAsRead();
         updateUnreadBadges();
@@ -2035,7 +2036,7 @@
     }
     /* ======================== LOADING MESSAGES (FIXED) ========================= */
     async function loadMessages(chat = currentChat) {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const messagesEl = document.getElementById("messages");
       const chatRef = chat || 'geral';
       messagesEl.innerHTML = '';
@@ -2090,7 +2091,7 @@
     }
     /* ====================== MARK MESSAGE AS READ ======================= */    
     async function markGeralAsRead() {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {data: messages} = await supabaseClient
       .from('chat_messages')
       .select('id')
@@ -2128,7 +2129,7 @@
         resetLayout();
         inputEl.dispatchEvent(new Event('input'));
       }
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       if (currentEditingMessage && !audioUrl) {
         sendBtn.disabled = false;
         return;
@@ -2294,7 +2295,7 @@
     /* =========================== ACTION STAR =========================== */
     async function actionStar() {
       if (selectedMessages.length === 0) return;      
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";      
+      const currentCorp = localStorage.getItem("currentCorpOperNr");      
       try {
         for (const msg of selectedMessages) {
           const {data: msgData, error: fetchError} = await supabaseClient
@@ -2548,7 +2549,7 @@
       loadTheme();
       await loadContacts();
       updateUnreadBadges();
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       supabaseClient.channel('chat_realtime')
         .on('postgres_changes', {
         event: 'INSERT',
@@ -2571,7 +2572,7 @@
         if (currentChat === 'geral' && msg.recipient_nint === 'geral') {
           addMessageToDOM(msg, 'geral');
           if (String(msg.n_int) !== currentUserNint && document.getElementById("messages")?.style.display !== 'none') {
-            const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+            const currentCorp = localStorage.getItem("currentCorpOperNr");
             const geralContact = document.querySelector('.contact[data-nint="geral"]');
             const currentBadge = geralContact?.querySelector('.unread-badge');
             const badgeValue = currentBadge ? currentBadge.textContent : null;
@@ -3032,7 +3033,7 @@
     }
     /* ========================= DELETE MESSAGE ========================== */
     async function deleteMessage(messageId) {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {error} = await supabaseClient
       .from('chat_messages')
       .update({
@@ -3069,7 +3070,7 @@
     /* ======================= SEND READ RECIPIENT ======================= */
     async function sendReadReceipt(toNint) {
       if (toNint === 'geral' || !toNint) return;    
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {error} = await supabaseClient
         .from('chat_messages')
         .update({read_at: new Date().toISOString()})
@@ -3089,7 +3090,7 @@
     let currentContactMenuTarget = null;
     async function openContactMenu(contactNint, contactName) {
       currentContactMenuTarget = {nint: contactNint, name: contactName};
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {data: blockData} = await supabaseClient
       .from('user_blocks')
       .select('id')
@@ -3146,7 +3147,7 @@
       if (!currentContactMenuTarget) return;      
       const targetNint = currentContactMenuTarget.nint;
       const targetName = currentContactMenuTarget.name;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {data: existing} = await supabaseClient
         .from('user_blocks')
         .select('id')
@@ -3195,7 +3196,7 @@
       if (!currentContactMenuTarget) return;      
       const targetNint = currentContactMenuTarget.nint;
       const targetName = currentContactMenuTarget.name;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {data: existing} = await supabaseClient
         .from('user_mutes')
         .select('id')
@@ -3243,7 +3244,7 @@
       if (!currentContactMenuTarget) return;
       const targetNint = currentContactMenuTarget.nint;
       const targetName = currentContactMenuTarget.name;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const myNint = localStorage.getItem("currentUserNint") || currentUserNint; 
       const confirmed = await confirmCriticalAction(targetName);
       if (!confirmed) return;
