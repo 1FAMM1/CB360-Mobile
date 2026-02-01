@@ -2003,6 +2003,13 @@
       currentChat = String(n_int);
       currentChatName = name;
       history.pushState(null, '', `?chatId=${currentChat}`);
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            type: 'SET_ACTIVE_CHAT',
+            chatId: currentChat
+        });
+        console.log("SW avisado: Chat ativo é " + currentChat);
+      }
       if (currentChat === 'geral') {
         await markGeralAsRead();
         updateUnreadBadges();
@@ -3397,4 +3404,5 @@
   </script>
 </body>
 </html>
+
 
