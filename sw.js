@@ -1,6 +1,5 @@
 /* =========================================================
     CB360 Mobile - Complete Service Worker
-    Optimized for: Push Notifications + Bar-Free Navigation
     v2.8.1 - Com supressão de notificações em chats ativos
     ========================================================= */
 const CACHE_NAME = 'cb360-cache-v2.8.1';
@@ -14,8 +13,8 @@ const ASSETS_TO_CACHE = [
   '/DecirTeam.html', '/InterChat.html', '/manifest.json'
 ];
 
-// ✅ NOVO: Track de chats ativos por tab
-let activeChats = new Map(); // {clientId: chatNint}
+// Track de chats ativos por tab
+let activeChats = new Map();
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -67,26 +66,28 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// ✅ NOVO: Receber mensagens do frontend sobre chat ativo
+// ✅ COMPATÍVEL COM TEU CÓDIGO FRONTEND
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'CHAT_FOCUS') {
-    activeChats.set(event.source.id, event.data.chatNint);
-    console.log('SW: Chat focado:', event.data.chatNint, 'ClientID:', event.source.id);
+  // Quando abre chat
+  if (event.data && event.data.type === 'SET_ACTIVE_CHAT') {
+    activeChats.set(event.source.id, String(event.data.chatId));
+    console.log('SW: Chat ativo:', event.data.chatId, 'ClientID:', event.source.id);
   }
   
-  if (event.data && event.data.type === 'CHAT_BLUR') {
+  // Quando fecha chat
+  if (event.data && event.data.type === 'CLEAR_ACTIVE_CHAT') {
     activeChats.delete(event.source.id);
-    console.log('SW: Chat desfocado, ClientID:', event.source.id);
+    console.log('SW: Chat limpo, ClientID:', event.source.id);
   }
   
-  // ✅ Limpar tabs fechadas
+  // Cleanup geral
   if (event.data && event.data.type === 'CLEANUP') {
     activeChats.clear();
     console.log('SW: Todos os chats limpos');
   }
 });
 
-// ✅ MODIFICADO: Push com verificação de chat ativo
+// Push com verificação de chat ativo
 self.addEventListener('push', function(event) {
   let data = { title: 'CB360 Mobile', message: 'Nova atualização no sistema!' };
   
@@ -98,16 +99,17 @@ self.addEventListener('push', function(event) {
     data.message = event.data.text();
   }
   
-  // ✅ NOVO: Verificar se user está no chat ativo
-  const chatNint = data.chatNint; // API deve enviar isto
+  // ✅ Verificar se user está no chat ativo
+  const chatNint = String(data.chatNint || data.chatId || '');
   
   if (chatNint) {
-    const isActiveInAnyTab = Array.from(activeChats.values()).includes(chatNint);
+    const isActiveInAnyTab = Array.from(activeChats.values())
+      .map(id => String(id))
+      .includes(chatNint);
     
     if (isActiveInAnyTab) {
       console.log('SW: Notificação suprimida - user está no chat', chatNint);
-      // NÃO mostrar notificação
-      return;
+      return; // NÃO mostrar notificação
     }
   }
   
@@ -118,7 +120,7 @@ self.addEventListener('push', function(event) {
     vibrate: [200, 100, 200, 100, 200],
     data: {
       url: data.url || '/',
-      chatNint: chatNint // ✅ Guardar para abrir chat correto
+      chatNint: chatNint
     },
     tag: 'cb360-notification',
     renotify: true
@@ -134,10 +136,8 @@ self.addEventListener('notificationclick', function(event) {
   
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      // ✅ Tentar focar janela existente
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
-          // ✅ NOVO: Enviar mensagem para abrir o chat correto
           if (event.notification.data.chatNint) {
             client.postMessage({
               type: 'OPEN_CHAT',
@@ -148,7 +148,6 @@ self.addEventListener('notificationclick', function(event) {
         }
       }
       
-      // Se não há janela aberta, abrir nova
       if (clients.openWindow) {
         return clients.openWindow(event.notification.data.url || '/');
       }
