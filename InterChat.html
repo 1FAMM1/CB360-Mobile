@@ -32,7 +32,7 @@
     .dark-mode #contact-list::-webkit-scrollbar-thumb, .dark-mode #chat-messages::-webkit-scrollbar-thumb {background: rgba(255, 255, 255, 0.15);}
     .dark-mode #contact-list::-webkit-scrollbar-thumb:hover, .dark-mode #chat-messages::-webkit-scrollbar-thumb:hover {background: rgba(255,255, 255, 0.3);}
     .dark-mode .contact-id-info {color: #ddd;}
-    .dark-mode .contact {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+    .dark-mode .contact {background: trsnsparent; color: #fff;}
     .dark-mode .contact:hover {background: rgba(255, 255, 255, 0.12);}
     .dark-mode .unread-badge {background-color: #f44336; box-shadow: 0 0 8px rgba(244, 67, 54, 0.4);}
     .dark-mode .chat-input-bar .input-wrapper {background: rgba(255, 255, 255, 0.15); transition: bottom 0.2s ease-in-out;}    
@@ -110,12 +110,12 @@
     @supports (-webkit-touch-callout: none) {body.keyboard-open {position: fixed; width: 100%;}}
     body.keyboard-open #full-emoji-picker-container{display:none !important;}
     /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828; position: fixed;
+    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828; position: fixed;
              top: 0; left: 0; right: 0; z-index: 1000;}
     .header h1 {margin: 0; font-size: 1.5em; font-weight: bold;}
     .header-subtitle {margin-top: 5px; font-size: 12px; opacity: 0.9;}
     .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828; position: fixed;
+    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828; position: fixed;
              bottom: 0; left: 0; right: 0; z-index: 1000;}
     .footer-content {max-width: 400px; margin: 0 auto;}
     .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px;}
@@ -123,9 +123,10 @@
     .footer strong {color: #ffebee;}
     .main-content {flex: 1 1 auto; max-height: calc(100dvh - 0px - 0px); display: flex; flex-direction: column; overflow-y: auto; padding-top: 100px; padding-bottom: 0px;}
     .contact-id-info {padding: 10px 20px 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
-    #contact-list {display: flex; flex-direction: column; padding: 0 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px;}
-    .contact {display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.15); color: #444; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer;
-              transition: background 0.2s, transform 0.2s; margin-bottom: 5px;}
+    #contact-list {display: flex; flex-direction: column; padding: 0 0px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px;
+                   margin-top: 10px}
+    .contact {display: flex; align-items: center; gap: 5px; padding: 5px 12px; background: rgba(0, 0, 0, 0.15); color: #444; cursor: pointer;
+              transition: background 0.2s, transform 0.2s; margin-bottom: 0px;}
     .contact:hover {background: #ddd;}
     .contact-avatar {width: 40px; height: 40px; border-radius: 50%; border: 2px solid #666; background: #d32f2f; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;
                      font-size: 18px; text-transform: uppercase; overflow: visible; position: relative;}
@@ -315,11 +316,11 @@
     .attach-file-card{display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; background: rgba(255,255,255,0.08); color:#fff; max-width: 90%;}
     .attach-file-card .material-icons{font-size: 32px;}
     .attach-file-meta{overflow:hidden;}
-    .attach-file-name{font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-    .attach-file-type{font-size:12px; opacity:0.8;}
+    .attach-file-name{font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+    .attach-file-type{font-size: 12px; opacity: 0.8;}
     .file-caption{margin-top: 6px; font-size: 12px; opacity: 0.85; line-height: 1.2;}
     .attach-grid{width: 100%; max-height: 65vh; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; padding: 10px; box-sizing: border-box;}
-    .attach-grid-cell{position:relative; background:#111; border-radius:12px; overflow:hidden; min-height:120px; cursor:pointer;}
+    .attach-grid-cell{position: relative; background: #111; border-radius: 12px; overflow: hidden; min-height: 120px; cursor: pointer;}
     .attach-grid-cell img{width: 100%; height: 100%; object-fit: cover; display :block;}
     .attach-grid-more{position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.55); color: #fff; 
                       font-weight: 800; font-size: 26px;}
@@ -344,6 +345,26 @@
     .contact-status{display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.85;}
     .unread-slot {order: 1;}
     .contact-status {order: 2;}
+    .search-container {padding: 0 10px 10px 10px; background: transparent; position: sticky;}    
+    .filter-btn-container {padding: 0 10px 10px 10px;}
+    .filter-btn-item {display: flex; flex-wrap: wrap; align-items: center; gap: 6px; background: #ccc; color: #444; border: 1px solid #aaa; border-radius: 50px; 
+                      padding: 2px 5px; font-size: 12px; cursor: pointer;}
+    .filter-btn {display: flex; flex-wrap: wrap; gap: 8px;}
+    .filter-btn-item .material-icons {font-size: 18px; color: #444;}  
+    .dark-mode .filter-btn-item .material-icons {color: #ddd;}
+    .dark-mode .filter-btn-item {background: #444; color: #ddd; border: 1px solid #555;}
+    .dark-mode .search-box {background: #444; border: 1px solid #555;}    
+    .dark-mode .search-icon {color: #bbb;}
+    .dark-mode #global-search {color: #ddd;}    
+    #global-search {border: none; background: transparent; width: 100%; outline: none; font-size: 15px; color: #444;}
+    .search-box {background: #ccc; border: 1px solid #aaa; border-radius: 50px; display: flex; align-items: center; padding: 5px 12px;}
+    .search-icon {color: #444; margin-right: 8px; font-size: 20px;}    
+    .filter-badge {border-radius: 50%; background: red; font-size: 12px; min-width: 16px; height: 16px; display: flex; align-items: center;
+                   justify-content: center; font-weight: bold; color: #ddd}
+    
+    
+    
+    
     @keyframes slideUp {from {transform: translateY(100%); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     @keyframes popScale {0% {transform: scale(0.85); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}    
     @keyframes pulse-green {0% {transform: scale(1); box-shadow: 0 0 5px #00ff00;} 50% {transform: scale(1.15); box-shadow: 0 0 12px #00ff00;} 100% {transform: scale(1); box-shadow: 0 0 5px #00ff00;}}
@@ -379,7 +400,7 @@
     <img id="corpLogo" class="header-logo" alt="" src="...">
     <h1>CHAT INTERNO</h1>
     <div class="header-subtitle">CHAT DE CONVERSAÇÃO INTERNA</div>
-  </header> 
+  </header>
   <div class="action-bar" id="action-bar">
     <button class="action-bar-close" onclick="clearSelection()" title="Cancelar"><span class="material-icons">close</span></button> 
     <div class="action-bar-counter" id="action-counter"></div>
@@ -391,8 +412,73 @@
       <button class="action-btn" id="action-delete" onclick="actionDelete()" title="Apagar"><span class="material-icons">delete</span></button>
       <button class="action-btn" id="action-edit" onclick="actionEdit()" title="Editar"><span class="material-icons">edit</span></button>
     </div>
-  </div> 
+  </div>
   <div class="main-content">
+    <div id="contact-title" class="contact-id-info">Contactos</div>    
+    <div id="search-container" class="search-container">
+      <div class="search-box">
+        <span class="material-icons search-icon">search</span>
+        <input type="text" id="global-search" placeholder="Pesquisar mensagens...">
+      </div>
+    </div>
+    <div id="filter-btn-container" class="filter-btn-container" style="display: none;">
+      <div id="filter-btn" class="filter-btn">
+        <button class="filter-btn-item">
+          <span class="material-icons">mark_unread_chat_alt</span>
+          <span>Não Lidas</span>
+          <span class="filter-badge" id="badge-unread">0</span>
+        </button>
+        <button class="filter-btn-item">
+          <span class="material-icons">photo</span>
+          <span>Fotos</span>
+          <span class="filter-badge" id="badge-video">0</span>
+        </button>
+        <button class="filter-btn-item">
+          <span class="material-icons">videocam</span>
+          <span>Vídeos</span>
+          <span class="filter-badge" id="badge-video">0</span>
+        </button>
+        <button class="filter-btn-item">
+          <span class="material-icons">link</span>
+          <span>Ligações</span>
+          <span class="filter-badge" id="badge-link">0</span>
+        </button>
+        <button class="filter-btn-item">
+          <span class="material-icons">gif</span>
+          <span>GIF</span>
+          <span class="filter-badge" id="badge-gif">0</span>
+        </button>
+        <button class="filter-btn-item">
+          <span class="material-icons">headphones</span>
+          <span>Áudios</span>
+          <span class="filter-badge" id="badge-audio">0</span>
+        </button>     
+        <button class="filter-btn-item">
+          <span class="material-icons">article</span>
+          <span>Documentos</span>
+          <span class="filter-badge" id="badge-document">0</span>
+        </button>
+        <button class="filter-btn-item">
+          <span class="material-icons">sticky_note_2</span>
+          <span>Stickers</span>
+          <span class="filter-badge" id="badge-sticker">0</span>
+        </buttom>
+        <button class="filter-btn-item">
+          <span class="material-icons">poll</span>
+          <span>Sondagens</span>
+          <span class="filter-badge" id="badge-poll">0</span>
+        </button>
+      </div>
+    </div>
+    <div id="search-results-container" style="display: none; flex: 1; overflow-y: auto; background: #ccc;">
+      <div class="contact-id-info" style="font-size: 13px; opacity: 0.6; padding: 15px 20px 5px;">Resultados da pesquisa</div>
+      <div id="search-results-list" style="padding: 0 5px;"></div>
+    </div>
+    
+    
+    
+    
+    
     <div id="chat-header-group" style="display: contents;"> 
       <div id="back-header" class="back-header" onclick="goBackToMain()" style="display: none;">
         <span class="material-icons back-arrow">arrow_back</span>
@@ -404,11 +490,16 @@
         <div class="pinned-text" id="pinned-text-content">...</div>
       </div>
     </div>
-    <div id="contact-title" class="contact-id-info">Contactos</div>
+  
+      
+   
+    
     <div id="contact-list"></div>
     <div id="messages" class="message-container"></div>
     <div id="typing-status" class="typing-indicator"></div>
   </div>
+  
+  
   <div class="chat-input-bar">
     <div class="input-wrapper">
       <button id="emoji-open-btn" type="button"><span class="material-icons">sentiment_satisfied_alt</span></button>
@@ -564,6 +655,7 @@
     <button id="chat-batch-viewer-next" class="attach-viewer-nav next" type="button">›</button>
     <div id="chat-batch-viewer-count" class="attach-viewer-count"></div>
   </div>
+  
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -619,6 +711,208 @@
       if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
       return headers;
     }
+    
+
+    const searchInput = document.getElementById('global-search');
+    const searchBtnContainer = document.getElementById('filter-btn-container');
+    const contactList = document.getElementById('contact-list');
+    const resultsContainer = document.getElementById('search-results-container');
+    const resultsList = document.getElementById('search-results-list');
+    const corp = localStorage.getItem("currentCorpOperNr");
+    const MyNint = String(localStorage.getItem("currentCorpNint"));
+    let searchTimeout;
+    const badgeEls = {unread: document.getElementById('badge-unread'), photo: document.getElementById('badge-photo'), video: document.getElementById('badge-video'),
+                      link: document.getElementById('badge-link'), gif: document.getElementById('badge-gif'),audio: document.getElementById('badge-audio'),
+                      document: document.getElementById('badge-document'), sticker: document.getElementById('badge-sticker'), poll: document.getElementById('badge-poll'),};
+    const MESSAGE_TYPES = ['photo', 'video', 'link', 'gif', 'audio', 'document', 'sticker', 'poll'];
+    function setBadge(el, value) {
+      if (!el) return;
+      const v = Number(value || 0);
+      el.textContent = String(v);
+      el.style.display = v > 0 ? 'inline-flex' : 'none';
+    }
+    async function fetchUnreadCount({ type = null } = {}) {
+    let q = supabaseClient
+        .from('chat_messages')
+        .select('id', {count: 'exact', head: true})
+        .eq('corp_oper_nr', corp)
+        .eq('recipient_nint', MyNint)  // Mensagens PARA mim
+        .is('read_at', null);  // Que ainda não foram lidas
+    
+    if (type) {
+        q = q.eq('message_type', type);
+    }
+    
+    const { count, error } = await q;
+    
+    if (error) {
+        console.error('Erro a contar não lidas:', error);
+        return 0;
+    }
+    
+    console.log(`Unread count (${type || 'all'}):`, count); // DEBUG
+    return count || 0;
+}
+    
+    async function updateUnreadTypeBadges() {
+    console.log('Updating unread badges...'); // DEBUG
+    try {
+        const totalPromise = fetchUnreadCount();
+        const perTypePromises = MESSAGE_TYPES.map(t => fetchUnreadCount({type: t}));
+        const [total, ...counts] = await Promise.all([totalPromise, ...perTypePromises]);
+        
+        console.log('Total unread:', total); // DEBUG
+        console.log('Counts by type:', counts); // DEBUG
+        
+        setBadge(badgeEls.unread, total);
+        MESSAGE_TYPES.forEach((t, i) => setBadge(badgeEls[t], counts[i]));
+    } catch (err) {
+        console.error('Erro updateUnreadBadges:', err);
+    }
+}
+    async function markChatAsRead(contactNint) {
+      try {
+        const { error } = await supabaseClient
+        .from('chat_messages')
+        .update({read_at: new Date().toISOString()})
+        .eq('corp_oper_nr', corp)
+        .eq('recipient_nint', MyNint)
+        .eq('n_int', String(contactNint))
+        .is('read_at', null);
+        if (error) console.error('Erro a marcar como lidas:', error);
+        await updateUnreadTypeBadges();
+      } catch (err) {
+        console.error('Erro markChatAsRead:', err);
+      }
+    }
+    function setupUnreadBadgesRealtime() {
+      try {
+        supabaseClient
+          .channel(`unread-badges-${corp}-${MyNint}`)
+          .on(
+          'postgres_changes',
+          {event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `corp_oper_nr=eq.${corp}`},
+          (payload) => {
+            const row = payload?.new;
+            if (!row) return;
+            if (String(row.recipient_nint) === String(MyNint) && row.read_at == null) {
+              updateUnreadTypeBadges();
+            }
+          }
+        )
+          .on(
+          'postgres_changes',
+          {event: 'UPDATE', schema: 'public', table: 'chat_messages', filter: `corp_oper_nr=eq.${corp}`},
+          (payload) => {
+            const row = payload?.new;
+            if (!row) return;
+            if (String(row.recipient_nint) === String(MyNint)) {
+              updateUnreadTypeBadges();
+            }
+          }
+        )
+          .subscribe();
+      } catch (err) {
+        console.error('Erro setupUnreadBadgesRealtime:', err);
+      }
+    }
+    searchInput.addEventListener('input', async (e) => {
+      const term = e.target.value.trim();
+      clearTimeout(searchTimeout);
+      if (term.length >= 3) {
+        contactList.style.display = 'none';
+        resultsContainer.style.display = 'block';
+        searchBtnContainer.style.display = 'block';
+        resultsList.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5; color: #444;">A pesquisar...</div>';
+        searchTimeout = setTimeout(async () => {
+          const {data, error} = await supabaseClient
+          .from('chat_messages')
+          .select('*')
+          .eq('corp_oper_nr', corp)
+          .or(`n_int.eq.${MyNint},recipient_nint.eq.${MyNint}`)
+          .ilike('message', `%${term}%`)
+          .order('created_at', {ascending: false})
+          .limit(150);
+          if (error) {
+            console.error("Erro na busca:", error);
+            resultsList.innerHTML = '<div style="padding:20px; color:red;">Erro ao pesquisar.</div>';
+            return;
+          }
+          renderSearchResults(data, term);
+        }, 300);
+      } else if (term.length > 0) {
+        contactList.style.display = 'none';
+        resultsContainer.style.display = 'block';
+        searchBtnContainer.style.display = 'block';
+        resultsList.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5;">Digite pelo menos 3 caracteres...</div>';
+      } else {
+        contactList.style.display = 'flex';
+        resultsContainer.style.display = 'none';
+        searchBtnContainer.style.display = 'none';
+        resultsList.innerHTML = '';
+      }
+    });
+    function highlightSearchTerm(text, term) {
+      if (!term) return text;
+      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedTerm})`, 'gi');
+      return String(text || '').replace(
+        regex,
+        '<mark style="background:#ffeb3b; padding:2px 4px; border-radius:3px;">$1</mark>'
+      );
+    }
+    function renderSearchResults(messages, searchTerm) {
+      resultsList.innerHTML = '';
+      if (!messages || messages.length === 0) {
+        resultsList.innerHTML = '<div style="padding: 20px; text-align:center; opacity:0.5;">Nenhuma mensagem encontrada.</div>';
+        return;
+      }
+      messages.forEach(msg => {
+        const isMyMessage = String(msg.n_int) === String(MyNint);
+        const contactNint = isMyMessage ? msg.recipient_nint : msg.n_int;
+        const displayName = isMyMessage ? 'Tu' : (msg.abv_name || 'Utilizador');
+        const highlightedText = highlightSearchTerm(msg.message, searchTerm);
+        const div = document.createElement('div');
+        div.className = 'contact';
+        div.style.marginBottom = "8px";
+        div.innerHTML = `
+          <div class="contact-info">
+            <div class="name" style="font-size: 14px; margin-bottom: 10px; font-weight: 600; color: #d32f2f;">
+              ${displayName}${String(contactNint) === 'geral' ? ' (Geral)' : ''}
+            </div>
+            <div class="nint" style="opacity:0.8; color:#333; font-size: 13px;">
+              ${highlightedText}
+            </div>
+          </div>
+        `;
+        div.onclick = async () => {
+          if (String(contactNint) === 'geral') {
+            openChat('geral', 'Chat Geral');
+          } else {
+            const user = users?.find(u => String(u.n_int) === String(contactNint));
+            if (user) openChat(user.n_int, user.abv_name);
+          }
+          if (String(contactNint) !== 'geral') {
+            await markChatAsRead(contactNint);
+          }
+          searchInput.value = '';
+          contactList.style.display = 'flex';
+          resultsContainer.style.display = 'none';
+          searchBtnContainer.style.display = 'none';
+          resultsList.innerHTML = '';
+        };
+        resultsList.appendChild(div);
+      });
+    }
+    updateUnreadTypeBadges();
+    setupUnreadBadgesRealtime();
+
+    
+    
+    
+    
+    
+    
     /* ======================= FUNCTION FIX LAYOUT ======================= */
     function adjustMainContent() {
       const main = document.querySelector('.main-content');
@@ -1251,7 +1545,7 @@
       const draftGeral = localStorage.getItem("draft_geral");
       const subTextGeral = draftGeral ? `<div class="draft-preview">Rascunho: ${draftGeral}</div>` : `<div class="nint">Broadcast</div>`;    
       geral.innerHTML = `
-        <div class="contact-avatar" style="background-color: #333;">G</div>
+        <div class="contact-avatar" style="background-color: #444;">G</div>
         <div class="contact-info">
           <div class="name">Chat Geral</div>
           ${subTextGeral}
@@ -1425,12 +1719,17 @@
     }
     /* ====================== BACK TO CONTACT LIST ======================= */
     function goBackToMain() {
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'CLEAR_ACTIVE_CHAT'
+        });
+      }  
       const text = inputMensage.value.trim();
       if (text !== "" && currentChat !== 'null') {
         localStorage.setItem(`draft_${currentChat}`, text);
       } else if (currentChat !== 'null') {
         localStorage.removeItem(`draft_${currentChat}`);
-      }
+      }  
       resetLayout();
       inputMensage.value = "";
       inputMensage.dispatchEvent(new Event('input'));
@@ -1442,12 +1741,18 @@
       document.getElementById("reply-bar").style.display = 'none';
       const inputBar = document.querySelector(".chat-input-bar");
       if (inputBar) inputBar.style.display = 'none';
-      document.getElementById("contact-list").style.display = 'flex';
+      document.getElementById("search-container").style.display = 'block';
+      document.getElementById("contact-list").style.display = 'flex';      
       document.getElementById("contact-title").style.display = 'block';
       currentChat = 'null';
-      history.pushState(null, '', `InterChat.html`);
+      history.pushState(null, '', 'InterChat.html');
       loadContacts();
     }
+    window.addEventListener('popstate', (event) => {
+      if (currentChat && currentChat !== 'null') {
+        goBackToMain();
+      }
+    });
     /* ======================== SCROLL TO BOTTOM ========================= */
     function scrollToBottom(forceImmediate = false) {
       const messagesEl = document.getElementById("messages");
@@ -1971,6 +2276,7 @@
       const contactListEl = document.getElementById("contact-list");
       const contactTitle = document.getElementById("contact-title");
       const chatIdInfo = document.getElementById("chat-id-info");
+      const messageSearch= document.getElementById("search-container");
       const backBtn = document.getElementById("back-header");
       const pinnedEl = document.getElementById("pinned-message");
       const inputBar = document.querySelector(".chat-input-bar");    
@@ -2019,6 +2325,7 @@
         if (badge) badge.remove();
         sendReadReceipt(currentChat);
       }
+      messageSearch.style.display = 'none';
       contactListEl.style.display = 'none';
       contactTitle.style.display = 'none';
       messagesEl.style.display = 'flex';
@@ -3185,8 +3492,7 @@
       document.getElementById('contact-menu-overlay').style.display = 'none';
       currentContactMenuTarget = null;
     }
-    /* ======================== TOGGLE BLOCK USER ======================== */
-  
+    /* ======================== TOGGLE BLOCK USER ======================== */ 
     async function toggleBlockUser() {
       if (!currentContactMenuTarget) return;      
       const targetNint = currentContactMenuTarget.nint;
@@ -3440,4 +3746,3 @@
   </script>
 </body>
 </html>
-
