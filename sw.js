@@ -1,8 +1,8 @@
 /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v2.8.3 - Com supressão de notificações em chats ativos
+    v2.8.4 - Com supressão de notificações em chats ativos
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v2.8.3';
+    const CACHE_NAME = 'cb360-cache-v2.8.4';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html',
                              '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/ExtDisp.html',
                              '/DispView.html', '/SolVacat.html', '/Attendance.html', '/OnGoingOcr.html',
