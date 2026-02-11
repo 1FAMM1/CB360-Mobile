@@ -1,8 +1,8 @@
 /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v2.8.5 - Com supressão de notificações em chats ativos
+    v2.8.6 - Com supressão de notificações em chats ativos
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v2.8.5';
+    const CACHE_NAME = 'cb360-cache-v2.8.6';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/manifest.json'];
     let activeChats = new Map();
     self.addEventListener('install', (event) => {
