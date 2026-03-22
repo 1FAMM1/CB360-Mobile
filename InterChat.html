@@ -473,12 +473,7 @@
     <div id="search-results-container" style="display: none; flex: 1; overflow-y: auto; background: #ccc;">
       <div class="contact-id-info" style="font-size: 13px; opacity: 0.6; padding: 15px 20px 5px;">Resultados da pesquisa</div>
       <div id="search-results-list" style="padding: 0 5px;"></div>
-    </div>
-    
-    
-    
-    
-    
+    </div>    
     <div id="chat-header-group" style="display: contents;"> 
       <div id="back-header" class="back-header" onclick="goBackToMain()" style="display: none;">
         <span class="material-icons back-arrow">arrow_back</span>
@@ -490,16 +485,10 @@
         <div class="pinned-text" id="pinned-text-content">...</div>
       </div>
     </div>
-  
-      
-   
-    
     <div id="contact-list"></div>
     <div id="messages" class="message-container"></div>
     <div id="typing-status" class="typing-indicator"></div>
-  </div>
-  
-  
+  </div>  
   <div class="chat-input-bar">
     <div class="input-wrapper">
       <button id="emoji-open-btn" type="button"><span class="material-icons">sentiment_satisfied_alt</span></button>
@@ -681,7 +670,14 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: {
+        headers: {
+          'x-my-corpo': localStorage.getItem("currentCorpOperNr") || "0805",
+          'x-my-nint': localStorage.getItem("currentCorpNint") || "205"
+        }
+      }
+    });
     /* ======================== GLOBAL VARIABLES ========================= */
     let currentChat = 'null';
     let currentChatName = '';
@@ -749,27 +745,20 @@
         console.error('Erro a contar não lidas:', error);
         return 0;
     }
-    
-    console.log(`Unread count (${type || 'all'}):`, count); // DEBUG
     return count || 0;
-}
-    
+    }    
     async function updateUnreadTypeBadges() {
     console.log('Updating unread badges...'); // DEBUG
     try {
-        const totalPromise = fetchUnreadCount();
-        const perTypePromises = MESSAGE_TYPES.map(t => fetchUnreadCount({type: t}));
-        const [total, ...counts] = await Promise.all([totalPromise, ...perTypePromises]);
-        
-        console.log('Total unread:', total); // DEBUG
-        console.log('Counts by type:', counts); // DEBUG
-        
-        setBadge(badgeEls.unread, total);
-        MESSAGE_TYPES.forEach((t, i) => setBadge(badgeEls[t], counts[i]));
+      const totalPromise = fetchUnreadCount();
+      const perTypePromises = MESSAGE_TYPES.map(t => fetchUnreadCount({type: t}));
+      const [total, ...counts] = await Promise.all([totalPromise, ...perTypePromises]);
+      setBadge(badgeEls.unread, total);
+      MESSAGE_TYPES.forEach((t, i) => setBadge(badgeEls[t], counts[i]));
     } catch (err) {
-        console.error('Erro updateUnreadBadges:', err);
+      console.error('Erro updateUnreadBadges:', err);
     }
-}
+    }
     async function markChatAsRead(contactNint) {
       try {
         const { error } = await supabaseClient
@@ -906,13 +895,6 @@
     }
     updateUnreadTypeBadges();
     setupUnreadBadgesRealtime();
-
-    
-    
-    
-    
-    
-    
     /* ======================= FUNCTION FIX LAYOUT ======================= */
     function adjustMainContent() {
       const main = document.querySelector('.main-content');
