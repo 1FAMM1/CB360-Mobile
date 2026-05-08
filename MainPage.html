@@ -919,18 +919,22 @@
           return;
         }
         const data = await response.json();
+        const validValues = ['PN', 'ED', 'EN', 'ET', 'EP'];
         const servicesByDate = {};
         data.forEach(d => {
-          if (d.day && d.month && d.year && d.value) {
+          if (d.day && d.month && d.year && d.value && validValues.includes(d.value)) {
             const key = `${d.year}-${String(d.month).padStart(2,'0')}-${String(d.day).padStart(2,'0')}`;
             if (!servicesByDate[key]) servicesByDate[key] = [];
             servicesByDate[key].push(d.value);
           }
         });
         const today = new Date();
-        today.setHours(0,0,0,0);
+        today.setHours(0, 0, 0, 0);
         const futureDates = Object.keys(servicesByDate)
-        .map(dateStr => ({ dateObj: new Date(dateStr), values: servicesByDate[dateStr] }))
+        .map(dateStr => {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          return {dateObj: new Date(y, m - 1, d), values: servicesByDate[dateStr]};
+        })
         .filter(d => d.dateObj >= today)
         .sort((a, b) => a.dateObj - b.dateObj);
         if (futureDates.length === 0) {
@@ -944,7 +948,7 @@
         const values = nextService.values;
         let serviceType = '';
         const hasPN = values.includes('PN');
-        const hasECIN = values.some(v => ['ED','EN','ET'].includes(v));
+        const hasECIN = values.some(v => ['ED', 'EN', 'ET', 'EP'].includes(v));
         if (hasPN && hasECIN) serviceType = 'ECIN/PIQUETE';
         else if (hasPN) serviceType = 'PIQUETE';
         else if (hasECIN) serviceType = 'ECIN';
