@@ -1,5 +1,7 @@
 const webpush = require('web-push');
 const { createClient } = require('@supabase/supabase-js');
+const ws = require('ws');
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -8,13 +10,26 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }  
   res.setHeader('Content-Type', 'application/json');
+  
   webpush.setVapidDetails(
     'mailto:fmartins.ahbfaro@gmail.com',
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );  
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+  
+  // Adicionado o transporte ws para compatibilidade com Node.js 20 na Vercel
+  const supabase = createClient(
+    process.env.SUPABASE_URL, 
+    process.env.SUPABASE_KEY, 
+    {
+      realtime: {
+        transport: ws
+      }
+    }
+  );
+  
   const { recipient_nint, corp_nr, sender_name, message_text, sender_nint } = req.body;  
+  
   try {
     let query = supabase.from('user_push_subscriptions').select('*');    
     if (recipient_nint === 'geral') {
@@ -24,16 +39,19 @@ export default async function handler(req, res) {
     } else {
       query = query.eq('n_int', parseInt(recipient_nint));
     }    
+    
     const { data: subs, error } = await query;
     if (error || !subs || subs.length === 0) {
       return res.status(200).json({ success: true, info: "Nenhum dispositivo encontrado." });
     }
+    
     const payload = JSON.stringify({
       title: recipient_nint === 'geral' ? `Geral: ${sender_name}` : sender_name,
       message: message_text,
       chatId: String(sender_nint),
       url: `/InterChat.html?chatId=${sender_nint}`
     });
+    
     const envios = subs.map(dispositivo => {
       const config = {
         endpoint: dispositivo.endpoint,
@@ -47,7 +65,9 @@ export default async function handler(req, res) {
           console.error("Falha ao enviar para um dispositivo:", dispositivo.endpoint);
         });
     });    
+    
     await Promise.all(envios);    
+    
     return res.status(200).json({ 
       success: true, 
       total_enviados: subs.length 
