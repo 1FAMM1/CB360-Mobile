@@ -49,7 +49,7 @@ export default async function handler(req, res) {
       title: recipient_nint === 'geral' ? `Geral: ${sender_name}` : sender_name,
       message: message_text,
       chatId: String(sender_nint),
-      url: `/InterChat.html?chatId=${sender_nint}`
+      url: `/index.html?chatId=${sender_nint}`
     });
     
     const envios = subs.map(dispositivo => {
