@@ -1,167 +1,195 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
-  <title>CB360 Mobile - Piquetes</title>  
+  <meta name="theme-color" content="#c62828">
+  <title>CB360 Mobile - Piquetes</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ==================== BODY ==================== */
-    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
-    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
-          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
-    /* ============= DARK MODE OPTIONS ============== */
-    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
-    .dark-mode .scales-subtitle {color: #e0e0e0;}
-    .dark-mode .scales-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
-    .dark-mode .scales-btn:hover:not(.selected) {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
-    .dark-mode .scales-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
-    .dark-mode .scales-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.7);}
-    .dark-mode .scales-card {background: rgba(0, 0, 0, 0.45); border: 1px solid red; border-left: 5px solid red; border-right: 5px solid red;}
-    .dark-mode .nextserv-info-title {background: #5c5c5c; border: 1px solid #444; color: #ddd; font-weight: bold;}
-    .dark-mode .nextserv-card {background: #5c5c5c; border: 1px solid #444;}
-    .dark-mode .nextserv-type .nextserv-type-value{color: #ccc;}
-    .dark-mode .nextserv-dates .nextserv-dates-value {color: #aad3f2;}
-    .dark-mode .nextserv-prevention {background: rgba(0, 0, 0, 0.25); color: #fff;}
-    .dark-mode .service-modal {background: rgba(0, 0, 0, 0.7);}
-    .dark-mode .service-modal-content {background: #2d2d2d; border: 1px solid #444;}
-    .dark-mode .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); border-bottom: 1px solid rgba(255, 255, 255, 0.1);}
-    .dark-mode .modal-footer {background: #1a1a1a; border-top: 1px solid #444;}
-    .dark-mode .modal-footer-btn {background: #d32f2f; color: #fff;}
-    .dark-mode .modal-footer-btn:hover {background: #b71c1c;}
-    .dark-mode .element-card {background: rgba(0, 0, 0, 0.3); border: 1px solid #555;}
-    .dark-mode .loading-spinner {color: #fff;}
-    .dark-mode .element-info .element-name {color: #fff;}
-    .dark-mode .element-info span {color: #ddd;}
-    .dark-mode .element-avatar {border: 2px solid #555;}
-    /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
-             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
-    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
-    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
-             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
-    .footer-content {max-width: 400px; margin: 0 auto;}
-    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
-    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
-    .footer strong {color: #ffebee;} 
-    .main-content {flex: 1; overflow-y: auto; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); padding-top: 50px; padding-bottom: 100px; padding-left: 20px; padding-right: 20px; 
-                   display: flex; flex-direction: column; align-items: center; justify-content: flex-start;}
-    .scales-header {flex-shrink: 0; text-align: center; width: 100%;} 
-    .scales-subtitle {font-size: 1.3em; color: #2c3e50; transition: color 0.3s ease;}
-    .scales-buttons {display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 22vw, 220px), 1fr)); justify-content: center; align-items: stretch; margin-bottom: 10px;}
-    .scales-btn {padding: clamp(10px, 1.5vw, 16px) clamp(12px, 2vw, 20px); min-height: clamp(42px, 6vh, 60px); min-width: clamp(80px, 28vw, 250px); max-width: clamp(190px, 18vw, 240px);
-                 font-size: clamp(11px, 1.2vw, 14px); border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; flex-direction: column;
-                 justify-content: center; align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
-    .scales-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-                         transition: left 0.4s ease; z-index: 1;}
-    .scales-btn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
-                        transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
-    .scales-btn:active::after {width: 150px; height: 150px;}
-    .scales-btn:hover:not(.selected) {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
-    .scales-btn:active:not(.selected) {transform: scale(0.98); transition:0.1s ease;}
-    .scales-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
-    .scales-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.6);}
-    .scales-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
-    .scales-btn span {position: relative; z-index: 2;} 
-    .scales-card {display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; border-radius: 15px; margin-bottom: 5px; background: #d0e2f5;
-                  border: 1px solid #bbb; border-left: 5px solid #bbb; border-right: 5px solid #bbb; width: 100%; max-width: 100%;}
-    .scales-card span.card-title {font-weight: bold; margin-bottom: 10px; font-size: 14px;}
-    .scales-card span.values {display: block; font-size: 13px;}
-    .loading-spinner {display: inline-block; width: 14px; height: 14px; border: 2px solid #d32f2f; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px;
-                      vertical-align: middle;}
-    .error-message {color: #e74c3c; font-weight: 600;}
-    .nextserv-info-title {font-size: 12px; font-weight: 500; text-align: left; color: #444; margin: 0 0 5px 0; background: #d0e2f5; padding: 4px 4px; border: 1px solid #bdc3c7; border-radius: 4px; width: 100%; 
-                          max-width: 100%;}
-    .nextserv-card {background: #d0e2f5; border-radius: 5px; border: 1px solid #bbb; padding: 10px 10px; margin-bottom: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;
-                    transition: transform 0.2s ease, box-shadow 0.2s ease; animation: slideDown 0.3s ease forwards;}
-    .nextserv-type {text-align: left; margin-bottom: -3px;}
-    .nextserv-type .label {font-size: 13px; font-weight: 700;}
-    .nextserv-type .nextserv-type-value {font-size: 14px; color: #0282fa; font-weight: 700;}
-    .nextserv-dates {display: flex; align-items: center; gap: 8px; margin-bottom: -3px;}
-    .nextserv-dates .label {font-size: 13px; font-weight: 700;}
-    .nextserv-dates .nextserv-dates-value {font-size: 13px; color: #0282fa;}
+    /* ============================================================
+    VARIABLES (mesmo sistema de design do CB360 Mobile)
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+    /* ============================================================
+    DARK MODE (mesma classe .dark-mode já usada por loadTheme())
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+          user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px;
+                   display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px;
+                   transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content::-webkit-scrollbar {display: none;}
+    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
+    .main-content.slide-out, .main-content.slide-in {transform: none;}
+    .scales-header {flex-shrink: 0; text-align: center; width: 100%;}
+    .scales-card {flex-shrink: 0;}
+    .nextserv-info-title {flex-shrink: 0;}
+    .scales-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
+    /* ============================================================
+    MONTH BUTTONS (estilo grid-card / mbtn do menu principal)
+    ============================================================ */
+    .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 4px; flex-shrink: 0;}
+    .scales-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
+    .scales-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+                 padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2);
+                 cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
+                 line-height: 1.2; transition: background var(--ease), color var(--ease);}
+    .scales-btn:nth-child(3n) {border-right: none;}
+    .scales-btn:nth-child(n+10) {border-bottom: none;}
+    .scales-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
+    .scales-btn:active:not(.selected) {background: var(--surface-2);}
+    .scales-btn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
+    .scales-btn:hover .material-icons {transform: scale(1.08);}
+    .scales-btn.selected {background: var(--red-light); color: var(--red);}
+    .scales-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
+    .scales-btn div, .scales-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    /* ============================================================
+    RESULT CARDS (piquetes / decir / extras)
+    ============================================================ */
+    .scales-card {display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px; border-radius: var(--r-md); background: var(--surface);
+                  border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%;}
+    .scales-card span.card-title {font-weight: 700; margin-bottom: 0; font-size: 13px; color: var(--txt-1); letter-spacing: 0.3px;}
+    .scales-card span.values {display: block; font-size: 13px; color: var(--txt-2);}
+    .loading-spinner {display: inline-block; width: 14px; height: 14px; border: 2px solid var(--red); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+                      margin-right: 8px; vertical-align: middle;}
+    .error-message {color: #e74c3c; font-weight: 600; font-size: 13px;}
+    /* ============================================================
+    NEXT SERVICES
+    ============================================================ */
+    .nextserv-info-title {font-size: 12px; font-weight: 700; text-align: left; color: var(--txt-2); margin: 0; background: var(--surface); padding: 5px 10px; border: 1px solid var(--border);
+                          border-radius: var(--r-sm); width: 100%; max-width: 100%; box-shadow: var(--sh-sm);}
+    .nextserv-card {margin-bottom: 5px; background: var(--surface); border-radius: var(--r-md); border: 1px solid var(--border); padding: 12px; box-shadow: var(--sh-sm); width: 100%; box-sizing: border-box;
+                    transition: transform var(--ease), box-shadow var(--ease); animation: slideDown 0.3s ease forwards; cursor: pointer;}
+    .nextserv-card:hover {box-shadow: var(--sh-md); transform: translateY(-1px);}
+    .nextserv-type {text-align: left; margin-bottom: 4px;}
+    .nextserv-type .label {font-size: 12.5px; font-weight: 700; color: var(--txt-2);}
+    .nextserv-type .nextserv-type-value {font-size: 13.5px; color: var(--red); font-weight: 700;}
+    .nextserv-dates {display: flex; align-items: center; gap: 8px; margin-bottom: 4px;}
+    .nextserv-dates .label {font-size: 12.5px; font-weight: 700; color: var(--txt-2);}
+    .nextserv-dates .nextserv-dates-value {font-size: 12.5px; color: var(--blue);}
     .nextserv-location {text-align: left;}
-    .nextserv-location .label {font-size: 13px; font-weight: 700; text-align: left}
-    .nextserv-location .location-value {font-size: 13px;}
-    .nextserv-prevention {margin-left: auto; background-color: #9dbee0; color: #444; font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 15px; white-space: nowrap; font-size: 11px;}
-    .service-modal {position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 15px;}
-    .service-modal-content {background: #fff; border-radius: 8px; width: 100%; max-width: 500px; max-height: 80%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; display: flex;
-                            flex-direction: column; overflow: hidden;}
-    .modal-header {background: #d32f2f; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px; flex-shrink: 0;}
-    .modal-close {position: absolute; top: 10px; right: 12px; font-size: 22px; cursor: pointer; color: #fff;}
-    .modal-elements-container {padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; scrollbar-width: none; -ms-overflow-style: none;}
+    .nextserv-location .label {font-size: 12.5px; font-weight: 700; color: var(--txt-2); text-align: left;}
+    .nextserv-location .location-value {font-size: 12.5px; color: var(--txt-1);}
+    .nextserv-prevention {margin-left: auto; background-color: var(--red-light); color: var(--red); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 15px; white-space: nowrap;}
+    /* ============================================================
+    SERVICE MODAL
+    ============================================================ */
+    .service-modal {position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px;}
+    .service-modal-content {background: var(--surface); border-radius: var(--r-lg); width: 100%; max-width: 460px; max-height: 78%; box-shadow: var(--sh-lg); border: 1px solid var(--border);
+                            position: relative; display: flex; flex-direction: column; overflow: hidden; animation: mIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);}
+    @keyframes mIn {from {opacity: 0; transform: scale(0.95) translateY(10px);} to {opacity: 1; transform: scale(1) translateY(0);}}
+    .modal-header {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 15px 18px; font-size: 15px; font-weight: 600; text-align: center; flex-shrink: 0;}
+    .modal-close {position: absolute; top: 12px; right: 14px; font-size: 20px; cursor: pointer; color: #fff;}
+    .modal-elements-container {padding: 14px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; flex: 1; scrollbar-width: none;}
     .modal-elements-container::-webkit-scrollbar {display: none;}
-    .modal-footer {background: #d5d5d5; padding: 12px; border-top: 1px solid #ddd; text-align: center; flex-shrink: 0; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;}
-    .modal-footer-btn {background: #d32f2f; color: white; border: none; padding: 10px 30px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s ease;}
-    .modal-footer-btn:hover {background: #b71c1c;}
+    .modal-footer {background: var(--surface-2); padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; flex-shrink: 0;}
+    .modal-footer-btn {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; border: none; padding: 9px 24px; border-radius: 50px; font-size: 13px; font-weight: 600;
+                       cursor: pointer; transition: opacity var(--ease);}
+    .modal-footer-btn:hover {opacity: 0.88;}
     .modal-footer-btn:active {transform: scale(0.98);}
-    .element-card {display: flex; justify-content: flex-start; align-items: center; border: 1px solid #ddd; border-radius: 6px; padding: 10px; background: #f5f5f5; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
-    .element-info .element-name {font-size: 16px; font-weight: bold;}
+    /* ============================================================
+    ELEMENT CARDS (dentro do modal)
+    ============================================================ */
+    .element-card {display: flex; justify-content: flex-start; align-items: center; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px; background: var(--surface-2);
+                   box-shadow: var(--sh-sm); gap: 5px;}
     .element-info {display: flex; flex-direction: column; gap: 2px;}
-    .element-info span {font-size: 14px; color: #333;}
-    .element-avatar {width: 50px; height: 50px; border-radius: 50%; background: #ccc; object-fit: cover; margin-right: 5px;}
-    #nextServicesCard {flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; scrollbar-width: none; -ms-overflow-style: none; width: 100%; max-width: 100%;}
+    .element-info .element-name {font-size: 15px; font-weight: 700; color: var(--txt-1);}
+    .element-info span {font-size: 13px; color: var(--txt-2);}
+    .element-avatar {width: 48px; height: 48px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); object-fit: cover; margin-right: 5px;}
+    /* ============================================================
+    NEXT SERVICES SCROLL CONTAINER
+    ============================================================ */
+    #nextServicesCard {flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 0px; scrollbar-width: none; width: 100%; max-width: 100%; }
     #nextServicesCard::-webkit-scrollbar {display: none;}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
     @keyframes spin {to { transform: rotate(360deg);}}
     @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
     @media (max-width: 480px) {
-      .header {padding: 8px 15px;}
-      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
-      .header-logo {height: 50px; top: 32px; left: 10px;}
-      .footer {padding: 5px 15px;}
-      .powered-by {font-size: 11px;}
-      .footer-year {font-size: 9px;}
-      .scales-header {flex-shrink: 0; padding-bottom: 10px;}
-      .scales-subtitle {font-size: 0.9em; font-weight: bold; margin-top: 10px;}
-      .scales-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}
-      .scales-btn {height: 50px; min-height: 30px; max-height:75px; font-size: 12px; padding: 15px 10px;}
-      .main-content {padding-left: 20px; padding-right: 20px; justify-content: center; align-items: center;}}
-    .main-content {transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
-    body.mobile-month-active .main-content {padding-top: 70px; justify-content: flex-start !important; align-items: stretch !important;}
-    .main-content.slide-out, .main-content.slide-in {transform: none;}
+      .header-title {font-size: 16px;}
+      .scales-subtitle {font-size: 0.95em;}
+      .scales-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
+      .scales-btn .material-icons {font-size: 19px;}
+      .main-content {padding-left: 14px; padding-right: 14px; justify-content: center; align-items: center;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>ESCALAS</h1>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">ESCALAS</span>
+      <span class="header-sub">Piquetes · Decir · Extras</span>
+    </div>
     <h2 id="corpInfo" style="display: none;"></h2>
-    <div class="header-subtitle">PIQUETES | DECIR | EXTRAS</div>
-  </div>  
+  </header>
   <div class="main-content">
-      <div class="scales-header">
-        <p class="scales-subtitle">Selecione o mês:</p>
+    <div class="scales-header">
+      <p class="scales-subtitle">Selecione o mês:</p>
+    </div>
+    <div class="months-card">
+      <div class="scales-buttons">
+        <button class="scales-btn" data-month="0"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
+        <button class="scales-btn" data-month="1"><span class="material-icons">favorite</span><div>Fevereiro</div></button>
+        <button class="scales-btn" data-month="2"><span class="material-icons">eco</span><div>Março</div></button>
+        <button class="scales-btn" data-month="3"><span class="material-icons">local_florist</span><div>Abril</div></button>
+        <button class="scales-btn" data-month="4"><span class="material-icons">wb_sunny</span><div>Maio</div></button>
+        <button class="scales-btn" data-month="5"><span class="material-icons">beach_access</span><div>Junho</div></button>
+        <button class="scales-btn" data-month="6"><span class="material-icons">local_fire_department</span><div>Julho</div></button>
+        <button class="scales-btn" data-month="7"><span class="material-icons">whatshot</span><div>Agosto</div></button>
+        <button class="scales-btn" data-month="8"><span class="material-icons">park</span><div>Setembro</div></button>
+        <button class="scales-btn" data-month="9"><span class="material-icons">cloud</span><div>Outubro</div></button>
+        <button class="scales-btn" data-month="10"><span class="material-icons">grain</span><div>Novembro</div></button>
+        <button class="scales-btn" data-month="11"><span class="material-icons">celebration</span><div>Dezembro</div></button>
       </div>
-        <div class="scales-buttons">
-          <button class="scales-btn" data-month="0">Janeiro</button>
-          <button class="scales-btn" data-month="1">Fevereiro</button>
-          <button class="scales-btn" data-month="2">Março</button>
-          <button class="scales-btn" data-month="3">Abril</button>
-          <button class="scales-btn" data-month="4">Maio</button>
-          <button class="scales-btn" data-month="5">Junho</button>
-          <button class="scales-btn" data-month="6">Julho</button>
-          <button class="scales-btn" data-month="7">Agosto</button>
-          <button class="scales-btn" data-month="8">Setembro</button>
-          <button class="scales-btn" data-month="9">Outubro</button>
-          <button class="scales-btn" data-month="10">Novembro</button>
-          <button class="scales-btn" data-month="11">Dezembro</button>
-        </div>
-      <div id="picketsCard" class="scales-card" style="display:none;"></div>
-      <div id="decirCard" class="scales-card" style="display:none;"></div>
-      <div id="extrasCard" class="scales-card" style="display:none;"></div>
-      <div id="nextserv-info-title" class="nextserv-info-title" style="display:none;">📅 Próximos(s) Serviços(s)</div>
-      <div id="nextServicesCard" style="display:none;"></div>
-  </div>  
+    </div>
+    <div id="picketsCard" class="scales-card" style="display:none; margin:-5px 0 0 0;"></div>
+    <div id="decirCard" class="scales-card" style="display:none; margin:-5px 0 0 0;"></div>
+    <div id="extrasCard" class="scales-card" style="display:none;"></div>
+    <div id="nextserv-info-title" class="nextserv-info-title" style="display:none; margin:0 0 -5px 0;">📅 Próximos(s) Serviços(s)</div>
+    <div id="nextServicesCard" style="display:none;"></div>
+  </div>
   <div id="serviceModal" class="service-modal" style="display:none;">
     <div class="service-modal-content">
       <div class="modal-header">
@@ -177,10 +205,10 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
-        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023-2025 - Sistema CB360 Mobile
+        © 2023–2025 · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -197,15 +225,21 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint");
+
+    /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
+    function getCorp()  {return localStorage.getItem("currentCorpOperNr")}
+    function getNInt()  {return localStorage.getItem("currentCorpNint")}
+
+    function getSupabaseHeaders(options = {}) {
+      const corp  = getCorp();
+      const nint  = getNInt();
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'x-my-corpo': corp,
-        'x-my-nint': nint
+        'x-my-nint': nint,
       };
       if (options.returnRepresentation) {
         headers['Prefer'] = 'return=representation';
@@ -460,7 +494,7 @@
       if (!elements || elements.length === 0) {
         const p = document.createElement('p');
         p.textContent = 'Nenhum elemento encontrado';
-        p.style.color = '#000';
+        p.style.color = 'var(--txt-1)';
         p.style.textAlign = 'center';
         p.style.padding = '40px';
         container.appendChild(p);
@@ -616,5 +650,3 @@
   </script>
 </body>
 </html>
-
-
