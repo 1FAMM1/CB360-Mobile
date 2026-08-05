@@ -81,155 +81,475 @@
     <div class="separator"></div>
     <div class="login-footer">2023-<span id="login-footer-year"></span> © Fábio Martins | Sistemas de Informação</div>
   </div>
-  <script>
-    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    
-    function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
-      const username = localStorage.getItem("currentUserName") || "";
-      
-      const headers = {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        'x-my-corpo': corp,
-        'x-my-nint': nint,
-        'x-username': username
-      };
-      if (options.returnRepresentation) {
-        headers['Prefer'] = 'return=representation';
-      }
-      return headers;
+
+<script>
+  const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+
+  // ============================================================
+  // HEADERS SUPABASE
+  // ============================================================
+  function getSupabaseHeaders(options = {}) {
+    const corp =
+      localStorage.getItem("currentCorpOperNr") ||
+      sessionStorage.getItem("currentCorpOperNr");
+
+    const nint =
+      localStorage.getItem("currentCorpNint") ||
+      sessionStorage.getItem("currentNInt");
+
+    const username =
+      localStorage.getItem("currentUserName") || "";
+
+    // Se existir um JWT real do utilizador, usa-o.
+    // Caso contrário, usa a Anon Key apenas para chamadas
+    // que não dependam da autenticação do utilizador.
+    const authToken =
+      localStorage.getItem("authToken") || SUPABASE_ANON_KEY;
+
+    const headers = {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+      'x-my-corpo': corp || '',
+      'x-my-nint': nint || '',
+      'x-username': username
+    };
+
+    if (options.returnRepresentation) {
+      headers['Prefer'] = 'return=representation';
     }
 
-    async function loginUser(user, pass) {
+    return headers;
+  }
+
+
+  // ============================================================
+  // LOGIN MOBILE
+  // ============================================================
+  async function loginUser(user, pass) {
+    try {
+
+      console.log("🔐 A iniciar login Mobile:", user);
+
+      // ----------------------------------------------------------
+      // Chamar a Edge Function Mobile
+      // ----------------------------------------------------------
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/login-mobile`,
+        {
+          method: 'POST',
+
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json'
+          },
+
+          body: JSON.stringify({
+            username: user,
+            password: pass
+          })
+        }
+      );
+
+      // ----------------------------------------------------------
+      // Ler resposta
+      // ----------------------------------------------------------
+      let data = null;
+
       try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/users_mobile?select=username,password,corp_oper_nr,nint_corp&username=eq.${user}&limit=1`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (!response.ok) throw new Error(`Erro ao buscar utilizador: ${response.status}`);
-        const data = await response.json();
-        
-        if (!data || data.length === 0) {
-          showToast("Utilizador não encontrado.", 2000, "error");
-          return;
-        }
-        
-        const userData = data[0];
-        if (userData.password !== pass) {
-          showToast("Password incorreta.", 2000, "error");
-          return;
-        }
-
-        const corp = String(userData.corp_oper_nr || "").padStart(4, "0");
-        const nintCorp = String(userData.nint_corp || "0").padStart(3, "0");
-        
-        // Gravação dupla (localStorage e sessionStorage) para persistência total
-        localStorage.setItem("currentUserDisplay", user);
-        localStorage.setItem("currentUserName", user);
-        localStorage.setItem("currentCorpOperNr", corp);
-        localStorage.setItem("currentCorpNint", nintCorp);
-        localStorage.setItem("currentNInt", nintCorp);
-        localStorage.setItem("authToken", SUPABASE_ANON_KEY);
-
-        sessionStorage.setItem("currentUserDisplay", user);
-        sessionStorage.setItem("currentUserName", user);
-        sessionStorage.setItem("currentCorpOperNr", corp);
-        sessionStorage.setItem("currentCorpNint", nintCorp);
-        sessionStorage.setItem("currentNInt", nintCorp);
-
-if (corp === "0000") {
-  localStorage.setItem("isMasterUser", "true");
-  showToast("Bem-vindo à administração do CB360!", 2000, "success");
-
-  setTimeout(() => {
-    window.location.href = "system_admin.html";
-  }, 1500);
-
-  return;
-}
-
-showToast("Login efetuado com sucesso!", 2000, "success");
-
-setTimeout(() => {
-  window.location.href = "MainPage.html";
-}, 1500);
-
-
-
-      } catch (err) {
-        console.error("❌ ERRO LOGIN MOBILE:", err);
-        showToast("Erro de conexão ao validar acesso.", 3000, "error");
+        data = await response.json();
+      } catch (jsonError) {
+        console.error("❌ Resposta inválida da Edge Function:", jsonError);
+        throw new Error("Resposta inválida do servidor.");
       }
-    }
 
-    document.getElementById("loginForm").addEventListener("submit", e => {
-      e.preventDefault();
-      const user = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value.trim();
-      if (!user || !pass) {
-        showToast("Preencha todos os campos.", 2000, "error");
+      console.log("📡 Resposta login Mobile:", data);
+
+      // ----------------------------------------------------------
+      // Erro HTTP
+      // ----------------------------------------------------------
+      if (!response.ok) {
+
+        if (response.status === 401) {
+          showToast(
+            data?.error || "Utilizador ou password incorretos.",
+            2500,
+            "error"
+          );
+          return;
+        }
+
+        throw new Error(
+          data?.error ||
+          `Erro na autenticação: ${response.status}`
+        );
+      }
+
+      // ----------------------------------------------------------
+      // Validar token
+      // ----------------------------------------------------------
+      if (!data || !data.token) {
+        console.error("❌ A Edge Function não devolveu token:", data);
+
+        showToast(
+          "O servidor não devolveu o token de autenticação.",
+          3000,
+          "error"
+        );
+
         return;
       }
+
+      // ----------------------------------------------------------
+      // Dados devolvidos pela Edge Function
+      // ----------------------------------------------------------
+      const corp = String(
+        data.corp_oper_nr || ""
+      ).padStart(4, "0");
+
+      const nintCorp = String(
+        data.nint_corp || ""
+      ).padStart(3, "0");
+
+      const username = data.username || user;
+
+      // ----------------------------------------------------------
+      // Guardar dados no LOCALSTORAGE
+      // ----------------------------------------------------------
+      localStorage.setItem(
+        "currentUserDisplay",
+        username
+      );
+
+      localStorage.setItem(
+        "currentUserName",
+        username
+      );
+
+      localStorage.setItem(
+        "currentCorpOperNr",
+        corp
+      );
+
+      localStorage.setItem(
+        "currentCorpNint",
+        nintCorp
+      );
+
+      localStorage.setItem(
+        "currentNInt",
+        nintCorp
+      );
+
+      // ==========================================================
+      // IMPORTANTE:
+      // Guardar o JWT devolvido pela Edge Function.
+      // NÃO guardar a SUPABASE_ANON_KEY.
+      // ==========================================================
+      localStorage.setItem(
+        "authToken",
+        data.token
+      );
+
+
+      // ----------------------------------------------------------
+      // Guardar dados no SESSIONSTORAGE
+      // ----------------------------------------------------------
+      sessionStorage.setItem(
+        "currentUserDisplay",
+        username
+      );
+
+      sessionStorage.setItem(
+        "currentUserName",
+        username
+      );
+
+      sessionStorage.setItem(
+        "currentCorpOperNr",
+        corp
+      );
+
+      sessionStorage.setItem(
+        "currentCorpNint",
+        nintCorp
+      );
+
+      sessionStorage.setItem(
+        "currentNInt",
+        nintCorp
+      );
+
+
+      // ----------------------------------------------------------
+      // Verificação
+      // ----------------------------------------------------------
+      console.log("✅ Login Mobile efetuado");
+      console.log("👤 Utilizador:", username);
+      console.log("🏢 Corporação:", corp);
+      console.log("🔢 NInt:", nintCorp);
+      console.log(
+        "🔐 JWT guardado:",
+        data.token ? "SIM" : "NÃO"
+      );
+
+
+      // ----------------------------------------------------------
+      // MASTER USER
+      // ----------------------------------------------------------
+      if (corp === "0000") {
+
+        localStorage.setItem(
+          "isMasterUser",
+          "true"
+        );
+
+        showToast(
+          "Bem-vindo à administração do CB360!",
+          2000,
+          "success"
+        );
+
+        setTimeout(() => {
+          window.location.href = "system_admin.html";
+        }, 1500);
+
+        return;
+      }
+
+
+      // ----------------------------------------------------------
+      // LOGIN NORMAL
+      // ----------------------------------------------------------
+      showToast(
+        "Login efetuado com sucesso!",
+        2000,
+        "success"
+      );
+
+      setTimeout(() => {
+        window.location.href = "MainPage.html";
+      }, 1500);
+
+
+    } catch (err) {
+
+      console.error(
+        "❌ ERRO LOGIN MOBILE:",
+        err
+      );
+
+      showToast(
+        err?.message ||
+        "Erro de conexão ao validar acesso.",
+        3000,
+        "error"
+      );
+    }
+  }
+
+
+  // ============================================================
+  // FORM LOGIN
+  // ============================================================
+  document
+    .getElementById("loginForm")
+    .addEventListener("submit", e => {
+
+      e.preventDefault();
+
+      const user =
+        document
+          .getElementById("username")
+          .value
+          .trim();
+
+      const pass =
+        document
+          .getElementById("password")
+          .value
+          .trim();
+
+      if (!user || !pass) {
+
+        showToast(
+          "Preencha todos os campos.",
+          2000,
+          "error"
+        );
+
+        return;
+      }
+
       loginUser(user, pass);
     });
 
-    const togglePassword = document.getElementById("togglePassword");
-    const passwordInput = document.getElementById("password");
-    if (togglePassword && passwordInput) {
-      togglePassword.addEventListener("click", () => {
-        const type = passwordInput.type === "password" ? "text" : "password";
+
+  // ============================================================
+  // MOSTRAR / OCULTAR PASSWORD
+  // ============================================================
+  const togglePassword =
+    document.getElementById("togglePassword");
+
+  const passwordInput =
+    document.getElementById("password");
+
+  if (togglePassword && passwordInput) {
+
+    togglePassword.addEventListener(
+      "click",
+      () => {
+
+        const type =
+          passwordInput.type === "password"
+            ? "text"
+            : "password";
+
         passwordInput.type = type;
-        togglePassword.classList.toggle("fa-eye");
-        togglePassword.classList.toggle("fa-eye-slash");
-      });
-    }
 
-    function showToast(message, duration = 2000, type = "error") {
-      let toast = document.getElementById("toast");
-      if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "toast";
-        toast.className = "toast";
-        document.body.appendChild(toast);
+        togglePassword.classList.toggle(
+          "fa-eye"
+        );
+
+        togglePassword.classList.toggle(
+          "fa-eye-slash"
+        );
       }
-      toast.textContent = message;
-      toast.className = "toast show";
-      if (type === "success") toast.classList.add("success");
-      setTimeout(() => toast.classList.remove("show"), duration);
+    );
+  }
+
+
+  // ============================================================
+  // TOAST
+  // ============================================================
+  function showToast(
+    message,
+    duration = 2000,
+    type = "error"
+  ) {
+
+    let toast =
+      document.getElementById("toast");
+
+    if (!toast) {
+
+      toast =
+        document.createElement("div");
+
+      toast.id = "toast";
+      toast.className = "toast";
+
+      document.body.appendChild(toast);
     }
 
-    function updateGreeting() {
-      const now = new Date();
-      const hour = now.getHours();
-      let greetingText = "🌙 Boa noite";
-      if (hour >= 6 && hour < 12) greetingText = "☀️ Bom dia";
-      else if (hour >= 12 && hour < 19) greetingText = "🌤️ Boa tarde";
-      const greetingEl = document.getElementById("greetingText");
-      const clockEl = document.getElementById("clock");
-      if (greetingEl) greetingEl.textContent = greetingText;
-      if (clockEl) {
-        clockEl.textContent = now.toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
-      }
+    toast.textContent = message;
+
+    toast.className = "toast show";
+
+    if (type === "success") {
+      toast.classList.add("success");
     }
 
-    function startClock() {
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, duration);
+  }
+
+
+  // ============================================================
+  // SAUDAÇÃO / RELÓGIO
+  // ============================================================
+  function updateGreeting() {
+
+    const now = new Date();
+    const hour = now.getHours();
+
+    let greetingText = "🌙 Boa noite";
+
+    if (hour >= 6 && hour < 12) {
+      greetingText = "☀️ Bom dia";
+    }
+    else if (hour >= 12 && hour < 19) {
+      greetingText = "🌤️ Boa tarde";
+    }
+
+    const greetingEl =
+      document.getElementById("greetingText");
+
+    const clockEl =
+      document.getElementById("clock");
+
+    if (greetingEl) {
+      greetingEl.textContent = greetingText;
+    }
+
+    if (clockEl) {
+
+      clockEl.textContent =
+        now.toLocaleTimeString(
+          'pt-PT',
+          {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          }
+        );
+    }
+  }
+
+
+  // ============================================================
+  // INICIAR RELÓGIO
+  // ============================================================
+  function startClock() {
+
+    updateGreeting();
+
+    const now = new Date();
+
+    setTimeout(() => {
+
       updateGreeting();
-      const now = new Date();
-      setTimeout(() => {
-        updateGreeting();
-        setInterval(updateGreeting, 1000);
-      }, 1000 - now.getMilliseconds());
-    }
 
-    startClock();
-    const usernameInput = document.getElementById("username");
-    if (usernameInput) usernameInput.focus();
-    document.getElementById('login-footer-year').textContent = new Date().getFullYear();
-  </script>
+      setInterval(
+        updateGreeting,
+        1000
+      );
+
+    }, 1000 - now.getMilliseconds());
+  }
+
+
+  startClock();
+
+
+  // ============================================================
+  // FOCUS NO USERNAME
+  // ============================================================
+  const usernameInput =
+    document.getElementById("username");
+
+  if (usernameInput) {
+    usernameInput.focus();
+  }
+
+
+  // ============================================================
+  // ANO DO FOOTER
+  // ============================================================
+  const footerYear =
+    document.getElementById(
+      'login-footer-year'
+    );
+
+  if (footerYear) {
+    footerYear.textContent =
+      new Date().getFullYear();
+  }
+
+</script>
 </body>
 </html>
