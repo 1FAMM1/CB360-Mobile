@@ -496,13 +496,13 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
 
     /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
-    function getCorp()  { return localStorage.getItem("currentCorpOperNr") || "0805"; }
-    function getNInt()  { return localStorage.getItem("currentCorpNint")   || "205";  }
+    function getCorp()  { return localStorage.getItem("currentCorpOperNr")}
+    function getNInt()  { return localStorage.getItem("currentCorpNint")}
 
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5NzMwNTB9.CcE8nI1bbWcL0PlJaVkKdm74UZEyzweZfsv2i0M-zmg';
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -560,21 +560,12 @@
       console.log("✅ Push registado/atualizado no Supabase");
     }
 
-    /* ======================= FUNCTION FIX LAYOUT ======================= */
-    function ajustarMainContent() {
-      const main = document.querySelector('.main');
-      const header = document.querySelector('.header');
-      const footer = document.querySelector('.footer');
-      if (!main) return;
-      const alturaViewport = window.innerHeight;
-      const headerHeight = header?.offsetHeight || 0;
-      const footerHeight = footer?.offsetHeight || 0;
-      main.style.paddingTop = (headerHeight + 16) + 'px';
-      main.style.paddingBottom = (footerHeight + 16) + 'px';
-    }
-    window.addEventListener('load', ajustarMainContent);
-    window.addEventListener('resize', ajustarMainContent);
-    window.addEventListener('pageshow', ajustarMainContent);
+    /* O CSS (.main padding-top/padding-bottom via calc(var(--header-h)...)) já
+       trata do espaçamento de forma fixa e estável — não precisa de JS para isto.
+       O ajuste manual anterior foi removido por poder desalinhar-se do valor real
+       (ex: se o logótipo ou os ícones ainda não tivessem carregado no momento da
+       leitura de offsetHeight), o que provocava esticamentos inconsistentes do
+       layout, sobretudo visíveis ao trocar de tema. */
 
     /* ============================== TOAST ============================== */
     let toastTimeout;
