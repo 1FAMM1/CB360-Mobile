@@ -19,7 +19,7 @@
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
            --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
     /* ============================================================
-    DARK MODE
+    DARK MODE (classe .dark aplicada ao <body>)
     ============================================================ */
     .dark {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
            --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
@@ -40,7 +40,7 @@
     .header-title {font-size: 20px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 2.5px; color: rgba(255,255,255,0.65); text-transform: uppercase;}
     .header-controls {position: fixed; top: 0; right: 12px; height: var(--header-h); display: flex; align-items: center; gap: 8px; z-index: 101;}
-    .hctrl {width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.20); display: flex; align-items: center; 
+    .hctrl {width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.20); display: flex; align-items: center;
             justify-content: center; cursor: pointer; color: white; font-size: 15px; transition: background var(--ease), transform var(--ease);}
     .hctrl:hover {background: rgba(255,255,255,0.25);}
     .hctrl:active {transform: scale(0.92);}
@@ -75,7 +75,7 @@
     .welcome-text .label {font-size: 14px; font-weight: 400; color: var(--txt-3); margin-bottom: 2px;}
     .welcome-text .name {font-size: 18px; font-weight: 600; color: var(--txt-1); letter-spacing: -0.2px;}
     .welcome-right {display: flex; align-items: center; gap: 9px;}
-    .bell-wrap {position: relative; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; 
+    .bell-wrap {position: relative; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center;
                 justify-content: center; cursor: pointer; box-shadow: var(--sh-sm); transition: box-shadow var(--ease), background var(--ease);}
     .bell-wrap:hover {box-shadow: var(--sh-md); background: var(--surface-2);}
     .bell-wrap .material-icons {font-size: 18px; color: var(--txt-2);}
@@ -245,7 +245,7 @@
           <span class="material-icons">calendar_month</span>
           <div>Escalas</div>
         </button>
-        <button id="changes" class="mbtn" onclick="toggleButton(this); setTimeout(() => window.location.href='Swaps.html', 300);">
+        <button id="changes" class="mbtn" onclick="selBtn(this); setTimeout(() => window.location.href='Swaps.html', 300);">
           <span class="material-icons">multiple_stop</span>
           <div>Trocas de Serviço</div>
           <span class="bdg">0</span>
@@ -262,7 +262,7 @@
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">checkroom</span>
           <div>Pedido Fardamento</div>
         </button>
-        <button class="mbtn" onclick="toggleButton(this); setTimeout(() => window.location.href='Attendance.html', 300);">
+        <button class="mbtn" onclick="selBtn(this); setTimeout(() => window.location.href='Attendance.html', 300);">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">fingerprint</span>
           <div>Assíduidade</div>
         </button>
@@ -285,11 +285,11 @@
           <div>Relatórios de Ocorrência</div>
           <span class="bdg">0</span>
         </button>
-        <button class="mbtn" onclick="toggleButton(this); setTimeout(() => window.location.href='Documents.html', 300);">
+        <button class="mbtn" onclick="selBtn(this); setTimeout(() => window.location.href='Documents.html', 300);">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">description</span>
           <div>Documentos</div>
         </button>
-        <button id="comunicates" class="mbtn" onclick="toggleButton(this); setTimeout(() => window.location.href='Comunic.html', 300);">
+        <button id="comunicates" class="mbtn" onclick="selBtn(this); setTimeout(() => window.location.href='Comunic.html', 300);">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">assignment_add</span>
           <div>Comunicados</div>
           <span class="bdg">0</span>
@@ -489,405 +489,682 @@
     }
   </script>
   <script>
-    /* ===================== SUPABASE ===================== */
+    /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function sbHeaders(opts = {}) {
-      const corp = localStorage.getItem('currentCorpOperNr') || '0805';
-      const nint = localStorage.getItem('currentCorpNint') || '205';
-      const h = {
+
+    /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
+    function getCorp()  {return localStorage.getItem("currentCorpOperNr")}
+    function getNInt()  { return localStorage.getItem("currentCorpNint")}
+
+    function getSupabaseHeaders(options = {}) {
+      const corp  = getCorp();
+      const nint  = getNInt();
+      const token = localStorage.getItem("authToken");
+      const headers = {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'x-my-corpo': corp,
-        'x-my-nint': nint
+        'x-my-nint': nint,
       };
-      if (opts.returnRepresentation) h['Prefer'] = 'return=representation';
-      return h;
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
     }
-    /* ===================== PUSH ===================== */
-    const PUBLIC_VAPID_KEY = 'BON0DVn-crPvv9vQ43Egn7GvhXklY7e1puYKbuefOQWHMfDwjeIqg2IKdpsWz8hzWvbU6avlRR334mv9NCAVFOQ';
-    function b64ToUint8(b) {
-      const pad = '='.repeat((4 - b.length % 4) % 4);
-      const base64 = (b + pad).replace(/-/g, '+').replace(/_/g, '/');
-      return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
+    /* =================== ACTIVATE PUSH NOTIFICATIONS =================== */
+    const PUBLIC_VAPID_KEY = "BON0DVn-crPvv9vQ43Egn7GvhXklY7e1puYKbuefOQWHMfDwjeIqg2IKdpsWz8hzWvbU6avlRR334mv9NCAVFOQ";
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
     }
     async function enableNotifications() {
       if (!('Notification' in window)) return alert('Notificações não suportadas.');
-      if (await Notification.requestPermission() !== 'granted') return alert('Notificações não ativadas.');
-      await registerPush();
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return alert('Notificações não foram ativadas.');
+      await initializePushWithoutPermission();
       alert('Notificações ativadas ✅');
     }
-    async function registerPush() {
-      const nint = localStorage.getItem('currentCorpNint') || '0805';
-      const corp = localStorage.getItem('currentCorpOperNr') || '205';
-      if (!nint || !corp) return;
-      const reg = await navigator.serviceWorker.ready;
-      let sub = await reg.pushManager.getSubscription();
-      if (!sub) sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64ToUint8(PUBLIC_VAPID_KEY)});
-      const s = sub.toJSON();
+    async function initializePushWithoutPermission() {
+      const corp = getCorp();
+      const nint = getNInt();
+      if (!corp || !nint) {
+        console.warn("⚠️ Sem corp/nint — não dá para registar push");
+        return;
+      }
+      const registration = await navigator.serviceWorker.ready;
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+        });
+      }
+      const subJSON = subscription.toJSON();
+      const payload = {endpoint: subJSON.endpoint, n_int: parseInt(nint, 10), corp_oper_nr: corp.toString().padStart(4, "0"), p256dh: subJSON.keys.p256dh, auth: subJSON.keys.auth};
       await fetch(`${SUPABASE_URL}/rest/v1/user_push_subscriptions`, {
-        method: 'POST',
-        headers: { ...sbHeaders(), Prefer: 'resolution=merge-duplicates' },
-        body: JSON.stringify({endpoint: s.endpoint, n_int: parseInt(nint), corp_oper_nr: corp.toString().padStart(4,'0'), p256dh: s.keys.p256dh, auth: s.keys.auth})
+        method: "POST",
+        headers: { ...getSupabaseHeaders(), Prefer: "resolution=merge-duplicates" },
+        body: JSON.stringify(payload)
       });
+      console.log("✅ Push registado/atualizado no Supabase");
     }
-    /* ===================== LAYOUT ===================== */
-    function fixLayout() {
+
+    /* ======================= FUNCTION FIX LAYOUT ======================= */
+    function ajustarMainContent() {
       const main = document.querySelector('.main');
+      const header = document.querySelector('.header');
+      const footer = document.querySelector('.footer');
       if (!main) return;
-      const hh = document.querySelector('.header')?.offsetHeight || 60;
-      const fh = document.querySelector('.footer')?.offsetHeight || 50;
-      const h = window.innerHeight - hh - fh;
-      main.style.height = h + 'px';
-      main.style.maxHeight = h + 'px';
+      const alturaViewport = window.innerHeight;
+      const headerHeight = header?.offsetHeight || 0;
+      const footerHeight = footer?.offsetHeight || 0;
+      main.style.paddingTop = (headerHeight + 16) + 'px';
+      main.style.paddingBottom = (footerHeight + 16) + 'px';
     }
-    ['load','resize','pageshow'].forEach(e => window.addEventListener(e, fixLayout));
-    /* ===================== TOAST ===================== */
-    let _tt;
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg; t.classList.add('show');
-      clearTimeout(_tt);
-      _tt = setTimeout(() => t.classList.remove('show'), 2400);
+    window.addEventListener('load', ajustarMainContent);
+    window.addEventListener('resize', ajustarMainContent);
+    window.addEventListener('pageshow', ajustarMainContent);
+
+    /* ============================== TOAST ============================== */
+    let toastTimeout;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
     }
-    /* ===================== SWITCH TAB ===================== */
+
+    /* =========================== SWITCH TAB ============================ */
     function switchTab(tab) {
-      const ind = document.getElementById('swIndicator');
-      document.getElementById('swHome').classList.toggle('active', tab === 'inicio');
-      document.getElementById('swCfg').classList.toggle('active',  tab === 'config');
-      if (ind) setTimeout(() => ind.style.transform = tab === 'config' ? 'translateX(100%)' : 'translateX(0)', 10);
-      if (tab === 'config') showConfigModal();
+      const indicator = document.getElementById('swIndicator');
+      const buttons = document.querySelectorAll('.sw-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      let targetBtn;
+      if (tab === 'config') {
+        targetBtn = document.getElementById('swCfg');
+        showConfigModal();
+      } else {
+        targetBtn = document.getElementById('swHome');
+      }
+      if (targetBtn) targetBtn.classList.add('active');
+      if (indicator) {
+        setTimeout(() => {
+          indicator.style.transform = tab === 'config' ? 'translateX(100%)' : 'translateX(0)';
+        }, 10);
+      }
     }
     async function showConfigModal() {
-      const nInt = localStorage.getItem('currentCorpNint') || '205';
-      openModal('configModal');
+      const nInt = getNInt();
+      showModal('configModal');
       try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/reg_elems?select=full_name,photo_url,patent&n_int=eq.${nInt}`, {headers: sbHeaders()});
-        const data = await r.json();
-        const u = data[0];
-        document.getElementById('configUserAvatar').src = u?.photo_url || 'https://www.gravatar.com/avatar/?d=mp';
-        document.getElementById('configUserName').textContent = u?.full_name || 'Utilizador';
-        document.getElementById('configUserRank').textContent = u?.patent || '—';
-      } catch {
-        document.getElementById('configUserName').textContent = 'Erro de ligação';
-        document.getElementById('configUserRank').textContent = '—';
+        const url = `${SUPABASE_URL}/rest/v1/reg_elems?select=full_name,photo_url,patent&n_int=eq.${nInt}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) throw new Error(`Erro na resposta: ${response.statusText}`);
+        const data = await response.json();
+        const user = data[0];
+        if (user) {
+          document.getElementById('configUserAvatar').src = user.photo_url || "https://www.gravatar.com/avatar/?d=mp";
+          document.getElementById('configUserName').textContent = user.full_name || "Utilizador";
+          document.getElementById('configUserRank').textContent = user.patent || "-";
+        } else {
+          console.warn("Nenhum utilizador encontrado com nInt:", nInt);
+          document.getElementById('configUserName').textContent = "Utilizador não encontrado";
+          document.getElementById('configUserRank').textContent = "-";
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados do utilizador:", err);
+        document.getElementById('configUserName').textContent = "Erro de ligação";
+        document.getElementById('configUserRank').textContent = "-";
       }
     }
-    function togglePw(id) {
-      const inp = document.getElementById(id);
-      const ico = inp.nextElementSibling;
-      if (inp.type === 'password') {inp.type = 'text'; ico.textContent = 'visibility';}
-      else { inp.type = 'password'; ico.textContent = 'visibility_off'; }
-      if (navigator.vibrate) navigator.vibrate(25);
+    function togglePw(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const icon = input.parentElement.querySelector('.material-icons');
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) icon.textContent = 'visibility';
+      } else {
+        input.type = 'password';
+        if (icon) icon.textContent = 'visibility_off';
+      }
+      if (navigator.vibrate) navigator.vibrate(30);
     }
-    function closeConfigModal() {
-      document.getElementById('passwordChangeContainer').style.display = 'none';
-      document.getElementById('changePasswordBtn').style.display = 'inline-block';
-      ['currentPassword','newPassword','repeatPassword'].forEach(id => document.getElementById(id).value = '');
-      closeModal('configModal');
-      const ind = document.getElementById('swIndicator');
-      document.getElementById('swHome').classList.add('active');
-      document.getElementById('swCfg').classList.remove('active');
-      if (ind) ind.style.transform = 'translateX(0)';
+    function closeConfigModal(modalId = 'configModal') {
+      const container = document.getElementById('passwordChangeContainer');
+      const btn = document.getElementById('changePasswordBtn');
+      const modal = document.getElementById(modalId);
+      if (container) container.style.display = 'none';
+      if (btn) btn.style.display = 'flex';
+      if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+      }
+      const cp = document.getElementById('currentPassword');
+      const np = document.getElementById('newPassword');
+      const rp = document.getElementById('repeatPassword');
+      if (cp) cp.value = '';
+      if (np) np.value = '';
+      if (rp) rp.value = '';
+      const indicator = document.getElementById('swIndicator');
+      const buttons = document.querySelectorAll('.sw-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      const home = document.getElementById('swHome');
+      if (home) home.classList.add('active');
+      if (indicator) indicator.style.transform = 'translateX(0)';
     }
     function showPasswordChange() {
-      document.getElementById('passwordChangeContainer').style.display = 'flex';
-      document.getElementById('changePasswordBtn').style.display = 'none';
+      const container = document.getElementById('passwordChangeContainer');
+      const btn = document.getElementById('changePasswordBtn');
+      if (container) container.style.display = 'flex';
+      if (btn) btn.style.display = 'none';
     }
     async function changePassword() {
-      const cur = document.getElementById('currentPassword').value;
-      const nw  = document.getElementById('newPassword').value;
-      const rep = document.getElementById('repeatPassword').value;
-      const corp = localStorage.getItem('currentCorpOperNr') || '0805';
-      const nint = localStorage.getItem('currentCorpNint') || '205';
-      if (!cur || !nw || !rep) {showToast('❌ Preencha todos os campos'); return;}
-      if (nw !== rep) {showToast('❌ As passwords não coincidem'); return;}
-      if (nw.length < 6) {showToast('❌ Mínimo 6 caracteres'); return;}
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const repeatPassword = document.getElementById('repeatPassword').value;
+      const corpOperNr = getCorp();
+      const nIntCorp = getNInt();
+      if (!currentPassword || !newPassword || !repeatPassword) { showToast('❌ Preencha todos os campos'); return; }
+      if (newPassword !== repeatPassword) { showToast('❌ As passwords não coincidem'); return; }
+      if (newPassword.length < 6) { showToast('❌ A nova password deve ter pelo menos 6 caracteres'); return; }
+      if (!corpOperNr || !nIntCorp) { showToast('❌ Erro: dados de sessão não encontrados'); return; }
       try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/users_mobile?select=password&corp_oper_nr=eq.${corp}&nint_corp=eq.${nint}`, {headers: sbHeaders()});
-        const data = await r.json();
-        if (!data.length) {showToast('❌ Utilizador não encontrado'); return;}
-        if (data[0].password !== cur) {showToast('❌ Password atual incorreta'); return;}
-        const upd = await fetch(`${SUPABASE_URL}/rest/v1/users_mobile?corp_oper_nr=eq.${corp}&nint_corp=eq.${nint}`, {
+        const url = `${SUPABASE_URL}/rest/v1/users_mobile?select=password&corp_oper_nr=eq.${corpOperNr}&nint_corp=eq.${nIntCorp}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) throw new Error(`Erro na resposta: ${response.statusText}`);
+        const data = await response.json();
+        if (data.length === 0) { showToast('❌ Utilizador não encontrado'); return; }
+        const user = data[0];
+        if (user.password !== currentPassword) { showToast('❌ Password atual incorreta'); return; }
+        const updateUrl = `${SUPABASE_URL}/rest/v1/users_mobile?corp_oper_nr=eq.${corpOperNr}&nint_corp=eq.${nIntCorp}`;
+        const updateResponse = await fetch(updateUrl, {
           method: 'PATCH',
-          headers: sbHeaders({ returnRepresentation: true }),
-          body: JSON.stringify({ password: nw })
+          headers: getSupabaseHeaders({ returnRepresentation: true }),
+          body: JSON.stringify({password: newPassword})
         });
-        if (!upd.ok) throw new Error();
-        showToast('✅ Password alterada!');
-        ['currentPassword','newPassword','repeatPassword'].forEach(id => document.getElementById(id).value = '');
+        if (!updateResponse.ok) throw new Error(`Erro ao atualizar: ${updateResponse.statusText}`);
+        showToast('✅ Password alterada com sucesso!');
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('repeatPassword').value = '';
         document.getElementById('passwordChangeContainer').style.display = 'none';
-        document.getElementById('changePasswordBtn').style.display = 'inline-block';
-      } catch {showToast('❌ Erro ao alterar. Tente novamente.');}
+        document.getElementById('changePasswordBtn').style.display = 'flex';
+      } catch (error) {
+        console.error('❌ Erro ao alterar password:', error);
+        showToast('❌ Erro ao alterar password. Tente novamente.');
+      }
     }
-    /* ===================== NOTIFICATIONS ===================== */
+
+    /* ======================== DEVELOPMENT MODAL ======================== */
+    function showEmDesenvolvimento() {
+      showModal('emDesenvolvimentoModal');
+    }
+
+    /* ======================= NOTIFICATIONS LOGIC ======================= */
     async function openNotifications() {
-      if (navigator.vibrate) navigator.vibrate(25);
-      openModal('notificationsModal');
-      const nInt = localStorage.getItem('currentCorpNint');
-      const list = document.getElementById('notificationsList');
+      if (navigator.vibrate) navigator.vibrate(30);
+      showModal('notificationsModal');
+      const nInt = getNInt();
+      const listContainer = document.getElementById('notificationsList');
       try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&is_read=eq.false&order=created_at.desc`, {headers: sbHeaders()});
-        const data = await r.json();
-        if (!data.length) {
-          list.innerHTML = '<p style="text-align:center;padding:24px;color:var(--txt-3);">Sem notificações novas.</p>';
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&is_read=eq.false&order=created_at.desc`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data.length === 0) {
+          listContainer.innerHTML = '<p style="text-align:center; padding: 20px; color: var(--txt-3);">Não tens notificações novas.</p>';
           return;
         }
-        list.innerHTML = data.map(n => `
+        listContainer.innerHTML = data.map(notif => `
           <div class="notif-item">
-            <strong>${n.title}</strong>
-            <span>${n.message}</span>
-            <small>${new Date(n.created_at).toLocaleString('pt-PT')}</small>
-          </div>`).join('');
-      } catch {list.innerHTML = '<p style="color:var(--red);text-align:center;">Erro ao carregar.</p>';}
+            <strong>${notif.title}</strong>
+            <span>${notif.message}</span>
+            <small>${new Date(notif.created_at).toLocaleString('pt-PT')}</small>
+          </div>
+        `).join('');
+      } catch (err) {
+        listContainer.innerHTML = '<p style="color: var(--red);">Erro ao carregar notificações.</p>';
+      }
+    }
+    function closeNotificationsModal() {
+      closeModal('notificationsModal');
     }
     async function markAllAsRead() {
-      const nInt = localStorage.getItem('currentCorpNint') || '205';
+      const nInt = getNInt();
       try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&is_read=eq.false`, {
-          method: 'PATCH', headers: sbHeaders(), body: JSON.stringify({ is_read: true })
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&is_read=eq.false`, {
+          method: 'PATCH',
+          headers: getSupabaseHeaders(),
+          body: JSON.stringify({ is_read: true })
         });
-        if (r.ok) {updateBadge('notifBadge', 0); closeModal('notificationsModal'); showToast('Notificações limpas');}
-      } catch {}
-    }
-    function updateBadge(id, count) {
-      const el = document.getElementById(id);
-      if (el) { el.textContent = count; el.style.display = 'flex'; }
-    }
-    async function checkNotifications() {
-      const nInt = localStorage.getItem('currentCorpNint') || '205';
-      const corp = localStorage.getItem('currentCorpOperNr') || '0805';
-      try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&corp_oper_nr=eq.${corp}&is_read=eq.false&select=*`, {headers: sbHeaders()});
-        updateBadge('notifBadge', (await r.json()).length);
-      } catch {}
-    }
-    /* ===================== CORP / USER LOADING ===================== */
-    function formatCorpName(n) {
-      if (!n) return '';
-      n = n.trim();
-      if (n.startsWith('Associação Humanitária dos Bombeiros')) {
-        n = n.replace('Associação Humanitária dos Bombeiros','').replace('Voluntários','').trim().replace(/^\s*de\s*/i,'');
-        return `C.B. de ${n}`;
+        if (res.ok) {
+          updateNotifBadge(0);
+          closeNotificationsModal();
+          showToast('Notificações limpas');
+        }
+      } catch (err) {
+        console.error('Erro ao limpar notificações:', err);
       }
-      if (n.startsWith('Companhia Sapadores')) return n.replace('Companhia','CB');
-      if (n.startsWith('Centro Municipal de Operações de Socorro')) {
-        const zona = n.replace('Centro Municipal de Operações de Socorro','').trim().replace(/^de\s*/i,'');
+    }
+    function updateNotifBadge(count) {
+      const badge = document.getElementById('notifBadge');
+      if (!badge) return;
+      badge.textContent = count;
+      badge.style.display = 'flex';
+      badge.style.opacity = '1';
+    }
+
+    /* =================== FORMATTING CORPORATION NAME =================== */
+    function formatCorpName(rawName) {
+      if (!rawName) return "";
+      let name = rawName.trim();
+      if (name.startsWith("Associação Humanitária dos Bombeiros")) {
+        name = name.replace("Associação Humanitária dos Bombeiros", "")
+          .replace("Voluntários", "")
+          .trim()
+          .replace(/^\s*de\s*/i, "");
+        return `C.B. de ${name}`;
+      }
+      if (name.startsWith("Companhia Sapadores")) {
+        return name.replace("Companhia", "CB");
+      }
+      if (name.startsWith("Centro Municipal de Operações de Socorro")) {
+        let zona = name.replace("Centro Municipal de Operações de Socorro", "").trim()
+          .replace(/^de\s*/i, "");
         return `CMOS ${zona}`;
       }
-      return n;
+      return name;
     }
+
+    /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corp = localStorage.getItem('currentCorpOperNr') || '0805';
+      const corpOperNr = getCorp();
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) {
+        if (h2) h2.textContent = "Não definido";
+        return;
+      }
       try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corp}`, {headers: sbHeaders()});
-        const data = await r.json();
-        if (data?.length) {
-          const c = data[0];
-          const logo = document.getElementById('corpLogo');
-          if (logo && c.logo_url) logo.src = c.logo_url.trim();
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
+          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+        } else {
+          if (h2) h2.textContent = "Não encontrado";
         }
-      } catch {}
+      } catch (err) {
+        console.error('Erro no loadCorpInfo:', err);
+        if (h2) h2.textContent = corpOperNr;
+      }
     }
+
+    /* ======================== USERNAME LOADING ========================= */
     async function loadUserName() {
-      const nInt = localStorage.getItem('currentCorpNint') || '205';
-      const nameEl  = document.querySelector('.welcome-text .name');
+      const nInt = getNInt();
+      const welcomeNameEl = document.querySelector('.welcome-text .name');
       const avatarEl = document.getElementById('userAvatar');
       try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,photo_url&n_int=eq.${nInt}`, {headers: sbHeaders()});
-        const data = await r.json();
-        nameEl.textContent = data[0]?.abv_name  || 'Utilizador';
-        avatarEl.src = data[0]?.photo_url || 'https://www.gravatar.com/avatar/?d=mp';
-      } catch { nameEl.textContent = 'Utilizador'; }
+        const url = `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,photo_url&n_int=eq.${nInt}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        const data = await response.json();
+        if (welcomeNameEl) welcomeNameEl.textContent = data[0]?.abv_name || 'Utilizador';
+        if (avatarEl) avatarEl.src = data[0]?.photo_url || "https://www.gravatar.com/avatar/?d=mp";
+      } catch (error) {
+        if (welcomeNameEl) welcomeNameEl.textContent = 'Utilizador';
+        if (avatarEl) avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
+      }
     }
+
     async function loadNextService() {
-      const nInt = parseInt(localStorage.getItem('currentCorpNint') || '205', 10);
-      const txt  = document.querySelector('.next-service-text');
-      txt.textContent = 'A carregar...';
+      const nintCorp = parseInt(getNInt(), 10);
+      const container = document.querySelector(".next-pill");
+      const textSpan = container.querySelector(".next-service-text");
+      textSpan.textContent = "A carregar...";
       try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/reg_serv?select=day,month,year,value&n_int=eq.${nInt}`, {headers: sbHeaders()});
-        if (!r.ok) { txt.textContent = 'Erro ao carregar'; return; }
-        const data = await r.json();
-        const valid = ['PN','ED','EN','ET','EP'];
-        const byDate = {};
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_serv?select=day,month,year,value&n_int=eq.${nintCorp}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) { textSpan.textContent = "Erro ao carregar dados"; return; }
+        const data = await response.json();
+        const validValues = ['PN', 'ED', 'EN', 'ET', 'EP'];
+        const servicesByDate = {};
         data.forEach(d => {
-          if (d.day && d.month && d.year && valid.includes(d.value)) {
-            const k = `${d.year}-${String(d.month).padStart(2,'0')}-${String(d.day).padStart(2,'0')}`;
-            (byDate[k] = byDate[k] || []).push(d.value);
+          if (d.day && d.month && d.year && d.value && validValues.includes(d.value)) {
+            const key = `${d.year}-${String(d.month).padStart(2,'0')}-${String(d.day).padStart(2,'0')}`;
+            if (!servicesByDate[key]) servicesByDate[key] = [];
+            servicesByDate[key].push(d.value);
           }
         });
-        const today = new Date(); today.setHours(0,0,0,0);
-        const future = Object.entries(byDate)
-          .map(([k,v]) => { const [y,m,d] = k.split('-').map(Number); return {d: new Date(y,m-1,d), v };})
-          .filter(x => x.d >= today).sort((a,b) => a.d - b.d);
-        if (!future.length) { txt.textContent = 'Sem serviços registados'; return; }
-        const nx = future[0];
-        const dd = String(nx.d.getDate()).padStart(2,'0');
-        const mm = String(nx.d.getMonth()+1).padStart(2,'0');
-        const yy = nx.d.getFullYear();
-        const hasPN = nx.v.includes('PN');
-        const hasEC = nx.v.some(v => ['ED','EN','ET','EP'].includes(v));
-        const type  = hasPN && hasEC ? 'ECIN/PIQUETE' : hasPN ? 'PIQUETE' : 'ECIN';
-        txt.textContent = `${dd}/${mm}/${yy} — ${type}`;
-      } catch { txt.textContent = 'Erro de ligação'; }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const futureDates = Object.keys(servicesByDate)
+          .map(dateStr => {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return {dateObj: new Date(y, m - 1, d), values: servicesByDate[dateStr]};
+          })
+          .filter(d => d.dateObj >= today)
+          .sort((a, b) => a.dateObj - b.dateObj);
+        if (futureDates.length === 0) { textSpan.textContent = "Próximo Serviço: Não existem registos"; return; }
+        const nextService = futureDates[0];
+        const day = String(nextService.dateObj.getDate()).padStart(2,'0');
+        const month = String(nextService.dateObj.getMonth() + 1).padStart(2,'0');
+        const year = nextService.dateObj.getFullYear();
+        const values = nextService.values;
+        const hasPN = values.includes('PN');
+        const hasECIN = values.some(v => ['ED', 'EN', 'ET', 'EP'].includes(v));
+        let serviceType = hasPN && hasECIN ? 'ECIN/PIQUETE' : hasPN ? 'PIQUETE' : 'ECIN';
+        textSpan.textContent = `Próximo Serviço: ${day}/${month}/${year} - ${serviceType}`;
+      } catch (err) {
+        console.error("Erro ao carregar próximo serviço:", err);
+        textSpan.textContent = "Erro de ligação ao servidor";
+      }
     }
-    /* ===================== THEME ===================== */
+
+    /* ======================= FETCH NOTIFICATIONS ======================= */
+    async function checkRealNotifications() {
+      const nInt = getNInt();
+      const corpOperNr = getCorp();
+      if (!nInt || !corpOperNr) return;
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/user_notifications?n_int=eq.${nInt}&corp_oper_nr=eq.${corpOperNr}&is_read=eq.false&select=*`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        updateNotifBadge(data.length);
+      } catch (err) {
+        console.error('Erro ao verificar notificações:', err);
+      }
+    }
+
+    /* ================= TOGGLE THEME AND MENU DROPDOWN ================= */
     function toggleTheme() {
-      document.body.classList.toggle('dark');
-      localStorage.setItem('sgo-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-      if (navigator.vibrate) navigator.vibrate(25);
+      const body = document.body;
+      const isDark = body.classList.contains('dark');
+      if (isDark) {
+        body.classList.remove('dark');
+        localStorage.setItem('sgo-theme', 'light');
+      } else {
+        body.classList.add('dark');
+        localStorage.setItem('sgo-theme', 'dark');
+      }
+      if (navigator.vibrate) navigator.vibrate(30);
     }
     function loadTheme() {
-      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark');
+      if (localStorage.getItem('sgo-theme') === 'dark') {
+        document.body.classList.add('dark');
+      }
     }
-    /* ===================== MENU ===================== */
     function toggleMenu() {
-      document.getElementById('menuDropdown').classList.toggle('open');
-      if (navigator.vibrate) navigator.vibrate(25);
+      const dropdown = document.getElementById('menuDropdown');
+      if (!dropdown) return;
+      dropdown.classList.toggle('open');
+      if (navigator.vibrate) navigator.vibrate(30);
     }
-    document.addEventListener('click', e => {
-      const dd  = document.getElementById('menuDropdown');
-      const btn = document.getElementById('menuDotsBtn');
-      if (dd && btn && !dd.contains(e.target) && !btn.contains(e.target)) dd.classList.remove('open');
+    document.addEventListener('click', function(event) {
+      const menuDots = document.getElementById('menuDotsBtn');
+      const dropdown = document.getElementById('menuDropdown');
+      if (menuDots && dropdown &&
+        !menuDots.contains(event.target) &&
+        !dropdown.contains(event.target)) {
+        dropdown.classList.remove('open');
+      }
     });
-    /* ===================== MODALS ===================== */
-    function openModal(id) {
-      const m = document.getElementById(id);
-      if (m) {m.classList.add('show'); document.body.style.overflow = 'hidden'; if (navigator.vibrate) navigator.vibrate(35);}
+
+    /* ============================== MODALS ============================= */
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        if (navigator.vibrate) navigator.vibrate(50);
+      }
     }
-    function closeModal(id) {
-      const m = document.getElementById(id);
-      if (m) {m.classList.remove('show'); document.body.style.overflow = '';}
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+      }
     }
-    function showPolicies() {openModal('policiesModal'); toggleMenu();}
-    function showTerms() {openModal('termsModal'); toggleMenu();}
-    function showAbout() {openModal('aboutModal'); toggleMenu();}
-    function showContact() {openModal('contactModal'); toggleMenu();}
-    function showEmDesenvolvimento() { openModal('emDesenvolvimentoModal');}
-    document.addEventListener('click', e => {
-      if (e.target.classList.contains('modal')) {e.target.classList.remove('show'); document.body.style.overflow = '';}
+    function showPolicies() { showModal('policiesModal'); toggleMenu(); }
+    function showTerms() { showModal('termsModal'); toggleMenu(); }
+    function showAbout() { showModal('aboutModal'); toggleMenu(); }
+    function showContact() { showModal('contactModal'); toggleMenu(); }
+    document.addEventListener('click', function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('show');
+        document.body.style.overflow = 'auto';
+      }
     });
-    /* ===================== BUTTONS ===================== */
-    function selBtn(btn) {
-      document.querySelectorAll('.mbtn').forEach(b => {if (b !== btn) b.classList.remove('sel');});
-      btn.classList.add('sel');
-      if (navigator.vibrate) navigator.vibrate(60);
-      setTimeout(() => btn.classList.remove('sel'), 2000);
+
+    /* ============================= BUTTONS ============================= */
+    function selBtn(button) {
+      document.querySelectorAll('.mbtn').forEach(btn => {
+        if (btn !== button) btn.classList.remove('sel');
+      });
+      button.classList.add('sel');
+      if (navigator.vibrate) navigator.vibrate(100);
+      setTimeout(() => button.classList.remove('sel'), 2000);
     }
-    function clearSel() {document.querySelectorAll('.mbtn').forEach(b => b.classList.remove('sel'));}
-    /* ===================== BADGES ===================== */
-    async function badgeFetch(selector, url) {
-      const el = document.querySelector(selector);
-      if (!el) return;
+    function clearAllSelections() {
+      document.querySelectorAll('.mbtn').forEach(btn => btn.classList.remove('sel'));
+    }
+
+    /* ======================= OCCURRENCE LOADING ======================== */
+    async function updateOccurrencesBadge() {
+      const corpOperNr = getCorp();
+      const badge = document.querySelector('#ongoingBtn .bdg');
+      if (!badge) return;
+      if (!corpOperNr) { badge.textContent = '0'; return; }
       try {
-        const r = await fetch(url, {headers: sbHeaders()});
-        el.textContent = (await r.json()).length;
-      } catch { el.textContent = '!'; }
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/occurrences_control?select=*&corp_oper_nr=eq.${corpOperNr}`, { headers: getSupabaseHeaders() });
+        const data = await response.json();
+        badge.textContent = `${data.length}`;
+      } catch (err) {
+        console.error('Erro ao buscar ocorrências:', err);
+        badge.textContent = '!';
+      }
     }
-    function updateOccurrencesBadge() {
-      const corp = localStorage.getItem('currentCorpOperNr');
-      if (corp) badgeFetch('#ongoingBtn .bdg', `${SUPABASE_URL}/rest/v1/occurrences_control?select=id&corp_oper_nr=eq.${corp}`);
+
+    /* ========================= EVENTS LOADING ========================== */
+    async function updateEventsBadge() {
+      const corpOperNr = getCorp();
+      const badge = document.querySelector('#events .bdg');
+      if (!badge) return;
+      if (!corpOperNr) { badge.textContent = '0'; return; }
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=*&corp_oper_nr=eq.${corpOperNr}`, { headers: getSupabaseHeaders() });
+        const data = await response.json();
+        badge.textContent = `${data.length}`;
+      } catch (err) {
+        console.error('Erro ao buscar eventos:', err);
+        badge.textContent = '!';
+      }
     }
-    function updateEventsBadge() {
-      const corp = localStorage.getItem('currentCorpOperNr');
-      if (corp) badgeFetch('#events .bdg', `${SUPABASE_URL}/rest/v1/event_list?select=id&corp_oper_nr=eq.${corp}`);
+
+    /* ========================= REPORTS LOADING ========================= */
+    async function updateOccurrenceReportsBadge() {
+      const corpOperNr = getCorp();
+      const nInt = getNInt();
+      const badge = document.querySelector('#reports .bdg');
+      if (!badge) return;
+      if (!corpOperNr || !nInt) { badge.textContent = '0'; return; }
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reports_control?select=id&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nInt}&report_state=eq.false`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) throw new Error(`Erro API: ${response.status}`);
+        const data = await response.json();
+        badge.textContent = data.length;
+        badge.style.display = 'flex';
+      } catch (err) {
+        console.error('Erro ao atualizar badge de relatórios:', err);
+        badge.textContent = '!';
+      }
     }
-    function updateReportsBadge() {
-      const corp = localStorage.getItem('currentCorpOperNr') || '0805';
-      const nint = localStorage.getItem('currentCorpNint') || '205';
-      badgeFetch('#reports .bdg', `${SUPABASE_URL}/rest/v1/reports_control?select=id&corp_oper_nr=eq.${corp}&n_int=eq.${nint}&report_state=eq.false`);
-    }
-    function updateHospitalBadge() {
-      const corp = localStorage.getItem('currentCorpOperNr');
-      if (corp) badgeFetch('#hospadv .bdg', `${SUPABASE_URL}/rest/v1/hospital_restrictions?select=id&corp_oper_nr=eq.${corp}`);
-    }
+
+    /* ======================= COMUNICATES LOADING ======================= */
     async function updateComunicatesBadge() {
-      const corp = localStorage.getItem('currentCorpOperNr') || '0805';
-      const el = document.querySelector('#comunicates .bdg');
-      if (!el) return;
+      const corpOperNr = getCorp();
+      const badge = document.querySelector('#comunicates .bdg');
+      if (!badge) return;
+      if (!corpOperNr) { badge.textContent = '0'; return; }
       try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/serv_comun?select=comun_url&corp_oper_nr=eq.${corp}`, {headers: sbHeaders()});
-        const items = await r.json();
-        const viewed = JSON.parse(localStorage.getItem('viewed_communications') || '[]');
-        let count = 0;
-        items.forEach(c => {
-          if (!c.comun_url) return;
-          const url = c.comun_url.startsWith('http') ? c.comun_url : `${SUPABASE_URL}/storage/v1/object/public/comunicados/${c.comun_url}`;
-          if (!viewed.includes(url)) count++;
+        const url = `${SUPABASE_URL}/rest/v1/serv_comun?select=comun_url&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        const comunicados = await response.json();
+        const viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]");
+        let unreadCount = 0;
+        comunicados.forEach(comun => {
+          if (comun.comun_url) {
+            const publicUrl = comun.comun_url.startsWith('http') ?
+              comun.comun_url :
+              `${SUPABASE_URL}/storage/v1/object/public/comunicados/${comun.comun_url}`;
+            if (!viewedDocs.includes(publicUrl)) unreadCount++;
+          }
         });
-        el.textContent = count;
-      } catch { el.textContent = '!'; }
+        badge.textContent = `${unreadCount}`;
+      } catch (err) {
+        console.error('Erro ao buscar comunicados:', err);
+        badge.textContent = '!';
+      }
     }
-    async function updateMeteoBadge() {
+
+    /* ====================== IPMA WARNINGS LOADING ====================== */
+    function updateMeteoBadge(count) {
+      const badge = document.querySelector("#meteoadv .bdg");
+      if (badge) {
+        badge.style.display = "flex";
+        badge.textContent = count;
+      }
+    }
+    async function countIPMAWarningsFromSite() {
       try {
-        const r = await fetch('https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json');
-        const data = await r.json();
-        const el = document.querySelector('#meteoadv .bdg');
-        if (el) el.textContent = data.filter(a => a.idAreaAviso === 'FAR' && a.awarenessLevelID !== 'green').length;
-      } catch {}
+        const response = await fetch("https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json");
+        const data = await response.json();
+        const warnings = data.filter(a => a.idAreaAviso === "FAR" && a.awarenessLevelID !== "green");
+        updateMeteoBadge(warnings.length);
+      } catch (err) {
+        console.error("Erro ao buscar e contar avisos IPMA:", err);
+      }
     }
+
+    /* ====================== NO HOSPITAL LOADING ======================== */
+    async function updateNohospitalBadge() {
+      const corpOperNr = getCorp();
+      const badge = document.querySelector('#hospadv .bdg');
+      if (!badge) return;
+      if (!corpOperNr) { badge.textContent = '0'; return; }
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/hospital_restrictions?select=*&corp_oper_nr=eq.${corpOperNr}`, { headers: getSupabaseHeaders() });
+        const data = await response.json();
+        badge.textContent = `${data.length}`;
+      } catch (err) {
+        console.error('Erro ao buscar constrangimentos hospitalares:', err);
+        badge.textContent = '!';
+      }
+    }
+
+    /* ====================== INTERNAL CHAT LOADING ====================== */
     async function updateChatBadge() {
-      const corp  = localStorage.getItem('currentCorpOperNr') || '0805';
-      const myNint = localStorage.getItem('currentCorpNint') || '205';
-      const el = document.querySelector('#internalChat .bdg');
-      if (!el) return;
+      const corpOperNr = getCorp();
+      const myNInt = getNInt();
+      const badge = document.querySelector('#internalChat .bdg');
+      if (!badge) return;
+      if (!corpOperNr || !myNInt) { badge.textContent = '0'; return; }
       try {
-        const [privR, geralR, readsR] = await Promise.all([
-          fetch(`${SUPABASE_URL}/rest/v1/chat_messages?select=id&corp_oper_nr=eq.${corp}&recipient_nint=eq.${myNint}&read_at=is.null`, {headers: sbHeaders()}),
-          fetch(`${SUPABASE_URL}/rest/v1/chat_messages?select=id&corp_oper_nr=eq.${corp}&recipient_nint=eq.geral`, {headers: sbHeaders()}),
-          fetch(`${SUPABASE_URL}/rest/v1/chat_message_reads?select=message_id&corp_oper_nr=eq.${corp}&n_int=eq.${myNint}`, {headers: sbHeaders()})
-        ]);
-        const [priv, geral, reads] = await Promise.all([privR.json(), geralR.json(), readsR.json()]);
-        const readSet = new Set(reads.map(r => r.message_id));
-        el.textContent = priv.length + geral.filter(m => !readSet.has(m.id)).length;
-      } catch { el.textContent = '!'; }
+        const privUrl = `${SUPABASE_URL}/rest/v1/chat_messages?select=id&corp_oper_nr=eq.${corpOperNr}&recipient_nint=eq.${myNInt}&read_at=is.null`;
+        const privRes = await fetch(privUrl, { headers: getSupabaseHeaders() });
+        const privData = await privRes.json();
+        const geralUrl = `${SUPABASE_URL}/rest/v1/chat_messages?select=id&corp_oper_nr=eq.${corpOperNr}&recipient_nint=eq.geral`;
+        const geralRes = await fetch(geralUrl, { headers: getSupabaseHeaders() });
+        const geralMsgs = await geralRes.json();
+        const readsUrl = `${SUPABASE_URL}/rest/v1/chat_message_reads?select=message_id&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${myNInt}`;
+        const readsRes = await fetch(readsUrl, { headers: getSupabaseHeaders() });
+        const readsData = await readsRes.json();
+        const readSet = new Set(readsData.map(r => r.message_id));
+        const total = privData.length + geralMsgs.filter(m => !readSet.has(m.id)).length;
+        badge.textContent = `${total}`;
+      } catch (err) {
+        console.error('Erro ao atualizar chat badge:', err);
+        badge.textContent = '!';
+      }
     }
-    /* ===================== INIT ===================== */
-    window.addEventListener('load', () => {
-      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark');
-    });
+
+    /* ============================= INIT ================================ */
     document.addEventListener('DOMContentLoaded', () => {
       loadTheme();
       loadCorpInfo();
       loadUserName();
       loadNextService();
-      checkNotifications();
       updateOccurrencesBadge();
       updateEventsBadge();
-      updateReportsBadge();
+      updateOccurrenceReportsBadge();
       updateComunicatesBadge();
-      updateMeteoBadge();
-      updateHospitalBadge();
+      countIPMAWarningsFromSite();
+      updateNohospitalBadge();
       updateChatBadge();
-      setInterval(checkNotifications, 10000);
+      checkRealNotifications();
       setInterval(updateOccurrencesBadge, 10000);
       setInterval(updateEventsBadge, 10000);
-      setInterval(updateReportsBadge, 10000);
+      setInterval(updateOccurrenceReportsBadge, 10000);
       setInterval(updateComunicatesBadge, 10000);
-      setInterval(updateMeteoBadge, 600000);
-      setInterval(updateHospitalBadge, 10000);
+      setInterval(countIPMAWarningsFromSite, 10 * 60 * 1000);
+      setInterval(updateNohospitalBadge, 10000);
       setInterval(updateChatBadge, 10000);
-      document.querySelectorAll('.mbtn').forEach((btn, i) => {
-        btn.style.opacity = '0';
-        btn.style.transform = 'translateY(10px)';
+      setInterval(checkRealNotifications, 10000);
+      const buttons = document.querySelectorAll('.mbtn');
+      buttons.forEach((button, index) => {
+        button.style.opacity = '0';
+        button.style.transform = 'translateY(20px)';
         setTimeout(() => {
-          btn.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
-          btn.style.opacity = '1';
-          btn.style.transform = 'translateY(0)';
-        }, 50 + i * 45);
+          button.style.transition = 'all 0.5s ease';
+          button.style.opacity = '1';
+          button.style.transform = 'translateY(0)';
+        }, index * 100);
       });
-      document.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preventDefault(); }, {passive: false});
-      let lastTouch = 0;
+      document.addEventListener('touchstart', e => {
+        if (e.touches.length > 1) e.preventDefault();
+      });
+      let lastTouchEnd = 0;
       document.addEventListener('touchend', e => {
         const now = Date.now();
-        if (now - lastTouch <= 300) e.preventDefault();
-        lastTouch = now;
+        if (now - lastTouchEnd <= 300) e.preventDefault();
+        lastTouchEnd = now;
       }, false);
     });
-    window.addEventListener('click', e => {
-      const skip = ['.mbtn', '.theme-pill', '.hctrl', '.modal-box', '.header-controls'];
-      if (!skip.some(s => e.target.closest(s))) clearSel();
+    window.addEventListener('click', event => {
+      const isButtonClick = event.target.closest('.mbtn');
+      const isThemeToggle = event.target.closest('.theme-pill');
+      const isMenuClick = event.target.closest('#menuDotsBtn') || event.target.closest('#menuDropdown');
+      const isModalClick = event.target.closest('.modal-box');
+      if (!isButtonClick && !isThemeToggle && !isMenuClick && !isModalClick) clearAllSelections();
     });
     document.addEventListener('selectstart', e => e.preventDefault());
     document.addEventListener('contextmenu', e => e.preventDefault());
