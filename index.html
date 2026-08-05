@@ -113,58 +113,53 @@
       return headers;
     }
 
-    async function loginUser(user, pass) {
-      try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/users_mobile?select=username,password,corp_oper_nr,nint_corp&username=eq.${user}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (!response.ok) throw new Error(`Erro ao buscar utilizador: ${response.status}`);
-        const data = await response.json();
-        if (data.length === 0) {
-          showToast("Utilizador não encontrado.", 2000, "error");
-          return;
-        }
-        const userData = data[0];
-        if (userData.password !== pass) {
-          showToast("Password incorreta.", 2000, "error");
-          return;
-        }
-        const corp = String(userData.corp_oper_nr || "").padStart(4, "0");
-        const nintCorp = String(userData.nint_corp || "0").padStart(3, "0");
-        
-        if (corp === "0000") {
-          localStorage.setItem("isMasterUser", "true");
-          localStorage.setItem("currentUserDisplay", user);
-          localStorage.setItem("currentUserName", user);
-          localStorage.setItem("currentCorpOperNr", "0000");
-          localStorage.setItem("currentCorpNint", "0");
-          localStorage.setItem("authToken", SUPABASE_ANON_KEY); // Token guardado para master
-          showToast("Bem-vindo à administração do CB360 Online!", 2000, "success");
-          setTimeout(() => {
-            window.location.href = "go:SYSTEM_ADMIN";
-          }, 2000);
-          return;
-        }
-
-        localStorage.setItem("currentUserDisplay", user);
-        localStorage.setItem("currentUserName", user);
-        localStorage.setItem("currentCorpOperNr", corp);
-        localStorage.setItem("currentCorpNint", nintCorp);
-        
-        // CORREÇÃO CRUCIAL AQUI: Grava o token para as páginas seguintes deixarem de ficar a carregar
-        localStorage.setItem("authToken", SUPABASE_ANON_KEY);
-
-        showToast("Login efetuado com sucesso!", 2000, "success");
-        setTimeout(() => {
-          window.location.href = "go:MainPage";
-        }, 2000);
-      } catch (err) {
-        console.error(err);
-        showToast("Erro de conexão. Verifique a tabela e a RLS.", 3000, "error");
+   async function loginUser(user, pass) {
+  console.log("1. A tentar fazer login para:", user);
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/users_mobile?select=username,password,corp_oper_nr,nint_corp&username=eq.${user}`, {
+        headers: getSupabaseHeaders()
       }
+    );
+    if (!response.ok) throw new Error(`Erro ao buscar utilizador: ${response.status}`);
+    const data = await response.json();
+    console.log("2. Dados recebidos da base de dados:", data);
+
+    if (data.length === 0) {
+      showToast("Utilizador não encontrado.", 2000, "error");
+      return;
     }
+    const userData = data[0];
+    if (userData.password !== pass) {
+      showToast("Password incorreta.", 2000, "error");
+      return;
+    }
+
+    const corp = String(userData.corp_oper_nr || "").padStart(4, "0");
+    const nintCorp = String(userData.nint_corp || "0").padStart(3, "0");
+    
+    // A GRAVAÇÃO OCORRE AQUI:
+    localStorage.setItem("currentUserName", user);
+    localStorage.setItem("currentCorpOperNr", corp);
+    localStorage.setItem("currentCorpNint", nintCorp);
+    localStorage.setItem("authToken", SUPABASE_ANON_KEY);
+    
+    console.log("3. Valores gravados no localStorage:", {
+      user: localStorage.getItem("currentUserName"),
+      corp: localStorage.getItem("currentCorpOperNr"),
+      token: localStorage.getItem("authToken")
+    });
+
+    showToast("Login efetuado com sucesso!", 2000, "success");
+    setTimeout(() => {
+      window.location.href = "MainPage.html"; // Confirme se o nome do ficheiro está correto
+    }, 1500);
+
+  } catch (err) {
+    console.error("Erro no processo de login:", err);
+    showToast("Erro de conexão.", 3000, "error");
+  }
+}
 
     document.getElementById("loginForm").addEventListener("submit", e => {
       e.preventDefault();
