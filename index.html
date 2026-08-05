@@ -142,7 +142,24 @@
         sessionStorage.setItem("currentCorpNint", nintCorp);
         sessionStorage.setItem("currentNInt", nintCorp);
 
-       if (corp === "0000") { localStorage.setItem("isMasterUser", "true"); showToast("Bem-vindo à administração do CB360!", 2000, "success"); setTimeout(() => { window.location.href = "system_admin.html"; }, 1500); return; } showToast("Login efetuado com sucesso!", 2000, "success"); setTimeout(() => { window.location.href = "MainPage.html"; }, 1500);
+if (corp === "0000") {
+  localStorage.setItem("isMasterUser", "true");
+  showToast("Bem-vindo à administração do CB360!", 2000, "success");
+
+  setTimeout(() => {
+    window.location.href = "system_admin.html";
+  }, 1500);
+
+  return;
+}
+
+showToast("Login efetuado com sucesso!", 2000, "success");
+
+setTimeout(() => {
+  window.location.href = "MainPage.html";
+}, 1500);
+
+
 
       } catch (err) {
         console.error("❌ ERRO LOGIN MOBILE:", err);
