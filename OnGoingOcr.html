@@ -244,26 +244,32 @@
     <script>
 /* ===================== SUPABASE CONFIGURATION ====================== */
 const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr"); 
-      const nint = localStorage.getItem("currentNInt");
-      const token = localStorage.getItem("authToken");
-      const headers = {        
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'x-my-corpo': corp,
-        'x-my-nint': nint,
-        };
-      if (options.returnRepresentation) {        
-        headers['Prefer'] = 'return=representation';
-      }
-      return headers;
-    }   
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+
+// Defina aqui o endpoint correto do seu serviço (Edge Function ou Telegram API backend)
+const TELEGRAM_API = `${SUPABASE_URL}/functions/v1/send-telegram-report`; 
+
+let currentOccurrence = null;
+let selectedFiles = [];
+
+function getSupabaseHeaders(options = {}) {
+  const corp = localStorage.getItem("currentCorpOperNr"); 
+  const nint = localStorage.getItem("currentNInt");
+  const token = localStorage.getItem("authToken");
+  const headers = {       
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    'x-my-corpo': corp,
+    'x-my-nint': nint,
+  };
+  if (options.returnRepresentation) {       
+    headers['Prefer'] = 'return=representation';
+  }
+  return headers;
+}    
 
 /* =================== CORPORATION LOADING ======================= */
-
 async function loadCorpInfo() {
   const corpOperNr = localStorage.getItem("currentCorpOperNr");
   const h2 = document.getElementById("corpInfo");
@@ -302,14 +308,12 @@ async function loadCorpInfo() {
         }
       }
     }
-
   } catch (err) {
     console.error('Erro silencioso:', err);
   }
 }
-```
 
-      /* =========================== EPE LOADING (COM DEBUG) =========================== */
+/* =========================== EPE LOADING =========================== */
 let controllerEpe, controllerOcorrencias;
 async function LoadEPE() {
   if (controllerEpe) controllerEpe.abort();
@@ -329,8 +333,6 @@ async function LoadEPE() {
     const headers = getSupabaseHeaders();
     headers['x-my-corpo'] = corpOperNr;
     
-    // Se estiver a usar a Edge Function, mude o URL para `${SUPABASE_URL}/functions/v1/NOME_DA_EDGE`
-    // Se estiver a usar direto nas tabelas, mantenha assim:
     const response = await fetch(
       `${SUPABASE_URL}/rest/v1/epe_status?select=epe_type,epe&corp_oper_nr=eq.${corpOperNr}`, {
         signal: controllerEpe.signal,
@@ -374,257 +376,290 @@ async function LoadEPE() {
       console.error('❌ Erro ao carregar EPE:', error);
       epeDecirStatus.textContent = 'Erro';
       epeDiopsStatus.textContent = 'Erro';
-      // Isto vai mostrar um pop-up no telemóvel exatamente com o erro técnico que está a acontecer
-      alert('Erro EPE Mobile: ' + error.message);
     }
   }
 }
-      /* ======================= OCCURRENCE LOADING ======================== */
-      async function LoadOccurrences() {
-        if (controllerOcorrencias) controllerOcorrencias.abort();
-        controllerOcorrencias = new AbortController();
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
-        if (!corpOperNr) return;
-        try {
-          const headers = getSupabaseHeaders();
-          headers['x-my-corpo'] = corpOperNr;
-          const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/occurrences_control?select=*&corp_oper_nr=eq.${corpOperNr}&order=id.desc`, {
-              signal: controllerOcorrencias.signal,
-              headers: headers
-            }
-          );
-          if (!response.ok) throw new Error(`Erro Supabase Ocorrências: ${response.status}`);
-          const ocorrencias = await response.json();
-          const cardsContainer = document.getElementById('cardsContainer');
-          const statsBadge = document.getElementById('statsBadge');
-          const noMsg = document.getElementById('noOccurrencesMessage');
-          cardsContainer.innerHTML = '';
-          cardsContainer.style.display = 'none';
-          statsBadge.style.display = 'none';
-          noMsg.style.display = 'none';
-          if (!ocorrencias || ocorrencias.length === 0) {
-            noMsg.style.display = 'block';
-            return;
-          }
-          const ocorrenciasEmCurso = ocorrencias.filter(occ => occ.status && occ.status.toLowerCase() === 'em curso');
-          const totalOccurrences = ocorrenciasEmCurso.length;
-          const totalVehicles = ocorrenciasEmCurso.reduce((sum, occ) => sum + Number(occ.vehicles || 0), 0);
-          const totalElements = ocorrenciasEmCurso.reduce((sum, occ) => sum + Number(occ.elements || 0), 0);
-          document.getElementById('totalOccurrences').textContent = totalOccurrences;
-          document.getElementById('totalVehicles').textContent = totalVehicles;
-          document.getElementById('totalElements').textContent = totalElements;
-          if (totalOccurrences > 0) statsBadge.style.display = 'flex';
-          cardsContainer.style.display = 'grid';
-          ocorrencias.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'occurrence-card';
-            const statusClass = (item.status && item.status.toLowerCase() === 'finalizada') 
-            ? 'status-completed' 
-            : 'status-in-progress';
-            card.innerHTML = `
-              <div class="card-header">
-                <span class="status-badge ${statusClass}">${item.status || 'N/D'}</span>
-              </div>
-              <div class="card-body">
-                <h3>🔥 ${item.occorrence || 'Sem Nome'}</h3>
-                <div class="location-wrapper">
-                  <span>📍</span>
-                  <span class="location-text">${item.local || 'Localização não disponível'}</span>
-                </div>
-              </div>
-            `;
-            card.onclick = () => openOccurrencePopup(item);
-            cardsContainer.appendChild(card);
-          });
-        } catch (error) {
-          if (error.name !== 'AbortError') {
-            console.error('❌ Erro ao carregar ocorrências:', error);
-          }
-        }
+
+/* ======================= OCCURRENCE LOADING ======================== */
+async function LoadOccurrences() {
+  if (controllerOcorrencias) controllerOcorrencias.abort();
+  controllerOcorrencias = new AbortController();
+  const corpOperNr = localStorage.getItem("currentCorpOperNr");
+  if (!corpOperNr) return;
+  try {
+    const headers = getSupabaseHeaders();
+    headers['x-my-corpo'] = corpOperNr;
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/occurrences_control?select=*&corp_oper_nr=eq.${corpOperNr}&order=id.desc`, {
+        signal: controllerOcorrencias.signal,
+        headers: headers
       }
-      /* ========================= TOAST FUCTIONS ========================== */
-      function showToast(message, type = 'info', duration = 4000) {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.textContent = message;
-        toast.onclick = () => {
-          container.removeChild(toast);
-        };
-        container.appendChild(toast);
-        setTimeout(() => toast.classList.add('show'), 50);
-        setTimeout(() => {
-          toast.classList.remove('show');
-          setTimeout(() => {
-            if (toast.parentNode === container) container.removeChild(toast);
-          }, 400);
-        }, duration);
-      }
-      /* ======================== OCCURRENCE POPUP ========================= */
-      function openOccurrencePopup(occurrence) {
-        currentOccurrence = occurrence;
-        document.getElementById('detailOccurrence').textContent = occurrence.occorrence;
-        document.getElementById('detailLocal').textContent = occurrence.local;
-        const statusSelect = document.getElementById('detailStatus');
-        statusSelect.value = occurrence.status;
-        document.getElementById('messageText').value = '';
-        selectedFiles = [];
-        updateAttachmentPreview();
-        document.getElementById('occurrencePopup').classList.add('active');
-      }
-      function closeOccurrencePopup() {
-        document.getElementById('occurrencePopup').classList.remove('active');
-        currentOccurrence = null;
-        selectedFiles = [];
-        updateAttachmentPreview();
-      }
-      function handleFileSelect(event) {
-        const files = Array.from(event.target.files);
-        selectedFiles = [...selectedFiles, ...files];
-        if (selectedFiles.length > 10) {
-          showToast('⚠️ Só é permitido um máximo de 10 fotos!', 'warning');
-          selectedFiles = selectedFiles.slice(0, 10);
-        }
-        updateAttachmentPreview();
-        event.target.value = '';
-      }
-      function updateAttachmentPreview() {
-        const preview = document.getElementById('attachmentPreview');
-        const counter = document.getElementById('photoCount');
-        if (counter) counter.textContent = selectedFiles.length;
-        if (selectedFiles.length === 0) {
-          preview.classList.remove('has-files');
-          preview.innerHTML = '';
-          return;
-        }
-        preview.classList.add('has-files');
-        preview.innerHTML = '';
-        selectedFiles.forEach((file, index) => {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            const item = document.createElement('div');
-            item.className = 'attachment-item';
-            item.style.display = 'flex';
-            item.style.alignItems = 'center';
-            item.style.marginBottom = '6px';
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.alt = file.name;
-            img.style.width = '50px';
-            img.style.height = '50px';
-            img.style.objectFit = 'cover';
-            img.style.borderRadius = '6px';
-            img.style.cursor = 'pointer';
-            img.style.marginRight = '10px';
-            img.title = file.name;
-            img.onclick = () => openLightbox(e.target.result);
-            const infoDiv = document.createElement('div');
-            infoDiv.style.flex = '1';
-            infoDiv.style.display = 'flex';
-            infoDiv.style.flexDirection = 'column';
-            infoDiv.style.justifyContent = 'center';
-            infoDiv.innerHTML = `<span class="attachment-name">${file.name}</span>`;
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-attachment';
-            removeBtn.textContent = '×';
-            removeBtn.onclick = () => {
-              removeAttachment(index);
-            };
-            item.appendChild(img);
-            item.appendChild(infoDiv);
-            item.appendChild(removeBtn);
-            preview.appendChild(item);
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-      function openLightbox(src) {
-        const lightbox = document.getElementById('lightbox');
-        const img = document.getElementById('lightboxImg');
-        img.src = src;
-        lightbox.style.display = 'flex';
-      }
-      document.getElementById('lightbox').addEventListener('click', function() {
-        this.style.display = 'none';
-      });
-      function removeAttachment(index) {
-        selectedFiles.splice(index, 1);
-        updateAttachmentPreview();
-      }
-      async function sendOccurrenceReport() {
-        if (!currentOccurrence) return;
-        const messageText = document.getElementById('messageText').value.trim();
-        if (!messageText && selectedFiles.length === 0) {
-          showToast('❌ Escreva a descrição ou adicione anexos!', 'error');
-          return;
-        }
-        const sendBtn = document.querySelector('.send-btn');
-        sendBtn.disabled = true;
-        sendBtn.innerHTML = '<span>⏳</span><span>A Enviar...</span>';
-        try {
-          const corpOperNr = (localStorage.getItem("currentCorpOperNr") || '').trim();
-          if (!corpOperNr) throw new Error('corp_oper_nr não definido!');
-          const selectedStatus = document.getElementById('detailStatus').value;
-          const now = new Date();
-          const time = now.toLocaleTimeString('pt-PT', {
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-          const date = now.toLocaleDateString('pt-PT');
-          let message = `🚨 <b>ATUALIZAÇÃO DE OCORRÊNCIA</b>\n\n`;
-          message += `📋 <b>Ocorrência:</b> ${currentOccurrence.occorrence}\n`;
-          message += `📍 <b>Local:</b> ${currentOccurrence.local}\n`;
-          message += `📊 <b>Estado:</b> ${selectedStatus}\n`;
-          message += `⏰ ${time}\n`;
-          message += `📅 ${date}`;
-          if (messageText) {
-            message += `\n\n💬 <b>Descrição:</b>\n\n<i>${messageText}</i>`;
-          }
-          const formData = new FormData();
-          formData.append('corp_oper_nr', corpOperNr);
-          formData.append('message', message);
-          selectedFiles.forEach((file) => {
-            formData.append('photos', file, file.name);
-          });
-          const res = await fetch(TELEGRAM_API, {
-            method: 'POST',
-            body: formData
-          });
-          const result = await res.json();
-          if (result.success) {
-            showToast('✅ Relatório e anexos enviados com sucesso!', 'success');
-            closeOccurrencePopup();
-          } else {
-            showToast(`❌ Erro ao enviar: ${JSON.stringify(result)}`, 'error', 8000);
-            console.error('Resposta completa do backend:', result);
-          }
-        } catch (err) {
-          console.error('❌ Erro ao enviar:', err);
-          showToast(`❌ ${err.message}`, 'error', 8000);
-        } finally {
-          sendBtn.disabled = false;
-          sendBtn.innerHTML = '<span>📤</span><span>Enviar Relatório</span>';
-        }
-      }
-      window.addEventListener('load', function() {
-        const savedTheme = localStorage.getItem('sgo-theme');
-        if (savedTheme === 'dark') {
-          document.body.classList.add('dark-mode');
-        }
-        loadCorpInfo();
-        LoadEPE();
-        LoadOccurrences();
-        setInterval(LoadEPE, 8000);
-        setInterval(LoadOccurrences, 8000);
-      });
-      document.getElementById('occurrencePopup').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closeOccurrencePopup();
-        }
-      });
-    </script>
+    );
+    if (!response.ok) throw new Error(`Erro Supabase Ocorrências: ${response.status}`);
+    const ocorrencias = await response.json();
+    const cardsContainer = document.getElementById('cardsContainer');
+    const statsBadge = document.getElementById('statsBadge');
+    const noMsg = document.getElementById('noOccurrencesMessage');
+    
+    if (!cardsContainer) return;
+
+    cardsContainer.innerHTML = '';
+    cardsContainer.style.display = 'none';
+    if (statsBadge) statsBadge.style.display = 'none';
+    if (noMsg) noMsg.style.display = 'none';
+
+    if (!ocorrencias || ocorrencias.length === 0) {
+      if (noMsg) noMsg.style.display = 'block';
+      return;
+    }
+
+    const ocorrenciasEmCurso = ocorrencias.filter(occ => occ.status && occ.status.toLowerCase() === 'em curso');
+    const totalOccurrences = ocorrenciasEmCurso.length;
+    const totalVehicles = ocorrenciasEmCurso.reduce((sum, occ) => sum + Number(occ.vehicles || 0), 0);
+    const totalElements = ocorrenciasEmCurso.reduce((sum, occ) => sum + Number(occ.elements || 0), 0);
+    
+    if (document.getElementById('totalOccurrences')) document.getElementById('totalOccurrences').textContent = totalOccurrences;
+    if (document.getElementById('totalVehicles')) document.getElementById('totalVehicles').textContent = totalVehicles;
+    if (document.getElementById('totalElements')) document.getElementById('totalElements').textContent = totalElements;
+    
+    if (totalOccurrences > 0 && statsBadge) statsBadge.style.display = 'flex';
+    cardsContainer.style.display = 'grid';
+
+    ocorrencias.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'occurrence-card';
+      const statusClass = (item.status && item.status.toLowerCase() === 'finalizada') 
+      ? 'status-completed' 
+      : 'status-in-progress';
+      card.innerHTML = `
+        <div class="card-header">
+          <span class="status-badge ${statusClass}">${item.status || 'N/D'}</span>
+        </div>
+        <div class="card-body">
+          <h3>🔥 ${item.occorrence || 'Sem Nome'}</h3>
+          <div class="location-wrapper">
+            <span>📍</span>
+            <span class="location-text">${item.local || 'Localização não disponível'}</span>
+          </div>
+        </div>
+      `;
+      card.onclick = () => openOccurrencePopup(item);
+      cardsContainer.appendChild(card);
+    });
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.error('❌ Erro ao carregar ocorrências:', error);
+    }
+  }
+}
+
+/* ========================= TOAST FUNCTIONS ========================== */
+function showToast(message, type = 'info', duration = 4000) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  toast.onclick = () => {
+    if (toast.parentNode === container) container.removeChild(toast);
+  };
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 50);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      if (toast.parentNode === container) container.removeChild(toast);
+    }, 400);
+  }, duration);
+}
+
+/* ======================== OCCURRENCE POPUP ========================= */
+function openOccurrencePopup(occurrence) {
+  currentOccurrence = occurrence;
+  if (document.getElementById('detailOccurrence')) document.getElementById('detailOccurrence').textContent = occurrence.occorrence;
+  if (document.getElementById('detailLocal')) document.getElementById('detailLocal').textContent = occurrence.local;
+  const statusSelect = document.getElementById('detailStatus');
+  if (statusSelect) statusSelect.value = occurrence.status;
+  if (document.getElementById('messageText')) document.getElementById('messageText').value = '';
+  selectedFiles = [];
+  updateAttachmentPreview();
+  if (document.getElementById('occurrencePopup')) document.getElementById('occurrencePopup').classList.add('active');
+}
+
+function closeOccurrencePopup() {
+  if (document.getElementById('occurrencePopup')) document.getElementById('occurrencePopup').classList.remove('active');
+  currentOccurrence = null;
+  selectedFiles = [];
+  updateAttachmentPreview();
+}
+
+function handleFileSelect(event) {
+  const files = Array.from(event.target.files);
+  selectedFiles = [...selectedFiles, ...files];
+  if (selectedFiles.length > 10) {
+    showToast('⚠️ Só é permitido um máximo de 10 fotos!', 'warning');
+    selectedFiles = selectedFiles.slice(0, 10);
+  }
+  updateAttachmentPreview();
+  event.target.value = '';
+}
+
+function updateAttachmentPreview() {
+  const preview = document.getElementById('attachmentPreview');
+  const counter = document.getElementById('photoCount');
+  if (!preview) return;
+  if (counter) counter.textContent = selectedFiles.length;
+  if (selectedFiles.length === 0) {
+    preview.classList.remove('has-files');
+    preview.innerHTML = '';
+    return;
+  }
+  preview.classList.add('has-files');
+  preview.innerHTML = '';
+  selectedFiles.forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const item = document.createElement('div');
+      item.className = 'attachment-item';
+      item.style.display = 'flex';
+      item.style.alignItems = 'center';
+      item.style.marginBottom = '6px';
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.alt = file.name;
+      img.style.width = '50px';
+      img.style.height = '50px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '6px';
+      img.style.cursor = 'pointer';
+      img.style.marginRight = '10px';
+      img.title = file.name;
+      img.onclick = () => openLightbox(e.target.result);
+      const infoDiv = document.createElement('div');
+      infoDiv.style.flex = '1';
+      infoDiv.style.display = 'flex';
+      infoDiv.style.flexDirection = 'column';
+      infoDiv.style.justifyContent = 'center';
+      infoDiv.innerHTML = `<span class="attachment-name">${file.name}</span>`;
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-attachment';
+      removeBtn.textContent = '×';
+      removeBtn.onclick = () => {
+        removeAttachment(index);
+      };
+      item.appendChild(img);
+      item.appendChild(infoDiv);
+      item.appendChild(removeBtn);
+      preview.appendChild(item);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function openLightbox(src) {
+  const lightbox = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  if (lightbox && img) {
+    img.src = src;
+    lightbox.style.display = 'flex';
+  }
+}
+
+if (document.getElementById('lightbox')) {
+  document.getElementById('lightbox').addEventListener('click', function() {
+    this.style.display = 'none';
+  });
+}
+
+function removeAttachment(index) {
+  selectedFiles.splice(index, 1);
+  updateAttachmentPreview();
+}
+
+async function sendOccurrenceReport() {
+  if (!currentOccurrence) return;
+  const messageTextEl = document.getElementById('messageText');
+  const messageText = messageTextEl ? messageTextEl.value.trim() : '';
+  
+  if (!messageText && selectedFiles.length === 0) {
+    showToast('❌ Escreva a descrição ou adicione anexos!', 'error');
+    return;
+  }
+  const sendBtn = document.querySelector('.send-btn');
+  if (sendBtn) {
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<span>⏳</span><span>A Enviar...</span>';
+  }
+  try {
+    const corpOperNr = (localStorage.getItem("currentCorpOperNr") || '').trim();
+    if (!corpOperNr) throw new Error('corp_oper_nr não definido!');
+    const detailStatusEl = document.getElementById('detailStatus');
+    const selectedStatus = detailStatusEl ? detailStatusEl.value : '';
+    
+    const now = new Date();
+    const time = now.toLocaleTimeString('pt-PT', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    const date = now.toLocaleDateString('pt-PT');
+    let message = `🚨 <b>ATUALIZAÇÃO DE OCORRÊNCIA</b>\n\n`;
+    message += `📋 <b>Ocorrência:</b> ${currentOccurrence.occorrence}\n`;
+    message += `📍 <b>Local:</b> ${currentOccurrence.local}\n`;
+    message += `📊 <b>Estado:</b> ${selectedStatus}\n`;
+    message += `⏰ ${time}\n`;
+    message += `📅 ${date}`;
+    if (messageText) {
+      message += `\n\n💬 <b>Descrição:</b>\n\n<i>${messageText}</i>`;
+    }
+    const formData = new FormData();
+    formData.append('corp_oper_nr', corpOperNr);
+    formData.append('message', message);
+    selectedFiles.forEach((file) => {
+      formData.append('photos', file, file.name);
+    });
+    const res = await fetch(TELEGRAM_API, {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if (result.success) {
+      showToast('✅ Relatório e anexos enviados com sucesso!', 'success');
+      closeOccurrencePopup();
+    } else {
+      showToast(`❌ Erro ao enviar: ${JSON.stringify(result)}`, 'error', 8000);
+      console.error('Resposta completa do backend:', result);
+    }
+  } catch (err) {
+    console.error('❌ Erro ao enviar:', err);
+    showToast(`❌ ${err.message}`, 'error', 8000);
+  } finally {
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<span>📤</span><span>Enviar Relatório</span>';
+    }
+  }
+}
+
+window.addEventListener('load', function() {
+  const savedTheme = localStorage.getItem('sgo-theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+  loadCorpInfo();
+  LoadEPE();
+  LoadOccurrences();
+  setInterval(LoadEPE, 8000);
+  setInterval(LoadOccurrences, 8000);
+});
+
+if (document.getElementById('occurrencePopup')) {
+  document.getElementById('occurrencePopup').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeOccurrencePopup();
+    }
+  });
+}
+</script>
 </body>
 </html>
 
