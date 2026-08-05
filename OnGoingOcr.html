@@ -292,52 +292,76 @@
           console.error('Erro silencioso:', err);
         }
       }
-      /* =========================== EPE LOADING =========================== */
-      let controllerEpe, controllerOcorrencias;
-      async function LoadEPE() {
-        if (controllerEpe) controllerEpe.abort();
-        controllerEpe = new AbortController();
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
-        if (!corpOperNr) return;
-        try {
-          const headers = getSupabaseHeaders();
-          headers['x-my-corpo'] = corpOperNr;
-          const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/epe_status?select=epe_type,epe&corp_oper_nr=eq.${corpOperNr}`, {
-              signal: controllerEpe.signal,
-              headers: headers
-            }
-          );
-          if (!response.ok) throw new Error(`Erro Supabase: ${response.status}`);
-          const epeData = await response.json();
-          const epeDecirStatus = document.getElementById('epedecir');
-          const epeDiopsStatus = document.getElementById('epediops');
-          if (!epeDecirStatus || !epeDiopsStatus) return;
-          epeDecirStatus.className = 'message';
-          epeDiopsStatus.className = 'message';
-          const levelMap = {'Monitorização': 'epe-level-0', 'MONITORIZAÇÃO': 'epe-level-0', 'Nível I': 'epe-level-1', 'NÍVEL I': 'epe-level-1', 'Nível II': 'epe-level-2', 
-                            'NÍVEL II': 'epe-level-2', 'Nível III': 'epe-level-3', 'NÍVEL III': 'epe-level-3', 'Nível IV': 'epe-level-4', 'NÍVEL IV': 'epe-level-4'};
-          const decir = epeData.find(item => item.epe_type === 'epe-decir');
-          if (decir) {
-            epeDecirStatus.textContent = decir.epe; epeDecirStatus.classList.add(levelMap[decir.epe] || 'empty');
-          } else {
-            epeDecirStatus.textContent = 'N/D';
-            epeDecirStatus.classList.add('empty');
-          }
-          const diops = epeData.find(item => item.epe_type === 'epe-diops');
-          if (diops) {
-            epeDiopsStatus.textContent = diops.epe;
-            epeDiopsStatus.classList.add(levelMap[diops.epe] || 'empty');
-          } else {
-            epeDiopsStatus.textContent = 'N/D';
-            epeDiopsStatus.classList.add('empty');
-          }
-        } catch (error) {
-          if (error.name !== 'AbortError') {
-            console.error('❌ Erro ao carregar EPE:', error);
-          }
-        }
+      /* =========================== EPE LOADING (COM DEBUG) =========================== */
+let controllerEpe, controllerOcorrencias;
+async function LoadEPE() {
+  if (controllerEpe) controllerEpe.abort();
+  controllerEpe = new AbortController();
+  const corpOperNr = localStorage.getItem("currentCorpOperNr");
+  
+  const epeDecirStatus = document.getElementById('epedecir');
+  const epeDiopsStatus = document.getElementById('epediops');
+  if (!epeDecirStatus || !epeDiopsStatus) return;
+
+  if (!corpOperNr) {
+    epeDecirStatus.textContent = 'Sem Corp Nr';
+    return;
+  }
+
+  try {
+    const headers = getSupabaseHeaders();
+    headers['x-my-corpo'] = corpOperNr;
+    
+    // Se estiver a usar a Edge Function, mude o URL para `${SUPABASE_URL}/functions/v1/NOME_DA_EDGE`
+    // Se estiver a usar direto nas tabelas, mantenha assim:
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/epe_status?select=epe_type,epe&corp_oper_nr=eq.${corpOperNr}`, {
+        signal: controllerEpe.signal,
+        headers: headers
       }
+    );
+
+    if (!response.ok) throw new Error(`Erro Supabase EPE: ${response.status}`);
+    const epeData = await response.json();
+    
+    epeDecirStatus.className = 'message';
+    epeDiopsStatus.className = 'message';
+    
+    const levelMap = {
+      'Monitorização': 'epe-level-0', 'MONITORIZAÇÃO': 'epe-level-0', 
+      'Nível I': 'epe-level-1', 'NÍVEL I': 'epe-level-1', 
+      'Nível II': 'epe-level-2', 'NÍVEL II': 'epe-level-2', 
+      'Nível III': 'epe-level-3', 'NÍVEL III': 'epe-level-3', 
+      'Nível IV': 'epe-level-4', 'NÍVEL IV': 'epe-level-4'
+    };
+
+    const decir = epeData.find(item => item.epe_type === 'epe-decir');
+    if (decir) {
+      epeDecirStatus.textContent = decir.epe; 
+      epeDecirStatus.classList.add(levelMap[decir.epe] || 'empty');
+    } else {
+      epeDecirStatus.textContent = 'N/D';
+      epeDecirStatus.classList.add('empty');
+    }
+
+    const diops = epeData.find(item => item.epe_type === 'epe-diops');
+    if (diops) {
+      epeDiopsStatus.textContent = diops.epe;
+      epeDiopsStatus.classList.add(levelMap[diops.epe] || 'empty');
+    } else {
+      epeDiopsStatus.textContent = 'N/D';
+      epeDiopsStatus.classList.add('empty');
+    }
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.error('❌ Erro ao carregar EPE:', error);
+      epeDecirStatus.textContent = 'Erro';
+      epeDiopsStatus.textContent = 'Erro';
+      // Isto vai mostrar um pop-up no telemóvel exatamente com o erro técnico que está a acontecer
+      alert('Erro EPE Mobile: ' + error.message);
+    }
+  }
+}
       /* ======================= OCCURRENCE LOADING ======================== */
       async function LoadOccurrences() {
         if (controllerOcorrencias) controllerOcorrencias.abort();
