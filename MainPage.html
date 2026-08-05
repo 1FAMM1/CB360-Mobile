@@ -212,7 +212,9 @@
     <div class="menu-item" onclick="showContact()">📞 Contacto</div>
   </div>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">CB360</span>
       <span class="header-sub">Mobile</span>
@@ -494,13 +496,13 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
 
     /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
-    function getCorp()  {return localStorage.getItem("currentCorpOperNr")}
-    function getNInt()  { return localStorage.getItem("currentCorpNint")}
+    function getCorp()  { return localStorage.getItem("currentCorpOperNr") || "0805"; }
+    function getNInt()  { return localStorage.getItem("currentCorpNint")   || "205";  }
 
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5NzMwNTB9.CcE8nI1bbWcL0PlJaVkKdm74UZEyzweZfsv2i0M-zmg';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -797,26 +799,37 @@
       const corpOperNr = getCorp();
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
+      console.log('🔎 loadCorpInfo — corpOperNr usado na query:', corpOperNr);
       if (!corpOperNr) {
         if (h2) h2.textContent = "Não definido";
         return;
       }
       try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
+        const url = `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        console.log('🔎 loadCorpInfo — status HTTP:', response.status);
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error('❌ loadCorpInfo — erro na resposta:', errText);
+          if (h2) h2.textContent = "Erro na consulta";
+          return;
+        }
         const data = await response.json();
+        console.log('🔎 loadCorpInfo — dados recebidos:', data);
         if (data && data.length > 0) {
           const corp = data[0];
           if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
-          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
+          if (logoEl && corp.logo_url) {
+            logoEl.src = corp.logo_url.trim();
+          } else {
+            console.warn('⚠️ loadCorpInfo — registo encontrado mas sem logo_url:', corp);
+          }
         } else {
+          console.warn('⚠️ loadCorpInfo — nenhum registo devolvido para corp_oper_nr =', corpOperNr);
           if (h2) h2.textContent = "Não encontrado";
         }
       } catch (err) {
-        console.error('Erro no loadCorpInfo:', err);
+        console.error('❌ Erro no loadCorpInfo:', err);
         if (h2) h2.textContent = corpOperNr;
       }
     }
