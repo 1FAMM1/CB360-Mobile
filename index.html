@@ -2,14 +2,11 @@
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  
   <meta name="theme-color" content="#d32f2f">
-  <link rel="manifest" href="/manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&family=Roboto+Mono:wght@300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <title>Login</title>
@@ -27,17 +24,17 @@
     .header-fade .greeting, .header-fade .prepare {margin: 10px 0 0 0; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.6); font-weight: 100;} 
     .login-container {position: relative; background: #eeee; padding: clamp(8px, 2vh, 15px); border-radius: 6px 6px 8px 8px; width: clamp(240px, 25vw, 285px); text-align: center; z-index: 1; margin: 0 0 50px 0; }
     .login-container::before {content: ""; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent;
-                              border-bottom: 10px solid #eeee; z-index: 10;}
+                             border-bottom: 10px solid #eeee; z-index: 10;}
     .login-container::after {content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 50px; background: #2c3e50; border-radius: 0 0 6px 5px; z-index: -1;}
     .login-container h1 {font-size: clamp(15px, 1.5vw, 17px); font-weight: normal; text-align: left; color: #2c3e50;}
     .login-container .logo {display: block; margin: clamp(-30px, -10vh, -40px) auto clamp(-40px, -12vh, -40px) auto; width: clamp(135px, 15vw, 175px); height: auto;}
     .login-container .separator {width: calc(100% + 30px); height: 1px; background: rgba(0, 0, 0, 0.1); margin: 24px -15px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);}
     .login-container label {display: block; margin-bottom: 6px; text-align: left; font-weight: normal; font-size: clamp(12px, 1vw, 13px); color: #666;}
     .login-container input {width: 100%; padding: clamp(8px, 1.5vh, 10px) clamp(10px, 2vw, 12px); margin-bottom: 16px; border-radius: 4px; border: 1px solid #bbb; font-size: clamp(12px, 1vw, 14px);
-                            box-sizing: border-box; color: #777;}
+                          box-sizing: border-box; color: #777;}
     .login-container input:focus {border: 1px solid #2c3e50; border-radius: 6px; outline: none;}
     .login-container button {width: 100%; padding: clamp(8px, 1.5vh, 10px) 0; background: #2c3e50; color: #fff; border: none; border-radius: 4px; font-size: clamp(14px, 1.2vw, 15px); cursor: pointer;
-                             transition: background 0.3s;}
+                            transition: background 0.3s;}
     .login-container button:hover {background: #1a252f;}
     .login-footer {font-size: clamp(10px, 1vw, 11px); color: #aaa; margin-top: 16px; text-align: center;}
     .toast {position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background-color: rgba(220, 53, 69, 0.92); color: #fff; padding: 8px 22px; border-radius: 10px;
@@ -46,25 +43,27 @@
     .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
     .toast.success {background-color: rgba(40, 167, 69, 0.92);}
     .toast.success::before, .toast:not(.success)::before {font-size: 16px; background: rgba(255, 255, 255, 0.2); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center;
-                                                          justify-content: center;}
+                                                            justify-content: center;}
     .toast.success::before {content: "✓";}
     .toast:not(.success)::before {content: "✕";}
     .toast::after {content: ""; position: absolute; bottom: 0; left: 0; height: 2px; background: rgba(255, 255, 255, 0.6); width: 100%; animation: progressBar linear forwards;
-                   animation-duration: var(--toast-duration, 2s);}
+                  animation-duration: var(--toast-duration, 2s);}
     .password-wrapper {position: relative; display: flex; align-items: center;}
     .password-wrapper input {flex: 1; padding-right: 35px; box-sizing: border-box; -webkit-appearance: none;}
     .password-wrapper i {position: absolute; right: 10px; font-size: 15px; color: #555; cursor: pointer; margin-bottom: 15px; -webkit-appearance: none; -webkit-tap-highlight-color: transparent;}
     @keyframes progressBar {from {width: 100%;} to {width: 0%;}}
     @keyframes fadeIn {from {opacity: 0; transform: translateY(-15px);} to {opacity: 1; transform: translateY(0);}}
-    /* ================================
-    RESPONSIVITY FOR 480p
-    =============================== */
     @media (max-width: 480px) {
       body {justify-content: flex-start; padding-top: 120px;}
       .header-fade {padding: 10px 0;}
       .greeting {font-size: clamp(18px, 4vw, 20px) !important; margin: 0px 0 10px 0 !important;}
       #clock {font-size: clamp(18px, 4vw, 20px) !important;}
-      .prepare {font-size: clamp(16px, 3.5vw, 18px) !important; margin-top: -5px !important;}      
+      .prepare {font-size: clamp(16px, 3.5vw, 18px) !important; margin-top: -5px !important;}
+      .login-container {width: 60%;}
+      .login-container h1 {font-size: 15px;}
+      .login-container .logo {width: 135px; margin: -10px auto -30px auto;}
+      .login-container input {padding: 9px 11px; font-size: 13px;}
+      .login-container button {padding: 10px; font-size: 14px;}
       .toast {min-width: 240px; max-width: 85%; font-size: 13px; padding: 6px 16px;}}
   </style>
 </head>
@@ -95,17 +94,9 @@
     <div class="login-footer">2023-2025 © Fábio Martins | Sistemas de Informação</div>
   </div>
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('App pronta: ', reg.scope))
-          .catch(err => console.log('Erro no motor da App: ', err));
-      });
-    }
-  </script>
-  <script>
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    
     function getSupabaseHeaders(options = {}) {
       const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
       const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
@@ -121,6 +112,7 @@
       }
       return headers;
     }
+
     async function loginUser(user, pass) {
       try {
         const response = await fetch(
@@ -141,37 +133,46 @@
         }
         const corp = String(userData.corp_oper_nr || "").padStart(4, "0");
         const nintCorp = String(userData.nint_corp || "0").padStart(3, "0");
+        
         if (corp === "0000") {
           localStorage.setItem("isMasterUser", "true");
           localStorage.setItem("currentUserDisplay", user);
           localStorage.setItem("currentUserName", user);
           localStorage.setItem("currentCorpOperNr", "0000");
           localStorage.setItem("currentCorpNint", "0");
+          localStorage.setItem("authToken", SUPABASE_ANON_KEY); // Token guardado para master
           showToast("Bem-vindo à administração do CB360 Online!", 2000, "success");
           setTimeout(() => {
             window.location.href = "go:SYSTEM_ADMIN";
           }, 2000);
           return;
         }
+
         localStorage.setItem("currentUserDisplay", user);
         localStorage.setItem("currentUserName", user);
         localStorage.setItem("currentCorpOperNr", corp);
         localStorage.setItem("currentCorpNint", nintCorp);
+        
+        // CORREÇÃO CRUCIAL AQUI: Grava o token para as páginas seguintes deixarem de ficar a carregar
+        localStorage.setItem("authToken", SUPABASE_ANON_KEY);
+
         showToast("Login efetuado com sucesso!", 2000, "success");
         setTimeout(() => {
-          window.location.href = "MainPage.html";
+          window.location.href = "go:MainPage";
         }, 2000);
       } catch (err) {
         console.error(err);
         showToast("Erro de conexão. Verifique a tabela e a RLS.", 3000, "error");
       }
     }
+
     document.getElementById("loginForm").addEventListener("submit", e => {
       e.preventDefault();
       const user = document.getElementById("username").value.trim();
       const pass = document.getElementById("password").value.trim();
       loginUser(user, pass);
     });
+
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
     togglePassword.addEventListener("click", () => {
@@ -180,6 +181,7 @@
       togglePassword.classList.toggle("fa-eye");
       togglePassword.classList.toggle("fa-eye-slash");
     });
+
     function showToast(message, duration = 2000, type = "error") {
       let toast = document.getElementById("toast");
       if (!toast) {
@@ -193,6 +195,7 @@
       if (type === "success") toast.classList.add("success");
       setTimeout(() => toast.classList.remove("show"), duration);
     }
+
     function updateGreeting() {
       const now = new Date();
       const hour = now.getHours();
@@ -202,6 +205,7 @@
       document.getElementById("greetingText").textContent = greetingText;
       document.getElementById("clock").textContent = now.toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
     }
+
     function startClock() {
       updateGreeting();
       const now = new Date();
@@ -210,10 +214,9 @@
         setInterval(updateGreeting, 1000);
       }, 1000 - now.getMilliseconds());
     }
+
     startClock();
     document.getElementById("username").focus();
   </script>
 </body>
 </html>
-
-
