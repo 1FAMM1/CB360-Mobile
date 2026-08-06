@@ -53,16 +53,34 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; background: var(--bg); padding: calc(var(--header-h) + var(--planning-h) + 20px) 16px calc(var(--footer-h) + 16px); display: flex; flex-direction: column;
+    .main-content {flex: 1; background: var(--bg); padding: calc(var(--header-h) + var(--planning-h) + 15px) 16px calc(var(--footer-h) + 25px); display: flex; flex-direction: column;
                    height: 100vh; overflow: hidden; transition: background var(--ease);}
-    .tables-scroll-area {flex: 1; overflow-y: scroll; overflow-x: hidden; padding-bottom: 10px; scrollbar-width: none; -ms-overflow-style: none; min-height: 0;}
+    .tables-scroll-area {flex: 1; overflow-y: scroll; overflow-x: hidden; padding-bottom: 20px; scrollbar-width: none; -ms-overflow-style: none; min-height: 0;}
     .tables-scroll-area::-webkit-scrollbar {display: none; width: 0; height: 0;}
-    .tables-container {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto; width: 100%; padding-bottom: 30px;}
+    
+    /* === CONTAINER DOS CARDS (GRID) === */
+    .tables-container {
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+      gap: 16px; /* <--- ESPAÇAMENTO ENTRE CARDS (Mude aqui se quiser mais ou menos espaço) */
+      max-width: 1200px; 
+      margin: 0 auto; 
+      width: 100%; 
+      padding-bottom: 40px;
+    }
+
     /* ============================================================
     TABLE CARDS
     ============================================================ */
-    .table-wrapper {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); overflow: hidden;
-                    transition: transform var(--ease), box-shadow var(--ease), background var(--ease), border-color var(--ease);}
+    .table-wrapper {
+      background: var(--surface); 
+      border: 1px solid var(--border); 
+      border-radius: var(--r-md); 
+      box-shadow: var(--sh-sm); 
+      overflow: hidden; 
+      margin-bottom: -10px; /* <--- ESPAÇAMENTO EM BAIXO DE CADA CARD */
+      transition: transform var(--ease), box-shadow var(--ease), background var(--ease), border-color var(--ease);
+    }
     .table-wrapper:hover {transform: translateY(-1px); box-shadow: var(--sh-md);}
     .table-header {display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 12px 15px;
                    text-align: center; font-weight: 700; font-size: 14px; letter-spacing: 0.3px; text-transform: uppercase;}
