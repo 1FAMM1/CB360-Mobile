@@ -303,7 +303,7 @@
         return orderA - orderB;
       });
     }
-    window.addEventListener('load', async () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       loadTheme();
       await loadCorpInfo();
       createTables();
