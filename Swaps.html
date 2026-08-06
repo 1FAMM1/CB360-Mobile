@@ -13,7 +13,6 @@
   <style>
     /* ============================================================
        CB360 MOBILE — DESIGN UNIFICADO COM "ESCALAS"
-       Mantém os seletores/IDs existentes para não alterar a lógica JS.
        ============================================================ */
     :root {
       --red: #c62828;
@@ -76,52 +75,12 @@
     }
 
     /* ================= HEADER ================= */
-    .header {
-      position:fixed;
-      top:0; left:0; right:0;
-      height:var(--header-h);
-      padding:0 14px;
-      background:linear-gradient(to right,var(--red-dark),var(--red));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:1000;
-      box-shadow:0 2px 8px rgba(0,0,0,0.20);
-      border:0;
-    }
-    .header-logo {
-      position:absolute;
-      left:14px;
-      top:50%;
-      transform:translateY(-50%);
-      height:50px;
-      width:auto;
-      border-radius:6px;
-      z-index:1001;
-      object-fit:contain;
-    }
-    .header h1 {
-      margin:0;
-      font-size:19px;
-      font-weight:700;
-      letter-spacing:1.5px;
-      color:#fff;
-      line-height:1.1;
-    }
-    .header-subtitle {
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      top:36px;
-      margin:0;
-      font-size:10px !important;
-      font-weight:500;
-      letter-spacing:1.5px;
-      color:rgba(255,255,255,0.75) !important;
-      text-transform:uppercase;
-      white-space:nowrap;
-    }
-    .header h2 { display:none !important; }
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
 
     /* ================= MAIN ================= */
     .main-content {
@@ -488,16 +447,14 @@
 
     /* ================= RESPONSIVE ================= */
     @media (max-width:480px) {
-      .header { height:var(--header-h); }
-      .header h1 { font-size:16px; letter-spacing:1.2px; }
-      .header-subtitle { top:35px; font-size:8.5px !important; letter-spacing:1.1px; }
-      .main-content { padding-left:14px; padding-right:14px; }
+      .header-title {font-size: 16px;}
+      .main-content {padding-left: 14px; padding-right: 14px;}
       .swap-options-btn { min-height:92px; font-size:10.5px; padding:10px 5px; }
       .swap-options-btn .material-icons { font-size:21px; }
       .swap-month-btn { min-height:56px; font-size:10.5px; padding:8px 4px; }
       .month-icon { font-size:19px !important; }
       .shifts-btn { font-size:10px; min-height:32px; }
-      .swap-subtitle { font-size:.95em; }
+      
       .footer { height:var(--footer-h); }
     }
     @media (min-width:769px) {
@@ -510,16 +467,20 @@
       align-items:stretch !important;
     }
     .main-content.slide-out,.main-content.slide-in { transform:none; }
-    .main-content:has(#pending-swaps-container[style*="flex"]) { justify-content:flex-start !important; align-items:stretch !important; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>TROCAS DE SERVIÇO</h1>
+  
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">TROCAS DE SERVIÇO</span>
+      <span class="header-sub">PIQUETES · ECIN · PROFISSIONAIS</span>
+    </div>
     <h2 id="corpInfo" style="display: none;"></h2>
-    <div class="header-subtitle">PIQUETES | ECIN | PROFISSIONAIS</div>
-  </div>  
+  </header>
   <div class="main-content">
     <div id="back-header" class="back-header" onclick="goBackToMain()" style="display: none;">
       <span class="material-icons back-arrow">arrow_back</span>
@@ -616,14 +577,13 @@
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
 
-    /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
     function getCorp()  {return localStorage.getItem("currentCorpOperNr");}
     function getNInt()  {return localStorage.getItem("currentCorpNint"); }
 
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") ;
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -636,7 +596,7 @@
       }
       return headers;
     }
-    /* ======================== UTILITY FUNCTIONS ======================== */
+
     function getWorkYear(selectedMonthIndex) {
       const now = new Date();
       const currentMonth = now.getMonth();
@@ -654,10 +614,10 @@
       const modal = document.getElementById(id);
       if (modal) modal.classList.remove('show');
       const mainMenu = document.querySelector('.swap-options-buttons');
-      if (mainMenu) mainMenu.style.display = 'flex';
+      if (mainMenu) mainMenu.style.display = 'grid';
       hideBackHeader();
     }
-    /* ======================= CORPORATION LOADING ======================= */
+
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
@@ -686,12 +646,12 @@
         console.error('Erro silencioso:', err);
       }
     }
-    /* ========================== THEME LOADING ========================== */    
+
     function loadTheme() {
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') document.body.classList.add('dark-mode');
     }    
-    /* ======================== BACK MENU OPTION ========================= */
+
     function showBackHeader(text = "Voltar", onClick = null) {
       const header = document.getElementById("back-header");
       header.querySelector(".back-text").textContent = text;
@@ -705,37 +665,43 @@
       header.style.display = "none";
       header.onclick = null;
     }
+
     function goBackToMain() {
       const madeSwap = document.getElementById('made-swap');
       const viewSwap = document.getElementById('pending-swaps-container');
       if (madeSwap) madeSwap.style.display = 'none';
       if (viewSwap) viewSwap.style.display = 'none';
+      
       const mainMenu = document.querySelector('.swap-options-buttons');
-      if (mainMenu) mainMenu.style.display = 'flex';
+      if (mainMenu) mainMenu.style.display = 'grid'; // CORRIGIDO PARA GRID
+      
+      document.querySelectorAll('.swap-options-btn').forEach(b => b.classList.remove('selected'));
+      hideBackHeader();
       resetSwapUI();
     }
-    /* ========================= SELECT OPTIONS ========================== */
+
     function selectOption(index, btn) {
       document.querySelectorAll('.swap-options-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       const mainMenu = document.querySelector('.swap-options-buttons');
       const pendingContainer = document.getElementById("pending-swaps-container");
       const madeSwap = document.getElementById('made-swap');
+      
       if (mainMenu) mainMenu.style.display = 'none';
       if (pendingContainer) pendingContainer.style.display = 'none';
       if (madeSwap) madeSwap.style.display = 'none';
       hideBackHeader();
+
       if (index === 0) {
         if (pendingContainer) pendingContainer.style.display = 'flex';
         showBackHeader("Voltar", () => {
-          pendingContainer.style.display = 'none';
-          if (mainMenu) mainMenu.style.display = 'flex';
-          hideBackHeader();
+          goBackToMain();
         });
         loadPendingSwaps();
       }
       if (index === 1) {
         btn.classList.remove('selected');
+        if (mainMenu) mainMenu.style.display = 'grid';
         openModal('emDesenvolvimentoModal');
         return;
       }
@@ -757,14 +723,11 @@
           });
         }
         showBackHeader("Voltar", () => {
-          if (madeSwap) madeSwap.style.display = 'none';
-          if (mainMenu) mainMenu.style.display = 'flex';
-          hideBackHeader();
-          resetSwapUI();
+          goBackToMain();
         });
       }
     }
-    /* ================= LOAD/ACEPT/REJECT PENDING SWAPS ================= */
+
     async function loadPendingSwaps() {
       const nint = localStorage.getItem("currentCorpNint");
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -836,12 +799,8 @@
           swapCard.appendChild(swapActions);
           list.appendChild(swapCard);
           const sendNotification = async (accepted) => {
-            const title = accepted
-            ? "Troca de Serviço Aceite"
-            : "Troca de Serviço Rejeitada";
-            const msg = accepted
-            ? `O elemento ${myName} aceitou a tua solicitação de troca de serviço do dia ${swap.start_shift_day} para o dia ${swap.end_shift_day}.`
-            : `O elemento ${myName} rejeitou a tua solicitação de troca de serviço do dia ${swap.start_shift_day} para o dia ${swap.end_shift_day}.`;
+            const title = accepted ? "Troca de Serviço Aceite" : "Troca de Serviço Rejeitada";
+            const msg = accepted ? `O elemento ${myName} aceitou a tua solicitação de troca de serviço do dia ${swap.start_shift_day} para o dia ${swap.end_shift_day}.` : `O elemento ${myName} rejeitou a tua solicitação de troca de serviço do dia ${swap.start_shift_day} para o dia ${swap.end_shift_day}.`;
             await fetch(`${SUPABASE_URL}/rest/v1/user_notifications`, {
               method: "POST",
               headers: supabaseHeaders,
@@ -870,7 +829,7 @@
               rejectBtn.disabled = true;
               await sendNotification(true);
             } catch (err) {
-          console.error(err);
+              console.error(err);
             }
           };
           rejectBtn.onclick = async () => {
@@ -895,13 +854,13 @@
         list.innerHTML = "<p style='text-align:center; font-weight:bold;'>Erro ao carregar trocas pendentes</p>";
       }
     }
-    /* ======================== SELECT MONTH ========================= */
+
     async function selectMonth(monthIndex, button) {
       const comboboxContainer = document.getElementById('comboboxContainer');
       const shiftsContainer = document.getElementById('shiftsContainer');
       const elementsShiftsContainer = document.getElementById('elementsShiftsContainer');
       const swapbtn = document.getElementById('swap-btn');
-      const mainContent = document.querySelector('.main-content');      
+      
       if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
         button.classList.remove('selected');
         comboboxContainer.style.display = 'none';
@@ -925,7 +884,7 @@
         comboboxContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
       }, 100);      
     }
-    /* =========================== THEME SHITS =========================== */    
+
     async function loadShifts(monthIndex) {
       const nint = localStorage.getItem("currentCorpNint");
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -941,7 +900,6 @@
           }
         );
         if (!response.ok) {
-          const err = await response.json();
           shiftsButtons.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
           return;
         }
@@ -989,7 +947,7 @@
         shiftsButtons.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
       }
     }
-    /* ======================== ELEMENTS LOADING ========================= */
+
     let currentMonthIndex = null;
     async function loadElements() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -1026,7 +984,7 @@
         select.innerHTML = '<option value="">Erro ao carregar</option>';
       }
     }
-    /* ===================== ELEMENT SHIFTS LOADING ====================== */
+
     async function loadElementShifts(nint, monthIndex) {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const container = document.getElementById("elementsShiftsContainer");
@@ -1040,10 +998,8 @@
           `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nint}&month=eq.${monthIndex + 1}&year=eq.${year}&value=in.(PN,ED,EN,ET)&order=day.asc`, {
             headers: getSupabaseHeaders()
           }
-        ); 
+        );
         if (!response.ok) {
-          const err = await response.json();
-          console.error("Erro Supabase:", err);
           buttonsDiv.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
           return;
         }
@@ -1076,7 +1032,13 @@
                 btn.classList.add("selected");
                 btn.dataset.day = row.day;
                 btn.dataset.value = row.value;
-                if (switchBtn) switchBtn.style.display = "block";
+                if (switchBtn) {
+                  switchBtn.style.display = "block";
+                  // ADICIONADO: Faz o scroll rolar suavemente até ao botão de envio
+                  setTimeout(() => {
+                    switchBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                  }, 50);
+                }
               } else {
                 delete btn.dataset.day;
                 delete btn.dataset.value;
@@ -1093,7 +1055,7 @@
         buttonsDiv.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
       }
     }
-    /* ======================== SEND SWAP REQUEST ======================== */
+
     async function sendSwapRequest(targetNInt) {
       const supabaseHeaders = getSupabaseHeaders({ returnRepresentation: true });
       const myShiftBtn = document.querySelector("#shiftsButtons .shifts-btn.selected");
@@ -1136,8 +1098,6 @@
           body: JSON.stringify([{corp_oper_nr: corpOperNr, n_int: myNInt, start_shift_day: myShiftDay, start_shift_month: monthNumber, start_shift_year: year, n_int_end: targetNInt, end_shift_day: targetShiftDay,
                                  end_shift_month: monthNumber, end_shift_year: year, created_at: new Date().toISOString()}])});
         if (!swapResp.ok) {
-          const err = await swapResp.json();
-          console.error("Erro Supabase:", err);
           throw new Error("Erro ao gravar troca");
         }
         const nameResp = await fetch(
@@ -1166,6 +1126,7 @@
         showToast("Erro ao enviar pedido de troca.");
       }
     }
+
     function handleSwapClick() {
       const selectedShiftBtn = document.querySelector("#elementsShiftsButtons .shifts-btn.selected");
       if (!selectedShiftBtn) {
@@ -1181,7 +1142,7 @@
       const shiftType = selectedShiftBtn.dataset.value;
       sendSwapRequest(targetNInt, shiftDay, shiftType);
     }
-    /* ========================== RESET SWAP UI ========================== */  
+
     function resetSwapUI() {
       document.getElementById("shiftsContainer").style.display = 'none';
       document.getElementById("comboboxContainer").style.display = 'none';
@@ -1195,7 +1156,7 @@
       currentMonthIndex = null;
       document.body.classList.remove("mobile-month-selected");
     }
-    /* ============================== TOAST ============================== */
+
     function showToast(message) {
       const toast = document.createElement("div");
       toast.className = "toast";
@@ -1207,11 +1168,12 @@
       setTimeout(() => {
         toast.classList.remove("show");
         if (content) content.classList.remove("content-blur");
-        resetSwapUI()
+        resetSwapUI();
+        goBackToMain(); // Retorna automaticamente ao menu principal após o toast
         setTimeout(() => toast.remove(), 300);
       }, 4500);
     }
-    /* ============================== INIT =============================== */
+
     document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
       loadTheme();
