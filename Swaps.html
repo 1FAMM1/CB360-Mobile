@@ -6,13 +6,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#c62828">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>CB360 Mobile - Trocas Serviço</title>
   <style>
     /* ============================================================
-       CB360 MOBILE — DESIGN UNIFICADO COM "ESCALAS"
+       CB360 MOBILE — DESIGN UNIFICADO
        ============================================================ */
     :root {
       --red: #c62828;
@@ -90,8 +90,7 @@
       margin:0 auto;
       overflow-y:auto;
       overflow-x:hidden;
-      /* Ajustado o padding inferior para um valor equilibrado (nem muito curto, nem exagerado) */
-      padding:calc(var(--header-h) + 20px) 16px 120px;
+      padding:calc(var(--header-h) + 18px) 16px 160px;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -219,10 +218,36 @@
 
     /* ================= SWAP AREA ================= */
     #made-swap { width:100%; }
-    .swap-header { width:100%; text-align:center; flex-shrink:0; }
+    
+    .swap-header { 
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--bg);
+      padding-top: 5px;
+      padding-bottom: 5px;
+      width: 100%; 
+      text-align: center; 
+      flex-shrink:0; 
+    }
     .swap-subtitle { font-size:1.1em; font-weight:600; color:var(--txt-2); transition:color var(--ease); margin-bottom:8px; }
 
-    .swap-month-buttons,
+    .swap-month-buttons {
+      position: sticky;
+      top: 32px;
+      z-index: 20;
+      background: var(--bg);
+      padding-bottom: 8px;
+      display:grid;
+      gap:1px;
+      width:100%;
+      grid-template-columns:repeat(3,1fr);
+      border:1px solid var(--border);
+      border-radius:var(--r-lg);
+      overflow:hidden;
+      box-shadow:var(--sh-md);
+    }
+
     .own-shifts-buttons,
     .other-shifts-buttons {
       display:grid;
@@ -330,13 +355,13 @@
     }
     .shifts-btn:hover:not(.selected) { background:var(--red-light); color:var(--txt-1); transform:none; }
     .shifts-btn.selected { color:#fff; background:linear-gradient(to right,var(--red-dark),var(--red)); box-shadow:var(--sh-sm); transform:none; }
-    .swap-btn { display:none; text-align:center; margin-top:4px; }
+    .swap-btn { display:none; text-align:center; margin-top:10px; margin-bottom: 20px; }
     .swap-btn button {
       width:100%;
       max-width:260px;
-      padding:10px 22px;
+      padding:12px 22px;
       font-family:'Inter',sans-serif;
-      font-size:13px;
+      font-size:14px;
       font-weight:600;
       border-radius:50px;
       border:0;
@@ -478,7 +503,7 @@
          onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">TROCAS DE SERVIÇO</span>
-      <span class="header-sub">PIQUETES · ECIN · PROFISSIONAIS</span>
+      <span class="header-sub">Piquetes · Decir · Extras</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
@@ -537,7 +562,7 @@
         <label class="shifts-label">Turnos do Bombeiro:</label>
         <div id="elementsShiftsButtons" class="other-shifts-buttons"></div>
       </div>
-      <div id="swap-btn" class="swap-btn" style="display:none; text-align:center; margin-top:10px;">
+      <div id="swap-btn" class="swap-btn" style="display:none; text-align:center;">
         <button onclick="handleSwapClick()">Enviar Pedido</button>
       </div>
     </div>
@@ -557,10 +582,10 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
-        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023-2025 - Sistema CB360 Mobile
+        © 2023–2025 · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -730,7 +755,7 @@
     }
 
     async function loadPendingSwaps() {
-      const nint = localStorage.getItem("currentCorpNint") || "205";
+      const nint = localStorage.getItem("currentCorpNint") || "204";
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       if (!nint || !corpOperNr) return;
       const container = document.getElementById("pending-swaps-container");
@@ -882,13 +907,12 @@
       await loadElements();
       setTimeout(() => {
         comboboxContainer.classList.add('show');
-        comboboxContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
       }, 100);      
     }
 
     async function loadShifts(monthIndex) {
-      const nint = localStorage.getItem("currentCorpNint") || "205";
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const nint = localStorage.getItem("currentCorpNint");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const shiftsContainer = document.getElementById("shiftsContainer");
       const shiftsButtons = document.getElementById("shiftsButtons");
       if (!nint || !corpOperNr || !shiftsContainer) return;
@@ -951,8 +975,8 @@
 
     let currentMonthIndex = null;
     async function loadElements() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
-      const myNInt = localStorage.getItem("currentCorpNint") || "205";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const myNInt = localStorage.getItem("currentCorpNint");
       const select = document.getElementById("elementsSelect");
       if (!corpOperNr) {
         select.innerHTML = '<option value="">Corporação não definida</option>';
@@ -987,7 +1011,7 @@
     }
 
     async function loadElementShifts(nint, monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr")||  "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const container = document.getElementById("elementsShiftsContainer");
       const buttonsDiv = document.getElementById("elementsShiftsButtons");
       const switchBtn = document.getElementById("swap-btn");
@@ -1036,8 +1060,7 @@
                 if (switchBtn) {
                   switchBtn.style.display = "block";
                   setTimeout(() => {
-                    // Mantém os meses visíveis em cima e faz scroll suave apenas para o botão aparecer em baixo
-                    switchBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                   }, 50);
                 }
               } else {
