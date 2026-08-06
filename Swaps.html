@@ -30,8 +30,8 @@
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
     body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
           user-select: none; transition: background var(--ease), color var(--ease);}
-    body.has-back-header .main-content {justify-content: flex-start;}
-    body.mobile-month-selected .main-content {padding-top:calc(var(--header-h) + 10px); justify-content:flex-start !important; align-items:stretch !important;}
+    
+    
     /* ============================================================
     HEADER
     ============================================================ */
@@ -44,8 +44,8 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex:1; width:100%; max-width:700px; margin:0 auto; overflow-y:auto; overflow-x:hidden; padding:calc(var(--header-h) + 10px) 16px 120px; display:flex; flex-direction:column;
-               align-items:center; justify-content:center; background:var(--bg); scrollbar-width:none; transition:padding-top 0.9s cubic-bezier(0.4,0,0.2,1), background var(--ease);}
+    .main-content {flex:1; width:100%; max-width:700px; margin:0 auto; overflow-y:auto; overflow-x:hidden; padding:calc(var(--header-h) + 10px) 16px 100px; display:flex; flex-direction:column;
+           align-items:center; justify-content:flex-start; background:var(--bg); scrollbar-width:none; transition:padding-top 0.9s cubic-bezier(0.4,0,0.2,1), background var(--ease);}
     .main-content::-webkit-scrollbar {display:none;}
     .main-content.slide-out,.main-content.slide-in {transform:none;}
     .content-blur {filter:blur(2px); opacity:1; pointer-events:none;}
@@ -59,7 +59,7 @@
     /* ============================================================
     MAIN MENU CARDS
     ============================================================ */
-    .swap-options-buttons {width:100%; max-width:100%; margin:0 4px; display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border);
+    .swap-options-buttons {width:100%; max-width:100%; margin:auto 4px; display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border);
                            border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-md);}
     .swap-options-btn {position:relative; min-width:0; max-width:none; min-height:104px; padding:14px 8px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
                        font-size:12px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:7px; line-height:1.2;
