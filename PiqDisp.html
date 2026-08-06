@@ -7,12 +7,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
   <meta name="theme-color" content="#c62828">
-  <title>CB360 Mobile - Disponibilidades DECIR</title>
+  <title>CB360 Mobile - Disponibilidades Piquetes</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ============================================================
-    VARIABLES (alinhadas com a página Escalas / Disponibilidades Piquetes)
+    VARIABLES (alinhadas com a página Escalas)
     ============================================================ */
     :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
@@ -49,26 +49,26 @@
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
     .main-content.content-blur {filter: blur(2px); pointer-events: none;}
-    .availability-dec-header {flex-shrink: 0; text-align: center; width: 100%;}
-    .availability-dec-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
+    .availability-pik-header {flex-shrink: 0; text-align: center; width: 100%;}
+    .availability-pik-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
     /* ============================================================
-    MONTH BUTTONS
+    MONTH BUTTONS (mesmo estilo grid-card / mbtn da página Escalas)
     ============================================================ */
     .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 4px; flex-shrink: 0;}
-    .availability-dec-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
-    .availability-dec-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    .availability-pik-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
+    .availability-pik-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
                  padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2);
                  cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
                  line-height: 1.2; transition: background var(--ease), color var(--ease);}
-    .availability-dec-btn:nth-child(3n) {border-right: none;}
-    .availability-dec-btn:nth-child(n+10) {border-bottom: none;}
-    .availability-dec-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
-    .availability-dec-btn:active:not(.selected) {background: var(--surface-2);}
-    .availability-dec-btn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
-    .availability-dec-btn:hover .material-icons {transform: scale(1.08);}
-    .availability-dec-btn.selected {background: var(--red-light); color: var(--red);}
-    .availability-dec-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
-    .availability-dec-btn div, .availability-dec-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    .availability-pik-btn:nth-child(3n) {border-right: none;}
+    .availability-pik-btn:nth-child(n+10) {border-bottom: none;}
+    .availability-pik-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
+    .availability-pik-btn:active:not(.selected) {background: var(--surface-2);}
+    .availability-pik-btn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
+    .availability-pik-btn:hover .material-icons {transform: scale(1.08);}
+    .availability-pik-btn.selected {background: var(--red-light); color: var(--red);}
+    .availability-pik-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
+    .availability-pik-btn div, .availability-pik-btn span {position: relative; z-index: 2; line-height: 1.2;}
     /* ============================================================
     CALENDAR CARD
     ============================================================ */
@@ -83,46 +83,20 @@
                    transition: background var(--ease), transform 0.15s ease, color var(--ease);}
     .calendar-day:hover {background: var(--red-light); color: var(--red); transform: scale(1.05);}
     .calendar-day.empty {background: transparent; cursor: default;}
-    .calendar-day.empty:hover {transform: none; background: transparent; color: inherit;}
+    .calendar-day.empty:hover {transform: none; background: transparent;}
     .calendar-day.today {background: var(--red-dark); color: #fff; font-weight: 700; border: 2px solid #e67e22;}
-    .calendar-day.disp-D {background: linear-gradient(135deg, #ffd54f, #ffca28, #ffa726); color: #4e342e; font-weight: 700; border: 2px solid rgba(255,255,255,0.2);}
-    .calendar-day.disp-D:hover {background: linear-gradient(135deg, #ffe082, #ffd54f, #ffb300); box-shadow: 0 4px 12px rgba(255, 193, 7, 0.55); transform: scale(1.05); color: #4e342e;}
-    .calendar-day.disp-N {background: linear-gradient(135deg, #3949ab, #2c387e, #1a237e); color: #fff; font-weight: 700; border: 2px solid rgba(255,255,255,0.2);}
-    .calendar-day.disp-N:hover {background: linear-gradient(135deg, #5c6bc0, #303f9f, #1a237e); box-shadow: 0 4px 14px rgba(26, 35, 126, 0.6); transform: scale(1.05); color: #fff;}
-    .calendar-day.disp-DN {background: linear-gradient(135deg, #ab47bc, #9c27b0, #8e24aa); color: #fff; font-weight: 700; border: 2px solid rgba(255,255,255,0.2);}
-    .calendar-day.disp-DN:hover {background: linear-gradient(135deg, #9c27b0, #7b1fa2); box-shadow: 0 4px 12px rgba(156, 39, 176, 0.5); transform: scale(1.05); color: #fff;}
-    .calendar-day.disp-D.today, .calendar-day.disp-N.today, .calendar-day.disp-DN.today {border: 2px solid #f39c12;}
+    .calendar-day.selected {background: linear-gradient(135deg, var(--blue), #1aa9c5); color: #fff; font-weight: 700; border: 2px solid #1aa9c5;}
+    .calendar-day.selected.today {background: linear-gradient(135deg, #27ae60, #1e8449); border: 2px solid #f39c12;}
+    .calendar-day.processing {opacity: 0.55; pointer-events: none;}
     /* ============================================================
     LEGEND
     ============================================================ */
     .calendar-legend {display: none; width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm);
-                      justify-content: center; align-items: center; padding: 10px 14px; gap: 20px; font-size: 12px; flex-wrap: wrap;}
+                      justify-content: center; align-items: center; padding: 10px 16px; gap: 30px; font-size: 12.5px;}
     .calendar-legend.show {display: flex;}
-    .legend-item {display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: var(--txt-2); font-weight: 600;}
-    .legend-color {width: 17px; height: 17px; border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);}
-    .legend-color.day {background: linear-gradient(135deg, #ffd54f, #ffca28, #ffa726);}
-    .legend-color.night {background: linear-gradient(135deg, #3949ab, #2c387e, #1a237e);}
-    .legend-color.daynight {background: linear-gradient(135deg, #ab47bc, #9c27b0, #8e24aa);}
-    /* ============================================================
-    SHIFT SELECTION MODAL
-    ============================================================ */
-    .disp-modal {position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px;}
-    .disp-modal.show {display: flex;}
-    .disp-modal-content {background: var(--surface); border-radius: var(--r-lg); width: 100%; max-width: 340px; box-shadow: var(--sh-lg); border: 1px solid var(--border);
-                         display: flex; flex-direction: column; overflow: hidden; animation: mIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);}
-    @keyframes mIn {from {opacity: 0; transform: scale(0.95) translateY(10px);} to {opacity: 1; transform: scale(1) translateY(0);}}
-    .disp-modal-header {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 15px 18px; font-size: 15px; font-weight: 600; text-align: center; flex-shrink: 0;}
-    .disp-modal-body {padding: 20px 18px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;}
-    .disp-btn {flex: 1 1 45%; padding: 14px 0; font-size: 12.5px; font-weight: 700; border-radius: var(--r-sm); border: 2px solid transparent; cursor: pointer; transition: transform var(--ease), box-shadow var(--ease); text-transform: uppercase;}
-    .disp-btn:hover {transform: scale(1.05); box-shadow: var(--sh-md);}
-    .disp-btn.d {background: linear-gradient(135deg, #ffd54f, #ffa726); color: #4e342e;}
-    .disp-btn.n {background: linear-gradient(135deg, #3949ab, #1a237e); color: #fff;}
-    .disp-btn.dn {background: linear-gradient(135deg, #ab47bc, #8e24aa); color: #fff;}
-    .disp-btn.nd {background: var(--surface-2); color: var(--red); border-color: var(--red);}
-    .disp-btn.active {border-color: var(--txt-1);}
-    .disp-modal-footer {background: var(--surface-2); padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: center; flex-shrink: 0;}
-    .disp-cancel {background: transparent; border: 1px solid var(--border); color: var(--txt-2); cursor: pointer; font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 50px; transition: background var(--ease), color var(--ease);}
-    .disp-cancel:hover {background: var(--red-light); color: var(--red); border-color: transparent;}
+    .legend-item {display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--txt-2); font-weight: 600;}
+    .legend-color {width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);}
+    .legend-color.pick {background: linear-gradient(135deg, var(--blue), #1aa9c5);}
     /* ============================================================
     TOAST
     ============================================================ */
@@ -138,15 +112,16 @@
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    @keyframes spin {to { transform: rotate(360deg);}}
     @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
     /* ============================================================
     RESPONSIVE
     ============================================================ */
     @media (max-width: 480px) {
       .header-title {font-size: 16px;}
-      .availability-dec-subtitle {font-size: 0.95em;}
-      .availability-dec-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
-      .availability-dec-btn .material-icons {font-size: 19px;}
+      .availability-pik-subtitle {font-size: 0.95em;}
+      .availability-pik-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
+      .availability-pik-btn .material-icons {font-size: 19px;}
       .main-content {padding-left: 14px; padding-right: 14px; justify-content: center; align-items: center;}
     }
     @media (min-width: 769px) {
@@ -161,28 +136,28 @@
          onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">DISPONIBILIDADES</span>
-      <span class="header-sub">DECIR</span>
+      <span class="header-sub">Piquetes</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
   <div class="main-content">
-    <div class="availability-dec-header">
-      <p class="availability-dec-subtitle">Selecione o mês, dias e tipo de turno:</p>
+    <div class="availability-pik-header">
+      <p class="availability-pik-subtitle">Selecione o mês e dias:</p>
     </div>
     <div class="months-card">
-      <div class="availability-dec-buttons">
-        <button class="availability-dec-btn" data-month="0" onclick="showCalendar(0, this)"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
-        <button class="availability-dec-btn" data-month="1" onclick="showCalendar(1, this)"><span class="material-icons">favorite</span><div>Fevereiro</div></button>
-        <button class="availability-dec-btn" data-month="2" onclick="showCalendar(2, this)"><span class="material-icons">eco</span><div>Março</div></button>
-        <button class="availability-dec-btn" data-month="3" onclick="showCalendar(3, this)"><span class="material-icons">local_florist</span><div>Abril</div></button>
-        <button class="availability-dec-btn" data-month="4" onclick="showCalendar(4, this)"><span class="material-icons">wb_sunny</span><div>Maio</div></button>
-        <button class="availability-dec-btn" data-month="5" onclick="showCalendar(5, this)"><span class="material-icons">beach_access</span><div>Junho</div></button>
-        <button class="availability-dec-btn" data-month="6" onclick="showCalendar(6, this)"><span class="material-icons">local_fire_department</span><div>Julho</div></button>
-        <button class="availability-dec-btn" data-month="7" onclick="showCalendar(7, this)"><span class="material-icons">whatshot</span><div>Agosto</div></button>
-        <button class="availability-dec-btn" data-month="8" onclick="showCalendar(8, this)"><span class="material-icons">park</span><div>Setembro</div></button>
-        <button class="availability-dec-btn" data-month="9" onclick="showCalendar(9, this)"><span class="material-icons">cloud</span><div>Outubro</div></button>
-        <button class="availability-dec-btn" data-month="10" onclick="showCalendar(10, this)"><span class="material-icons">grain</span><div>Novembro</div></button>
-        <button class="availability-dec-btn" data-month="11" onclick="showCalendar(11, this)"><span class="material-icons">celebration</span><div>Dezembro</div></button>
+      <div class="availability-pik-buttons">
+        <button class="availability-pik-btn" data-month="0" onclick="showCalendar(0, this)"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
+        <button class="availability-pik-btn" data-month="1" onclick="showCalendar(1, this)"><span class="material-icons">favorite</span><div>Fevereiro</div></button>
+        <button class="availability-pik-btn" data-month="2" onclick="showCalendar(2, this)"><span class="material-icons">eco</span><div>Março</div></button>
+        <button class="availability-pik-btn" data-month="3" onclick="showCalendar(3, this)"><span class="material-icons">local_florist</span><div>Abril</div></button>
+        <button class="availability-pik-btn" data-month="4" onclick="showCalendar(4, this)"><span class="material-icons">wb_sunny</span><div>Maio</div></button>
+        <button class="availability-pik-btn" data-month="5" onclick="showCalendar(5, this)"><span class="material-icons">beach_access</span><div>Junho</div></button>
+        <button class="availability-pik-btn" data-month="6" onclick="showCalendar(6, this)"><span class="material-icons">local_fire_department</span><div>Julho</div></button>
+        <button class="availability-pik-btn" data-month="7" onclick="showCalendar(7, this)"><span class="material-icons">whatshot</span><div>Agosto</div></button>
+        <button class="availability-pik-btn" data-month="8" onclick="showCalendar(8, this)"><span class="material-icons">park</span><div>Setembro</div></button>
+        <button class="availability-pik-btn" data-month="9" onclick="showCalendar(9, this)"><span class="material-icons">cloud</span><div>Outubro</div></button>
+        <button class="availability-pik-btn" data-month="10" onclick="showCalendar(10, this)"><span class="material-icons">grain</span><div>Novembro</div></button>
+        <button class="availability-pik-btn" data-month="11" onclick="showCalendar(11, this)"><span class="material-icons">celebration</span><div>Dezembro</div></button>
       </div>
     </div>
     <div id="calendarContainer" class="calendar-container">
@@ -191,30 +166,8 @@
     </div>
     <div id="legend" class="calendar-legend">
       <div class="legend-item">
-        <span class="legend-color day"></span>
-        <span class="legend-text">ECIN Dia</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color night"></span>
-        <span class="legend-text">ECIN Noite</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color daynight"></span>
-        <span class="legend-text">ECIN 24h</span>
-      </div>
-    </div>
-  </div>
-  <div class="disp-modal" id="dispModal">
-    <div class="disp-modal-content">
-      <div class="disp-modal-header" id="dispModalTitle">DISPONIBILIDADE</div>
-      <div class="disp-modal-body">
-        <button class="disp-btn d" onclick="confirmDisp('ED')">Dia</button>
-        <button class="disp-btn n" onclick="confirmDisp('EN')">Noite</button>
-        <button class="disp-btn dn" onclick="confirmDisp('ET')">Dia/Noite</button>
-        <button class="disp-btn nd" onclick="confirmDisp('N/D')">Não Disponível</button>
-      </div>
-      <div class="disp-modal-footer">
-        <button class="disp-cancel" onclick="closeDispModal()">Cancelar</button>
+        <span class="legend-color pick"></span>
+        <span class="legend-text">PIQUETE</span>
       </div>
     </div>
   </div>
@@ -231,7 +184,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('sw.js')
           .then(reg => console.log('App pronta: ', reg.scope))
           .catch(err => console.log('Erro no motor da App: ', err));
       });
@@ -258,6 +211,22 @@
         headers['Prefer'] = 'return=representation';
       }
       return headers;
+    }
+    /* ===================== UTILITY FUNCTIONS ===================== */
+    function getWorkYear(selectedMonthIndex) {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      if (currentMonth === 11 && selectedMonthIndex === 0 && now.getDate() >= 15) {
+        return currentYear + 1;
+      }
+      return currentYear;
+    }
+    function isPastMonth(selectedMonthIndex, selectedYear) {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      return selectedYear < currentYear || (selectedYear === currentYear && selectedMonthIndex < currentMonth);
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
@@ -295,166 +264,208 @@
     }
     /* ========================== GLOBAL STATE =========================== */
     let currentMonthIndex = null;
-    let selectedDays = {};
-    let selectedDayElement = null;
-    let selectedDayNumber = null;
+    let selectedDays = [];
+    let isLoadingCalendar = false;
+    let allowPiqPastMonthsEdit = false;
     /* ========================== LOADING DAYS =========================== */
     async function loadSelectedDaysFromSupabase(monthIndex) {
       const nint = localStorage.getItem("currentCorpNint");
-      const corp = localStorage.getItem("currentCorpOperNr");
-      if (!nint || !corp) return {};
+      const corp = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
+      if (!nint || !corp) return [];
       const month = monthIndex + 1;
-      const year = new Date().getFullYear();
+      const year = getWorkYear(monthIndex);
       try {
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${parseInt(nint,10)}&corp_oper_nr=eq.${corp.padStart(4,"0")}&year=eq.${year}&month=eq.${month}&value=in.(ED,EN,ET)`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (!res.ok) return {};
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/reg_serv?select=day&n_int=eq.${nint}&corp_oper_nr=eq.${corp}&month=eq.${month}&year=eq.${year}&value=eq.PN`, {
+          headers: getSupabaseHeaders()
+        });
         const data = await res.json();
-        const map = {};
-        data.forEach(r => map[r.day] = r.value);
-        return map;
-      } catch (e) {
-        console.error("Erro load dec_disp:", e);
-        return {};
+        return data.map(d => `${year}-${String(month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`);
+      } catch (err) {
+        console.error('Erro ao ler dias selecionados:', err);
+        return [];
       }
+    }
+    /* ======================= MOBILE LAYOUT TOGGLE ======================= */
+    function toggleMobileMonthLayout(active) {
+      if (window.innerWidth > 480) return Promise.resolve();
+      const body = document.body;
+      const main = document.querySelector('.main-content');
+      if (!main) return Promise.resolve();
+      return new Promise(resolve => {
+        const currentScroll = main.scrollTop;
+        main.classList.remove('slide-in');
+        main.classList.add('slide-out');
+        setTimeout(() => {
+          if (active) {
+            body.classList.add('mobile-month-active');
+          } else {
+            body.classList.remove('mobile-month-active');
+          }
+          main.classList.remove('slide-out');
+          main.classList.add('slide-in');
+          main.scrollTo({top: currentScroll, behavior: 'smooth'});
+          setTimeout(() => {
+            main.classList.remove('slide-in');
+            resolve();
+          }, 350);
+        }, 50);
+      });
     }
     /* ============================ CALENDAR ============================= */
-    let allowPastMonthsEdit = true;
-    function canEditDay(monthIndex, dayNumber) {
-      if (allowPastMonthsEdit) return true;
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      if (monthIndex < currentMonth) {
-        showToast("Não é possível alterar registos de meses anteriores.");
-        return false;
-      }
-      if (monthIndex === currentMonth) {
-        showToast("Não é possível alterar registos do mês atual. Para alterações a efetue-as partir do menu 'Trocas de Serviço'. Obrigado.");
-        return false;
-      }
-      return true;
-    }
-    function resetCalendarUI() {
-      document.querySelectorAll('.availability-dec-btn')
-        .forEach(b => b.classList.remove('selected'));
-      document.getElementById('calendarContainer')
-        .classList.remove('show');
-      document.getElementById('legend')
-        .classList.remove('show');
-      document.body.classList.remove('mobile-month-active');
-      currentMonthIndex = null;
-    }
-    const BLOCKED_MONTHS = [0, 1, 2, 3, 10, 11];
     async function showCalendar(monthIndex, button) {
-      if (BLOCKED_MONTHS.includes(monthIndex)) {
-        resetCalendarUI();
-        showToast('Não é possível dar disponibilidades para DECIR no mês selecionado.', 4500);
-        return;
-      }
+      if (isLoadingCalendar) return;
+      const calendarContainer = document.getElementById('calendarContainer');
+      const legend = document.getElementById('legend');
       if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
         button.classList.remove('selected');
-        document.getElementById('calendarContainer').classList.remove('show');
-        document.body.classList.remove('mobile-month-active');
-        document.getElementById('legend').classList.remove('show');
+        calendarContainer.classList.remove('show');
+        legend.classList.remove('show');
+        await toggleMobileMonthLayout(false);
         currentMonthIndex = null;
         return;
       }
+      isLoadingCalendar = true;
       currentMonthIndex = monthIndex;
-      document.querySelectorAll('.availability-dec-btn').forEach(b => b.classList.remove('selected'));
-      document.body.classList.add('mobile-month-active');
+      document.querySelectorAll('.availability-pik-btn').forEach(btn => btn.classList.remove('selected'));
       button.classList.add('selected');
-      const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-      const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      const year = new Date().getFullYear();
+      await toggleMobileMonthLayout(true);
+      const year = getWorkYear(monthIndex);
+      const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const dayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
       const firstDay = new Date(year, monthIndex, 1);
-      const lastDay = new Date(year, monthIndex + 1, 0);
-      const calendarGrid = document.getElementById('calendarGrid');
+      const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+      const startingDayOfWeek = firstDay.getDay();
       const calendarHeader = document.getElementById('calendarHeader');
-      const calendarContainer = document.getElementById('calendarContainer');
+      const calendarGrid = document.getElementById('calendarGrid');
       calendarHeader.textContent = `${monthNames[monthIndex]} ${year}`;
       calendarGrid.innerHTML = '';
-      dayNames.forEach(d => {
-        const el = document.createElement('div');
-        el.className = 'calendar-day-header';
-        el.textContent = d;
-        calendarGrid.appendChild(el);
+      dayNames.forEach(day => {
+        const div = document.createElement('div');
+        div.className = 'calendar-day-header';
+        div.textContent = day;
+        calendarGrid.appendChild(div);
       });
-      for (let i = 0; i < firstDay.getDay(); i++) {
-        calendarGrid.appendChild(
-          Object.assign(document.createElement('div'), {
-            className: 'calendar-day empty'
-          })
-        );
+      for (let i = 0; i < startingDayOfWeek; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'calendar-day empty';
+        calendarGrid.appendChild(empty);
       }
       /* Constrói a grelha completa (números + clique) de imediato, para nunca
          mostrar um calendário vazio enquanto se aguarda o Supabase. */
       const today = new Date();
-      const dayElementsByDay = {};
-      for (let day = 1; day <= lastDay.getDate(); day++) {
-        const el = document.createElement('div');
-        el.className = 'calendar-day';
-        el.textContent = day;
+      const dayElementsByDate = {};
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = day;
+        const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         if (year === today.getFullYear() && monthIndex === today.getMonth() && day === today.getDate()) {
-          el.classList.add('today');
+          dayElement.classList.add('today');
         }
-        el.addEventListener('click', () => {
-          if (!canEditDay(monthIndex, day)) {
-            return;
-          }
-          const month = currentMonthIndex + 1;
-          if (month === 5 && day < 15) {
-            showToast('DECIR inicia apenas às 00:00 de 15 de Maio');
-            return;
-          }
-          if (month === 10 && day > 15) {
-            showToast('DECIR finalizou às 23:59 do dia 15 de Outubro');
-            return;
-          }
-          selectedDayElement = el;
-          selectedDayNumber = day;
-          document.getElementById('dispModalTitle').textContent = `Disponibilidade - ${day} ${monthNames[currentMonthIndex]}`;
-          highlightSelectedButton(selectedDays[day] || null);
-          document.getElementById('dispModal').classList.add('show');
-        });
-        calendarGrid.appendChild(el);
-        dayElementsByDay[day] = el;
+        dayElement.onclick = () => handleDayClick(day, dateStr, dayElement);
+        calendarGrid.appendChild(dayElement);
+        dayElementsByDate[dateStr] = dayElement;
       }
       calendarContainer.classList.add('show');
-      document.getElementById('legend').classList.add('show');
+      legend.classList.add('show');
+      calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       const requestedMonth = monthIndex;
       selectedDays = await loadSelectedDaysFromSupabase(monthIndex);
-      if (currentMonthIndex !== requestedMonth) { return; }
-      Object.keys(selectedDays).forEach(dayStr => {
-        const day = parseInt(dayStr, 10);
-        const value = selectedDays[dayStr];
-        const el = dayElementsByDay[day];
-        if (el && DISP_CLASS_MAP[value]) {
-          el.classList.add(DISP_CLASS_MAP[value]);
-          el.dataset.value = value;
+      if (currentMonthIndex !== requestedMonth) { isLoadingCalendar = false; return; }
+      selectedDays.forEach(dateStr => {
+        const el = dayElementsByDate[dateStr];
+        if (el) el.classList.add('selected');
+      });
+      isLoadingCalendar = false;
+    }
+    /* ======================== HANDLE DAY CLICK ========================= */
+    async function handleDayClick(day, dateStr, element) {
+      const year = getWorkYear(currentMonthIndex);
+      const month = currentMonthIndex + 1;
+      const nint = localStorage.getItem("currentCorpNint");
+      const corp = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
+      if (!allowPiqPastMonthsEdit) {
+        if (isPastMonth(currentMonthIndex, year)) return showToast("Não permitido alterar meses passados.");
+        if (currentMonthIndex === new Date().getMonth() && year === new Date().getFullYear()) {
+          return showToast("Não pode efetuar alteração às disponibilidades do mês atual. Use a opção TROCAS DE SERVIÇO para efetuar uma troca com outro Bombeiro.");
         }
-      });
+      }
+      if (selectedDays.includes(dateStr)) {
+        element.classList.add('processing');
+        try {
+          const query = `n_int=eq.${nint}&corp_oper_nr=eq.${corp}&month=eq.${month}&day=eq.${day}&value=eq.PN`;
+          await Promise.all([
+            fetch(`${SUPABASE_URL}/rest/v1/reg_serv?${query}`, {method: 'DELETE', headers: getSupabaseHeaders()}),
+            fetch(`${SUPABASE_URL}/rest/v1/reg_disp?${query}`, {method: 'DELETE', headers: getSupabaseHeaders()})
+          ]);
+          selectedDays = selectedDays.filter(d => d !== dateStr);
+          element.classList.remove('selected', 'processing');
+        } catch (err) {
+          showToast("Erro ao remover disponibilidade.");
+        }
+        return;
+      }
+      const success = await saveDayToPiqDisp(day);
+      if (success) {
+        selectedDays.push(dateStr);
+        element.classList.add('selected');
+      }
     }
-    /* ============================== MODAL ============================== */
-    function closeDispModal() {
-      document.getElementById('dispModal').classList.remove('show');
-      selectedDayElement = null;
-      selectedDayNumber = null;
-    }
-    function highlightSelectedButton(value) {
-      document.querySelectorAll('.disp-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.textContent === value) btn.classList.add('active');
-      });
+    /* ============================== SAVE =============================== */
+    async function saveDayToPiqDisp(day) {
+      const year = getWorkYear(currentMonthIndex);
+      const month = currentMonthIndex + 1;
+      const nint = parseInt(localStorage.getItem("currentCorpNint"), 10) || 0;
+      const corp = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
+      try {
+        const checkServ = await fetch(`${SUPABASE_URL}/rest/v1/reg_serv?select=value&n_int=eq.${nint}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=in.(EN,ET)`, {
+          headers: getSupabaseHeaders()
+        });
+        const servData = await checkServ.json();
+        if (servData.length > 0) return showToast(`ATENÇÃO! Já deu disponibilidade para ECIN Noite no dia (${day}/${month}). Não pode dar disponibilidade para PIQUETE.`);
+        const checkDisp = await fetch(`${SUPABASE_URL}/rest/v1/reg_disp?select=value&n_int=eq.${nint}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=in.(ET,PN)`, {
+          headers: getSupabaseHeaders()
+        });
+        const dispData = await checkDisp.json();
+        if (dispData.length > 0) return showToast(`ATENÇÃO! Já deu disponibilidade para ECIN Noite no dia (${day}/${month}). Não pode dar disponibilidade para PIQUETE.`);
+        const userRes = await fetch(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,section&n_int=eq.${nint}`, {
+          headers: getSupabaseHeaders()
+        });
+        const userData = await userRes.json();
+        const { abv_name = "N/D", section = "N/D" } = userData[0] || {};
+        const payloadServ = { n_int: nint, abv_name, section, day, month, year, value: "PN", corp_oper_nr: corp };
+        const payloadDisp = { n_int: nint, day, month, year, value: "PN", corp_oper_nr: corp };
+        const [res1, res2] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/reg_serv`, {
+            method: "POST",
+            headers: getSupabaseHeaders({returnRepresentation: true}),
+            body: JSON.stringify(payloadServ)
+          }),
+          fetch(`${SUPABASE_URL}/rest/v1/reg_disp`, {
+            method: "POST",
+            headers: getSupabaseHeaders({returnRepresentation: true}),
+            body: JSON.stringify(payloadDisp)
+          })
+        ]);
+        if (res1.ok && res2.ok) {
+          return true;
+        } else {
+          const errorText = await res2.text();
+          console.error("Erro Supabase:", errorText);
+          showToast("Erro ao gravar na base de dados.");
+          return false;
+        }
+      } catch (err) {
+        console.error("Erro na função saveDayToPiqDisp:", err);
+        return false;
+      }
     }
     /* ============================== TOAST ============================== */
     function showToast(message) {
       const toast = document.createElement("div");
       toast.className = "toast";
       toast.textContent = message;
-      const content = document.querySelector(".main-content"); 
+      const content = document.querySelector(".main-content");
       document.body.appendChild(toast);
       if (content) content.classList.add("content-blur");
       setTimeout(() => toast.classList.add("show"), 50);
@@ -464,134 +475,8 @@
         setTimeout(() => toast.remove(), 300);
       }, 4500);
     }
-    /* ============================== SAVE =============================== */
-    const DISP_CLASS_MAP = {'ED': 'disp-D', 'EN': 'disp-N', 'ET': 'disp-DN'};
-    async function confirmDisp(value) {
-      if (!selectedDayElement || selectedDayNumber === null) return;
-      const month = currentMonthIndex + 1;
-      if ((value === 'EN' || value === 'ET')) {
-        const pnExists = await checkPNExists(selectedDayNumber, month);
-        if (pnExists) {
-          showToast(`ATENÇÃO! Já deu disponibilidade para PIQUETE no dia (${selectedDayNumber}/${month}). Não pode dar disponibilidade para ECIN Noite.`);
-          return;
-        }
-      }
-      const currentValue = selectedDays[selectedDayNumber] || null;
-      if (value === 'N/D') {
-        await deleteDayFromTables(selectedDayNumber);
-        selectedDayElement.classList.remove('disp-D', 'disp-N', 'disp-DN', 'disp-ND');
-        delete selectedDays[selectedDayNumber];
-        closeDispModal();
-        return;
-      }
-      let finalValue = value;
-      if (currentValue === 'ED' && value === 'EN') {
-        finalValue = 'EN';
-      } else if (currentValue === 'EN' && value === 'ED') {
-        finalValue = 'ED';
-      } else if (currentValue === 'ET' && (value === 'ED' || value === 'EN')) {
-        finalValue = value;
-      } else if (currentValue === 'ET' && value === 'ET') {
-        finalValue = 'ET';
-      }
-      await deleteDayFromTables(selectedDayNumber, 'ED,EN,ET');
-      selectedDayElement.classList.remove('disp-D', 'disp-N', 'disp-DN', 'disp-ND');
-      selectedDayElement.classList.add(DISP_CLASS_MAP[finalValue]);
-      selectedDayElement.dataset.value = finalValue;
-      selectedDays[selectedDayNumber] = finalValue;
-      await saveDayToDecDisp(selectedDayNumber, finalValue);
-      closeDispModal();
-    }
-    async function checkPNExists(day, month) {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp = localStorage.getItem("currentCorpOperNr");
-      if (!nint || !corp || currentMonthIndex === null) return false;
-      const year = new Date().getFullYear();
-      try {
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_serv?select=value&n_int=eq.${parseInt(nint,10)}&corp_oper_nr=eq.${corp.padStart(4,"0")}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=eq.PN`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (!res.ok) return false;
-        const data = await res.json();
-        return data && data.length > 0;
-      } catch (e) {
-        console.error("Erro checkPNExists:", e);
-        return false;
-      }
-    }
-    async function deleteDayFromTables(day, value = null) {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp = localStorage.getItem("currentCorpOperNr");
-      if (!nint || !corp || currentMonthIndex === null) return;    
-      const nintInt = parseInt(nint, 10);
-      const corpPadded = corp.padStart(4, "0");
-      const year = new Date().getFullYear();
-      const month = currentMonthIndex + 1;    
-      try {
-        let commonFilter = `n_int=eq.${nintInt}&corp_oper_nr=eq.${corpPadded}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=neq.PN`;    
-        let regServUrl = `${SUPABASE_URL}/rest/v1/reg_serv?${commonFilter}`;
-        let regDispUrl = `${SUPABASE_URL}/rest/v1/reg_disp?${commonFilter}`;
-        const [res1, res2] = await Promise.all([
-          fetch(regServUrl, { method: 'DELETE', headers: getSupabaseHeaders() }),
-          fetch(regDispUrl, { method: 'DELETE', headers: getSupabaseHeaders() })
-        ]);    
-        if (res1.ok) console.log("Eliminado de reg_serv");
-        if (res2.ok) console.log("Eliminado de reg_disp");    
-      } catch (e) {
-        console.error("Erro ao apagar registros:", e);
-      }
-    }
-    async function getAbvNameFromRegElems() {
-      const nint = localStorage.getItem("currentCorpNint");
-      if (!nint) return null;
-      try {
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${parseInt(nint, 10)}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (!res.ok) return null;
-        const data = await res.json();
-        if (data && data.length > 0) {
-          return data[0].abv_name || null;
-        }
-        return null;
-      } catch (e) {
-        console.error("Erro ao buscar abv_name:", e);
-        return null;
-      }
-    }
-    async function saveDayToDecDisp(day, value) {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp = localStorage.getItem("currentCorpOperNr");
-      if (!nint || !corp || currentMonthIndex === null) return;
-      const nintInt = parseInt(nint, 10);
-      const corpPadded = corp.padStart(4, "0");
-      const year = new Date().getFullYear();
-      const month = currentMonthIndex + 1;
-      try {
-        await deleteDayFromTables(day);
-        const abvName = await getAbvNameFromRegElems() || 'N/A';
-        const payloadServ = { n_int: nintInt, corp_oper_nr: corpPadded, abv_name: abvName, section: 'DECIR', year, month, day, value };
-        await fetch(`${SUPABASE_URL}/rest/v1/reg_serv`, {
-          method: 'POST',
-          headers: getSupabaseHeaders(),
-          body: JSON.stringify(payloadServ)
-        });
-        const payloadDisp = { n_int: nintInt, corp_oper_nr: corpPadded, year, month, day, value };
-        await fetch(`${SUPABASE_URL}/rest/v1/reg_disp`, {
-          method: 'POST',
-          headers: getSupabaseHeaders(),
-          body: JSON.stringify(payloadDisp)
-        });
-      } catch (e) {
-        console.error("Erro saveDayToDecDisp:", e);
-      }
-    }
     /* ============================== INIT =============================== */
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
       loadTheme();
     });
