@@ -1,175 +1,191 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#c62828">
   <title>CB360 Mobile - Pedido de Férias</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ==================== BODY ==================== */
-    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
-    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
-          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
-    /* ============= DARK MODE OPTIONS ============== */
-    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
-    .dark-mode .vacations-req-subtitle {color: #e0e0e0;}
-    .dark-mode .vacations-req-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
-    .dark-mode .vacations-req-btn:hover:not(.selected) {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
-    .dark-mode .vacations-req-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
-    .dark-mode .vacations-req-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.7);}
-    .dark-mode .calendar-container {border: 1px solid #222; background: rgba(65, 65, 65, 0.9); color: #fff;}
-    .dark-mode .calendar-header {color: #ff6b6b; border-bottom: 1px solid rgba(255, 255, 255, 0.2);}
-    .dark-mode .calendar-day-header {color: #aaa;}
-    .dark-mode .calendar-day {background: rgba(255, 255, 255, 0.1);}    
-    .dark-mode .calendar-day:hover {background: rgba(255, 255, 255, 0.15);}
-    .dark-mode .calendar-day.selected {background: linear-gradient(135deg, #ffb74d, #ff9800, #ef6c00); color: #444; border: 2px solid #ef6c00;}
-    .dark-mode .calendar-day.selected:hover {background: linear-gradient(135deg, #ff9800, #f57c00, #e65100); transform: scale(1.05);}
-    .dark-mode .calendar-day.today {background: #8a1c1c; border: 2px solid #f1c40f;}
-    .dark-mode .calendar-day.selected.today {background-color: rgba(39, 174, 96, 1); border: 2px solid #f39c12;}
-    .dark-mode .vacation-card {background: rgba(65, 65, 65, 0.9); border: 1px solid rgba(255, 255, 255, 0.15); border-left: 5px solid #00acc1; color: #fff;}
-    .dark-mode .vacation-state {font-weight: bold; color: #ff9800;}
-    .dark-mode .vacation-card.approved .vacation-state { color: #66bb6a; }
-    .dark-mode .vacation-card.rejected .vacation-state { color: #ef5350; }
-    .dark-mode .calendar-day.state-pending {background: linear-gradient(135deg, #ff9800, #ef6c00, #e65100);}
-    .dark-mode .calendar-day.state-approved {background: linear-gradient(135deg, #43a047, #2e7d32, #1b5e20);}
-    .dark-mode .calendar-day.state-rejected {background: linear-gradient(135deg, #e53935, #b71c1c, #8e0000);}
-    /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
-             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
-    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
-    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
-             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
-    .footer-content {max-width: 400px; margin: 0 auto;}
-    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
-    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
-    .footer strong {color: #ffebee;} 
-    .main-content {flex: 1; overflow-y: auto; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; 
-                   display: flex; flex-direction: column; align-items: center; justify-content: flex-start;}
-    .vacations-req-header {flex-shrink: 0; text-align: center; width: 100%;} 
-    .vacations-req-subtitle {font-size: 1.3em; color: #2c3e50; transition: color 0.3s ease;}
-    .vacations-req-buttons {display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 22vw, 220px), 1fr)); justify-content: center; align-items: stretch; margin-bottom: 10px;}
-    .vacations-req-btn {padding: clamp(10px, 1.5vw, 16px) clamp(12px, 2vw, 20px); min-height: clamp(42px, 6vh, 60px); min-width: clamp(80px, 28vw, 250px); max-width: clamp(190px, 18vw, 240px);
-                 font-size: clamp(11px, 1.2vw, 14px); border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; flex-direction: column;
-                 justify-content: center; align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
-    .vacations-req-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-                         transition: left 0.4s ease; z-index: 1;}
-    .vacations-reqbtn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
-                        transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
-    .vacations-req-btn:active::after {width: 150px; height: 150px;}
-    .vacations-req-btn:hover:not(.selected) {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
-    .vacations-req-btn:active:not(.selected) {transform: scale(0.98); transition:0.1s ease;}
-    .vacations-req-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
-    .vacations-req-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.6);}
-    .vacations-req-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
-    .vacations-req-btn span {position: relative; z-index: 2;}
-    .calendar-container {margin: 0 auto 0 auto;  padding: clamp(10px, 3vw, 15px); background: rgba(0, 0, 0, 0.05); border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-                         display: none;  width: 100%;}
-    .calendar-container.show { display: block; animation: slideDown 0.3s ease;}    
-    .calendar-header {text-align: center;  font-size: clamp(1em, 3vw, 1.2em); font-weight: bold; color: #d32f2f;  margin-bottom: clamp(5px, 1vw, 10px); border-bottom: 1px solid rgba(0, 0, 0, 0.2); padding-bottom: 8px;}
-    .calendar-grid {display: grid;  grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: clamp(2px, 1vw, 5px);}
-    .calendar-day-header {text-align: center; font-weight: bold; padding: clamp(4px, 1.5vw, 8px); font-size: clamp(0.7em, 2vw, 0.9em); color: #666;}  
-    .calendar-day {text-align: center; padding: clamp(5px, 2vw, 10px); border-radius: 3px; background: rgba(0, 0, 0, 0.10); font-size: clamp(0.75em, 2vw, 0.9em); cursor: pointer;  transition: 0.2s ease;}
-    .calendar-day:hover {background: #e0e0e0; transform: scale(1.05);}
-    .calendar-day.empty {background: transparent; cursor: default;}    
-    .calendar-day.empty:hover {transform: none;}    
-    .calendar-day.today {background: #8a1c1c; color: white; font-weight: bold; border: 2px solid #e67e22; }
-    .calendar-day.selected {background: linear-gradient(135deg, #ffb74d, #ff9800, #ef6c00); color: #444; font-weight: bold; border: 2px solid #ef6c00;}
-    .calendar-day.selected:hover {background: linear-gradient(135deg, #ff9800, #f57c00, #e65100); color: #444; border: 2px solid #ef6c00; transform: scale(1.05);}
-    .calendar-day.selected.today {background-color: #229954; border: 2px solid #f39c12;}  
-    .vacation-card {background: #ddd; border: 1px solid #bdc3c7; border-left: 5px solid #00acc1; border-right: 5px solid #00acc1 !important;border-radius: 10px; margin: 0 0 5px 0; padding: 8px 15px; 
-                    font-size: 0.70em; display: flex; justify-content: space-between; align-items: center; color: #444;}
-    .vacation-card.pending {border-left-color: #ef6c00; border-right-color: #ef6c00 !important;}
-    .vacation-card.approved {border-left-color: #2e7d32; border-right-color: #2e7d32 !important;}
-    .vacation-card.rejected {border-left-color: #b71c1c; border-right-color: #b71c1c !important;}
-    .vacation-state {font-weight: bold;}
+    /* ============================================================
+    VARIABLES (alinhadas com a página Escalas / Disponibilidades)
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --orange: #ef6c00; --green: #2e7d32;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+          user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px;
+                   display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px;
+                   transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content::-webkit-scrollbar {display: none;}
+    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
+    .main-content.content-blur {filter: blur(2px); pointer-events: none;}
+    .vacations-req-header {flex-shrink: 0; text-align: center; width: 100%;}
+    .vacations-req-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
+    /* ============================================================
+    MONTH BUTTONS
+    ============================================================ */
+    .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 4px; flex-shrink: 0;}
+    .vacations-req-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
+    .vacations-req-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 14px 8px; min-height: 64px; 
+                        font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; display: flex; flex-direction: column; 
+                        justify-content: center; align-items: center; gap: 6px; line-height: 1.2; transition: background var(--ease), color var(--ease);}
+    .vacations-req-btn:nth-child(3n) {border-right: none;}
+    .vacations-req-btn:nth-child(n+10) {border-bottom: none;}
+    .vacations-req-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
+    .vacations-req-btn:active:not(.selected) {background: var(--surface-2);}
+    .vacations-req-btn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
+    .vacations-req-btn:hover .material-icons {transform: scale(1.08);}
+    .vacations-req-btn.selected {background: var(--red-light); color: var(--red);}
+    .vacations-req-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
+    .vacations-req-btn div, .vacations-req-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    /* ============================================================
+    CALENDAR CARD
+    ============================================================ */
+    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md);
+                         box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%; display: none;}
+    .calendar-container.show {display: block; animation: slideDown 0.3s ease;}
+    .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px;
+                      letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
+    .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
+    .calendar-day-header {text-align: center; font-weight: 700; padding: 6px 0; font-size: 11px; color: var(--txt-3);}
+    .calendar-day {text-align: center; padding: 9px 0; border-radius: var(--r-sm); background: var(--surface-2); font-size: 12.5px; color: var(--txt-1); cursor: pointer;
+                   transition: background var(--ease), transform 0.15s ease, color var(--ease);}
+    .calendar-day:hover {background: var(--red-light); color: var(--red); transform: scale(1.05);}
+    .calendar-day.empty {background: transparent; cursor: default;}
+    .calendar-day.empty:hover {transform: none; background: transparent;}
+    .calendar-day.today {background: var(--red-dark); color: #fff; font-weight: 700; border: 2px solid #e67e22;}
+    .calendar-day.state-pending {background: linear-gradient(135deg, #ffb74d, #ff9800, #ef6c00); color: #fff; font-weight: 700; border: 2px solid rgba(255,255,255,0.2);}
+    .calendar-day.state-pending:hover {background: linear-gradient(135deg, #ff9800, #f57c00, #e65100); box-shadow: 0 4px 12px rgba(239, 108, 0, 0.5); transform: scale(1.05);}
+    .calendar-day.state-approved {background: linear-gradient(135deg, #66bb6a, #43a047, #2e7d32); color: #fff; font-weight: 700; border: 2px solid rgba(255,255,255,0.2);}
+    .calendar-day.state-approved:hover {background: linear-gradient(135deg, #4caf50, #388e3c, #1b5e20); box-shadow: 0 4px 12px rgba(46, 125, 50, 0.5); transform: scale(1.05);}
+    .calendar-day.state-rejected {background: linear-gradient(135deg, #ef5350, #e53935, #b71c1c); color: #fff; font-weight: 700; border: 2px solid rgba(255,255,255,0.2);}
+    .calendar-day.state-rejected:hover {background: linear-gradient(135deg, #e53935, #c62828, #8e0000); box-shadow: 0 4px 12px rgba(183, 28, 28, 0.5); transform: scale(1.05);}
+    /* ============================================================
+    SAVE BUTTON
+    ============================================================ */
+    .save-vacation-btn {display: none; width: 100%; padding: 12px; background: linear-gradient(135deg, #27ae60, #229954); color: white; border: none; border-radius: var(--r-md); font-size: 13.5px; font-weight: 600;
+                        cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); text-align: center;}
+    .save-vacation-btn:hover {background: linear-gradient(135deg, #229954, #1e8449); transform: translateY(-1px);}
+    .save-vacation-btn.show {display: block; animation: slideDown 0.3s ease;}
+
+    /* ============================================================
+    VACATION CARDS CONTAINER & CARDS
+    ============================================================ */
+    #vacationCardsContainer {width: 100%; display: flex; flex-direction: column; gap: 8px;}
+    .vacation-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--orange); border-radius: var(--r-sm); padding: 12px 14px;
+                    box-shadow: var(--sh-sm); font-size: 12.5px; display: flex; justify-content: space-between; align-items: center; color: var(--txt-1); transition: transform var(--ease);}
+    .vacation-card.pending {border-left-color: #ef6c00;}
+    .vacation-card.approved {border-left-color: #2e7d32;}
+    .vacation-card.rejected {border-left-color: #b71c1c;}
+    .vacation-state {font-weight: 700;}
     .vacation-card.pending .vacation-state {color: #ef6c00;}
     .vacation-card.approved .vacation-state {color: #2e7d32;}
     .vacation-card.rejected .vacation-state {color: #b71c1c;}
-    .calendar-day.state-pending {background: linear-gradient(135deg, #ffb74d, #ff9800, #ef6c00); color: #fff; font-weight: bold; border: 2px solid #ef6c00;}
-    .calendar-day.state-pending:hover {background: linear-gradient(135deg, #ff9800, #f57c00, #e65100);}
-    .calendar-day.state-approved {background: linear-gradient(135deg, #66bb6a, #43a047, #2e7d32); color: #fff; font-weight: bold; border: 2px solid #2e7d32;}
-    .calendar-day.state-approved:hover {background: linear-gradient(135deg, #4caf50, #388e3c, #1b5e20);}
-    .calendar-day.state-rejected {background: linear-gradient(135deg, #ef5350, #e53935, #b71c1c); color: #fff; font-weight: bold; border: 2px solid #8e0000;}
-    .calendar-day.state-rejected:hover {background: linear-gradient(135deg, #e53935, #c62828, #8e0000);} 
-    .save-vacation-btn {display: none; padding: 8px 15px; background: linear-gradient(135deg, #27ae60, #229954); color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: bold;
-                        cursor: pointer; margin: 5px auto 0 auto; transition: all 0.3s ease; justify-content: center; align-items: center;width: fit-content;}
-    .save-vacation-btn:hover {background: linear-gradient(135deg, #229954, #1e8449); transform: translateY(-2px);}
-    .save-vacation-btn:active {transform: translateY(0);}
-    .save-vacation-btn.show {display: flex;}
-    .toast {position: fixed; bottom: clamp(100px, 20vh, 175px); left: 50%; transform: translateX(-50%); background: rgba(194, 21, 21, 0.85); color: #fff; padding: 18px 30px; border-radius: 10px; 
-            font-size: clamp(16px, 3vw, 20px); font-weight: bold; width: 500px; max-width: 90%; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
-    .toast.show {opacity: 1; transform: translateX(-50%) translateY(-10px);}    
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */
-    /* ============ RESPONSIVENESS 480px ============ */
+    /* ============================================================
+    TOAST
+    ============================================================ */
+    .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red));
+            color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center;
+            z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
     @media (max-width: 480px) {
-      .header {padding: 8px 15px;}
-      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
-      .header-logo {height: 50px; top: 32px; left: 10px;}
-      .footer {padding: 5px 15px;}
-      .powered-by {font-size: 11px;}
-      .footer-year {font-size: 9px;}
-      .vacations-req-header {flex-shrink: 0; padding-bottom: 10px;}
-      .vacations-req-subtitle {font-size: 0.9em; font-weight: bold; margin-top: 10px;}
-      .vacations-req-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}
-      .vacations-req-btn {height: 50px; min-height: 30px; max-height:75px; font-size: 12px; padding: 15px 10px;}
-      .main-content {padding-left: 20px; padding-right: 20px; justify-content: center; align-items: center;}}
-    .main-content {transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
-    body.mobile-month-active .main-content {padding-top: 70px; justify-content: flex-start !important; align-items: stretch !important;}
-    .main-content.slide-out, .main-content.slide-in {transform: none;}  
+      .header-title {font-size: 16px;}
+      .vacations-req-subtitle {font-size: 0.95em;}
+      .vacations-req-btn {min-height: 56px; font-size: 10.5px; padding: 10px 10px;}
+      .vacations-req-btn .material-icons {font-size: 19px;}
+      .main-content {padding-left: 14px; padding-right: 14px; justify-content: center; align-items: center;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>PEDIDO FÉRIAS</h1>
-    <h2 id="corpInfo" style="display: none;"></h2>
-    <div class="header-subtitle">VOLUNTARIADO</div>
-  </div>
-  <div class="main-content">
-    <div class="vacations-req-container">
-      <div class="vacations-req-header">
-        <p class="vacations-req-subtitle">Selecione o mês:</p>
-      </div>
-      <div class="vacations-req-buttons-container">
-        <div class="vacations-req-buttons">
-          <button class="vacations-req-btn" onclick="showCalendar(0, this)">Janeiro</button>
-          <button class="vacations-req-btn" onclick="showCalendar(1, this)">Fevereiro</button>
-          <button class="vacations-req-btn" onclick="showCalendar(2, this)">Março</button>
-          <button class="vacations-req-btn" onclick="showCalendar(3, this)">Abril</button>
-          <button class="vacations-req-btn" onclick="showCalendar(4, this)">Maio</button>
-          <button class="vacations-req-btn" onclick="showCalendar(5, this)">Junho</button>
-          <button class="vacations-req-btn" onclick="showCalendar(6, this)">Julho</button>
-          <button class="vacations-req-btn" onclick="showCalendar(7, this)">Agosto</button>
-          <button class="vacations-req-btn" onclick="showCalendar(8, this)">Setembro</button>
-          <button class="vacations-req-btn" onclick="showCalendar(9, this)">Outubro</button>
-          <button class="vacations-req-btn" onclick="showCalendar(10, this)">Novembro</button>
-          <button class="vacations-req-btn" onclick="showCalendar(11, this)">Dezembro</button>
-        </div>
-      </div>
-      <div id="calendarContainer" class="calendar-container">
-        <div class="calendar-header" id="calendarHeader"></div>
-        <div class="calendar-grid" id="calendarGrid"></div>
-      </div>
-      <button id="saveVacationBtn" class="save-vacation-btn" onclick="saveVacation()">Efetuar Pedido</button>
-      <div id="vacationCardsContainer" style="margin-top: 20px;"></div>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">PEDIDO FÉRIAS</span>
+      <span class="header-sub">Voluntariado</span>
     </div>
+    <h2 id="corpInfo" style="display: none;"></h2>
+  </header>  
+  <div class="main-content">
+    <div class="vacations-req-header">
+      <p class="vacations-req-subtitle">Selecione o mês:</p>
+    </div>    
+    <div class="months-card">
+      <div class="vacations-req-buttons">
+        <button class="vacations-req-btn" data-month="0" onclick="showCalendar(0, this)"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
+        <button class="vacations-req-btn" data-month="1" onclick="showCalendar(1, this)"><span class="material-icons">favorite</span><div>Fevereiro</div></button>
+        <button class="vacations-req-btn" data-month="2" onclick="showCalendar(2, this)"><span class="material-icons">eco</span><div>Março</div></button>
+        <button class="vacations-req-btn" data-month="3" onclick="showCalendar(3, this)"><span class="material-icons">local_florist</span><div>Abril</div></button>
+        <button class="vacations-req-btn" data-month="4" onclick="showCalendar(4, this)"><span class="material-icons">wb_sunny</span><div>Maio</div></button>
+        <button class="vacations-req-btn" data-month="5" onclick="showCalendar(5, this)"><span class="material-icons">beach_access</span><div>Junho</div></button>
+        <button class="vacations-req-btn" data-month="6" onclick="showCalendar(6, this)"><span class="material-icons">local_fire_department</span><div>Julho</div></button>
+        <button class="vacations-req-btn" data-month="7" onclick="showCalendar(7, this)"><span class="material-icons">whatshot</span><div>Agosto</div></button>
+        <button class="vacations-req-btn" data-month="8" onclick="showCalendar(8, this)"><span class="material-icons">park</span><div>Setembro</div></button>
+        <button class="vacations-req-btn" data-month="9" onclick="showCalendar(9, this)"><span class="material-icons">cloud</span><div>Outubro</div></button>
+        <button class="vacations-req-btn" data-month="10" onclick="showCalendar(10, this)"><span class="material-icons">grain</span><div>Novembro</div></button>
+        <button class="vacations-req-btn" data-month="11" onclick="showCalendar(11, this)"><span class="material-icons">celebration</span><div>Dezembro</div></button>
+      </div>
+    </div>    
+    <div id="calendarContainer" class="calendar-container">
+      <div class="calendar-header" id="calendarHeader"></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>    
+    <button id="saveVacationBtn" class="save-vacation-btn" onclick="saveVacation()">Efetuar Pedido</button>
+    <div id="vacationCardsContainer"></div>
   </div>
   <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
-        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023-2025 - Sistema CB360 Mobile
+        © 2023–2025 · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -186,19 +202,20 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    let vacationsData = [];
-    let currentMonthIndex = null;
-    let selectedDays = [];
+    /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
+    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
+    function getNInt() {return localStorage.getItem("currentCorpNint")}
     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
-      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const corp  = getCorp();
+      const nint  = getNInt();
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'x-my-corpo': corp, 
-        'x-my-nint': nint
-      };    
+        'x-my-corpo': corp,
+        'x-my-nint': nint,
+      };
       if (options.returnRepresentation) {
         headers['Prefer'] = 'return=representation';
       }
@@ -241,10 +258,11 @@
     /* ======================== VACATIONS LOADING ======================== */
     async function loadVacations() {
       const n_int = localStorage.getItem("currentCorpNint");
-      const corp_oper_nr = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
+      const corp_oper_nr = localStorage.getItem("currentCorpOperNr");
       const currentYear = new Date().getFullYear();
+      if (!n_int || !corp_oper_nr) return;
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat?n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr}&order=year,month`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat?n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr.padStart(4, "0")}&order=year,month`, {
           headers: getSupabaseHeaders()
         });
         const data = await res.json();
@@ -275,11 +293,11 @@
       const calendarContainer = document.getElementById('calendarContainer');
       const saveBtn = document.getElementById('saveVacationBtn');
       const cardsContainer = document.getElementById('vacationCardsContainer');
-      if (currentMonthIndex === monthIndex) {
+      if (currentMonthIndex === monthIndex && button && button.classList.contains('selected')) {
         calendarContainer.classList.remove('show');
         document.body.classList.remove('mobile-month-active');
-        if (saveBtn) saveBtn.style.display = 'none';
-        cardsContainer.style.display = 'block';
+        if (saveBtn) saveBtn.classList.remove('show');
+        cardsContainer.style.display = 'flex';
         currentMonthIndex = null;
         document.querySelectorAll('.vacations-req-btn').forEach(btn => btn.classList.remove('selected'));
         return;
@@ -288,7 +306,7 @@
       cardsContainer.style.display = 'none';
       calendarContainer.classList.add('show');
       document.body.classList.add('mobile-month-active');
-      if (saveBtn) saveBtn.style.display = 'block';
+      if (saveBtn) saveBtn.classList.add('show');      
       document.querySelectorAll('.vacations-req-btn').forEach(btn => btn.classList.remove('selected'));
       if (button) button.classList.add('selected');
       selectedDays = [];
@@ -300,25 +318,25 @@
       grid.innerHTML = '';
       selectedDays = [];
       const names = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const daysWeek = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];      
+      const daysWeek = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];    
       const now = new Date();
       const year = now.getFullYear();
       const month = monthIndex + 1;
       const todayRef = new Date();
-      todayRef.setHours(0, 0, 0, 0);    
+      todayRef.setHours(0, 0, 0, 0);      
       daysWeek.forEach(d => {
         const div = document.createElement('div');
         div.className = 'calendar-day-header';
         div.textContent = d;
         grid.appendChild(div);
-      });    
+      });      
       const firstDay = new Date(year, monthIndex, 1).getDay();
-      const lastDay = new Date(year, monthIndex + 1, 0).getDate();    
+      const lastDay = new Date(year, monthIndex + 1, 0).getDate();      
       for (let i = 0; i < firstDay; i++) {
         grid.appendChild(Object.assign(document.createElement('div'), { className: 'calendar-day empty' }));
-      }    
+      }      
       const stateClass = {'Em Aprovação': 'state-pending', 'Aprovadas': 'state-approved', 'Recusadas': 'state-rejected'};
-      const monthRecords = vacationsData.filter(v => parseInt(v.month) === month);    
+      const monthRecords = vacationsData.filter(v => parseInt(v.month) === month);      
       for (let day = 1; day <= lastDay; day++) {
         const dayEl = document.createElement('div');
         dayEl.className = 'calendar-day';
@@ -329,16 +347,16 @@
         }
         if (dateObj < todayRef) {
           dayEl.classList.add('disabled');
-        }    
+        }        
         const isDayDecir = (month === 5 && day >= 15) || (month > 5 && month < 10) || (month === 10 && day <= 15);
-        if (isDayDecir) dayEl.classList.add('decir-period');    
+        if (isDayDecir) dayEl.classList.add('decir-period');        
         monthRecords.forEach(r => {
           const days = r.day.split(',').map(d => parseInt(d.trim()));
           if (days.includes(day)) {
             dayEl.classList.add(stateClass[r.state] || 'state-pending');
             selectedDays.push(day);
           }
-        });    
+        });        
         dayEl.onclick = () => {
           if (isDayDecir) {
             showToast("Não é possível marcar Férias de Voluntariado em período DECIR.");
@@ -368,8 +386,8 @@
     async function saveVacation() {
       if (currentMonthIndex === null) return showToast("Selecione um mês.");
       if (selectedDays.length === 0) return showToast("Selecione pelo menos um dia.");
-      const n_int = parseInt(localStorage.getItem("currentCorpNint") || "205");
-      const corp_oper_nr = (localStorage.getItem("currentCorpOperNr") || "0805").padStart(4, "0");
+      const n_int = parseInt(localStorage.getItem("currentCorpNint"));
+      const corp_oper_nr = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
       const year = new Date().getFullYear();
       const month = currentMonthIndex + 1;
       const daysStr = selectedDays.sort((a, b) => a - b).join(',');
@@ -435,28 +453,20 @@
       document.getElementById('vacationCardsContainer').appendChild(card);
     }
     function showToast(message) {
-      const existing = document.querySelector('.toast');
-      if (existing) existing.remove();
-      const toast = document.createElement('div');
-      toast.className = 'toast show';
+      const toast = document.createElement("div");
+      toast.className = "toast";
       toast.textContent = message;
+      const content = document.querySelector(".main-content");
       document.body.appendChild(toast);
+      if (content) content.classList.add("content-blur");
+      setTimeout(() => toast.classList.add("show"), 50);
       setTimeout(() => {
-        toast.classList.remove('show');
+        toast.classList.remove("show");
+        if (content) content.classList.remove("content-blur");
         setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
-    /* ========================= GLOBAL LOADING ========================== */
-    const buttons = document.querySelectorAll('.vacations-req-btn');
-    buttons.forEach((button, index) => {
-      button.style.opacity = '0';
-      button.style.transform = 'translateY(20px)';
-      setTimeout(() => {
-        button.style.transition = 'all 0.5s ease';
-        button.style.opacity = '1';
-        button.style.transform = 'translateY(0)';
-      }, index * 100);
-    });
+    /* ============================== INIT =============================== */
     document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
       loadTheme();
@@ -465,6 +475,3 @@
   </script>
 </body>
 </html>
-
-
-
