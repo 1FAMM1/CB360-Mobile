@@ -1,85 +1,119 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT" style="background-color: #8b0000;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#c62828">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>CB360 Mobile - Equipa de Serviço</title>
   <style>
-    /* ==================== BODY ==================== */
-    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
-    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh;
-          user-select: none; display: flex; flex-direction: column; transition: all 0.3s ease; overflow: hidden; scrollbar-width: none !important; -ms-overflow-style: none !important;}
-    body::-webkit-scrollbar {display: none !important; width: 0 !important; height: 0 !important;}
-    /* ============= DARK MODE OPTIONS ============== */
-    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
-    .dark-mode .planning-header {background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%); border-bottom-color: #d32f2f;}
-    .dark-mode .table-wrapper {background: rgba(45, 45, 45, 0.95);}
-    .dark-mode .table th, body.dark-mode .table td {border-bottom-color: #444; border-right-color: #444; color: #fff;}
-    .dark-mode .table th {background: #3a3a3a; color: #fff; text-align: center;}
-    .dark-mode .table tbody tr:hover {background: #4a4a4a;}
-    /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
-             transition: all 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
-    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}    
-    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: all 0.3s ease; z-index: 1001;}
-    .planning-header {background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 15px 20px; text-align: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-                      border-bottom: 3px solid #d32f2f; position: fixed; top: 100px; left: 0; width: 100%; z-index: 999; margin-top: 0;}
-    .planning-header h2 {margin: 0px; font-size: 1.4em; font-weight: 600; margin-bottom: 8px;}
-    .planning-info {font-size: 14px; opacity: 0.9; font-weight: 500;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
-             transition: all 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
-    .footer-content {max-width: 400px; margin: 0 auto;}
-    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
-    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
-    .footer strong {color: #ffebee;}
-    .main-content {flex: 1; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); padding: 205px 20px 60px 20px; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
-    .tables-scroll-area {flex: 1; overflow-y: scroll !important; overflow-x: hidden; padding-bottom: 20px; scrollbar-width: none !important; -ms-overflow-style: none !important; min-height: 0;
-                         max-height: calc(100vh - 265px);}    
-    .tables-container {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; max-width: 1200px; margin: 0 auto; width: 100%; min-height: 100vh; padding-bottom: 50px;}
-    .table-wrapper {background: rgba(255, 255, 255, 0.95); border-radius: 6px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); overflow: hidden; transition: all 0.3s ease;}
-    .table-wrapper:nth-child(7) .table-header {background: linear-gradient(45deg, #ffd600, #ffb300); color: black; font-weight: bold;}
-    .table-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 16px;}
+    /* ============================================================
+    VARIABLES
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+            --header-h: 60px; --planning-h: 64px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;
+            --gold: #b8860b;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100vh; overflow: hidden; display: flex;
+          flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-title .material-icons {font-size: 1.1em;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    PLANNING HEADER
+    ============================================================ */
+    .planning-header {position: fixed; top: var(--header-h); left: 0; right: 0; min-height: var(--planning-h); background: var(--surface-2); border-bottom: 1px solid var(--border);
+                      box-shadow: var(--sh-sm); padding: 10px 20px; text-align: center; z-index: 999; transition: background var(--ease), border-color var(--ease);}
+    .planning-header h2 {display: flex; align-items: center; justify-content: center; gap: 5px; margin: 0 0 10px; font-size: 0.95em; font-weight: 700; letter-spacing: 1px; color: var(--txt-1);
+                         text-transform: uppercase;}
+    .planning-header h2 .material-icons {font-size: 1.05em; color: var(--red-icon);}
+    .planning-info {font-size: 13px; font-weight: 600; color: var(--txt-2);}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; background: var(--bg); padding: calc(var(--header-h) + var(--planning-h) + 20px) 16px calc(var(--footer-h) + 16px); display: flex; flex-direction: column;
+                   height: 100vh; overflow: hidden; transition: background var(--ease);}
+    .tables-scroll-area {flex: 1; overflow-y: scroll; overflow-x: hidden; padding-bottom: 10px; scrollbar-width: none; -ms-overflow-style: none; min-height: 0;}
+    .tables-scroll-area::-webkit-scrollbar {display: none; width: 0; height: 0;}
+    .tables-container {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto; width: 100%; padding-bottom: 30px;}
+    /* ============================================================
+    TABLE CARDS
+    ============================================================ */
+    .table-wrapper {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); overflow: hidden;
+                    transition: transform var(--ease), box-shadow var(--ease), background var(--ease), border-color var(--ease);}
+    .table-wrapper:hover {transform: translateY(-1px); box-shadow: var(--sh-md);}
+    .table-header {display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 12px 15px;
+                   text-align: center; font-weight: 700; font-size: 14px; letter-spacing: 0.3px; text-transform: uppercase;}
+    .table-header .material-icons {font-size: 17px;}
     .table {width: 100%; border-collapse: collapse;}
-    .table th, .table td {padding: 12px 15px; text-align: left; border-bottom: 1px solid #ecf0f1; border-right: 1px solid #ecf0f1; transition: all 0.3s ease;}
-    .table th:last-child, .table td:last-child {border-right: none;}
-    .table th {background: #dae0e6; font-weight: bold; color: #2c3e50; text-align: center;}
-    .table tbody tr:hover {background: none !important;}
-    .table th:first-child, .table td:first-child {width: 160px; min-width: 100px; max-width: 200px;}
+    .table th, .table td {padding: 10px 14px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); font-size: 13px; color: var(--txt-1);
+                          transition: border-color var(--ease), color var(--ease);}
+    .table th:first-child, .table td:first-child {text-align: center;}
+    .table th:last-child, .table td:last-child {text-align: left; border-right: none;}
+    .table tbody tr:last-child td {border-bottom: none;}
+    .table th {background: var(--surface-2); font-weight: 700; color: var(--txt-2); text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;}
+    .table tbody tr {transition: background var(--ease);}
+    .table tbody tr:hover {background: var(--red-light);}
+    .table th:first-child, .table td:first-child {width: 150px; min-width: 100px; max-width: 190px;}
     .table th:last-child, .table td:last-child {width: auto;}
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */    
-    /* ============ RESPONSIVENESS 480px ============ */
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    .footer strong {color: inherit;}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
     @media (max-width: 480px) {
-      .header {padding: 8px 15px;}
-      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
-      .header-logo {height: 50px; top: 32px; left: 10px;}
-      .footer {padding: 5px 15px;}
-      .powered-by {font-size: 11px;}
-      .footer-year {font-size: 9px;}
-      .planning-header {top: 59px; padding: 10px 15px;}
-      .planning-header h2 {font-size: 1.0em; margin-bottom: 5px;}
-      .planning-info {font-size: 12px;}
-      .main-content {padding: 135px 10px 30px 10px;}
-      .tables-scroll-area {max-height: calc(100vh - 190px);}}    
+      .header-title {font-size: 16px;}
+      .planning-header {padding: 8px 15px;}
+      .planning-header h2 {font-size: 0.85em;}
+      .planning-info {font-size: 11.5px;}
+      .main-content {padding-left: 10px; padding-right: 10px;}
+      .table th, .table td {padding: 8px 10px; font-size: 12px;}
+    }
+    @media (min-width: 769px) {
+      .tables-container {max-width: 1200px;}
+    }
   </style>
 </head>
 <body>
   <header class="header">
     <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>EQUIPA DE SERVIÇO</h1>
+    <div class="header-center">
+      <span class="header-title">EQUIPA DE SERVIÇO</span>
+      <span class="header-sub">Força Mínima de Intervenção</span>
+    </div>
     <h2 id="corpInfo" style="display: none;"></h2>
-    <div>FORÇA MÍNIMA DE INTERVENÇÃO</div>
   </header>
   <section class="planning-header">
-    <h2>TURNO</h2>
+    <h2><span class="material-icons">schedule</span>TURNO</h2>
     <div class="planning-info" id="planning-info">
       A carregar informações...
     </div>
@@ -93,10 +127,10 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
-        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023-2025 - Sistema CB360 Mobile
+        © 2023–2025 · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -113,15 +147,18 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const corp  = getCorp();
+      const nint  = getNInt();
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'x-my-corpo': corp,
-        'x-my-nint': nint
+        'x-my-nint': nint,
       };
       if (options.returnRepresentation) {
         headers['Prefer'] = 'return=representation';
@@ -198,9 +235,17 @@
       }
     }
     /* ======================= UTILS & RENDER ======================= */
-    const teamsMap = [{label: 'OFOPE', id: 'ofope'}, {label: 'Chefe de Serviço', id: 'chefe_servico'}, {label: 'OPTEL', id: 'optel'}, {label: 'Equipa 01', id: 'equipa_01'},
-                      {label: 'Equipa 02', id: 'equipa_02'}, {label: 'Logística', id: 'logistica'}, {label: 'INEM', id: 'inem'}, {label: 'INEM Reserva', id: 'inem_reserva'},
-                      {label: 'Serviço Geral', id: 'servico_geral'}];
+    const teamsMap = [
+      {label: 'OFOPE', id: 'ofope', icon: 'military_tech'},
+      {label: 'Chefe de Serviço', id: 'chefe_servico', icon: 'star'},
+      {label: 'OPTEL', id: 'optel', icon: 'headset_mic'},
+      {label: 'Equipa 01', id: 'equipa_01', icon: 'groups'},
+      {label: 'Equipa 02', id: 'equipa_02', icon: 'groups'},
+      {label: 'Logística', id: 'logistica', icon: 'inventory_2'},
+      {label: 'INEM', id: 'inem', icon: 'medical_services'},
+      {label: 'INEM Reserva', id: 'inem_reserva', icon: 'medical_services'},
+      {label: 'Serviço Geral', id: 'servico_geral', icon: 'engineering'}
+    ];
     function createTables() {
       const container = document.getElementById('tables-container');
       if (!container) return;
@@ -208,7 +253,7 @@
       teamsMap.forEach(team => {
         const tableHTML = `
         <div class="table-wrapper" data-team="${team.id}" style="display: none;">
-          <div class="table-header">${team.label}</div>
+          <div class="table-header"><span class="material-icons">${team.icon}</span>${team.label}</div>
           <table class="table">
             <thead>
               <tr><th>Patente</th><th>Nome</th></tr>
@@ -241,7 +286,7 @@
     }
     function sortByPatente(data) {
       const patenteOrder = ['Comandante', '2º Comandante', 'Adj. de Comando', 'Oficial Bº Superior', 'Oficial Bº Principal', 'Oficial Bº 1ª', 'Oficial Bº 2ª', 
-                            'Oficial Bº Estagiário', 'Chefe', 'Subchefe', 'Bombeiro(a) 1ª', 'Bombeiro(a) 2ª', 'Bombeiro(a) 3ª', 'Estagiário(a)', 'Bº Especialista', 'Cadete'];
+                          'Oficial Bº Estagiário', 'Chefe', 'Subchefe', 'Bombeiro(a) 1ª', 'Bombeiro(a) 2ª', 'Bombeiro(a) 3ª', 'Estagiário(a)', 'Bº Especialista', 'Cadete'];
       return data.sort((a, b) => {
         const indexA = patenteOrder.indexOf(a.patente);
         const indexB = patenteOrder.indexOf(b.patente);
@@ -262,8 +307,6 @@
       loadAllTeams();
       loadPlanningHeader();
     }, 10 * 60 * 1000);
-  </script>    
+  </script>
 </body>
 </html>
-
-
