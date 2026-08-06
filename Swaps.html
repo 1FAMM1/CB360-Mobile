@@ -90,8 +90,8 @@
       margin:0 auto;
       overflow-y:auto;
       overflow-x:hidden;
-      /* Ajustado o padding inferior para um valor equilibrado (nem muito curto, nem exagerado) */
-      padding:calc(var(--header-h) + 18px) 16px 85px;
+      /* Padding inferior bastante largo para garantir que o botão Enviar Pedido tem muito respiro acima do footer */
+      padding:calc(var(--header-h) + 18px) 16px 160px;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -219,10 +219,37 @@
 
     /* ================= SWAP AREA ================= */
     #made-swap { width:100%; }
-    .swap-header { width:100%; text-align:center; flex-shrink:0; }
+    
+    /* TORNA OS MESES FIXOS NO TOPO DENTRO DA ÁREA ROLÁVEL */
+    .swap-header { 
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--bg);
+      padding-top: 5px;
+      padding-bottom: 5px;
+      width: 100%; 
+      text-align: center; 
+      flex-shrink:0; 
+    }
     .swap-subtitle { font-size:1.1em; font-weight:600; color:var(--txt-2); transition:color var(--ease); margin-bottom:8px; }
 
-    .swap-month-buttons,
+    .swap-month-buttons {
+      position: sticky;
+      top: 32px; /* Fica logo abaixo do header/subtitle e do back-header */
+      z-index: 20;
+      background: var(--bg);
+      padding-bottom: 8px;
+      display:grid;
+      gap:1px;
+      width:100%;
+      grid-template-columns:repeat(3,1fr);
+      border:1px solid var(--border);
+      border-radius:var(--r-lg);
+      overflow:hidden;
+      box-shadow:var(--sh-md);
+    }
+
     .own-shifts-buttons,
     .other-shifts-buttons {
       display:grid;
@@ -330,13 +357,13 @@
     }
     .shifts-btn:hover:not(.selected) { background:var(--red-light); color:var(--txt-1); transform:none; }
     .shifts-btn.selected { color:#fff; background:linear-gradient(to right,var(--red-dark),var(--red)); box-shadow:var(--sh-sm); transform:none; }
-    .swap-btn { display:none; text-align:center; margin-top:4px; }
+    .swap-btn { display:none; text-align:center; margin-top:10px; margin-bottom: 20px; }
     .swap-btn button {
       width:100%;
       max-width:260px;
-      padding:10px 22px;
+      padding:12px 22px;
       font-family:'Inter',sans-serif;
-      font-size:13px;
+      font-size:14px;
       font-weight:600;
       border-radius:50px;
       border:0;
@@ -537,7 +564,7 @@
         <label class="shifts-label">Turnos do Bombeiro:</label>
         <div id="elementsShiftsButtons" class="other-shifts-buttons"></div>
       </div>
-      <div id="swap-btn" class="swap-btn" style="display:none; text-align:center; margin-top:10px;">
+      <div id="swap-btn" class="swap-btn" style="display:none; text-align:center;">
         <button onclick="handleSwapClick()">Enviar Pedido</button>
       </div>
     </div>
@@ -882,7 +909,6 @@
       await loadElements();
       setTimeout(() => {
         comboboxContainer.classList.add('show');
-        comboboxContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
       }, 100);      
     }
 
@@ -1036,8 +1062,8 @@
                 if (switchBtn) {
                   switchBtn.style.display = "block";
                   setTimeout(() => {
-                    // Mantém os meses visíveis em cima e faz scroll suave apenas para o botão aparecer em baixo
-                    switchBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    // Faz scroll apenas focando na caixa dos turnos do bombeiro/botão sem mexer nos meses fixos
+                    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                   }, 50);
                 }
               } else {
