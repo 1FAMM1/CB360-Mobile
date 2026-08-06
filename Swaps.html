@@ -30,8 +30,6 @@
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
     body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
           user-select: none; transition: background var(--ease), color var(--ease);}
-    
-    
     /* ============================================================
     HEADER
     ============================================================ */
@@ -594,7 +592,6 @@
       await loadElements();
       setTimeout(() => {
         comboboxContainer.classList.add('show');
-        comboboxContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
       }, 100);      
     }
     async function loadShifts(monthIndex) {
@@ -744,10 +741,6 @@
                 btn.dataset.value = row.value;
                 if (switchBtn) {
                   switchBtn.style.display = "block";
-                  setTimeout(() => {
-                    // Mantém os meses visíveis em cima e faz scroll suave apenas para o botão aparecer em baixo
-                    switchBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                  }, 50);
                 }
               } else {
                 delete btn.dataset.day;
