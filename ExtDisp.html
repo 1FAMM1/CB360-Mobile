@@ -1,167 +1,181 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#c62828">
   <title>CB360 Mobile - Disponibilidades Extras</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ==================== BODY ==================== */
-    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
-    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
-          transition: all 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
-    /* ============= DARK MODE OPTIONS ============== */
-    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
-    .dark-mode .availability-extras-subtitle {color: #e0e0e0;}
-    .dark-mode .availability-extras-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
-    .dark-mode .availability-extras-btn:hover:not(.selected) {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
-    .dark-mode .availability-extras-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}
-    .dark-mode .availability-extras-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.7);}
-    .dark-mode .calendar-container {border: 1px solid #222; background: rgba(65, 65, 65, 0.9); color: #fff;}
-    .dark-mode .calendar-header {color: #ff6b6b; border-bottom: 1px solid rgba(255, 255, 255, 0.2); padding-bottom: 8px;}
-    .dark-mode .calendar-day-header {color: #aaa;}
-    .dark-mode .calendar-day {background: rgba(255, 255, 255, 0.1);}    
-    .dark-mode .calendar-day:hover {background: rgba(255, 255, 255, 0.15);}
-    .dark-mode .calendar-day.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.9), rgba(183, 28, 28, 0.9)); color: #fff; font-weight: bold; border: 2px solid rgba(183, 28, 28, 1);}
-    .dark-mode .calendar-day.today {background: #8a1c1c; border: 2px solid #f1c40f;}
-    .dark-mode .calendar-day.selected.today {background-color: rgba(39, 174, 96, 1); border: 2px solid #f39c12;}
-    .dark-mode .calendar-legend {border: 1px solid #222}
-    .dark-mode .calendar-legend {background: rgba(255, 255, 255, 0.08);}
-    .dark-mode .legend-item {color: #fff;}
-    /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
-             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
-    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
-    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
-             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
-    .footer-content {max-width: 400px; margin: 0 auto;}
-    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
-    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
-    .footer strong {color: #ffebee;} 
-    .main-content {flex: 1; overflow-y: auto; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; 
-                   display: flex; flex-direction: column; align-items: center; justify-content: flex-start;}
-    .availability-extras-header {flex-shrink: 0; text-align: center; width: 100%;} 
-    .availability-extras-subtitle {font-size: 1.3em; color: #2c3e50; transition: color 0.3s ease;}
-    .availability-extras-buttons {display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 22vw, 220px), 1fr)); justify-content: center; align-items: stretch; margin-bottom: 10px;}
-    .availability-extras-btn {padding: clamp(10px, 1.5vw, 16px) clamp(12px, 2vw, 20px); min-height: clamp(42px, 6vh, 60px); min-width: clamp(80px, 28vw, 250px); max-width: clamp(190px, 18vw, 240px);
-                 font-size: clamp(11px, 1.2vw, 14px); border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; color: #2c3e50; cursor: pointer; text-align: center; display: flex; flex-direction: column;
-                 justify-content: center; align-items: center; position: relative; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);}
-    .availability-extras-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-                         transition: left 0.4s ease; z-index: 1;}
-    .availability-extras-btn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
-                        transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
-    .availability-extras-btn:active::after {width: 150px; height: 150px;}
-    .availability-extras-btn:hover:not(.selected) {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
-    .availability-extras-btn:active:not(.selected) {transform: scale(0.98); transition:0.1s ease;}
-    .availability-extras-btn.selected {color: white; transform: scale(1.03);  box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
-    .availability-extras-btn.selected:hover {transform: scale(1.05); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.6);}
-    .availability-extras-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
-    .availability-extras-btn span {position: relative; z-index: 2;}
-    .calendar-container {margin: 0 auto 0 auto;  padding: clamp(10px, 3vw, 15px); background: rgba(0, 0, 0, 0.05); border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-                         display: none;  width: 100%;}
-    .calendar-container.show { display: block; animation: slideDown 0.3s ease;}    
-    .calendar-header {text-align: center;  font-size: clamp(1em, 3vw, 1.2em); font-weight: bold; color: #d32f2f;  margin-bottom: clamp(5px, 1vw, 10px); border-bottom: 1px solid rgba(0, 0, 0, 0.2); padding-bottom: 8px;}
-    .calendar-grid {display: grid;  grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: clamp(2px, 1vw, 5px);}
-    .calendar-day-header {text-align: center; font-weight: bold; padding: clamp(4px, 1.5vw, 8px); font-size: clamp(0.7em, 2vw, 0.9em); color: #666;}  
-    .calendar-day {text-align: center; padding: clamp(5px, 2vw, 10px); border-radius: 3px; background: rgba(0, 0, 0, 0.10); font-size: clamp(0.75em, 2vw, 0.9em); cursor: pointer;  transition: 0.2s ease;}
-    .calendar-day:hover {background: #e0e0e0; transform: scale(1.05);}
-    .calendar-day.empty {background: transparent; cursor: default;}    
-    .calendar-day.empty:hover {transform: none;}    
-    .calendar-day.today {background: #8a1c1c; color: white; font-weight: bold; border: 2px solid #e67e22; }
-    .calendar-day.selected {background: linear-gradient(135deg, #d32f2f, #b71c1c); color: #fff; font-weight: bold; border: 2px solid #b71c1c;}
-    .calendar-day.selected.today {background-color: #229954; border: 2px solid #f39c12;}
-    .calendar-legend {display: none; width: 100%;  margin: 5px auto 0; border-radius: 10px; background: rgba(0, 0, 0, 0.05); border: 1px solid #ccc; justify-content: center; align-items: center;
-                      padding: clamp(8px, 2vw, 12px) clamp(10px, 3vw, 20px); gap: clamp(10px, 5vw, 42px); font-size: clamp(11px, 2vw, 13px); white-space: nowrap; text-align: center;}
-    .calendar-legend.show {display: flex;}
-    .legend-item {display: inline-flex; font-size: clamp(8px, 3vw, 20px); align-items: center; gap: 5px; color: #333; margin: 0 8px;}
-    .legend-color {width: clamp(20px, 2vw, 22px); height: clamp(20px, 2vw, 22px); border-radius: 3px; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.2);}
-    .legend-color.extras {background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: rgba(255, 255, 255, 0.2);}
-    .toast {position: fixed; bottom: clamp(100px, 20vh, 175px); left: 50%; transform: translateX(-50%); background: rgba(194, 21, 21, 0.85); color: #fff; padding: 18px 30px; border-radius: 10px; 
-            font-size: clamp(16px, 3vw, 20px); font-weight: bold; width: 500px; max-width: 90%; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
-    .toast.show {opacity: 1; transform: translateX(-50%) translateY(-10px);}
-    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */
-    /* ============ RESPONSIVENESS MODAL ============ */
-    @media (max-width: 600px) and (min-width: 401px) {
-      .disp-modal-content {width: 90%;}
-      .disp-btn {flex: 1 1 48%; font-weight: 600;}
-      .disp-modal-header {font-size: 1.1em; }
-      .disp-modal-body {gap: 10px; padding: 20px 15px;}
-      .disp-modal-footer {padding: 10px 15px;}
-    }
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */
-    /* ============ RESPONSIVENESS 480px ============ */
-    @media (max-width: 480px) {
-      .header {padding: 8px 15px;}
-      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
-      .header-logo {height: 50px; top: 32px; left: 10px;}
-      .footer {padding: 5px 15px;}
-      .powered-by {font-size: 11px;}
-      .footer-year {font-size: 9px;}
-      .availability-extras-header {flex-shrink: 0; padding-bottom: 10px;}
-      .availability-extras-subtitle {font-size: 0.9em; font-weight: bold; margin-top: 10px;}
-      .availability-extras-buttons {grid-template-columns: repeat(3, 1fr); gap: 5px;}
-      .availability-extras-btn {height: 50px; min-height: 30px; max-height:75px; font-size: 12px; padding: 15px 10px;}
-      .main-content {padding-left: 20px; padding-right: 20px; justify-content: center; align-items: center;}}
-    .main-content {transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
-    body.mobile-month-active .main-content {padding-top: 70px; justify-content: flex-start !important; align-items: stretch !important;}
+    /* ============================================================
+    VARIABLES (alinhadas com a página Escalas)
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+          user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px;
+                   display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px;
+                   transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content::-webkit-scrollbar {display: none;}
+    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
+    .main-content.content-blur {filter: blur(2px); pointer-events: none;}
+    .availability-extras-header {flex-shrink: 0; text-align: center; width: 100%;}
+    .availability-extras-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
+    /* ============================================================
+    MONTH BUTTONS (mesmo estilo grid-card / mbtn da página Escalas)
+    ============================================================ */
+    .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 4px; flex-shrink: 0;}
+    .availability-extras-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
+    .availability-extras-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+                 padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2);
+                 cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
+                 line-height: 1.2; transition: background var(--ease), color var(--ease);}
+    .availability-extras-btn:nth-child(3n) {border-right: none;}
+    .availability-extras-btn:nth-child(n+10) {border-bottom: none;}
+    .availability-extras-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
+    .availability-extras-btn:active:not(.selected) {background: var(--surface-2);}
+    .availability-extras-btn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
+    .availability-extras-btn:hover .material-icons {transform: scale(1.08);}
+    .availability-extras-btn.selected {background: var(--red-light); color: var(--red);}
+    .availability-extras-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
+    .availability-extras-btn div, .availability-extras-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    /* ============================================================
+    CALENDAR CARD
+    ============================================================ */
+    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md);
+                         box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%; display: none;}
+    .calendar-container.show {display: block; animation: slideDown 0.3s ease;}
+    .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px;
+                      letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
+    .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
+    .calendar-day-header {text-align: center; font-weight: 700; padding: 6px 0; font-size: 11px; color: var(--txt-3);}
+    .calendar-day {text-align: center; padding: 9px 0; border-radius: var(--r-sm); background: var(--surface-2); font-size: 12.5px; color: var(--txt-1); cursor: pointer;
+                   transition: background var(--ease), transform 0.15s ease, color var(--ease);}
+    .calendar-day:hover {background: var(--red-light); color: var(--red); transform: scale(1.05);}
+    .calendar-day.empty {background: transparent; cursor: default;}
+    .calendar-day.empty:hover {transform: none; background: transparent;}
+    .calendar-day.today {background: var(--red-dark); color: #fff; font-weight: 700; border: 2px solid #e67e22;}
+    .calendar-day.selected {background: linear-gradient(135deg, var(--red), var(--red-dark)); color: #fff; font-weight: 700; border: 2px solid var(--red-dark);}
+    .calendar-day.selected.today {background: linear-gradient(135deg, #27ae60, #1e8449); border: 2px solid #f39c12;}
+    /* ============================================================
+    LEGEND
+    ============================================================ */
+    .calendar-legend {display: none; width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm);
+                      justify-content: center; align-items: center; padding: 10px 16px; gap: 30px; font-size: 12.5px;}
+    .calendar-legend.show {display: flex;}
+    .legend-item {display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--txt-2); font-weight: 600;}
+    .legend-color {width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);}
+    .legend-color.extras {background: linear-gradient(135deg, var(--red), var(--red-dark));}
+    /* ============================================================
+    TOAST
+    ============================================================ */
+    .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red));
+            color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center;
+            z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
+    @media (max-width: 480px) {
+      .header-title {font-size: 16px;}
+      .availability-extras-subtitle {font-size: 0.95em;}
+      .availability-extras-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
+      .availability-extras-btn .material-icons {font-size: 19px;}
+      .main-content {padding-left: 14px; padding-right: 14px; justify-content: center; align-items: center;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>DISPONIBILIDADES</h1>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">DISPONIBILIDADES</span>
+      <span class="header-sub">Extras</span>
+    </div>
     <h2 id="corpInfo" style="display: none;"></h2>
-    <div class="header-subtitle">EXTRAS</div>
-  </div>
+  </header>
   <div class="main-content">
-      <div class="availability-extras-header">
-        <p class="availability-extras-subtitle">Selecione o mês e dias:</p>
+    <div class="availability-extras-header">
+      <p class="availability-extras-subtitle">Selecione o mês e dias:</p>
+    </div>
+    <div class="months-card">
+      <div class="availability-extras-buttons">
+        <button class="availability-extras-btn" data-month="0" onclick="showCalendar(0, this)"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
+        <button class="availability-extras-btn" data-month="1" onclick="showCalendar(1, this)"><span class="material-icons">favorite</span><div>Fevereiro</div></button>
+        <button class="availability-extras-btn" data-month="2" onclick="showCalendar(2, this)"><span class="material-icons">eco</span><div>Março</div></button>
+        <button class="availability-extras-btn" data-month="3" onclick="showCalendar(3, this)"><span class="material-icons">local_florist</span><div>Abril</div></button>
+        <button class="availability-extras-btn" data-month="4" onclick="showCalendar(4, this)"><span class="material-icons">wb_sunny</span><div>Maio</div></button>
+        <button class="availability-extras-btn" data-month="5" onclick="showCalendar(5, this)"><span class="material-icons">beach_access</span><div>Junho</div></button>
+        <button class="availability-extras-btn" data-month="6" onclick="showCalendar(6, this)"><span class="material-icons">local_fire_department</span><div>Julho</div></button>
+        <button class="availability-extras-btn" data-month="7" onclick="showCalendar(7, this)"><span class="material-icons">whatshot</span><div>Agosto</div></button>
+        <button class="availability-extras-btn" data-month="8" onclick="showCalendar(8, this)"><span class="material-icons">park</span><div>Setembro</div></button>
+        <button class="availability-extras-btn" data-month="9" onclick="showCalendar(9, this)"><span class="material-icons">cloud</span><div>Outubro</div></button>
+        <button class="availability-extras-btn" data-month="10" onclick="showCalendar(10, this)"><span class="material-icons">grain</span><div>Novembro</div></button>
+        <button class="availability-extras-btn" data-month="11" onclick="showCalendar(11, this)"><span class="material-icons">celebration</span><div>Dezembro</div></button>
       </div>
-        <div class="availability-extras-buttons">
-          <button class="availability-extras-btn" onclick="showCalendar(0, this)">Janeiro</button>
-          <button class="availability-extras-btn" onclick="showCalendar(1, this)">Fevereiro</button>
-          <button class="availability-extras-btn" onclick="showCalendar(2, this)">Março</button>
-          <button class="availability-extras-btn" onclick="showCalendar(3, this)">Abril</button>
-          <button class="availability-extras-btn" onclick="showCalendar(4, this)">Maio</button>
-          <button class="availability-extras-btn" onclick="showCalendar(5, this)">Junho</button>
-          <button class="availability-extras-btn" onclick="showCalendar(6, this)">Julho</button>
-          <button class="availability-extras-btn" onclick="showCalendar(7, this)">Agosto</button>
-          <button class="availability-extras-btn" onclick="showCalendar(8, this)">Setembro</button>
-          <button class="availability-extras-btn" onclick="showCalendar(9, this)">Outubro</button>
-          <button class="availability-extras-btn" onclick="showCalendar(10, this)">Novembro</button>
-          <button class="availability-extras-btn" onclick="showCalendar(11, this)">Dezembro</button>
-        </div>
-      <div id="calendarContainer" class="calendar-container">
-        <div class="calendar-header" id="calendarHeader"></div>
-        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+    <div id="calendarContainer" class="calendar-container">
+      <div class="calendar-header" id="calendarHeader"></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+    <div id="legend" class="calendar-legend">
+      <div class="legend-item">
+        <span class="legend-color extras"></span>
+        <span class="legend-text">TURNOS EXTRA</span>
       </div>
-      <div id="legend" class="calendar-legend">
-        <div class="legend-item">
-          <span class="legend-color extras"></span>
-          <span class="legend-text">TURNOS EXTRA</span>
-        </div>
-      </div>
+    </div>
   </div>
   <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
-        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023-2025 - Sistema CB360 Mobile
+        © 2023–2025 · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -178,15 +192,18 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
+    function getNInt() {return localStorage.getItem("currentCorpNint")}
     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const corp  = getCorp();
+      const nint  = getNInt();
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'x-my-corpo': corp,
-        'x-my-nint': nint
+        'x-my-nint': nint,
       };
       if (options.returnRepresentation) {
         headers['Prefer'] = 'return=representation';
@@ -264,13 +281,14 @@
     }
     let isLoadingCalendar = false;
     async function showCalendar(monthIndex, button) {
-      document.getElementById('legend').style.display = 'none';
-      
       if (isLoadingCalendar) return;
+      const calendarContainer = document.getElementById('calendarContainer');
+      const legend = document.getElementById('legend');
       isLoadingCalendar = true;
       if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
         button.classList.remove('selected');
-        document.getElementById('calendarContainer').classList.remove('show');
+        calendarContainer.classList.remove('show');
+        legend.classList.remove('show');
         document.body.classList.remove('mobile-month-active');
         currentMonthIndex = null;
         isLoadingCalendar = false;
@@ -297,7 +315,6 @@
       const lastDay = new Date(headerYear, monthIndex + 1, 0);
       const daysInMonth = lastDay.getDate();
       const startingDayOfWeek = firstDay.getDay();
-      const calendarContainer = document.getElementById('calendarContainer');
       const calendarHeader = document.getElementById('calendarHeader');
       const calendarGrid = document.getElementById('calendarGrid');
       calendarHeader.textContent = `${monthNames[monthIndex]} ${headerYear}`;
@@ -313,26 +330,27 @@
         emptyDay.className = 'calendar-day empty';
         calendarGrid.appendChild(emptyDay);
       }
-      selectedDays = await loadSelectedDaysFromSupabase(monthIndex);
+      /* Constrói a grelha completa (números + clique) de imediato, para nunca
+         mostrar um calendário vazio enquanto se aguarda o Supabase. */
+      const dayElementsByDate = {};
       for (let day = 1; day <= daysInMonth; day++) {
         const dayElement = document.createElement('div');
         dayElement.className = 'calendar-day';
         dayElement.textContent = day;
         const dateStr = `${headerYear}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        if (selectedDays.includes(dateStr)) dayElement.classList.add('selected');
         if (headerYear === currentYear && monthIndex === currentMonth && day === currentDay) {
           dayElement.classList.add('today');
         }
         dayElement.addEventListener('click', async () => {
           const year = getWorkYear(currentMonthIndex);
           const now = new Date();
-          const currentDay = now.getDate();
+          const nowDay = now.getDate();
           if (!allowPiqPastMonthsEdit) {
             if (isPastMonth(currentMonthIndex, year)) {
               showToast("Não é possível alterar registos de meses anteriores.");
               return;
             }
-            if (currentMonthIndex === now.getMonth() && year === now.getFullYear() && day <= currentDay) {
+            if (currentMonthIndex === now.getMonth() && year === now.getFullYear() && day <= nowDay) {
               showToast("Não é possível alterar registos de dias anteriores ou do dia atual.");
               return;
             }
@@ -372,12 +390,20 @@
           }
         });
         calendarGrid.appendChild(dayElement);
+        dayElementsByDate[dateStr] = dayElement;
       }
       calendarContainer.classList.add('show');
-      document.getElementById('legend').style.display = 'block';
+      legend.classList.add('show');
       calendarContainer.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest'
+      });
+      const requestedMonth = monthIndex;
+      selectedDays = await loadSelectedDaysFromSupabase(monthIndex);
+      if (currentMonthIndex !== requestedMonth) { isLoadingCalendar = false; return; }
+      selectedDays.forEach(dateStr => {
+        const el = dayElementsByDate[dateStr];
+        if (el) el.classList.add('selected');
       });
       isLoadingCalendar = false;
     }
@@ -386,10 +412,13 @@
       const toast = document.createElement("div");
       toast.className = "toast";
       toast.textContent = message;
+      const content = document.querySelector(".main-content");
       document.body.appendChild(toast);
+      if (content) content.classList.add("content-blur");
       setTimeout(() => toast.classList.add("show"), 50);
       setTimeout(() => {
         toast.classList.remove("show");
+        if (content) content.classList.remove("content-blur");
         setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
@@ -504,17 +533,7 @@
         return false;
       }
     }
-    /* ========================= GLOBAL LOADING ========================== */
-    const buttons = document.querySelectorAll('.availability-extras-btn');
-    buttons.forEach((button, index) => {
-      button.style.opacity = '0';
-      button.style.transform = 'translateY(20px)';
-      setTimeout(() => {
-        button.style.transition = 'all 0.5s ease';
-        button.style.opacity = '1';
-        button.style.transform = 'translateY(0)';
-      }, index * 100);
-    });
+    /* ============================== INIT =============================== */
     document.addEventListener('DOMContentLoaded', function() {
       loadCorpInfo();
       loadTheme();
@@ -522,6 +541,3 @@
   </script>
 </body>
 </html>
-
-
-
