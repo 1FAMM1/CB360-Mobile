@@ -29,7 +29,7 @@
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
     body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
-          user-select: none; transition: background var(--ease), color var(--ease);}
+         user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER
     ============================================================ */
@@ -68,20 +68,19 @@
     .availability-view-btn:hover .material-icons {transform: scale(1.08);}
     .availability-view-btn.selected {background: var(--red-light); color: var(--red);}
     .availability-view-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
-    .availability-view-btn div, .availability-dec-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    .availability-view-btn div, .availability-view-btn span {position: relative; z-index: 2; line-height: 1.2;}
     /* ============================================================
     CALENDAR CARD
     ============================================================ */
-    .calendar-container {width: 100%; max-width: 700px; padding: clamp(12px, 3vw, 16px); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red);
-                         border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); display: none; flex-shrink: 0;}
+    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md);
+                         box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%; display: none; flex-shrink: 0;}
     .calendar-container.show {display: block; animation: slideDown 0.3s ease;}
-    @keyframes slideDown {from {opacity: 0; transform: translateY(-8px);} to {opacity: 1; transform: translateY(0);}}
-    .calendar-header {text-align: center; font-size: clamp(1em, 3vw, 1.15em); font-weight: 700; color: var(--red); margin-bottom: clamp(6px, 1vw, 10px); border-bottom: 1px solid var(--border);
-                      padding-bottom: 8px;}
-    .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: clamp(2px, 1vw, 5px);}
-    .calendar-day-header {text-align: center; font-weight: 700; padding: clamp(4px, 1.5vw, 8px); font-size: clamp(0.7em, 2vw, 0.85em); color: var(--txt-3);}
-    .calendar-day {text-align: center; padding: clamp(5px, 2vw, 10px); border-radius: var(--r-sm); background: var(--surface-2); color: var(--txt-1); font-size: clamp(0.75em, 2vw, 0.9em);
-                   cursor: pointer; transition: background var(--ease), transform var(--ease), box-shadow var(--ease);}
+    .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px;
+                      letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
+    .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
+    .calendar-day-header {text-align: center; font-weight: 700; padding: 6px 0; font-size: 11px; color: var(--txt-3);}
+    .calendar-day {text-align: center; padding: 9px 0; border-radius: var(--r-sm); background: var(--surface-2); font-size: 12.5px; color: var(--txt-1); cursor: pointer;
+                   transition: background var(--ease), transform 0.15s ease, color var(--ease);}
     .calendar-day:hover {background: var(--surface); transform: scale(1.05);}
     .calendar-day.empty {background: transparent; cursor: default;}
     .calendar-day.empty:hover {transform: none;}
@@ -89,7 +88,7 @@
     .calendar-day.selected {background-color: var(--blue); color: #fff; font-weight: 700;}
     .calendar-day.selected.today {background-color: #27ae60; border: 2px solid #f39c12;}
     /* ============================================================
-    CALENDAR DAY TYPES (cores semânticas fixas, iguais em dark/light)
+    CALENDAR DAY TYPES (cores semânticas fixas)
     ============================================================ */
     .calendar-day.type-pn {background: linear-gradient(135deg, #3ad0ec, #28c0de, #1aa9c5); color: white; font-weight: bold; border: 2px solid #1aa9c5;}
     .calendar-day.type-pn:hover {background: linear-gradient(135deg, #5adbf2, #28c0de, #159bb5); box-shadow: 0 4px 12px rgba(40, 192, 222, 0.6); transform: scale(1.05);}
@@ -106,12 +105,11 @@
     /* ============================================================
     LEGEND CARD
     ============================================================ */
-    .calendar-legend {display: none; grid-template-columns: repeat(auto-fit, minmax(90px, auto)); justify-content: center; align-items: center; gap: 8px; width: 100%; max-width: 700px;
-                      margin: 0 auto; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm); padding: clamp(10px, 2vw, 14px);
-                      flex-shrink: 0;}
-    .calendar-legend.show {display: grid !important;}
-    .legend-item {display: flex; align-items: center; gap: 8px; color: var(--txt-1); font-size: clamp(10px, 2.6vw, 13px);}
-    .legend-color {width: clamp(18px, 2vw, 20px); height: clamp(18px, 2vw, 20px); border-radius: 5px; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.2);}
+    .calendar-legend {display: none; width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm);
+                      justify-content: center; align-items: center; padding: 10px 16px; gap: 30px; font-size: 12.5px; flex-shrink: 0;}
+    .calendar-legend.show {display: flex;}
+    .legend-item {display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--txt-2); font-weight: 600;}
+    .legend-color {width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);}
     .legend-color.type-pn {background: linear-gradient(135deg, #3ad0ec, #28c0de, #1aa9c5); border-color: rgba(255, 255, 255, 0.05);}
     .legend-color.type-ed {background: linear-gradient(135deg, #ffd54f, #ffca28, #ffa726); border-color: rgba(255, 255, 255, 0.05);}
     .legend-color.type-en {background: linear-gradient(135deg, #3949ab, #2c387e, #1a237e); border-color: rgba(255, 255, 255, 0.05);}
@@ -167,7 +165,7 @@
     @media (min-width: 769px) {
       .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
     }
-  </style>
+</style>
 </head>
 <body>
   <header class="header">
