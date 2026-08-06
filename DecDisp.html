@@ -241,6 +241,7 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
     function getCorp() {return localStorage.getItem("currentCorpOperNr")}
     function getNInt() {return localStorage.getItem("currentCorpNint")}
     function getSupabaseHeaders(options = {}) {
@@ -389,16 +390,14 @@
           })
         );
       }
-      selectedDays = await loadSelectedDaysFromSupabase(monthIndex);
+      /* Constrói a grelha completa (números + clique) de imediato, para nunca
+         mostrar um calendário vazio enquanto se aguarda o Supabase. */
       const today = new Date();
+      const dayElementsByDay = {};
       for (let day = 1; day <= lastDay.getDate(); day++) {
         const el = document.createElement('div');
         el.className = 'calendar-day';
         el.textContent = day;
-        if (selectedDays[day] && DISP_CLASS_MAP[selectedDays[day]]) {
-          el.classList.add(DISP_CLASS_MAP[selectedDays[day]]);
-          el.dataset.value = selectedDays[day];
-        }
         if (year === today.getFullYear() && monthIndex === today.getMonth() && day === today.getDate()) {
           el.classList.add('today');
         }
@@ -422,9 +421,22 @@
           document.getElementById('dispModal').classList.add('show');
         });
         calendarGrid.appendChild(el);
+        dayElementsByDay[day] = el;
       }
       calendarContainer.classList.add('show');
       document.getElementById('legend').classList.add('show');
+      const requestedMonth = monthIndex;
+      selectedDays = await loadSelectedDaysFromSupabase(monthIndex);
+      if (currentMonthIndex !== requestedMonth) { return; }
+      Object.keys(selectedDays).forEach(dayStr => {
+        const day = parseInt(dayStr, 10);
+        const value = selectedDays[dayStr];
+        const el = dayElementsByDay[day];
+        if (el && DISP_CLASS_MAP[value]) {
+          el.classList.add(DISP_CLASS_MAP[value]);
+          el.dataset.value = value;
+        }
+      });
     }
     /* ============================== MODAL ============================== */
     function closeDispModal() {
