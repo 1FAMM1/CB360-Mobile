@@ -309,7 +309,7 @@
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken";
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -593,7 +593,7 @@
       sendBtn.disabled = true;
       sendBtn.innerHTML = '<span class="icon-btn-text"><span class="material-icons spin">autorenew</span><span>A Enviar...</span></span>';
       try {
-        const corpOperNr = (localStorage.getItem("currentCorpOperNr")).trim();
+        const corpOperNr = (localStorage.getItem("currentCorpOperNr") || "").trim();
         if (!corpOperNr) throw new Error('corp_oper_nr não definido!');
         const selectedStatus = document.getElementById('detailStatus').value;
         const now = new Date();
