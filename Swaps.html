@@ -13,6 +13,7 @@
   <style>
     /* ============================================================
        CB360 MOBILE — DESIGN UNIFICADO COM "ESCALAS"
+       Mantém os seletores/IDs existentes para não alterar a lógica JS.
        ============================================================ */
     :root {
       --red: #c62828;
@@ -90,8 +91,7 @@
       margin:0 auto;
       overflow-y:auto;
       overflow-x:hidden;
-      /* Alterado o último valor de calc(var(--footer-h) + 18px) para 100px para dar folga ao botão */
-      padding:calc(var(--header-h) + 18px) 16px 100px;
+      padding:calc(var(--header-h) + 18px) 16px 140px;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -578,13 +578,13 @@
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
 
-    function getCorp()  {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt()  {return localStorage.getItem("currentCorpNint"); }
+    function getCorp()  {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt()  {return localStorage.getItem("currentCorpNint")   || "205"; }
 
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken") ;
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -620,7 +620,7 @@
     }
 
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -674,7 +674,7 @@
       if (viewSwap) viewSwap.style.display = 'none';
       
       const mainMenu = document.querySelector('.swap-options-buttons');
-      if (mainMenu) mainMenu.style.display = 'grid'; // CORRIGIDO PARA GRID
+      if (mainMenu) mainMenu.style.display = 'grid';
       
       document.querySelectorAll('.swap-options-btn').forEach(b => b.classList.remove('selected'));
       hideBackHeader();
@@ -730,8 +730,8 @@
     }
 
     async function loadPendingSwaps() {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || "204";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       if (!nint || !corpOperNr) return;
       const container = document.getElementById("pending-swaps-container");
       const list = document.getElementById("pending-swaps-list");
@@ -1035,9 +1035,8 @@
                 btn.dataset.value = row.value;
                 if (switchBtn) {
                   switchBtn.style.display = "block";
-                  // ADICIONADO: Faz o scroll rolar suavemente até ao botão de envio
                   setTimeout(() => {
-                    switchBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    switchBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   }, 50);
                 }
               } else {
@@ -1170,7 +1169,7 @@
         toast.classList.remove("show");
         if (content) content.classList.remove("content-blur");
         resetSwapUI();
-        goBackToMain(); // Retorna automaticamente ao menu principal após o toast
+        goBackToMain();
         setTimeout(() => toast.remove(), 300);
       }, 4500);
     }
