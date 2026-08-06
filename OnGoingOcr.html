@@ -637,7 +637,7 @@
         sendBtn.innerHTML = '<span class="icon-btn-text"><span class="material-icons">send</span><span>Enviar Relatório</span></span>';
       }
     }
-    window.addEventListener('load', function() {
+    document.addEventListener('DOMContentLoaded', function() {
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
