@@ -289,9 +289,10 @@
         console.error("Erro ao carregar restrições:", err);
         container.innerHTML = '<div class="loading-msg"><span class="material-icons">error</span>Erro ao carregar restrições.</div>';
       }
-    }
-    window.addEventListener('load', () => {
-      if (localStorage.getItem('sgo-theme') === 'dark') {
+    }  
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
       }
       loadCorpInfo();
