@@ -63,7 +63,7 @@
     /* ============================================================
     VEHICLE LIST
     ============================================================ */
-    .vehicle-scroll-area {flex: 1; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 15px; padding-bottom: 50px;}
+    .vehicle-scroll-area {flex: 1; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 15px; padding-bottom: 55px;}
     .vehicle-scroll-area::-webkit-scrollbar {display: none;}
     .vehicle-item {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--txt-3); border-radius: var(--r-md); padding: 15px; box-shadow: var(--sh-sm);
                    transition: box-shadow var(--ease), transform var(--ease), background var(--ease), border-color var(--ease);}
@@ -203,7 +203,7 @@
     let vehicleStatuses = {};
     let vehicleINOP = {};
     let vehicles = [];
-    window.addEventListener('load', function() {
+    document.addEventListener('DOMContentLoaded', () => {
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') document.body.classList.add('dark-mode');
       loadCorpInfo();
