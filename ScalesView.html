@@ -7,19 +7,19 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
   <meta name="theme-color" content="#c62828">
-  <title>CB360 Mobile - Piquetes</title>
+  <title>CB360 Mobile - Escalas</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ============================================================
-    VARIABLES (mesmo sistema de design do CB360 Mobile)
+    VARIABLES
     ============================================================ */
     :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
            --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
     /* ============================================================
-    DARK MODE (mesma classe .dark-mode já usada por loadTheme())
+    DARK MODE
     ============================================================ */
     .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
                 --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
@@ -126,7 +126,7 @@
     /* ============================================================
     NEXT SERVICES SCROLL CONTAINER
     ============================================================ */
-    #nextServicesCard {flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 0px; scrollbar-width: none; width: 100%; max-width: 100%; margin-bottom:40px;}
+    #nextServicesCard {flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 5px; scrollbar-width: none; width: 100%; max-width: 100%; MARGIN-BOTTOM: 25PX; }
     #nextServicesCard::-webkit-scrollbar {display: none;}
     /* ============================================================
     FOOTER
@@ -225,12 +225,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
-    function getNInt() {return localStorage.getItem("currentCorpNint")}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "205"; }
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -260,7 +260,7 @@
       card.innerHTML = `<span class="error-message">⚠️ ${message}</span>`;
     }    
     function validateCorpData() {
-      const nintCorpStr = localStorage.getItem("currentCorpNint");
+      const nintCorpStr = localStorage.getItem("currentCorpNint") || "205";
       if (!nintCorpStr || isNaN(parseInt(nintCorpStr, 10))) {
         return null;
       }
@@ -268,7 +268,7 @@
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -294,11 +294,6 @@
       } catch (err) {
         console.error('Erro silencioso:', err);
       }
-    }
-    /* ========================== THEME LOADING ========================== */
-    function loadTheme() {
-      const savedTheme = localStorage.getItem('sgo-theme');
-      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
     }    
     function getWorkYear(targetMonthIndex) {
       const now = new Date();
@@ -312,7 +307,7 @@
     }
     /* ===================== GENERIC DATA LOADER ===================== */
     async function loadMonthData(config, monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();      
       if (!nintCorp) {
         showError(config.cardId, "Elemento e Corporação não definidos.");
@@ -437,7 +432,7 @@
     }
     async function fetchServiceElements(day, month, value) {
       try {
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
         const nintCorp = validateCorpData();
         if (!nintCorp || !corpOperNr) return [];        
         const regServUrl = `${SUPABASE_URL}/rest/v1/reg_serv?select=n_int&corp_oper_nr=eq.${corpOperNr}&day=eq.${day}&month=eq.${month}&value=eq.${value}`;
@@ -527,7 +522,7 @@
       document.getElementById('serviceModal').style.display = 'none';
     });
     async function loadNextServicesUnified(selectedMonth) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const container = document.getElementById("nextServicesCard");
       const title = document.getElementById("nextserv-info-title");
       container.innerHTML = "";
@@ -605,12 +600,15 @@
     /* ========================== INITIALIZATION ========================== */
     document.addEventListener('DOMContentLoaded', function() {
       loadCorpInfo();
-      loadTheme();      
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
       let selectedMonth = null;
-      const mesesSemDecir = [0, 1, 2, 3, 10, 11];      
+      const mesesSemDecir = [0, 1, 2, 3, 10, 11];
       document.querySelectorAll(".scales-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
-          const month = parseInt(btn.dataset.month, 10);          
+          const month = parseInt(btn.dataset.month, 10);
           if (selectedMonth === month) {
             btn.classList.remove("selected");
             selectedMonth = null;
@@ -621,7 +619,7 @@
             document.getElementById("nextServicesCard").style.display = "none";
             document.getElementById("nextserv-info-title").style.display = "none";
             return;
-          }      
+          }
           document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
           btn.classList.add("selected");
           selectedMonth = month;
@@ -630,9 +628,9 @@
           document.getElementById("decirCard").style.display = "none";
           document.getElementById("extrasCard").style.display = "none";
           document.getElementById("nextServicesCard").style.display = "none";
-          document.getElementById("nextserv-info-title").style.display = "none";          
-          const today = new Date();          
-          await loadPicketsMonth(month);          
+          document.getElementById("nextserv-info-title").style.display = "none";
+          const today = new Date();
+          await loadPicketsMonth(month);
           if (!mesesSemDecir.includes(month)) {
             await loadDecirMonth(month);
           }
