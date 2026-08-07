@@ -1,107 +1,154 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT" style="background-color: #8b0000;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#c62828">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <title>CB360_DOCUMENTOS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>CB360 Mobile - Documentos</title>
   <style>
-    /* ==================== BODY ==================== */
-    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
+    /* ============================================================
+    VARIABLES
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa; --green: #2e7d32; --green-state: #2e7d32; --red-state: #c62828;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;
+                --green: #66bb6a; --green-state: #66bb6a; --red-state: #ff6b6b;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
     html, body {overscroll-behavior: none;}
-    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; display: flex; flex-direction: column;
-          height: 100vh; overflow: hidden;}
-    /* ============= DARK MODE OPTIONS ============== */
-    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
-    .dark-mode .documents-list-title {color: #ddd;}
-    .dark-mode .comun-card {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15);}
-    .dark-mode .comun-card:hover {background: rgba(255, 255, 255, 0.15);}
-    .dark-mode .comun-title {color: #fff;}
-    .dark-mode .modal-content { background: #2c2c2c; border: 1px solid #444; }
-    .dark-mode .modal-body {color: #eee;}
-    .dark-mode .modal-footer {border-top-color: #444;}
-    /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828; position: fixed;
-             top: 0; left: 0; right: 0; z-index: 1000;}
-    .header h1 {margin: 0; font-size: 1.5em; font-weight: bold;}
-    .header-subtitle {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828; position: fixed;
-             bottom: 0; left: 0; right: 0; z-index: 1000;}
-    .footer-content {max-width: 400px; margin: 0 auto;}
-    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px;}
-    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
-    .footer strong {color: #ffebee;}
-    .main-content {flex: 1; display: flex; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); flex-direction: column; padding-top: 50px; padding-bottom: 0; overflow: hidden;}
-    .upload-docs-bar {padding: 0 20px 0 15px; bottom: calc(env(safe-area-inset-bottom) + 60px);}
-    #upload-doc-btn {width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600; cursor: pointer;
-                     background: linear-gradient(45deg, #1976d2, #0d47a1); color: #fff; box-shadow: 0 6px 14px rgba(0,0,0,0.2); transition: transform 0.15s ease, box-shadow 0.15s ease;}
-    #upload-doc-btn:hover {transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,0.25);}
-    #upload-doc-btn .material-icons {font-size: 22px;}
-    .documents-list-title {display: flex; justify-content: center; font-weight: bold; color: #444; margin: 0 0 15px 0; padding: 0 20px; font-size: 16px;}
-    .documents-list-container {flex: 1; overflow-y: auto; padding: 0 20px; padding-bottom: 110px;}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
+          flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease); padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; padding-top: calc(var(--header-h) + 14px);
+                   background: var(--bg); transition: background var(--ease);}
+    .section-title {display: flex; align-items: center; gap: 8px; font-size: 0.9em; font-weight: 700; letter-spacing: 1px; color: var(--txt-2); text-transform: uppercase; margin: 0 16px 12px;}
+    .section-title::before {content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--red); display: inline-block;}
+    /* ============================================================
+    DOCUMENT LIST
+    ============================================================ */
+    .documents-list-container {flex: 1; overflow-y: auto; padding: 0 16px; padding-bottom: 130px; scrollbar-width: none; -ms-overflow-style: none;}
     .documents-list-container::-webkit-scrollbar {display: none;}
-    .documents-list-container {-ms-overflow-style: none; scrollbar-width: none;}
-    .documents-list {display: flex; flex-direction: column; gap: 5px; padding-bottom: 20px;}
-    .comun-card {background: #ddd; border: 1px solid #bdc3c7; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; 
-                 box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); cursor: pointer; transition: background 0.3s ease, box-shadow 0.2s ease;}
-    .comun-card:hover {background: #c8c8c8; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);}
-    .comun-title {font-size: 15px; font-weight: 600; color: #333; flex: 1;}
-    .comun-icon {font-size: 28px; color: #d32f2f;}
-    #pdf-viewer-container {position: fixed; left: 0; right: 0; display: none; flex-direction: column; background: #fff; z-index: 999;}
-    #pdf-viewer-header {background: #d32f2f; color: #eee; padding: 10px; display: flex; align-items: center; gap: 10px; justify-content: space-between;}
+    .documents-list {display: flex; flex-direction: column; gap: 8px;}
+    .doc-row {display: flex; gap: 8px; align-items: stretch;}
+    .comun-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;
+                 box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), box-shadow var(--ease), transform var(--ease);}
+    .comun-card:hover {background: var(--surface-2); box-shadow: var(--sh-md);}
+    .comun-card:active {transform: scale(.99);}
+    .comun-icon-wrap {flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; background: var(--red-light); display: flex; align-items: center; justify-content: center;}
+    .comun-icon-wrap .material-icons {font-size: 20px; color: var(--red-state);}
+    .comun-icon-wrap.read {background: rgba(46, 125, 50, 0.12);}
+    .comun-icon-wrap.read .material-icons {color: var(--green-state);}
+    .comun-title {font-size: 13.5px; font-weight: 600; color: var(--txt-1); flex: 1; min-width: 0;}
+    .delete-card {width: 46px; min-width: 46px; display: flex; align-items: center; justify-content: center; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border);
+                  box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), transform var(--ease);}
+    .delete-card:hover {background: var(--surface-2);}
+    .delete-card:active {transform: scale(.95);}
+    .delete-card .material-icons {font-size: 19px; color: var(--txt-3);}
+    .empty-card {text-align: center; font-weight: 700; padding: 20px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--txt-2); box-shadow: var(--sh-sm);}
+    /* ============================================================
+    UPLOAD BAR
+    ============================================================ */
+    .upload-docs-bar {position: fixed; left: 0; right: 0; bottom: calc(var(--footer-h) + 14px); padding: 0 16px; max-width: 700px; margin: 0 auto; width: 100%; box-sizing: border-box; z-index: 50;}
+    #upload-doc-btn {width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border-radius: 50px; border: none; font-family: 'Inter', sans-serif; font-size: 14px;
+                     font-weight: 600; cursor: pointer; background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; box-shadow: var(--sh-md); transition: opacity var(--ease), transform var(--ease);}
+    #upload-doc-btn:hover {opacity: .9;}
+    #upload-doc-btn:active {transform: scale(.98);}
+    #upload-doc-btn .material-icons {font-size: 19px;}
+    /* ============================================================
+    PDF VIEWER
+    ============================================================ */
+    #pdf-viewer-container {position: fixed; left: 0; right: 0; display: none; flex-direction: column; background: var(--bg); z-index: 999;}
+    #pdf-viewer-header {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 12px 14px; display: flex; align-items: center; gap: 10px; justify-content: space-between;}
     #pdf-controls {display: flex; gap: 8px; align-items: center;}
-    #pdf-controls button {background: rgba(255, 255, 255, 0.2); border: none; color: #fff; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background 0.2s;}
-    #pdf-controls button:hover {background: rgba(255, 255, 255, 0.3);}
-    #pdf-controls span {font-size: 14px; min-width: 50px; text-align: center;}
-    #pdf-viewer {flex: 1; overflow: auto; background: #fff; padding: 10px; text-align: center;}
+    #pdf-controls button {background: rgba(255,255,255,0.2); border: none; color: #fff; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background var(--ease);}
+    #pdf-controls button:hover {background: rgba(255,255,255,0.3);}
+    #pdf-controls span {font-size: 13px; min-width: 44px; text-align: center; font-weight: 600;}
+    #pdf-viewer {flex: 1; overflow: auto; background: var(--surface-2); padding: 12px; text-align: center; scrollbar-width: none;}
     #pdf-viewer::-webkit-scrollbar {display: none;}
-    #pdf-viewer {-ms-overflow-style: none; scrollbar-width: none;}    
-    .modal {display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);align-items: center; justify-content: center;}
-    .modal.show { display: flex; }
-    .modal-content {background: #fff; width: 90%; max-width: 450px; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; animation: fadeIn 0.3s ease;}
-    .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: center;}
-    .modal-header h3 {font-size: 1.2rem; margin: 0;}
-    .modal-close-btn {background: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s ease;}
-    .modal-close-btn:hover {background: #b71c1c;}
-    .modal-upload-submit-btn {background:#1976d2; color:#fff; border:none; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer;}
-    .modal-body {padding: 20px; max-height: 60vh; overflow-y: auto; color: #333;}
-    .modal-footer {padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center;}    
-    .choose-file-btn {width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; background: linear-gradient(45deg, #1976d2, #0d47a1); color: #fff;
-                      box-shadow: 0 6px 14px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap:8px;}
-    #message-modal .modal-header {background: linear-gradient(45deg, #d32f2f, #b71c1c); color: white; padding: 15px 20px; text-align: center;}
-    #message-modal.success .modal-header {background: linear-gradient(45deg, #388e3c, #1b5e20);}
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */
-    /* ============ RESPONSIVENESS 480px ============ */
-    @media (max-width:480px) {
-      .header {padding: 8px 15px;}
-      .header h1 {font-size: 1.2em !important;}
-      .header-logo {height: 50px; top: 32px;}
-      .main-content {padding-top: 80px; padding-bottom: 100px;}
-      .footer {padding: 5px 15px;}
-      .powered-by {font-size: 11px;}
-      .footer-year {font-size: 9px;}
-      .documents-list-container {padding: 0 20px;}
-      .documents-list-title {padding: 0 20px;}
-      .upload-docs-bar {padding: 15px 20px;}}
+    /* ============================================================
+    MODAL
+    ============================================================ */
+    .modal {display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.5); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px;}
+    .modal.show, .modal[style*="flex"] {display: flex;}
+    .modal-content {background: var(--surface); color: var(--txt-1); width: 100%; max-width: 450px; max-height: 80vh; border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--sh-lg);
+                    border: 1px solid var(--border); display: flex; flex-direction: column; animation: modalIn .25s cubic-bezier(.34,1.2,.64,1);}
+    .modal-header {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 15px 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+    .modal-header h3 {font-size: 15px; font-weight: 600; margin: 0;}
+    #message-modal.success .modal-header {background: linear-gradient(to right, #1b5e20, #2e7d32);}
+    .modal-body {padding: 20px; max-height: 60vh; overflow-y: auto; color: var(--txt-1); font-size: 14px; text-align: center;}
+    .modal-footer {background: var(--surface-2); padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: center; gap: 10px;}
+    .modal-close-btn {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; border: 0; padding: 9px 24px; border-radius: 50px; cursor: pointer; font-family: 'Inter', sans-serif;
+                      font-size: 13px; font-weight: 600; transition: opacity var(--ease), transform var(--ease);}
+    .modal-close-btn:hover {opacity: .88;}
+    .modal-close-btn:active {transform: scale(.98);}
+    .modal-upload-submit-btn {background: linear-gradient(to right, var(--blue), #0269c9); color: #fff; border: 0; padding: 9px 24px; border-radius: 50px; cursor: pointer; font-family: 'Inter', sans-serif;
+                              font-size: 13px; font-weight: 600; transition: opacity var(--ease), transform var(--ease);}
+    .modal-upload-submit-btn:hover {opacity: .88;}
+    .modal-upload-submit-btn:active {transform: scale(.98);}
+    .choose-file-btn {width: 100%; padding: 13px; border-radius: 50px; border: none; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;
+                      background: linear-gradient(to right, var(--blue), #0269c9); color: #fff; box-shadow: var(--sh-sm); display: flex; align-items: center; justify-content: center; gap: 8px;
+                      transition: opacity var(--ease);}
+    .choose-file-btn:hover {opacity: .9;}
+    @keyframes modalIn {from{opacity:0;transform:scale(.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)}}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    .footer strong {color: inherit;}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
+    @media (max-width: 480px) {
+      .header-title {font-size: 16px;}
+      .documents-list-container {padding: 0 12px;}
+      .section-title {margin-left: 12px; margin-right: 12px;}
+      .upload-docs-bar {padding: 0 12px;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px;}
+    }
   </style>
 </head>
 <body>
   <header class="header">
     <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>DOCUMENTOS</h1>
-    <div class="header-subtitle">VISUALIZAÇÃO E ENVIO DE DOCUMENTOS</div>
+    <div class="header-center">
+      <span class="header-title">DOCUMENTOS</span>
+      <span class="header-sub">Visualização · Envio</span>
+    </div>
+    <h2 id="corpInfo" style="display: none;"></h2>
   </header>
-  <div class="main-content">    
-    <div class="documents-list-title">LISTA DE DOCUMENTOS</div>
+  <div class="main-content">
+    <div class="section-title"><span class="material-icons" style="font-size:1.1em; color:var(--red-icon);">description</span>Lista de Documentos</div>
     <div class="documents-list-container">
       <div id="documents-list" class="documents-list"></div>
     </div>
@@ -112,7 +159,7 @@
       <div id="pdf-viewer-header">
         <div style="display:flex; align-items:center; gap:10px;">
           <span class="material-icons" style="cursor:pointer" id="pdf-back-btn">arrow_back</span>
-          <span id="pdf-title" style="font-weight:600"></span>
+          <span id="pdf-title" style="font-weight:600; font-size:14px;"></span>
         </div>
         <div id="pdf-controls">
           <button id="zoom-out">−</button>
@@ -126,26 +173,26 @@
   <div id="upload-modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>📄 Adicionar Documento</h3>          
+        <h3>📄 Adicionar Documento</h3>
       </div>
-      <div class="modal-body" style="text-align:center;">
+      <div class="modal-body">
         <input type="file" id="upload-file-input" accept="application/pdf" style="display:none;"/>
         <button id="choose-file-btn" class="choose-file-btn"><span class="material-icons">attach_file</span>Escolher ficheiro PDF</button>
-        <div id="selected-file-name"  style="margin-top:12px; font-size:14px; color:#555;"> Nenhum ficheiro selecionado</div>
-        <div id="upload-status" style="margin-top:10px; font-size:14px;"></div>
+        <div id="selected-file-name" style="margin-top:12px; font-size:13px; color:var(--txt-2);">Nenhum ficheiro selecionado</div>
+        <div id="upload-status" style="margin-top:10px; font-size:13px; color:var(--txt-2);"></div>
       </div>
-      <div class="modal-footer" style="gap:10px;">
+      <div class="modal-footer">
         <button class="modal-close-btn" id="upload-cancel-btn">Cancelar</button>
         <button id="upload-submit-btn" class="modal-upload-submit-btn">Upload</button>
       </div>
-    </div>  
+    </div>
   </div>
   <div id="message-modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 id="message-modal-title">Mensagem</h3>
       </div>
-      <div class="modal-body" id="message-modal-body" style="text-align:center; font-size:16px;"></div>
+      <div class="modal-body" id="message-modal-body"></div>
       <div class="modal-footer">
         <button class="modal-close-btn" onclick="closeMessageModal()">Fechar</button>
       </div>
@@ -156,19 +203,23 @@
       <div class="modal-header">
         <h3>Confirmação</h3>
       </div>
-      <div class="modal-body" id="confirm-modal-body" style="text-align:center; font-size:16px;"></div>
-      <div class="modal-footer" style="gap:10px;">
+      <div class="modal-body" id="confirm-modal-body"></div>
+      <div class="modal-footer">
         <button class="modal-close-btn" id="confirm-cancel-btn">Cancelar</button>
-        <button class="modal-upload-submit-btn" id="confirm-ok-btn">Apagar</button>
+        <button class="modal-upload-submit-btn" id="confirm-ok-btn" style="background: linear-gradient(to right, var(--red-dark), var(--red));">Apagar</button>
       </div>
     </div>
   </div>
-  <div class="footer">
+  <footer class="footer">
     <div class="footer-content">
-      <div class="powered-by"><strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360</div>
-      <div class="footer-year">© 2023-2025 - Sistema CB360 Mobile</div>
+      <div class="powered-by">
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023–2025 · Sistema CB360 Mobile
+      </div>
     </div>
-  </div>
+  </footer>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -187,22 +238,26 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint");
+      const corp = getCorp();
+      const nint = getNInt();
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'x-my-corpo': corp,
-        'x-my-nint': nint
+        'x-my-nint': nint,
       };
-      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
       return headers;
     }
-    /* ======================= CORPORATION LOADING ======================= */   
-     async function loadCorpInfo() {
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
@@ -234,7 +289,6 @@
     function showMessageModal(message, title = "Mensagem", type = "error") {
       const modal = document.getElementById("message-modal");
       const body = document.getElementById("message-modal-body");
-      const header = modal.querySelector(".modal-header");
       body.textContent = message;
       document.getElementById("message-modal-title").textContent = title;
       modal.classList.remove("success", "error");
@@ -273,7 +327,7 @@
       const corp = localStorage.getItem("currentCorpOperNr");
       const nint = localStorage.getItem("currentCorpNint");
       const list = document.getElementById("documents-list");
-      list.innerHTML = "<p style='text-align:center; padding:20px;'>A carregar documentos...</p>";
+      list.innerHTML = "<p style='text-align:center; padding:20px; color:var(--txt-2);'>A carregar documentos...</p>";
       const viewedDocs = JSON.parse(localStorage.getItem("viewed_documents") || "[]");
       try {
         const resp = await fetch(
@@ -282,9 +336,9 @@
           }
         );
         const documents = await resp.json();
-        list.innerHTML = ""; 
+        list.innerHTML = "";
         if (!Array.isArray(documents) || documents.length === 0) {
-          list.innerHTML = `<div class="comun-card"><div class="comun-title" style="text-align: center;">Sem documentos disponíveis.</div></div>`;
+          list.innerHTML = `<div class="empty-card">Sem documentos disponíveis</div>`;
           return;
         }
         documents.forEach(doc => {
@@ -294,41 +348,28 @@
           : `${SUPABASE_URL}/storage/v1/object/public/personal_docs/${doc.doc_url}`;
           const isRead = viewedDocs.includes(publicUrl);
           const row = document.createElement("div");
-          row.style.display = "flex";
-          row.style.gap = "8px";
-          row.style.alignItems = "center";
+          row.className = "doc-row";
           const card = document.createElement("div");
           card.className = "comun-card";
-          card.style.flex = "1";
           card.innerHTML = `
+            <div class="comun-icon-wrap ${isRead ? 'read' : ''}">
+              <span class="material-icons">${isRead ? 'check_circle' : 'picture_as_pdf'}</span>
+            </div>
             <div class="comun-title">${doc.doc_title}</div>
-            <span class="material-icons comun-icon"
-              style="color:${isRead ? '#4CAF50' : '#d32f2f'}">
-              ${isRead ? 'check_circle' : 'picture_as_pdf'}
-            </span>
           `;
           card.onclick = () => {
             markAsRead(publicUrl);
-            const icon = card.querySelector('.comun-icon');
-            icon.innerText = 'check_circle';
-            icon.style.color = '#4CAF50';
+            const iconWrap = card.querySelector('.comun-icon-wrap');
+            iconWrap.classList.add('read');
+            iconWrap.querySelector('.material-icons').innerText = 'check_circle';
             openPdfViewer(publicUrl, doc.doc_title);
           };
           const deleteCard = document.createElement("div");
-          deleteCard.className = "comun-card";
-          deleteCard.style.width = "52px";
-          deleteCard.style.minWidth = "52px";
-          deleteCard.style.justifyContent = "center";
-          deleteCard.style.cursor = "pointer";
-          deleteCard.innerHTML = `
-            <span class="material-icons comun-icon" style="color:#777;">delete</span>
-          `;
+          deleteCard.className = "delete-card";
+          deleteCard.innerHTML = `<span class="material-icons">delete</span>`;
           deleteCard.onclick = async (e) => {
             e.stopPropagation();
             await deleteDocument(publicUrl, row);
-          };   
-          card.querySelector('.comun-icon:nth-child(2)').onclick = () => {
-            deleteDocument(publicUrl, card);
           };
           row.appendChild(card);
           row.appendChild(deleteCard);
@@ -336,7 +377,7 @@
         });
       } catch (err) {
         console.error("Erro ao carregar documentos:", err);
-        list.innerHTML = `<div class="comun-card"><div class="comun-title">Erro ao carregar documentos</div></div>`;
+        list.innerHTML = `<div class="empty-card">Erro ao carregar documentos</div>`;
       }
     }
     let currentScale = 0.75;
@@ -349,33 +390,36 @@
       const pdfViewer = document.getElementById("pdf-viewer");
       const pdfTitle = document.getElementById("pdf-title");
       const commListContainer = document.querySelector(".documents-list-container");
-      const commTitle = document.querySelector(".documents-list-title");
+      const commTitle = document.querySelector(".section-title");
+      const uploadBar = document.querySelector(".upload-docs-bar");
       const header = document.querySelector(".header");
       const footer = document.querySelector(".footer");
       const headerHeight = header.offsetHeight;
       const footerHeight = footer.offsetHeight;
       viewerContainer.style.top = `${headerHeight}px`;
-      viewerContainer.style.bottom = `${footerHeight}px`;      
+      viewerContainer.style.bottom = `${footerHeight}px`;
       commListContainer.style.display = "none";
       commTitle.style.display = "none";
+      if (uploadBar) uploadBar.style.display = "none";
       viewerContainer.style.display = "flex";
       pdfTitle.textContent = title;
       pdfViewer.innerHTML = "<p style='text-align:center; padding:20px;'>A carregar PDF...</p>";
       currentScale = 0.75;
       pinchScale = 1;
       updateZoomLevel();
-      setupPinchZoom(pdfViewer);      
+      setupPinchZoom(pdfViewer);
       document.getElementById("pdf-back-btn").onclick = () => {
         viewerContainer.style.display = "none";
         commListContainer.style.display = "block";
         if (commTitle) commTitle.style.display = "flex";
+        if (uploadBar) uploadBar.style.display = "block";
         currentPdf = null;
       };
       try {
         currentPdf = await pdfjsLib.getDocument(pdfUrl).promise;
         await renderPdf();
       } catch (err) {
-        pdfViewer.innerHTML = "<p style='text-align:center; font-weight:bold; padding:20px; color:red;'>Não foi possível carregar o PDF.</p>";
+        pdfViewer.innerHTML = "<p style='text-align:center; font-weight:bold; padding:20px; color:var(--red);'>Não foi possível carregar o PDF.</p>";
       }
     }
     /* ======================= DELETING DOCUMENTS ======================== */
@@ -403,10 +447,10 @@
         if (rowElement) rowElement.remove();
         const list = document.getElementById("documents-list");
         if (!list.querySelector('.comun-card')) {
-          list.innerHTML = `<div class="comun-card"><div class="comun-title" style="text-align: center;">Sem documentos disponíveis.</div></div>`;
+          list.innerHTML = `<div class="empty-card">Sem documentos disponíveis</div>`;
         }
-        showMessageModal("Documento apagado com sucesso!", "Sucesso", "success"); 
-        return true;        
+        showMessageModal("Documento apagado com sucesso!", "Sucesso", "success");
+        return true;
       } catch (err) {
         console.error("Erro ao apagar documento:", err);
         showMessageModal(`Falha ao apagar documento: ${err.message}`, "Erro", "error");
@@ -515,7 +559,8 @@
           canvas.style.display = "block";
           canvas.style.marginLeft = "auto";
           canvas.style.marginRight = "auto";
-          canvas.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+          canvas.style.boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
+          canvas.style.borderRadius = "8px";
           const ctx = canvas.getContext('2d');
           const viewport = page.getViewport({
             scale: currentScale
@@ -531,7 +576,7 @@
         pdfViewer.innerHTML = "";
         pdfViewer.appendChild(tempContainer);
       } catch (err) {
-        pdfViewer.innerHTML = "<p style='color:red;'>Erro ao renderizar páginas.</p>";
+        pdfViewer.innerHTML = "<p style='color:var(--red);'>Erro ao renderizar páginas.</p>";
       }
     }
     function updateZoomLevel(scale) {
@@ -563,6 +608,7 @@
         document.getElementById("upload-modal").style.display = "flex";
         document.getElementById("upload-file-input").value = "";
         document.getElementById("upload-status").textContent = "";
+        document.getElementById("selected-file-name").textContent = "Nenhum ficheiro selecionado";
       };
       document.getElementById("choose-file-btn").onclick = () => {
         document.getElementById("upload-file-input").click();
@@ -602,7 +648,3 @@
   </script>
 </body>
 </html>
-
-
-
-
