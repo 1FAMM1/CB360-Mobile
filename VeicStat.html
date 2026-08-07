@@ -285,12 +285,12 @@
     let vehicleINOP = {};
     let currentVehicleList = [];
     /* ============================= EVENTS ============================== */
-    window.addEventListener('load', function() {
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCorpInfo();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
-      }
-      loadCorpInfo()
+      } 
       loadVehiclesFromAPI();
       loadVehicleStatuses();
       deselectVehicle();
