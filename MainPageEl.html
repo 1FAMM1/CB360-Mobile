@@ -59,6 +59,10 @@
     .availability-btn .material-icons {font-size:28px; color:var(--red-icon); transition:transform var(--ease),color var(--ease);}
     .availability-btn:hover .material-icons,
     .availability-btn.selected .material-icons {transform:scale(1.08);}
+    .availability-btn:hover {background:var(--surface-2); color:var(--txt-1);}
+    .availability-btn:active {background:var(--surface-2); transform:scale(.98);}
+    .availability-btn:disabled {opacity: 0.3; cursor: not-allowed; pointer-events: none; filter: alpha(opacity=30);}
+    .availability-btn:disabled *, .availability-btn:disabled .material-icons {opacity: 0.3 !important;}
     /* ============================================================
     FOOTER
     ============================================================ */
@@ -104,6 +108,14 @@
         <span class="material-icons">whatshot</span>
         <span>DECIR</span>
       </button>
+      <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='DecDisp.html', 300);" disabled>
+        <span class="material-icons">flight</span>
+        <span>SBAS</span>
+      </button>
+      <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='DecDisp.html', 300);" disabled>
+        <span class="material-icons">cell_tower</span>
+        <span>OPATS</span>
+      </button>
       <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='ExtDisp.html', 300);">
         <span class="material-icons">emergency</span>
         <span>Extras</span>
@@ -137,11 +149,11 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp()  {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt()  {return localStorage.getItem("currentCorpNint");}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
-      const corp  = getCorp();
-      const nint  = getNInt();
+      const corp = getCorp();
+      const nint = getNInt();
       const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
@@ -182,11 +194,7 @@
       } catch (err) {
         console.error('Erro silencioso:', err);
       }
-    }
-    function loadTheme() {
-      const savedTheme = localStorage.getItem('sgo-theme');
-      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
-    }
+    }    
     function toggleButton(button) {
       document.querySelectorAll('.availability-btn').forEach(btn => {
         if (btn !== button) btn.classList.remove('selected');
@@ -197,9 +205,12 @@
         button.classList.remove('selected');
       }, 2000);
     }
-    document.addEventListener('DOMContentLoaded', () => {
-      loadCorpInfo();
-      loadTheme();
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }    
+      loadCorpInfo();     
       document.querySelectorAll('.availability-btn').forEach((btn, i) => {
         btn.style.opacity = '0';
         btn.style.transform = 'translateY(15px)';
@@ -220,7 +231,7 @@
       }, false);
     });
     document.addEventListener('selectstart', e => e.preventDefault());
-    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('contextmenu', e => e.preventDefault());    
   </script>
 </body>
 </html>
