@@ -307,12 +307,12 @@
     const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendToTelegram';
     let selectedFiles = [];
     let currentOccurrence = null;
-    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
-    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -327,7 +327,7 @@
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -359,7 +359,7 @@
     async function LoadEPE() {
       if (controllerEpe) controllerEpe.abort();
       controllerEpe = new AbortController();
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       if (!corpOperNr) return;
       try {
         const headers = getSupabaseHeaders();
@@ -404,7 +404,7 @@
     async function LoadOccurrences() {
       if (controllerOcorrencias) controllerOcorrencias.abort();
       controllerOcorrencias = new AbortController();
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       if (!corpOperNr) return;
       try {
         const headers = getSupabaseHeaders();
@@ -643,7 +643,7 @@
         sendBtn.innerHTML = '<span class="icon-btn-text"><span class="material-icons">send</span><span>Enviar Relatório</span></span>';
       }
     }
-    window.addEventListener('load', function() {
+    document.addEventListener('DOMContentLoaded', function() {
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
