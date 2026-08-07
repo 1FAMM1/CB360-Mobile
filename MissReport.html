@@ -1,129 +1,152 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT" style="background-color: #8b0000;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
-  <title>CB360_RELATÓRIOS</title>
+  <meta name="theme-color" content="#c62828">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>CB360 Mobile - Os Meus Relatórios</title>
   <style>
-    /* ==================== BODY ==================== */
-    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
+    /* ============================================================
+    VARIABLES
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;
+           --green: #2e7d32; --green-state: #2e7d32; --red-state: #c62828; --amber: #b8860b;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;
+                --green: #66bb6a; --green-state: #66bb6a; --red-state: #ff6b6b; --amber: #e0b34d;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
     html, body {overscroll-behavior: none;}
-    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none; display: flex;
-          flex-direction: column; height: 100vh; overflow: hidden;}
-    /* ============= DARK MODE OPTIONS ============== */
-    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
-    .dark-mode .report-stats-container, .dark-mode .report-list-container {background: rgba(45, 45, 45, 0.95); border: 1px solid #444;}
-    .dark-mode .report-stats-container h1, .dark-mode .report-list-container h1 {color: #fff;}
-    .dark-mode .report-stats-container h1::after, .dark-mode .report-list-container h1::after {background: rgba(255, 255, 255, 0.2);}
-    .dark-mode .stats-badge {background: rgba(255, 255, 255, 0.25); border: 1px solid #444; color: #fff;}
-    .dark-mode .stats-badge.has-reports {background: linear-gradient(45deg, #e74c3c, #c0392b); border: 1px solid #c0392b;}
-    .dark-mode .stats-badge.no-reports {background: linear-gradient(45deg, #27ae60, #229954); border: 1px solid #229954;}
-    .dark-mode .cards-container::-webkit-scrollbar-track {background: rgba(255, 255, 255, 0.05);}
-    .dark-mode .report-card {background: #2d2d2d; border: 1px solid #444; border-left-color: #ff4d4d; border-left: 6px solid #d32f2f; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
-    .dark-mode .report-card:active {transform: scale(0.98); background: #1f1f1f; border-left-color: #2ecc71; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);}
-    .dark-mode .report-nr {color: #ecf0f1;}
-    .dark-mode .report-date {color: #bbb;}
-    .dark-mode .badge-pending {background: #4a3728; color: #ffb74d;}
-    .dark-mode .open-platform {color: #bbb;}
-    /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
-             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;} .header h1 {margin: 0; font-size: 1.5em; font-weight: bold;} .header-subtitle {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
-             position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
-    .footer-content {max-width: 400px; margin: 0 auto;}
-    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px;}
-    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
-    .footer strong {color: #ffebee;}
-    .main-content {flex: 1; overflow-y: auto; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px;}
-    .report-stats-container, .report-list-container {background: rgba(245, 245, 245, 0.95); padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-                                                     animation: fadeIn 0.5s ease-out;}
-    .report-stats-container h1, .report-list-container h1 {text-align: center; font-size: clamp(0.5em, 5vw, 1.1em); color: #2c3e50; position: relative;}
-    .report-stats-container h1::after, .report-list-container h1::after {content: ""; display: block; height: 1px; background: rgba(0,0,0,0.1); margin: 15px auto; width: 90%;}
-    .stats-badge {background: #ccc; border-radius: 50px; padding: 5px 15px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: clamp(15px, 4vw, 25px);
-                  box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-weight: 600; font-size: clamp(0.85em, 2.5vw, 1em); max-width: fit-content; animation: fadeIn 0.5s ease-out; transition: background 0.3s ease;}
-    .stats-badge.has-reports {background: linear-gradient(45deg, #e74c3c, #c0392b); color: white;}
-    .stats-badge.no-reports {background: linear-gradient(45deg, #27ae60, #229954); color: white;}
-    .stat-item {display: flex; align-items: center; gap: 6px; white-space: nowrap;}
-    .report-list-container {margin: 10px 0 0 0; display: flex; flex-direction: column; max-height: calc(100vh - 300px); min-height: 100px; overflow: hidden;}
-    .cards-container {display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 5px; margin-top: 10px; overflow-y: auto; flex: 1; padding-right: 5px; padding-bottom: 10px;}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
+          flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease); padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-title .material-icons {font-size: 1.1em;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; overflow: hidden; padding: calc(var(--header-h) + 14px) 16px calc(var(--footer-h) + 20px);
+                   display: flex; flex-direction: column; gap: 14px; background: var(--bg); transition: background var(--ease);}
+    /* ============================================================
+    CARDS / SURFACES
+    ============================================================ */
+    .report-stats-container, .report-list-container {background: var(--surface); padding: 16px; border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md);
+                                                      transition: background var(--ease), box-shadow var(--ease), border-color var(--ease); animation: fadeIn 0.4s ease-out;}
+    .report-stats-container h1, .report-list-container h1 {text-align: center; font-size: clamp(0.85em, 4vw, 1em); font-weight: 700; letter-spacing: 0.5px; color: var(--txt-1); position: relative;}
+    .report-stats-container h1::after, .report-list-container h1::after {content: ""; display: block; height: 1px; background: var(--border); margin: 14px auto; width: 90%;}
+    .title-row {display: inline-flex; align-items: center; gap: 8px;}
+    .title-row .material-icons {font-size: 1.15em; color: var(--red-icon);}
+    .stats-badge {border-radius: 50px; padding: 6px 15px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: var(--sh-sm); font-weight: 700;
+                  font-size: clamp(0.85em, 2.5vw, 1em); max-width: fit-content; color: #fff; transition: background var(--ease);}
+    .stats-badge .material-icons {font-size: 1.05em;}
+    .stats-badge.has-reports {background: linear-gradient(to right, var(--red-dark), var(--red));}
+    .stats-badge.no-reports {background: linear-gradient(to right, #1b5e20, var(--green));}
+    .report-list-container {margin: 0; display: flex; flex-direction: column; max-height: calc(100vh - 340px); min-height: 100px; overflow: hidden;}
+    .cards-container {display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; margin-top: 12px; overflow-y: auto; flex: 1; padding-right: 4px; padding-bottom: 6px;
+                      scrollbar-width: thin; scrollbar-color: var(--red) transparent;}
     .cards-container::-webkit-scrollbar {width: 4px;}
-    .cards-container::-webkit-scrollbar-track {background: rgba(0, 0, 0, 0.05); border-radius: 10px;}
-    .cards-container::-webkit-scrollbar-thumb {background: linear-gradient(to bottom, #d32f2f, #b71c1c); border-radius: 10px;}
-    .cards-container {scrollbar-width: thin; scrollbar-color: #d32f2f rgba(0, 0, 0, 0.05);}
-    .message {text-align: center; font-weight: 600; padding: clamp(8px, 2vw, 10px) clamp(10px, 3vw, 15px); border-radius: 5px; font-size: clamp(0.85em, 2.5vw, 1em); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-              animation: fadeIn 0.4s ease-out;}
-    .message.loading {background: linear-gradient(45deg, #3498db, #2980b9); color: white;}
-    .message.error {background: linear-gradient(45deg, #e74c3c, #c0392b); color: white;}
-    .no-reports {text-align: center; font-weight: 600; padding: 10px 15px; border-radius: 5px; background: #27ae60; font-size: 1em; box-shadow: 0 4px 12px rgba(0,0,0,0.1); animation: fadeIn 0.4s ease-out;
-                 color: #fff;}
-    .report-card {background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 5px; border: 1px solid #ccc; border-left: 6px solid #d32f2f; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-                  transition: transform 0.2s ease; cursor: pointer;}
-    .report-card:active {transform: scale(0.98); background: #f9f9f9;}
-    .card-top {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
-    .report-nr {font-family: 'Monaco', monospace; font-weight: 800; color: #2c3e50; font-size: clamp(0.9em, 3vw, 1.1em);}
-    .report-date {font-size: clamp(0.75em, 2.5vw, 0.85em); color: #7f8c8d; display: flex; align-items: center; gap: 4px;}
-    .status-row {display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee;}
-    .badge-pending {background: #fff3e0; color: #e65100; padding: 4px 10px; border-radius: 6px; font-size: clamp(0.65em, 2vw, 0.75em); font-weight: 700; text-transform: uppercase;}
-    .open-platform {font-size: clamp(0.75em, 2.5vw, 0.875em); color: #7f8c8d;}
+    .cards-container::-webkit-scrollbar-track {background: transparent;}
+    .cards-container::-webkit-scrollbar-thumb {background: linear-gradient(to bottom, var(--red), var(--red-dark)); border-radius: 10px;}
+    .message {text-align: center; font-weight: 700; padding: clamp(8px, 2vw, 10px) clamp(10px, 3vw, 15px); border-radius: var(--r-sm); font-size: clamp(0.85em, 2.5vw, 1em);
+              box-shadow: var(--sh-sm); animation: fadeIn 0.4s ease-out;}
+    .message.loading {background: var(--blue); color: #fff;}
+    .message.error {background: var(--red); color: #fff;}
+    .no-reports {display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; font-weight: 700; padding: 12px 15px; border-radius: var(--r-sm); background: var(--green);
+                 font-size: 1em; box-shadow: var(--sh-sm); animation: fadeIn 0.4s ease-out; color: #fff;}
+    /* ============================================================
+    REPORT CARD
+    ============================================================ */
+    .report-card {background: var(--surface-2); border-radius: var(--r-md); padding: 0; box-shadow: var(--sh-sm); border: 1px solid var(--border); cursor: pointer;
+                  transition: transform var(--ease), box-shadow var(--ease), background var(--ease); position: relative; display: flex; flex-direction: column; overflow: hidden;}
+    .report-card:hover {transform: translateY(-1px); box-shadow: var(--sh-md);}
+    .report-card:active {transform: scale(.99);}
+    .card-top {padding: 8px 14px; background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; justify-content: space-between; align-items: center; gap: 8px;}
+    .report-nr {font-family: 'Monaco', monospace; font-weight: 800; color: #fff; font-size: 0.85em;}
+    .report-date {font-size: 0.72em; color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 4px; font-weight: 600;}
+    .status-row {display: flex; align-items: center; justify-content: space-between; padding: 12px 14px;}
+    .badge-pending {display: inline-flex; align-items: center; gap: 4px; background: rgba(184, 134, 11, 0.14); color: var(--amber); padding: 4px 10px; border-radius: 9999px; font-size: 0.66rem;
+                    font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;}
+    .badge-pending .material-icons {font-size: 13px;}
+    .open-platform {display: inline-flex; align-items: center; gap: 4px; font-size: 0.76rem; font-weight: 700; color: var(--red-icon);}
     @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */
-    /* ============ RESPONSIVENESS 480px ============ */
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    .footer strong {color: inherit;}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
     @media (max-width: 480px) {
-      .header {padding: 8px 15px;}
-      .header h1 {font-size: 1.2em !important;}
-      .header-logo {height: 50px; top: 32px;}
-      .main-content {padding-top: 130px; padding-left: 10px; padding-right: 10px;}
-      .report-stats-container {padding: 20px 15px; margin: -50px 0 0 0;}
+      .header-title {font-size: 16px;}
+      .main-content {padding-left: 12px; padding-right: 12px;}
       .cards-container {grid-template-columns: 1fr;}
-      .footer {padding: 5px 15px;}
-      .powered-by {font-size: 11px;}
-      .footer-year {font-size: 9px;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px;}
     }
   </style>
 </head>
 <body>
   <header class="header">
     <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>OS MEUS RELATÓRIOS</h1>
-    <div class="header-subtitle">CONTROLO DE RELATÓRIOS PENDENTES</div>
+    <div class="header-center">
+      <span class="header-title">OS MEUS RELATÓRIOS</span>
+      <span class="header-sub">Controlo de Pendentes</span>
+    </div>
+    <h2 id="corpInfo" style="display: none;"></h2>
   </header>
   <div class="main-content">
     <div class="report-stats-container">
-      <h1>📊 RESUMO DE PENDENTES 📊</h1>
+      <h1><span class="title-row"><span class="material-icons">assessment</span>Resumo de Pendentes</span></h1>
       <div id="statsBadge" class="stats-badge" style="display: flex;">
-        <div class="stat-item">
-          <span>📋</span>
-          <span id="totalPendingReports">0</span> Relatórios Pendentes
-        </div>
+        <span class="material-icons">assignment_late</span>
+        <span><span id="totalPendingReports">0</span> Relatórios Pendentes</span>
       </div>
     </div>
     <div class="report-list-container">
-      <h1>📑 LISTA DE RELATÓRIOS 📑</h1>
+      <h1><span class="title-row"><span class="material-icons">list_alt</span>Lista de Relatórios</span></h1>
       <div id="reportsCardsContainer" class="cards-container"></div>
       <div id="noReportsMessage" class="no-reports" style="display: none;">
-        ✓ NÃO TEM RELATÓRIOS PENDENTES
+        <span class="material-icons">check_circle</span> NÃO TEM RELATÓRIOS PENDENTES
       </div>
     </div>
   </div>
-  <div class="footer">
+  <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
-        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023-2025 - Sistema CB360 Mobile
+        © 2023–2025 · Sistema CB360 Mobile
       </div>
     </div>
-  </div>
+  </footer>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -137,22 +160,25 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
-        const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
-        const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentCorpNint");
-        const headers = {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-          'x-my-corpo': corp,
-          'x-my-nint': nint
-        };
-        if (options.returnRepresentation) {
-          headers['Prefer'] = 'return=representation';
-        }
-        return headers;
+      const corp = getCorp();
+      const nint = getNInt();
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint,
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
       }
-    /* ======================= CORPORATION LOADING ======================= */    
+      return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
@@ -208,7 +234,7 @@
           statsBadge.classList.add('no-reports');
         }
         if (data.length === 0) {
-          noReportsMsg.style.display = 'block';
+          noReportsMsg.style.display = 'flex';
           container.innerHTML = '';
           return;
         }
@@ -219,20 +245,20 @@
             const d = new Date(report.report_date);
             if (!isNaN(d)) {
               const day = String(d.getDate()).padStart(2, '0');
-              const month = String(d.getMonth() + 1).padStart(2, '0'); 
+              const month = String(d.getMonth() + 1).padStart(2, '0');
               const year = d.getFullYear();
               formattedDate = `${day}/${month}/${year}`;
             }
-          }     
+          }
           return `
             <div class="report-card" onclick="openGescorp()">
               <div class="card-top">
                 <span class="report-nr">OCORRÊNCIA: ${report.report_nr || '---'}</span>
-                <span class="report-date">📅 ${formattedDate}</span>
+                <span class="report-date"><span class="material-icons" style="font-size:13px;">event</span>${formattedDate}</span>
               </div>
               <div class="status-row">
-                <span class="badge-pending">⚠️ AGUARDA GESCORP</span>
-                <span class="open-platform">ABRIR PLATAFORMA ➔</span>
+                <span class="badge-pending"><span class="material-icons">warning</span>Aguarda GESCORP</span>
+                <span class="open-platform">Abrir Plataforma<span class="material-icons" style="font-size:15px;">arrow_forward</span></span>
               </div>
             </div>
           `;
@@ -254,6 +280,3 @@
   </script>
 </body>
 </html>
-
-
-
