@@ -1,80 +1,144 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT" style="background-color: #8b0000;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#c62828">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>CB360 Mobile - Avisos Meteorológicos</title>
   <style>
-    /* ==================== BODY ==================== */
-    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
-    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
-          transition: 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}
-    /* ============= DARK MODE OPTIONS ============== */
-    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
-    /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
-             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
-    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
-    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
-             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
-    .footer-content {max-width: 400px; margin: 0 auto;}
-    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
-    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
-    .footer strong {color: #ffebee;}
-    .main-content {flex: 1; overflow-y: auto; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); padding-top: 50px; padding-bottom: 100px; padding-left: 20px; padding-right: 20px; display: flex; 
-                   flex-direction: column; align-items: center; justify-content: flex-start; -ms-overflow-style: none; scrollbar-width: none;}
-    #ipma-alerts {display: flex; flex-direction: column; align-items: center; gap: 12px; width: 95%;}
-    .ipma-card {width: 100%; max-width: 580px; border-radius: 15px; padding: 18px; font-size: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px; position: relative;
-                border: 2px solid; border-left: 10px solid; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 0 12px rgba(255, 255, 255, 0.15) inset; transition: transform 0.25s ease, box-shadow 0.25s ease;
-    opacity: 0; transform: translateY(30px); transition: opacity 0.5s ease, transform 0.5s ease;}
+    /* ============================================================
+    VARIABLES
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;
+           --green: #2e7d32; --level-green: #2e9e46; --level-yellow: #f0c000; --level-yellow-dark: #a87900; --level-orange: #ff8800; --level-orange-dark: #c25700; --level-red: #e02020; --level-red-dark: #a10e0e;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
+          flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-title .material-icons {font-size: 1.1em;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; overflow-x: hidden; padding: calc(var(--header-h) + 16px) 16px calc(var(--footer-h) + 20px);
+                   display: flex; flex-direction: column; align-items: center; background: var(--bg); scrollbar-width: none; transition: background var(--ease);}
+    .main-content::-webkit-scrollbar {display: none;}
+    #ipma-alerts {display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%;}
+    /* ============================================================
+    WEATHER CARDS
+    ============================================================ */
+    .ipma-card {width: 100%; max-width: 580px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-md); overflow: hidden;
+               opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease, background var(--ease), box-shadow var(--ease);}
     .ipma-card.show {opacity: 1; transform: translateY(0);}
-    .ipma-center {justify-content: center; align-items: center; text-align: center;}
-    .ipma-green {border-color: #66bb6a; background: linear-gradient(135deg, rgba(245, 255, 247, 0.90) 75%, rgba(102, 187, 106, 0.95) 90%);}
-    .ipma-yellow {border-color: #f9e15b; background: linear-gradient(135deg, rgba(255, 255, 230, 0.90) 75%, rgba(249, 225, 91, 0.95) 90%);}
-    .ipma-orange {border-color: #ff8f3d; background: linear-gradient(135deg, rgba(255, 240, 220, 0.90) 75%, rgba(255, 143, 61, 0.95) 90%);}
-    .ipma-red {border-color: #ef5350; background: linear-gradient( 135deg, rgba(255, 245, 247, 0.90) 75%, rgba(239, 83, 80, 0.95) 90%);}
-    .ipma-title {font-weight: bold; font-size: 18px; margin-bottom: 5px; color: #555; text-align: center;}
-    .ipma-subtitle {color: #555; font-size: 14px; margin-bottom: 15px; text-align: center;}
-    .ipma-time  {font-size: 12px; text-align: left; color: #555; }
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */    
-    /* ============ RESPONSIVENESS 480px ============ */
+    .ipma-card-accent {height: 5px; width: 100%;}
+    .ipma-green .ipma-card-accent {background: linear-gradient(to right, var(--level-green), #1b6b2d);}
+    .ipma-yellow .ipma-card-accent {background: linear-gradient(to right, var(--level-yellow), var(--level-yellow-dark));}
+    .ipma-orange .ipma-card-accent {background: linear-gradient(to right, var(--level-orange), var(--level-orange-dark));}
+    .ipma-red .ipma-card-accent {background: linear-gradient(to right, var(--level-red), var(--level-red-dark));}
+    .ipma-card-body {padding: 18px;}
+    .ipma-top-row {display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px;}
+    .ipma-type-row {display: flex; align-items: center; gap: 12px;}
+    .ipma-icon-circle {flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;}
+    .ipma-icon-circle .material-icons {font-size: 24px; color: #fff;}
+    .ipma-green .ipma-icon-circle {background: linear-gradient(135deg, var(--level-green), #1b6b2d);}
+    .ipma-yellow .ipma-icon-circle {background: linear-gradient(135deg, var(--level-yellow), var(--level-yellow-dark));}
+    .ipma-orange .ipma-icon-circle {background: linear-gradient(135deg, var(--level-orange), var(--level-orange-dark));}
+    .ipma-red .ipma-icon-circle {background: linear-gradient(135deg, var(--level-red), var(--level-red-dark));}
+    .ipma-title {font-weight: 700; font-size: 1.05em; color: var(--txt-1); letter-spacing: -0.01em; line-height: 1.25;}
+    .ipma-subtitle {display: flex; align-items: center; gap: 4px; color: var(--txt-2); font-size: 12.5px; font-weight: 600; margin-top: 3px;}
+    .ipma-subtitle .material-icons {font-size: 14px; color: var(--txt-3);}
+    .ipma-level-badge {flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 9999px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+                       letter-spacing: 0.04em; white-space: nowrap;}
+    .ipma-level-badge .material-icons {font-size: 13px;}
+    .ipma-green .ipma-level-badge {background: rgba(46,158,70,0.16); color: var(--level-green);}
+    .ipma-yellow .ipma-level-badge {background: rgba(240,192,0,0.20); color: var(--level-yellow-dark);}
+    .ipma-orange .ipma-level-badge {background: rgba(255,136,0,0.18); color: var(--level-orange-dark);}
+    .ipma-red .ipma-level-badge {background: rgba(224,32,32,0.16); color: var(--level-red-dark);}
+    .ipma-time-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;}
+    .ipma-time-box {display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 8px 10px;}
+    .ipma-time-box .material-icons {font-size: 16px; color: var(--red-icon); flex-shrink: 0;}
+    .ipma-time-label {font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--txt-3); display: block;}
+    .ipma-time-value {font-size: 12px; font-weight: 700; color: var(--txt-1); line-height: 1.2;}
+    .ipma-description {margin-top: 14px; padding: 12px 14px; background: var(--surface-2); border-left: 3px solid var(--border); border-radius: var(--r-sm); color: var(--txt-2); font-size: 13px;
+                       font-style: italic; line-height: 1.5;}
+    .ipma-yellow .ipma-description {border-left-color: var(--level-yellow-dark);}
+    .ipma-orange .ipma-description {border-left-color: var(--level-orange);}
+    .ipma-red .ipma-description {border-left-color: var(--level-red);}
+    .ipma-center {text-align: center;}
+    .ipma-center .ipma-card-body {display: flex; flex-direction: column; align-items: center; padding: 34px 20px;}
+    .ipma-center .ipma-icon-circle {width: 60px; height: 60px; margin-bottom: 14px;}
+    .ipma-center .ipma-icon-circle .material-icons {font-size: 32px;}
+    .ipma-center .ipma-title {font-size: 1.15em;}
+    .ipma-center .ipma-subtitle {justify-content: center; margin-top: 6px;}
+    .loading-msg {display: flex; align-items: center; gap: 8px; color: var(--txt-2); font-weight: 600; font-size: 14px; padding: 30px 0;}
+    .loading-msg .material-icons {animation: spin 1s linear infinite;}
+    @keyframes spin {to {transform: rotate(360deg);}}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    .footer strong {color: inherit;}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
     @media (max-width: 480px) {
-      .header {padding: 8px 15px;}
-      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
-      .header-logo {height: 50px; top: 32px; left: 10px;}
-      .footer {padding: 5px 15px;}
-      .powered-by {font-size: 11px;}
-      .footer-year {font-size: 9px;}
-      .main-content {padding-top: 80px; padding-left: 15px; padding-right: 15px;}} 
+      .header-title {font-size: 16px;}
+      .main-content {padding-left: 12px; padding-right: 12px;}
+      .ipma-time-grid {grid-template-columns: 1fr;}
+      .ipma-top-row {flex-direction: column; align-items: flex-start;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px;}
+    }
   </style>
 </head>
 <body>
-  <div class="header">
+  <header class="header">
     <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>AVISOS METEOROLÓGICOS</h1>
+    <div class="header-center">
+      <span class="header-title">AVISOS METEOROLÓGICOS</span>
+      <span class="header-sub">Algarve</span>
+    </div>
     <h2 id="corpInfo" style="display: none;"></h2>
-    <div class="header-subtitle">ALGARVE</div>
-  </div>
+  </header>
   <div class="main-content">
-    <div class="card-body" id="ipma-alerts"></div>
+    <div id="ipma-alerts"></div>
   </div>
   <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
-        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023-2025 - Sistema CB360 Mobile
+        © 2023–2025 · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -90,17 +154,20 @@
   <script>
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';    
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint")";}
     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
-      const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+      const corp  = getCorp();
+      const nint  = getNInt();
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'x-my-corpo': corp, 
-        'x-my-nint': nint
-      };    
+        'x-my-corpo': corp,
+        'x-my-nint': nint,
+      };
       if (options.returnRepresentation) {
         headers['Prefer'] = 'return=representation';
       }
@@ -146,19 +213,61 @@
         return [];
       }
     }
+    const levelLabelMap = { yellow: "Aviso Amarelo", orange: "Aviso Laranja", red: "Aviso Vermelho" };
+    const levelIconMap = { yellow: "warning", orange: "warning", red: "error" };
+    function getWarningTypeIcon(typeName) {
+      const name = (typeName || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      if (name.includes("vento")) return "air";
+      if (name.includes("agitacao") || name.includes("maritim") || name.includes("ondulacao")) return "waves";
+      if (name.includes("precipita") || name.includes("chuva")) return "water_drop";
+      if (name.includes("trovoada")) return "bolt";
+      if (name.includes("nevoeiro")) return "cloud";
+      if (name.includes("neve")) return "ac_unit";
+      if (name.includes("calor") || name.includes("temperatura maxima") || name.includes("temperatura alta")) return "wb_sunny";
+      if (name.includes("frio") || name.includes("temperatura minima") || name.includes("temperatura baixa")) return "ac_unit";
+      if (name.includes("uv")) return "wb_sunny";
+      if (name.includes("incendio") || name.includes("fogo")) return "local_fire_department";
+      return "warning";
+    }
     function createIPMAAlertCard(alert) {
-      const card = document.createElement("div");    
+      const card = document.createElement("div");
       const levelClass = { yellow: "ipma-yellow", orange: "ipma-orange", red: "ipma-red" }[alert.awarenessLevelID];
-      card.className = `ipma-card ${levelClass}`;    
+      card.className = `ipma-card ${levelClass}`;
       card.dataset.startTime = alert.startTime;
       card.dataset.endTime = alert.endTime;
+      const typeIcon = getWarningTypeIcon(alert.awarenessTypeName);
+      const levelLabel = levelLabelMap[alert.awarenessLevelID] || "Aviso";
+      const levelIcon = levelIconMap[alert.awarenessLevelID] || "warning";
       card.innerHTML = `
-        <div>
-          <div class="ipma-title">${alert.awarenessTypeName}</div>
-          <div class="ipma-subtitle"><b>Algarve (Faro)</b></div>
-          <div class="ipma-time"><b>Início:</b> ${new Date(alert.startTime).toLocaleString("pt-PT")}</div>
-          <div class="ipma-time"><b>Fim:</b> ${new Date(alert.endTime).toLocaleString("pt-PT")}</div>
-          ${alert.text ? `<div style="margin-top: 10px; color: #333; font-size: 14px; text-align: left; font-style: italic; line-height: 1.4;">${alert.text}</div>` : ""}
+        <div class="ipma-card-accent"></div>
+        <div class="ipma-card-body">
+          <div class="ipma-top-row">
+            <div class="ipma-type-row">
+              <div class="ipma-icon-circle"><span class="material-icons">${typeIcon}</span></div>
+              <div>
+                <div class="ipma-title">${alert.awarenessTypeName}</div>
+                <div class="ipma-subtitle"><span class="material-icons">place</span>Algarve (Faro)</div>
+              </div>
+            </div>
+            <span class="ipma-level-badge"><span class="material-icons">${levelIcon}</span>${levelLabel}</span>
+          </div>
+          <div class="ipma-time-grid">
+            <div class="ipma-time-box">
+              <span class="material-icons">event</span>
+              <div>
+                <span class="ipma-time-label">Início</span>
+                <span class="ipma-time-value">${new Date(alert.startTime).toLocaleString("pt-PT")}</span>
+              </div>
+            </div>
+            <div class="ipma-time-box">
+              <span class="material-icons">event_available</span>
+              <div>
+                <span class="ipma-time-label">Fim</span>
+                <span class="ipma-time-value">${new Date(alert.endTime).toLocaleString("pt-PT")}</span>
+              </div>
+            </div>
+          </div>
+          ${alert.text ? `<div class="ipma-description">${alert.text}</div>` : ""}
         </div>
       `;
       return card;
@@ -166,16 +275,18 @@
     async function updateWarnings() {
       const container = document.getElementById("ipma-alerts");
       if (!container) return;
-      container.innerHTML = "A carregar avisos...";
+      container.innerHTML = '<div class="loading-msg"><span class="material-icons">autorenew</span>A carregar avisos...</div>';
       const warnings = await fetchIPMAWarnings();
       container.innerHTML = "";
       if (warnings.length === 0) {
         const card = document.createElement("div");
         card.className = "ipma-card ipma-green ipma-center";
         card.innerHTML = `
-          <div>
+          <div class="ipma-card-accent"></div>
+          <div class="ipma-card-body">
+            <div class="ipma-icon-circle"><span class="material-icons">check_circle</span></div>
             <div class="ipma-title">Sem avisos meteorológicos</div>
-            <div class="ipma-subtitle" style="text-align:center; margin-top: 5px; font-size: 13px; font-weight: normal;">Não existem avisos meteorológicos para o Algarve.</div>
+            <div class="ipma-subtitle"><span class="material-icons">place</span>Não existem avisos ativos para o Algarve</div>
           </div>
         `;
         container.appendChild(card);
@@ -190,19 +301,15 @@
           setTimeout(() => card.classList.add("show"), index * 100);
         });
       });
-    }    
+    }
     window.addEventListener('load', () => {
       if (localStorage.getItem('sgo-theme') === 'dark') {
         document.body.classList.add('dark-mode');
       }
       loadCorpInfo();
-      updateWarnings();      
+      updateWarnings();
       setInterval(updateWarnings, 10 * 60 * 1000);
     });
   </script>
 </body>
 </html>
-
-
-
-
