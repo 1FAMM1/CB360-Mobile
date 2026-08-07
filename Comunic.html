@@ -1,85 +1,113 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT" style="background-color: #8b0000;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#c62828">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <title>CB360_COMUNICADOS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>CB360 Mobile - Comunicados</title>
   <style>
-    /* ==================== BODY ==================== */
-    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
+    /* ============================================================
+    VARIABLES
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa; --green: #2e7d32; --green-state: #2e7d32; --red-state: #c62828;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;
+                --green: #66bb6a; --green-state: #66bb6a; --red-state: #ff6b6b;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
     html, body {overscroll-behavior: none;}
-    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; display: flex; flex-direction: column;
-          height: 100vh; overflow: hidden;}
-    /* ============= DARK MODE OPTIONS ============== */
-    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
-    .dark-mode .communications-list-title {color: #ddd;}
-    .dark-mode .comun-card {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15);}
-    .dark-mode .comun-card:hover {background: rgba(255, 255, 255, 0.15);}
-    .dark-mode .comun-title {color: #fff;}
-    /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828; position: fixed;
-             top: 0; left: 0; right: 0; z-index: 1000;}
-    .header h1 {margin: 0; font-size: 1.5em; font-weight: bold;}
-    .header-subtitle {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; z-index: 1001;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828; position: fixed;
-             bottom: 0; left: 0; right: 0; z-index: 1000;}
-    .footer-content {max-width: 400px; margin: 0 auto;}
-    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px;}
-    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
-    .footer strong {color: #ffebee;}
-    .main-content {flex: 1; display: flex; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); flex-direction: column; padding-top: 50px; padding-bottom: 50px; overflow: hidden;}
-    .communications-list-title {display: flex; justify-content: center; font-weight: bold; color: #444; margin: 0 0 15px 0; padding: 0 20px; font-size: 16px;}
-    .communications-list-container {flex: 1; overflow-y: auto; padding: 0 20px;}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
+          flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease); padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; padding-top: calc(var(--header-h) + 14px);
+                   background: var(--bg); transition: background var(--ease);}
+    .section-title {display: flex; align-items: center; gap: 8px; font-size: 0.9em; font-weight: 700; letter-spacing: 1px; color: var(--txt-2); text-transform: uppercase; margin: 0 16px 12px;}
+    .section-title::before {content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--red); display: inline-block;}
+    /* ============================================================
+    COMMUNICATIONS LIST
+    ============================================================ */
+    .communications-list-container {flex: 1; overflow-y: auto; padding: 0 16px; padding-bottom: 20px; scrollbar-width: none; -ms-overflow-style: none;}
     .communications-list-container::-webkit-scrollbar {display: none;}
-    .communications-list-container {-ms-overflow-style: none; scrollbar-width: none;}
-    .communications-list {display: flex; flex-direction: column; gap: 5px; padding-bottom: 20px;}
-    .comun-card {background: #ddd; border: 1px solid #bdc3c7; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; 
-                 box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); cursor: pointer; transition: background 0.3s ease, box-shadow 0.2s ease;}
-    .comun-card:hover {background: #c8c8c8; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);}
-    .comun-title {font-size: 15px; font-weight: 600; color: #333; flex: 1;}
-    .comun-icon {font-size: 28px; color: #d32f2f;}
-    #pdf-viewer-container {position: fixed; left: 0; right: 0; display: none; flex-direction: column; background: #fff; z-index: 999;}
-    #pdf-viewer-header {background: #d32f2f; color: #eee; padding: 10px; display: flex; align-items: center; gap: 10px; justify-content: space-between;}
+    .communications-list {display: flex; flex-direction: column; gap: 8px;}
+    .comun-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+                 box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), box-shadow var(--ease), transform var(--ease);}
+    .comun-card:hover {background: var(--surface-2); box-shadow: var(--sh-md);}
+    .comun-card:active {transform: scale(.99);}
+    .comun-icon-wrap {flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; background: var(--red-light); display: flex; align-items: center; justify-content: center;}
+    .comun-icon-wrap .material-icons {font-size: 20px; color: var(--red-state);}
+    .comun-icon-wrap.read {background: rgba(46, 125, 50, 0.12);}
+    .comun-icon-wrap.read .material-icons {color: var(--green-state);}
+    .comun-title {font-size: 13.5px; font-weight: 600; color: var(--txt-1); flex: 1; min-width: 0;}
+    .empty-card {text-align: center; font-weight: 700; padding: 20px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--txt-2); box-shadow: var(--sh-sm);}
+    /* ============================================================
+    PDF VIEWER
+    ============================================================ */
+    #pdf-viewer-container {position: fixed; left: 0; right: 0; display: none; flex-direction: column; background: var(--bg); z-index: 999;}
+    #pdf-viewer-header {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 12px 14px; display: flex; align-items: center; gap: 10px; justify-content: space-between;}
     #pdf-controls {display: flex; gap: 8px; align-items: center;}
-    #pdf-controls button {background: rgba(255, 255, 255, 0.2); border: none; color: #fff; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background 0.2s;}
-    #pdf-controls button:hover {background: rgba(255, 255, 255, 0.3);}
-    #pdf-controls span {font-size: 14px; min-width: 50px; text-align: center;}
-    #pdf-viewer {flex: 1; overflow: auto; background: #fff; padding: 10px; text-align: center;}
+    #pdf-controls button {background: rgba(255,255,255,0.2); border: none; color: #fff; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background var(--ease);}
+    #pdf-controls button:hover {background: rgba(255,255,255,0.3);}
+    #pdf-controls span {font-size: 13px; min-width: 44px; text-align: center; font-weight: 600;}
+    #pdf-viewer {flex: 1; overflow: auto; background: var(--surface-2); padding: 12px; text-align: center; scrollbar-width: none;}
     #pdf-viewer::-webkit-scrollbar {display: none;}
-    #pdf-viewer {-ms-overflow-style: none; scrollbar-width: none;}
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */
-    /* ============ RESPONSIVENESS 480px ============ */
-    @media (max-width:480px) {
-      .header {padding: 8px 15px;}
-      .header h1 {font-size: 1.2em !important;}
-      .header-logo {height: 50px; top: 32px;}
-      .main-content {padding-top: 80px; padding-bottom: 80px;}
-      .footer {padding: 5px 15px;}
-      .powered-by {font-size: 11px;}
-      .footer-year {font-size: 9px;}
-      .communications-list-container {padding: 0 20px;}
-      .communications-list-title {padding: 0 20px;}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    .footer strong {color: inherit;}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
+    @media (max-width: 480px) {
+      .header-title {font-size: 16px;}
+      .communications-list-container {padding: 0 12px;}
+      .section-title {margin-left: 12px; margin-right: 12px;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px;}
     }
   </style>
 </head>
 <body>
   <header class="header">
     <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>COMUNICADOS</h1>
-    <div class="header-subtitle">VISUALIZAÇÃO DE COMUNICADOS</div>
+    <div class="header-center">
+      <span class="header-title">COMUNICADOS</span>
+      <span class="header-sub">Visualização de Comunicados</span>
+    </div>
+    <h2 id="corpInfo" style="display: none;"></h2>
   </header>
   <div class="main-content">
-    <div class="communications-list-title">LISTA DE COMUNICADOS</div>
+    <div class="section-title"><span class="material-icons" style="font-size:1.1em; color:var(--red-icon);">campaign</span>Lista de Comunicados</div>
     <div class="communications-list-container">
       <div id="communications-list" class="communications-list"></div>
     </div>
@@ -87,7 +115,7 @@
       <div id="pdf-viewer-header">
         <div style="display:flex; align-items:center; gap:10px;">
           <span class="material-icons" style="cursor:pointer" id="pdf-back-btn">arrow_back</span>
-          <span id="pdf-title" style="font-weight:600"></span>
+          <span id="pdf-title" style="font-weight:600; font-size:14px;"></span>
         </div>
         <div id="pdf-controls">
           <button id="zoom-out">−</button>
@@ -98,12 +126,16 @@
       <div id="pdf-viewer"></div>
     </div>
   </div>
-  <div class="footer">
+  <footer class="footer">
     <div class="footer-content">
-      <div class="powered-by"><strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360</div>
-      <div class="footer-year">© 2023-2025 - Sistema CB360 Mobile</div>
+      <div class="powered-by">
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023–2025 · Sistema CB360 Mobile
+      </div>
     </div>
-  </div>
+  </footer>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -121,20 +153,25 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint");
+      const corp = getCorp();
+      const nint = getNInt();
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'x-my-corpo': corp,
-        'x-my-nint': nint
+        'x-my-nint': nint,
       };
-      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
       return headers;
     }
-    /* ======================= CORPORATION LOADING ======================= */   
+    /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
@@ -162,7 +199,7 @@
       } catch (err) {
         console.error('Erro silencioso:', err);
       }
-    } 
+    }
     /* ===================== PRESS RELEASES LOADING ====================== */
     function markAsRead(url) {
       let viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]");
@@ -174,16 +211,16 @@
     async function loadComunicates() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const list = document.getElementById("communications-list");
-      list.innerHTML = "<p style='text-align:center; padding:20px;'>A carregar comunicados...</p>";
+      list.innerHTML = "<p style='text-align:center; padding:20px; color:var(--txt-2);'>A carregar comunicados...</p>";
       const viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]");
       try {
         const resp = await fetch(`${SUPABASE_URL}/rest/v1/serv_comun?select=comun_title,comun_url&corp_oper_nr=eq.${corpOperNr}&order=created_at.desc`, {
           headers: getSupabaseHeaders()
         });
         const comunicados = await resp.json();
-        list.innerHTML = ""; 
+        list.innerHTML = "";
         if (!Array.isArray(comunicados) || comunicados.length === 0) {
-          list.innerHTML = `<div class="comun-card"><div class="comun-title" style="text-align: center;">Sem comunicados disponíveis.</div></div>`;
+          list.innerHTML = `<div class="empty-card">Sem comunicados disponíveis</div>`;
           return;
         }
         comunicados.forEach(comun => {
@@ -194,22 +231,22 @@
           const card = document.createElement("div");
           card.className = "comun-card";
           card.innerHTML = `
+            <div class="comun-icon-wrap ${isRead ? 'read' : ''}">
+              <span class="material-icons">${isRead ? 'check_circle' : 'picture_as_pdf'}</span>
+            </div>
             <div class="comun-title">${comun.comun_title}</div>
-              <span class="material-icons comun-icon" style="color: ${isRead ? '#4CAF50' : '#d32f2f'}">
-                ${isRead ? 'check_circle' : 'picture_as_pdf'}
-              </span>
           `;
           card.onclick = () => {
-            markAsRead(publicUrl); 
-            const icon = card.querySelector('.comun-icon');
-            icon.innerText = 'check_circle';
-            icon.style.color = '#4CAF50';
+            markAsRead(publicUrl);
+            const iconWrap = card.querySelector('.comun-icon-wrap');
+            iconWrap.classList.add('read');
+            iconWrap.querySelector('.material-icons').innerText = 'check_circle';
             openPdfViewer(publicUrl, comun.comun_title);
           };
           list.appendChild(card);
         });
       } catch (err) {
-        list.innerHTML = `<div class="comun-card"><div class="comun-title">Erro ao carregar comunicados</div></div>`;
+        list.innerHTML = `<div class="empty-card">Erro ao carregar comunicados</div>`;
       }
     }
     let currentScale = 0.75;
@@ -222,13 +259,13 @@
       const pdfViewer = document.getElementById("pdf-viewer");
       const pdfTitle = document.getElementById("pdf-title");
       const commListContainer = document.querySelector(".communications-list-container");
-      const commTitle = document.querySelector(".communications-list-title");
+      const commTitle = document.querySelector(".section-title");
       const header = document.querySelector(".header");
       const footer = document.querySelector(".footer");
       const headerHeight = header.offsetHeight;
       const footerHeight = footer.offsetHeight;
       viewerContainer.style.top = `${headerHeight}px`;
-      viewerContainer.style.bottom = `${footerHeight}px`;      
+      viewerContainer.style.bottom = `${footerHeight}px`;
       commListContainer.style.display = "none";
       commTitle.style.display = "none";
       viewerContainer.style.display = "flex";
@@ -237,7 +274,7 @@
       currentScale = 0.75;
       pinchScale = 1;
       updateZoomLevel();
-      setupPinchZoom(pdfViewer);      
+      setupPinchZoom(pdfViewer);
       document.getElementById("pdf-back-btn").onclick = () => {
         viewerContainer.style.display = "none";
         commListContainer.style.display = "block";
@@ -248,7 +285,7 @@
         currentPdf = await pdfjsLib.getDocument(pdfUrl).promise;
         await renderPdf();
       } catch (err) {
-        pdfViewer.innerHTML = "<p style='text-align:center; font-weight:bold; padding:20px; color:red;'>Não foi possível carregar o PDF.</p>";
+        pdfViewer.innerHTML = "<p style='text-align:center; font-weight:bold; padding:20px; color:var(--red);'>Não foi possível carregar o PDF.</p>";
       }
     }
     /* =========================== ZOOM PINCH ============================ */
@@ -321,7 +358,8 @@
           canvas.style.display = "block";
           canvas.style.marginLeft = "auto";
           canvas.style.marginRight = "auto";
-          canvas.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+          canvas.style.boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
+          canvas.style.borderRadius = "8px";
           const ctx = canvas.getContext('2d');
           const viewport = page.getViewport({
             scale: currentScale
@@ -337,7 +375,7 @@
         pdfViewer.innerHTML = "";
         pdfViewer.appendChild(tempContainer);
       } catch (err) {
-        pdfViewer.innerHTML = "<p style='color:red;'>Erro ao renderizar páginas.</p>";
+        pdfViewer.innerHTML = "<p style='color:var(--red);'>Erro ao renderizar páginas.</p>";
       }
     }
     function updateZoomLevel(scale) {
@@ -353,7 +391,7 @@
           updateZoomLevel();
           await renderPdf();
         }
-      };      
+      };
       document.getElementById("zoom-out").onclick = async () => {
         if (currentPdf && currentScale > 0.5) {
           currentScale -= 0.50;
