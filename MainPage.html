@@ -28,7 +28,7 @@
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100vh; height: 100svh; overflow: hidden; display: flex; flex-direction: column;
           user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER
@@ -66,7 +66,7 @@
     MAIN SCROLL AREA
     ============================================================ */
     .main {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 16px); padding-bottom: calc(var(--footer-h) + 16px); padding-left: 14px; padding-right: 14px;
-           display: flex; flex-direction: column; gap: 12px; min-height: 0;}
+           display: flex; flex-direction: column; gap: 12px;}
     .main::-webkit-scrollbar {display: none;}
     /* ============================================================
     WELCOME ROW
@@ -92,7 +92,7 @@
     /* ============================================================
     GRID CARD CONTAINER
     ============================================================ */
-    .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex; min-height: 0;}
+    .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex;}
     .btn-grid {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(6, minmax(0, 1fr)); flex: 1; width: 100%; height: 100%;}    
     /* ============================================================
     MENU BUTTONS
@@ -495,12 +495,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
-    function getNInt() {return localStorage.getItem("currentCorpNint") || "205"; }
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5NzMwNTB9.CcE8nI1bbWcL0PlJaVkKdm74UZEyzweZfsv2i0M-zmg';
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -554,6 +554,7 @@
         headers: { ...getSupabaseHeaders(), Prefer: "resolution=merge-duplicates" },
         body: JSON.stringify(payload)
       });
+      console.log("✅ Push registado/atualizado no Supabase");
     }
     /* ======================= FUNCTION FIX LAYOUT ======================= */
     function ajustarMainContent() {
@@ -788,6 +789,7 @@
       const corpOperNr = getCorp();
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
+      console.log('🔎 loadCorpInfo — corpOperNr usado na query:', corpOperNr);
       if (!corpOperNr) {
         if (h2) h2.textContent = "Não definido";
         return;
@@ -795,6 +797,7 @@
       try {
         const url = `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`;
         const response = await fetch(url, { headers: getSupabaseHeaders() });
+        console.log('🔎 loadCorpInfo — status HTTP:', response.status);
         if (!response.ok) {
           const errText = await response.text();
           console.error('❌ loadCorpInfo — erro na resposta:', errText);
@@ -802,6 +805,7 @@
           return;
         }
         const data = await response.json();
+        console.log('🔎 loadCorpInfo — dados recebidos:', data);
         if (data && data.length > 0) {
           const corp = data[0];
           if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
@@ -1153,36 +1157,6 @@
     });
     document.addEventListener('selectstart', e => e.preventDefault());
     document.addEventListener('contextmenu', e => e.preventDefault());
-    
-    
-    
-    /* ======================= FUNCTION FIX LAYOUT ======================= */
-function ajustarMainContent() {
-  const main = document.querySelector('.main');
-  const header = document.querySelector('.header');
-  const footer = document.querySelector('.footer');
-  if (!main) return;
-  const headerHeight = header?.offsetHeight || 0;
-  const footerHeight = footer?.offsetHeight || 0;
-  main.style.paddingTop = (headerHeight + 16) + 'px';
-  main.style.paddingBottom = (footerHeight + 16) + 'px';
-}
-
-// Corre logo, e depois mais algumas vezes enquanto a viewport estabiliza
-// (barra de sistema, notch, teclado, etc. em WebView/PWA Android)
-window.addEventListener('load', () => {
-  ajustarMainContent();
-  [50, 150, 300, 600, 1000].forEach(delay => setTimeout(ajustarMainContent, delay));
-});
-window.addEventListener('resize', ajustarMainContent);
-window.addEventListener('pageshow', ajustarMainContent);
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) ajustarMainContent();
-});
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', ajustarMainContent);
-}
-    
   </script>
 </body>
 </html>
