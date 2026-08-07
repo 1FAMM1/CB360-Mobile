@@ -241,12 +241,11 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
-    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
-    function getNInt() {return localStorage.getItem("currentCorpNint")}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
-      const corp  = getCorp();
-      const nint  = getNInt();
+      const corp = getCorp();
+      const nint = getNInt();
       const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
@@ -288,11 +287,6 @@
       } catch (err) {
         console.error('Erro silencioso:', err);
       }
-    }
-    /* ========================== THEME LOADING ========================== */
-    function loadTheme() {
-      const savedTheme = localStorage.getItem('sgo-theme');
-      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
     }
     /* ========================== GLOBAL STATE =========================== */
     let currentMonthIndex = null;
@@ -594,7 +588,10 @@
     /* ============================== INIT =============================== */
     document.addEventListener('DOMContentLoaded', function() {
       loadCorpInfo();
-      loadTheme();
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
     });
   </script>
 </body>
