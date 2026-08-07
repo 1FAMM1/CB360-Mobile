@@ -57,15 +57,15 @@
     /* ============================================================
     MAIN MENU CARDS
     ============================================================ */
-    .swap-options-buttons {width:100%; max-width:100%; margin:auto 4px; display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border);
+    .swap-options-buttons {width:100%; max-width:100%; margin:auto 4px; display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); border:1px solid var(--border);
                            border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-md);}
-    .swap-options-btn {position:relative; min-width:0; max-width:none; min-height:104px; padding:14px 8px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
-                       font-size:12px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:7px; line-height:1.2;
+    .swap-options-btn {position:relative; min-width:0; max-width:none; min-height:120px; padding:16px 10px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
+                       font-size:13px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:8px; line-height:1.2;
                        box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
     .swap-options-btn:hover {background:var(--surface-2); color:var(--txt-1);}
     .swap-options-btn:active {background:var(--surface-2); transform:scale(.98);}
     .swap-options-btn.selected {background:var(--red-light); color:var(--red);}
-    .swap-options-btn .material-icons {font-size:24px; color:var(--red-icon); transition:transform var(--ease),color var(--ease);}
+    .swap-options-btn .material-icons {font-size:22px; color:var(--red-icon); transition:transform var(--ease),color var(--ease);}
     .swap-options-btn:hover .material-icons,
     .swap-options-btn.selected .material-icons {transform:scale(1.08);}
     /* ============================================================
@@ -171,8 +171,8 @@
     @media (max-width:480px) {
       .header-title {font-size: 16px;}
       .main-content {padding-left: 14px; padding-right: 14px;}
-      .swap-options-btn {min-height:92px; font-size:10.5px; padding:10px 5px;}
-      .swap-options-btn .material-icons { font-size:21px;}
+      .swap-options-btn {min-height:104px; font-size:11.5px; padding:12px 8px;}
+      .swap-options-btn .material-icons { font-size:25px;}
       .swap-month-btn {min-height:56px; font-size:10.5px; padding:8px 4px;}
       .month-icon {font-size:19px !important;}
       .shifts-btn {font-size:10px; min-height:32px;}      
