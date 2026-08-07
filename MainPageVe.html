@@ -1,114 +1,126 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT" style="background-color: #8b0000;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#c62828">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>CB360 Mobile - Menú Veículos</title>
   <style>
-    /* ==================== BODY ==================== */
-    html {background-color: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
-    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; user-select: none;
-          transition: 0.3s ease; display: flex; flex-direction: column; height: 100vh; overflow: hidden;}  
-    /* ============= DARK MODE OPTIONS ============== */
-    .dark-mode {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);}
-    .dark-mode .vehicles-container {border: 1px solid #444; background: rgba(45, 45, 45, 0.95); color: #fff;}
-    .dark-mode .vehicles-subtitle {color: #e0e0e0;}
-    .dark-mode .vehicles-btn {background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
-    .dark-mode .vehicles-btn:hover {background: rgba(255, 255, 255, 0.12); border-color: rgba(211, 47, 47, 0.8); transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);}
-    .dark-mode .vehicles-btn.selected {background: linear-gradient(135deg, rgba(211, 47, 47, 0.5), rgba(183, 28, 28, 0.5)); border-color: rgba(211, 47, 47, 0.8); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);}     
-    /* ============= LIGHT MODE OPTIONS ============= */
-    .header {background-color: #d32f2f; color: white; padding: 20px 15px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 2px solid #c62828;
-             transition: 0.3s ease; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;}
-    .header h1, .header h2 {margin: 0; font-size: 1.5em; font-weight: bold;}
-    .header div {margin-top: 5px; font-size: 12px; opacity: 0.9;}
-    .header-logo {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); height: 80px; width: auto; border-radius: 8px; transition: 0.3s ease; z-index: 1001;}
-    .footer {background-color: #d32f2f; color: white; padding: 8px 15px; text-align: center; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); border-top: 2px solid #c62828;
-             transition: 0.3s ease; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;}
-    .footer-content {max-width: 400px; margin: 0 auto;}
-    .powered-by {font-size: 13px; font-weight: bold; margin-bottom: 3px; color: #fff;}
-    .footer-year {font-size: 10px; opacity: 0.8; color: #ffcdd2;}
-    .footer strong {color: #ffebee;}
-    .main-content {flex: 1; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); padding-top: 50px; padding-bottom: 50px; padding-left: 20px; padding-right: 20px; display: flex; flex-direction: column; 
-                   align-items: center;justify-content: flex-start;}
-    .vehicles-container {background: rgba(245, 245, 245, 0.95); padding: 40px 0px 0px 0px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); max-width: 550px; width: 100%; 
-                       transition: 0.3s ease; text-align: center; display: flex; flex-direction: column; height: calc(100vh - 150px); max-height: 100%;}
-    .vehicles-header {flex-shrink: 0; margin-bottom: 15px;}
-    .vehicles-buttons-container {margin: -15px 0 10px 0; height: 100%; transition: 0.3s ease;}
-    .vehicles-subtitle {font-size: clamp(1em, 3vw, 1.3em); margin-bottom: 0; color: #2c3e50; transition: color 0.3s ease;}
-    .vehicles-buttons {display: grid; gap: clamp(8px, 2vw, 20px); grid-template-columns: repeat(auto-fit, minmax(clamp(100px, 20vw, 150px), 1fr)); justify-content: center; padding: clamp(8px, 2vw, 14px);}
-    .vehicles-btn {padding: 18px 12px; border: 1px solid #bdc3c7; border-radius: 15px; background: #ddd; text-align: center; transition: 0.2s ease; position: relative; overflow: hidden; height: 100%;
-               width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; color: #2c3e50; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); cursor: pointer;}
-    .vehicles-btn::before {content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); 
-                               transition: left 0.4s ease; z-index: 1;}
-    .vehicles-btn::after {content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%);
-                        transition: width 0.3s ease, height 0.3s ease; z-index: 1;}
-    .vehicles-btn:active::after {width: 150px; height: 150px;}
-    .vehicles-btn:hover {box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-color: #7a7a7a; background: linear-gradient(135deg, #808080, #adadad); z-index: 1; color: #fff;}
-    .vehicles-btn:active {transform: scale(0.98); transition: 0.1s ease;}
-    .vehicles-btn.selected {color: white; transform: scale(1.03); box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5); background: linear-gradient(135deg, #d32f2f, #b71c1c); border-color: #b71c1c;}
-    .vehicles-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}     
-    /* =================================================
-    MEDIA QUERIES - FULL RESPONSIVENESS
-    ================================================= */
-    /* ============ RESPONSIVENESS 480px ============ */
+    /* ============================================================
+    VARIABLES
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+            --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
+          flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-title .material-icons {font-size: 1.1em;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; overflow-x: hidden; padding: calc(var(--header-h) + 16px) 16px calc(var(--footer-h) + 20px);
+                   display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg); scrollbar-width: none; transition: background var(--ease);}
+    .main-content::-webkit-scrollbar {display: none;}
+    /* ============================================================
+    VEHICLES BUTTONS GRID
+    ============================================================ */
+    .vehicles-buttons {width: 100%; max-width: 550px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border);
+                       border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--sh-md);}
+    .vehicles-btn {position: relative; min-width: 0; max-width: none; min-height: 120px; padding: 16px 10px; border: 0; border-radius: 0; background: var(--surface); color: var(--txt-2); font-family: 'Inter', sans-serif;
+                   font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; line-height: 1.2;
+                   box-shadow: none; transition: background var(--ease), color var(--ease), transform var(--ease);}
+    .vehicles-btn:hover {background: var(--surface-2); color: var(--txt-1);}
+    .vehicles-btn:active {background: var(--surface-2); transform: scale(.98);}
+    .vehicles-btn.selected {background: var(--red-light); color: var(--red);}
+    .vehicles-btn .material-icons {font-size: 28px; color: var(--red-icon); transition: transform var(--ease), color var(--ease);}
+    .vehicles-btn:hover .material-icons,
+    .vehicles-btn.selected .material-icons {transform: scale(1.08);}
+    .vehicles-btn:disabled {opacity: 0.3; cursor: not-allowed; pointer-events: none; filter: alpha(opacity=30);}
+    .vehicles-btn:disabled *, .vehicles-btn:disabled .material-icons {opacity: 0.3 !important;}
+    .vehicles-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000; transition: background var(--ease);}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    .footer strong {color: inherit;}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
     @media (max-width: 480px) {
-      .header {padding: 8px 15px;}
-      .header h1 {font-size: 1.2em !important; margin: 0 !important;}
-      .header-logo {height: 50px; top: 32px; left: 10px;}
-      .main-content {padding-top: 130px; padding-left: 10px; padding-right: 10px;}
-      .vehicles-container {padding: 20px 15px; margin: -50px 0 0 0;}
-      .vehicles-header {flex-shrink: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); padding-bottom: 10px;}
-      .dark-mode .vehicles-header {border-bottom: 1px solid rgba(255, 255, 255, 0.1);}
-      .vehicles-subtitle {margin-top: -10px;}
-      .vehicles-buttons-container {min-height: 100px; max-height: 750px; border-bottom: 1px solid rgba(0, 0, 0, 0.1);}
-      .dark-mode .vehicles-buttons-container {border-bottom: 1px solid rgba(255, 255, 255, 0.1);}
-      .vehicles-buttons {grid-template-columns: repeat(3, 1fr) !important; gap: 5px;}
-      .vehicles-btn {min-height: 75px; max-height: 75px; min-width: 90px; max-width: 160px; font-size: 11px; padding: 15px 10px;}
-      .footer {padding: 5px 15px;}
-      .powered-by {font-size: 11px;}
-      .footer-year {font-size: 9px;}}
+      .header-title {font-size: 16px;}
+      .main-content {padding-left: 12px; padding-right: 12px;}
+      .vehicles-btn {min-height: 104px; font-size: 11.5px; padding: 12px 8px;}
+      .vehicles-btn .material-icons {font-size: 25px;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px;}
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
-    <h1>VEÍCULOS</h1>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" src="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">VEÍCULOS</span>
+      <span class="header-sub">Status · SITOP · Ficha Veículo</span>
+    </div>
     <h2 id="corpInfo" style="display: none;"></h2>
-    <div class="header-subtitle">STATUS | SITOP | FICHA VEÍCULO</div>
-  </div>
+  </header>
   <div class="main-content">
-    <div class="vehicles-container">
-      <div class="vehicles-header">
-        <p class="vehicles-subtitle">GESTÃO DE VEÍCULOS</p>
-      </div>
-      <div class="vehicles-buttons-container">
-        <div class="vehicles-buttons">
-          <button class="vehicles-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='VeicStat.html', 300);">
-            <span style="font-size: 20px; margin-bottom: 8px;">🌍</span>
-            <div>Gestão de Status</div>
-          </button>
-          <button class="vehicles-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='VeicSitop.html', 300);">
-            <span style="font-size: 20px; margin-bottom: 8px;">🚒</span>
-            <div>Situação Operacional</div>
-          </button>
-          <button class="vehicles-btn" onclick="">
-            <span style="font-size: 20px; margin-bottom: 8px;">🚒</span>
-            <div>Consulta de Veículos</div>
-          </button>
-        </div>
-      </div>
+    <div class="vehicles-buttons">
+      <button class="vehicles-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='VeicStat.html', 300);">
+        <span class="material-icons">public</span>
+        <div>Gestão de Status</div>
+      </button>
+      <button class="vehicles-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='VeicSitop.html', 300);">
+        <span class="material-icons">local_shipping</span>
+        <div>Situação Operacional</div>
+      </button>
+      <button class="vehicles-btn" onclick="toggleButton(this);">
+        <span class="material-icons">search</span>
+        <div>Consulta de Veículos</div>
+      </button>
     </div>
   </div>
   <footer class="footer">
     <div class="footer-content">
-      <div class="powered-by"><strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360</div>
-      <div class="footer-year">© 2023-2025 - Sistema CB360 Mobile</div>
+      <div class="powered-by">
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023–2025 · Sistema CB360 Mobile
+      </div>
     </div>
   </footer>
   <script>
@@ -124,20 +136,20 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
+    function getNInt() {return localStorage.getItem("currentCorpNint")}
     function getSupabaseHeaders(options = {}) {
-      // Tenta ler do localStorage, se não encontrar tenta no sessionStorage
-      const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr"); 
-      const nint = localStorage.getItem("currentNInt") || sessionStorage.getItem("currentNInt");
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      
-      const headers = {        
+      const corp  = getCorp();
+      const nint  = getNInt();
+      const token = localStorage.getItem("authToken");
+      const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'x-my-corpo': corp,
         'x-my-nint': nint,
       };
-      if (options.returnRepresentation) {        
+      if (options.returnRepresentation) {
         headers['Prefer'] = 'return=representation';
       }
       return headers;
@@ -194,17 +206,6 @@
         button.classList.remove('selected');
       }, 2000);
     }
-    /* ========================= GLOBAL LOADING ========================== */
-    const buttons = document.querySelectorAll('.vehicles-btn');
-    buttons.forEach((button, index) => {
-      button.style.opacity = '0';
-      button.style.transform = 'translateY(20px)';
-      setTimeout(() => {
-        button.style.transition = 'all 0.5s ease';
-        button.style.opacity = '1';
-        button.style.transform = 'translateY(0)';
-      }, index * 100);
-    });
     document.addEventListener('DOMContentLoaded', function() {
       loadCorpInfo();
       loadTheme();
@@ -224,12 +225,12 @@
     });
     window.addEventListener('click', event => {
       const isButtonClick = event.target.closest('.vehicles-btn');
-      if (!isButtonClick) clearAllSelections();
+      if (!isButtonClick) {
+        document.querySelectorAll('.vehicles-btn').forEach(btn => btn.classList.remove('selected'));
+      }
     });
     document.addEventListener('selectstart', e => e.preventDefault());
     document.addEventListener('contextmenu', e => e.preventDefault());
   </script>
 </body>
 </html>
-
-
