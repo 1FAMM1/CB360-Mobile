@@ -494,11 +494,8 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-
-    /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
     function getCorp()  { return localStorage.getItem("currentCorpOperNr")}
     function getNInt()  { return localStorage.getItem("currentCorpNint")}
-
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
@@ -515,7 +512,6 @@
       }
       return headers;
     }
-
     /* =================== ACTIVATE PUSH NOTIFICATIONS =================== */
     const PUBLIC_VAPID_KEY = "BON0DVn-crPvv9vQ43Egn7GvhXklY7e1puYKbuefOQWHMfDwjeIqg2IKdpsWz8hzWvbU6avlRR334mv9NCAVFOQ";
     function urlBase64ToUint8Array(base64String) {
@@ -559,14 +555,6 @@
       });
       console.log("✅ Push registado/atualizado no Supabase");
     }
-
-    /* O CSS (.main padding-top/padding-bottom via calc(var(--header-h)...)) já
-       trata do espaçamento de forma fixa e estável — não precisa de JS para isto.
-       O ajuste manual anterior foi removido por poder desalinhar-se do valor real
-       (ex: se o logótipo ou os ícones ainda não tivessem carregado no momento da
-       leitura de offsetHeight), o que provocava esticamentos inconsistentes do
-       layout, sobretudo visíveis ao trocar de tema. */
-
     /* ============================== TOAST ============================== */
     let toastTimeout;
     function showToast(message) {
@@ -579,7 +567,6 @@
         toast.classList.remove('show');
       }, 2500);
     }
-
     /* =========================== SWITCH TAB ============================ */
     function switchTab(tab) {
       const indicator = document.getElementById('swIndicator');
@@ -701,12 +688,10 @@
         showToast('❌ Erro ao alterar password. Tente novamente.');
       }
     }
-
     /* ======================== DEVELOPMENT MODAL ======================== */
     function showEmDesenvolvimento() {
       showModal('emDesenvolvimentoModal');
     }
-
     /* ======================= NOTIFICATIONS LOGIC ======================= */
     async function openNotifications() {
       if (navigator.vibrate) navigator.vibrate(30);
@@ -762,7 +747,6 @@
       badge.style.display = 'flex';
       badge.style.opacity = '1';
     }
-
     /* =================== FORMATTING CORPORATION NAME =================== */
     function formatCorpName(rawName) {
       if (!rawName) return "";
@@ -784,7 +768,6 @@
       }
       return name;
     }
-
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
       const corpOperNr = getCorp();
@@ -824,7 +807,6 @@
         if (h2) h2.textContent = corpOperNr;
       }
     }
-
     /* ======================== USERNAME LOADING ========================= */
     async function loadUserName() {
       const nInt = getNInt();
@@ -841,7 +823,6 @@
         if (avatarEl) avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
       }
     }
-
     async function loadNextService() {
       const nintCorp = parseInt(getNInt(), 10);
       const container = document.querySelector(".next-pill");
@@ -888,7 +869,6 @@
         textSpan.textContent = "Erro de ligação ao servidor";
       }
     }
-
     /* ======================= FETCH NOTIFICATIONS ======================= */
     async function checkRealNotifications() {
       const nInt = getNInt();
@@ -906,7 +886,6 @@
         console.error('Erro ao verificar notificações:', err);
       }
     }
-
     /* ================= TOGGLE THEME AND MENU DROPDOWN ================= */
     function toggleTheme() {
       const body = document.body;
@@ -940,7 +919,6 @@
         dropdown.classList.remove('open');
       }
     });
-
     /* ============================== MODALS ============================= */
     function showModal(modalId) {
       const modal = document.getElementById(modalId);
@@ -967,7 +945,6 @@
         document.body.style.overflow = 'auto';
       }
     });
-
     /* ============================= BUTTONS ============================= */
     function selBtn(button) {
       document.querySelectorAll('.mbtn').forEach(btn => {
@@ -980,7 +957,6 @@
     function clearAllSelections() {
       document.querySelectorAll('.mbtn').forEach(btn => btn.classList.remove('sel'));
     }
-
     /* ======================= OCCURRENCE LOADING ======================== */
     async function updateOccurrencesBadge() {
       const corpOperNr = getCorp();
@@ -996,7 +972,6 @@
         badge.textContent = '!';
       }
     }
-
     /* ========================= EVENTS LOADING ========================== */
     async function updateEventsBadge() {
       const corpOperNr = getCorp();
@@ -1012,7 +987,6 @@
         badge.textContent = '!';
       }
     }
-
     /* ========================= REPORTS LOADING ========================= */
     async function updateOccurrenceReportsBadge() {
       const corpOperNr = getCorp();
@@ -1032,7 +1006,6 @@
         badge.textContent = '!';
       }
     }
-
     /* ======================= COMUNICATES LOADING ======================= */
     async function updateComunicatesBadge() {
       const corpOperNr = getCorp();
@@ -1059,7 +1032,6 @@
         badge.textContent = '!';
       }
     }
-
     /* ====================== IPMA WARNINGS LOADING ====================== */
     function updateMeteoBadge(count) {
       const badge = document.querySelector("#meteoadv .bdg");
@@ -1078,7 +1050,6 @@
         console.error("Erro ao buscar e contar avisos IPMA:", err);
       }
     }
-
     /* ====================== NO HOSPITAL LOADING ======================== */
     async function updateNohospitalBadge() {
       const corpOperNr = getCorp();
@@ -1094,7 +1065,6 @@
         badge.textContent = '!';
       }
     }
-
     /* ====================== INTERNAL CHAT LOADING ====================== */
     async function updateChatBadge() {
       const corpOperNr = getCorp();
@@ -1120,7 +1090,6 @@
         badge.textContent = '!';
       }
     }
-
     /* ============================= INIT ================================ */
     document.addEventListener('DOMContentLoaded', () => {
       loadTheme();
