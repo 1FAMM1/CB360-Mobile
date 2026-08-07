@@ -50,7 +50,7 @@
     ============================================================ */
     .main-btn {width:100%; max-width:400px; margin-top:auto; margin-bottom:auto; display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); border:1px solid var(--border);
               border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-md);}
-    .btn-choose {position:relative; min-width:0; height:140px; padding:14px 8px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
+    .btn-choose {position:relative; width: 100%; min-height: 120px; padding:14px 8px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
                  font-size:14px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; line-height:1.2;
                  box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
     .btn-choose:hover {background:var(--surface-2); color:var(--txt-1);}
@@ -278,8 +278,8 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';    
-    function getCorp() { return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() { return localStorage.getItem("currentCorpNint");}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
