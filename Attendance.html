@@ -48,11 +48,15 @@
     /* ============================================================
     SELECTION CARDS (PROFISSIONAIS / VOLUNTÁRIOS)
     ============================================================ */
-    .main-btn {display: flex; flex-direction: row; gap: 16px; justify-content: center; align-items: center; margin-top: auto;margin-bottom: auto; width: 100%; max-width: 400px;}
-    .btn-choose {flex: 1; height: 140px; border-radius: var(--r-lg); border: 1px solid var(--border); cursor: pointer; background: var(--surface); color: var(--txt-1); font-family: 'Inter', sans-serif;
-                 font-size: 14px; font-weight: 600; box-shadow: var(--sh-md); transition: all var(--ease); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;}
-    .btn-choose:hover {background: var(--surface-2); transform: translateY(-4px); box-shadow: var(--sh-lg); color: var(--red);}
-    .btn-choose:hover .btn-icon {transform: scale(1.1); color: var(--red);}
+    .main-btn {width:100%; max-width:400px; margin-top:auto; margin-bottom:auto; display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); border:1px solid var(--border);
+              border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-md);}
+    .btn-choose {position:relative; min-width:0; height:140px; padding:14px 8px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
+                 font-size:14px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; line-height:1.2;
+                 box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
+    .btn-choose:hover {background:var(--surface-2); color:var(--txt-1);}
+    .btn-choose:active {background:var(--surface-2); transform:scale(.98);}
+    .btn-choose.selected {background:var(--red-light); color:var(--red);}
+    .btn-choose:hover .btn-icon {transform:scale(1.08);}
     .btn-icon {font-size: 36px; color: var(--red-icon); transition: transform var(--ease), color var(--ease);}
     .btn-text {font-size: 14px; font-weight: 600;}
     /* ============================================================
@@ -127,7 +131,6 @@
     @media (max-width: 480px) {
       .header-title {font-size: 16px;}
       .main-content {padding-left: 14px; padding-right: 14px;}
-      .main-btn {gap: 12px;}
       .btn-choose {height: 120px; font-size: 13px;}
       .btn-icon {font-size: 30px;}
     }
@@ -275,12 +278,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';    
-    function getCorp() { return localStorage.getItem("currentCorpOperNr") || "0805";}
-    function getNInt() { return localStorage.getItem("currentCorpNint") || "205";}
+    function getCorp() { return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() { return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';      
+      const token = localStorage.getItem("authToken");      
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -358,10 +361,6 @@
       } catch (err) {
         console.error('Erro silencioso:', err);
       }
-    }
-    /* ========================== THEME LOADING ========================== */
-    function loadTheme() {
-      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
     }
     /* ===================== ATTENDANCE DATA LOADING ===================== */
     async function loadAttendanceData() {
@@ -457,7 +456,10 @@
     /* ========================= GLOBAL LOADING ========================== */
     document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
-      loadTheme();   
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
     });
   </script>
 </body>
