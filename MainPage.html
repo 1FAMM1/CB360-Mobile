@@ -66,7 +66,7 @@
     MAIN SCROLL AREA
     ============================================================ */
     .main {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 16px); padding-bottom: calc(var(--footer-h) + 16px); padding-left: 14px; padding-right: 14px;
-           display: flex; flex-direction: column; gap: 12px;}
+           display: flex; flex-direction: column; gap: 12px; min-height: 0;}
     .main::-webkit-scrollbar {display: none;}
     /* ============================================================
     WELCOME ROW
@@ -92,7 +92,7 @@
     /* ============================================================
     GRID CARD CONTAINER
     ============================================================ */
-    .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex;}
+    .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex; min-height: 0;}
     .btn-grid {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(6, minmax(0, 1fr)); flex: 1; width: 100%; height: 100%;}    
     /* ============================================================
     MENU BUTTONS
@@ -495,12 +495,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() { return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() { return localStorage.getItem("currentCorpNint"); }
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "205"; }
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5NzMwNTB9.CcE8nI1bbWcL0PlJaVkKdm74UZEyzweZfsv2i0M-zmg';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -1076,7 +1076,7 @@
         console.error('Erro ao buscar constrangimentos hospitalares:', err);
         badge.textContent = '!';
       }
-    
+    }
     /* ====================== INTERNAL CHAT LOADING ====================== */
     async function updateChatBadge() {
       const corpOperNr = getCorp();
@@ -1153,6 +1153,36 @@
     });
     document.addEventListener('selectstart', e => e.preventDefault());
     document.addEventListener('contextmenu', e => e.preventDefault());
+    
+    
+    
+    /* ======================= FUNCTION FIX LAYOUT ======================= */
+function ajustarMainContent() {
+  const main = document.querySelector('.main');
+  const header = document.querySelector('.header');
+  const footer = document.querySelector('.footer');
+  if (!main) return;
+  const headerHeight = header?.offsetHeight || 0;
+  const footerHeight = footer?.offsetHeight || 0;
+  main.style.paddingTop = (headerHeight + 16) + 'px';
+  main.style.paddingBottom = (footerHeight + 16) + 'px';
+}
+
+// Corre logo, e depois mais algumas vezes enquanto a viewport estabiliza
+// (barra de sistema, notch, teclado, etc. em WebView/PWA Android)
+window.addEventListener('load', () => {
+  ajustarMainContent();
+  [50, 150, 300, 600, 1000].forEach(delay => setTimeout(ajustarMainContent, delay));
+});
+window.addEventListener('resize', ajustarMainContent);
+window.addEventListener('pageshow', ajustarMainContent);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) ajustarMainContent();
+});
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', ajustarMainContent);
+}
+    
   </script>
 </body>
 </html>
