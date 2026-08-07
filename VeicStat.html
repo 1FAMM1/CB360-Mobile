@@ -24,6 +24,7 @@
     ============================================================ */
     .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
                 --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    .dark-mode .warning {background: rgba(255, 82, 82, 0.16); color: #ff6b6b; border-color: rgba(255, 82, 82, 0.35);}
     /* ============================================================
     RESET & BASE
     ============================================================ */
@@ -56,7 +57,7 @@
     VEHICLE GRID / BUTTONS
     ============================================================ */
     .vehicle-grid {display:grid; grid-template-columns:repeat(3,1fr); gap:6px;}
-    .vehicle-btn {position:relative; min-height:88px; padding:12px 6px; border:1px solid var(--border); border-left:3px solid var(--txt-3); border-radius:var(--r-md); background:var(--surface-2);
+    .vehicle-btn {position:relative; min-height:88px; padding:24px 6px 8px; border:1px solid var(--border); border-left:3px solid var(--txt-3); border-radius:var(--r-md); background:var(--surface-2);
                  cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:var(--sh-sm);
                  transition:transform var(--ease), box-shadow var(--ease), background var(--ease), border-color var(--ease), padding var(--ease);}
     .vehicle-btn:hover:not(.selected):not(.inop) {transform:translateY(-0px); box-shadow:var(--sh-md); background:var(--surface);}
@@ -69,9 +70,9 @@
     .vehicle-btn.selected .vehicle-code {color:#fff;}
     .vehicle-btn.selected .vehicle-icon {transform:scale(1.1);}
     .vehicle-btn.selected::before {content:'✓'; position:absolute; top:5px; left:6px; font-size:10px; font-weight:700; color:#fff;}
-    .vehicle-btn.em-servico, .vehicle-btn.inop {padding-top:24px; padding-bottom:8px;}
     .status-badge {position:absolute; top:5px; left:50%; transform:translateX(-50%); font-size:7px; font-weight:800; letter-spacing:0.4px; padding:2.5px 7px; border-radius:20px; color:#fff;
                    white-space:nowrap; text-transform:uppercase; box-shadow:0 1px 3px rgba(0,0,0,0.25);}
+    .vehicle-btn.em-parque .status-badge {background:var(--green);}
     .vehicle-btn.em-servico {background: rgba(255, 152, 0, 0.16); border-left-color: var(--orange);}
     .vehicle-btn.em-servico .status-badge {background:var(--orange); animation:statusPulse 1.6s infinite;}
     .vehicle-btn.inop {background: var(--red-light); opacity:1; cursor:not-allowed; border-left-color:var(--red) !important;}
@@ -99,11 +100,12 @@
     .btn-chegada-to {background:linear-gradient(135deg, var(--blue), #0264c2);}
     .btn-saida-to {background:linear-gradient(135deg, var(--orange), #e67e22);}
     .btn-chegada-und {background:linear-gradient(135deg, var(--green), #189349);}
+    .btn-retido {background:linear-gradient(135deg, #5c5c5c, #333333);}
     .geostat-btn.sending {animation:pulse 1s infinite;}
     /* ============================================================
     WARNING BANNER
     ============================================================ */
-    .warning {width:100%; padding:12px 14px; border-radius:var(--r-sm); background:var(--red-light); color:var(--red); border:1px solid var(--border); text-align:center; font-weight:600; font-size:13px;}
+    .warning {width:100%; padding:10px 10px; border-radius:var(--r-sm); background:var(--red-light); color:var(--red); border:1px solid var(--border); text-align:center; font-weight:600; font-size:13px;}
     /* ============================================================
     POPUP
     ============================================================ */
@@ -128,8 +130,7 @@
     ============================================================ */
     .toast-container {position:fixed; top:calc(var(--header-h) + 10px); right:14px; z-index:9999; display:flex; flex-direction:column; gap:8px;}
     .toast {min-width:200px; max-width:320px; padding:10px 14px; border-radius:var(--r-md); color:#fff; font-weight:600; font-size:13px; box-shadow:var(--sh-lg); display:flex; align-items:center;
-            gap:8px; opacity:0; transform:translateX(100%); animation:toastslideIn 0.4s forwards, toastfadeOut 0.4s forwards 3s; cursor:pointer;}
-    .toast .icon {font-size:13px; width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,0.25); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+            opacity:0; transform:translateX(100%); animation:toastslideIn 0.4s forwards, toastfadeOut 0.4s forwards 3s; cursor:pointer;}
     .toast.success {background:linear-gradient(135deg, var(--green), #189349);}
     .toast.error {background:linear-gradient(135deg, var(--red), var(--red-dark));}
     .toast.warning {background:linear-gradient(135deg, var(--orange), #e67e22);}
@@ -174,7 +175,7 @@
          onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
          onload="this.style.display='block';">
     <div class="header-center">
-      <span class="header-title">V-STATUS</span>
+      <span class="header-title">STATUS OPERACIONAL</span>
       <span class="header-sub">Sistema de Gestão de Status</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
@@ -203,15 +204,15 @@
           <span class="btn-icon"><span class="material-icons">home</span></span>
           <strong style="font-size:8.5px;">Chegada ao Quartel</strong>
         </button>
-        <button class="geostat-btn btn-chegada-und" onclick="sendArrivalHeadquarters()">
+        <button class="geostat-btn btn-retido" id="retidoMacasBtn" style="display:none;" onclick="sendGeostat('Retido por Falta de Macas')">
           <span class="btn-icon"><span class="material-icons">block</span></span>
           <strong style="font-size:8.5px;">Retido Falta Macas</strong>
         </button>
       </div>
     </div>
     <div class="warning" id="warningMessage">
-      ⚠️ <strong>Selecione o Veículo</strong> antes de enviar Status
-    </div>
+  <span class="material-icons" style=" color: yellow; vertical-align: middle; font-size: 16px; margin-right: 4px;">warning</span> <strong>Selecione o Veículo</strong> antes de enviar Status
+</div>
   </div>
   <div id="toastContainer" class="toast-container"></div>
   <footer class="footer">
@@ -237,11 +238,14 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+
+    /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
+    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
+    function getNInt() {return localStorage.getItem("currentCorpNint")}
+
     function getSupabaseHeaders(options = {}) {
-      const corp  = getCorp();
-      const nint  = getNInt();
+      const corp = getCorp();
+      const nint = getNInt();
       const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
@@ -267,6 +271,12 @@
                                 'VTTU': 14, 'VTTF': 15, 'VTTR': 16, 'VTGC': 17, 'VALE': 18, 'VOPE': 19, 'VPMA': 20, 'VTTP': 21, 'VTPT': 22, 'ERST': 23, 'MRSA': 24,'ATRL': 25, 
                                 'ABSC': 26,  'ABTD': 27, 'ABTM': 28, 'VDTD': 29};
     const BACKUP_VEHICLES = [ 'VCOT-01', 'VCOT-02', 'VTTP-01', 'VTTP-02', 'VTTP-03', 'VFCI-01', 'VFCI-02', 'VTTU-01', 'VTTF-02', 'ABSC-02', 'ABSC-03', 'ABSC-04'];
+    const RETIDO_MACAS_TYPES = ['ABSC', 'ABCI', 'ABTD', 'ABTM', 'VDTD'];
+    function toggleRetidoMacasButton(type) {
+      const btn = document.getElementById('retidoMacasBtn');
+      if (!btn) return;
+      btn.style.display = (type && RETIDO_MACAS_TYPES.includes(type)) ? 'flex' : 'none';
+    }
     /* === VARIÁVEIS DE ESTADO GLOBAL ==*/    
     let selectedVehicle = null;
     let vehicleIcon = null;
@@ -391,7 +401,7 @@
         const typeClass = type.toLowerCase();
         vehicleGrid.insertAdjacentHTML('beforeend', `
       <div class="vehicle-btn ${typeClass}" onclick="selectVehicle('${code}','${icon}','${type}', true, event)">
-        <span class="status-badge" style="display:none;"></span>
+        <span class="status-badge"></span>
         <span class="vehicle-icon">${icon}</span>
         <div class="vehicle-code">${code}</div>
       </div>
@@ -442,16 +452,17 @@
         const match = onclickAttr.match(/'([^']+)'/);
         if (!match) return;
         const code = match[1];
-        btn.classList.remove('inop', 'em-servico');
+        btn.classList.remove('inop', 'em-servico', 'em-parque');
         const badge = btn.querySelector('.status-badge');
         if (vehicleINOP[code] === true) {
           btn.classList.add('inop');
-          if (badge) { badge.textContent = 'INOP'; badge.style.display = 'block'; }
+          if (badge) badge.textContent = 'INOP';
         } else if (vehicleStatuses[code] === 'Em Serviço') {
           btn.classList.add('em-servico');
-          if (badge) { badge.textContent = 'Em Serviço'; badge.style.display = 'block'; }
-        } else if (badge) {
-          badge.style.display = 'none';
+          if (badge) badge.textContent = 'Em Serviço';
+        } else {
+          btn.classList.add('em-parque');
+          if (badge) badge.textContent = 'Em Parque';
         }
       });
     }
@@ -493,7 +504,7 @@
       if (!container) return;
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-      toast.innerHTML = `<span class="icon">${type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠'}</span> <span>${message}</span>`;
+      toast.textContent = message;
       toast.addEventListener('click', () => toast.remove());
       container.appendChild(toast);
       setTimeout(() => toast.remove(), duration + 500);
@@ -510,7 +521,7 @@
       const toast = document.createElement('div');
       toast.id = 'vehicleSelectedToast';
       toast.className = 'toast vehicle-selected';
-      toast.innerHTML = `<span class="icon">🚒</span><span>${message}</span>`;
+      toast.textContent = message;
       container.appendChild(toast);
     }
     function removeVehicleToast() {
@@ -563,6 +574,7 @@
       showVehicleToast(`${icon} ${vehicle} selecionado`);
       if (buttonsContainerEl) buttonsContainerEl.style.display = 'block';
       if (warningMessageEl) warningMessageEl.style.display = 'none';
+      toggleRetidoMacasButton(type);
       if (navigator.vibrate && animate) {
         navigator.vibrate(100);
       }
@@ -580,6 +592,7 @@
       const warningMessage = document.getElementById('warningMessage');
       if (buttonsContainer) buttonsContainer.style.display = 'none';
       if (warningMessage) warningMessage.style.display = 'block';
+      toggleRetidoMacasButton(null);
     }
     /* ========================== STATUS EVENT =========================== */
     async function sendGeostat(action) {
