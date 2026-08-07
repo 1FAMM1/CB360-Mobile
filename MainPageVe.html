@@ -43,7 +43,7 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; overflow-x: hidden; padding: calc(var(--header-h) + 16px) 16px calc(var(--footer-h) + 20px);
+    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; overflow-x: hidden; padding:calc(var(--header-h) + 10px) 16px 115px; 
                    display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg); scrollbar-width: none; transition: background var(--ease);}
     .main-content::-webkit-scrollbar {display: none;}
     /* ============================================================
@@ -77,7 +77,7 @@
     ============================================================ */
     @media (max-width: 480px) {
       .header-title {font-size: 16px;}
-      .main-content {padding-left: 12px; padding-right: 12px;}
+      .main-content {padding-left: 14px; padding-right: 14px;}
       .vehicles-btn {min-height: 104px; font-size: 11.5px; padding: 12px 8px;}
       .vehicles-btn .material-icons {font-size: 25px;}
     }
@@ -136,8 +136,8 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
+    function getNInt() {return localStorage.getItem("currentCorpNint")}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
