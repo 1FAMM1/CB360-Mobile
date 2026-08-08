@@ -69,6 +69,7 @@
     .availability-dec-btn.selected {background: var(--red-light); color: var(--red);}
     .availability-dec-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
     .availability-dec-btn div, .availability-dec-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    .availability-dec-btn.month-blocked {opacity: 0.35; pointer-events: none; cursor: not-allowed;}
     /* ============================================================
     CALENDAR CARD
     ============================================================ */
@@ -592,6 +593,12 @@
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
       }
+      document.querySelectorAll('.availability-dec-btn').forEach(btn => {
+        const month = parseInt(btn.dataset.month, 10);
+        if (BLOCKED_MONTHS.includes(month)) {
+          btn.classList.add('month-blocked');
+        }
+      });
     });
   </script>
 </body>
