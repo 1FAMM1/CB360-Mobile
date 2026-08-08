@@ -259,7 +259,7 @@
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr"); 
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -437,13 +437,22 @@
           console.warn("Aviso Supabase Storage:", storageError.message);
           if (!storageError.message.includes("file not found")) throw storageError;
         }
-        const { data: tableData, error: tableError } = await supabaseClient
-        .from('personal_docs')
-        .delete()
-        .eq('doc_url', publicUrl);
-        if (tableError) {
-          console.warn("Aviso Supabase Table:", tableError.message);
-          if (!tableError.message.includes("No rows found")) throw tableError;
+        /* Apagar na tabela usando o JWT customizado (com claims corp_oper_nr/n_int),
+           em vez do supabaseClient (que usa a anon key e é bloqueado pelas policies de RLS
+           sem devolver erro — parecia "apagar" mas não apagava nada). */
+        const deleteResp = await fetch(
+          `${SUPABASE_URL}/rest/v1/personal_docs?doc_url=eq.${encodeURIComponent(publicUrl)}`, {
+            method: 'DELETE',
+            headers: getSupabaseHeaders({ returnRepresentation: true })
+          }
+        );
+        if (!deleteResp.ok) {
+          const errText = await deleteResp.text();
+          throw new Error(errText || `Erro HTTP ${deleteResp.status} ao apagar da tabela`);
+        }
+        const deletedRows = await deleteResp.json();
+        if (!Array.isArray(deletedRows) || deletedRows.length === 0) {
+          throw new Error("Nenhum registo apagado — verifique as permissões (RLS) da tabela personal_docs.");
         }
         if (rowElement) rowElement.remove();
         const list = document.getElementById("documents-list");
