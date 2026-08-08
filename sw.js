@@ -1,8 +1,8 @@
     /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v2.8.5 - Com supressão de notificações em chats ativos
+    v2.8.6 - Fix: não intercetar/cachear pedidos não-GET (POST/PATCH/DELETE)
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v2.8.5';
+    const CACHE_NAME = 'cb360-cache-v2.8.6';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', 
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', 
                              '/MissReport.html', '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', 
@@ -34,6 +34,12 @@
       );
     });
     self.addEventListener('fetch', (event) => {
+      // Só intercetar/cachear pedidos GET. POST/PUT/PATCH/DELETE (mensagens de chat,
+      // uploads, chamadas REST ao Supabase, etc.) vão sempre diretos para a rede sem
+      // passar por respondWith/cache.put, que só aceita respostas de pedidos GET.
+      if (event.request.method !== 'GET') {
+        return;
+      }
       if (event.request.url.includes(self.location.origin)) {
         event.respondWith(
           caches.match(event.request).then((cachedResponse) => {
