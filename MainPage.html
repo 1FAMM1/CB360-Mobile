@@ -49,10 +49,11 @@
     .theme-pill::before {content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left var(--ease);
                          box-shadow: 0 1px 3px rgba(0,0,0,0.2);}
     .dark .theme-pill::before {left: 25px;}
-    .theme-pill .t-sun {position: absolute; left: 5px;  top: 50%; transform: translateY(-50%); font-size: 10px;}
-    .theme-pill .t-moon {position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-size: 10px; opacity: 0.5;}
+    .theme-pill .t-sun {position: absolute; left: 5px;  top: 50%; transform: translateY(-50%); font-size: 12px; color:#fff;}
+    .theme-pill .t-moon {position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-size: 12px; opacity: 0.5; color:#fff;}
     .dark .theme-pill .t-sun  {opacity: 0.35;}
     .dark .theme-pill .t-moon {opacity: 1;}
+    .dark .welcome-text .label {color: var(--txt-2);}
     /* ============================================================
     DROPDOWN MENU
     ============================================================ */
@@ -60,8 +61,10 @@
                     box-shadow: var(--sh-lg); padding: 5px; min-width: 200px; opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.98); transform-origin: top right;
                     transition: all var(--ease); z-index: 102;}
     .menu-dropdown.open {opacity: 1; visibility: visible; transform: translateY(0) scale(1);}
-    .menu-item {padding: 9px 12px; border-radius: var(--r-sm); font-size: 13px; font-weight: 500; color: var(--txt-2); cursor: pointer; transition: background var(--ease), color var(--ease);}
-    .menu-item:hover {background: var(--surface-2); color: var(--txt-1);}
+    .menu-item {display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--r-sm); font-size:13px; font-weight:500; color:var(--txt-2); cursor:pointer; 
+                transition:background var(--ease), color var(--ease);}
+    .menu-item:hover {background:var(--surface-2); color:var(--txt-1);}
+    .menu-item .material-icons {font-size:16px; width:18px; text-align:center; color:var(--txt-2); flex-shrink:0;}
     /* ============================================================
     MAIN SCROLL AREA
     ============================================================ */
@@ -200,17 +203,17 @@
 <body>
   <div class="header-controls">
     <div class="theme-pill" onclick="toggleTheme()">
-      <span class="t-sun">☀️</span>
-      <span class="t-moon">🌙</span>
+      <span class="material-icons t-sun">wb_sunny</span>
+      <span class="material-icons t-moon">dark_mode</span>
     </div>
     <div class="hctrl" id="menuDotsBtn" onclick="toggleMenu()">⋮</div>
   </div>
   <div class="menu-dropdown" id="menuDropdown">
-    <div class="menu-item" onclick="enableNotifications()">🔔 Ativar Notificações</div>
-    <div class="menu-item" onclick="showPolicies()">📋 Políticas de Privacidade</div>
-    <div class="menu-item" onclick="showTerms()">📄 Termos de Uso</div>
-    <div class="menu-item" onclick="showAbout()">ℹ️ Sobre o Sistema</div>
-    <div class="menu-item" onclick="showContact()">📞 Contacto</div>
+    <div class="menu-item" onclick="enableNotifications()"><span class="material-icons">notifications_active</span> Ativar Notificações</div>
+    <div class="menu-item" onclick="showPolicies()"><span class="material-icons">policy</span> Políticas de Privacidade</div>
+    <div class="menu-item" onclick="showTerms()"><span class="material-icons">description</span> Termos de Uso</div>
+    <div class="menu-item" onclick="showAbout()"><span class="material-icons">info</span> Sobre o Sistema</div>
+    <div class="menu-item" onclick="showContact()"><span class="material-icons">call</span> Contacto</div>
   </div>
   <header class="header">
     <img id="corpLogo" class="header-logo" alt="" style="display:none;"
@@ -225,7 +228,7 @@
   <main class="main">
     <div class="welcome-row">
       <div class="welcome-text">
-        <div class="label">👋 Bem-vindo(a),</div>
+        <div class="label"><span class="material-icons" style="font-size:14px; vertical-align:-2px;">waving_hand</span> Bem-vindo(a),</div>
         <div class="name">Utilizador</div>
       </div>
       <div class="welcome-right">
@@ -343,18 +346,68 @@
   </footer>
   <div id="policiesModal" class="modal">
     <div class="modal-box">
-      <div class="modal-head">📋 Políticas de Privacidade</div>
+      <div class="modal-head"><span class="material-icons">policy</span>Políticas de Privacidade</div>
       <div class="modal-body">
         <h3>Política de Privacidade — CB360</h3>
-        <p><strong>Última atualização:</strong> Dezembro 2025</p>
-        <h4>1. Informações que Coletamos</h4>
-        <p>• Dados de localização para GPS<br>• Informações de uso do sistema<br>• Dados operacionais dos bombeiros</p>
-        <h4>2. Como Usamos</h4>
-        <p>• Melhorar a eficiência operacional<br>• Garantir a segurança das equipas<br>• Análise estatística de ocorrências</p>
-        <h4>3. Proteção de Dados</h4>
-        <p>Todos os dados são criptografados e armazenados de forma segura.</p>
-        <h4>4. Contacto</h4>
-        <p>privacy@cb360.pt</p>
+        <p><strong>Última atualização:</strong> Agosto 2026 &nbsp;·&nbsp; <strong>Responsável pelo tratamento:</strong> Corpo de Bombeiros (ver dados em Contacto)</p>
+        <h4>1. Quem Trata os Seus Dados</h4>
+        <p>O CB360 é utilizado pela sua corporação de bombeiros, que é a responsável pelo tratamento dos dados recolhidos através da aplicação. O sistema é operado tecnicamente pelo Grupo CB360, na qualidade de subcontratante.</p>
+        <h4>2. Dados que Recolhemos</h4>
+        <p>
+          • Dados de identificação (nome, número interno, posto/patente)<br>
+          • Fotografia de perfil (quando fornecida)<br>
+          • Dados de autenticação (utilizador e password, armazenada de forma protegida)<br>
+          • Dados operacionais: escalas, turnos, disponibilidades, trocas de serviço, assiduidade e faltas<br>
+          • Localização e status de viaturas (GPS/geolocalização operacional)<br>
+          • Mensagens trocadas no Chat Interno<br>
+          • Notificações e comunicados internos<br>
+          • Dados técnicos do dispositivo (para notificações push e funcionamento da app)
+        </p>
+        <h4>3. Base Legal do Tratamento</h4>
+        <p>
+          • Execução de obrigações decorrentes da relação de bombeiro/voluntário com a corporação<br>
+          • Cumprimento de obrigações legais aplicáveis à atividade de proteção civil<br>
+          • Interesse legítimo na gestão operacional e segurança das equipas<br>
+          • Consentimento, quando aplicável (ex: notificações push)
+        </p>
+        <h4>4. Finalidades</h4>
+        <p>
+          • Gestão de escalas, turnos e disponibilidade de recursos humanos e viaturas<br>
+          • Coordenação operacional em tempo real<br>
+          • Comunicação interna entre elementos da corporação<br>
+          • Cumprimento de registos de assiduidade exigidos pela atividade<br>
+          • Segurança e rastreabilidade de viaturas em serviço
+        </p>
+        <h4>5. Partilha com Terceiros</h4>
+        <p>Alguns dados são processados por prestadores de serviços tecnológicos, apenas na medida do necessário:</p>
+        <p>
+          • <strong>Supabase</strong> — alojamento de base de dados<br>
+          • <strong>Telegram</strong> — envio de notificações operacionais (status de viaturas, composição de equipas)<br>
+          • <strong>IPMA</strong> — consulta pública de avisos meteorológicos (sem envio de dados pessoais)<br>
+          • Serviço de notificações push do navegador/dispositivo
+        </p>
+        <p>Não vendemos nem partilhamos os seus dados para fins de marketing ou publicidade.</p>
+        <h4>6. Prazo de Conservação</h4>
+        <p>Os dados operacionais e de assiduidade são conservados enquanto durar o vínculo com a corporação, e posteriormente pelo período exigido por obrigações legais aplicáveis. Mensagens de chat e notificações podem ser eliminadas periodicamente conforme política interna da corporação.</p>
+        <h4>7. Os Seus Direitos</h4>
+        <p>Nos termos do RGPD, pode a qualquer momento solicitar à sua corporação:</p>
+        <p>
+          • Acesso aos seus dados pessoais<br>
+          • Retificação de dados incorretos ou incompletos<br>
+          • Apagamento dos dados, quando legalmente possível<br>
+          • Limitação ou oposição ao tratamento<br>
+          • Portabilidade dos dados<br>
+          • Retirar consentimento, quando o tratamento se baseie nele
+        </p>
+        <p>Para exercer estes direitos, contacte-nos através dos meios indicados na secção "Contacto".</p>
+        <h4>8. Segurança</h4>
+        <p>Aplicamos medidas técnicas e organizativas adequadas — autenticação segura, encriptação em trânsito e controlo de acesso por corporação — para proteger os seus dados contra acesso não autorizado, perda ou alteração.</p>
+        <h4>9. Menores de Idade</h4>
+        <p>A aplicação destina-se a elementos autorizados da corporação. Caso existam voluntários menores de idade, o tratamento de dados respetivo seguirá as garantias adicionais exigidas por lei, com autorização do encarregado de educação quando aplicável.</p>
+        <h4>10. Alterações a Esta Política</h4>
+        <p>Esta política pode ser atualizada periodicamente para refletir alterações legais ou funcionais da aplicação. A data da última atualização é sempre indicada no topo deste documento.</p>
+        <h4>11. Contacto</h4>
+        <p>Para questões de privacidade ou exercício de direitos: <strong>privacy@cb360.pt</strong></p>
       </div>
       <div class="modal-foot">
         <button class="btn-close" onclick="closeModal('policiesModal')">Fechar</button>
@@ -363,18 +416,61 @@
   </div>
   <div id="termsModal" class="modal">
     <div class="modal-box">
-      <div class="modal-head">📄 Termos de Uso</div>
+      <div class="modal-head"><span class="material-icons">description</span>Termos de Uso</div>
       <div class="modal-body">
         <h3>Termos de Uso — CB360</h3>
-        <p><strong>Vigência:</strong> Dezembro 2025</p>
-        <h4>1. Aceitação</h4>
-        <p>Ao usar o CB360, concorda com estes termos.</p>
-        <h4>2. Uso Autorizado</h4>
-        <p>• Exclusivo para bombeiros autorizados<br>• Apenas para fins operacionais<br>• Proibido partilhar credenciais</p>
-        <h4>3. Responsabilidades</h4>
-        <p>• Manter informações atualizadas<br>• Usar responsavelmente<br>• Reportar problemas técnicos</p>
-        <h4>4. Limitações</h4>
-        <p>O sistema é fornecido "como está" e pode ter interrupções para manutenção.</p>
+        <p><strong>Vigência:</strong> Agosto 2026</p>
+        <h4>1. Aceitação dos Termos</h4>
+        <p>Ao aceder ou utilizar o CB360, o utilizador declara ter lido, compreendido e aceite estes Termos de Uso, bem como a respetiva Política de Privacidade. Caso não concorde, não deverá utilizar a aplicação.</p>
+
+        <h4>2. Elegibilidade e Uso Autorizado</h4>
+        <p>
+          • O acesso é exclusivo a elementos autorizados da corporação de bombeiros<br>
+          • O uso destina-se unicamente a fins operacionais, administrativos e de coordenação relacionados com a atividade de bombeiro<br>
+          • É proibida a criação de contas falsas ou a utilização em nome de terceiros
+        </p>
+        <h4>3. Conta e Credenciais</h4>
+        <p>
+          • O utilizador é responsável por manter a confidencialidade da sua password<br>
+          • É estritamente proibido partilhar credenciais de acesso com terceiros<br>
+          • Qualquer atividade realizada através da sua conta é da sua responsabilidade, salvo em caso de uso fraudulento comprovado por terceiros<br>
+          • Deve comunicar de imediato qualquer suspeita de acesso não autorizado à sua conta
+        </p>
+        <h4>4. Regras de Utilização</h4>
+        <p>Ao utilizar o CB360, o utilizador compromete-se a:</p>
+        <p>
+          • Manter os seus dados e informações operacionais atualizados<br>
+          • Usar o Chat Interno e os Comunicados de forma respeitosa e exclusivamente para fins relacionados com o serviço<br>
+          • Não introduzir conteúdo ofensivo, ilegal, difamatório ou que viole direitos de terceiros<br>
+          • Não tentar aceder, adulterar ou testar vulnerabilidades dos sistemas, bases de dados ou comunicações do CB360<br>
+          • Não utilizar a aplicação para fins alheios à atividade operacional da corporação<br>
+          • Reportar prontamente problemas técnicos, falhas de segurança ou comportamentos indevidos de outros utilizadores
+        </p>
+        <h4>5. Dados de Localização e Operacionais</h4>
+        <p>Determinadas funcionalidades (como o V-Status) dependem do registo de dados de localização e estado de viaturas. Ao utilizar estas funcionalidades, o utilizador aceita o tratamento destes dados nos termos descritos na Política de Privacidade.</p>
+
+        <h4>6. Disponibilidade do Serviço</h4>
+        <p>
+          • O CB360 é fornecido "como está" e "conforme disponível"<br>
+          • Podem ocorrer interrupções para manutenção, atualizações ou por motivos alheios ao nosso controlo (ex: falhas de rede, indisponibilidade de serviços terceiros)<br>
+          • Não garantimos disponibilidade ininterrupta nem ausência total de erros<br>
+          • Em situações de emergência real, deve sempre recorrer aos canais oficiais de socorro (112), nunca depender exclusivamente da aplicação
+        </p>
+        <h4>7. Propriedade Intelectual</h4>
+        <p>O software, design, marca e conteúdos do CB360 são propriedade do Grupo CB360 ou dos respetivos titulares, sendo protegidos por direitos de autor. Não é permitida a reprodução, distribuição ou modificação sem autorização prévia.</p>
+        <h4>8. Limitação de Responsabilidade</h4>
+        <p>
+          • O Grupo CB360 não se responsabiliza por danos indiretos, perdas de dados ou interrupções decorrentes de uso indevido, falhas de terceiros (rede, dispositivo, serviços externos) ou de casos fortuitos ou de força maior<br>
+          • A responsabilidade por decisões operacionais tomadas com base na informação da aplicação cabe sempre à cadeia de comando da corporação
+        </p>
+        <h4>9. Suspensão e Cessação de Acesso</h4>
+        <p>O acesso à aplicação pode ser suspenso ou cancelado em caso de violação destes termos, cessação de vínculo com a corporação, ou por decisão da entidade responsável, sem prejuízo de outros direitos aplicáveis.</p>
+        <h4>10. Alterações aos Termos</h4>
+        <p>Estes termos podem ser atualizados periodicamente. A data de vigência indicada no topo reflete a versão mais recente. A utilização continuada da aplicação após alterações implica a aceitação dos novos termos.</p>
+        <h4>11. Lei Aplicável e Foro</h4>
+        <p>Estes Termos são regidos pela lei portuguesa. Para a resolução de eventuais litígios, é competente o foro da comarca da sede da corporação, com renúncia expressa a qualquer outro.</p>
+        <h4>12. Contacto</h4>
+        <p>Para dúvidas sobre estes Termos: <strong>suporte@cb360.pt</strong></p>
       </div>
       <div class="modal-foot">
         <button class="btn-close" onclick="closeModal('termsModal')">Fechar</button>
@@ -383,20 +479,54 @@
   </div>
   <div id="aboutModal" class="modal">
     <div class="modal-box">
-      <div class="modal-head">ℹ️ Sobre o Sistema</div>
+      <div class="modal-head"><span class="material-icons">info</span>Sobre o Sistema</div>
       <div class="modal-body">
         <h3>CB360 — Gestão Operacional</h3>
-        <p><strong>Versão:</strong> 2.1.0 &nbsp;·&nbsp; <strong>Build:</strong> 2025.01.15</p>
-        <h4>📋 Funcionalidades</h4>
-        <p>• Gestão de Status Operacional<br>• Controlo de Veículos<br>• Sistema FOMIO<br>• Relatórios e Estatísticas<br>• Gestão de Ocorrências</p>
-        <h4>🛠️ Tecnologias</h4>
-        <p>• Interface Web Responsiva<br>• Integração GPS<br>• Base de Dados em Tempo Real<br>• Sincronização Multi-dispositivo</p>
-        <h4>🏢 Para</h4>
+        <p><strong>Versão:</strong> 2.4.1 &nbsp;·&nbsp; <strong>Build:</strong> 2026.08.06</p>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">apps</span> Funcionalidades Atuais</h4>
+        <p>
+          • Escalas e Consulta de Serviço<br>
+          • Trocas de Serviço (Piquetes · DECIR · Voluntariado)<br>
+          • Disponibilidades por calendário (Piquetes · DECIR · SBAS · OPATS · Extras)<br>
+          • Pedido de Férias e Pedido de Fardamento<br>
+          • Assiduidade com painel de risco de reserva<br>
+          • Composição de Equipas DECIR (1 ECIN · ECIN/ELAC · BCIN)<br>
+          • Gestão de Status de Viaturas (V-Status) com notificação Telegram<br>
+          • Ocorrências em Curso e Relatórios de Ocorrência<br>
+          • Equipa de Serviço (FOMIO)<br>
+          • Eventos, Documentos e Comunicados internos<br>
+          • Avisos METEO (integração IPMA) e Constrangimentos Hospitalares<br>
+          • Chat Interno e Notificações Push<br>
+          • Modo Escuro e sincronização multi-dispositivo
+        </p>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">build</span> Tecnologias</h4>
+        <p>
+          • Interface Web Responsiva (PWA)<br>
+          • Base de Dados em Tempo Real (Supabase)<br>
+          • Autenticação segura por corporação (JWT / RLS)<br>
+          • Integração Telegram e Push Notifications<br>
+          • Sincronização Multi-dispositivo
+        </p>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">business</span> Para</h4>
         <p><strong>CB's Algarve</strong> — Corpo de Bombeiros Voluntários</p>
-        <h4>👨‍💻 Desenvolvimento</h4>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">code</span> Desenvolvimento</h4>
         <p>Fábio Martins · Grupo CB360 · dev@cb360.pt</p>
-        <h4>📅 Versões</h4>
-        <p>• v2.1.0 — Interface mobile otimizada<br>• v2.0.0 — Novo design<br>• v1.5.0 — FOMIO integrado<br>• v1.0.0 — Lançamento</p>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">history</span> Histórico de Versões</h4>
+        <p>
+          • <strong>v2.4.1</strong> — Design unificado aplicado a Disponibilidades, V-Status e Composição DECIR; melhorias de UX nos calendários e seleção de meses<br>
+          • <strong>v2.4.0</strong> — Reformulação total do V-Status: cards de viaturas, estados INOP/Em Serviço mais claros, popup de quilómetros redesenhado<br>
+          • <strong>v2.3.0</strong> — Novo sistema de Disponibilidades por calendário com bloqueio de meses passados<br>
+          • <strong>v2.2.0</strong> — Trocas de Serviço redesenhadas com pedidos pendentes, aprovação/rejeição e notificações automáticas<br>
+          • <strong>v2.1.0</strong> — Interface mobile otimizada; introdução do design system CB360 (variáveis de cor, tipografia Inter)<br>
+          • <strong>v2.0.0</strong> — Novo design geral da aplicação<br>
+          • <strong>v1.6.0</strong> — Composição de Equipas DECIR (1 ECIN · ECIN/ELAC · BCIN) via Telegram<br>
+          • <strong>v1.5.0</strong> — FOMIO integrado (Equipa de Serviço)<br>
+          • <strong>v1.4.0</strong> — Chat Interno e Notificações Push<br>
+          • <strong>v1.3.0</strong> — Avisos METEO (IPMA) e Constrangimentos Hospitalares<br>
+          • <strong>v1.2.0</strong> — Ocorrências em Curso, Eventos e Relatórios de Ocorrência<br>
+          • <strong>v1.1.0</strong> — Assiduidade com estatísticas e painel de risco<br>
+          • <strong>v1.0.0</strong> — Lançamento: Escalas, autenticação multi-corporação, Documentos e Comunicados
+        </p>
       </div>
       <div class="modal-foot">
         <button class="btn-close" onclick="closeModal('aboutModal')">Fechar</button>
@@ -405,18 +535,18 @@
   </div>
   <div id="contactModal" class="modal">
     <div class="modal-box">
-      <div class="modal-head">📞 Contacto</div>
+      <div class="modal-head"><span class="material-icons">call</span>Contacto</div>
       <div class="modal-body">
         <h3>Informações de Contacto</h3>
-        <h4>🏢 CB Faro Cruz Lusa</h4>
-        <p>Rua dos Bombeiros, nº 123 · 8000-000 Faro<br>+351 289 123 456 · geral@cbfarocruzlusa.pt</p>
-        <h4>💻 Suporte Técnico</h4>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">business</span> CB Faro Cruz Lusa</h4>
+        <p>Rua Comandante Francisco Manuel, 7 a 13 · 8000-250 Faro<br>+351 289 803 066 · geral@cbfarocruzlusa.pt</p>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">support_agent</span> Suporte Técnico</h4>
         <p>Fábio Martins · suporte@cb360.pt · +351 912 345 678</p>
-        <h4>🚨 Emergência</h4>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">emergency</span> Emergência</h4>
         <p style="font-size:26px; font-weight:700; color:var(--red);">112</p>
-        <h4>⏰ Horários</h4>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">schedule</span> Horários</h4>
         <p>Quartel: 24h/7 dias · Suporte: Seg–Sex 9h–18h</p>
-        <h4>🌐 Redes Sociais</h4>
+        <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">public</span> Redes Sociais</h4>
         <p>@CBFaroCruzLusa</p>
       </div>
       <div class="modal-foot">
@@ -426,7 +556,7 @@
   </div>
   <div id="notificationsModal" class="modal">
     <div class="modal-box">
-      <div class="modal-head"><h3>🔔 Notificações</h3></div>
+      <div class="modal-head"><span class="material-icons">notifications</span><h3>Notificações</h3></div>
       <div id="notificationsList" class="modal-body">
         <p style="text-align:center; color:var(--txt-3); padding:20px;">A carregar...</p>
       </div>
@@ -437,7 +567,7 @@
   </div>
   <div id="emDesenvolvimentoModal" class="modal">
     <div class="modal-box">
-      <div class="modal-head">🚧 Em Desenvolvimento</div>
+      <div class="modal-head"><span class="material-icons">construction</span>Em Desenvolvimento</div>
       <div class="modal-body" style="text-align:center; padding:28px 18px;">
         <p style="color:var(--txt-2);">Esta funcionalidade ainda está em desenvolvimento.<br>Por favor, verifique mais tarde.</p>
       </div>
@@ -448,7 +578,7 @@
   </div>
   <div id="configModal" class="modal">
     <div class="modal-box" style="max-width:390px;">
-      <div class="modal-head">⚙️ Configurações</div>
+      <div class="modal-head"><span class="material-icons">settings</span>Configurações</div>
       <div class="modal-body">
         <div class="cfg-avatar">
           <img id="configUserAvatar" src="https://www.gravatar.com/avatar/?d=mp" alt="Avatar">
