@@ -3205,10 +3205,7 @@
       function getKeyboardHeight() {
         if (!window.visualViewport) return 0;
         const vv = window.visualViewport;
-        const a = window.innerHeight - vv.height;
-        const b = window.innerHeight - vv.height - vv.offsetTop;
-        const c = window.innerHeight - vv.height + vv.offsetTop;
-        return Math.max(0, a, b, c);
+        return Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
       }
 
       function onKeyboardOpen(kbHeight) {
@@ -3248,17 +3245,22 @@
           setTimeout(scrollToBottom, 120);
         }
       }
+      let kbRAF = null;
+      function scheduleDetect() {
+        if (kbRAF) cancelAnimationFrame(kbRAF);
+        kbRAF = requestAnimationFrame(detectKeyboard);
+      }
       if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", detectKeyboard);
-        window.visualViewport.addEventListener("scroll", detectKeyboard);
+        window.visualViewport.addEventListener("resize", scheduleDetect);
+        window.visualViewport.addEventListener("scroll", scheduleDetect);
       } else {
-        window.addEventListener("resize", detectKeyboard);
+        window.addEventListener("resize", scheduleDetect);
       }
       inputEl?.addEventListener("focus", () => {
         scrollToBottom();
         setTimeout(scrollToBottom, 120);
       });
-      inputEl?.addEventListener("blur", () => setTimeout(detectKeyboard, 150));
+      inputEl?.addEventListener("blur", () => setTimeout(onKeyboardClose, 150));
       window.addEventListener("orientationchange", () => {
         setTimeout(() => {
           baseInnerHeight = window.innerHeight;
