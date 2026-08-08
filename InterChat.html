@@ -755,19 +755,11 @@
     const corp = localStorage.getItem("currentCorpOperNr") || "0805";
     const MyNint = String(localStorage.getItem("currentCorpNint") || "204");
     let searchTimeout;
-    const badgeEls = {
-      unread: document.getElementById('badge-unread'),
-      photo: document.getElementById('badge-photo'),
-      video: document.getElementById('badge-video'),
-      link: document.getElementById('badge-link'),
-      gif: document.getElementById('badge-gif'),
-      audio: document.getElementById('badge-audio'),
-      document: document.getElementById('badge-document'),
-      sticker: document.getElementById('badge-sticker'),
-      poll: document.getElementById('badge-poll'),
-    };
+    const badgeEls = {unread: document.getElementById('badge-unread'), photo: document.getElementById('badge-photo'), video: document.getElementById('badge-video'), link: document.getElementById('badge-link'),
+                      gif: document.getElementById('badge-gif'), audio: document.getElementById('badge-audio'), document: document.getElementById('badge-document'), sticker: document.getElementById('badge-sticker'),
+                      poll: document.getElementById('badge-poll'),
+                     };
     const MESSAGE_TYPES = ['photo', 'video', 'link', 'gif', 'audio', 'document', 'sticker', 'poll'];
-
     function setBadge(el, value) {
       if (!el) return;
       const v = Number(value || 0);
@@ -784,8 +776,8 @@
           head: true
         })
         .eq('corp_oper_nr', corp)
-        .eq('recipient_nint', MyNint) // Mensagens PARA mim
-        .is('read_at', null); // Que ainda não foram lidas
+        .eq('recipient_nint', MyNint)
+        .is('read_at', null);
       if (type) {
         q = q.eq('message_type', type);
       }
@@ -913,7 +905,6 @@
         resultsList.innerHTML = '';
       }
     });
-
     function highlightSearchTerm(text, term) {
       if (!term) return text;
       const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -923,7 +914,6 @@
         '<mark style="background:#ffeb3b; padding:2px 4px; border-radius:3px;">$1</mark>'
       );
     }
-
     function renderSearchResults(messages, searchTerm) {
       resultsList.innerHTML = '';
       if (!messages || messages.length === 0) {
@@ -994,7 +984,6 @@
     const emojiContainer = document.getElementById('full-emoji-picker-container');
     const picker = document.querySelector('emoji-picker');
     const messageContainer = document.querySelector('.message-container');
-
     function resetLayout() {
       emojiContainer.style.display = 'none';
       inputBar.style.removeProperty('bottom');
@@ -1101,7 +1090,6 @@
         }
       }, 250);
     }
-
     function stopAudioLogic() {
       clearTimeout(recordTimeout);
       if (isRecording) {
@@ -1153,7 +1141,6 @@
       files: [],
       previewUrl: null
     };
-
     function clearAttachGridPreviews() {
       if (window.gridPreviewUrls && Array.isArray(window.gridPreviewUrls)) {
         window.gridPreviewUrls.forEach(u => {
@@ -1164,7 +1151,6 @@
       }
       window.gridPreviewUrls = [];
     }
-
     function renderAttachGrid(files) {
       const grid = document.getElementById("attach-grid");
       const imgMain = document.getElementById("attach-preview-img");
@@ -1203,7 +1189,6 @@
         }
       }
     }
-
     function openAttachViewer(startIndex = 0) {
       const viewer = document.getElementById("attach-viewer");
       const img = document.getElementById("attach-viewer-img");
@@ -1229,7 +1214,6 @@
       nextBtn.style.display = files.length > 1 ? "block" : "none";
       viewer.style.display = "flex";
     }
-
     function closeAttachViewer() {
       const viewer = document.getElementById("attach-viewer");
       if (viewer) viewer.style.display = "none";
@@ -1240,7 +1224,6 @@
       }
       window.viewerUrl = null;
     }
-
     function viewerGo(delta) {
       const files = (Array.isArray(window.pendingAttachFiles) && window.pendingAttachFiles.length ? window.pendingAttachFiles :
         (Array.isArray(window.attachState?.files) && window.attachState.files.length ? window.attachState.files : []));
@@ -1250,7 +1233,6 @@
       if (idx >= files.length) idx = 0;
       openAttachViewer(idx);
     }
-
     function initAttachViewerHandlers() {
       const closeBtn = document.getElementById("attach-viewer-close");
       const prevBtn = document.getElementById("attach-viewer-prev");
@@ -1265,10 +1247,7 @@
       });
       let startX = 0;
       let isDown = false;
-      const onDown = (x) => {
-        startX = x;
-        isDown = true;
-      };
+      const onDown = (x) => {startX = x; isDown = true;};
       const onUp = (x) => {
         if (!isDown) return;
         isDown = false;
@@ -1459,16 +1438,7 @@
     async function sendImageMessage(imageUrl, fileName, caption = "") {
       const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
       const senderName = await fetchUserName();
-      const payload = {
-        n_int: currentUserNint,
-        recipient_nint: String(currentChat),
-        corp_oper_nr: currentCorp,
-        abv_name: senderName,
-        message_type: "image",
-        file_url: imageUrl,
-        file_name: fileName,
-        message: caption
-      };
+      const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl, file_name: fileName, message: caption};
       const {
         error
       } = await supabaseClient
@@ -1480,13 +1450,7 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          recipient_nint: String(currentChat),
-          corp_nr: currentCorp,
-          sender_name: senderName,
-          message_text: caption?.trim() ? `📷 ${caption.trim()}` : "📷 Foto",
-          sender_nint: currentUserNint
-        })
+        body: JSON.stringify({recipient_nint: String(currentChat), corp_nr: currentCorp, sender_name: senderName, message_text: caption?.trim() ? `📷 ${caption.trim()}` : "📷 Foto", sender_nint: currentUserNint})
       }).catch(err => console.error("Erro no push:", err));
     }
     /* ========================== FILE HANDLER =========================== */
@@ -1534,12 +1498,7 @@
       const chatId = String(currentChat);
       if (file.type?.startsWith('image/')) {
         try {
-          file = await compressImage(file, {
-            maxWidth: 1280,
-            maxHeight: 1280,
-            quality: 0.7,
-            mimeType: 'image/jpeg'
-          });
+          file = await compressImage(file, {maxWidth: 1280, maxHeight: 1280, quality: 0.7, mimeType: 'image/jpeg'});
         } catch (e) {
           console.warn("Falha a comprimir imagem, enviando original.", e);
         }
@@ -1554,10 +1513,7 @@
         const isImage = file.type?.startsWith('image/');
         if (isPdf && window.pdfjsLib) {
           try {
-            const thumbBlob = await renderPdfFirstPageToBlob(file, {
-              scale: 0.35,
-              quality: 0.7
-            });
+            const thumbBlob = await renderPdfFirstPageToBlob(file, {scale: 0.35, quality: 0.7});
             if (thumbBlob) {
               const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.jpg`;
               const {
@@ -1600,19 +1556,9 @@
           "Enviou uma foto 📷" :
           (isPdf ? `Documento PDF: ${file.name}` : `Ficheiro: ${file.name}`);
         const finalMsg = (caption || "").trim() || defaultMsg;
-        const payload = {
-          n_int: currentUserNint,
-          recipient_nint: chatId,
-          corp_oper_nr: currentCorp,
-          abv_name: senderName,
-          created_at: new Date().toISOString(),
-          message_type: isImage ? 'image' : 'file',
-          file_url: publicUrl,
-          file_name: file.name || safeName,
-          preview_url: previewUrl,
-          message: finalMsg,
-          batch_id: opts?.batchId || null
-        };
+        const payload = {n_int: currentUserNint, recipient_nint: chatId, corp_oper_nr: currentCorp, abv_name: senderName, created_at: new Date().toISOString(), message_type: isImage ? 'image' : 'file',
+                         file_url: publicUrl, file_name: file.name || safeName, preview_url: previewUrl, message: finalMsg, batch_id: opts?.batchId || null
+                        };
         const {
           error: insertError
         } = await supabaseClient
@@ -1628,13 +1574,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            recipient_nint: chatId,
-            corp_nr: currentCorp,
-            sender_name: senderName,
-            message_text: pushText,
-            sender_nint: currentUserNint
-          })
+          body: JSON.stringify({recipient_nint: chatId, corp_nr: currentCorp, sender_name: senderName, message_text: pushText, sender_nint: currentUserNint})
         }).catch(err => console.error("Erro no push:", err));
       } catch (err) {
         console.error("Erro no envio (detalhes):", err);
@@ -1654,10 +1594,7 @@
       const ctx = canvas.getContext('2d');
       canvas.width = viewport.width;
       canvas.height = viewport.height;
-      await page.render({
-        canvasContext: ctx,
-        viewport
-      }).promise;
+      await page.render({canvasContext: ctx, viewport}).promise;
       return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
     }
     /* ==================== LOADING CORPORATION DATA ===================== */
@@ -1699,34 +1636,10 @@
     let muteGeralCache = false;
     async function loadContacts() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
-      const colors = {
-        'A': '#f44336',
-        'B': '#e91e63',
-        'C': '#9c27b0',
-        'D': '#673ab7',
-        'E': '#3f51b5',
-        'F': '#2196f3',
-        'G': '#03a9f4',
-        'H': '#00bcd4',
-        'I': '#009688',
-        'J': '#4caf50',
-        'K': '#8bc34a',
-        'L': '#cddc39',
-        'M': '#ffeb3b',
-        'N': '#ffc107',
-        'O': '#ff9800',
-        'P': '#ff5722',
-        'Q': '#795548',
-        'R': '#9e9e9e',
-        'S': '#60727b',
-        'T': '#333333',
-        'U': '#ff4081',
-        'V': '#7c4dff',
-        'W': '#536dfe',
-        'X': '#448aff',
-        'Y': '#00e676',
-        'Z': '#cfd8dc'
-      };
+      const colors = {'A': '#f44336', 'B': '#e91e63', 'C': '#9c27b0', 'D': '#673ab7', 'E': '#3f51b5', 'F': '#2196f3', 'G': '#03a9f4', 'H': '#00bcd4', 'I': '#009688', 'J': '#4caf50', 'K': '#8bc34a',
+                      'L': '#cddc39', 'M': '#ffeb3b', 'N': '#ffc107', 'O': '#ff9800', 'P': '#ff5722', 'Q': '#795548', 'R': '#9e9e9e', 'S': '#60727b', 'T': '#333333', 'U': '#ff4081', 'V': '#7c4dff',
+                      'W': '#536dfe', 'X': '#448aff', 'Y': '#00e676', 'Z': '#cfd8dc'
+                     };
       const {
         data: users,
         error
@@ -1843,7 +1756,6 @@
       mutedSetCache = mutedSet;
       muteGeralCache = muteGeral;
     }
-
     function renderContactStatus(nint, {
       blocked,
       muted
@@ -2325,7 +2237,6 @@
       const meta = bubble.querySelector(".msg-meta");
       if (meta) meta.textContent = time || meta.textContent || "";
     }
-
     function renderBatchBubble(bubble) {
       const items = bubble._batchItems || [];
       const grid = bubble.querySelector(".batch-grid");
@@ -2388,7 +2299,6 @@
       });
     }
     window.batchStore = window.batchStore || new Map();
-
     function registerBatchMessage(msg, chatRef) {
       if (!msg?.batch_id) {
         if (msg.message_type === 'image' || msg.message_type === 'file') {
@@ -2404,14 +2314,12 @@
       arr.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       window.batchStore.set(key, arr);
     }
-
     function getBatchItems(chatRef, batchId) {
       const key = `${String(chatRef)}::${String(batchId)}`;
       return window.batchStore.get(key) || [];
     }
     window.chatBatchViewerIndex = 0;
     window.chatBatchViewerUrl = null;
-
     function openChatBatchViewer(chatRef, batchId, startIndex = 0) {
       const viewer = document.getElementById("chat-batch-viewer");
       const imgEl = document.getElementById("chat-batch-viewer-img");
@@ -2469,14 +2377,12 @@
       viewer.dataset.chatRef = String(chatRef);
       viewer.dataset.batchId = String(batchId);
     }
-
     function closeChatBatchViewer() {
       const viewer = document.getElementById("chat-batch-viewer");
       if (viewer) viewer.style.display = "none";
       const imgEl = document.getElementById("chat-batch-viewer-img");
       if (imgEl) imgEl.src = "";
     }
-
     function chatBatchViewerGo(delta) {
       const viewer = document.getElementById("chat-batch-viewer");
       if (!viewer) return;
@@ -2489,7 +2395,6 @@
       if (idx >= items.length) idx = 0;
       openChatBatchViewer(chatRef, batchId, idx);
     }
-
     function initChatBatchViewerHandlers() {
       const viewer = document.getElementById("chat-batch-viewer");
       const closeBtn = document.getElementById("chat-batch-viewer-close");
@@ -2539,7 +2444,6 @@
         year: 'numeric'
       });
     }
-
     function toggleAudio(id, btn) {
       const audio = document.getElementById(id);
       const icon = btn.querySelector('.material-icons');
@@ -2558,7 +2462,6 @@
         icon.textContent = 'play_arrow';
       }
     }
-
     function updateProgress(id) {
       const audio = document.getElementById(id);
       const fill = document.getElementById(`fill-${id}`);
@@ -2570,7 +2473,6 @@
       const secs = Math.floor(audio.currentTime % 60);
       timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
-
     function resetAudioIcon(id) {
       const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
       if (icon) icon.textContent = 'play_arrow';
@@ -2597,15 +2499,7 @@
         ).length > 1;
         const forwardBatchId = hasMultipleMedia ? crypto.randomUUID() : null;
         for (const msg of messagesToForward) {
-          const payload = {
-            n_int: currentUserNint,
-            recipient_nint: String(n_int),
-            corp_oper_nr: currentCorp,
-            abv_name: senderName,
-            message: msg.message,
-            is_forwarded: true,
-            message_type: msg.message_type || 'text'
-          };
+          const payload = {n_int: currentUserNint, recipient_nint: String(n_int), corp_oper_nr: currentCorp, abv_name: senderName, message: msg.message, is_forwarded: true, message_type: msg.message_type || 'text'};
           if (msg.message_type === 'image' || msg.message_type === 'file') {
             payload.file_url = msg.file_url;
             payload.file_name = msg.file_name;
@@ -2840,15 +2734,7 @@
         }
       }
       const senderName = await fetchUserName();
-      const messageData = {
-        n_int: currentUserNint,
-        recipient_nint: currentChat,
-        corp_oper_nr: currentCorp,
-        abv_name: senderName,
-        message: text,
-        file_url: audioUrl,
-        message_type: audioUrl ? 'audio' : 'text'
-      };
+      const messageData = {n_int: currentUserNint, recipient_nint: currentChat, corp_oper_nr: currentCorp, abv_name: senderName, message: text, file_url: audioUrl, message_type: audioUrl ? 'audio' : 'text'};
       if (currentReplyToMessage) {
         messageData.reply_to_message_id = currentReplyToMessage.id;
       }
@@ -2887,13 +2773,7 @@
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-              recipient_nint: String(currentChat),
-              corp_nr: currentCorp,
-              sender_name: senderName,
-              message_text: pushText,
-              sender_nint: currentUserNint
-            })
+            body: JSON.stringify({recipient_nint: String(currentChat), corp_nr: currentCorp, sender_name: senderName, message_text: pushText, sender_nint: currentUserNint})
           }).catch(err => console.error("Erro no push:", err));
         }
         cancelReply();
@@ -3129,7 +3009,6 @@
       }
       clearSelection();
     }
-
     function askConfirm(count, allMine) {
       const modal = document.getElementById('modal-confirm');
       if (modal) {
@@ -3147,7 +3026,6 @@
         confirmResolver = resolve;
       });
     }
-
     function resConfirm(choice) {
       const modal = document.getElementById('modal-confirm');
       if (modal) modal.style.display = 'none';
@@ -3173,7 +3051,6 @@
       inputEl.focus();
       clearSelection();
     }
-
     function cancelEdit() {
       currentEditingMessage = null;
       document.getElementById('edit-bar').style.display = 'none';
@@ -3196,18 +3073,16 @@
       function setKb(px) {
         document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(px)) + "px");
       }
-
       function isChatVisible() {
         const el = document.getElementById("messages");
         return el && el.style.display !== "none";
       }
-
       function getKeyboardHeight() {
         if (!window.visualViewport) return 0;
         const vv = window.visualViewport;
         return Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
       }
-
+      const footerEl = document.querySelector(".footer");
       function onKeyboardOpen(kbHeight) {
         if (!isChatVisible()) return;
         keyboardOpen = true;
@@ -3216,13 +3091,14 @@
         inputBar?.classList.add("keyboard-active");
         mainContent?.classList.add("keyboard-active");
         setKb(kbHeight);
+        if (footerEl) footerEl.style.display = "none";
+        if (inputBar) inputBar.style.bottom = `calc(${kbHeight}px + var(--gap))`;
         if (emojiContainer && emojiContainer.style.display === "block") {
           emojiContainer.style.display = "none";
         }
         scrollToBottom();
         setTimeout(scrollToBottom, 120);
       }
-
       function onKeyboardClose() {
         keyboardOpen = false;
         body.classList.remove("keyboard-open");
@@ -3230,8 +3106,9 @@
         inputBar?.classList.remove("keyboard-active");
         mainContent?.classList.remove("keyboard-active");
         setKb(0);
+        if (footerEl) footerEl.style.display = "";
+        if (inputBar) inputBar.style.removeProperty("bottom");
       }
-
       function detectKeyboard() {
         if (!keyboardOpen) baseInnerHeight = window.innerHeight;
         const kb = getKeyboardHeight();
@@ -3241,11 +3118,12 @@
           onKeyboardClose();
         } else if (keyboardOpen) {
           setKb(kb);
+          if (inputBar) inputBar.style.bottom = `calc(${kb}px + var(--gap))`;
           scrollToBottom();
           setTimeout(scrollToBottom, 120);
         }
       }
-      let kbRAF = null;
+      kbRAF = null;
       function scheduleDetect() {
         if (kbRAF) cancelAnimationFrame(kbRAF);
         kbRAF = requestAnimationFrame(detectKeyboard);
@@ -3489,10 +3367,7 @@
         typingChannel.send({
           type: 'broadcast',
           event: 'typing',
-          payload: {
-            nint: String(currentUserNint),
-            isTyping: true
-          }
+          payload: {n_int: String(currentUserNint), isTyping: true}
         });
         clearTimeout(typingTimer);
         typingTimer = setTimeout(() => {
@@ -3749,7 +3624,6 @@
         console.error("Erro inesperado:", err);
       }
     }
-
     function openFullEmojiPicker() {
       const menu = document.getElementById('reaction-menu');
       const pickerContainer = document.getElementById('full-emoji-picker-container');
@@ -3957,7 +3831,6 @@
       document.getElementById('contact-menu-clear').onclick = () => clearConversation();
       document.getElementById('contact-menu-overlay').style.display = 'flex';
     }
-
     function closeContactMenu() {
       document.getElementById('contact-menu-overlay').style.display = 'none';
       currentContactMenuTarget = null;
@@ -4222,11 +4095,9 @@
       mMessage.innerText = mensagem;
       modal.style.display = 'flex';
     }
-
     function closeAlertSystem() {
       document.getElementById('modal-alert-system').style.display = 'none';
     }
-
     function confirmCriticalAction(userName) {
       return new Promise((resolve) => {
         const modalSistema = document.getElementById('contact-menu-overlay');
