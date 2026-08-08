@@ -1997,7 +1997,7 @@
       document.getElementById("contact-title").style.display = 'block';
       currentChat = 'null';
       history.pushState(null, '', 'InterChat.html');
-      loadContacts();
+      loadContacts().then(() => applyPresenceState());
     }
     window.addEventListener('popstate', (event) => {
       if (currentChat && currentChat !== 'null') {
@@ -3280,6 +3280,16 @@
       window.forceRestoreKeyboard = onKeyboardClose;
     })();
     /* =================== INITIALIZATION AND REALTIME =================== */
+    function applyPresenceState() {
+      const pc = window.presenceChannel;
+      if (!pc) return;
+      const state = pc.presenceState();
+      document.querySelectorAll('.status-dot').forEach(dot => dot.classList.remove('online'));
+      Object.keys(state).forEach((nint) => {
+        const dot = document.querySelector(`.contact[data-nint="${nint}"] .status-dot`);
+        if (dot) dot.classList.add('online');
+      });
+    }
     document.addEventListener('DOMContentLoaded', async () => {
       loadCorpInfo();
       loadTheme();
@@ -3449,14 +3459,13 @@
           }
         },
       });
+      window.presenceChannel = presenceChannel;
       presenceChannel.on('presence', {
         event: 'sync'
       }, () => {
+        applyPresenceState();
         const state = presenceChannel.presenceState();
-        document.querySelectorAll('.status-dot').forEach(dot => dot.classList.remove('online'));
         Object.keys(state).forEach((nint) => {
-          const dot = document.querySelector(`.contact[data-nint="${nint}"] .status-dot`);
-          if (dot) dot.classList.add('online');
           if (currentChat !== 'geral' && String(nint) === currentChat) {
             document.querySelectorAll('.status-checks.sent').forEach(check => {
               check.classList.remove('sent');
