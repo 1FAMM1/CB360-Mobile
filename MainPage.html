@@ -839,6 +839,22 @@
         if (avatarEl) avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
       }
     }
+    /* ====================== NEXT SERVICE (ATUALIZADO) =================== */
+    /* Hora limite de cada tipo de turno: ED corta às 08:00, os restantes (PN/EN/ET/EP) às 20:00.
+       Rótulos para os tipos de ECIN, tal como usados em Escalas/Trocas Serviço. */
+    const SERVICE_LIMIT_HOUR = { ED: 8, EN: 20, ET: 20, PN: 20, EP: 20 };
+    const ECIN_LABELS = { ED: 'ECIN Dia', EN: 'ECIN Noite', ET: 'ECIN 24H', EP: 'ECIN Dia' };
+    function getServiceTypeLabel(values) {
+      const hasPN = values.includes('PN');
+      const hasECIN = values.some(v => ['ED', 'EN', 'ET', 'EP'].includes(v));
+      if (hasPN && hasECIN) return 'ECIN/Piquete';
+      if (hasPN) return 'Piquete';
+      if (hasECIN) {
+        const ecinValue = values.find(v => ['ED', 'EN', 'ET', 'EP'].includes(v));
+        return ECIN_LABELS[ecinValue] || 'ECIN';
+      }
+      return '-';
+    }
     async function loadNextService() {
       const nintCorp = parseInt(getNInt(), 10);
       const container = document.querySelector(".next-pill");
@@ -861,6 +877,7 @@
             servicesByDate[key].push(d.value);
           }
         });
+        const now = new Date();
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const futureDates = Object.keys(servicesByDate)
@@ -868,17 +885,22 @@
             const [y, m, d] = dateStr.split('-').map(Number);
             return {dateObj: new Date(y, m - 1, d), values: servicesByDate[dateStr]};
           })
-          .filter(d => d.dateObj >= today)
+          .filter(d => {
+            if (d.dateObj > today) return true;
+            if (d.dateObj < today) return false;
+            /* É hoje: só conta se pelo menos um dos turnos do dia ainda não passou da hora limite. */
+            const maxLimitHour = Math.max(...d.values.map(v => SERVICE_LIMIT_HOUR[v] ?? 20));
+            const limitDate = new Date(d.dateObj);
+            limitDate.setHours(maxLimitHour, 0, 0, 0);
+            return limitDate > now;
+          })
           .sort((a, b) => a.dateObj - b.dateObj);
         if (futureDates.length === 0) { textSpan.textContent = "Próximo Serviço: Não existem registos"; return; }
         const nextService = futureDates[0];
         const day = String(nextService.dateObj.getDate()).padStart(2,'0');
         const month = String(nextService.dateObj.getMonth() + 1).padStart(2,'0');
         const year = nextService.dateObj.getFullYear();
-        const values = nextService.values;
-        const hasPN = values.includes('PN');
-        const hasECIN = values.some(v => ['ED', 'EN', 'ET', 'EP'].includes(v));
-        let serviceType = hasPN && hasECIN ? 'ECIN/PIQUETE' : hasPN ? 'PIQUETE' : 'ECIN';
+        const serviceType = getServiceTypeLabel(nextService.values);
         textSpan.textContent = `Próximo Serviço: ${day}/${month}/${year} - ${serviceType}`;
       } catch (err) {
         console.error("Erro ao carregar próximo serviço:", err);
@@ -1081,7 +1103,7 @@
         badge.textContent = '!';
       }
     }
-    /* ====================== INTERNAL CHAT LOADING ====================== */
+    /* ====================== INTERNAL CHAT LOADING ======================== */
     async function updateChatBadge() {
       const corpOperNr = getCorp();
       const myNInt = getNInt();
