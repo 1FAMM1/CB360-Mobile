@@ -733,20 +733,6 @@
     let recordTimeout;
     let recordingTimer;
     const currentUserNint = String(localStorage.getItem("currentCorpNint"));
-
-    function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint");
-      const headers = {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        'x-my-corpo': corp,
-        'x-my-nint': nint
-      };
-      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
-      return headers;
-    }
     const searchInput = document.getElementById('global-search');
     const searchBtnContainer = document.getElementById('filter-btn-container');
     const contactList = document.getElementById('contact-list');
