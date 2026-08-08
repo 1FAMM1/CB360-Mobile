@@ -688,9 +688,9 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
-    function getNInt() {return localStorage.getItem("currentCorpNint") || "204";}
-    function getAuthToken() {return localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzI0MDY2NzR9.uaB01G5l6sfKxlh4cPv-DZ8xDptjouuUbGY0m8_6hYA';}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getAuthToken() {return localStorage.getItem("authToken");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
@@ -732,11 +732,11 @@
     let isRecording = false;
     let recordTimeout;
     let recordingTimer;
-    const currentUserNint = String(localStorage.getItem("currentCorpNint") || "204");
+    const currentUserNint = String(localStorage.getItem("currentCorpNint"));
 
     function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr") || "0805";
-      const nint = localStorage.getItem("currentCorpNint") || "204";
+      const corp = localStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -752,8 +752,8 @@
     const contactList = document.getElementById('contact-list');
     const resultsContainer = document.getElementById('search-results-container');
     const resultsList = document.getElementById('search-results-list');
-    const corp = localStorage.getItem("currentCorpOperNr") || "0805";
-    const MyNint = String(localStorage.getItem("currentCorpNint") || "204");
+    const corp = localStorage.getItem("currentCorpOperNr");
+    const MyNint = String(localStorage.getItem("currentCorpNint"));
     let searchTimeout;
     const badgeEls = {unread: document.getElementById('badge-unread'), photo: document.getElementById('badge-photo'), video: document.getElementById('badge-video'), link: document.getElementById('badge-link'),
                       gif: document.getElementById('badge-gif'), audio: document.getElementById('badge-audio'), document: document.getElementById('badge-document'), sticker: document.getElementById('badge-sticker'),
@@ -1436,7 +1436,7 @@
       return publicUrl;
     }
     async function sendImageMessage(imageUrl, fileName, caption = "") {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const senderName = await fetchUserName();
       const payload = {n_int: currentUserNint, recipient_nint: String(currentChat), corp_oper_nr: currentCorp, abv_name: senderName, message_type: "image", file_url: imageUrl, file_name: fileName, message: caption};
       const {
@@ -1494,7 +1494,7 @@
         return;
       }
       if (!currentChat || currentChat === "null") return;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const chatId = String(currentChat);
       if (file.type?.startsWith('image/')) {
         try {
@@ -1599,7 +1599,7 @@
     }
     /* ==================== LOADING CORPORATION DATA ===================== */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -1635,7 +1635,7 @@
     let mutedSetCache = new Set();
     let muteGeralCache = false;
     async function loadContacts() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const colors = {'A': '#f44336', 'B': '#e91e63', 'C': '#9c27b0', 'D': '#673ab7', 'E': '#3f51b5', 'F': '#2196f3', 'G': '#03a9f4', 'H': '#00bcd4', 'I': '#009688', 'J': '#4caf50', 'K': '#8bc34a',
                       'L': '#cddc39', 'M': '#ffeb3b', 'N': '#ffc107', 'O': '#ff9800', 'P': '#ff5722', 'Q': '#795548', 'R': '#9e9e9e', 'S': '#60727b', 'T': '#333333', 'U': '#ff4081', 'V': '#7c4dff',
                       'W': '#536dfe', 'X': '#448aff', 'Y': '#00e676', 'Z': '#cfd8dc'
@@ -1826,7 +1826,7 @@
     }
     /* ========================== UPDATE BADGES ========================== */
     async function updateUnreadBadges() {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {
         count: totalGeral
       } = await supabaseClient
@@ -2597,7 +2597,7 @@
     }
     /* ======================== LOADING MESSAGES (FIXED) ========================= */
     async function loadMessages(chat = currentChat) {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const messagesEl = document.getElementById("messages");
       const chatRef = chat || 'geral';
       messagesEl.innerHTML = '';
@@ -2659,7 +2659,7 @@
     }
     /* ====================== MARK MESSAGE AS READ ======================= */
     async function markGeralAsRead() {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {
         data: messages
       } = await supabaseClient
@@ -2708,7 +2708,7 @@
         resetLayout();
         inputEl.dispatchEvent(new Event('input'));
       }
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       if (currentEditingMessage && !audioUrl) {
         sendBtn.disabled = false;
         return;
@@ -2889,7 +2889,7 @@
     /* =========================== ACTION STAR =========================== */
     async function actionStar() {
       if (selectedMessages.length === 0) return;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       try {
         for (const msg of selectedMessages) {
           const {
@@ -3173,7 +3173,7 @@
       loadTheme();
       await loadContacts();
       updateUnreadBadges();
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       supabaseClient.channel('chat_realtime')
         .on('postgres_changes', {
           event: 'INSERT',
@@ -3198,7 +3198,7 @@
           if (currentChat === 'geral' && msg.recipient_nint === 'geral') {
             addMessageToDOM(msg, 'geral');
             if (String(msg.n_int) !== currentUserNint && document.getElementById("messages")?.style.display !== 'none') {
-              const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+              const currentCorp = localStorage.getItem("currentCorpOperNr");
               const geralContact = document.querySelector('.contact[data-nint="geral"]');
               const currentBadge = geralContact?.querySelector('.unread-badge');
               const badgeValue = currentBadge ? currentBadge.textContent : null;
@@ -3709,7 +3709,7 @@
     }
     /* ========================= DELETE MESSAGE ========================== */
     async function deleteMessage(messageId) {
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {
         error
       } = await supabaseClient
@@ -3751,7 +3751,7 @@
     /* ======================= SEND READ RECIPIENT ======================= */
     async function sendReadReceipt(toNint) {
       if (toNint === 'geral' || !toNint) return;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {
         error
       } = await supabaseClient
@@ -3780,7 +3780,7 @@
         nint: contactNint,
         name: contactName
       };
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {
         data: blockData
       } = await supabaseClient
@@ -3840,7 +3840,7 @@
       if (!currentContactMenuTarget) return;
       const targetNint = currentContactMenuTarget.nint;
       const targetName = currentContactMenuTarget.name;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {
         data: existing
       } = await supabaseClient
@@ -3899,7 +3899,7 @@
       if (!currentContactMenuTarget) return;
       const targetNint = currentContactMenuTarget.nint;
       const targetName = currentContactMenuTarget.name;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const {
         data: existing
       } = await supabaseClient
@@ -3960,7 +3960,7 @@
       if (!currentContactMenuTarget) return;
       const targetNint = currentContactMenuTarget.nint;
       const targetName = currentContactMenuTarget.name;
-      const currentCorp = localStorage.getItem("currentCorpOperNr") || "0805";
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
       const myNint = localStorage.getItem("currentUserNint") || currentUserNint;
       const confirmed = await confirmCriticalAction(targetName);
       if (!confirmed) return;
