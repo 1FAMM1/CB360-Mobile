@@ -80,9 +80,9 @@
     .dark-mode .reaction-menu {background: #232d36; box-shadow: 0 4px 20px rgba(0, 0, 0, .4);}
     .dark-mode .plus-button {background: #3b4a54; box-shadow: -8px 0 12px #232d36;}
     .dark-mode .plus-button .material-icons {color: #aebac1;}
-    .dark-mode .reaction-badge {background: #333; border-color: #555;}
-    .dark-mode .reaction-badge.my-reaction {background: #f9a825; border-color: #fbc02d; color: #fff;}
-    .dark-mode .reaction-count {color: #ddd;}
+    .dark-mode .reaction-badge {background: transparent; border-color: transparent;}
+    .dark-mode .reaction-badge.my-reaction {background: transparent; border-color: transparent; color: #fff;}
+    .dark-mode .reaction-count {background: rgba(0,0,0,.5); color: #ddd;}
     .dark-mode .reaction-badge:hover {box-shadow: 0 2px 5px rgba(0, 0, 0, .6);}
     .dark-mode .custom-confirm-card {background: #2b2b2b; color: #fff;}
     .dark-mode .confirm-text {color: #eee;}
@@ -276,19 +276,20 @@
     .plus-button {display: flex !important; align-items: center; justify-content: center; width: 28px; height: 28px; background: #f0f2f5; border-radius: 50%; cursor: pointer; flex-shrink: 0;
                   margin-left: 5px; box-shadow: -8px 0 12px #fff;}
     .plus-button .material-icons {font-size: 20px; color: #667781;}
-    .message-reactions {position: absolute; bottom: -12px; right: 10px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 5; pointer-events: all;}
-    .reaction-badge {display: inline-flex; align-items: center; justify-content: center; background: #f0f0f0; border: 1px solid #ccc; border-radius: 20px; height: 21px; width: 21px; padding: 0 5px;
-                     box-shadow: 0 1px 2px rgba(0, 0, 0, .1); transition: all .2s; cursor: pointer; flex-shrink: 0;}
-    .reaction-badge.my-reaction {background: #ffd54f; border-color: #ffb300;}
+    .message-reactions {position: absolute; bottom: -14px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 5; pointer-events: all;}
+    .message.self .message-reactions {right: 10px;}
+    .message.other .message-reactions {left: 10px;}
+    .reaction-badge {display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 20px; height: 21px; width: 21px; padding: 0 5px;
+                     box-shadow: 0 1px 2px rgba(0, 0, 0, .18); transition: all .2s; cursor: pointer; flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15));}
+    .reaction-badge.my-reaction {background: transparent; border: none;}
     .reaction-badge.my-reaction .reaction-count {color: #d32f2f; font-weight: 700;}
-    .reaction-emoji {font-size: 12px; line-height: 1; display: flex; align-items: center; justify-content: center;}
-    .reaction-count {font-size: 11px; font-weight: 700; margin-left: 2px; color: #444;}
-    .reaction-badge:hover {transform: scale(1.1); box-shadow: 0 2px 5px rgba(0, 0, 0, .18);}
+    .reaction-emoji {font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;}
+    .reaction-count {font-size: 11px; font-weight: 700; margin-left: 2px; color: #444; background: rgba(255,255,255,.85); border-radius: 8px; padding: 0 3px;}
+    .reaction-badge:hover {transform: scale(1.1);}
     .reaction-badge:active {transform: scale(.95);}
     .thumb-emoji {margin-bottom: 5px;}
-    .message:has(.reaction-badge) {padding-bottom: 8px; position: relative;}
+    .message:has(.reaction-badge) {padding-bottom: 6px; position: relative; margin-bottom: 20px;}
     .reaction-badge:has(.reaction-count) {min-width: 35px; padding: 0 8px;}
-    .message.self:has(.reaction-badge) {margin-bottom: 15px;}
     /* ============================================================
     CONFIRM / EMOJI / DRAFT
     ============================================================ */
