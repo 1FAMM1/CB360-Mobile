@@ -1223,10 +1223,15 @@
       const corpOperNr = getCorp();
       const badge = document.querySelector('#hospadv .bdg');
       if (!badge) return;
-      if (!corpOperNr) { badge.textContent = '0'; return; }
+      if (!corpOperNr) { badge.textontent = '0'; return; }
       try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/hospital_restrictions?select=*&corp_oper_nr=eq.${corpOperNr}`, { headers: getSupabaseHeaders() });
-        const data = await response.json();
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/hospital_restrictions?select=service,hospital&corp_oper_nr=eq.${corpOperNr}&service=not.is.null&hospital=neq.EMPTY`, { 
+            headers: getSupabaseHeaders() 
+          }
+        );
+        const rawData = await response.json();
+        const data = (rawData || []).filter(item => item.service && item.service.trim() !== "" && item.hospital && item.hospital.trim().toUpperCase() !== "EMPTY");
         badge.textContent = `${data.length}`;
       } catch (err) {
         console.error('Erro ao buscar constrangimentos hospitalares:', err);
