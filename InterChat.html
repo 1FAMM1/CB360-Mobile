@@ -732,7 +732,7 @@
     let isRecording = false;
     let recordTimeout;
     let recordingTimer;
-    const currentUserNint = String(localStorage.getItem("currentCorpNint")");
+    const currentUserNint = String(localStorage.getItem("currentCorpNint"));
 
     function getSupabaseHeaders(options = {}) {
       const corp = localStorage.getItem("currentCorpOperNr");
