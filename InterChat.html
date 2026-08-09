@@ -209,7 +209,7 @@
                      background: transparent; width: 100%; max-width: 100%; box-sizing: border-box; transition: bottom .12s ease;}
     .chat-input-bar.keyboard-active {box-shadow: 0 -4px 12px rgba(0, 0, 0, .12); background: rgba(255, 255, 255, .98);}
     .input-wrapper {display: flex; flex: 1; min-width: 0; align-items: center; background: #ccc; border-radius: 25px; padding: 5px 12px; gap: 2px; min-height: 40px; transition: all .3s ease;}
-    #chat-input {color: #fff; flex: 1; min-width: 0; border: none; background: transparent; outline: none; resize: none; padding: 10px 5px; font-size: 15px; max-height: 100px; overflow-y: auto;
+    #chat-input {color: #444; flex: 1; min-width: 0; border: none; background: transparent; outline: none; resize: none; padding: 10px 5px; font-size: 15px; max-height: 100px; overflow-y: auto;
                  font-family: inherit; scrollbar-width: none; -ms-overflow-style: none;}
     #chat-input::-webkit-scrollbar {width: 0; background: transparent;}
     .chat-input-bar button {height: 40px; width: 40px; padding: 4px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent;
@@ -508,7 +508,7 @@
   <div class="chat-input-bar">
     <div class="input-wrapper">
       <button id="emoji-open-btn" type="button"><span class="material-icons">sentiment_satisfied_alt</span></button>
-      <input type="text" id="chat-input" placeholder="Mensagem" autocomplete="off" />
+      <textarea id="chat-input" placeholder="Mensagem" autocomplete="off" rows="1"></textarea>
       <button id="attachment-btn" type="button"><span class="material-icons">attach_file</span></button>
       <input type="file" id="doc-file-input" accept="*/*" multiple style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
       <button id="camera-btn" type="button"><span class="material-icons">photo_camera</span></button>
@@ -994,23 +994,25 @@
       }, 100);
     }
     inputMensage.addEventListener('input', function() {
-      const hasText = this.value.trim().length > 0;
-      const novoIcone = hasText ? 'send' : 'mic';
-      if (iconBtn.textContent !== novoIcone) {
-        iconBtn.style.transform = 'rotate(180deg) scale(0)';
-        iconBtn.style.opacity = '0';
-        setTimeout(() => {
-          iconBtn.textContent = novoIcone;
-          iconBtn.style.transform = 'rotate(0deg) scale(1)';
-          iconBtn.style.opacity = '1';
-          if (hasText) {
-            inputBar.classList.add('typing');
-          } else {
-            inputBar.classList.remove('typing');
-          }
-        }, 150);
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  const hasText = this.value.trim().length > 0;
+  const novoIcone = hasText ? 'send' : 'mic';
+  if (iconBtn.textContent !== novoIcone) {
+    iconBtn.style.transform = 'rotate(180deg) scale(0)';
+    iconBtn.style.opacity = '0';
+    setTimeout(() => {
+      iconBtn.textContent = novoIcone;
+      iconBtn.style.transform = 'rotate(0deg) scale(1)';
+      iconBtn.style.opacity = '1';
+      if (hasText) {
+        inputBar.classList.add('typing');
+      } else {
+        inputBar.classList.remove('typing');
       }
-    });
+    }, 150);
+  }
+});
     emojiBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (emojiContainer.style.display === 'block') {
@@ -3384,7 +3386,7 @@
       });
       document.getElementById("chat-send-btn").onclick = () => sendMessage();
       inputEl.onkeydown = e => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           sendMessage();
         }
