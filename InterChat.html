@@ -3157,6 +3157,8 @@
     document.addEventListener('DOMContentLoaded', async () => {
       loadCorpInfo();
       loadTheme();
+      await supabaseClient.realtime.setAuth(getAuthToken());
+  console.log('Realtime auth (DOMContentLoaded):', JSON.parse(atob(getAuthToken().split('.')[1])));
       await loadContacts();
       updateUnreadBadges();
       const currentCorp = localStorage.getItem("currentCorpOperNr");
