@@ -202,11 +202,12 @@
       container.innerHTML = '<div class="loading-msg"><span class="material-icons">autorenew</span>A carregar restrições...</div>';
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/hospital_restrictions?select=service,hospital,start_date,start_time,end_date,end_time,next_hospital`, {
+          `${SUPABASE_URL}/rest/v1/hospital_restrictions?select=service,hospital,start_date,start_time,end_date,end_time,next_hospital&service=not.is.null&hospital=neq.EMPTY`, {
             headers: getSupabaseHeaders()
           }
         );
-        const data = await response.json();
+        const rawData = await response.json();
+        const data = (rawData || []).filter(item => item.service && item.service.trim() !== "" && item.hospital && item.hospital.trim().toUpperCase() !== "EMPTY");
         container.innerHTML = "";
         if (!data || data.length === 0) {
           const card = document.createElement("div");
