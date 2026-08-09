@@ -126,7 +126,7 @@
     /* ============================================================
     NEXT SERVICES SCROLL CONTAINER
     ============================================================ */
-    #nextServicesCard {flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 5px; scrollbar-width: none; width: 100%; max-width: 100%; margin-bottom: 35px; }
+    #nextServicesCard {flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 5px; scrollbar-width: none; width: 100%; max-width: 100%; margin-bottom: 40px; }
     #nextServicesCard::-webkit-scrollbar {display: none;}
     /* ============================================================
     FOOTER
@@ -260,7 +260,7 @@
       card.innerHTML = `<span class="error-message">⚠️ ${message}</span>`;
     }    
     function validateCorpData() {
-      const nintCorpStr = localStorage.getItem("currentCorpNint") || "205";
+      const nintCorpStr = localStorage.getItem("currentCorpNint");
       if (!nintCorpStr || isNaN(parseInt(nintCorpStr, 10))) {
         return null;
       }
@@ -423,6 +423,15 @@
                    EX: {tipo: "EXTRA", turno: "08:00-20:00"}};
       return map[code] || { tipo: code, turno: "-" };
     }
+    function getServiceValuesToMatch(value) {
+      let valuesToMatch = [value];
+      if (value === "ED" || value === "EN") {
+        valuesToMatch = [value, "ET"];
+      } else if (value === "ET") {
+        valuesToMatch = ["ED", "EN", "ET"];
+      }
+      return valuesToMatch;
+    }
     function formatDateWithWeekday(day, month, year) {
       const date = new Date(year, month - 1, day);
       const weekdays = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
@@ -434,18 +443,28 @@
       try {
         const corpOperNr = localStorage.getItem("currentCorpOperNr");
         const nintCorp = validateCorpData();
-        if (!nintCorp || !corpOperNr) return [];        
-        const regServUrl = `${SUPABASE_URL}/rest/v1/reg_serv?select=n_int&corp_oper_nr=eq.${corpOperNr}&day=eq.${day}&month=eq.${month}&value=eq.${value}`;
+        if (!nintCorp || !corpOperNr) return [];
+        const valuesToMatch = getServiceValuesToMatch(value);
+        const table = value === "EX" ? "reg_extras" : "reg_serv";
+        const regServUrl = `${SUPABASE_URL}/rest/v1/${table}?select=n_int,value&corp_oper_nr=eq.${corpOperNr}&day=eq.${day}&month=eq.${month}&value=in.(${valuesToMatch.join(',')})`;
         const servResponse = await fetch(regServUrl, { headers: getSupabaseHeaders() });
-        const servData = await servResponse.json();        
-        if (!Array.isArray(servData) || servData.length === 0) return [];        
+        const servData = await servResponse.json();
+        if (!Array.isArray(servData) || servData.length === 0) return [];
+        const valueByNInt = {};
+        servData.forEach(s => {
+          const n = parseInt(s.n_int);
+          if (!isNaN(n)) valueByNInt[n] = s.value;
+        });
         const nInts = [...new Set(servData.map(s => parseInt(s.n_int)).filter(n => !isNaN(n)))];
-        if (nInts.length === 0) return [];        
+        if (nInts.length === 0) return [];
         const nIntsPadded = nInts.map(n => String(n).padStart(3, '0'));
         const elemUrl = `${SUPABASE_URL}/rest/v1/reg_elems?select=n_int,full_name,patent,photo_url&n_int=in.(${nIntsPadded.join(',')})&corp_oper_nr=eq.${corpOperNr}`;
         const elemResponse = await fetch(elemUrl, { headers: getSupabaseHeaders() });
-        const allElements = await elemResponse.json();        
-        if (!Array.isArray(allElements)) return [];        
+        const allElements = await elemResponse.json();
+        if (!Array.isArray(allElements)) return [];
+        allElements.forEach(e => {
+          e.serviceValue = valueByNInt[parseInt(e.n_int)] || null;
+        });
         allElements.sort((a, b) => parseInt(a.n_int) - parseInt(b.n_int));
         return allElements;
       } catch (err) {
@@ -467,13 +486,17 @@
                           "Bombeiro(a) 3ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/B3C.png",
                           "Estagiário(a)": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Est..png",
                           "Bº Especialista": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Esp.png",};
+    const serviceColors = {PN: {bg: 'linear-gradient(135deg, var(--blue), #1aa9c5)', text: '#fff'}, ED: {bg: 'linear-gradient(135deg, #ffd54f, #ffca28, #ffa726)', text: '#444'},
+                           EN: {bg: 'linear-gradient(135deg, #3949ab, #2c387e, #1a237e)', text: '#fff'}, ET: {bg: 'linear-gradient(135deg, #ab47bc, #9c27b0, #8e24aa)', text: '#fff'},
+                           EX: {bg: 'linear-gradient(135deg, #c62828, #8b0000)', text: '#fff'}
+                          };
     function openServiceModal(title, elements) {
       const modal = document.getElementById('serviceModal');
       const container = document.getElementById('modalElementsContainer');
-      const modalTitle = document.getElementById('modalTitle');      
+      const modalTitle = document.getElementById('modalTitle');  
       modalTitle.textContent = title;
       modal.style.display = 'flex';
-      container.innerHTML = '';      
+      container.innerHTML = '';
       if (elements === null) {
         container.innerHTML = `
           <div style="display: flex; justify-content: center; align-items: center; padding: 40px;">
@@ -482,7 +505,7 @@
           </div>
         `;
         return;
-      }      
+      }
       if (!elements || elements.length === 0) {
         const p = document.createElement('p');
         p.textContent = 'Nenhum elemento encontrado';
@@ -493,27 +516,36 @@
       } else {
         elements.forEach(e => {
           const card = document.createElement('div');
-          card.className = 'element-card';          
+          card.className = 'element-card';
+          card.style.position = 'relative';
           const avatar = document.createElement('img');
           avatar.className = 'element-avatar';
           avatar.src = e.photo_url || 'https://www.gravatar.com/avatar/?d=mp';
-          avatar.alt = e.full_name || 'Avatar';          
+          avatar.alt = e.full_name || 'Avatar';
           const info = document.createElement('div');
           info.className = 'element-info';
           info.innerHTML = `
             <span class="element-name">${e.full_name || 'N/D'}</span>
             <span>${e.patent || 'N/D'}</span>
-          `;          
+          `;
           const patenteImg = document.createElement('img');
           patenteImg.src = patenteLogos[e.patent] || '';
           patenteImg.alt = e.patent || '';
           patenteImg.style.width = '30px';
           patenteImg.style.height = '30px';
           patenteImg.style.objectFit = 'contain';
-          patenteImg.style.marginLeft = 'auto';          
+          patenteImg.style.marginLeft = 'auto';
           card.appendChild(avatar);
           card.appendChild(info);
           card.appendChild(patenteImg);
+          if (e.serviceValue) {
+            const badge = document.createElement('span');
+            badge.textContent = e.serviceValue;
+            const colorInfo = serviceColors[e.serviceValue] || { bg: 'var(--red)', text: '#fff' };
+            badge.style.cssText = `position: absolute; top: -6px; right: -6px; background: ${colorInfo.bg}; color: ${colorInfo.text}; font-size: 10px; font-weight: 700;
+                                   padding: 3px 7px; border-radius: 10px; box-shadow: var(--sh-sm); letter-spacing: 0.3px;`;
+            card.appendChild(badge);
+          }
           container.appendChild(card);
         });
       }
@@ -556,16 +588,17 @@
         container.style.display = "block";
         let index = 0;
         for (const service of services) {
-          const countUrl = service.value === "EX"
-          ? `${SUPABASE_URL}/rest/v1/reg_extras?select=id&month=eq.${service.month}&year=eq.${yearToFetch}&day=eq.${service.day}&value=eq.${service.value}&corp_oper_nr=eq.${corpOperNr}`
-          : `${SUPABASE_URL}/rest/v1/reg_serv?select=id&month=eq.${service.month}&year=eq.${yearToFetch}&day=eq.${service.day}&value=eq.${service.value}&corp_oper_nr=eq.${corpOperNr}`;
-          const countResponse = await fetch(countUrl, { headers: getSupabaseHeaders() });
-          const countData = await countResponse.json();
-          const totalElements = Array.isArray(countData) ? countData.length : 0;
-          const card = createServiceCard({ day: service.day, month: service.month, value: service.value, totalElements, year: yearToFetch }, index);
-          container.appendChild(card);
-          index++;
-        }
+  const valuesToMatch = getServiceValuesToMatch(service.value);
+  const table = service.value === "EX" ? "reg_extras" : "reg_serv";
+  const countUrl = `${SUPABASE_URL}/rest/v1/${table}?select=n_int&month=eq.${service.month}&year=eq.${yearToFetch}&day=eq.${service.day}&value=in.(${valuesToMatch.join(',')})&corp_oper_nr=eq.${corpOperNr}`;
+  const countResponse = await fetch(countUrl, { headers: getSupabaseHeaders() });
+  const countData = await countResponse.json();
+  const uniqueNInts = new Set((countData || []).map(d => d.n_int));
+  const totalElements = uniqueNInts.size;
+  const card = createServiceCard({ day: service.day, month: service.month, value: service.value, totalElements, year: yearToFetch }, index);
+  container.appendChild(card);
+  index++;
+}
       } catch (err) {
         console.error("Erro ao carregar próximos serviços:", err);
       }
