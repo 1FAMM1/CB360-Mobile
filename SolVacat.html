@@ -96,20 +96,36 @@
                         cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); text-align: center;}
     .save-vacation-btn:hover {background: linear-gradient(135deg, #229954, #1e8449); transform: translateY(-1px);}
     .save-vacation-btn.show {display: block; animation: slideDown 0.3s ease;}
-
     /* ============================================================
     VACATION CARDS CONTAINER & CARDS
     ============================================================ */
-    #vacationCardsContainer {width: 100%; display: flex; flex-direction: column; gap: 8px;}
-    .vacation-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--orange); border-radius: var(--r-sm); padding: 12px 14px;
-                    box-shadow: var(--sh-sm); font-size: 12.5px; display: flex; justify-content: space-between; align-items: center; color: var(--txt-1); transition: transform var(--ease);}
-    .vacation-card.pending {border-left-color: #ef6c00;}
-    .vacation-card.approved {border-left-color: #2e7d32;}
-    .vacation-card.rejected {border-left-color: #b71c1c;}
-    .vacation-state {font-weight: 700;}
-    .vacation-card.pending .vacation-state {color: #ef6c00;}
-    .vacation-card.approved .vacation-state {color: #2e7d32;}
-    .vacation-card.rejected .vacation-state {color: #b71c1c;}
+    .vacation-cards-title {width: 100%; font-size: 13.5px; font-weight: 700; color: var(--txt-2); margin: 15px 2px 0px 0px; letter-spacing: 0.2px;}
+    .vacation-cards-title::before {content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--red); display: inline-block; margin-right: 5px;}
+    #vacationCardsContainer {width: 100%; display: flex; flex-direction: column; gap: 5px;}
+    .vacation-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--orange); border-radius: var(--r-md); padding: 13px 16px;
+                    box-shadow: var(--sh-sm); font-size: 12.5px; display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--txt-1);
+                    transition: transform var(--ease), box-shadow var(--ease), background var(--ease);}
+    .vacation-card.pending {border-left-color: #ef6c00; background: linear-gradient(to right, rgba(239, 108, 0, 0.08), var(--surface) 22%);}
+    .vacation-card.approved {border-left-color: #2e7d32; background: linear-gradient(to right, rgba(46, 125, 50, 0.08), var(--surface) 22%);}
+    .vacation-card.rejected {border-left-color: #b71c1c; background: linear-gradient(to right, rgba(183, 28, 28, 0.08), var(--surface) 22%);}
+    .dark-mode .vacation-card.pending {background: linear-gradient(to right, rgba(239, 108, 0, 0.14), var(--surface) 26%);}
+    .dark-mode .vacation-card.approved {background: linear-gradient(to right, rgba(46, 125, 50, 0.14), var(--surface) 26%);}
+    .dark-mode .vacation-card.rejected {background: linear-gradient(to right, rgba(183, 28, 28, 0.14), var(--surface) 26%);}
+    .vacation-card-info {display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;}
+    .vacation-card-label {font-size: 10px; font-weight: 500; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85;}
+    .vacation-card-dates {font-size: 14px; font-weight: 700; color: var(--txt-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+    .vacation-state {display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: 11px; padding: 6px 12px; border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+                     border: 1px solid transparent;}
+    .vacation-state .material-icons {font-size: 15px; line-height: 1;}
+    .vacation-card.pending .vacation-state {color: #ef6c00; background: rgba(239, 108, 0, 0.20); border-color: rgba(239, 108, 0, 0.35);}
+    .vacation-card.approved .vacation-state {color: #2e7d32; background: rgba(46, 125, 50, 0.20); border-color: rgba(46, 125, 50, 0.35);}
+    .vacation-card.rejected .vacation-state {color: #b71c1c; background: rgba(183, 28, 28, 0.20); border-color: rgba(183, 28, 28, 0.35);}
+    .dark-mode .vacation-card.pending .vacation-state {color: #ffb74d; background: rgba(255, 152, 0, 0.24); border-color: rgba(255, 152, 0, 0.4);}
+    .dark-mode .vacation-card.approved .vacation-state {color: #81c784; background: rgba(76, 175, 80, 0.24); border-color: rgba(76, 175, 80, 0.4);}
+    .dark-mode .vacation-card.rejected .vacation-state {color: #e57373; background: rgba(239, 83, 80, 0.24); border-color: rgba(239, 83, 80, 0.4);}
+    .vacation-card-empty {border-left-color: var(--border); justify-content: center;}
+    .vacation-card-empty-content {display: flex; align-items: center; gap: 8px; color: var(--txt-3); font-size: 12.5px; text-align: center;}
+    .vacation-card-empty-content .material-icons {font-size: 20px; color: var(--txt-3); flex-shrink: 0;}
     /* ============================================================
     TOAST
     ============================================================ */
@@ -177,6 +193,7 @@
       <div class="calendar-grid" id="calendarGrid"></div>
     </div>    
     <button id="saveVacationBtn" class="save-vacation-btn" onclick="saveVacation()">Efetuar Pedido</button>
+    <p class="vacation-cards-title">Períodos Solicitados:</p>
     <div id="vacationCardsContainer"></div>
   </div>
   <footer class="footer">
@@ -268,10 +285,13 @@
         container.innerHTML = '';
         if (vacationsData.length === 0) {
           const emptyMsg = document.createElement('div');
-          emptyMsg.className = 'vacation-card';
-          emptyMsg.style.justifyContent = 'center';
-          emptyMsg.style.textAlign = 'center';
-          emptyMsg.innerHTML = `<strong>Ainda não marcou Férias de Voluntário para o ano ${currentYear}.</strong>`;
+          emptyMsg.className = 'vacation-card vacation-card-empty';
+          emptyMsg.innerHTML = `
+            <div class="vacation-card-empty-content">
+              <span class="material-icons">event_busy</span>
+              <span>Ainda não efetuou pedidos de férias de voluntariado.</span>
+            </div>
+          `;
           container.appendChild(emptyMsg);
           return;
         }
@@ -421,6 +441,7 @@
     function showVacationCard(days, month, year, state) {
       const names = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
       const stateClasses = {'Em Aprovação': 'pending', 'Aprovadas': 'approved', 'Recusadas': 'rejected'};
+      const stateIcons = {'Em Aprovação': 'hourglass_top', 'Aprovadas': 'check_circle', 'Recusadas': 'cancel'};
       const card = document.createElement('div');
       card.className = `vacation-card ${stateClasses[state] || ''}`;
       const sortedDays = days.sort((a, b) => a - b);
@@ -440,12 +461,13 @@
         groups.push(start === end ? String(start).padStart(2, '0') : `${String(start).padStart(2, '0')} a ${String(end).padStart(2, '0')}`);
       }
       const rangeStr = groups.join(', ');
+      const icon = stateIcons[state] || 'schedule';
       card.innerHTML = `
-        <div style="display:flex; justify-content: space-between; align-items: center; width: 100%;">
-          <div style="flex: 1; text-align: left;"><strong>Férias Solicitadas:</strong></div>
-          <div style="flex: 2; text-align: center;">${rangeStr} de ${names[month-1]}</div>
-          <div style="flex: 1; text-align: right;" class="vacation-state">${state}</div>
+        <div class="vacation-card-info">
+          <span class="vacation-card-label">${names[month - 1]} · ${year}</span>
+          <span class="vacation-card-dates">${rangeStr}</span>
         </div>
+        <span class="vacation-state"><span class="material-icons">${icon}</span>${state}</span>
       `;
       document.getElementById('vacationCardsContainer').appendChild(card);
     }
