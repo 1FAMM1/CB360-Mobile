@@ -226,7 +226,7 @@
         comunicados.forEach(comun => {
           if (!comun.comun_url) return;
           const publicUrl = comun.comun_url.startsWith('http') ? comun.comun_url :
-          `${SUPABASE_URL}/storage/v1/object/public/comunicados/${comun.comun_url}`;
+          `${SUPABASE_URL}/storage/v1/object/public/cb_pdf/${comun.comun_url}`;
           const isRead = viewedDocs.includes(publicUrl);
           const card = document.createElement("div");
           card.className = "comun-card";
