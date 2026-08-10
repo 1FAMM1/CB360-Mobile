@@ -205,7 +205,7 @@
       container.innerHTML = '<div class="section-title"><span class="material-icons">event</span>Eventos a Decorrer</div>';
       try {
         const corpOperNr = localStorage.getItem("currentCorpOperNr");
-        const resp = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=event,event_type,value,location,date_start,date_end&corp_oper_nr=eq.${corpOperNr}`, {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=event,event_type,value,location,date_start,date_end,is_ended&corp_oper_nr=eq.${corpOperNr}&is_ended=eq.false`, {
           headers: getSupabaseHeaders()
         });
         const data = await resp.json();
@@ -361,10 +361,14 @@
         backHeader.style.display = 'none';
       };
       try {
-        const eventResp = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=*&event=eq.${encodeURIComponent(eventName)}`, {
+        const eventResp = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=*&event=eq.${encodeURIComponent(eventName)}&is_ended=eq.false`, {
           headers: getSupabaseHeaders()
         });
         const eventData = await eventResp.json();
+        if (!eventData || eventData.length === 0) {
+          shiftsList.innerHTML = '<div class="error-card">Este evento já terminou.</div>';
+          return;
+        }
         const resp = await fetch(`${SUPABASE_URL}/rest/v1/event_shifts?select=event,event_shift_date,event_shift,nec_oper,act_oper&event=eq.${encodeURIComponent(eventName)}`, {
           headers: getSupabaseHeaders()
         });
