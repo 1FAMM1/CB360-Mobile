@@ -379,9 +379,9 @@
     ============================================================ */
     .search-container {padding: 0 10px 10px; background: transparent; position: sticky;}
     .filter-btn-container {padding: 0 10px 10px;}
-    .filter-btn {display: flex; flex-wrap: wrap; gap: 8px;}
-    .filter-btn-item {display: flex; flex-wrap: wrap; align-items: center; gap: 6px; background: #ccc; color: #444; border: 1px solid #aaa; border-radius: 50px; padding: 2px 5px; font-size: 12px;
-                      cursor: pointer;}
+    .filter-btn {display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;}
+    .filter-btn::-webkit-scrollbar {display: none;}
+    .filter-btn-item {display: flex; flex-wrap: wrap; align-items: center; gap: 6px; background: #ccc; color: #444; border: 1px solid #aaa; border-radius: 50px; padding: 2px 5px; font-size: 12px; cursor: pointer; flex-shrink: 0;}
     .filter-btn-item .material-icons {font-size: 18px; color: #444;}
     .filter-btn-item.active-filter {background: var(--red); color: #fff; border-color: var(--red);}
     .filter-btn-item.active-filter .material-icons {color: #fff;}
@@ -759,6 +759,9 @@
     const corp = localStorage.getItem("currentCorpOperNr");
     const MyNint = String(localStorage.getItem("currentCorpNint"));
     let searchTimeout;
+    searchInput.addEventListener('focus', () => {
+      searchBtnContainer.style.display = 'block';
+    });
     const badgeEls = {unread: document.getElementById('badge-unread'), photo: document.getElementById('badge-photo'), video: document.getElementById('badge-video'), link: document.getElementById('badge-link'),
                       gif: document.getElementById('badge-gif'), audio: document.getElementById('badge-audio'), document: document.getElementById('badge-document'), sticker: document.getElementById('badge-sticker'),
                       poll: document.getElementById('badge-poll'),
