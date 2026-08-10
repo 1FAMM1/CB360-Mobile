@@ -382,6 +382,8 @@
     .filter-btn-item {display: flex; flex-wrap: wrap; align-items: center; gap: 6px; background: #ccc; color: #444; border: 1px solid #aaa; border-radius: 50px; padding: 2px 5px; font-size: 12px;
                       cursor: pointer;}
     .filter-btn-item .material-icons {font-size: 18px; color: #444;}
+    .filter-btn-item.active-filter {background: var(--red); color: #fff; border-color: var(--red);}
+    .filter-btn-item.active-filter .material-icons {color: #fff;}
     .search-box {background: #ccc; border: 1px solid #aaa; border-radius: 50px; display: flex; align-items: center; padding: 5px 12px;}
     .search-icon {color: #444; margin-right: 8px; font-size: 20px;}
     #global-search {border: none; background: transparent; width: 100%; outline: none; font-size: 15px; color: #444;}
@@ -439,51 +441,51 @@
     </div>
     <div id="filter-btn-container" class="filter-btn-container" style="display: none;">
       <div id="filter-btn" class="filter-btn">
-        <button class="filter-btn-item">
+        <button class="filter-btn-item" data-type="unread">
           <span class="material-icons">mark_unread_chat_alt</span>
           <span>Não Lidas</span>
           <span class="filter-badge" id="badge-unread">0</span>
         </button>
-        <button class="filter-btn-item">
+        <button class="filter-btn-item" data-type="photo">
           <span class="material-icons">photo</span>
           <span>Fotos</span>
-          <span class="filter-badge" id="badge-video">0</span>
+          <span class="filter-badge" id="badge-photo">0</span>
         </button>
-        <button class="filter-btn-item">
+        <button class="filter-btn-item" data-type="video">
           <span class="material-icons">videocam</span>
           <span>Vídeos</span>
           <span class="filter-badge" id="badge-video">0</span>
         </button>
-        <button class="filter-btn-item">
+        <button class="filter-btn-item" data-type="link">
           <span class="material-icons">link</span>
           <span>Ligações</span>
           <span class="filter-badge" id="badge-link">0</span>
         </button>
-        <button class="filter-btn-item">
+        <button class="filter-btn-item" data-type="gif">
           <span class="material-icons">gif</span>
           <span>GIF</span>
           <span class="filter-badge" id="badge-gif">0</span>
         </button>
-        <button class="filter-btn-item">
+        <button class="filter-btn-item" data-type="audio">
           <span class="material-icons">headphones</span>
           <span>Áudios</span>
           <span class="filter-badge" id="badge-audio">0</span>
         </button>
-        <button class="filter-btn-item">
+        <button class="filter-btn-item" data-type="document">
           <span class="material-icons">article</span>
           <span>Documentos</span>
           <span class="filter-badge" id="badge-document">0</span>
         </button>
-        <button class="filter-btn-item">
+        <button class="filter-btn-item" data-type="sticker">
           <span class="material-icons">sticky_note_2</span>
           <span>Stickers</span>
           <span class="filter-badge" id="badge-sticker">0</span>
-          </buttom>
-          <button class="filter-btn-item">
-            <span class="material-icons">poll</span>
-            <span>Sondagens</span>
-            <span class="filter-badge" id="badge-poll">0</span>
-          </button>
+        </button>
+        <button class="filter-btn-item" data-type="poll">
+          <span class="material-icons">poll</span>
+          <span>Sondagens</span>
+          <span class="filter-badge" id="badge-poll">0</span>
+        </button>
       </div>
     </div>
     <div id="search-results-container" class="search-results-container" style="display: none; flex: 1; overflow-y: auto;">
@@ -868,6 +870,7 @@
     searchInput.addEventListener('input', async (e) => {
       const term = e.target.value.trim();
       clearTimeout(searchTimeout);
+      applyActiveFilterStyle(null);
       if (term.length >= 3) {
         contactList.style.display = 'none';
         resultsContainer.style.display = 'block';
@@ -941,10 +944,21 @@
         `;
         div.onclick = async () => {
           if (String(contactNint) === 'geral') {
-            openChat('geral', 'Chat Geral');
+            await openChat('geral', 'Chat Geral');
           } else {
-            const user = users?.find(u => String(u.n_int) === String(contactNint));
-            if (user) openChat(user.n_int, user.abv_name);
+            let user = (window.allUsers || []).find(u => String(u.n_int) === String(contactNint));
+            if (!user) {
+              const {
+                data: fallbackUser
+              } = await supabaseClient
+                .from('reg_elems')
+                .select('n_int, abv_name')
+                .eq('n_int', contactNint)
+                .eq('corp_oper_nr', corp)
+                .maybeSingle();
+              if (fallbackUser) user = fallbackUser;
+            }
+            if (user) await openChat(user.n_int, user.abv_name);
           }
           if (String(contactNint) !== 'geral') {
             await markChatAsRead(contactNint);
@@ -954,10 +968,75 @@
           resultsContainer.style.display = 'none';
           searchBtnContainer.style.display = 'none';
           resultsList.innerHTML = '';
+          setTimeout(() => scrollToMessage(msg.id), 350);
         };
         resultsList.appendChild(div);
       });
     }
+    /* ==================== FILTROS DE PESQUISA (Não Lidas / Fotos / etc.) ==================== */
+    const FILTER_DB_TYPE_MAP = {
+      photo: 'image',
+      document: 'file'
+    };
+    function applyActiveFilterStyle(activeBtn) {
+      document.querySelectorAll('.filter-btn-item').forEach(b => b.classList.remove('active-filter'));
+      if (activeBtn) activeBtn.classList.add('active-filter');
+    }
+    async function runTypeFilter(type, btn) {
+      contactList.style.display = 'none';
+      resultsContainer.style.display = 'block';
+      resultsList.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5; color: #444;">A carregar...</div>';
+      applyActiveFilterStyle(btn);
+      let query;
+      if (type === 'unread') {
+        query = supabaseClient
+          .from('chat_messages')
+          .select('*')
+          .eq('corp_oper_nr', corp)
+          .eq('recipient_nint', MyNint)
+          .is('read_at', null)
+          .order('created_at', {
+            ascending: false
+          })
+          .limit(150);
+      } else {
+        const dbType = FILTER_DB_TYPE_MAP[type] || type;
+        query = supabaseClient
+          .from('chat_messages')
+          .select('*')
+          .eq('corp_oper_nr', corp)
+          .or(`n_int.eq.${MyNint},recipient_nint.eq.${MyNint}`)
+          .eq('message_type', dbType)
+          .order('created_at', {
+            ascending: false
+          })
+          .limit(150);
+      }
+      const {
+        data,
+        error
+      } = await query;
+      if (error) {
+        console.error('Erro ao filtrar:', error);
+        resultsList.innerHTML = '<div style="padding:20px; color:red;">Erro ao filtrar.</div>';
+        return;
+      }
+      renderSearchResults(data, '');
+    }
+    document.querySelectorAll('.filter-btn-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.type;
+        if (!type) return;
+        if (btn.classList.contains('active-filter')) {
+          applyActiveFilterStyle(null);
+          contactList.style.display = 'flex';
+          resultsContainer.style.display = 'none';
+          resultsList.innerHTML = '';
+          return;
+        }
+        runTypeFilter(type, btn);
+      });
+    });
     updateUnreadTypeBadges();
     setupUnreadBadgesRealtime();
     /* ======================= FUNCTION FIX LAYOUT ======================= */
@@ -1644,16 +1723,18 @@
                       'W': '#536dfe', 'X': '#448aff', 'Y': '#00e676', 'Z': '#cfd8dc'
                      };
       const {
-        data: users,
+        data: rawUsers,
         error
       } = await supabaseClient.from('reg_elems')
-        .select('n_int, abv_name, photo_url, elem_state')
+        .select('n_int, abv_name, photo_url, elem_state, type_quad')
         .eq('corp_oper_nr', corpOperNr)
         .eq('elem_state', true)
         .order('n_int', {
           ascending: true
         });
       if (error) return console.error(error);
+      const users = (rawUsers || []).filter(u => u.type_quad !== null && u.type_quad !== undefined && String(u.type_quad).trim() !== '');
+      window.allUsers = users;
       totalTeam = users.length + 1;
       const listEl = document.getElementById("contact-list");
       listEl.innerHTML = '';
@@ -2589,7 +2670,7 @@
     if (navigator.serviceWorker) {
       navigator.serviceWorker.addEventListener('message', event => {
         if (event.data.type === 'OPEN_CHAT' && event.data.chatNint) {
-          const contact = users.find(u => String(u.n_int) === String(event.data.chatNint));
+          const contact = (window.allUsers || []).find(u => String(u.n_int) === String(event.data.chatNint));
           if (contact) {
             openChat(contact.n_int, contact.abv_name);
           } else if (event.data.chatNint === 'geral') {
@@ -3739,9 +3820,11 @@
           behavior: 'smooth',
           block: 'center'
         });
+        msgElement.classList.add('highlighted');
         msgElement.style.background = 'rgba(188, 217, 255, 0.5)';
         setTimeout(() => {
           msgElement.style.background = '';
+          msgElement.classList.remove('highlighted');
         }, 1500);
       }
     }
