@@ -66,6 +66,7 @@
     .swap-options-btn:active {background:var(--surface-2); transform:scale(.98);}
     .swap-options-btn.selected {background:var(--red-light); color:var(--red);}
     .swap-options-btn .material-icons {font-size:22px; color:var(--red-icon); transition:transform var(--ease),color var(--ease);}
+    .swap-options-btn.option-disabled {opacity:0.4; cursor:not-allowed; pointer-events:none;}
     .swap-options-btn:hover .material-icons,
     .swap-options-btn.selected .material-icons {transform:scale(1.08);}
     /* ============================================================
@@ -202,14 +203,14 @@
         <span class="material-icons" style="margin-bottom:4px;">sync_alt</span>
         <span>Pedidos Pendentes</span>
       </button>
-      <button class="swap-options-btn" onclick="selectOption(1, this)">
+      <button class="swap-options-btn option-disabled" onclick="selectOption(1, this)" disabled>
         <span class="material-icons" style="margin-bottom:4px;">swap_horiz</span>
         <span>Trocas Profissionais</span>
       </button>
       <button class="swap-options-btn" onclick="selectOption(2, this)">
         <span class="material-icons" style="margin-bottom:4px;">compare_arrows</span>
         <span>Trocas Voluntariado</span>
-      </button>
+      </button>       
     </div>
     <div id="pending-swaps-container" class="pending-swaps-container">      
       <div class="pending-swaps-title">Pedidos Pendentes</div>
