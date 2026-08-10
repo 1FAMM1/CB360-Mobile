@@ -2224,7 +2224,7 @@
                   </div>
                   <div class="audio-time" id="time-${audioID}">0:00</div>
                 </div>
-                
+                <audio id="${audioID}" src="${msg.file_url}" onended="resetAudioIcon('${audioID}')"></audio>
               </div>
             `;
             break;
@@ -2358,8 +2358,7 @@
             `;
           }).join("")}
         </div>
-        ${items.length > 4 ? `<div class="batch-more" style="position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,0.55); color:white; 
-                                                             font-size:12px; padding:6px 8px; border-radius:999px;">+${items.length - 4} </div>` : ""}`;
+        ${items.length > 4 ? `<div class="batch-more" style="position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,0.55); color:white; font-size:12px; padding:6px 8px; border-radius:999px;">+${items.length - 4} </div>` : ""}`;
       const grid2 = grid.querySelector(".batch-grid-2x2");
       if (grid2) {
         grid2.style.display = "grid";
