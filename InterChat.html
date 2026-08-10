@@ -326,19 +326,7 @@
     .audio-play-btn .material-icons {font-size: 24px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .2));}
     .audio-bubble.playing .audio-play-btn {animation: gentle-pulse 2s ease-in-out infinite;}
     .audio-progress-container {flex-grow: 1; display: flex; flex-direction: column; gap: 7px;}
-    .audio-progress-bar {
-  width: 100%; 
-  flex: 1; /* Força o elemento a expandir-se no container flex */
-  min-width: 120px; /* Garante que a barra nunca fica com largura zero */
-  height: 5px; 
-  background: rgba(0, 0, 0, .15); 
-  border-radius: 999px; 
-  overflow: hidden; 
-  position: relative; 
-  cursor: pointer; 
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
-  transition: all .2s ease;
-}
+     .audio-progress-bar {width: 100%; height: 5px; background: rgba(0, 0, 0, .15); border-radius: 999px; overflow: hidden; position: relative; cursor: pointer; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1); transition: all .2s ease;}
     .audio-progress-bar:hover {height: 6px; background: rgba(0, 0, 0, .18);}
     .audio-progress-fill {height: 100%; width: 0%; background: linear-gradient(90deg, #34b7f1, #2196F3); border-radius: 999px; transition: width .1s linear; position: relative;
                           box-shadow: 0 0 8px rgba(52, 183, 241, .8), 0 0 4px rgba(52, 183, 241, .6);}
@@ -2223,23 +2211,23 @@
             break;
           }
           case "audio": {
-  const audioID = `audio-${msg.id || Date.now()}`;
-  finalContentHTML = `
-    <div class="audio-bubble">
-      <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
-        <span class="material-icons">play_arrow</span>
-      </div>
-      <div class="audio-progress-container">
-        <div class="audio-progress-bar">
-          <div id="fill-${audioID}" class="audio-progress-fill"></div>
-        </div>
-        <div class="audio-time" id="time-${audioID}">0:00</div>
-      </div>
-      <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
-    </div>
-  `;
-  break;
-}   
+            const audioID = `audio-${msg.id || Date.now()}`;
+            finalContentHTML = `
+              <div class="audio-bubble">
+                <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
+                  <span class="material-icons">play_arrow</span>
+                </div>
+                <div class="audio-progress-container">
+                  <div class="audio-progress-bar">
+                    <div id="fill-${audioID}" class="audio-progress-fill"></div>
+                  </div>
+                  <div class="audio-time" id="time-${audioID}">0:00</div>
+                </div>
+                <audio id="${audioID}" src="${msg.file_url}" onended="resetAudioIcon('${audioID}')"></audio>
+              </div>
+            `;
+            break;
+          }
           case "file": {
             const fileName = msg.file_name || "";
             const isPdf = fileName.toLowerCase().endsWith(".pdf");
@@ -2552,74 +2540,41 @@
         year: 'numeric'
       });
     }
-    function fixAudioDuration(audio) {
-  return new Promise((resolve) => {
-    if (audio.duration !== Infinity && !isNaN(audio.duration)) {
-      resolve(audio.duration);
-      return;
-    }
-    const onTimeUpdate = () => {
-      audio.removeEventListener('timeupdate', onTimeUpdate);
-      audio.currentTime = 0;
-      resolve(audio.duration);
-    };
-    audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.currentTime = 1e101;
-  });
-}
-
-async function toggleAudio(id, btn) {
-  const audio = document.getElementById(id);
-  if (!audio) return;
-  const icon = btn.querySelector('.material-icons');
-  
-  // Associa os eventos de progresso e tempo apenas uma vez por elemento
-  if (!audio.dataset.progressBound) {
-    audio.addEventListener('timeupdate', () => updateProgress(id));
-    audio.addEventListener('loadedmetadata', () => updateProgress(id));
-    audio.dataset.progressBound = "true";
-  }
-
-  if (audio.paused) {
-    document.querySelectorAll('audio').forEach(a => {
-      if (a.id !== id) {
-        a.pause();
-        const otherBtn = document.querySelector(`[onclick*="${a.id}"] .material-icons`);
-        if (otherBtn) otherBtn.textContent = 'play_arrow';
+    function toggleAudio(id, btn) {
+      const audio = document.getElementById(id);
+      const icon = btn.querySelector('.material-icons');
+      if (audio.paused) {
+        document.querySelectorAll('audio').forEach(a => {
+          if (a.id !== id) {
+            a.pause();
+            const otherBtn = document.querySelector(`[onclick*="${a.id}"] .material-icons`);
+            if (otherBtn) otherBtn.textContent = 'play_arrow';
+          }
+        });
+        audio.play();
+        icon.textContent = 'pause';
+      } else {
+        audio.pause();
+        icon.textContent = 'play_arrow';
       }
-    });
-    if (audio.duration === Infinity || isNaN(audio.duration)) {
-      await fixAudioDuration(audio);
     }
-    audio.play();
-    icon.textContent = 'pause';
-  } else {
-    audio.pause();
-    icon.textContent = 'play_arrow';
-  }
-}
-
-function updateProgress(id) {
-  const audio = document.getElementById(id);
-  const fill = document.getElementById(`fill-${id}`);
-  const timeDisplay = document.getElementById(`time-${id}`);
-  if (!audio || !fill || !timeDisplay) return;
-  if (!audio.duration || isNaN(audio.duration) || audio.duration === Infinity) return;
-  
-  const percent = (audio.currentTime / audio.duration) * 100;
-  fill.style.width = percent + "%";
-  
-  const mins = Math.floor(audio.currentTime / 60);
-  const secs = Math.floor(audio.currentTime % 60);
-  timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-}
-
-function resetAudioIcon(id) {
-  const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
-  if (icon) icon.textContent = 'play_arrow';
-  const fill = document.getElementById(`fill-${id}`);
-  if (fill) fill.style.width = "0%";
-}
+    function updateProgress(id) {
+      const audio = document.getElementById(id);
+      const fill = document.getElementById(`fill-${id}`);
+      const timeDisplay = document.getElementById(`time-${id}`);
+      if (!audio.duration) return;
+      const percent = (audio.currentTime / audio.duration) * 100;
+      fill.style.width = percent + "%";
+      const mins = Math.floor(audio.currentTime / 60);
+      const secs = Math.floor(audio.currentTime % 60);
+      timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+    function resetAudioIcon(id) {
+      const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
+      if (icon) icon.textContent = 'play_arrow';
+      const fill = document.getElementById(`fill-${id}`);
+      if (fill) fill.style.width = "0%";
+    }
     /* ============================ OPEN CHAT ============================ */
     async function openChat(n_int, name) {
       const messagesEl = document.getElementById("messages");
