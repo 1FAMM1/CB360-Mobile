@@ -60,8 +60,8 @@
     .vehicles-btn .material-icons {font-size: 28px; color: var(--red-icon); transition: transform var(--ease), color var(--ease);}
     .vehicles-btn:hover .material-icons,
     .vehicles-btn.selected .material-icons {transform: scale(1.08);}
-    .vehicles-btn:disabled {opacity: 0.3; cursor: not-allowed; pointer-events: none; filter: alpha(opacity=30);}
-    .vehicles-btn:disabled *, .vehicles-btn:disabled .material-icons {opacity: 0.3 !important;}
+    .vehicles-btn:disabled {cursor:not-allowed; pointer-events:none;}
+    .vehicles-btn:disabled *, .vehicles-btn:disabled .material-icons {opacity:0.4; cursor:not-allowed; pointer-events:none;}
     .vehicles-btn div {position: relative; z-index: 2; line-height: 1.2; margin: 0; padding: 0;}
     /* ============================================================
     FOOTER
@@ -107,9 +107,13 @@
         <span class="material-icons">local_shipping</span>
         <div>Situação Operacional</div>
       </button>
-      <button class="vehicles-btn" onclick="toggleButton(this);">
+      <button class="vehicles-btn" onclick="toggleButton(this);" disabled>
         <span class="material-icons">search</span>
         <div>Consulta de Veículos</div>
+      </button>
+      <button class="vehicles-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='VeicAnomalias.html', 300);">
+        <span class="material-icons">report_problem</span>
+        <div>Reportar Anomalias</div>
       </button>
     </div>
   </div>
