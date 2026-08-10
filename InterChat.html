@@ -2212,23 +2212,23 @@
             break;
           }
           case "audio": {
-            const audioID = `audio-${msg.id || Date.now()}`;
-            finalContentHTML = `
-              <div class="audio-bubble">
-                <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
-                  <span class="material-icons">play_arrow</span>
-                </div>
-                <div class="audio-progress-container">
-                  <div class="audio-progress-bar">
-                    <div id="fill-${audioID}" class="audio-progress-fill"></div>
-                  </div>
-                  <div class="audio-time" id="time-${audioID}">0:00</div>
-                </div>
-                <audio id="${audioID}" src="${msg.file_url}" onended="resetAudioIcon('${audioID}')"></audio>
-              </div>
-            `;
-            break;
-          }           
+  const audioID = `audio-${msg.id || Date.now()}`;
+  finalContentHTML = `
+    <div class="audio-bubble">
+      <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
+        <span class="material-icons">play_arrow</span>
+      </div>
+      <div class="audio-progress-container">
+        <div class="audio-progress-bar">
+          <div id="fill-${audioID}" class="audio-progress-fill"></div>
+        </div>
+        <div class="audio-time" id="time-${audioID}">0:00</div>
+      </div>
+      <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
+    </div>
+  `;
+  break;
+}   
           case "file": {
             const fileName = msg.file_name || "";
             const isPdf = fileName.toLowerCase().endsWith(".pdf");
