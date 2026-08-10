@@ -920,61 +920,60 @@
       );
     }
     function renderSearchResults(messages, searchTerm) {
-  resultsList.innerHTML = '';
-  if (!messages || messages.length === 0) {
-    resultsList.innerHTML = '<div style="padding: 20px; text-align:center; opacity:0.5;">Nenhuma mensagem encontrada.</div>';
-    return;
-  }
-  messages.forEach(msg => {
-    const isMyMessage = String(msg.n_int) === String(MyNint);
-    const contactNint = isMyMessage ? msg.recipient_nint : msg.n_int;
-    const displayName = isMyMessage ? 'Tu' : (msg.abv_name || 'Utilizador');
-    const highlightedText = highlightSearchTerm(msg.message, searchTerm);
-    const div = document.createElement('div');
-    div.className = 'contact';
-    div.style.marginBottom = "8px";
-    div.innerHTML = `
-      <div class="contact-info">
-        <div class="name" style="font-size: 14px; margin-bottom: 10px; font-weight: 600; color: #d32f2f;">
-          ${displayName}${String(contactNint) === 'geral' ? ' (Geral)' : ''}
-        </div>
-        <div class="nint" style="opacity:0.8; color:#333; font-size: 13px;">
-          ${highlightedText}
-        </div>
-      </div>
-    `;
-    div.onclick = async () => {
-      if (String(contactNint) === 'geral') {
-        await openChat('geral', 'Chat Geral');
-      } else {
-        let user = (window.allUsers || []).find(u => String(u.n_int) === String(contactNint));
-        if (!user) {
-          const {
-            data: fallbackUser
-          } = await supabaseClient
-            .from('reg_elems')
-            .select('n_int, abv_name')
-            .eq('n_int', contactNint)
-            .eq('corp_oper_nr', corp)
-            .maybeSingle();
-          if (fallbackUser) user = fallbackUser;
-        }
-        if (user) await openChat(user.n_int, user.abv_name);
-      }
-      if (String(contactNint) !== 'geral') {
-        await markChatAsRead(contactNint);
-      }
-      // Não repor a lista de contactos aqui — o openChat() já tratou da UI da conversa.
-      searchInput.value = '';
-      resultsContainer.style.display = 'none';
-      searchBtnContainer.style.display = 'none';
       resultsList.innerHTML = '';
-      applyActiveFilterStyle(null);
-      setTimeout(() => scrollToMessage(msg.id), 350);
-    };
-    resultsList.appendChild(div);
-  });
-}
+      if (!messages || messages.length === 0) {
+        resultsList.innerHTML = '<div style="padding: 20px; text-align:center; opacity:0.5;">Nenhuma mensagem encontrada.</div>';
+        return;
+      }
+      messages.forEach(msg => {
+        const isMyMessage = String(msg.n_int) === String(MyNint);
+        const contactNint = isMyMessage ? msg.recipient_nint : msg.n_int;
+        const displayName = isMyMessage ? 'Tu' : (msg.abv_name || 'Utilizador');
+        const highlightedText = highlightSearchTerm(msg.message, searchTerm);
+        const div = document.createElement('div');
+        div.className = 'contact';
+        div.style.marginBottom = "8px";
+        div.innerHTML = `
+          <div class="contact-info">
+            <div class="name" style="font-size: 14px; margin-bottom: 10px; font-weight: 600; color: #d32f2f;">
+              ${displayName}${String(contactNint) === 'geral' ? ' (Geral)' : ''}
+            </div>
+            <div class="nint" style="opacity:0.8; color:#333; font-size: 13px;">
+              ${highlightedText}
+            </div>
+          </div>
+        `;
+        div.onclick = async () => {
+          searchInput.value = '';
+          resultsContainer.style.display = 'none';
+          searchBtnContainer.style.display = 'none';
+          resultsList.innerHTML = '';
+          applyActiveFilterStyle(null);
+          if (String(contactNint) === 'geral') {
+            await openChat('geral', 'Chat Geral');
+          } else {
+            let user = (window.allUsers || []).find(u => String(u.n_int) === String(contactNint));
+            if (!user) {
+              const {
+                data: fallbackUser
+              } = await supabaseClient
+                .from('reg_elems')
+                .select('n_int, abv_name')
+                .eq('n_int', contactNint)
+                .eq('corp_oper_nr', corp)
+                .maybeSingle();
+              if (fallbackUser) user = fallbackUser;
+            }
+            if (user) await openChat(user.n_int, user.abv_name);
+          }
+          if (String(contactNint) !== 'geral') {
+            await markChatAsRead(contactNint);
+          }
+          setTimeout(() => scrollToMessage(msg.id), 350);
+        };
+        resultsList.appendChild(div);
+      });
+    }
     /* ==================== FILTROS DE PESQUISA (Não Lidas / Fotos / etc.) ==================== */
     const FILTER_DB_TYPE_MAP = {
       photo: 'image',
