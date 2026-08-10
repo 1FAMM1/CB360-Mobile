@@ -2071,43 +2071,36 @@
     }
     /* ======================= TOGGLE REACTIONS ========================== */
     async function toggleReaction(messageId, emoji) {
-      const {
-        data: msg,
-        error: fetchError
-      } = await supabaseClient
-        .from('chat_messages')
-        .select('reactions')
-        .eq('id', messageId)
-        .single();
-      if (fetchError) {
-        console.error("Erro ao ler reações:", fetchError);
-        return;
-      }
-      let currentReactions = msg.reactions || {};
-      if (!currentReactions[emoji]) {
-        currentReactions[emoji] = [];
-      }
-      const userIndex = currentReactions[emoji].indexOf(currentUserNint);
-      if (userIndex === -1) {
-        currentReactions[emoji].push(currentUserNint);
-      } else {
-        currentReactions[emoji].splice(userIndex, 1);
-        if (currentReactions[emoji].length === 0) {
-          delete currentReactions[emoji];
-        }
-      }
-      const {
-        error: updateError
-      } = await supabaseClient
-        .from('chat_messages')
-        .update({
-          reactions: currentReactions
-        })
-        .eq('id', messageId);
-      if (updateError) {
-        console.error("Erro ao atualizar reação:", updateError);
-      }
-    }
+  const {
+    data: msg,
+    error: fetchError
+  } = await supabaseClient
+    .from('chat_messages')
+    .select('reactions')
+    .eq('id', messageId)
+    .single();
+  if (fetchError) {
+    console.error("Erro ao ler reações:", fetchError);
+    return;
+  }
+  let currentReactions = msg.reactions || {};
+  if (currentReactions[currentUserNint] === emoji) {
+    delete currentReactions[currentUserNint];
+  } else {
+    currentReactions[currentUserNint] = emoji;
+  }
+  const {
+    error: updateError
+  } = await supabaseClient
+    .from('chat_messages')
+    .update({
+      reactions: currentReactions
+    })
+    .eq('id', messageId);
+  if (updateError) {
+    console.error("Erro ao atualizar reação:", updateError);
+  }
+}
     /* ======================= ADD MESSAGE TO DOM ======================== */
     function addMessageToDOM(msg, chatRef) {
       if (msg.hidden_for && Array.isArray(msg.hidden_for)) {
@@ -2235,7 +2228,7 @@
               </div>
             `;
             break;
-          }
+          }           
           case "file": {
             const fileName = msg.file_name || "";
             const isPdf = fileName.toLowerCase().endsWith(".pdf");
@@ -2253,6 +2246,7 @@
             break;
         }
       }
+      finalContentHTML = finalContentHTML.trim();
       div.innerHTML = `
         ${nameHTML}
         ${replyPreviewHTML}
