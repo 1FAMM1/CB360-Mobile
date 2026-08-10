@@ -766,6 +766,16 @@
     searchInput.addEventListener('focus', () => {
       searchBtnContainer.style.display = 'block';
     });
+    searchInput.addEventListener('blur', () => {
+      setTimeout(() => {
+        const stillInFilters = document.activeElement && document.activeElement.closest('#filter-btn-container');
+        if (stillInFilters) return;
+        const hasActiveFilter = document.querySelector('.filter-btn-item.active-filter');
+        if (searchInput.value.trim().length === 0 && !hasActiveFilter) {
+          searchBtnContainer.style.display = 'none';
+        }
+      }, 150);
+    });
     const badgeEls = {unread: document.getElementById('badge-unread'), photo: document.getElementById('badge-photo'), video: document.getElementById('badge-video'), link: document.getElementById('badge-link'),
                       gif: document.getElementById('badge-gif'), audio: document.getElementById('badge-audio'), document: document.getElementById('badge-document'), sticker: document.getElementById('badge-sticker'),
                       poll: document.getElementById('badge-poll'),
@@ -1081,25 +1091,25 @@
       }, 100);
     }
     inputMensage.addEventListener('input', function() {
-  this.style.height = 'auto';
-  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-  const hasText = this.value.trim().length > 0;
-  const novoIcone = hasText ? 'send' : 'mic';
-  if (iconBtn.textContent !== novoIcone) {
-    iconBtn.style.transform = 'rotate(180deg) scale(0)';
-    iconBtn.style.opacity = '0';
-    setTimeout(() => {
-      iconBtn.textContent = novoIcone;
-      iconBtn.style.transform = 'rotate(0deg) scale(1)';
-      iconBtn.style.opacity = '1';
-      if (hasText) {
-        inputBar.classList.add('typing');
-      } else {
-        inputBar.classList.remove('typing');
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+      const hasText = this.value.trim().length > 0;
+      const novoIcone = hasText ? 'send' : 'mic';
+      if (iconBtn.textContent !== novoIcone) {
+        iconBtn.style.transform = 'rotate(180deg) scale(0)';
+        iconBtn.style.opacity = '0';
+        setTimeout(() => {
+          iconBtn.textContent = novoIcone;
+          iconBtn.style.transform = 'rotate(0deg) scale(1)';
+          iconBtn.style.opacity = '1';
+          if (hasText) {
+            inputBar.classList.add('typing');
+          } else {
+            inputBar.classList.remove('typing');
+          }
+        }, 150);
       }
-    }, 150);
-  }
-});
+    });
     emojiBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (emojiContainer.style.display === 'block') {
@@ -2100,175 +2110,171 @@
     }
     /* ======================= ADD MESSAGE TO DOM ======================== */
     function addMessageToDOM(msg, chatRef) {
-  if (msg.hidden_for && Array.isArray(msg.hidden_for)) {
-    if (msg.hidden_for.includes(currentUserNint)) {
-      return;
-    }
-  }
-  registerBatchMessage(msg, chatRef);
-  if (!currentChat || currentChat !== String(chatRef)) return;
-  const messagesEl = document.getElementById("messages");
-  if (!messagesEl) return;
-  if (msg.id && !msg.batch_id) {
-    const alreadyRendered = messagesEl.querySelector(`[data-message-id="${msg.id}"]`);
-    if (alreadyRendered) return;
-  }
-  const msgDate = new Date(msg.created_at);
-  const dateLabel = getDateLabel(msgDate);
-  if (dateLabel !== lastDateLabel) {
-    const divider = document.createElement("div");
-    divider.className = "date-divider";
-    divider.innerHTML = `<span>${dateLabel}</span>`;
-    messagesEl.appendChild(divider);
-    lastDateLabel = dateLabel;
-    lastMessageSenderNint = null; // novo dia — não agrupa com o dia anterior
-  }
-  const emptyMsg = messagesEl.querySelector(".empty-chat-placeholder");
-  if (emptyMsg) emptyMsg.remove();
-  let time = "";
-  if (msg.edited_at) {
-    time = new Date(msg.edited_at).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  } else if (msg.created_at) {
-    time = new Date(msg.created_at).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  }
-  if (msg.batch_id) {
-    const isGroupedBatch = lastMessageSenderNint !== null && String(lastMessageSenderNint) === String(msg.n_int);
-    addOrUpdateBatchBubble(msg, chatRef, {
-      time,
-      isGrouped: isGroupedBatch
-    });
-    lastMessageSenderNint = msg.n_int;
-    if (messagesEl.style.display !== "none") scrollToBottom();
-    return;
-  }
-  const isMe = String(msg.n_int) === currentUserNint;
-  const isGrouped = lastMessageSenderNint !== null && String(lastMessageSenderNint) === String(msg.n_int);
-  let checkHTML = "";
-  if (isMe) {
-    let icon = "done";
-    let checkClass = "sent";
-    if (chatRef === "geral") {
-      const numLeituras = (msg.chat_message_reads && msg.chat_message_reads[0]) ? msg.chat_message_reads[0].count : 0;
-      icon = "done_all";
-      checkClass = (numLeituras >= (totalTeam - 1) && totalTeam > 1) ? "read" : "delivered";
-      const contador = numLeituras > 0 ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` : "";
-      const msgId = msg.id || "temp-" + Date.now();
-      checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>${contador}`;
-    } else {
-      const recipientDot = document.querySelector(`.contact[data-nint="${chatRef}"] .status-dot`);
-      const isOnline = recipientDot && recipientDot.classList.contains("online");
-      if (msg.read_at) {
-        icon = "done_all";
-        checkClass = "read";
-      } else if (isOnline) {
-        icon = "done_all";
-        checkClass = "delivered";
+      if (msg.hidden_for && Array.isArray(msg.hidden_for)) {
+        if (msg.hidden_for.includes(currentUserNint)) {
+          return;
+        }
       }
-      const msgId = msg.id || "temp-" + Date.now();
-      checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>`;
-    }
-  }
-  const div = document.createElement("div");
-  div.className = "message " + (isMe ? "self" : "other") + (isGrouped ? " grouped" : "");
-  div.dataset.messageId = msg.id;
-  div.dataset.messageText = msg.message;
-  div.dataset.senderName = msg.abv_name;
-  div.dataset.senderNint = msg.n_int;
-  const isDeleted = msg.deleted_at !== null && msg.deleted_at !== undefined;
-  if (isDeleted) div.classList.add("deleted");
-  const nameHTML = (chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${msg.abv_name}</div>` : "";
-  let replyPreviewHTML = "";
-  if (msg.reply_to_message_id && msg.reply_to_message) {
-    const replyMsg = msg.reply_to_message;
-    replyPreviewHTML = `
-      <div class="reply-preview" onclick="scrollToMessage('${msg.reply_to_message_id}')">
-        <div class="reply-preview-name">${replyMsg.abv_name || "Utilizador"}</div>
-        <div class="reply-preview-text">${replyMsg.message || ""}</div>
-      </div>
-    `;
-  }
-  const reactionsHTML = renderReactions(msg.reactions, msg.id);
-  const isStarred = msg.starred_by && msg.starred_by.includes(currentUserNint);
-  const starIcon = isStarred ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>' : "";
-  let finalContentHTML = "";
-  if (isDeleted) {
-    finalContentHTML = '<span class="material-icons" style="font-size: 15px;">block</span> Mensagem apagada';
-  } else {
-    switch (msg.message_type) {
-      case "image": {
-        const batchKey = msg.batch_id || `single-${msg.id}`;
-        finalContentHTML = `
-          <img src="${msg.file_url}" class="chat-img" style="max-width:230px; border-radius:10px; display:block; 
-                    margin-bottom:5px; cursor:pointer;" onclick="event.preventDefault(); event.stopPropagation(); 
-                    openChatBatchViewer('${chatRef}','${batchKey}',0); return false;">`;
-        if (msg.message) finalContentHTML += `<div class="img-caption">${escapeHTML(msg.message)}</div>`;
-        break;
+      registerBatchMessage(msg, chatRef);
+      if (!currentChat || currentChat !== String(chatRef)) return;
+      const messagesEl = document.getElementById("messages");
+      if (!messagesEl) return;
+      if (msg.id && !msg.batch_id) {
+        const alreadyRendered = messagesEl.querySelector(`[data-message-id="${msg.id}"]`);
+        if (alreadyRendered) return;
       }
-      case "audio": {
-        const audioID = `audio-${msg.id || Date.now()}`;
-        finalContentHTML = `
-          <div class="audio-bubble">
-            <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
-              <span class="material-icons">play_arrow</span>
-            </div>
-            <div class="audio-progress-container">
-              <div class="audio-progress-bar">
-                <div id="fill-${audioID}" class="audio-progress-fill"></div>
+      const msgDate = new Date(msg.created_at);
+      const dateLabel = getDateLabel(msgDate);
+      if (dateLabel !== lastDateLabel) {
+        const divider = document.createElement("div");
+        divider.className = "date-divider";
+        divider.innerHTML = `<span>${dateLabel}</span>`;
+        messagesEl.appendChild(divider);
+        lastDateLabel = dateLabel;
+        lastMessageSenderNint = null;
+      }
+      const emptyMsg = messagesEl.querySelector(".empty-chat-placeholder");
+      if (emptyMsg) emptyMsg.remove();
+      let time = "";
+      if (msg.edited_at) {
+        time = new Date(msg.edited_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      } else if (msg.created_at) {
+        time = new Date(msg.created_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      }
+      if (msg.batch_id) {
+        const isGroupedBatch = lastMessageSenderNint !== null && String(lastMessageSenderNint) === String(msg.n_int);
+        addOrUpdateBatchBubble(msg, chatRef, {
+          time,
+          isGrouped: isGroupedBatch
+        });
+        lastMessageSenderNint = msg.n_int;
+        if (messagesEl.style.display !== "none") scrollToBottom();
+        return;
+      }
+      const isMe = String(msg.n_int) === currentUserNint;
+      const isGrouped = lastMessageSenderNint !== null && String(lastMessageSenderNint) === String(msg.n_int);
+      let checkHTML = "";
+      if (isMe) {
+        let icon = "done";
+        let checkClass = "sent";
+        if (chatRef === "geral") {
+          const numLeituras = (msg.chat_message_reads && msg.chat_message_reads[0]) ? msg.chat_message_reads[0].count : 0;
+          icon = "done_all";
+          checkClass = (numLeituras >= (totalTeam - 1) && totalTeam > 1) ? "read" : "delivered";
+          const contador = numLeituras > 0 ? `<span style="font-size:9px; margin-left:2px; opacity:0.8;">${numLeituras}</span>` : "";
+          const msgId = msg.id || "temp-" + Date.now();
+          checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>${contador}`;
+        } else {
+          const recipientDot = document.querySelector(`.contact[data-nint="${chatRef}"] .status-dot`);
+          const isOnline = recipientDot && recipientDot.classList.contains("online");
+          if (msg.read_at) {
+            icon = "done_all";
+            checkClass = "read";
+          } else if (isOnline) {
+            icon = "done_all";
+            checkClass = "delivered";
+          }
+          const msgId = msg.id || "temp-" + Date.now();
+          checkHTML = `<span id="check-${msgId}" class="material-icons status-checks ${checkClass}">${icon}</span>`;
+        }
+      }
+      const div = document.createElement("div");
+      div.className = "message " + (isMe ? "self" : "other") + (isGrouped ? " grouped" : "");
+      div.dataset.messageId = msg.id;
+      div.dataset.messageText = msg.message;
+      div.dataset.senderName = msg.abv_name;
+      div.dataset.senderNint = msg.n_int;
+      const isDeleted = msg.deleted_at !== null && msg.deleted_at !== undefined;
+      if (isDeleted) div.classList.add("deleted");
+      const nameHTML = (chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${msg.abv_name}</div>` : "";
+      let replyPreviewHTML = "";
+      if (msg.reply_to_message_id && msg.reply_to_message) {
+        const replyMsg = msg.reply_to_message;
+        replyPreviewHTML = `
+          <div class="reply-preview" onclick="scrollToMessage('${msg.reply_to_message_id}')">
+            <div class="reply-preview-name">${replyMsg.abv_name || "Utilizador"}</div>
+            <div class="reply-preview-text">${replyMsg.message || ""}</div>
+          </div>
+        `;
+      }
+      const reactionsHTML = renderReactions(msg.reactions, msg.id);
+      const isStarred = msg.starred_by && msg.starred_by.includes(currentUserNint);
+      const starIcon = isStarred ? '<span class="star-icon" style="color: #ffd700; margin-left: 5px; font-size: 14px;">⭐</span>' : "";
+      let finalContentHTML = "";
+      if (isDeleted) {
+        finalContentHTML = '<span class="material-icons" style="font-size: 15px;">block</span> Mensagem apagada';
+      } else {
+        switch (msg.message_type) {
+          case "image": {
+            const batchKey = msg.batch_id || `single-${msg.id}`;
+            finalContentHTML = `
+              <img src="${msg.file_url}" class="chat-img" style="max-width:230px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="event.preventDefault(); event.stopPropagation(); openChatBatchViewer('${chatRef}','${batchKey}',0); return false;">`;
+            if (msg.message) finalContentHTML += `<div class="img-caption">${escapeHTML(msg.message)}</div>`;
+            break;
+          }
+          case "audio": {
+            const audioID = `audio-${msg.id || Date.now()}`;
+            finalContentHTML = `
+              <div class="audio-bubble">
+                <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
+                  <span class="material-icons">play_arrow</span>
+                </div>
+                <div class="audio-progress-container">
+                  <div class="audio-progress-bar">
+                    <div id="fill-${audioID}" class="audio-progress-fill"></div>
+                  </div>
+                  <div class="audio-time" id="time-${audioID}">0:00</div>
+                </div>
+                <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
               </div>
-              <div class="audio-time" id="time-${audioID}">0:00</div>
-            </div>
-            <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
-          </div>`;
-        break;
+            `;
+            break;
+          }
+          case "file": {
+            const fileName = msg.file_name || "";
+            const isPdf = fileName.toLowerCase().endsWith(".pdf");
+            const batchKey = msg.batch_id || `single-${msg.id}`;
+            finalContentHTML = `${msg.preview_url ? `<img src="${msg.preview_url}" class="chat-img" style="max-width:230px; max-height:140px; border-radius:10px; display:block; margin-bottom:6px; object-fit:contain; cursor:pointer;" onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">` : ""}
+                               <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px; cursor:pointer;" onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">
+                                 <span class="material-icons">${isPdf ? "picture_as_pdf" : "insert_drive_file"}</span>
+                                 <div style="font-size:13px; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(fileName || "Documento")}</div>
+                               </div>
+                               ${(msg.message && !msg.message.startsWith("Ficheiro:")) ? `<div class="img-caption">${escapeHTML(msg.message)}</div>` : ""}`;
+            break;
+          }
+          default:
+            finalContentHTML = escapeHTML(msg.message || "");
+            break;
+        }
       }
-      case "file": {
-        const fileName = msg.file_name || "";
-        const isPdf = fileName.toLowerCase().endsWith(".pdf");
-        const batchKey = msg.batch_id || `single-${msg.id}`;
-        finalContentHTML = `${msg.preview_url ? `<img src="${msg.preview_url}" class="chat-img" style="max-width:230px; max-height:140px; 
-                           border-radius:10px; display:block; margin-bottom:6px; object-fit:contain; cursor:pointer;"
-                           onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">` : ""}
-                           <div class="file-msg" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.05); padding: 8px; 
-                                       border-radius: 8px; cursor:pointer;" onclick="openChatBatchViewer('${chatRef}','${batchKey}',0)">
-                             <span class="material-icons">${isPdf ? "picture_as_pdf" : "insert_drive_file"}</span>
-                             <div style="font-size:13px; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(fileName || "Documento")}</div>
-                           </div>
-                           ${(msg.message && !msg.message.startsWith("Ficheiro:")) ? `<div class="img-caption">${escapeHTML(msg.message)}</div>` : ""}`;
-        break;
+      div.innerHTML = `
+        ${nameHTML}
+        ${replyPreviewHTML}
+        <span class="msg-text-content">${finalContentHTML}</span>${starIcon}
+        ${reactionsHTML}
+        <div class="msg-meta">${time} ${checkHTML}</div>
+      `;
+      if (!isDeleted && msg.edited_at) {
+        const metaDiv = div.querySelector(".msg-meta");
+        if (metaDiv) {
+          const editTag = document.createElement("span");
+          editTag.className = "message-edited-tag";
+          editTag.textContent = "editada";
+          metaDiv.insertBefore(editTag, metaDiv.firstChild);
+        }
       }
-      default:
-        finalContentHTML = escapeHTML(msg.message || "");
-        break;
+      if (msg.is_forwarded) div.classList.add("is-forwarded");
+      setupMessageInteraction(div, msg);
+      messagesEl.appendChild(div);
+      lastMessageSenderNint = msg.n_int;
+      if (messagesEl.style.display !== "none") scrollToBottom();
     }
-  }
-  div.innerHTML = `
-    ${nameHTML}
-    ${replyPreviewHTML}
-    <span class="msg-text-content">${finalContentHTML}</span>${starIcon}
-    ${reactionsHTML}
-    <div class="msg-meta">${time} ${checkHTML}</div>
-  `;
-  if (!isDeleted && msg.edited_at) {
-    const metaDiv = div.querySelector(".msg-meta");
-    if (metaDiv) {
-      const editTag = document.createElement("span");
-      editTag.className = "message-edited-tag";
-      editTag.textContent = "editada";
-      metaDiv.insertBefore(editTag, metaDiv.firstChild);
-    }
-  }
-  if (msg.is_forwarded) div.classList.add("is-forwarded");
-  setupMessageInteraction(div, msg);
-  messagesEl.appendChild(div);
-  lastMessageSenderNint = msg.n_int;
-  if (messagesEl.style.display !== "none") scrollToBottom();
-}
     /* ============================= HELPERS ============================= */
     function escapeHTML(str) {
       const s = document.createElement("span");
@@ -2277,65 +2283,64 @@
     }
     /* ========================== BATCH BUBBLE =========================== */
     window.batchRenderTimers = window.batchRenderTimers || {};
-
     function addOrUpdateBatchBubble(msg, chatRef, {
-  time,
-  isGrouped
-}) {
-  const messagesEl = document.getElementById("messages");
-  if (!messagesEl) return;
-  const batchId = msg.batch_id;
-  const isMe = String(msg.n_int) === currentUserNint;
-  let bubble = messagesEl.querySelector(`.message.batch-bubble[data-batch-id="${batchId}"]`);
-  const isNewBubble = !bubble;
-  if (!bubble) {
-    bubble = document.createElement("div");
-    bubble.className = `message ${isMe ? "self" : "other"} batch-bubble` + (isGrouped ? " grouped" : "");
-    bubble.dataset.batchId = batchId;
-    bubble.dataset.chatRef = chatRef;
-    bubble.dataset.senderNint = msg.n_int;
-    bubble.dataset.senderName = msg.abv_name;
-    bubble.dataset.messageId = msg.id;
-    bubble.dataset.messageText = msg.message || "";
-    if (msg.is_forwarded) {
-      bubble.classList.add('is-forwarded');
+      time,
+      isGrouped
+    }) {
+      const messagesEl = document.getElementById("messages");
+      if (!messagesEl) return;
+      const batchId = msg.batch_id;
+      const isMe = String(msg.n_int) === currentUserNint;
+      let bubble = messagesEl.querySelector(`.message.batch-bubble[data-batch-id="${batchId}"]`);
+      const isNewBubble = !bubble;
+      if (!bubble) {
+        bubble = document.createElement("div");
+        bubble.className = `message ${isMe ? "self" : "other"} batch-bubble` + (isGrouped ? " grouped" : "");
+        bubble.dataset.batchId = batchId;
+        bubble.dataset.chatRef = chatRef;
+        bubble.dataset.senderNint = msg.n_int;
+        bubble.dataset.senderName = msg.abv_name;
+        bubble.dataset.messageId = msg.id;
+        bubble.dataset.messageText = msg.message || "";
+        if (msg.is_forwarded) {
+          bubble.classList.add('is-forwarded');
+        }
+        bubble.innerHTML = `
+          ${(chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${escapeHTML(msg.abv_name)}</div>` : ""}
+          <div class="msg-text-content">
+            <div class="batch-grid" data-batch-grid="1"></div>
+            <div class="batch-caption" style="display:none;"></div>
+          </div>
+          <div class="msg-meta">${time || ""}</div>
+        `;
+        bubble._batchItems = [];
+        messagesEl.appendChild(bubble);
+        setupMessageInteraction(bubble, msg);
+      }
+      const item = {
+        id: msg.id,
+        type: msg.message_type,
+        url: msg.file_url,
+        preview: msg.preview_url || null,
+        name: msg.file_name || "",
+        caption: (msg.message || "").trim() || ""
+      };
+      bubble._batchItems = bubble._batchItems || [];
+      if (bubble._batchItems.some(x => String(x.id) === String(item.id))) return;
+      bubble._batchItems.push(item);
+      if (window.batchRenderTimers[batchId]) {
+        clearTimeout(window.batchRenderTimers[batchId]);
+      }
+      window.batchRenderTimers[batchId] = setTimeout(() => {
+        renderBatchBubble(bubble);
+        delete window.batchRenderTimers[batchId];
+        if (document.getElementById("messages").style.display !== 'none') {
+          scrollToBottom();
+        }
+      }, 300);
+      const meta = bubble.querySelector(".msg-meta");
+      if (meta) meta.textContent = time || meta.textContent || "";
     }
-    bubble.innerHTML = `
-      ${(chatRef === "geral" && !isMe) ? `<div class="msg-sender-name">${escapeHTML(msg.abv_name)}</div>` : ""}
-      <div class="msg-text-content">
-        <div class="batch-grid" data-batch-grid="1"></div>
-        <div class="batch-caption" style="display:none;"></div>
-      </div>
-      <div class="msg-meta">${time || ""}</div>
-    `;
-    bubble._batchItems = [];
-    messagesEl.appendChild(bubble);
-    setupMessageInteraction(bubble, msg);
-  }
-  const item = {
-    id: msg.id,
-    type: msg.message_type,
-    url: msg.file_url,
-    preview: msg.preview_url || null,
-    name: msg.file_name || "",
-    caption: (msg.message || "").trim() || ""
-  };
-  bubble._batchItems = bubble._batchItems || [];
-  if (bubble._batchItems.some(x => String(x.id) === String(item.id))) return;
-  bubble._batchItems.push(item);
-  if (window.batchRenderTimers[batchId]) {
-    clearTimeout(window.batchRenderTimers[batchId]);
-  }
-  window.batchRenderTimers[batchId] = setTimeout(() => {
-    renderBatchBubble(bubble);
-    delete window.batchRenderTimers[batchId];
-    if (document.getElementById("messages").style.display !== 'none') {
-      scrollToBottom();
-    }
-  }, 300);
-  const meta = bubble.querySelector(".msg-meta");
-  if (meta) meta.textContent = time || meta.textContent || "";
-}
     function renderBatchBubble(bubble) {
       const items = bubble._batchItems || [];
       const grid = bubble.querySelector(".batch-grid");
@@ -2696,67 +2701,67 @@
     }
     /* ======================== LOADING MESSAGES (FIXED) ========================= */
     async function loadMessages(chat = currentChat) {
-  const currentCorp = localStorage.getItem("currentCorpOperNr");
-  const messagesEl = document.getElementById("messages");
-  const chatRef = chat || 'geral';
-  messagesEl.innerHTML = '';
-  lastDateLabel = "";
-  lastMessageSenderNint = null;
-  let query = supabaseClient
-    .from('chat_messages')
-    .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
-    .eq('corp_oper_nr', currentCorp);
-  if (chatRef === 'geral') {
-    query = query.eq('recipient_nint', 'geral');
-  } else {
-    query = query.or(`and(n_int.eq.${currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${currentUserNint})`);
-  }
-  try {
-    const {
-      data: msgs,
-      error
-    } = await query.order('created_at', {
-      ascending: true
-    });
-    if (currentChat !== chatRef) return;
-    if (error) return console.error(error);
-    let filteredMsgs = msgs || [];
-    if (filteredMsgs.length > 0 && chatRef !== 'geral') {
-      const {
-        data: myBlocks
-      } = await supabaseClient
-        .from('user_blocks')
-        .select('blocked_nint')
-        .eq('blocker_nint', currentUserNint)
+      const currentCorp = localStorage.getItem("currentCorpOperNr");
+      const messagesEl = document.getElementById("messages");
+      const chatRef = chat || 'geral';
+      messagesEl.innerHTML = '';
+      lastDateLabel = "";
+      lastMessageSenderNint = null;
+      let query = supabaseClient
+        .from('chat_messages')
+        .select('*, chat_message_reads(count), reply_to_message:reply_to_message_id(id, message, abv_name)')
         .eq('corp_oper_nr', currentCorp);
-      if (myBlocks && myBlocks.length > 0) {
-        const blockedList = myBlocks.map(b => b.blocked_nint);
-        filteredMsgs = filteredMsgs.filter(m => !blockedList.includes(String(m.n_int)));
+      if (chatRef === 'geral') {
+        query = query.eq('recipient_nint', 'geral');
+      } else {
+        query = query.or(`and(n_int.eq.${currentUserNint},recipient_nint.eq.${chatRef}),and(n_int.eq.${chatRef},recipient_nint.eq.${currentUserNint})`);
+      }
+      try {
+        const {
+          data: msgs,
+          error
+        } = await query.order('created_at', {
+          ascending: true
+        });
+        if (currentChat !== chatRef) return;
+        if (error) return console.error(error);
+        let filteredMsgs = msgs || [];
+        if (filteredMsgs.length > 0 && chatRef !== 'geral') {
+          const {
+            data: myBlocks
+          } = await supabaseClient
+            .from('user_blocks')
+            .select('blocked_nint')
+            .eq('blocker_nint', currentUserNint)
+            .eq('corp_oper_nr', currentCorp);
+          if (myBlocks && myBlocks.length > 0) {
+            const blockedList = myBlocks.map(b => b.blocked_nint);
+            filteredMsgs = filteredMsgs.filter(m => !blockedList.includes(String(m.n_int)));
+          }
+        }
+        filteredMsgs = filteredMsgs.filter(m => {
+          const hiddenList = m.hidden_for || [];
+          return !hiddenList.includes(currentUserNint);
+        });
+        if (!filteredMsgs || filteredMsgs.length === 0) {
+          const emptyMsg = document.createElement("div");
+          emptyMsg.className = "empty-chat-placeholder";
+          emptyMsg.innerHTML = `
+            <div style="text-align: center; width: 100%; padding: 20px;">
+              <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
+              <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${currentChatName || 'este contacto'}</strong></span>
+            </div>
+          `;
+          messagesEl.appendChild(emptyMsg);
+        } else {
+          filteredMsgs.forEach(msg => addMessageToDOM(msg, chatRef));
+          setTimeout(() => scrollToBottom(), 100);
+          setTimeout(() => scrollToBottom(), 500);
+        }
+      } catch (err) {
+        console.error(err);
       }
     }
-    filteredMsgs = filteredMsgs.filter(m => {
-      const hiddenList = m.hidden_for || [];
-      return !hiddenList.includes(currentUserNint);
-    });
-    if (!filteredMsgs || filteredMsgs.length === 0) {
-      const emptyMsg = document.createElement("div");
-      emptyMsg.className = "empty-chat-placeholder";
-      emptyMsg.innerHTML = `
-        <div style="text-align: center; width: 100%; padding: 20px;">
-          <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
-          <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${currentChatName || 'este contacto'}</strong></span>
-        </div>
-      `;
-      messagesEl.appendChild(emptyMsg);
-    } else {
-      filteredMsgs.forEach(msg => addMessageToDOM(msg, chatRef));
-      setTimeout(() => scrollToBottom(), 100);
-      setTimeout(() => scrollToBottom(), 500);
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
     /* ====================== MARK MESSAGE AS READ ======================= */
     async function markGeralAsRead() {
       const currentCorp = localStorage.getItem("currentCorpOperNr");
