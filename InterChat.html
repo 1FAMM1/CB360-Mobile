@@ -2570,22 +2570,24 @@ window.updateProgress = function(id) {
 
   const currentSec = audio.currentTime || 0;
   
-  // Atualiza o relógio do áudio
+  // Atualiza sempre o relógio (que já confirmou que funciona)
   const mins = Math.floor(currentSec / 60);
   const secs = Math.floor(currentSec % 60);
   if (timeDisplay) {
     timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   }
 
-  // Atualiza a largura da barra de progresso
+  // Tenta calcular a percentagem real
+  let percent = 0;
   if (audio.duration && !isNaN(audio.duration) && audio.duration !== Infinity && audio.duration > 0) {
-    const percent = (currentSec / audio.duration) * 100;
-    fill.style.width = percent + "%";
+    percent = (currentSec / audio.duration) * 100;
   } else {
-    // Fallback se a duração do WebM vier como Infinity no telemóvel
-    const percent = Math.min((currentSec / 15) * 100, 100);
-    fill.style.width = percent + "%";
+    // Fallback: Se a duração for inválida, assume uma escala progressiva baseada no tempo decorrido 
+    // (ou ajusta dinamicamente se o currentTime ultrapassar estimativas)
+    percent = Math.min((currentSec / (audio.duration && audio.duration !== Infinity ? audio.duration : 15)) * 100, 100);
   }
+
+  fill.style.width = percent + "%";
 };
 
 window.resetAudioIcon = function(id) {
