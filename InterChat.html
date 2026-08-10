@@ -2224,7 +2224,7 @@
                   </div>
                   <div class="audio-time" id="time-${audioID}">0:00</div>
                 </div>
-                <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
+                
               </div>
             `;
             break;
@@ -2542,7 +2542,23 @@
         year: 'numeric'
       });
     }
-    function toggleAudio(id, btn) {
+    function fixAudioDuration(audio) {
+  return new Promise((resolve) => {
+    if (audio.duration !== Infinity && !isNaN(audio.duration)) {
+      resolve(audio.duration);
+      return;
+    }
+    const onTimeUpdate = () => {
+      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.currentTime = 0;
+      resolve(audio.duration);
+    };
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.currentTime = 1e101;
+  });
+}
+
+async function toggleAudio(id, btn) {
   const audio = document.getElementById(id);
   if (!audio) return;
   const icon = btn.querySelector('.material-icons');
@@ -2559,6 +2575,9 @@
         if (otherBtn) otherBtn.textContent = 'play_arrow';
       }
     });
+    if (audio.duration === Infinity || isNaN(audio.duration)) {
+      await fixAudioDuration(audio);
+    }
     audio.play();
     icon.textContent = 'pause';
   } else {
@@ -2566,12 +2585,13 @@
     icon.textContent = 'play_arrow';
   }
 }
+
 function updateProgress(id) {
   const audio = document.getElementById(id);
   const fill = document.getElementById(`fill-${id}`);
   const timeDisplay = document.getElementById(`time-${id}`);
   if (!audio || !fill || !timeDisplay) return;
-  if (!audio.duration || isNaN(audio.duration)) return;
+  if (!audio.duration || isNaN(audio.duration) || audio.duration === Infinity) return;
   const percent = (audio.currentTime / audio.duration) * 100;
   fill.style.width = percent + "%";
   const mins = Math.floor(audio.currentTime / 60);
