@@ -2540,11 +2540,15 @@
         year: 'numeric'
       });
     }
-    window.toggleAudio = function(id, btn) {
+    async function toggleAudio(id, btn) {
   const audio = document.getElementById(id);
   if (!audio) return;
   const icon = btn.querySelector('.material-icons');
-  
+  if (!audio.dataset.progressBound) {
+    audio.addEventListener('timeupdate', () => updateProgress(id));
+    audio.addEventListener('loadedmetadata', () => updateProgress(id));
+    audio.dataset.progressBound = "true";
+  }
   if (audio.paused) {
     document.querySelectorAll('audio').forEach(a => {
       if (a.id !== id) {
@@ -2553,63 +2557,35 @@
         if (otherBtn) otherBtn.textContent = 'play_arrow';
       }
     });
+    if (audio.duration === Infinity || isNaN(audio.duration)) {
+      await fixAudioDuration(audio);
+    }
     audio.play();
     icon.textContent = 'pause';
   } else {
     audio.pause();
     icon.textContent = 'play_arrow';
   }
-};
+}
 
-window.updateProgress = function(id) {
+function updateProgress(id) {
   const audio = document.getElementById(id);
   const fill = document.getElementById(`fill-${id}`);
   const timeDisplay = document.getElementById(`time-${id}`);
-  
-  if (!audio || !fill) return;
-
-  const currentSec = audio.currentTime || 0;
-  
-  // Atualiza sempre o relógio (que já confirmou que funciona)
-  const mins = Math.floor(currentSec / 60);
-  const secs = Math.floor(currentSec % 60);
-  if (timeDisplay) {
-    timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  }
-
-  // Tenta calcular a percentagem real
-  let percent = 0;
-  if (audio.duration && !isNaN(audio.duration) && audio.duration !== Infinity && audio.duration > 0) {
-    percent = (currentSec / audio.duration) * 100;
-  } else {
-    // Fallback: Se a duração for inválida, assume uma escala progressiva baseada no tempo decorrido 
-    // (ou ajusta dinamicamente se o currentTime ultrapassar estimativas)
-    percent = Math.min((currentSec / (audio.duration && audio.duration !== Infinity ? audio.duration : 15)) * 100, 100);
-  }
-
+  if (!audio || !fill || !timeDisplay) return;
+  if (!audio.duration || isNaN(audio.duration) || audio.duration === Infinity) return;
+  const percent = (audio.currentTime / audio.duration) * 100;
   fill.style.width = percent + "%";
-};
-
-window.resetAudioIcon = function(id) {
+  const mins = Math.floor(audio.currentTime / 60);
+  const secs = Math.floor(audio.currentTime % 60);
+  timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+function resetAudioIcon(id) {
   const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
   if (icon) icon.textContent = 'play_arrow';
   const fill = document.getElementById(`fill-${id}`);
   if (fill) fill.style.width = "0%";
-};
-
-window.seekAudio = function(event, id) {
-  const audio = document.getElementById(id);
-  const progressBar = event.currentTarget;
-  if (!audio || !audio.duration || isNaN(audio.duration) || audio.duration === Infinity) return;
-
-  const rect = progressBar.getBoundingClientRect();
-  const clickX = event.clientX - rect.left;
-  const width = progressBar.offsetWidth;
-  const percent = Math.max(0, Math.min(1, clickX / width));
-
-  audio.currentTime = percent * audio.duration;
-  window.updateProgress(id);
-};
+}
     /* ============================ OPEN CHAT ============================ */
     async function openChat(n_int, name) {
       const messagesEl = document.getElementById("messages");
