@@ -53,6 +53,7 @@
     .btn-choose {position:relative; width: 100%; min-height: 120px; padding:14px 8px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
                  font-size:14px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; line-height:1.2;
                  box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
+    .btn-choose:disabled {opacity:0.4; cursor:not-allowed; pointer-events:none;}
     .btn-choose:hover {background:var(--surface-2); color:var(--txt-1);}
     .btn-choose:active {background:var(--surface-2); transform:scale(.98);}
     .btn-choose.selected {background:var(--red-light); color:var(--red);}
@@ -149,7 +150,7 @@
   </header>
   <div class="main-content">
     <div class="main-btn">
-      <button class="btn-choose" id="btn-professionals">
+      <button class="btn-choose" id="btn-professionals" disabled>
         <span class="material-icons btn-icon">badge</span>
         <span class="btn-text">Profissionais</span>
       </button>
