@@ -173,6 +173,7 @@
     MESSAGES
     ============================================================ */
     .message {max-width: 75%; padding: 10px; border-radius: 7.5px; margin-bottom: 4px; position: relative; font-size: 14.5px; line-height: 1.5; box-shadow: 0 1px .5px rgba(0, 0, 0, .13); word-wrap: break-word;}
+    .msg-text-content {white-space: pre-wrap;}
     .message.self {align-self: flex-end; background: #6b9e59; color: #fff; margin-right: 10px; border-top-right-radius: 0;}
     .message.other {align-self: flex-start; background: #ddd; color: #000; margin-left: 10px; border-top-left-radius: 0;}
     .message.self::after, .message.other::after {content: ""; position: absolute; top: 0; width: 0; height: 0; border-bottom: 10px solid transparent;}
@@ -277,7 +278,7 @@
                   margin-left: 5px; box-shadow: -8px 0 12px #fff;}
     .plus-button .material-icons {font-size: 20px; color: #667781;}
     .message-reactions {position: absolute; bottom: -12px; right: -6px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 5; pointer-events: all;}
-    .message.self .message-reactions {right: 10px;}
+    .message.self .message-reactions {left: 10px;}
     .message.other .message-reactions {left: 10px;}
     .reaction-badge {display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 20px; height: 21px; width: 21px; padding: 0 5px;
                      box-shadow: 0 1px 2px rgba(0, 0, 0, .18); transition: all .2s; cursor: pointer; flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15));}
@@ -919,60 +920,61 @@
       );
     }
     function renderSearchResults(messages, searchTerm) {
-      resultsList.innerHTML = '';
-      if (!messages || messages.length === 0) {
-        resultsList.innerHTML = '<div style="padding: 20px; text-align:center; opacity:0.5;">Nenhuma mensagem encontrada.</div>';
-        return;
+  resultsList.innerHTML = '';
+  if (!messages || messages.length === 0) {
+    resultsList.innerHTML = '<div style="padding: 20px; text-align:center; opacity:0.5;">Nenhuma mensagem encontrada.</div>';
+    return;
+  }
+  messages.forEach(msg => {
+    const isMyMessage = String(msg.n_int) === String(MyNint);
+    const contactNint = isMyMessage ? msg.recipient_nint : msg.n_int;
+    const displayName = isMyMessage ? 'Tu' : (msg.abv_name || 'Utilizador');
+    const highlightedText = highlightSearchTerm(msg.message, searchTerm);
+    const div = document.createElement('div');
+    div.className = 'contact';
+    div.style.marginBottom = "8px";
+    div.innerHTML = `
+      <div class="contact-info">
+        <div class="name" style="font-size: 14px; margin-bottom: 10px; font-weight: 600; color: #d32f2f;">
+          ${displayName}${String(contactNint) === 'geral' ? ' (Geral)' : ''}
+        </div>
+        <div class="nint" style="opacity:0.8; color:#333; font-size: 13px;">
+          ${highlightedText}
+        </div>
+      </div>
+    `;
+    div.onclick = async () => {
+      if (String(contactNint) === 'geral') {
+        await openChat('geral', 'Chat Geral');
+      } else {
+        let user = (window.allUsers || []).find(u => String(u.n_int) === String(contactNint));
+        if (!user) {
+          const {
+            data: fallbackUser
+          } = await supabaseClient
+            .from('reg_elems')
+            .select('n_int, abv_name')
+            .eq('n_int', contactNint)
+            .eq('corp_oper_nr', corp)
+            .maybeSingle();
+          if (fallbackUser) user = fallbackUser;
+        }
+        if (user) await openChat(user.n_int, user.abv_name);
       }
-      messages.forEach(msg => {
-        const isMyMessage = String(msg.n_int) === String(MyNint);
-        const contactNint = isMyMessage ? msg.recipient_nint : msg.n_int;
-        const displayName = isMyMessage ? 'Tu' : (msg.abv_name || 'Utilizador');
-        const highlightedText = highlightSearchTerm(msg.message, searchTerm);
-        const div = document.createElement('div');
-        div.className = 'contact';
-        div.style.marginBottom = "8px";
-        div.innerHTML = `
-          <div class="contact-info">
-            <div class="name" style="font-size: 14px; margin-bottom: 10px; font-weight: 600; color: #d32f2f;">
-              ${displayName}${String(contactNint) === 'geral' ? ' (Geral)' : ''}
-            </div>
-            <div class="nint" style="opacity:0.8; color:#333; font-size: 13px;">
-              ${highlightedText}
-            </div>
-          </div>
-        `;
-        div.onclick = async () => {
-          if (String(contactNint) === 'geral') {
-            await openChat('geral', 'Chat Geral');
-          } else {
-            let user = (window.allUsers || []).find(u => String(u.n_int) === String(contactNint));
-            if (!user) {
-              const {
-                data: fallbackUser
-              } = await supabaseClient
-                .from('reg_elems')
-                .select('n_int, abv_name')
-                .eq('n_int', contactNint)
-                .eq('corp_oper_nr', corp)
-                .maybeSingle();
-              if (fallbackUser) user = fallbackUser;
-            }
-            if (user) await openChat(user.n_int, user.abv_name);
-          }
-          if (String(contactNint) !== 'geral') {
-            await markChatAsRead(contactNint);
-          }
-          searchInput.value = '';
-          contactList.style.display = 'flex';
-          resultsContainer.style.display = 'none';
-          searchBtnContainer.style.display = 'none';
-          resultsList.innerHTML = '';
-          setTimeout(() => scrollToMessage(msg.id), 350);
-        };
-        resultsList.appendChild(div);
-      });
-    }
+      if (String(contactNint) !== 'geral') {
+        await markChatAsRead(contactNint);
+      }
+      // Não repor a lista de contactos aqui — o openChat() já tratou da UI da conversa.
+      searchInput.value = '';
+      resultsContainer.style.display = 'none';
+      searchBtnContainer.style.display = 'none';
+      resultsList.innerHTML = '';
+      applyActiveFilterStyle(null);
+      setTimeout(() => scrollToMessage(msg.id), 350);
+    };
+    resultsList.appendChild(div);
+  });
+}
     /* ==================== FILTROS DE PESQUISA (Não Lidas / Fotos / etc.) ==================== */
     const FILTER_DB_TYPE_MAP = {
       photo: 'image',
