@@ -163,8 +163,8 @@
     .back-header:hover {opacity: .75;}
     .back-arrow {font-size: 25px !important; margin: 4px 0 0; font-weight: bold !important;}
     .chat-id-info {padding: 5px 20px; font-size: 15px; font-weight: bold; color: #d32f2f; background: rgba(0, 0, 0, .1); border-left: 4px solid #d32f2f;}
-    .message-container {display: none; flex-direction: column; gap: 0; padding: 15px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 125px; max-height: calc(100dvh - 220px);
-                        padding-bottom: calc(var(--footer-h) + -40px + var(--kb) + var(--safe)); transition: max-height .3s ease, margin-bottom .3s ease;}
+    .message-container {display: none; flex-direction: column; gap: 0; padding: 15px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 60px; max-height: calc(100dvh - 220px);
+                        padding-bottom: calc(var(--footer-h) + 60px + var(--kb) + var(--safe)); transition: max-height .3s ease, margin-bottom .3s ease;}
     .message-container.keyboard-active {scroll-behavior: auto;}
     .pinned-banner {background: rgba(255, 248, 225, .95); border-bottom: 1px solid #ffe082; padding: 10px 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #856404;
                     position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); max-height: 100px; overflow-y: auto;}
@@ -276,7 +276,7 @@
     .plus-button {display: flex !important; align-items: center; justify-content: center; width: 28px; height: 28px; background: #f0f2f5; border-radius: 50%; cursor: pointer; flex-shrink: 0;
                   margin-left: 5px; box-shadow: -8px 0 12px #fff;}
     .plus-button .material-icons {font-size: 20px; color: #667781;}
-    .message-reactions {position: absolute; bottom: -14px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 5; pointer-events: all;}
+    .message-reactions {position: absolute; bottom: -12px; right: -6px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 5; pointer-events: all;}
     .message.self .message-reactions {right: 10px;}
     .message.other .message-reactions {left: 10px;}
     .reaction-badge {display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 20px; height: 21px; width: 21px; padding: 0 5px;
@@ -3384,13 +3384,7 @@
           });
         }, 2000);
       });
-      document.getElementById("chat-send-btn").onclick = () => sendMessage();
-      inputEl.onkeydown = e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
-      };
+      document.getElementById("chat-send-btn").onclick = () => sendMessage();      
       inputEl.addEventListener('focus', () => {
         if (currentChat !== 'geral') sendReadReceipt(currentChat);
       });
