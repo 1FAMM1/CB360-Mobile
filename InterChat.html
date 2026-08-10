@@ -134,14 +134,12 @@
     /* ============================================================
     MAIN / CONTACTS
     ============================================================ */
-    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; padding-top: calc(var(--header-h) + 10px); background: var(--bg);
-                   transition: background var(--ease);}
+    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; padding-top: calc(var(--header-h) + 10px); background: var(--bg); transition: background var(--ease);}
     .contact-id-info {padding: 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
     #contact-list {display: flex; flex-direction: column; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0; margin: 10px 0 50px;} 
     .contact {display: flex; align-items: center; gap: 5px; padding: 5px 12px; margin: 0; background: rgba(0, 0, 0, .15); color: #777; cursor: pointer; transition: background .2s, transform .2s;}
     .contact:hover {background: #ddd;}
-    .contact-avatar {width: 40px; height: 40px; border-radius: 50%; border: 2px solid #666; background: #d32f2f; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold;
-                     font-size: 18px; text-transform: uppercase; overflow: visible; position: relative;}
+    .contact-avatar {width: 40px; height: 40px; border-radius: 50%; border: 2px solid #666; background: #d32f2f; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; text-transform: uppercase; overflow: visible; position: relative;}
     .contact-avatar img {width: 100%; height: 100%; object-fit: cover; border-radius: 50%;}
     .contact-info {display: flex; flex-direction: column; justify-content: center; flex: 1; min-width: 0;}
     .contact-info .nint {font-size: 14px; opacity: .6;}
@@ -151,8 +149,7 @@
     .unread-slot {order: 1;}
     .status-dot {width: 13px; height: 13px; background: #bbb; border-radius: 50%; border: 2.5px solid #fff; position: absolute; bottom: -1px; right: -1px; transition: all .3s ease; z-index: 2;}
     .status-dot.online {background: #0f0; box-shadow: 0 0 8px #0f0, 0 0 12px rgba(0, 255, 0, .5); animation: pulse-green 2s infinite;}
-    .unread-badge {background: #d32f2f; color: #fff; font-size: 13px; font-weight: bold; padding: 0 6px; min-width: 30px; height: 20px; line-height: 20px; border-radius: 10px; display: flex;
-                   align-items: center; justify-content: center; margin-left: auto; box-shadow: 0 2px 4px rgba(0, 0, 0, .2);}
+    .unread-badge {background: #d32f2f; color: #fff; font-size: 13px; font-weight: bold; padding: 0 6px; min-width: 30px; height: 20px; line-height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-left: auto; box-shadow: 0 2px 4px rgba(0, 0, 0, .2);}
     /* ============================================================
     BACK / CHAT
     ============================================================ */
@@ -163,11 +160,9 @@
     .back-header:hover {opacity: .75;}
     .back-arrow {font-size: 25px !important; margin: 4px 0 0; font-weight: bold !important;}
     .chat-id-info {padding: 5px 20px; font-size: 15px; font-weight: bold; color: #d32f2f; background: rgba(0, 0, 0, .1); border-left: 4px solid #d32f2f;}
-    .message-container {display: none; flex-direction: column; gap: 0; padding: 15px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 60px; max-height: calc(100dvh - 220px);
-                        padding-bottom: calc(var(--footer-h) + 60px + var(--kb) + var(--safe)); transition: max-height .3s ease, margin-bottom .3s ease;}
+    .message-container {display: none; flex-direction: column; gap: 0; padding: 15px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 60px; max-height: calc(100dvh - 220px); padding-bottom: calc(var(--footer-h) + 60px + var(--kb) + var(--safe)); transition: max-height .3s ease, margin-bottom .3s ease;}
     .message-container.keyboard-active {scroll-behavior: auto;}
-    .pinned-banner {background: rgba(255, 248, 225, .95); border-bottom: 1px solid #ffe082; padding: 10px 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #856404;
-                    position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); max-height: 100px; overflow-y: auto;}
+    .pinned-banner {background: rgba(255, 248, 225, .95); border-bottom: 1px solid #ffe082; padding: 10px 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #856404; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); max-height: 100px; overflow-y: auto;}
     .pinned-text {white-space: normal; word-wrap: break-word; flex: 1; font-weight: 500; line-height: 1.4;}
     /* ============================================================
     MESSAGES
@@ -202,22 +197,18 @@
     .message.deleted .msg-text-content {color: #888 !important; display: flex; align-items: center; gap: 6px;}
     .deleted-icon {font-size: 16px; opacity: .7;}
     .message.deleted .msg-meta {opacity: .5;}
-    .message.is-forwarded::before {content: "forward"; font-family: "Material Symbols Outlined"; font-size: 16px; opacity: .6; position: absolute; left: -22px; top: 50%; pointer-events: none;
-                                   transform: translateY(-50%); user-select: none; line-height: 1; direction: ltr;}
+    .message.is-forwarded::before {content: "forward"; font-family: "Material Symbols Outlined"; font-size: 16px; opacity: .6; position: absolute; left: -22px; top: 50%; pointer-events: none; transform: translateY(-50%); user-select: none; line-height: 1; direction: ltr;}
     .message-edited-tag {font-size: 10px; color: rgba(255, 255, 255, .5); font-style: italic; margin-left: 5px;}
     .message.other .message-edited-tag {color: rgba(0, 0, 0, .4);}
     /* ============================================================
     INPUT / SCROLL
     ============================================================ */
-    .chat-input-bar {position: fixed; left: 0; right: 0; bottom: calc(var(--footer-h) + var(--kb) + var(--gap) + var(--safe)); z-index: 10001; display: none; align-items: flex-end; gap: 8px; padding: 8px 10px;
-                     background: transparent; width: 100%; max-width: 100%; box-sizing: border-box; transition: bottom .12s ease;}
+    .chat-input-bar {position: fixed; left: 0; right: 0; bottom: calc(var(--footer-h) + var(--kb) + var(--gap) + var(--safe)); z-index: 10001; display: none; align-items: flex-end; gap: 8px; padding: 8px 10px; background: transparent; width: 100%; max-width: 100%; box-sizing: border-box; transition: bottom .12s ease;}
     .chat-input-bar.keyboard-active {box-shadow: 0 -4px 12px rgba(0, 0, 0, .12); background: rgba(255, 255, 255, .98);}
     .input-wrapper {display: flex; flex: 1; min-width: 0; align-items: center; background: #ccc; border-radius: 25px; padding: 5px 12px; gap: 2px; min-height: 40px; transition: all .3s ease;}
-    #chat-input {color: #444; flex: 1; min-width: 0; border: none; background: transparent; outline: none; resize: none; padding: 10px 5px; font-size: 15px; max-height: 100px; overflow-y: auto;
-                 font-family: inherit; scrollbar-width: none; -ms-overflow-style: none;}
+    #chat-input {color: #444; flex: 1; min-width: 0; border: none; background: transparent; outline: none; resize: none; padding: 10px 5px; font-size: 15px; max-height: 100px; overflow-y: auto; font-family: inherit; scrollbar-width: none; -ms-overflow-style: none;}
     #chat-input::-webkit-scrollbar {width: 0; background: transparent;}
-    .chat-input-bar button {height: 40px; width: 40px; padding: 4px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent;
-                            color: #54656f; transition: transform .1s ease, background .2s; flex-shrink: 0;}
+    .chat-input-bar button {height: 40px; width: 40px; padding: 4px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent; color: #54656f; transition: transform .1s ease, background .2s; flex-shrink: 0;}
     #chat-send-btn {background: #00a884; color: #fff; border-radius: 50%; width: 50px; height: 50px; flex-shrink: 0;}
     #send-icon {display: inline-block; transition: transform .3s cubic-bezier(.175, .885, .32, 1.275), opacity .2s;}
     .icon-spin {transform: rotate(360deg) scale(.5); opacity: 0;}
@@ -230,18 +221,14 @@
     /* ============================================================
     ACTION / TYPING
     ============================================================ */
-    .typing-indicator {position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #888; font-style: italic; background: rgba(255, 255, 255, .95); padding: 6px 16px;
-                       border-radius: 20px; z-index: 1100; display: none; pointer-events: none; border: 1px solid rgba(0, 0, 0, .08); box-shadow: 0 4px 12px rgba(0, 0, 0, .1); transition: opacity .2s ease;
-                       white-space: nowrap; max-width: 80%;}
-    .action-bar {position: fixed; top: 100px; left: 0; right: 0; background: #f0f0f0; border-bottom: 2px solid #d32f2f; padding: 8px 15px; display: none; align-items: center; gap: 15px; z-index: 2000;
-                 box-shadow: 0 2px 8px rgba(0, 0, 0, .15); transform: translateY(-100%); transition: transform .3s ease;}
+    .typing-indicator {position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #888; font-style: italic; background: rgba(255, 255, 255, .95); padding: 6px 16px; border-radius: 20px; z-index: 1100; display: none; pointer-events: none; border: 1px solid rgba(0, 0, 0, .08); box-shadow: 0 4px 12px rgba(0, 0, 0, .1); transition: opacity .2s ease; white-space: nowrap; max-width: 80%;}
+    .action-bar {position: fixed; top: 100px; left: 0; right: 0; background: #f0f0f0; border-bottom: 2px solid #d32f2f; padding: 8px 15px; display: none; align-items: center; gap: 15px; z-index: 2000; box-shadow: 0 2px 8px rgba(0, 0, 0, .15); transform: translateY(-100%); transition: transform .3s ease;}
     .action-bar.show {display: flex; transform: translateY(0); animation: slideDown .3s ease;}
     .action-bar-close {background: none; border: none; color: #d32f2f; font-size: 24px; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: transform .2s;}
     .action-bar-close:active {transform: scale(.9);}
     .action-bar-counter {flex: 1; font-size: 15px; font-weight: 500; color: #333;}
     .action-bar-actions {display: flex; gap: 8px; align-items: center;}
-    .action-btn {background: none; border: none; color: #d32f2f; font-size: 22px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;
-                 transition: all .2s; min-width: 35px; min-height: 35px;}
+    .action-btn {background: none; border: none; color: #d32f2f; font-size: 22px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all .2s; min-width: 35px; min-height: 35px;}
     .action-btn:active {transform: scale(.9); background: rgba(211, 47, 47, .1);}
     .action-btn.disabled {opacity: .3; pointer-events: none;}
     /* ============================================================
@@ -269,22 +256,18 @@
     /* ============================================================
     IMAGENS / REACTIONS
     ============================================================ */
-    .chat-img {max-width: 230px; width: 100%; height: auto; border-radius: 10px; display: block; cursor: pointer; -webkit-touch-callout: none !important; -webkit-user-select: none !important;
-               -moz-user-select: none !important; -ms-user-select: none !important; user-select: none !important; pointer-events: auto; -webkit-user-drag: none !important;}
+    .chat-img {max-width: 230px; width: 100%; height: auto; border-radius: 10px; display: block; cursor: pointer; -webkit-touch-callout: none !important; -webkit-user-select: none !important; -moz-user-select: none !important; -ms-user-select: none !important; user-select: none !important; pointer-events: auto; -webkit-user-drag: none !important;}
     .img-caption {line-height: 1.35; opacity: .95; word-wrap: break-word;}
-    .reaction-menu {display: none; position: fixed; z-index: 10000; background: #fff; border-radius: 30px; padding: 3px 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, .15); align-items: center;
-                    justify-content: space-between; animation: popScale .1s ease-out; width: 215px;}
+    .reaction-menu {display: none; position: fixed; z-index: 10000; background: #fff; border-radius: 30px; padding: 3px 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, .15); align-items: center; justify-content: space-between; animation: popScale .1s ease-out; width: 215px;}
     .emoji-scroll-container {display: flex; gap: 5px; overflow-x: auto; padding-right: 8px; scrollbar-width: none; -ms-overflow-style: none; flex: 1;}
     .emoji-scroll-container::-webkit-scrollbar {display: none;}
     .reaction-emoji-container {font-size: 25px; cursor: pointer; margin: 0 0 5px; flex-shrink: 0; transition: transform .1s cubic-bezier(.175, .885, .32, 1.275);}
-    .plus-button {display: flex !important; align-items: center; justify-content: center; width: 28px; height: 28px; background: #f0f2f5; border-radius: 50%; cursor: pointer; flex-shrink: 0;
-                  margin-left: 5px; box-shadow: -8px 0 12px #fff;}
+    .plus-button {display: flex !important; align-items: center; justify-content: center; width: 28px; height: 28px; background: #f0f2f5; border-radius: 50%; cursor: pointer; flex-shrink: 0;  margin-left: 5px; box-shadow: -8px 0 12px #fff;}
     .plus-button .material-icons {font-size: 20px; color: #667781;}
     .message-reactions {position: absolute; bottom: -12px; right: -6px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 5; pointer-events: all;}
     .message.self .message-reactions {right: 10px;}
     .message.other .message-reactions {left: 10px;}
-    .reaction-badge {display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 20px; height: 21px; width: 21px; padding: 0 5px;
-                     box-shadow: 0 1px 2px rgba(0, 0, 0, .18); transition: all .2s; cursor: pointer; flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15));}
+    .reaction-badge {display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 20px; height: 21px; width: 21px; padding: 0 5px; box-shadow: 0 1px 2px rgba(0, 0, 0, .18); transition: all .2s; cursor: pointer; flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15));}
     .reaction-badge.my-reaction {background: transparent; border: none;}
     .reaction-badge.my-reaction .reaction-count {color: #d32f2f; font-weight: 700;}
     .reaction-emoji {font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;}
@@ -305,21 +288,15 @@
     .btn-confirm-action {display: block;}
     .btn-confirm-cancel {margin-top: 10px;}
     .btn-confirm-action:active, .btn-confirm-cancel:active {background: rgba(0, 0, 0, .05);}
-    #full-emoji-picker-container {display: none; position: fixed; bottom: 0; width: 100%; height: 300px; z-index: 10001; box-shadow: 0 -5px 25px rgba(0, 0, 0, .2); overflow: hidden;
-                                  animation: slideUp .3s ease-out; transition: opacity .2s ease-in-out;}
+    #full-emoji-picker-container {display: none; position: fixed; bottom: 0; width: 100%; height: 300px; z-index: 10001; box-shadow: 0 -5px 25px rgba(0, 0, 0, .2); overflow: hidden; animation: slideUp .3s ease-out; transition: opacity .2s ease-in-out;}
     emoji-picker {width: 100%; height: 100%;}
     .draft-preview {color: #444 !important; font-size: .85em; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;}
     /* ============================================================
     AUDIO
     ============================================================ */
-    .audio-bubble {display: flex; align-items: center; gap: 12px; padding: 6px 10px; background: rgba(255, 255, 255, .15); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255, 255, 255, .2);
-                   border-radius: 10px; width: 200px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 4px 16px rgba(0, 0, 0, .15), 0 2px 4px rgba(0, 0, 0, .1); position: relative; top: 5px;
-                   transition: all .3s cubic-bezier(.4, 0, .2, 1);}
-    .audio-play-btn {width: 35px; height: 35px; background: linear-gradient(135deg, #34b7f1, #2196F3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff;
-                     cursor: pointer; flex-shrink: 0; position: relative; box-shadow: 0 4px 12px rgba(52, 183, 241, .5), 0 2px 6px rgba(52, 183, 241, .3), inset 0 1px 0 rgba(255, 255, 255, .25);
-                     transition: all .25s cubic-bezier(.4, 0, .2, 1);}
-    .audio-play-btn::after {content: ''; position: absolute; inset: -3px; border-radius: 50%; background: radial-gradient(circle, rgba(52, 183, 241, .4), transparent 70%); opacity: 0;
-                            transition: opacity .25s ease;}
+    .audio-bubble {display: flex; align-items: center; gap: 12px; padding: 6px 10px; background: rgba(255, 255, 255, .15); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255, 255, 255, .2); border-radius: 10px; width: 200px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 4px 16px rgba(0, 0, 0, .15), 0 2px 4px rgba(0, 0, 0, .1); position: relative; top: 5px; transition: all .3s cubic-bezier(.4, 0, .2, 1);}
+    .audio-play-btn {width: 35px; height: 35px; background: linear-gradient(135deg, #34b7f1, #2196F3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; flex-shrink: 0; position: relative; box-shadow: 0 4px 12px rgba(52, 183, 241, .5), 0 2px 6px rgba(52, 183, 241, .3), inset 0 1px 0 rgba(255, 255, 255, .25); transition: all .25s cubic-bezier(.4, 0, .2, 1);}
+    .audio-play-btn::after {content: ''; position: absolute; inset: -3px; border-radius: 50%; background: radial-gradient(circle, rgba(52, 183, 241, .4), transparent 70%); opacity: 0; transition: opacity .25s ease;}
     .audio-play-btn:hover {transform: scale(1.12); box-shadow: 0 6px 18px rgba(52, 183, 241, .6), 0 3px 10px rgba(52, 183, 241, .4), inset 0 1px 0 rgba(255, 255, 255, .3);}
     .audio-play-btn:hover::after {opacity: 1;}
     .audio-play-btn:active {transform: scale(.95);}
@@ -328,15 +305,12 @@
     .audio-progress-container {flex-grow: 1; display: flex; flex-direction: column; gap: 7px;}
     .audio-progress-bar {width: 100%; height: 5px; background: rgba(0, 0, 0, .15); border-radius: 999px; overflow: hidden; position: relative; cursor: pointer; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1); transition: all .2s ease;}
     .audio-progress-bar:hover {height: 6px; background: rgba(0, 0, 0, .18);}
-    .audio-progress-fill {height: 100%; width: 0%; background: linear-gradient(90deg, #34b7f1, #2196F3); border-radius: 999px; transition: width .1s linear; position: absolute; left: 0; top: 0;
-                          box-shadow: 0 0 8px rgba(52, 183, 241, .8), 0 0 4px rgba(52, 183, 241, .6);}
-    .audio-progress-fill::after {content: ''; position: absolute; right: -1px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background: #fff; border-radius: 50%; opacity: 0;
-                                 box-shadow: 0 2px 6px rgba(52, 183, 241, .5), 0 0 0 2px #34b7f1; transition: opacity .2s ease;}
+    .audio-progress-fill {height: 100%; width: 0%; background: linear-gradient(90deg, #34b7f1, #2196F3); border-radius: 999px; transition: width .1s linear; position: absolute; left: 0; top: 0; box-shadow: 0 0 8px rgba(52, 183, 241, .8), 0 0 4px rgba(52, 183, 241, .6);}
+    .audio-progress-fill::after {content: ''; position: absolute; right: -1px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background: #fff; border-radius: 50%; opacity: 0; box-shadow: 0 2px 6px rgba(52, 183, 241, .5), 0 0 0 2px #34b7f1; transition: opacity .2s ease;}
     .audio-progress-bar:hover .audio-progress-fill::after {opacity: 1;}
     .audio-info {display: flex; justify-content: space-between; align-items: center;}
     .audio-time {font-size: 11px; font-weight: 600; opacity: .8; color: #fff; letter-spacing: .4px; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0, 0, 0, .15);}
-    .audio-bubble.loading .audio-progress-fill {background: linear-gradient(90deg, rgba(52, 183, 241, .3), rgba(52, 183, 241, .7), rgba(52, 183, 241, .3)); background-size: 200% 100%;
-                                                animation: shimmer 1.5s ease-in-out infinite;}
+    .audio-bubble.loading .audio-progress-fill {background: linear-gradient(90deg, rgba(52, 183, 241, .3), rgba(52, 183, 241, .7), rgba(52, 183, 241, .3)); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite;}
     .audio-bubble.dark {background: rgba(20, 20, 25, .85); border-color: rgba(255, 255, 255, .08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 4px 16px rgba(0, 0, 0, .4), 0 2px 4px rgba(0, 0, 0, .3);}
     .audio-bubble.dark:hover {background: rgba(25, 25, 30, .9);}
     .audio-bubble.dark .audio-progress-bar {background: rgba(255, 255, 255, .08);}
@@ -367,14 +341,11 @@
     .attach-viewer {position: absolute; inset: 0; background: rgba(0, 0, 0, .95); display: flex; align-items: center; justify-content: center; z-index: 9999999;}
     .attach-viewer-img {max-width: 96%; max-height: 86vh; object-fit: contain; user-select: none; -webkit-user-drag: none;}
     .attach-viewer-close {position: absolute; top: 10px; right: 10px; border: none; background: rgba(255, 255, 255, .12); color: #fff; font-size: 18px; padding: 10px 12px; border-radius: 10px;}
-    .attach-viewer-nav {position: absolute; top: 50%; transform: translateY(-50%); border: none; background: rgba(255, 255, 255, .12); color: #fff; font-size: 34px; width: 44px; height: 60px;
-                        border-radius: 12px;}
+    .attach-viewer-nav {position: absolute; top: 50%; transform: translateY(-50%); border: none; background: rgba(255, 255, 255, .12); color: #fff; font-size: 34px; width: 44px; height: 60px; border-radius: 12px;}
     .attach-viewer-nav.prev {left: 10px;}
     .attach-viewer-nav.next {right: 10px;}
-    .attach-viewer-count {position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: #fff; font-weight: 700; font-size: 12px; background: rgba(255, 255, 255, .12);
-                          padding: 6px 10px; border-radius: 999px;}
-    .batch-cell, .batch-cell img, .batch-grid-2x2 {-webkit-touch-callout: none !important; -webkit-user-select: none !important; -moz-user-select: none !important; -ms-user-select: none !important;
-                                                   user-select: none !important; -webkit-user-drag: none !important;}
+    .attach-viewer-count {position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: #fff; font-weight: 700; font-size: 12px; background: rgba(255, 255, 255, .12); padding: 6px 10px; border-radius: 999px;}
+    .batch-cell, .batch-cell img, .batch-grid-2x2 {-webkit-touch-callout: none !important; -webkit-user-select: none !important; -moz-user-select: none !important; -ms-user-select: none !important; user-select: none !important; -webkit-user-drag: none !important;}
     .batch-cell img {pointer-events: none;}
     /* ============================================================
     SEARCH / FILTER
@@ -2070,36 +2041,36 @@
     }
     /* ======================= TOGGLE REACTIONS ========================== */
     async function toggleReaction(messageId, emoji) {
-  const {
-    data: msg,
-    error: fetchError
-  } = await supabaseClient
-    .from('chat_messages')
-    .select('reactions')
-    .eq('id', messageId)
-    .single();
-  if (fetchError) {
-    console.error("Erro ao ler reações:", fetchError);
-    return;
-  }
-  let currentReactions = msg.reactions || {};
-  if (currentReactions[currentUserNint] === emoji) {
-    delete currentReactions[currentUserNint];
-  } else {
-    currentReactions[currentUserNint] = emoji;
-  }
-  const {
-    error: updateError
-  } = await supabaseClient
-    .from('chat_messages')
-    .update({
-      reactions: currentReactions
-    })
-    .eq('id', messageId);
-  if (updateError) {
-    console.error("Erro ao atualizar reação:", updateError);
-  }
-}
+      const {
+        data: msg,
+        error: fetchError
+      } = await supabaseClient
+      .from('chat_messages')
+      .select('reactions')
+      .eq('id', messageId)
+      .single();
+      if (fetchError) {
+        console.error("Erro ao ler reações:", fetchError);
+        return;
+      }
+      let currentReactions = msg.reactions || {};
+      if (currentReactions[currentUserNint] === emoji) {
+        delete currentReactions[currentUserNint];
+      } else {
+        currentReactions[currentUserNint] = emoji;
+      }
+      const {
+        error: updateError
+      } = await supabaseClient
+      .from('chat_messages')
+      .update({
+        reactions: currentReactions
+      })
+      .eq('id', messageId);
+      if (updateError) {
+        console.error("Erro ao atualizar reação:", updateError);
+      }
+    }
     /* ======================= ADD MESSAGE TO DOM ======================== */
     function addMessageToDOM(msg, chatRef) {
       if (msg.hidden_for && Array.isArray(msg.hidden_for)) {
@@ -2211,23 +2182,23 @@
             break;
           }
           case "audio": {
-  const audioID = `audio-${msg.id || Date.now()}`;
-  finalContentHTML = `
-    <div class="audio-bubble">
-      <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
-        <span class="material-icons">play_arrow</span>
-      </div>
-      <div class="audio-progress-container">
-        <div class="audio-progress-bar" onclick="seekAudio(event, '${audioID}')">
-          <div id="fill-${audioID}" class="audio-progress-fill"></div>
-        </div>
-        <div class="audio-time" id="time-${audioID}">0:00</div>
-      </div>
-      <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
-    </div>
-  `;
-  break;
-}
+            const audioID = `audio-${msg.id || Date.now()}`;
+            finalContentHTML = `
+              <div class="audio-bubble">
+                <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
+                  <span class="material-icons">play_arrow</span>
+                </div>
+                <div class="audio-progress-container">
+                  <div class="audio-progress-bar" onclick="seekAudio(event, '${audioID}')">
+                    <div id="fill-${audioID}" class="audio-progress-fill"></div>
+                  </div>
+                  <div class="audio-time" id="time-${audioID}">0:00</div>
+               </div>
+               <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
+              </div>
+            `;
+            break;
+          }
           case "file": {
             const fileName = msg.file_name || "";
             const isPdf = fileName.toLowerCase().endsWith(".pdf");
@@ -2541,51 +2512,50 @@
       });
     }
     async function toggleAudio(id, btn) {
-  const audio = document.getElementById(id);
-  if (!audio) return;
-  const icon = btn.querySelector('.material-icons');
-  if (!audio.dataset.progressBound) {
-    audio.addEventListener('timeupdate', () => updateProgress(id));
-    audio.addEventListener('loadedmetadata', () => updateProgress(id));
-    audio.dataset.progressBound = "true";
-  }
-  if (audio.paused) {
-    document.querySelectorAll('audio').forEach(a => {
-      if (a.id !== id) {
-        a.pause();
-        const otherBtn = document.querySelector(`[onclick*="${a.id}"] .material-icons`);
-        if (otherBtn) otherBtn.textContent = 'play_arrow';
+      const audio = document.getElementById(id);
+      if (!audio) return;
+      const icon = btn.querySelector('.material-icons');
+      if (!audio.dataset.progressBound) {
+        audio.addEventListener('timeupdate', () => updateProgress(id));
+        audio.addEventListener('loadedmetadata', () => updateProgress(id));
+        audio.dataset.progressBound = "true";
       }
-    });
-    if (audio.duration === Infinity || isNaN(audio.duration)) {
-      await fixAudioDuration(audio);
+      if (audio.paused) {
+        document.querySelectorAll('audio').forEach(a => {
+          if (a.id !== id) {
+            a.pause();
+            const otherBtn = document.querySelector(`[onclick*="${a.id}"] .material-icons`);
+            if (otherBtn) otherBtn.textContent = 'play_arrow';
+          }
+        });
+        if (audio.duration === Infinity || isNaN(audio.duration)) {
+          await fixAudioDuration(audio);
+        }
+        audio.play();
+        icon.textContent = 'pause';
+      } else {
+        audio.pause();
+        icon.textContent = 'play_arrow';
+      }
     }
-    audio.play();
-    icon.textContent = 'pause';
-  } else {
-    audio.pause();
-    icon.textContent = 'play_arrow';
-  }
-}
-
-function updateProgress(id) {
-  const audio = document.getElementById(id);
-  const fill = document.getElementById(`fill-${id}`);
-  const timeDisplay = document.getElementById(`time-${id}`);
-  if (!audio || !fill || !timeDisplay) return;
-  if (!audio.duration || isNaN(audio.duration) || audio.duration === Infinity) return;
-  const percent = (audio.currentTime / audio.duration) * 100;
-  fill.style.width = percent + "%";
-  const mins = Math.floor(audio.currentTime / 60);
-  const secs = Math.floor(audio.currentTime % 60);
-  timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-}
-function resetAudioIcon(id) {
-  const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
-  if (icon) icon.textContent = 'play_arrow';
-  const fill = document.getElementById(`fill-${id}`);
-  if (fill) fill.style.width = "0%";
-}
+    function updateProgress(id) {
+      const audio = document.getElementById(id);
+      const fill = document.getElementById(`fill-${id}`);
+      const timeDisplay = document.getElementById(`time-${id}`);
+      if (!audio || !fill || !timeDisplay) return;
+      if (!audio.duration || isNaN(audio.duration) || audio.duration === Infinity) return;
+      const percent = (audio.currentTime / audio.duration) * 100;
+      fill.style.width = percent + "%";
+      const mins = Math.floor(audio.currentTime / 60);
+      const secs = Math.floor(audio.currentTime % 60);
+      timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+    function resetAudioIcon(id) {
+      const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
+      if (icon) icon.textContent = 'play_arrow';
+      const fill = document.getElementById(`fill-${id}`);
+      if (fill) fill.style.width = "0%";
+    }
     /* ============================ OPEN CHAT ============================ */
     async function openChat(n_int, name) {
       const messagesEl = document.getElementById("messages");
@@ -3793,7 +3763,6 @@ function resetAudioIcon(id) {
         fallbackCopy(text);
       }
     }
-
     function fallbackCopy(text) {
       const textArea = document.createElement('textarea');
       textArea.value = text;
