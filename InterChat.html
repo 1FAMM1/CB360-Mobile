@@ -326,9 +326,9 @@
     .audio-play-btn .material-icons {font-size: 24px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .2));}
     .audio-bubble.playing .audio-play-btn {animation: gentle-pulse 2s ease-in-out infinite;}
     .audio-progress-container {flex-grow: 1; display: flex; flex-direction: column; gap: 7px;}
-     .audio-progress-bar {width: 100%; height: 5px; background: rgba(0, 0, 0, .15); border-radius: 999px; overflow: hidden; position: relative; cursor: pointer; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1); transition: all .2s ease;}
+    .audio-progress-bar {width: 100%; height: 5px; background: rgba(0, 0, 0, .15); border-radius: 999px; overflow: hidden; position: relative; cursor: pointer; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1); transition: all .2s ease;}
     .audio-progress-bar:hover {height: 6px; background: rgba(0, 0, 0, .18);}
-    .audio-progress-fill {height: 100%; width: 0%; background: linear-gradient(90deg, #34b7f1, #2196F3); border-radius: 999px; transition: width .1s linear; position: relative;
+    .audio-progress-fill {height: 100%; width: 0%; background: linear-gradient(90deg, #34b7f1, #2196F3); border-radius: 999px; transition: width .1s linear; position: absolute; left: 0; top: 0;
                           box-shadow: 0 0 8px rgba(52, 183, 241, .8), 0 0 4px rgba(52, 183, 241, .6);}
     .audio-progress-fill::after {content: ''; position: absolute; right: -1px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background: #fff; border-radius: 50%; opacity: 0;
                                  box-shadow: 0 2px 6px rgba(52, 183, 241, .5), 0 0 0 2px #34b7f1; transition: opacity .2s ease;}
