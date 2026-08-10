@@ -2211,23 +2211,23 @@
             break;
           }
           case "audio": {
-            const audioID = `audio-${msg.id || Date.now()}`;
-            finalContentHTML = `
-              <div class="audio-bubble">
-                <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
-                  <span class="material-icons">play_arrow</span>
-                </div>
-                <div class="audio-progress-container">
-                  <div class="audio-progress-bar">
-                    <div id="fill-${audioID}" class="audio-progress-fill"></div>
-                  </div>
-                  <div class="audio-time" id="time-${audioID}">0:00</div>
-                </div>
-                <audio id="${audioID}" src="${msg.file_url}" onended="resetAudioIcon('${audioID}')"></audio>
-              </div>
-            `;
-            break;
-          }
+  const audioID = `audio-${msg.id || Date.now()}`;
+  finalContentHTML = `
+    <div class="audio-bubble">
+      <div class="audio-play-btn" onclick="toggleAudio('${audioID}', this)">
+        <span class="material-icons">play_arrow</span>
+      </div>
+      <div class="audio-progress-container">
+        <div class="audio-progress-bar" onclick="seekAudio(event, '${audioID}')">
+          <div id="fill-${audioID}" class="audio-progress-fill"></div>
+        </div>
+        <div class="audio-time" id="time-${audioID}">0:00</div>
+      </div>
+      <audio id="${audioID}" src="${msg.file_url}" ontimeupdate="updateProgress('${audioID}')" onended="resetAudioIcon('${audioID}')"></audio>
+    </div>
+  `;
+  break;
+}
           case "file": {
             const fileName = msg.file_name || "";
             const isPdf = fileName.toLowerCase().endsWith(".pdf");
@@ -2540,41 +2540,74 @@
         year: 'numeric'
       });
     }
-    function toggleAudio(id, btn) {
-      const audio = document.getElementById(id);
-      const icon = btn.querySelector('.material-icons');
-      if (audio.paused) {
-        document.querySelectorAll('audio').forEach(a => {
-          if (a.id !== id) {
-            a.pause();
-            const otherBtn = document.querySelector(`[onclick*="${a.id}"] .material-icons`);
-            if (otherBtn) otherBtn.textContent = 'play_arrow';
-          }
-        });
-        audio.play();
-        icon.textContent = 'pause';
-      } else {
-        audio.pause();
-        icon.textContent = 'play_arrow';
+    window.toggleAudio = function(id, btn) {
+  const audio = document.getElementById(id);
+  if (!audio) return;
+  const icon = btn.querySelector('.material-icons');
+  
+  if (audio.paused) {
+    document.querySelectorAll('audio').forEach(a => {
+      if (a.id !== id) {
+        a.pause();
+        const otherBtn = document.querySelector(`[onclick*="${a.id}"] .material-icons`);
+        if (otherBtn) otherBtn.textContent = 'play_arrow';
       }
-    }
-    function updateProgress(id) {
-      const audio = document.getElementById(id);
-      const fill = document.getElementById(`fill-${id}`);
-      const timeDisplay = document.getElementById(`time-${id}`);
-      if (!audio.duration) return;
-      const percent = (audio.currentTime / audio.duration) * 100;
-      fill.style.width = percent + "%";
-      const mins = Math.floor(audio.currentTime / 60);
-      const secs = Math.floor(audio.currentTime % 60);
-      timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    }
-    function resetAudioIcon(id) {
-      const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
-      if (icon) icon.textContent = 'play_arrow';
-      const fill = document.getElementById(`fill-${id}`);
-      if (fill) fill.style.width = "0%";
-    }
+    });
+    audio.play();
+    icon.textContent = 'pause';
+  } else {
+    audio.pause();
+    icon.textContent = 'play_arrow';
+  }
+};
+
+window.updateProgress = function(id) {
+  const audio = document.getElementById(id);
+  const fill = document.getElementById(`fill-${id}`);
+  const timeDisplay = document.getElementById(`time-${id}`);
+  
+  if (!audio || !fill) return;
+
+  const currentSec = audio.currentTime || 0;
+  
+  // Atualiza o relógio do áudio
+  const mins = Math.floor(currentSec / 60);
+  const secs = Math.floor(currentSec % 60);
+  if (timeDisplay) {
+    timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+
+  // Atualiza a largura da barra de progresso
+  if (audio.duration && !isNaN(audio.duration) && audio.duration !== Infinity && audio.duration > 0) {
+    const percent = (currentSec / audio.duration) * 100;
+    fill.style.width = percent + "%";
+  } else {
+    // Fallback se a duração do WebM vier como Infinity no telemóvel
+    const percent = Math.min((currentSec / 15) * 100, 100);
+    fill.style.width = percent + "%";
+  }
+};
+
+window.resetAudioIcon = function(id) {
+  const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
+  if (icon) icon.textContent = 'play_arrow';
+  const fill = document.getElementById(`fill-${id}`);
+  if (fill) fill.style.width = "0%";
+};
+
+window.seekAudio = function(event, id) {
+  const audio = document.getElementById(id);
+  const progressBar = event.currentTarget;
+  if (!audio || !audio.duration || isNaN(audio.duration) || audio.duration === Infinity) return;
+
+  const rect = progressBar.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const width = progressBar.offsetWidth;
+  const percent = Math.max(0, Math.min(1, clickX / width));
+
+  audio.currentTime = percent * audio.duration;
+  window.updateProgress(id);
+};
     /* ============================ OPEN CHAT ============================ */
     async function openChat(n_int, name) {
       const messagesEl = document.getElementById("messages");
