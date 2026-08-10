@@ -2561,11 +2561,14 @@ async function toggleAudio(id, btn) {
   const audio = document.getElementById(id);
   if (!audio) return;
   const icon = btn.querySelector('.material-icons');
+  
+  // Associa os eventos de progresso e tempo apenas uma vez por elemento
   if (!audio.dataset.progressBound) {
     audio.addEventListener('timeupdate', () => updateProgress(id));
     audio.addEventListener('loadedmetadata', () => updateProgress(id));
     audio.dataset.progressBound = "true";
   }
+
   if (audio.paused) {
     document.querySelectorAll('audio').forEach(a => {
       if (a.id !== id) {
@@ -2591,12 +2594,15 @@ function updateProgress(id) {
   const timeDisplay = document.getElementById(`time-${id}`);
   if (!audio || !fill || !timeDisplay) return;
   if (!audio.duration || isNaN(audio.duration) || audio.duration === Infinity) return;
+  
   const percent = (audio.currentTime / audio.duration) * 100;
   fill.style.width = percent + "%";
+  
   const mins = Math.floor(audio.currentTime / 60);
   const secs = Math.floor(audio.currentTime % 60);
   timeDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
+
 function resetAudioIcon(id) {
   const icon = document.querySelector(`[onclick*="${id}"] .material-icons`);
   if (icon) icon.textContent = 'play_arrow';
