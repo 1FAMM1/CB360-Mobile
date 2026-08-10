@@ -5,7 +5,7 @@
     to 'Response'); devolve sempre um Response válido, com
     fallback para index.html em navegações offline.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v4.1.0';
+    const CACHE_NAME = 'cb360-cache-v4.1.1';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', 
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', 
                              '/MissReport.html', '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', 
