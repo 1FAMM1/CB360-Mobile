@@ -28,31 +28,24 @@
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
-          user-select: none; transition: background var(--ease), color var(--ease);}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER / FOOTER
     ============================================================ */
-    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
-    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 20px); padding-bottom: calc(var(--footer-h) + 15px); padding-left: 16px; padding-right: 16px;
-                    display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;}
-    .main-content::-webkit-scrollbar {display: none;}
-    @media (min-width: 769px) {
-      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
-    }
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 20px); padding-bottom: calc(var(--footer-h) + 15px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;}
+    .main-content::-webkit-scrollbar {display: none;}    
     .section-title {width: 100%; font-size: 13.5px; font-weight: 700; color: var(--txt-2); margin: 15px 0px 5px 0px; letter-spacing: 0.2px; display: flex; align-items: center; transition: opacity var(--ease), max-height var(--ease); overflow: hidden;}
     .section-title::before {content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--red); display: inline-block; margin-right: 5px;}
     .hide-on-focus {transition: opacity var(--ease), max-height var(--ease), margin var(--ease), padding var(--ease); opacity: 1; max-height: 300px; overflow: hidden;}
@@ -60,12 +53,10 @@
     /* ============================================================
     VEHICLE SELECTOR (botão que abre a lista)
     ============================================================ */
-    .vehicle-selector-btn {width: 100%; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 5px 15px;
-                           box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), box-shadow var(--ease), transform var(--ease); text-align: left; margin-bottom: 5px;}
+    .vehicle-selector-btn {width: 100%; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 5px 15px; box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), box-shadow var(--ease), transform var(--ease); text-align: left; margin-bottom: 5px;}
     .vehicle-selector-btn:hover {box-shadow: var(--sh-md); transform: translateY(-1px);}
     .vehicle-selector-btn:active {transform: translateY(0);}
-    .vehicle-selector-icon {width: 42px; height: 42px; border-radius: 50%; background: var(--red-light); color: var(--red); display: flex; align-items: center; justify-content: center;
-                            flex-shrink: 0; transition: background var(--ease), color var(--ease);}
+    .vehicle-selector-icon {width: 42px; height: 42px; border-radius: 50%; background: var(--red-light); color: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background var(--ease), color var(--ease);}
     .vehicle-selector-icon .material-icons {font-size: 22px;}
     .vehicle-selector-info {flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;}
     .vehicle-selector-label {font-size: 10px; font-weight: 600; color: var(--txt-3); text-transform: uppercase; letter-spacing: 0.5px;}
@@ -78,13 +69,10 @@
     ============================================================ */
     .anomaly-textarea-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 4px; transition: box-shadow var(--ease); margin-bottom: 5px;}
     .anomaly-textarea-card:focus-within {box-shadow: var(--sh-md);}
-    .anomaly-textarea {width: 100%; min-height: 120px; max-height: 200px; resize: vertical; border: none; background: transparent; outline: none; padding: 12px; font-family: inherit;
-                        font-size: 14px; line-height: 1.5; color: var(--txt-1);}
+    .anomaly-textarea {width: 100%; min-height: 120px; max-height: 200px; resize: vertical; border: none; background: transparent; outline: none; padding: 12px; font-family: inherit; font-size: 14px; line-height: 1.5; color: var(--txt-1);}
     .anomaly-textarea::placeholder {color: var(--txt-3);}
     .anomaly-photo-actions {display: flex; gap: 10px; width: 100%; margin-bottom: 5px;}
-    .anomaly-photo-btn {flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: var(--r-md); font-size: 13px; font-weight: 600;
-                        cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--txt-1); box-shadow: var(--sh-sm);
-                        transition: background var(--ease), transform var(--ease), box-shadow var(--ease); font-family: inherit;}
+    .anomaly-photo-btn {flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: var(--r-md); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--txt-1); box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease), box-shadow var(--ease); font-family: inherit;}
     .anomaly-photo-btn:hover {transform: translateY(-1px); box-shadow: var(--sh-md);}
     .anomaly-photo-btn:active {transform: translateY(0);}
     .anomaly-photo-btn .material-icons {font-size: 20px; color: var(--red);}
@@ -93,12 +81,9 @@
     .anomaly-photo-preview {display: flex; gap: 8px; flex-wrap: wrap; width: 100%; margin-bottom: 5px;}
     .anomaly-photo-thumb {position: relative; width: 64px; height: 64px; border-radius: var(--r-sm); overflow: hidden; box-shadow: var(--sh-sm); flex-shrink: 0;}
     .anomaly-photo-thumb img {width: 100%; height: 100%; object-fit: cover; display: block;}
-    .anomaly-photo-thumb .remove-btn {position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff;
-                                    display: flex; align-items: center; justify-content: center; cursor: pointer;}
+    .anomaly-photo-thumb .remove-btn {position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;}
     .anomaly-photo-thumb .remove-btn .material-icons {font-size: 14px; color: #fff;}
-    .anomaly-submit-btn {width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 14px; border-radius: var(--r-md); font-size: 14px; font-weight: 700;
-                         font-family: inherit; cursor: pointer; border: none; color: #fff; background: linear-gradient(135deg, var(--red-dark), var(--red)); box-shadow: var(--sh-md);
-                         transition: background var(--ease), transform var(--ease), box-shadow var(--ease); margin-bottom: 10px;}
+    .anomaly-submit-btn {width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 14px; border-radius: var(--r-md); font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; color: #fff; background: linear-gradient(135deg, var(--red-dark), var(--red)); box-shadow: var(--sh-md); transition: background var(--ease), transform var(--ease), box-shadow var(--ease); margin-bottom: 10px;}
     .anomaly-submit-btn:hover {transform: translateY(-1px); box-shadow: var(--sh-lg);}
     .anomaly-submit-btn:active {transform: translateY(0);}
     .anomaly-submit-btn .material-icons {font-size: 20px;}
@@ -111,9 +96,10 @@
     .history-table-container::-webkit-scrollbar-thumb {background: rgba(0,0,0,0.15); border-radius: 10px;}
     .history-table {width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;}
     .history-table th {position: sticky; top: 0; z-index: 2; background: var(--surface-2); color: var(--txt-2); font-weight: 700; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;}
-    .history-table td {padding: 12px; border-bottom: 1px solid var(--border); color: var(--txt-1); vertical-align: top;}
+    .history-table td {padding: 12px; border-bottom: 1px solid var(--border); color: var(--txt-1); vertical-align: middle;}
     .history-table tr:last-child td {border-bottom: none;}
     .history-date {white-space: nowrap; font-weight: 600; color: var(--txt-2); font-size: 12px;}
+    .history-nint {white-space: nowrap; font-weight: 600; color: var(--red); font-size: 11.5px;}
     .history-desc {word-break: break-word; line-height: 1.4;}
     .history-empty {text-align: center; padding: 20px; color: var(--txt-3); font-size: 13px;}
     /* ============================================================
@@ -121,8 +107,7 @@
     ============================================================ */
     .vehicle-modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 5000; display: none; align-items: flex-end; justify-content: center;}
     .vehicle-modal-overlay.show {display: flex; animation: fadeIn 0.2s ease;}
-    .vehicle-modal-card {background: var(--surface); width: 100%; max-width: 500px; max-height: 78vh; border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--sh-lg);
-                           display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);}
+    .vehicle-modal-card {background: var(--surface); width: 100%; max-width: 500px; max-height: 78vh; border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--sh-lg); display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);}
     .vehicle-modal-header {display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;}
     .vehicle-modal-title {font-size: 15px; font-weight: 700; color: var(--txt-1);}
     .vehicle-modal-close {background: none; border: none; color: var(--txt-2); cursor: pointer; padding: 6px; display: flex; border-radius: 50%; transition: background var(--ease);}
@@ -161,7 +146,6 @@
     .custom-modal-btn {width: 100%; padding: 12px; border-radius: var(--r-md); font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; background: linear-gradient(135deg, var(--red-dark), var(--red)); color: #fff; box-shadow: var(--sh-md); transition: background var(--ease), transform var(--ease);}
     .custom-modal-btn:hover {transform: translateY(-1px);}
     @keyframes scaleUp {from {transform: scale(0.9); opacity: 0;} to {transform: scale(1); opacity: 1;}}
-
     @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
     @keyframes slideUp {from {transform: translateY(30px); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     /* ============================================================
@@ -171,12 +155,14 @@
       .header-title {font-size: 16px;}
       .main-content {padding-left: 14px; padding-right: 14px;}
     }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
+    }
   </style>
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
-         onerror="this.style.display='none';" onload="this.style.display='block';">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">REPORTAR ANOMALIAS</span>
       <span class="header-sub">Frota de Veículos</span>
@@ -214,12 +200,13 @@
           <thead>
             <tr>
               <th style="width: 35%;">Data / Hora</th>
-              <th style="width: 65%;">Anomalia</th>
+              <th style="width: 45%;">Anomalia</th>
+              <th style="width: 20%;">Nº Int.</th>
             </tr>
           </thead>
           <tbody id="anomalyHistoryList">
             <tr>
-              <td colspan="2" class="history-empty">Selecione um veículo para ver os registos anteriores.</td>
+              <td colspan="3" class="history-empty">Selecione um veículo para ver os registos anteriores.</td>
             </tr>
           </tbody>
         </table>
@@ -450,25 +437,26 @@
     /* ======================== HISTÓRICO DE ANOMALIAS ===================== */
     async function loadAnomalyHistory(vehicleName) {
       const historyListEl = document.getElementById('anomalyHistoryList');
-      historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">A carregar registos...</td></tr>';      
+      historyListEl.innerHTML = '<tr><td colspan="3" class="history-empty">A carregar registos...</td></tr>';      
       try {
         const corpOperNr = getCorp();
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/vehicle_reg_anomalies?select=date,hour,anomalie&corp_oper_nr=eq.${corpOperNr}&vehicle=eq.${encodeURIComponent(vehicleName)}&order=created_at.desc`,
+          `${SUPABASE_URL}/rest/v1/vehicle_reg_anomalies?select=date,hour,n_int,anomalie&corp_oper_nr=eq.${corpOperNr}&vehicle=eq.${encodeURIComponent(vehicleName)}&order=created_at.desc`,
           { headers: getSupabaseHeaders() }
         );
         const data = await res.json();
         renderAnomalyHistory(data || []);
       } catch (err) {
         console.error('Erro ao carregar histórico:', err);
-        historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">Erro ao carregar registos anteriores.</td></tr>';
+        historyListEl.innerHTML = '<tr><td colspan="3" class="history-empty">Erro ao carregar registos anteriores.</td></tr>';
       }
     }
     function renderAnomalyHistory(records) {
       const historyListEl = document.getElementById('anomalyHistoryList');
-      historyListEl.innerHTML = '';      
+      historyListEl.innerHTML = '';
+      
       if (!records || records.length === 0) {
-        historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">Sem anomalias registadas para este veículo.</td></tr>';
+        historyListEl.innerHTML = '<tr><td colspan="3" class="history-empty">Sem anomalias registadas para este veículo.</td></tr>';
         return;
       }      
       records.forEach(item => {
@@ -493,6 +481,7 @@
         tr.innerHTML = `
           <td class="history-date">${dateHourText || '-'}</td>
           <td class="history-desc">${item.anomalie || '-'}</td>
+          <td class="history-nint">${item.n_int || '-'}</td>
         `;
         historyListEl.appendChild(tr);
       });
@@ -556,6 +545,7 @@
         try {
           const uploadedUrls = [];
           const corpOperNr = getCorp();
+          const currentNInt = getNInt();
           for (const file of anomalyPhotos) {
             const fileExt = file.name.split('.').pop() || 'jpg';
             const fileName = `${corpOperNr}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
@@ -566,7 +556,7 @@
                 'apikey': SUPABASE_ANON_KEY,
                 'Authorization': `Bearer ${getAuthToken()}`,
                 'x-my-corpo': corpOperNr,
-                'x-my-nint': getNInt(),
+                'x-my-nint': currentNInt,
                 'upsert': 'true'
               },
               body: file
@@ -582,7 +572,7 @@
           const now = new Date();
           const dateStr = now.toISOString().split('T')[0];
           const timeStr = now.toTimeString().split(' ')[0];
-          const payload = {corp_oper_nr: corpOperNr, vehicle: selectedVehicle.vehicle, date: dateStr, hour: timeStr, anomalie: description, anomalie_urls: uploadedUrls.join(', ')};
+          const payload = {corp_oper_nr: corpOperNr, n_int: currentNInt, vehicle: selectedVehicle.vehicle, date: dateStr, hour: timeStr, anomalie: description, anomalie_urls: uploadedUrls.join(', ')};
           const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/vehicle_reg_anomalies`, {
             method: 'POST',
             headers: getSupabaseHeaders({ returnRepresentation: true }),
