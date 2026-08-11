@@ -21,8 +21,7 @@
     /* ============================================================
     DARK MODE
     ============================================================ */
-    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
-                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
     /* ============================================================
     RESET & BASE
     ============================================================ */
@@ -122,6 +121,8 @@
     .vehicle-list-item {display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-radius: var(--r-sm); cursor: pointer; transition: background var(--ease);}
     .vehicle-list-item:hover {background: var(--surface-2);}
     .vehicle-list-item.selected {background: var(--red-light);}
+    .vehicle-list-item.clear-item .vehicle-list-item-icon {background: rgba(0,0,0,0.06); color: var(--txt-3);}
+    .vehicle-list-item.clear-item:hover {background: rgba(0,0,0,0.08);}
     .vehicle-list-item-icon {width: 38px; height: 38px; border-radius: 50%; background: var(--surface-2); color: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
     .vehicle-list-item.selected .vehicle-list-item-icon {background: var(--red); color: #fff;}
     .vehicle-list-item-info {flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px;}
@@ -353,8 +354,20 @@
     function renderVehicleList(vehicles) {
       const listEl = document.getElementById('vehicleModalList');
       listEl.innerHTML = '';
+      const isClearSelected = !selectedVehicle;
+      const clearItem = document.createElement('div');
+      clearItem.className = `vehicle-list-item clear-item${isClearSelected ? ' selected' : ''}`;
+      clearItem.innerHTML = `
+        <div class="vehicle-list-item-icon"><span class="material-icons">remove_circle_outline</span></div>
+        <div class="vehicle-list-item-info">
+          <span class="vehicle-list-item-plate" style="color: var(--txt-3); font-style: italic;">Nenhum / Limpar seleção</span>
+        </div>
+        ${isClearSelected ? '<span class="material-icons check">check_circle</span>' : ''}
+      `;
+      clearItem.onclick = () => selectVehicle(null);
+      listEl.appendChild(clearItem);
+
       if (!vehicles || vehicles.length === 0) {
-        listEl.innerHTML = '<div class="vehicle-modal-empty">Nenhum veículo encontrado.</div>';
         return;
       }
       vehicles.forEach(v => {
@@ -375,13 +388,19 @@
     function selectVehicle(vehicle) {
       selectedVehicle = vehicle;
       const btn = document.getElementById('vehicleSelectorBtn');
-      const valueEl = document.getElementById('vehicleSelectorValue');
-      valueEl.textContent = vehicle.vehicle || 'Sem nome';
-      valueEl.classList.remove('placeholder');
-      btn.classList.add('has-value');
+      const valueEl = document.getElementById('vehicleSelectorValue');      
+      if (!vehicle) {
+        valueEl.textContent = 'Toque para escolher um veículo';
+        valueEl.classList.add('placeholder');
+        btn.classList.remove('has-value');
+        document.getElementById('anomalyHistoryList').innerHTML = '<tr><td colspan="3" class="history-empty">Selecione um veículo para ver os registos anteriores.</td></tr>';
+      } else {
+        valueEl.textContent = vehicle.vehicle || 'Sem nome';
+        valueEl.classList.remove('placeholder');
+        btn.classList.add('has-value');
+        loadAnomalyHistory(vehicle.vehicle);
+      }
       closeVehicleModal();
-      
-      loadAnomalyHistory(vehicle.vehicle);
     }
     function openVehicleModal() {
       document.getElementById('vehicleModalOverlay').classList.add('show');
@@ -391,7 +410,6 @@
       } else {
         renderVehicleList(allVehicles);
       }
-      setTimeout(() => document.getElementById('vehicleSearchInput').focus(), 150);
     }
     function closeVehicleModal() {
       document.getElementById('vehicleModalOverlay').classList.remove('show');
@@ -453,8 +471,7 @@
     }
     function renderAnomalyHistory(records) {
       const historyListEl = document.getElementById('anomalyHistoryList');
-      historyListEl.innerHTML = '';
-      
+      historyListEl.innerHTML = '';      
       if (!records || records.length === 0) {
         historyListEl.innerHTML = '<tr><td colspan="3" class="history-empty">Sem anomalias registadas para este veículo.</td></tr>';
         return;
