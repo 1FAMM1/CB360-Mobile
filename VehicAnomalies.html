@@ -141,7 +141,21 @@
     .vehicle-list-item-plate {font-size: 14px; font-weight: 700; color: var(--txt-1);}
     .vehicle-list-item-desc {font-size: 12px; color: var(--txt-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
     .vehicle-list-item .material-icons.check {color: var(--red); font-size: 20px;}
-    .vehicle-modal-empty, .vehicle-modal-loading {text-align: center; padding: 30px 10px; color: var(--txt-3); font-size: 13px;}
+    .vehicle-modal-empty, .vehicle-modal-loading {text-align: center; padding: 30px 10px; color: var(--txt-3); font-size: 13px;}    
+    /* ============================================================
+    CUSTOM ALERT / SUCCESS MODAL
+    ============================================================ */
+    .custom-modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 6000; display: none; align-items: center; justify-content: center; padding: 20px;}
+    .custom-modal-overlay.show {display: flex; animation: fadeIn 0.2s ease;}
+    .custom-modal-card {background: var(--surface); width: 100%; max-width: 340px; border-radius: var(--r-lg); box-shadow: var(--sh-lg); padding: 24px 20px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: scaleUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);}
+    .custom-modal-icon-wrap {width: 60px; height: 60px; border-radius: 50%; background: rgba(46, 125, 50, 0.15); color: var(--green); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;}
+    .custom-modal-icon-wrap .material-icons {font-size: 32px;}
+    .custom-modal-title {font-size: 17px; font-weight: 700; color: var(--txt-1); margin-bottom: 8px;}
+    .custom-modal-msg {font-size: 13.5px; color: var(--txt-2); line-height: 1.5; margin-bottom: 20px;}
+    .custom-modal-btn {width: 100%; padding: 12px; border-radius: var(--r-md); font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; background: linear-gradient(135deg, var(--red-dark), var(--red)); color: #fff; box-shadow: var(--sh-md); transition: background var(--ease), transform var(--ease);}
+    .custom-modal-btn:hover {transform: translateY(-1px);}
+    @keyframes scaleUp {from {transform: scale(0.9); opacity: 0;} to {transform: scale(1); opacity: 1;}}
+
     @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
     @keyframes slideUp {from {transform: translateY(30px); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
     /* ============================================================
@@ -184,16 +198,15 @@
     <div class="anomaly-photo-preview" id="anomalyPhotoPreview"></div>
     <input type="file" id="anomalyGalleryInput" accept="image/*" multiple style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
     <input type="file" id="anomalyCameraInput" accept="image/*" capture="environment" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
-    <button type="button" class="anomaly-submit-btn" id="registerAnomalyBtn"><span class="material-icons">report</span>Registar Anomalia</button>
-    
+    <button type="button" class="anomaly-submit-btn" id="registerAnomalyBtn"><span class="material-icons">report</span>Registar Anomalia</button>    
     <p class="section-title">Registos Anteriores:</p>
     <div class="history-card">
       <div class="history-table-container">
         <table class="history-table">
           <thead>
             <tr>
-              <th style="width: 30%;">Data</th>
-              <th style="width: 70%;">Anomalia</th>
+              <th style="width: 35%;">Data / Hora</th>
+              <th style="width: 65%;">Anomalia</th>
             </tr>
           </thead>
           <tbody id="anomalyHistoryList">
@@ -222,6 +235,16 @@
       </div>
     </div>
   </div>
+  <div class="custom-modal-overlay" id="customModalOverlay">
+    <div class="custom-modal-card">
+      <div class="custom-modal-icon-wrap">
+        <span class="material-icons">check_circle</span>
+      </div>
+      <div class="custom-modal-title" id="customModalTitle">Sucesso</div>
+      <div class="custom-modal-msg" id="customModalMsg">Anomalia registada com sucesso!</div>
+      <button type="button" class="custom-modal-btn" onclick="closeCustomModal()">OK</button>
+    </div>
+  </div>
   <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
@@ -236,9 +259,9 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
-    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
-    function getAuthToken() {return localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzI5MTAxMjh9.jTy1wLiti3FukPmtghSQ1bVm50-tYPhhKoFin8OzRqg';}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getAuthToken() {return localStorage.getItem("authToken");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
@@ -253,9 +276,17 @@
       if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
       return headers;
     }
+    /* ======================= MODAL DE SUCESSO CUSTOM ======================= */
+    function showSuccessModal(message) {
+      document.getElementById('customModalMsg').textContent = message || 'Operação realizada com sucesso!';
+      document.getElementById('customModalOverlay').classList.add('show');
+    }
+    function closeCustomModal() {
+      document.getElementById('customModalOverlay').classList.remove('show');
+    }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -286,7 +317,7 @@
     let allVehicles = [];
     let selectedVehicle = null;
     async function loadVehicles() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const listEl = document.getElementById('vehicleModalList');
       if (!corpOperNr) return;
       listEl.innerHTML = '<div class="vehicle-modal-loading">A carregar veículos...</div>';
@@ -376,12 +407,11 @@
     /* ======================== HISTÓRICO DE ANOMALIAS ===================== */
     async function loadAnomalyHistory(vehicleName) {
       const historyListEl = document.getElementById('anomalyHistoryList');
-      historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">A carregar registos...</td></tr>';
-      
+      historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">A carregar registos...</td></tr>';      
       try {
         const corpOperNr = getCorp();
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/vehicle_reg_anomalies?select=date,anomalie&corp_oper_nr=eq.${corpOperNr}&vehicle=eq.${encodeURIComponent(vehicleName)}&order=created_at.desc`,
+          `${SUPABASE_URL}/rest/v1/vehicle_reg_anomalies?select=date,hour,anomalie&corp_oper_nr=eq.${corpOperNr}&vehicle=eq.${encodeURIComponent(vehicleName)}&order=created_at.desc`,
           { headers: getSupabaseHeaders() }
         );
         const data = await res.json();
@@ -398,12 +428,28 @@
       if (!records || records.length === 0) {
         historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">Sem anomalias registadas para este veículo.</td></tr>';
         return;
-      }
-      
+      }      
       records.forEach(item => {
-        const tr = document.createElement('tr');
+        const tr = document.createElement('tr');        
+        let formattedDate = item.date || '';
+        if (formattedDate.includes('-')) {
+          const parts = formattedDate.split('-');
+          if (parts.length === 3) {
+            formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+          }
+        }
+        let formattedHour = '';
+        if (item.hour) {
+          const timeParts = item.hour.split(':');
+          if (timeParts.length >= 2) {
+            formattedHour = `${timeParts[0]}:${timeParts[1]}`;
+          } else {
+            formattedHour = item.hour;
+          }
+        }
+        const dateHourText = formattedHour ? `${formattedDate} ${formattedHour}` : formattedDate;
         tr.innerHTML = `
-          <td class="history-date">${item.date || '-'}</td>
+          <td class="history-date">${dateHourText || '-'}</td>
           <td class="history-desc">${item.anomalie || '-'}</td>
         `;
         historyListEl.appendChild(tr);
@@ -461,16 +507,12 @@
           alert('Descreva a anomalia.');
           return;
         }
-
         const submitBtn = document.getElementById('registerAnomalyBtn');
         submitBtn.disabled = true;
         submitBtn.style.opacity = '0.7';
-
         try {
           const uploadedUrls = [];
           const corpOperNr = getCorp();
-
-          // Upload de cada foto para o bucket 'anomalies'
           for (const file of anomalyPhotos) {
             const fileExt = file.name.split('.').pop() || 'jpg';
             const fileName = `${corpOperNr}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
@@ -483,53 +525,35 @@
                 'Authorization': `Bearer ${getAuthToken()}`,
                 'x-my-corpo': corpOperNr,
                 'x-my-nint': getNInt(),
-                'Content-Type': file.type || 'image/jpeg'
+                'upsert': 'true'
               },
               body: file
             });
-
             if (!uploadRes.ok) {
+              const errText = await uploadRes.text();
+              console.error('Erro detalhado do Storage:', errText);
               throw new Error('Falha ao carregar imagem para o bucket.');
             }
-
-            // Obter URL pública do ficheiro no bucket 'anomalies'
             const publicUrlRes = `${SUPABASE_URL}/storage/v1/object/public/anomalies/${filePath}`;
             uploadedUrls.push(publicUrlRes);
           }
-
-          // Obter data atual (YYYY-MM-DD) e hora atual (HH:MM:SS)
           const now = new Date();
           const dateStr = now.toISOString().split('T')[0];
           const timeStr = now.toTimeString().split(' ')[0];
-
-          // Inserir registo na tabela vehicle_reg_anomalies
-          const payload = {
-            corp_oper_nr: corpOperNr,
-            vehicle: selectedVehicle.vehicle,
-            date: dateStr,
-            hour: timeStr,
-            anomalie: description,
-            anomalie_urls: uploadedUrls.join(', ') // ou JSON.stringify(uploadedUrls) dependendo da sua preferência
-          };
-
+          const payload = {corp_oper_nr: corpOperNr, vehicle: selectedVehicle.vehicle, date: dateStr, hour: timeStr, anomalie: description, anomalie_urls: uploadedUrls.join(', ')};
           const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/vehicle_reg_anomalies`, {
             method: 'POST',
             headers: getSupabaseHeaders({ returnRepresentation: true }),
             body: JSON.stringify(payload)
           });
-
           if (!insertRes.ok) {
             throw new Error('Erro ao gravar anomalia na base de dados.');
           }
-
-          alert('Anomalia registada com sucesso!');
+          showSuccessModal('Anomalia registada com sucesso!');
           document.getElementById('anomalyDescription').value = '';
           anomalyPhotos = [];
           renderAnomalyPhotoPreview();
-
-          // Atualizar histórico do veículo
           loadAnomalyHistory(selectedVehicle.vehicle);
-
         } catch (err) {
           console.error('Erro ao registar anomalia:', err);
           alert('Ocorreu um erro ao registar a anomalia.');
@@ -538,7 +562,7 @@
           submitBtn.style.opacity = '1';
         }
       });
-  });
+    });
   </script>
 </body>
 </html>
