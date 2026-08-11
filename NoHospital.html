@@ -224,13 +224,13 @@
           if (item.start_date) {
             const [y, m, d] = item.start_date.split("-");
             startTime = `${d}/${m}/${y}`;
-            if (item.start_time) startTime += ` ${item.start_time.substring(0,5)}`;
+            if (item.start_time) startTime += ` · ${item.start_time.substring(0,5)}`;
           }
           let endTime = "Indefinido";
           if (item.end_date) {
             const [y, m, d] = item.end_date.split("-");
             endTime = `${d}/${m}/${y}`;
-            if (item.end_time) endTime += ` ${item.end_time.substring(0,5)}`;
+            if (item.end_time) endTime += ` · ${item.end_time.substring(0,5)}`;
           }
           let nextHospital = item.next_hospital || "Não definida";
           nextHospital = nextHospital.replace(/^hospital\s*[:\-]\s*/i, "").trim();
