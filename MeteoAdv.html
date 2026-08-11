@@ -248,14 +248,14 @@
               <span class="material-icons">event</span>
               <div>
                 <span class="ipma-time-label">Início</span>
-                <span class="ipma-time-value">${new Date(alert.startTime).toLocaleString("pt-PT")}</span>
+                <span class="ipma-time-value">${new Date(alert.startTime).toLocaleDateString("pt-PT")} · ${new Date(alert.startTime).toLocaleTimeString("pt-PT", {hour: '2-digit', minute: '2-digit'})}</span>
               </div>
             </div>
             <div class="ipma-time-box">
               <span class="material-icons">event_available</span>
               <div>
                 <span class="ipma-time-label">Fim</span>
-                <span class="ipma-time-value">${new Date(alert.endTime).toLocaleString("pt-PT")}</span>
+                <span class="ipma-time-value">${new Date(alert.endTime).toLocaleDateString("pt-PT")} · ${new Date(alert.endTime).toLocaleTimeString("pt-PT", {hour: '2-digit', minute: '2-digit'})}</span>
               </div>
             </div>
           </div>
