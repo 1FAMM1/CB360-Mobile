@@ -236,9 +236,9 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
-    function getAuthToken() {return localStorage.getItem("authToken");}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
+    function getAuthToken() {return localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzI5MTAxMjh9.jTy1wLiti3FukPmtghSQ1bVm50-tYPhhKoFin8OzRqg';}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
@@ -255,7 +255,7 @@
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -286,7 +286,7 @@
     let allVehicles = [];
     let selectedVehicle = null;
     async function loadVehicles() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const listEl = document.getElementById('vehicleModalList');
       if (!corpOperNr) return;
       listEl.innerHTML = '<div class="vehicle-modal-loading">A carregar veículos...</div>';
@@ -379,19 +379,13 @@
       historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">A carregar registos...</td></tr>';
       
       try {
-        /* Simulação com vários registos para testar o scroll */
-        setTimeout(() => {
-          const mockData = [
-            { date: '10/06/2026 14:30', description: 'Lâmpada do farolim traseiro fundida.' },
-            { date: '02/05/2026 09:15', description: 'Pressão baixa no pneu dianteiro direito.' },
-            { date: '15/04/2026 11:20', description: 'Nível do óleo do motor ligeiramente abaixo do normal.' },
-            { date: '28/03/2026 08:45', description: 'Escova limpador de para-brisas danificada.' },
-            { date: '10/02/2026 17:00', description: 'Ruído anómalo na suspensão dianteira ao passar em lombas.' }
-          ];
-          
-          renderAnomalyHistory(mockData);
-        }, 300);
-        
+        const corpOperNr = getCorp();
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/vehicle_reg_anomalies?select=date,anomalie&corp_oper_nr=eq.${corpOperNr}&vehicle=eq.${encodeURIComponent(vehicleName)}&order=created_at.desc`,
+          { headers: getSupabaseHeaders() }
+        );
+        const data = await res.json();
+        renderAnomalyHistory(data || []);
       } catch (err) {
         console.error('Erro ao carregar histórico:', err);
         historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">Erro ao carregar registos anteriores.</td></tr>';
@@ -409,8 +403,8 @@
       records.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="history-date">${item.date}</td>
-          <td class="history-desc">${item.description}</td>
+          <td class="history-date">${item.date || '-'}</td>
+          <td class="history-desc">${item.anomalie || '-'}</td>
         `;
         historyListEl.appendChild(tr);
       });
@@ -457,7 +451,7 @@
         handleAnomalyFiles(e.target.files);
         e.target.value = '';
       });
-      document.getElementById('registerAnomalyBtn').addEventListener('click', () => {
+      document.getElementById('registerAnomalyBtn').addEventListener('click', async () => {
         const description = document.getElementById('anomalyDescription').value.trim();
         if (!selectedVehicle) {
           alert('Selecione um veículo.');
@@ -467,20 +461,84 @@
           alert('Descreva a anomalia.');
           return;
         }
-        console.log('Registar anomalia:', {
-          vehicle: selectedVehicle.vehicle,
-          description,
-          photos: anomalyPhotos
-        });
-        
-        alert('Anomalia registada com sucesso!');
-        document.getElementById('anomalyDescription').value = '';
-        anomalyPhotos = [];
-        renderAnomalyPhotoPreview();
-        
-        loadAnomalyHistory(selectedVehicle.vehicle);
+
+        const submitBtn = document.getElementById('registerAnomalyBtn');
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+
+        try {
+          const uploadedUrls = [];
+          const corpOperNr = getCorp();
+
+          // Upload de cada foto para o bucket 'anomalies'
+          for (const file of anomalyPhotos) {
+            const fileExt = file.name.split('.').pop() || 'jpg';
+            const fileName = `${corpOperNr}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/anomalies/${filePath}`, {
+              method: 'POST',
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${getAuthToken()}`,
+                'x-my-corpo': corpOperNr,
+                'x-my-nint': getNInt(),
+                'Content-Type': file.type || 'image/jpeg'
+              },
+              body: file
+            });
+
+            if (!uploadRes.ok) {
+              throw new Error('Falha ao carregar imagem para o bucket.');
+            }
+
+            // Obter URL pública do ficheiro no bucket 'anomalies'
+            const publicUrlRes = `${SUPABASE_URL}/storage/v1/object/public/anomalies/${filePath}`;
+            uploadedUrls.push(publicUrlRes);
+          }
+
+          // Obter data atual (YYYY-MM-DD) e hora atual (HH:MM:SS)
+          const now = new Date();
+          const dateStr = now.toISOString().split('T')[0];
+          const timeStr = now.toTimeString().split(' ')[0];
+
+          // Inserir registo na tabela vehicle_reg_anomalies
+          const payload = {
+            corp_oper_nr: corpOperNr,
+            vehicle: selectedVehicle.vehicle,
+            date: dateStr,
+            hour: timeStr,
+            anomalie: description,
+            anomalie_urls: uploadedUrls.join(', ') // ou JSON.stringify(uploadedUrls) dependendo da sua preferência
+          };
+
+          const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/vehicle_reg_anomalies`, {
+            method: 'POST',
+            headers: getSupabaseHeaders({ returnRepresentation: true }),
+            body: JSON.stringify(payload)
+          });
+
+          if (!insertRes.ok) {
+            throw new Error('Erro ao gravar anomalia na base de dados.');
+          }
+
+          alert('Anomalia registada com sucesso!');
+          document.getElementById('anomalyDescription').value = '';
+          anomalyPhotos = [];
+          renderAnomalyPhotoPreview();
+
+          // Atualizar histórico do veículo
+          loadAnomalyHistory(selectedVehicle.vehicle);
+
+        } catch (err) {
+          console.error('Erro ao registar anomalia:', err);
+          alert('Ocorreu um erro ao registar a anomalia.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+        }
       });
-    });
+  });
   </script>
 </body>
 </html>
