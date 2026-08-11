@@ -22,20 +22,17 @@
     /* ============================================================
     DARK MODE
     ============================================================ */
-    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
-                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
     /* ============================================================
     RESET & BASE
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
-          flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER
     ============================================================ */
-    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
@@ -44,15 +41,13 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; overflow-x: hidden; padding: calc(var(--header-h) + 16px) 16px calc(var(--footer-h) + 75px);
-                   display: flex; flex-direction: column; align-items: center; background: var(--bg); scrollbar-width: none; transition: background var(--ease);}
+    .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; overflow-x: hidden; padding: calc(var(--header-h) + 16px) 16px calc(var(--footer-h) + 75px); display: flex; flex-direction: column; align-items: center; background: var(--bg); scrollbar-width: none; transition: background var(--ease);}
     .main-content::-webkit-scrollbar {display: none;}
     #hosp-alerts {display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%;}
     /* ============================================================
     HOSPITAL CARDS
     ============================================================ */
-    .hosp-card {width: 100%; max-width: 580px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-md); overflow: hidden;
-               opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease, background var(--ease), box-shadow var(--ease);}
+    .hosp-card {width: 100%; max-width: 580px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-md); overflow: hidden; opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease, background var(--ease), box-shadow var(--ease);}
     .hosp-card.show {opacity: 1; transform: translateY(0);}
     .hosp-card-accent {height: 5px; width: 100%;}
     .hosp-green .hosp-card-accent {background: linear-gradient(to right, var(--level-green), #1b6b2d);}
@@ -67,19 +62,18 @@
     .hosp-title {font-weight: 700; font-size: 1.05em; color: var(--txt-1); letter-spacing: -0.01em; line-height: 1.25;}
     .hosp-ulssubtitle {display: flex; align-items: center; gap: 4px; color: var(--txt-2); font-size: 12.5px; font-weight: 600; margin-top: 3px;}
     .hosp-ulssubtitle .material-icons {font-size: 14px; color: var(--txt-3);}
-    .hosp-level-badge {flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 9999px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-                       letter-spacing: 0.04em; white-space: nowrap;}
+    .hosp-level-badge {flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 9999px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;}
     .hosp-level-badge .material-icons {font-size: 13px;}
     .hosp-green .hosp-level-badge {background: rgba(46,158,70,0.16); color: var(--level-green);}
-    .hosp-red .hosp-level-badge {background: rgba(224,32,32,0.16); color: var(--level-red-dark);}
-    .hosp-time-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;}
-    .hosp-time-box {display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 8px 10px;}
+    .hosp-red .hosp-level-badge {background: rgba(239, 83, 80, 0.25); color: #ff6b6b; font-weight: 800;}
+    .hosp-time-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px;}
+    .hosp-time-box {display: flex; align-items: center; gap: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px 10px;}
     .hosp-time-box .material-icons {font-size: 16px; color: var(--red-icon); flex-shrink: 0;}
-    .hosp-time-label {font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--txt-3); display: block;}
+    .hosp-time-label {font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--txt-2); display: block;}
     .hosp-time-value {font-size: 12px; font-weight: 700; color: var(--txt-1); line-height: 1.2;}
-    .hosp-next {display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px; background: var(--surface-2); border-left: 3px solid var(--level-red); border-radius: var(--r-sm);}
+    .hosp-next {display: flex; align-items: center; gap: 10px; margin-top: 5px; padding: 10px 12px; background: var(--surface-2); border-left: 3px solid var(--level-red); border-radius: var(--r-sm);}
     .hosp-next .material-icons {font-size: 18px; color: var(--red-icon); flex-shrink: 0;}
-    .hosp-next-label {font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--txt-3); display: block;}
+    .hosp-next-label {font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--txt-2); display: block;}
     .hosp-next-value {font-size: 13px; font-weight: 700; color: var(--txt-1);}
     .hosp-center {text-align: center;}
     .hosp-center .hosp-card-body {display: flex; flex-direction: column; align-items: center; padding: 34px 20px;}
@@ -93,8 +87,7 @@
     /* ============================================================
     FOOTER
     ============================================================ */
-    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000; transition: background var(--ease);}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000; transition: background var(--ease);}
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
@@ -148,12 +141,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp()  {return localStorage.getItem("currentCorpOperNr") || "0805";}
-    function getNInt()  {return localStorage.getItem("currentCorpNint")   || "205"; }
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
-      const corp  = getCorp();
-      const nint  = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzIxNDU0NTd9.MRIoS7nj_lCpUWTYLp6PodjHy_0774KClGF6JvrDWtM';
+      const corp = getCorp();
+      const nint = getNInt();
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -168,7 +161,7 @@
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -254,7 +247,7 @@
                     <div class="hosp-ulssubtitle"><span class="material-icons">local_hospital</span>${hospitalName}</div>
                   </div>
                 </div>
-                <span class="hosp-level-badge"><span class="material-icons">block</span>Em Constrangimento</span>
+                <span class="hosp-level-badge"><span class="material-icons">block</span>Com Constrangimento</span>
               </div>
               <div class="hosp-time-grid">
                 <div class="hosp-time-box">
