@@ -1,11 +1,11 @@
-/* =========================================================
+    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v4.3.3 - Fix: catch() do fetch handler já não deixa a
+    v4.3.4 - Fix: catch() do fetch handler já não deixa a
     promise resolver para undefined (Failed to convert value
     to 'Response'); devolve sempre um Response válido, com
     fallback para index.html em navegações offline.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v4.3.3';
+    const CACHE_NAME = 'cb360-cache-v4.3.4';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', 
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', 
                              '/MissReport.html', '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', 
@@ -37,9 +37,6 @@
       );
     });
     self.addEventListener('fetch', (event) => {
-      // Só intercetar/cachear pedidos GET. POST/PUT/PATCH/DELETE (mensagens de chat,
-      // uploads, chamadas REST ao Supabase, etc.) vão sempre diretos para a rede sem
-      // passar por respondWith/cache.put, que só aceita respostas de pedidos GET.
       if (event.request.method !== 'GET') {
         return;
       }
@@ -58,9 +55,6 @@
               }
               return networkResponse;
             }).catch(() => {
-              // A rede falhou e não havia nada em cache para este pedido.
-              // Para navegações (o browser a pedir uma página), tenta cair
-              // num fallback conhecido em vez de deixar a promise vazia.
               if (event.request.mode === 'navigate') {
                 return caches.match('/index.html').then((fallback) => {
                   return fallback || new Response(
@@ -73,8 +67,6 @@
                   );
                 });
               }
-              // Para outros GETs (ex: imagens, scripts), devolve um erro
-              // controlado em vez de deixar a promise resolver para undefined.
               return new Response('', {
                 status: 504,
                 statusText: 'Gateway Timeout'
