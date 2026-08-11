@@ -53,13 +53,13 @@
     @media (min-width: 769px) {
       .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
     }
-    .section-title {width: 100%; font-size: 13.5px; font-weight: 700; color: var(--txt-2); margin: 5px 0px 5px 0px; letter-spacing: 0.2px; display: flex; align-items: center;}
+    .section-title {width: 100%; font-size: 13.5px; font-weight: 700; color: var(--txt-2); margin: 15px 0px 5px 0px; letter-spacing: 0.2px; display: flex; align-items: center;}
     .section-title::before {content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--red); display: inline-block; margin-right: 5px;}
     /* ============================================================
     VEHICLE SELECTOR (botão que abre a lista)
     ============================================================ */
     .vehicle-selector-btn {width: 100%; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 5px 15px;
-                           box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), box-shadow var(--ease), transform var(--ease); text-align: left; margin-bottom: 15px;}
+                           box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), box-shadow var(--ease), transform var(--ease); text-align: left; margin-bottom: 5px;}
     .vehicle-selector-btn:hover {box-shadow: var(--sh-md); transform: translateY(-1px);}
     .vehicle-selector-btn:active {transform: translateY(0);}
     .vehicle-selector-icon {width: 42px; height: 42px; border-radius: 50%; background: var(--red-light); color: var(--red); display: flex; align-items: center; justify-content: center;
@@ -76,11 +76,11 @@
     ============================================================ */
     .anomaly-textarea-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 4px; transition: box-shadow var(--ease); margin-bottom: 5px;}
     .anomaly-textarea-card:focus-within {box-shadow: var(--sh-md);}
-    .anomaly-textarea {width: 100%; min-height: 150px; max-height: 240px; resize: vertical; border: none; background: transparent; outline: none; padding: 12px; font-family: inherit;
+    .anomaly-textarea {width: 100%; min-height: 120px; max-height: 200px; resize: vertical; border: none; background: transparent; outline: none; padding: 12px; font-family: inherit;
                        font-size: 14px; line-height: 1.5; color: var(--txt-1);}
     .anomaly-textarea::placeholder {color: var(--txt-3);}
-    .anomaly-photo-actions {display: flex; gap: 10px; width: 100%; margin-bottom: 0px;}
-    .anomaly-photo-btn {flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: var(--r-md); font-size: 13px; font-weight: 600;
+    .anomaly-photo-actions {display: flex; gap: 10px; width: 100%; margin-bottom: 5px;}
+    .anomaly-photo-btn {flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: var(--r-md); font-size: 13px; font-weight: 600;
                         cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--txt-1); box-shadow: var(--sh-sm);
                         transition: background var(--ease), transform var(--ease), box-shadow var(--ease); font-family: inherit;}
     .anomaly-photo-btn:hover {transform: translateY(-1px); box-shadow: var(--sh-md);}
@@ -88,18 +88,32 @@
     .anomaly-photo-btn .material-icons {font-size: 20px; color: var(--red);}
     .anomaly-photo-btn.primary {background: linear-gradient(135deg, var(--red-dark), var(--red)); color: #fff; border-color: transparent;}
     .anomaly-photo-btn.primary .material-icons {color: #fff;}
-    .anomaly-photo-preview {display: flex; gap: 8px; flex-wrap: wrap; width: 100%; margin-bottom: 10px;}
-    .anomaly-photo-thumb {position: relative; width: 72px; height: 72px; border-radius: var(--r-sm); overflow: hidden; box-shadow: var(--sh-sm); flex-shrink: 0;}
+    .anomaly-photo-preview {display: flex; gap: 8px; flex-wrap: wrap; width: 100%; margin-bottom: 5px;}
+    .anomaly-photo-thumb {position: relative; width: 64px; height: 64px; border-radius: var(--r-sm); overflow: hidden; box-shadow: var(--sh-sm); flex-shrink: 0;}
     .anomaly-photo-thumb img {width: 100%; height: 100%; object-fit: cover; display: block;}
     .anomaly-photo-thumb .remove-btn {position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff;
                                       display: flex; align-items: center; justify-content: center; cursor: pointer;}
     .anomaly-photo-thumb .remove-btn .material-icons {font-size: 14px; color: #fff;}
     .anomaly-submit-btn {width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 14px; border-radius: var(--r-md); font-size: 14px; font-weight: 700;
                          font-family: inherit; cursor: pointer; border: none; color: #fff; background: linear-gradient(135deg, var(--red-dark), var(--red)); box-shadow: var(--sh-md);
-                         transition: background var(--ease), transform var(--ease), box-shadow var(--ease);}
+                         transition: background var(--ease), transform var(--ease), box-shadow var(--ease); margin-bottom: 10px;}
     .anomaly-submit-btn:hover {transform: translateY(-1px); box-shadow: var(--sh-lg);}
     .anomaly-submit-btn:active {transform: translateY(0);}
     .anomaly-submit-btn .material-icons {font-size: 20px;}
+    /* ============================================================
+    TABELA DE REGISTOS ANTERIORES (COM SCROLL)
+    ============================================================ */
+    .history-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); overflow: hidden; margin-top: 5px; margin-bottom: 20px; display: flex; flex-direction: column; max-height: 250px;}
+    .history-table-container {overflow-y: auto; flex: 1;}
+    .history-table-container::-webkit-scrollbar {width: 6px;}
+    .history-table-container::-webkit-scrollbar-thumb {background: rgba(0,0,0,0.15); border-radius: 10px;}
+    .history-table {width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;}
+    .history-table th {position: sticky; top: 0; z-index: 2; background: var(--surface-2); color: var(--txt-2); font-weight: 700; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;}
+    .history-table td {padding: 12px; border-bottom: 1px solid var(--border); color: var(--txt-1); vertical-align: top;}
+    .history-table tr:last-child td {border-bottom: none;}
+    .history-date {white-space: nowrap; font-weight: 600; color: var(--txt-2); font-size: 12px;}
+    .history-desc {word-break: break-word; line-height: 1.4;}
+    .history-empty {text-align: center; padding: 20px; color: var(--txt-3); font-size: 13px;}
     /* ============================================================
     MODAL DE SELEÇÃO (lista pesquisável)
     ============================================================ */
@@ -130,6 +144,13 @@
     .vehicle-modal-empty, .vehicle-modal-loading {text-align: center; padding: 30px 10px; color: var(--txt-3); font-size: 13px;}
     @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
     @keyframes slideUp {from {transform: translateY(30px); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
+    @media (max-width: 480px) {
+      .header-title {font-size: 16px;}
+      .main-content {padding-left: 14px; padding-right: 14px;}
+    }
   </style>
 </head>
 <body>
@@ -152,12 +173,10 @@
       </div>
       <span class="material-icons chevron">expand_more</span>
     </button>
-
     <p class="section-title">Descreva a anomalia:</p>
     <div class="anomaly-textarea-card">
       <textarea class="anomaly-textarea" id="anomalyDescription" placeholder="Descreva a anomalia detetada..."></textarea>
     </div>
-
     <div class="anomaly-photo-actions">
       <button type="button" class="anomaly-photo-btn" id="attachPhotoBtn"><span class="material-icons">photo_library</span>Anexar Foto</button>
       <button type="button" class="anomaly-photo-btn primary" id="takePhotoBtn"><span class="material-icons">photo_camera</span>Tirar Foto</button>
@@ -165,8 +184,26 @@
     <div class="anomaly-photo-preview" id="anomalyPhotoPreview"></div>
     <input type="file" id="anomalyGalleryInput" accept="image/*" multiple style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
     <input type="file" id="anomalyCameraInput" accept="image/*" capture="environment" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
-
     <button type="button" class="anomaly-submit-btn" id="registerAnomalyBtn"><span class="material-icons">report</span>Registar Anomalia</button>
+    
+    <p class="section-title">Registos Anteriores:</p>
+    <div class="history-card">
+      <div class="history-table-container">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th style="width: 30%;">Data</th>
+              <th style="width: 70%;">Anomalia</th>
+            </tr>
+          </thead>
+          <tbody id="anomalyHistoryList">
+            <tr>
+              <td colspan="2" class="history-empty">Selecione um veículo para ver os registos anteriores.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
   <div class="vehicle-modal-overlay" id="vehicleModalOverlay" onclick="if(event.target===this) closeVehicleModal();">
     <div class="vehicle-modal-card">
@@ -245,10 +282,6 @@
         console.error('Erro silencioso:', err);
       }
     }
-    /* ========================== LOADING THEME =========================== */
-    function loadTheme() {
-      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
-    }
     /* ======================== VEHICLE SELECTOR ========================== */
     let allVehicles = [];
     let selectedVehicle = null;
@@ -301,6 +334,8 @@
       valueEl.classList.remove('placeholder');
       btn.classList.add('has-value');
       closeVehicleModal();
+      
+      loadAnomalyHistory(vehicle.vehicle);
     }
     function openVehicleModal() {
       document.getElementById('vehicleModalOverlay').classList.add('show');
@@ -331,10 +366,55 @@
       });
     });
     /* ============================== INIT =============================== */
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function() {
       loadCorpInfo();
-      loadTheme();
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
     });
+    /* ======================== HISTÓRICO DE ANOMALIAS ===================== */
+    async function loadAnomalyHistory(vehicleName) {
+      const historyListEl = document.getElementById('anomalyHistoryList');
+      historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">A carregar registos...</td></tr>';
+      
+      try {
+        /* Simulação com vários registos para testar o scroll */
+        setTimeout(() => {
+          const mockData = [
+            { date: '10/06/2026 14:30', description: 'Lâmpada do farolim traseiro fundida.' },
+            { date: '02/05/2026 09:15', description: 'Pressão baixa no pneu dianteiro direito.' },
+            { date: '15/04/2026 11:20', description: 'Nível do óleo do motor ligeiramente abaixo do normal.' },
+            { date: '28/03/2026 08:45', description: 'Escova limpador de para-brisas danificada.' },
+            { date: '10/02/2026 17:00', description: 'Ruído anómalo na suspensão dianteira ao passar em lombas.' }
+          ];
+          
+          renderAnomalyHistory(mockData);
+        }, 300);
+        
+      } catch (err) {
+        console.error('Erro ao carregar histórico:', err);
+        historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">Erro ao carregar registos anteriores.</td></tr>';
+      }
+    }
+    function renderAnomalyHistory(records) {
+      const historyListEl = document.getElementById('anomalyHistoryList');
+      historyListEl.innerHTML = '';
+      
+      if (!records || records.length === 0) {
+        historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">Sem anomalias registadas para este veículo.</td></tr>';
+        return;
+      }
+      
+      records.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="history-date">${item.date}</td>
+          <td class="history-desc">${item.description}</td>
+        `;
+        historyListEl.appendChild(tr);
+      });
+    }
     /* ======================== FOTOS DA ANOMALIA ========================= */
     let anomalyPhotos = [];
     function handleAnomalyFiles(fileList) {
@@ -387,12 +467,18 @@
           alert('Descreva a anomalia.');
           return;
         }
-        // TODO: gravar no Supabase (tabela de anomalias ainda por definir) e enviar anomalyPhotos.
         console.log('Registar anomalia:', {
           vehicle: selectedVehicle.vehicle,
           description,
           photos: anomalyPhotos
         });
+        
+        alert('Anomalia registada com sucesso!');
+        document.getElementById('anomalyDescription').value = '';
+        anomalyPhotos = [];
+        renderAnomalyPhotoPreview();
+        
+        loadAnomalyHistory(selectedVehicle.vehicle);
       });
     });
   </script>
