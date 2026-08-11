@@ -39,28 +39,28 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
     .main-content::-webkit-scrollbar {display: none;}
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
     .main-content.content-blur {filter: blur(2px); pointer-events: none;}
-    .availability-extras-header {flex-shrink: 0; text-align: center; width: 100%;}
-    .availability-extras-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
+    .availability-sbas-header {flex-shrink: 0; text-align: center; width: 100%;}
+    .availability-sbas-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
     /* ============================================================
     MONTH BUTTONS (mesmo estilo grid-card / mbtn da página Escalas)
     ============================================================ */
-    .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 4px; flex-shrink: 0;}
-    .availability-extras-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
-    .availability-extras-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; line-height: 1.2; transition: background var(--ease), color var(--ease);}
-    .availability-extras-btn:nth-child(3n) {border-right: none;}
-    .availability-extras-btn:nth-child(n+10) {border-bottom: none;}
-    .availability-extras-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
-    .availability-extras-btn:active:not(.selected) {background: var(--surface-2);}
-    .availability-extras-btn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
-    .availability-extras-btn:hover .material-icons {transform: scale(1.08);}
-    .availability-extras-btn.selected {background: var(--red-light); color: var(--red);}
-    .availability-extras-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
-    .availability-extras-btn div, .availability-extras-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 0px; flex-shrink: 0;}
+    .availability-sbas-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
+    .availability-sbas-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; line-height: 1.2; transition: background var(--ease), color var(--ease);}
+    .availability-sbas-btn:nth-child(3n) {border-right: none;}
+    .availability-sbas-btn:nth-child(n+10) {border-bottom: none;}
+    .availability-sbas-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
+    .availability-sbas-btn:active:not(.selected) {background: var(--surface-2);}
+    .availability-sbas-btn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
+    .availability-sbas-btn:hover .material-icons {transform: scale(1.08);}
+    .availability-sbas-btn.selected {background: var(--red-light); color: var(--red);}
+    .availability-sbas-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
+    .availability-sbas-btn div, .availability-sbas-btn span {position: relative; z-index: 2; line-height: 1.2;}
     /* ============================================================
     CALENDAR CARD
     ============================================================ */
@@ -83,7 +83,7 @@
     .calendar-legend.show {display: flex;}
     .legend-item {display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--txt-2); font-weight: 600;}
     .legend-color {width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);}
-    .legend-color.extras {background: linear-gradient(135deg, #00897b, #00695c, #004d40);}
+    .legend-color.sbas {background: linear-gradient(135deg, #00897b, #00695c, #004d40);}
     /* ============================================================
     TOAST
     ============================================================ */
@@ -102,9 +102,9 @@
     ============================================================ */
     @media (max-width: 480px) {
       .header-title {font-size: 16px;}
-      .availability-extras-subtitle {font-size: 0.95em;}
-      .availability-extras-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
-      .availability-extras-btn .material-icons {font-size: 19px;}
+      .availability-sbas-subtitle {font-size: 0.95em;}
+      .availability-sbas-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
+      .availability-sbas-btn .material-icons {font-size: 19px;}
       .main-content {padding-left: 14px; padding-right: 14px; justify-content: center; align-items: center;}
     }
     @media (min-width: 769px) {
@@ -124,23 +124,23 @@
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
   <div class="main-content">
-    <div class="availability-extras-header">
-      <p class="availability-extras-subtitle">Selecione o mês e dias:</p>
+    <div class="availability-sbas-header">
+      <p class="availability-sbas-subtitle">Selecione o mês e dias:</p>
     </div>
     <div class="months-card">
-      <div class="availability-extras-buttons">
-        <button class="availability-extras-btn" data-month="0" onclick="showCalendar(0, this)"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
-        <button class="availability-extras-btn" data-month="1" onclick="showCalendar(1, this)"><span class="material-icons">favorite</span><div>Fevereiro</div></button>
-        <button class="availability-extras-btn" data-month="2" onclick="showCalendar(2, this)"><span class="material-icons">eco</span><div>Março</div></button>
-        <button class="availability-extras-btn" data-month="3" onclick="showCalendar(3, this)"><span class="material-icons">local_florist</span><div>Abril</div></button>
-        <button class="availability-extras-btn" data-month="4" onclick="showCalendar(4, this)"><span class="material-icons">wb_sunny</span><div>Maio</div></button>
-        <button class="availability-extras-btn" data-month="5" onclick="showCalendar(5, this)"><span class="material-icons">beach_access</span><div>Junho</div></button>
-        <button class="availability-extras-btn" data-month="6" onclick="showCalendar(6, this)"><span class="material-icons">local_fire_department</span><div>Julho</div></button>
-        <button class="availability-extras-btn" data-month="7" onclick="showCalendar(7, this)"><span class="material-icons">whatshot</span><div>Agosto</div></button>
-        <button class="availability-extras-btn" data-month="8" onclick="showCalendar(8, this)"><span class="material-icons">park</span><div>Setembro</div></button>
-        <button class="availability-extras-btn" data-month="9" onclick="showCalendar(9, this)"><span class="material-icons">cloud</span><div>Outubro</div></button>
-        <button class="availability-extras-btn" data-month="10" onclick="showCalendar(10, this)"><span class="material-icons">grain</span><div>Novembro</div></button>
-        <button class="availability-extras-btn" data-month="11" onclick="showCalendar(11, this)"><span class="material-icons">celebration</span><div>Dezembro</div></button>
+      <div class="availability-sbas-buttons">
+        <button class="availability-sbas-btn" data-month="0" onclick="showCalendar(0, this)"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
+        <button class="availability-sbas-btn" data-month="1" onclick="showCalendar(1, this)"><span class="material-icons">favorite</span><div>Fevereiro</div></button>
+        <button class="availability-sbas-btn" data-month="2" onclick="showCalendar(2, this)"><span class="material-icons">eco</span><div>Março</div></button>
+        <button class="availability-sbas-btn" data-month="3" onclick="showCalendar(3, this)"><span class="material-icons">local_florist</span><div>Abril</div></button>
+        <button class="availability-sbas-btn" data-month="4" onclick="showCalendar(4, this)"><span class="material-icons">wb_sunny</span><div>Maio</div></button>
+        <button class="availability-sbas-btn" data-month="5" onclick="showCalendar(5, this)"><span class="material-icons">beach_access</span><div>Junho</div></button>
+        <button class="availability-sbas-btn" data-month="6" onclick="showCalendar(6, this)"><span class="material-icons">local_fire_department</span><div>Julho</div></button>
+        <button class="availability-sbas-btn" data-month="7" onclick="showCalendar(7, this)"><span class="material-icons">whatshot</span><div>Agosto</div></button>
+        <button class="availability-sbas-btn" data-month="8" onclick="showCalendar(8, this)"><span class="material-icons">park</span><div>Setembro</div></button>
+        <button class="availability-sbas-btn" data-month="9" onclick="showCalendar(9, this)"><span class="material-icons">cloud</span><div>Outubro</div></button>
+        <button class="availability-sbas-btn" data-month="10" onclick="showCalendar(10, this)"><span class="material-icons">grain</span><div>Novembro</div></button>
+        <button class="availability-sbas-btn" data-month="11" onclick="showCalendar(11, this)"><span class="material-icons">celebration</span><div>Dezembro</div></button>
       </div>
     </div>
     <div id="calendarContainer" class="calendar-container">
@@ -149,7 +149,7 @@
     </div>
     <div id="legend" class="calendar-legend">
       <div class="legend-item">
-        <span class="legend-color extras"></span>
+        <span class="legend-color sbas"></span>
         <span class="legend-text">SBA</span>
        </div>      
     </div>
@@ -275,7 +275,7 @@
         return;
       }
       currentMonthIndex = monthIndex;
-      document.querySelectorAll('.availability-extras-btn').forEach(btn => btn.classList.remove('selected'));
+      document.querySelectorAll('.availability-sbas-btn').forEach(btn => btn.classList.remove('selected'));
       document.body.classList.add('mobile-month-active');
       button.classList.add('selected');
       const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
