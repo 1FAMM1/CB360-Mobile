@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <meta name="theme-color" content="#c62828">
+  <title>CB360 Mobile - Disponibilidades SPA/PAT</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+    VARIABLES (alinhadas com a página Escalas)
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px;  transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content::-webkit-scrollbar {display: none;}
+    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
+    .main-content.slide-out, .main-content.slide-in {transform: none;}
+    .main-content.content-blur {filter: blur(2px); pointer-events: none;}
+    .availability-extras-header {flex-shrink: 0; text-align: center; width: 100%;}
+    .availability-extras-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
+    /* ============================================================
+    MONTH BUTTONS (mesmo estilo grid-card / mbtn da página Escalas)
+    ============================================================ */
+    .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 4px; flex-shrink: 0;}
+    .availability-extras-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
+    .availability-extras-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);  padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; line-height: 1.2; transition: background var(--ease), color var(--ease);}
+    .availability-extras-btn:nth-child(3n) {border-right: none;}
+    .availability-extras-btn:nth-child(n+10) {border-bottom: none;}
+    .availability-extras-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
+    .availability-extras-btn:active:not(.selected) {background: var(--surface-2);}
+    .availability-extras-btn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
+    .availability-extras-btn:hover .material-icons {transform: scale(1.08);}
+    .availability-extras-btn.selected {background: var(--red-light); color: var(--red);}
+    .availability-extras-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
+    .availability-extras-btn div, .availability-extras-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    /* ============================================================
+    CALENDAR CARD
+    ============================================================ */
+    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%; display: none;}
+    .calendar-container.show {display: block; animation: slideDown 0.3s ease;}
+    .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
+    .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
+    .calendar-day-header {text-align: center; font-weight: 700; padding: 6px 0; font-size: 11px; color: var(--txt-3);}
+    .calendar-day {text-align: center; padding: 9px 0; border-radius: var(--r-sm); background: var(--surface-2); font-size: 12.5px; color: var(--txt-1); cursor: pointer; transition: background var(--ease), transform 0.15s ease, color var(--ease);}
+    .calendar-day:hover {background: var(--red-light); color: var(--red); transform: scale(1.05);}
+    .calendar-day.empty {background: transparent; cursor: default;}
+    .calendar-day.empty:hover {transform: none; background: transparent;}
+    .calendar-day.today {background: var(--red-dark); color: #fff; font-weight: 700; border: 2px solid #e67e22;}
+    .calendar-day.selected {background: linear-gradient(135deg, var(--red), var(--red-dark)); color: #fff; font-weight: 700; border: 2px solid var(--red-dark);}
+    .calendar-day.selected.today {background: linear-gradient(135deg, #27ae60, #1e8449); border: 2px solid #f39c12;}
+    /* ============================================================
+    LEGEND
+    ============================================================ */
+    .calendar-legend {display: none; width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm); justify-content: center; align-items: center; padding: 10px 16px; gap: 30px; font-size: 12.5px;}
+    .calendar-legend.show {display: flex;}
+    .legend-item {display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--txt-2); font-weight: 600;}
+    .legend-color {width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);}
+    .legend-color.extras {background: linear-gradient(135deg, var(--red), var(--red-dark));}
+    /* ============================================================
+    TOAST
+    ============================================================ */
+    .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
+    @media (max-width: 480px) {
+      .header-title {font-size: 16px;}
+      .availability-extras-subtitle {font-size: 0.95em;}
+      .availability-extras-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
+      .availability-extras-btn .material-icons {font-size: 19px;}
+      .main-content {padding-left: 14px; padding-right: 14px; justify-content: center; align-items: center;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">DISPONIBILIDADES</span>
+      <span class="header-sub">Serviço de Brigadas de Aeródromo</span> 
+    </div>
+    <h2 id="corpInfo" style="display: none;"></h2>
+  </header>
+  <div class="main-content">
+    <div class="availability-extras-header">
+      <p class="availability-extras-subtitle">Selecione o mês e dias:</p>
+    </div>
+    <div class="months-card">
+      <div class="availability-extras-buttons">
+        <button class="availability-extras-btn" data-month="0" onclick="showCalendar(0, this)"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
+        <button class="availability-extras-btn" data-month="1" onclick="showCalendar(1, this)"><span class="material-icons">favorite</span><div>Fevereiro</div></button>
+        <button class="availability-extras-btn" data-month="2" onclick="showCalendar(2, this)"><span class="material-icons">eco</span><div>Março</div></button>
+        <button class="availability-extras-btn" data-month="3" onclick="showCalendar(3, this)"><span class="material-icons">local_florist</span><div>Abril</div></button>
+        <button class="availability-extras-btn" data-month="4" onclick="showCalendar(4, this)"><span class="material-icons">wb_sunny</span><div>Maio</div></button>
+        <button class="availability-extras-btn" data-month="5" onclick="showCalendar(5, this)"><span class="material-icons">beach_access</span><div>Junho</div></button>
+        <button class="availability-extras-btn" data-month="6" onclick="showCalendar(6, this)"><span class="material-icons">local_fire_department</span><div>Julho</div></button>
+        <button class="availability-extras-btn" data-month="7" onclick="showCalendar(7, this)"><span class="material-icons">whatshot</span><div>Agosto</div></button>
+        <button class="availability-extras-btn" data-month="8" onclick="showCalendar(8, this)"><span class="material-icons">park</span><div>Setembro</div></button>
+        <button class="availability-extras-btn" data-month="9" onclick="showCalendar(9, this)"><span class="material-icons">cloud</span><div>Outubro</div></button>
+        <button class="availability-extras-btn" data-month="10" onclick="showCalendar(10, this)"><span class="material-icons">grain</span><div>Novembro</div></button>
+        <button class="availability-extras-btn" data-month="11" onclick="showCalendar(11, this)"><span class="material-icons">celebration</span><div>Dezembro</div></button>
+      </div>
+    </div>
+    <div id="calendarContainer" class="calendar-container">
+      <div class="calendar-header" id="calendarHeader"></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+    <div id="legend" class="calendar-legend">
+      <div class="legend-item">
+        <span class="legend-color extras"></span>
+        <span class="legend-text">SBA</span>
+       </div>      
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023–2025 · Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */    
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getSupabaseHeaders(options = {}) {
+      const corp = getCorp();
+      const nint = getNInt();
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint,
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) return;
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) {
+        logoEl.src = cachedLogo;
+      }
+      if (h2) h2.textContent = corpOperNr;
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (corp.logo_url && corp.logo_url !== cachedLogo) {
+            localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+            if (logoEl) logoEl.src = corp.logo_url.trim();
+          }
+        }
+      } catch (err) {
+        console.error('Erro silencioso:', err);
+      }
+    }
+    /* ======================== CALENDAR DISPLAY ========================= */
+    let currentMonthIndex = null;
+    let selectedDays = [];
+    async function loadSelectedDaysFromSupabase(monthIndex) {
+      const currentNintCorpStr = localStorage.getItem("currentCorpNint");
+      const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
+      if (!currentNintCorpStr || !currentCorpOperNrStr) return [];
+      const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
+      const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
+      const month = monthIndex + 1;
+      const today = new Date();
+      const currentDay = today.getDate();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      let year = currentYear;
+      if (currentMonth === 11 && monthIndex === 0 && currentDay >= 15) {
+        year = currentYear + 1;
+      }
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_spaopat?select=day&n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&month=eq.${month}&year=eq.${year}&value=eq.SB`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) {
+          console.error('Erro ao ler Supabase:', await response.text());
+          return [];
+        }
+        const data = await response.json();
+        return data.map(d => `${year}-${String(month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`);
+      } catch (err) {
+        console.error('Erro de conexão ao ler:', err);
+        return [];
+      }
+    }
+    let isLoadingCalendar = false;
+    async function showCalendar(monthIndex, button) {
+      if (isLoadingCalendar) return;
+      const calendarContainer = document.getElementById('calendarContainer');
+      const legend = document.getElementById('legend');
+      isLoadingCalendar = true;
+      if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
+        button.classList.remove('selected');
+        calendarContainer.classList.remove('show');
+        legend.classList.remove('show');
+        document.body.classList.remove('mobile-month-active');
+        currentMonthIndex = null;
+        isLoadingCalendar = false;
+        return;
+      }
+      currentMonthIndex = monthIndex;
+      document.querySelectorAll('.availability-extras-btn').forEach(btn => btn.classList.remove('selected'));
+      document.body.classList.add('mobile-month-active');
+      button.classList.add('selected');
+      const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const today = new Date();
+      const currentDay = today.getDate();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      function getHeaderYear(selectedMonthIndex) {
+        if (currentMonth === 11 && selectedMonthIndex === 0 && currentDay >= 15) {
+          return currentYear + 1;
+        }
+        return currentYear;
+      }
+      const headerYear = getHeaderYear(monthIndex);
+      const firstDay = new Date(headerYear, monthIndex, 1);
+      const lastDay = new Date(headerYear, monthIndex + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDayOfWeek = firstDay.getDay();
+      const calendarHeader = document.getElementById('calendarHeader');
+      const calendarGrid = document.getElementById('calendarGrid');
+      calendarHeader.textContent = `${monthNames[monthIndex]} ${headerYear}`;
+      calendarGrid.innerHTML = '';
+      dayNames.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-day-header';
+        dayHeader.textContent = day;
+        calendarGrid.appendChild(dayHeader);
+      });
+      for (let i = 0; i < startingDayOfWeek; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'calendar-day empty';
+        calendarGrid.appendChild(emptyDay);
+      }
+      const dayElementsByDate = {};
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = day;
+        const dateStr = `${headerYear}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        if (headerYear === currentYear && monthIndex === currentMonth && day === currentDay) {
+          dayElement.classList.add('today');
+        }
+        dayElement.addEventListener('click', async () => {
+          const year = getWorkYear(currentMonthIndex);
+          const now = new Date();
+          const nowDay = now.getDate();
+          if (!allowPiqPastMonthsEdit) {
+            if (isPastMonth(currentMonthIndex, year)) {
+              showToast("Não é possível alterar registos de meses anteriores.");
+              return;
+            }
+            if (currentMonthIndex === now.getMonth() && year === now.getFullYear() && day <= nowDay) {
+              showToast("Não é possível alterar registos de dias anteriores ou do dia atual.");
+              return;
+            }
+          }
+          const currentNintCorpStr = localStorage.getItem("currentCorpNint");
+          const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
+          const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
+          const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
+          const month = currentMonthIndex + 1;
+          if (selectedDays.includes(dateStr)) {
+            selectedDays = selectedDays.filter(d => d !== dateStr);
+            dayElement.classList.remove('selected');
+            try {
+              const resServ = await fetch(
+                `${SUPABASE_URL}/rest/v1/reg_spaopat?n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&month=eq.${month}&day=eq.${day}&value=eq.SB`, {
+                  method: 'DELETE',
+                  headers: getSupabaseHeaders()
+                }
+              );
+              if (!resServ.ok) console.error(await resServ.text());
+              const resDisp = await fetch(
+                `${SUPABASE_URL}/rest/v1/reg_disp?n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&month=eq.${month}&day=eq.${day}&value=eq.SB`, {
+                  method: 'DELETE',
+                  headers: getSupabaseHeaders()
+                }
+              );
+              if (!resDisp.ok) console.error(await resDisp.text());
+            } catch (err) {
+              console.error(err);
+            }
+          } else {
+            const saved = await saveDayToPiqDisp(day);
+            if (saved) {
+              selectedDays.push(dateStr);
+              dayElement.classList.add('selected');
+            }
+          }
+        });
+        calendarGrid.appendChild(dayElement);
+        dayElementsByDate[dateStr] = dayElement;
+      }
+      calendarContainer.classList.add('show');
+      legend.classList.add('show');
+      calendarContainer.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
+      const requestedMonth = monthIndex;
+      selectedDays = await loadSelectedDaysFromSupabase(monthIndex);
+      if (currentMonthIndex !== requestedMonth) { isLoadingCalendar = false; return; }
+      selectedDays.forEach(dateStr => {
+        const el = dayElementsByDate[dateStr];
+        if (el) el.classList.add('selected');
+      });
+      isLoadingCalendar = false;
+    }
+    /* =========================== SHOW TOAST ============================ */
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = message;
+      const content = document.querySelector(".main-content");
+      document.body.appendChild(toast);
+      if (content) content.classList.add("content-blur");
+      setTimeout(() => toast.classList.add("show"), 50);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        if (content) content.classList.remove("content-blur");
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    /* ======================== SAVE DAY TO SCALE ======================== */
+    let allowPiqPastMonthsEdit = false;
+    function isPastMonth(selectedMonthIndex, selectedYear) {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      return (
+        selectedYear < currentYear ||
+        (selectedYear === currentYear && selectedMonthIndex < currentMonth)
+      );
+    }
+    function getWorkYear(selectedMonthIndex) {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      const currentDay = now.getDate();
+      if (currentMonth === 11 && selectedMonthIndex === 0 && currentDay >= 15) {
+        return currentYear + 1;
+      }
+      return currentYear;
+    }
+    async function saveDayToPiqDisp(day) {
+      if (currentMonthIndex === null) return false;
+      const year = getWorkYear(currentMonthIndex);
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentDay = now.getDate();
+      if (!allowPiqPastMonthsEdit) {
+        if (isPastMonth(currentMonthIndex, year)) {
+          showToast("Não é possível alterar registos de meses anteriores.");
+          return false;
+        }
+        if (currentMonthIndex === currentMonth && year === now.getFullYear() && day <= currentDay) {
+          showToast("Não é possível alterar registos de dias anteriores ou do dia atual. Para alterações efetue-as a partir do menu 'Trocas de Serviço'. Obrigado.");
+          return false;
+        }
+      }
+      const currentNintCorpStr = localStorage.getItem("currentCorpNint");
+      const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
+      if (!currentNintCorpStr || !currentCorpOperNrStr) {
+        return false;
+      }
+      const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
+      const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
+      const month = currentMonthIndex + 1;
+      const value = "SB";
+      try {
+        const checkServRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_spaopat?select=value&n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=eq.SB`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (checkServRes.ok) {
+          const existsServ = await checkServRes.json();
+          if (existsServ.length > 0) {
+            showToast("Já existe uma disponibilidade para SPA/PAT registada para este dia.");
+            return false;
+          }
+        }
+        const checkDispRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_disp?select=value&n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (checkDispRes.ok) {
+          const existsDisp = await checkDispRes.json();
+          const blocking = existsDisp.filter(r => r.value === "ED" || r.value === "ET");
+          if (blocking.length > 0) {
+            showToast("Já existe uma disponibilidade registada para outro tipo de serviço neste dia. Por favor verifique o menú VISUALIZAR DISPONIBILIDADES.");
+            return false;
+          }
+        }
+        let abv_name = "N/D";
+        const userRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${currentNintCorp}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          if (userData.length > 0) {
+            abv_name = userData[0].abv_name;
+          }
+        }
+        const payloadRegServ = {n_int: currentNintCorp, abv_name, day, month, year, value, corp_oper_nr: currentCorpOperNr};
+        const resServ = await fetch(`${SUPABASE_URL}/rest/v1/reg_spaopat`, {
+          method: "POST",
+          headers: getSupabaseHeaders({
+            returnRepresentation: true
+          }),
+          body: JSON.stringify(payloadRegServ)
+        });
+        const payloadRegDisp = {n_int: currentNintCorp, day, month, year, value, corp_oper_nr: currentCorpOperNr};
+        const resDisp = await fetch(`${SUPABASE_URL}/rest/v1/reg_disp`, {
+          method: "POST",
+          headers: getSupabaseHeaders({
+            returnRepresentation: true
+          }),
+          body: JSON.stringify(payloadRegDisp)
+        });
+        if (resServ.ok && resDisp.ok) {
+          return true;
+        } else {
+          console.error("Erro numa das gravações");
+          return false;
+        }
+      } catch (err) {
+        console.error("Erro geral:", err);
+        return false;
+      }
+    }
+    /* ============================== INIT =============================== */
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCorpInfo();
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+    });
+  </script>
+</body>
+</html>
