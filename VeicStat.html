@@ -204,9 +204,9 @@
           <span class="btn-icon"><span class="material-icons">home</span></span>
           <strong style="font-size:8.5px;">Chegada ao Quartel</strong>
         </button>
-        <button class="geostat-btn btn-retido" id="retidoMacasBtn" style="display:none;" onclick="sendGeostat('Retido por Falta de Macas')">
+        <button class="geostat-btn btn-retido" id="retidoMacasBtn" style="display:none;" onclick="showRetencaoPopup()">
           <span class="btn-icon"><span class="material-icons">block</span></span>
-          <strong style="font-size:8.5px;">Retido Falta Macas</strong>
+          <strong style="font-size:8.5px;">Retenção</strong>
         </button>
       </div>
     </div>
@@ -685,6 +685,67 @@
     }
     function closeKmPopup() {
       document.getElementById('kmPopup')?.remove();
+    }
+    function showRetencaoPopup() {
+      if (!selectedVehicle) {
+        showToast('Selecione uma viatura primeiro!', 'error');
+        return;
+      }
+      const popupHTML = `
+        <div id="retencaoPopup" class="popup-overlay">
+          <style>#retencaoPopup input[type="radio"] {width:20px; height:20px; accent-color: var(--red);}
+            #retencaoPopup input[type="radio"]:focus {outline:none; box-shadow:none;}
+          </style>
+          <div class="popup-content" style="overflow:hidden; border-radius:var(--r-lg); padding:0;">
+            <div style="padding:0px 0px 0px 0px !important;">
+              <h3 style="display:flex; align-items:center; justify-content:center; gap:10px; margin:0; padding:15px;">
+                <span class="material-icons" style="font-size:18px;">block</span>
+                Motivo de Retenção
+              </h3>
+            </div>
+            <div style="padding:16px 20px 24px 20px !important; display:flex; flex-direction:column; gap:16px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:19px; line-height:1;">${vehicleIcon}</span>
+                <strong style="font-size:15px; line-height:1;">${selectedVehicle}</strong>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:10px; margin: 10px 0 5px 30px;">
+                <label style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--txt-1); cursor:pointer;">
+                  <input type="radio" name="retencaoMotivo" value="Retido por Falta de Macas" checked style="width:auto; margin:0;">
+                  Falta de Macas
+                </label>
+                <label style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--txt-1); cursor:pointer;">
+                  <input type="radio" name="retencaoMotivo" value="Retido por Aguarda Triagem" style="width:auto; margin:0;">
+                  Aguarda Triagem
+                </label>
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--border); background:var(--surface-2); padding:15px 15px 15px 15px !important;">
+              <div style="display:flex; gap:10px;">
+                <button class="popup-btn confirm" onclick="sendRetencao()" style="display:flex; align-items:center; justify-content:center; gap:5px; margin:0;">
+                  <span class="material-icons" style="font-size:16px;">check_circle</span> Enviar Status
+                </button>
+                <button class="popup-btn cancel" onclick="closeRetencaoPopup()" style="display:flex; align-items:center; justify-content:center; gap:5px; margin:0;">
+                  <span class="material-icons" style="font-size:16px;">cancel</span> Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', popupHTML);
+    }
+    function closeRetencaoPopup() {
+      document.getElementById('retencaoPopup')?.remove();
+    }
+    async function sendRetencao() {
+      const selected = document.querySelector('input[name="retencaoMotivo"]:checked');
+      if (!selected) {
+        showToast('Selecione um motivo!', 'error');
+        return;
+      }
+      const action = selected.value;
+      closeRetencaoPopup();
+      await sendGeostat(action);
     }
     async function sendGeostatWithKmAndTime(action, kilometers, hours, minutes, hasPump) {
       if (!selectedVehicle) {
