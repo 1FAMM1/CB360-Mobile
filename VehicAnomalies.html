@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <meta name="theme-color" content="#c62828">
+  <title>CB360 Mobile - Reportar Anomalias</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+    VARIABLES (alinhadas com as restantes páginas)
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --orange: #ef6c00; --green: #2e7d32;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+          user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER / FOOTER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 20px); padding-bottom: calc(var(--footer-h) + 15px); padding-left: 16px; padding-right: 16px;
+                   display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;}
+    .main-content::-webkit-scrollbar {display: none;}
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
+    }
+    .section-title {width: 100%; font-size: 13.5px; font-weight: 700; color: var(--txt-2); margin: 5px 0px 5px 0px; letter-spacing: 0.2px; display: flex; align-items: center;}
+    .section-title::before {content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--red); display: inline-block; margin-right: 5px;}
+    /* ============================================================
+    VEHICLE SELECTOR (botão que abre a lista)
+    ============================================================ */
+    .vehicle-selector-btn {width: 100%; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 5px 15px;
+                           box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), box-shadow var(--ease), transform var(--ease); text-align: left; margin-bottom: 15px;}
+    .vehicle-selector-btn:hover {box-shadow: var(--sh-md); transform: translateY(-1px);}
+    .vehicle-selector-btn:active {transform: translateY(0);}
+    .vehicle-selector-icon {width: 42px; height: 42px; border-radius: 50%; background: var(--red-light); color: var(--red); display: flex; align-items: center; justify-content: center;
+                            flex-shrink: 0; transition: background var(--ease), color var(--ease);}
+    .vehicle-selector-icon .material-icons {font-size: 22px;}
+    .vehicle-selector-info {flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;}
+    .vehicle-selector-label {font-size: 10px; font-weight: 600; color: var(--txt-3); text-transform: uppercase; letter-spacing: 0.5px;}
+    .vehicle-selector-value {font-size: 14.5px; font-weight: 700; color: var(--txt-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+    .vehicle-selector-value.placeholder {color: var(--txt-3); font-weight: 500;}
+    .vehicle-selector-btn .material-icons.chevron {color: var(--txt-3); flex-shrink: 0;}
+    .vehicle-selector-btn.has-value .vehicle-selector-icon {background: var(--red); color: #fff;}
+    /* ============================================================
+    DESCRIÇÃO DA ANOMALIA + FOTOS
+    ============================================================ */
+    .anomaly-textarea-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 4px; transition: box-shadow var(--ease); margin-bottom: 5px;}
+    .anomaly-textarea-card:focus-within {box-shadow: var(--sh-md);}
+    .anomaly-textarea {width: 100%; min-height: 150px; max-height: 240px; resize: vertical; border: none; background: transparent; outline: none; padding: 12px; font-family: inherit;
+                       font-size: 14px; line-height: 1.5; color: var(--txt-1);}
+    .anomaly-textarea::placeholder {color: var(--txt-3);}
+    .anomaly-photo-actions {display: flex; gap: 10px; width: 100%; margin-bottom: 0px;}
+    .anomaly-photo-btn {flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: var(--r-md); font-size: 13px; font-weight: 600;
+                        cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--txt-1); box-shadow: var(--sh-sm);
+                        transition: background var(--ease), transform var(--ease), box-shadow var(--ease); font-family: inherit;}
+    .anomaly-photo-btn:hover {transform: translateY(-1px); box-shadow: var(--sh-md);}
+    .anomaly-photo-btn:active {transform: translateY(0);}
+    .anomaly-photo-btn .material-icons {font-size: 20px; color: var(--red);}
+    .anomaly-photo-btn.primary {background: linear-gradient(135deg, var(--red-dark), var(--red)); color: #fff; border-color: transparent;}
+    .anomaly-photo-btn.primary .material-icons {color: #fff;}
+    .anomaly-photo-preview {display: flex; gap: 8px; flex-wrap: wrap; width: 100%; margin-bottom: 10px;}
+    .anomaly-photo-thumb {position: relative; width: 72px; height: 72px; border-radius: var(--r-sm); overflow: hidden; box-shadow: var(--sh-sm); flex-shrink: 0;}
+    .anomaly-photo-thumb img {width: 100%; height: 100%; object-fit: cover; display: block;}
+    .anomaly-photo-thumb .remove-btn {position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff;
+                                      display: flex; align-items: center; justify-content: center; cursor: pointer;}
+    .anomaly-photo-thumb .remove-btn .material-icons {font-size: 14px; color: #fff;}
+    .anomaly-submit-btn {width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 14px; border-radius: var(--r-md); font-size: 14px; font-weight: 700;
+                         font-family: inherit; cursor: pointer; border: none; color: #fff; background: linear-gradient(135deg, var(--red-dark), var(--red)); box-shadow: var(--sh-md);
+                         transition: background var(--ease), transform var(--ease), box-shadow var(--ease);}
+    .anomaly-submit-btn:hover {transform: translateY(-1px); box-shadow: var(--sh-lg);}
+    .anomaly-submit-btn:active {transform: translateY(0);}
+    .anomaly-submit-btn .material-icons {font-size: 20px;}
+    /* ============================================================
+    MODAL DE SELEÇÃO (lista pesquisável)
+    ============================================================ */
+    .vehicle-modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 5000; display: none; align-items: flex-end; justify-content: center;}
+    .vehicle-modal-overlay.show {display: flex; animation: fadeIn 0.2s ease;}
+    .vehicle-modal-card {background: var(--surface); width: 100%; max-width: 500px; max-height: 78vh; border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--sh-lg);
+                         display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);}
+    .vehicle-modal-header {display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;}
+    .vehicle-modal-title {font-size: 15px; font-weight: 700; color: var(--txt-1);}
+    .vehicle-modal-close {background: none; border: none; color: var(--txt-2); cursor: pointer; padding: 6px; display: flex; border-radius: 50%; transition: background var(--ease);}
+    .vehicle-modal-close:hover {background: var(--surface-2);}
+    .vehicle-modal-search {padding: 10px 14px; flex-shrink: 0;}
+    .vehicle-modal-search-box {background: var(--surface-2); border: 1px solid var(--border); border-radius: 50px; display: flex; align-items: center; padding: 8px 14px; gap: 8px;}
+    .vehicle-modal-search-box .material-icons {font-size: 19px; color: var(--txt-3);}
+    .vehicle-modal-search-box input {border: none; background: transparent; outline: none; width: 100%; font-size: 14px; color: var(--txt-1); font-family: inherit;}
+    .vehicle-modal-list {flex: 1; overflow-y: auto; padding: 4px 8px 14px;}
+    .vehicle-modal-list::-webkit-scrollbar {width: 6px;}
+    .vehicle-modal-list::-webkit-scrollbar-thumb {background: rgba(0,0,0,0.15); border-radius: 10px;}
+    .vehicle-list-item {display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-radius: var(--r-sm); cursor: pointer; transition: background var(--ease);}
+    .vehicle-list-item:hover {background: var(--surface-2);}
+    .vehicle-list-item.selected {background: var(--red-light);}
+    .vehicle-list-item-icon {width: 38px; height: 38px; border-radius: 50%; background: var(--surface-2); color: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+    .vehicle-list-item.selected .vehicle-list-item-icon {background: var(--red); color: #fff;}
+    .vehicle-list-item-info {flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px;}
+    .vehicle-list-item-plate {font-size: 14px; font-weight: 700; color: var(--txt-1);}
+    .vehicle-list-item-desc {font-size: 12px; color: var(--txt-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+    .vehicle-list-item .material-icons.check {color: var(--red); font-size: 20px;}
+    .vehicle-modal-empty, .vehicle-modal-loading {text-align: center; padding: 30px 10px; color: var(--txt-3); font-size: 13px;}
+    @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
+    @keyframes slideUp {from {transform: translateY(30px); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="this.style.display='none';" onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">REPORTAR ANOMALIAS</span>
+      <span class="header-sub">Frota de Veículos</span>
+    </div>
+    <h2 id="corpInfo" style="display: none;"></h2>
+  </header>
+  <div class="main-content">
+    <p class="section-title">Selecione o veículo:</p>
+    <button type="button" class="vehicle-selector-btn" id="vehicleSelectorBtn" onclick="openVehicleModal()">
+      <div class="vehicle-selector-icon"><span class="material-icons">directions_car</span></div>
+      <div class="vehicle-selector-info">
+        <span class="vehicle-selector-label">Viatura</span>
+        <span class="vehicle-selector-value placeholder" id="vehicleSelectorValue">Toque para escolher um veículo</span>
+      </div>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+
+    <p class="section-title">Descreva a anomalia:</p>
+    <div class="anomaly-textarea-card">
+      <textarea class="anomaly-textarea" id="anomalyDescription" placeholder="Descreva a anomalia detetada..."></textarea>
+    </div>
+
+    <div class="anomaly-photo-actions">
+      <button type="button" class="anomaly-photo-btn" id="attachPhotoBtn"><span class="material-icons">photo_library</span>Anexar Foto</button>
+      <button type="button" class="anomaly-photo-btn primary" id="takePhotoBtn"><span class="material-icons">photo_camera</span>Tirar Foto</button>
+    </div>
+    <div class="anomaly-photo-preview" id="anomalyPhotoPreview"></div>
+    <input type="file" id="anomalyGalleryInput" accept="image/*" multiple style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
+    <input type="file" id="anomalyCameraInput" accept="image/*" capture="environment" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
+
+    <button type="button" class="anomaly-submit-btn" id="registerAnomalyBtn"><span class="material-icons">report</span>Registar Anomalia</button>
+  </div>
+  <div class="vehicle-modal-overlay" id="vehicleModalOverlay" onclick="if(event.target===this) closeVehicleModal();">
+    <div class="vehicle-modal-card">
+      <div class="vehicle-modal-header">
+        <span class="vehicle-modal-title">Selecionar Veículo</span>
+        <button type="button" class="vehicle-modal-close" onclick="closeVehicleModal()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="vehicle-modal-search">
+        <div class="vehicle-modal-search-box">
+          <span class="material-icons">search</span>
+          <input type="text" id="vehicleSearchInput" placeholder="Pesquisar veículo...">
+        </div>
+      </div>
+      <div class="vehicle-modal-list" id="vehicleModalList">
+        <div class="vehicle-modal-loading">A carregar veículos...</div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023–2025 · Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getAuthToken() {return localStorage.getItem("authToken");}
+    function getSupabaseHeaders(options = {}) {
+      const corp = getCorp();
+      const nint = getNInt();
+      const token = getAuthToken();
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint,
+      };
+      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
+      return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) return;
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) {
+        logoEl.src = cachedLogo;
+      }
+      if (h2) h2.textContent = corpOperNr;
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (corp.logo_url && corp.logo_url !== cachedLogo) {
+            localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+            if (logoEl) logoEl.src = corp.logo_url.trim();
+          }
+        }
+      } catch (err) {
+        console.error('Erro silencioso:', err);
+      }
+    }
+    /* ========================== LOADING THEME =========================== */
+    function loadTheme() {
+      if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+    }
+    /* ======================== VEHICLE SELECTOR ========================== */
+    let allVehicles = [];
+    let selectedVehicle = null;
+    async function loadVehicles() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const listEl = document.getElementById('vehicleModalList');
+      if (!corpOperNr) return;
+      listEl.innerHTML = '<div class="vehicle-modal-loading">A carregar veículos...</div>';
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/vehicle_status?select=vehicle&corp_oper_nr=eq.${corpOperNr}&order=vehicle`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await res.json();
+        allVehicles = data || [];
+        renderVehicleList(allVehicles);
+      } catch (err) {
+        console.error('Erro ao carregar veículos:', err);
+        listEl.innerHTML = '<div class="vehicle-modal-empty">Não foi possível carregar os veículos.</div>';
+      }
+    }
+    function renderVehicleList(vehicles) {
+      const listEl = document.getElementById('vehicleModalList');
+      listEl.innerHTML = '';
+      if (!vehicles || vehicles.length === 0) {
+        listEl.innerHTML = '<div class="vehicle-modal-empty">Nenhum veículo encontrado.</div>';
+        return;
+      }
+      vehicles.forEach(v => {
+        const isSelected = selectedVehicle && selectedVehicle.vehicle === v.vehicle;
+        const item = document.createElement('div');
+        item.className = `vehicle-list-item${isSelected ? ' selected' : ''}`;
+        item.innerHTML = `
+          <div class="vehicle-list-item-icon"><span class="material-icons">directions_car</span></div>
+          <div class="vehicle-list-item-info">
+            <span class="vehicle-list-item-plate">${v.vehicle || 'Sem nome'}</span>
+          </div>
+          ${isSelected ? '<span class="material-icons check">check_circle</span>' : ''}
+        `;
+        item.onclick = () => selectVehicle(v);
+        listEl.appendChild(item);
+      });
+    }
+    function selectVehicle(vehicle) {
+      selectedVehicle = vehicle;
+      const btn = document.getElementById('vehicleSelectorBtn');
+      const valueEl = document.getElementById('vehicleSelectorValue');
+      valueEl.textContent = vehicle.vehicle || 'Sem nome';
+      valueEl.classList.remove('placeholder');
+      btn.classList.add('has-value');
+      closeVehicleModal();
+    }
+    function openVehicleModal() {
+      document.getElementById('vehicleModalOverlay').classList.add('show');
+      document.getElementById('vehicleSearchInput').value = '';
+      if (allVehicles.length === 0) {
+        loadVehicles();
+      } else {
+        renderVehicleList(allVehicles);
+      }
+      setTimeout(() => document.getElementById('vehicleSearchInput').focus(), 150);
+    }
+    function closeVehicleModal() {
+      document.getElementById('vehicleModalOverlay').classList.remove('show');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('vehicleSearchInput');
+      searchInput.addEventListener('input', () => {
+        const term = searchInput.value.trim().toLowerCase();
+        if (!term) {
+          renderVehicleList(allVehicles);
+          return;
+        }
+        const filtered = allVehicles.filter(v => {
+          const haystack = `${v.vehicle || ''}`.toLowerCase();
+          return haystack.includes(term);
+        });
+        renderVehicleList(filtered);
+      });
+    });
+    /* ============================== INIT =============================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCorpInfo();
+      loadTheme();
+    });
+    /* ======================== FOTOS DA ANOMALIA ========================= */
+    let anomalyPhotos = [];
+    function handleAnomalyFiles(fileList) {
+      Array.from(fileList).forEach(file => {
+        if (file.type && file.type.startsWith('image/')) {
+          anomalyPhotos.push(file);
+        }
+      });
+      renderAnomalyPhotoPreview();
+    }
+    function renderAnomalyPhotoPreview() {
+      const container = document.getElementById('anomalyPhotoPreview');
+      container.innerHTML = '';
+      anomalyPhotos.forEach((file, idx) => {
+        const url = URL.createObjectURL(file);
+        const thumb = document.createElement('div');
+        thumb.className = 'anomaly-photo-thumb';
+        thumb.innerHTML = `
+          <img src="${url}" alt="foto ${idx + 1}">
+          <div class="remove-btn"><span class="material-icons">close</span></div>
+        `;
+        thumb.querySelector('.remove-btn').onclick = () => {
+          URL.revokeObjectURL(url);
+          anomalyPhotos.splice(idx, 1);
+          renderAnomalyPhotoPreview();
+        };
+        container.appendChild(thumb);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const galleryInput = document.getElementById('anomalyGalleryInput');
+      const cameraInput = document.getElementById('anomalyCameraInput');
+      document.getElementById('attachPhotoBtn').addEventListener('click', () => galleryInput.click());
+      document.getElementById('takePhotoBtn').addEventListener('click', () => cameraInput.click());
+      galleryInput.addEventListener('change', (e) => {
+        handleAnomalyFiles(e.target.files);
+        e.target.value = '';
+      });
+      cameraInput.addEventListener('change', (e) => {
+        handleAnomalyFiles(e.target.files);
+        e.target.value = '';
+      });
+      document.getElementById('registerAnomalyBtn').addEventListener('click', () => {
+        const description = document.getElementById('anomalyDescription').value.trim();
+        if (!selectedVehicle) {
+          alert('Selecione um veículo.');
+          return;
+        }
+        if (!description) {
+          alert('Descreva a anomalia.');
+          return;
+        }
+        // TODO: gravar no Supabase (tabela de anomalias ainda por definir) e enviar anomalyPhotos.
+        console.log('Registar anomalia:', {
+          vehicle: selectedVehicle.vehicle,
+          description,
+          photos: anomalyPhotos
+        });
+      });
+    });
+  </script>
+</body>
+</html>
