@@ -48,13 +48,15 @@
     MAIN CONTENT
     ============================================================ */
     .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 20px); padding-bottom: calc(var(--footer-h) + 15px); padding-left: 16px; padding-right: 16px;
-                   display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;}
+                    display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;}
     .main-content::-webkit-scrollbar {display: none;}
     @media (min-width: 769px) {
       .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
     }
-    .section-title {width: 100%; font-size: 13.5px; font-weight: 700; color: var(--txt-2); margin: 15px 0px 5px 0px; letter-spacing: 0.2px; display: flex; align-items: center;}
+    .section-title {width: 100%; font-size: 13.5px; font-weight: 700; color: var(--txt-2); margin: 15px 0px 5px 0px; letter-spacing: 0.2px; display: flex; align-items: center; transition: opacity var(--ease), max-height var(--ease); overflow: hidden;}
     .section-title::before {content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--red); display: inline-block; margin-right: 5px;}
+    .hide-on-focus {transition: opacity var(--ease), max-height var(--ease), margin var(--ease), padding var(--ease); opacity: 1; max-height: 300px; overflow: hidden;}
+    .hidden-section {opacity: 0 !important; max-height: 0 !important; margin: 0 !important; padding: 0 !important; pointer-events: none;}
     /* ============================================================
     VEHICLE SELECTOR (botão que abre a lista)
     ============================================================ */
@@ -77,7 +79,7 @@
     .anomaly-textarea-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 4px; transition: box-shadow var(--ease); margin-bottom: 5px;}
     .anomaly-textarea-card:focus-within {box-shadow: var(--sh-md);}
     .anomaly-textarea {width: 100%; min-height: 120px; max-height: 200px; resize: vertical; border: none; background: transparent; outline: none; padding: 12px; font-family: inherit;
-                       font-size: 14px; line-height: 1.5; color: var(--txt-1);}
+                        font-size: 14px; line-height: 1.5; color: var(--txt-1);}
     .anomaly-textarea::placeholder {color: var(--txt-3);}
     .anomaly-photo-actions {display: flex; gap: 10px; width: 100%; margin-bottom: 5px;}
     .anomaly-photo-btn {flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: var(--r-md); font-size: 13px; font-weight: 600;
@@ -92,7 +94,7 @@
     .anomaly-photo-thumb {position: relative; width: 64px; height: 64px; border-radius: var(--r-sm); overflow: hidden; box-shadow: var(--sh-sm); flex-shrink: 0;}
     .anomaly-photo-thumb img {width: 100%; height: 100%; object-fit: cover; display: block;}
     .anomaly-photo-thumb .remove-btn {position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff;
-                                      display: flex; align-items: center; justify-content: center; cursor: pointer;}
+                                    display: flex; align-items: center; justify-content: center; cursor: pointer;}
     .anomaly-photo-thumb .remove-btn .material-icons {font-size: 14px; color: #fff;}
     .anomaly-submit-btn {width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 14px; border-radius: var(--r-md); font-size: 14px; font-weight: 700;
                          font-family: inherit; cursor: pointer; border: none; color: #fff; background: linear-gradient(135deg, var(--red-dark), var(--red)); box-shadow: var(--sh-md);
@@ -103,7 +105,7 @@
     /* ============================================================
     TABELA DE REGISTOS ANTERIORES (COM SCROLL)
     ============================================================ */
-    .history-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); overflow: hidden; margin-top: 5px; margin-bottom: 20px; display: flex; flex-direction: column; max-height: 250px;}
+    .history-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); overflow: hidden; margin-top: 5px; margin-bottom: 20px; display: flex; flex-direction: column; max-height: 250px; transition: opacity var(--ease), max-height var(--ease), margin var(--ease), padding var(--ease); opacity: 1;}
     .history-table-container {overflow-y: auto; flex: 1;}
     .history-table-container::-webkit-scrollbar {width: 6px;}
     .history-table-container::-webkit-scrollbar-thumb {background: rgba(0,0,0,0.15); border-radius: 10px;}
@@ -120,7 +122,7 @@
     .vehicle-modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 5000; display: none; align-items: flex-end; justify-content: center;}
     .vehicle-modal-overlay.show {display: flex; animation: fadeIn 0.2s ease;}
     .vehicle-modal-card {background: var(--surface); width: 100%; max-width: 500px; max-height: 78vh; border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--sh-lg);
-                         display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);}
+                           display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);}
     .vehicle-modal-header {display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;}
     .vehicle-modal-title {font-size: 15px; font-weight: 700; color: var(--txt-1);}
     .vehicle-modal-close {background: none; border: none; color: var(--txt-2); cursor: pointer; padding: 6px; display: flex; border-radius: 50%; transition: background var(--ease);}
@@ -143,13 +145,17 @@
     .vehicle-list-item .material-icons.check {color: var(--red); font-size: 20px;}
     .vehicle-modal-empty, .vehicle-modal-loading {text-align: center; padding: 30px 10px; color: var(--txt-3); font-size: 13px;}    
     /* ============================================================
-    CUSTOM ALERT / SUCCESS MODAL
+    CUSTOM MODALS (Aviso, Loading e Sucesso)
     ============================================================ */
     .custom-modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 6000; display: none; align-items: center; justify-content: center; padding: 20px;}
     .custom-modal-overlay.show {display: flex; animation: fadeIn 0.2s ease;}
     .custom-modal-card {background: var(--surface); width: 100%; max-width: 340px; border-radius: var(--r-lg); box-shadow: var(--sh-lg); padding: 24px 20px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: scaleUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);}
     .custom-modal-icon-wrap {width: 60px; height: 60px; border-radius: 50%; background: rgba(46, 125, 50, 0.15); color: var(--green); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;}
+    .custom-modal-icon-wrap.warning {background: rgba(239, 108, 0, 0.15); color: var(--orange);}
+    .custom-modal-icon-wrap.loading {background: var(--red-light); color: var(--red);}
     .custom-modal-icon-wrap .material-icons {font-size: 32px;}
+    .custom-modal-icon-wrap .material-icons.spin {animation: spin 1s linear infinite;}
+    @keyframes spin {0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);}}    
     .custom-modal-title {font-size: 17px; font-weight: 700; color: var(--txt-1); margin-bottom: 8px;}
     .custom-modal-msg {font-size: 13.5px; color: var(--txt-2); line-height: 1.5; margin-bottom: 20px;}
     .custom-modal-btn {width: 100%; padding: 12px; border-radius: var(--r-md); font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; background: linear-gradient(135deg, var(--red-dark), var(--red)); color: #fff; box-shadow: var(--sh-md); transition: background var(--ease), transform var(--ease);}
@@ -186,21 +192,23 @@
         <span class="vehicle-selector-value placeholder" id="vehicleSelectorValue">Toque para escolher um veículo</span>
       </div>
       <span class="material-icons chevron">expand_more</span>
-    </button>
-    <p class="section-title">Descreva a anomalia:</p>
+    </button>    
+    <p class="section-title hide-on-focus" id="descTitle">Descreva a anomalia:</p>
     <div class="anomaly-textarea-card">
       <textarea class="anomaly-textarea" id="anomalyDescription" placeholder="Descreva a anomalia detetada..."></textarea>
-    </div>
-    <div class="anomaly-photo-actions">
-      <button type="button" class="anomaly-photo-btn" id="attachPhotoBtn"><span class="material-icons">photo_library</span>Anexar Foto</button>
-      <button type="button" class="anomaly-photo-btn primary" id="takePhotoBtn"><span class="material-icons">photo_camera</span>Tirar Foto</button>
-    </div>
+    </div>    
+    <div class="hide-on-focus" id="photoActionsContainer">
+      <div class="anomaly-photo-actions">
+        <button type="button" class="anomaly-photo-btn" id="attachPhotoBtn"><span class="material-icons">photo_library</span>Anexar Foto</button>
+        <button type="button" class="anomaly-photo-btn primary" id="takePhotoBtn"><span class="material-icons">photo_camera</span>Tirar Foto</button>
+      </div>
+    </div>    
     <div class="anomaly-photo-preview" id="anomalyPhotoPreview"></div>
     <input type="file" id="anomalyGalleryInput" accept="image/*" multiple style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
-    <input type="file" id="anomalyCameraInput" accept="image/*" capture="environment" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">
+    <input type="file" id="anomalyCameraInput" accept="image/*" capture="environment" style="position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0;">    
     <button type="button" class="anomaly-submit-btn" id="registerAnomalyBtn"><span class="material-icons">report</span>Registar Anomalia</button>    
-    <p class="section-title">Registos Anteriores:</p>
-    <div class="history-card">
+    <p class="section-title hide-on-focus" id="historyTitle">Registos Anteriores:</p>
+    <div class="history-card hide-on-focus" id="historyCardContainer">
       <div class="history-table-container">
         <table class="history-table">
           <thead>
@@ -237,12 +245,12 @@
   </div>
   <div class="custom-modal-overlay" id="customModalOverlay">
     <div class="custom-modal-card">
-      <div class="custom-modal-icon-wrap">
-        <span class="material-icons">check_circle</span>
+      <div class="custom-modal-icon-wrap" id="customModalIconWrap">
+        <span class="material-icons" id="customModalIcon">check_circle</span>
       </div>
       <div class="custom-modal-title" id="customModalTitle">Sucesso</div>
       <div class="custom-modal-msg" id="customModalMsg">Anomalia registada com sucesso!</div>
-      <button type="button" class="custom-modal-btn" onclick="closeCustomModal()">OK</button>
+      <button type="button" class="custom-modal-btn" id="customModalBtn" onclick="closeCustomModal()">OK</button>
     </div>
   </div>
   <footer class="footer">
@@ -276,10 +284,30 @@
       if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
       return headers;
     }
-    /* ======================= MODAL DE SUCESSO CUSTOM ======================= */
-    function showSuccessModal(message) {
-      document.getElementById('customModalMsg').textContent = message || 'Operação realizada com sucesso!';
-      document.getElementById('customModalOverlay').classList.add('show');
+    /* ======================= MODAIS CUSTOMIZADOS ======================= */
+    function showModal(type, title, message, showButton = true) {
+      const overlay = document.getElementById('customModalOverlay');
+      const iconWrap = document.getElementById('customModalIconWrap');
+      const iconEl = document.getElementById('customModalIcon');
+      const titleEl = document.getElementById('customModalTitle');
+      const msgEl = document.getElementById('customModalMsg');
+      const btnEl = document.getElementById('customModalBtn');
+      iconWrap.className = 'custom-modal-icon-wrap';
+      iconEl.className = 'material-icons';
+      if (type === 'success') {
+        iconEl.textContent = 'check_circle';
+      } else if (type === 'warning') {
+        iconWrap.classList.add('warning');
+        iconEl.textContent = 'warning';
+      } else if (type === 'loading') {
+        iconWrap.classList.add('loading');
+        iconEl.textContent = 'hourglass_empty';
+        iconEl.classList.add('spin');
+      }
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+      btnEl.style.display = showButton ? 'block' : 'none';
+      overlay.classList.add('show');
     }
     function closeCustomModal() {
       document.getElementById('customModalOverlay').classList.remove('show');
@@ -403,7 +431,22 @@
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
       }
+      const textarea = document.getElementById('anomalyDescription');
+      const historyTitle = document.getElementById('historyTitle');
+      const historyCard = document.getElementById('historyCardContainer');
+      textarea.addEventListener('focus', () => {
+        historyTitle.classList.add('hidden-section');
+        historyCard.classList.add('hidden-section');
+      });
     });
+    function showHistorySection() {
+      const historyTitle = document.getElementById('historyTitle');
+      const historyCard = document.getElementById('historyCardContainer');
+      if (historyTitle && historyCard) {
+        historyTitle.classList.remove('hidden-section');
+        historyCard.classList.remove('hidden-section');
+      }
+    }
     /* ======================== HISTÓRICO DE ANOMALIAS ===================== */
     async function loadAnomalyHistory(vehicleName) {
       const historyListEl = document.getElementById('anomalyHistoryList');
@@ -423,8 +466,7 @@
     }
     function renderAnomalyHistory(records) {
       const historyListEl = document.getElementById('anomalyHistoryList');
-      historyListEl.innerHTML = '';
-      
+      historyListEl.innerHTML = '';      
       if (!records || records.length === 0) {
         historyListEl.innerHTML = '<tr><td colspan="2" class="history-empty">Sem anomalias registadas para este veículo.</td></tr>';
         return;
@@ -500,16 +542,17 @@
       document.getElementById('registerAnomalyBtn').addEventListener('click', async () => {
         const description = document.getElementById('anomalyDescription').value.trim();
         if (!selectedVehicle) {
-          alert('Selecione um veículo.');
+          showModal('warning', 'Aviso', 'Por favor, selecione um veículo antes de continuar.');
           return;
         }
         if (!description) {
-          alert('Descreva a anomalia.');
+          showModal('warning', 'Campo Obrigatório', 'Por favor, descreva a anomalia detetada antes de efetuar o registo.');
           return;
         }
         const submitBtn = document.getElementById('registerAnomalyBtn');
         submitBtn.disabled = true;
         submitBtn.style.opacity = '0.7';
+        showModal('loading', 'A processar...', 'A enviar anexos e a registar anomalia. Por favor, aguarde.', false);
         try {
           const uploadedUrls = [];
           const corpOperNr = getCorp();
@@ -517,7 +560,6 @@
             const fileExt = file.name.split('.').pop() || 'jpg';
             const fileName = `${corpOperNr}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
             const filePath = `${fileName}`;
-
             const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/anomalies/${filePath}`, {
               method: 'POST',
               headers: {
@@ -549,14 +591,16 @@
           if (!insertRes.ok) {
             throw new Error('Erro ao gravar anomalia na base de dados.');
           }
-          showSuccessModal('Anomalia registada com sucesso!');
           document.getElementById('anomalyDescription').value = '';
           anomalyPhotos = [];
           renderAnomalyPhotoPreview();
           loadAnomalyHistory(selectedVehicle.vehicle);
+          showHistorySection();
+          showModal('success', 'Sucesso', 'Anomalia registada com sucesso!', true);
         } catch (err) {
           console.error('Erro ao registar anomalia:', err);
-          alert('Ocorreu um erro ao registar a anomalia.');
+          showHistorySection();
+          showModal('warning', 'Erro', 'Ocorreu um erro ao registar a anomalia. Tente novamente.');
         } finally {
           submitBtn.disabled = false;
           submitBtn.style.opacity = '1';
