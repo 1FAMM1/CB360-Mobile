@@ -21,17 +21,20 @@
     /* ============================================================
     DARK MODE
     ============================================================ */
-    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
     /* ============================================================
     RESET & BASE
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+          user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER
     ============================================================ */
-    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
@@ -39,7 +42,9 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px;  transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px;
+                   display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px;
+                   transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
     .main-content::-webkit-scrollbar {display: none;}
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
@@ -51,7 +56,10 @@
     ============================================================ */
     .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 4px; flex-shrink: 0;}
     .availability-extras-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
-    .availability-extras-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);  padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; line-height: 1.2; transition: background var(--ease), color var(--ease);}
+    .availability-extras-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+                 padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2);
+                 cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
+                 line-height: 1.2; transition: background var(--ease), color var(--ease);}
     .availability-extras-btn:nth-child(3n) {border-right: none;}
     .availability-extras-btn:nth-child(n+10) {border-bottom: none;}
     .availability-extras-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
@@ -64,12 +72,15 @@
     /* ============================================================
     CALENDAR CARD
     ============================================================ */
-    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%; display: none;}
+    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md);
+                         box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%; display: none;}
     .calendar-container.show {display: block; animation: slideDown 0.3s ease;}
-    .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
+    .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px;
+                      letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
     .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
     .calendar-day-header {text-align: center; font-weight: 700; padding: 6px 0; font-size: 11px; color: var(--txt-3);}
-    .calendar-day {text-align: center; padding: 9px 0; border-radius: var(--r-sm); background: var(--surface-2); font-size: 12.5px; color: var(--txt-1); cursor: pointer; transition: background var(--ease), transform 0.15s ease, color var(--ease);}
+    .calendar-day {text-align: center; padding: 9px 0; border-radius: var(--r-sm); background: var(--surface-2); font-size: 12.5px; color: var(--txt-1); cursor: pointer;
+                   transition: background var(--ease), transform 0.15s ease, color var(--ease);}
     .calendar-day:hover {background: var(--red-light); color: var(--red); transform: scale(1.05);}
     .calendar-day.empty {background: transparent; cursor: default;}
     .calendar-day.empty:hover {transform: none; background: transparent;}
@@ -79,7 +90,8 @@
     /* ============================================================
     LEGEND
     ============================================================ */
-    .calendar-legend {display: none; width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm); justify-content: center; align-items: center; padding: 10px 16px; gap: 30px; font-size: 12.5px;}
+    .calendar-legend {display: none; width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm);
+                      justify-content: center; align-items: center; padding: 10px 16px; gap: 30px; font-size: 12.5px;}
     .calendar-legend.show {display: flex;}
     .legend-item {display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--txt-2); font-weight: 600;}
     .legend-color {width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);}
@@ -87,12 +99,15 @@
     /* ============================================================
     TOAST
     ============================================================ */
-    .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red));
+            color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center;
+            z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
     .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
     /* ============================================================
     FOOTER
     ============================================================ */
-    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
@@ -177,8 +192,8 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */    
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
+    function getNInt() {return localStorage.getItem("currentCorpNint")}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
@@ -466,7 +481,7 @@
         );
         if (checkDispRes.ok) {
           const existsDisp = await checkDispRes.json();
-          const blocking = existsDisp.filter(r => r.value === "ED" || r.value === "ET");
+          const blocking = existsDisp.filter(r => r.value === "ED" || r.value === "ET" || r.value === "OP");
           if (blocking.length > 0) {
             showToast("Já existe uma disponibilidade registada para outro tipo de serviço neste dia. Por favor verifique o menú VISUALIZAR DISPONIBILIDADES.");
             return false;
