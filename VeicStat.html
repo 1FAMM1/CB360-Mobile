@@ -189,7 +189,7 @@
     <div id="buttonsContainer" class="container" style="display: none;">
       <div class="button-grid">
         <button class="geostat-btn btn-saida" onclick="sendGeostat('Saída Und.')">
-          <span class="btn-icon"><span class="material-icons">local_shipping</span></span>
+          <span class="btn-icon"><span class="material-icons">fire_truck</span></span>
           <strong>Saída do Quartel</strong>
         </button>
         <button class="geostat-btn btn-chegada-to" onclick="sendGeostat('Chegada TO')">
@@ -198,10 +198,10 @@
         </button>
         <button class="geostat-btn btn-saida-to" onclick="sendGeostat('Saída TO')">
           <strong>Saída do TO</strong>
-          <span class="btn-icon"><span class="material-icons">local_shipping</span></span>
+          <span class="btn-icon"><span class="material-icons">fire_truck</span></span>
         </button>
         <button class="geostat-btn btn-chegada-und" onclick="sendArrivalHeadquarters()">
-          <span class="btn-icon"><span class="material-icons">home</span></span>
+          <span class="btn-icon"><span class="material-icons">warehouse</span></span>
           <strong style="font-size:8.5px;">Chegada ao Quartel</strong>
         </button>
         <button class="geostat-btn btn-retido" id="retidoMacasBtn" style="display:none;" onclick="showRetencaoPopup()">
@@ -238,11 +238,8 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-
-    /* --- chave única e consistente em TODO o ficheiro para corp/nint --- */
-    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
-    function getNInt() {return localStorage.getItem("currentCorpNint")}
-
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
@@ -685,7 +682,7 @@
     }
     function closeKmPopup() {
       document.getElementById('kmPopup')?.remove();
-    }
+    }   
     function showRetencaoPopup() {
       if (!selectedVehicle) {
         showToast('Selecione uma viatura primeiro!', 'error');
