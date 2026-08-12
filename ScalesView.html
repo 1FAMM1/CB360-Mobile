@@ -263,8 +263,8 @@
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
     function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
-      const corp = getCorp();
-      const nint = getNInt();
+      const corp  = getCorp();
+      const nint  = getNInt();
       const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
@@ -376,20 +376,25 @@
     }
     /* ===================== RENDER SERVICE CHIPS ===================== */
     function renderServiceChips(sectionId, chipsId, items) {
-      const wrapper = document.getElementById("servicesCard");
-      const section = document.getElementById(sectionId);
-      const chipsEl = document.getElementById(chipsId);
-      if (!items || items.length === 0) {
-        section.style.display = "none";
-        const anyVisible = ["picketsSection", "decirSection", "extrasSection"]
-          .some(id => document.getElementById(id).style.display !== "none");
-        wrapper.style.display = anyVisible ? "flex" : "none";
-        return;
-      }
-      chipsEl.innerHTML = items.map(it => `<span class="day-chip type-${it.type}">${it.day}${it.suffix || ''}</span>`).join('');
-      section.style.display = "flex";
-      wrapper.style.display = "flex";
-    }
+  // TRAVA DE SEGURANÇA: Se o utilizador já clicou "Voltar", aborta o desenho
+  const monthsCard = document.querySelector(".months-card");
+  if (monthsCard && monthsCard.style.display !== "none") return;
+
+  const wrapper = document.getElementById("servicesCard");
+  const section = document.getElementById(sectionId);
+  const chipsEl = document.getElementById(chipsId);
+  
+  if (!items || items.length === 0) {
+    section.style.display = "none";
+    const anyVisible = ["picketsSection", "decirSection", "extrasSection"]
+      .some(id => document.getElementById(id).style.display !== "none");
+    wrapper.style.display = anyVisible ? "flex" : "none";
+    return;
+  }
+  chipsEl.innerHTML = items.map(it => `<span class="day-chip type-${it.type}">${it.day}${it.suffix || ''}</span>`).join('');
+  section.style.display = "flex";
+  wrapper.style.display = "flex";
+}
     /* ========================= PICKETS LOADING ========================= */
     async function loadPicketsMonth(monthIndex) {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -644,6 +649,8 @@
         const urlExtras = `${SUPABASE_URL}/rest/v1/reg_extras?select=day,month,value&n_int=eq.${nintCorp}&value=eq.EX&month=eq.${selectedMonth + 1}&year=eq.${yearToFetch}&order=day.asc`;
         const responseExtras = await fetch(urlExtras, {headers: getSupabaseHeaders()});
         const dataExtras = await responseExtras.json();
+        const monthsCard = document.querySelector(".months-card");
+        if (monthsCard && monthsCard.style.display !== "none") return;
         const services = [...dataServ, ...dataExtras].filter(d => {
           if (yearToFetch > currentYear) return true;
           if (selectedMonth > currentMonth) return true;
@@ -659,6 +666,7 @@
         container.style.display = "block";
         let index = 0;
         for (const service of services) {
+          if (monthsCard && monthsCard.style.display !== "none") return;
           const valuesToMatch = getServiceValuesToMatch(service.value);
           const table = service.value === "EX" ? "reg_extras" : "reg_serv";
           const countUrl = `${SUPABASE_URL}/rest/v1/${table}?select=n_int&month=eq.${service.month}&year=eq.${yearToFetch}&day=eq.${service.day}&value=in.(${valuesToMatch.join(',')})&corp_oper_nr=eq.${corpOperNr}`;
@@ -705,84 +713,85 @@
     }
     /* ========================== INITIALIZATION ========================== */
     document.addEventListener('DOMContentLoaded', function() {
-  loadCorpInfo();
-  const savedTheme = localStorage.getItem('sgo-theme');
-  if (savedTheme === 'dark') {
-    document.body.classList.add('dark-mode');
-  }
-
-  let selectedMonth = null;
-  const mesesSemDecir = [0, 1, 2, 3, 10, 11];
-
-  const monthsCard = document.querySelector(".months-card");
-  const btnBack = document.getElementById("btnBackToMonths");
-  const scalesSubtitle = id => document.getElementById("scalesSubtitle");
-
-  // Função para resetar a vista e voltar a mostrar o calendário de meses
-  function resetToMonthsView() {
-    selectedMonth = null;
-    document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
-
-    // Ocultar os blocos de serviços e o botão voltar
-    btnBack.style.display = "none";
-    document.getElementById("servicesCard").style.display = "none";
-    document.getElementById("picketsSection").style.display = "none";
-    document.getElementById("decirSection").style.display = "none";
-    document.getElementById("extrasSection").style.display = "none";
-    document.getElementById("nextServicesCard").style.display = "none";
-    document.getElementById("nextserv-info-title").style.display = "none";
-
-    // Reexibir a grelha de meses e repor o texto do subtítulo
-    monthsCard.style.display = "block";
-    if (scalesSubtitle()) scalesSubtitle().style.display = "block";
-
-    toggleMobileMonthLayout(false);
-  }
-
-  // Evento de clique no botão "Voltar"
-  btnBack.addEventListener("click", resetToMonthsView);
-
-  // Evento de clique nos botões dos meses
-  document.querySelectorAll(".scales-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const month = parseInt(btn.dataset.month, 10);
-
-      document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
-      selectedMonth = month;
-
-      // Ocultar a grelha de meses e o subtítulo original
-      monthsCard.style.display = "none";
-      if (scalesSubtitle()) scalesSubtitle().style.display = "none";
-
-      // Mostrar o botão "Voltar"
-      btnBack.style.display = "inline-flex";
-
-      await toggleMobileMonthLayout(true);
-
-      document.getElementById("servicesCard").style.display = "none";
-      document.getElementById("picketsSection").style.display = "none";
-      document.getElementById("decirSection").style.display = "none";
-      document.getElementById("extrasSection").style.display = "none";
-      document.getElementById("nextServicesCard").style.display = "none";
-      document.getElementById("nextserv-info-title").style.display = "none";
-
-      const today = new Date();
-      await loadPicketsMonth(month);
-
-      if (!mesesSemDecir.includes(month)) {
-        await loadDecirMonth(month);
+      loadCorpInfo();
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
       }
-
-      await loadExtrasMonth(month);
-
-      if (month >= today.getMonth()) {
-        document.getElementById("nextserv-info-title").style.display = "block";
-        await loadNextServicesUnified(month);
+      let selectedMonth = null;
+      let currentFetchRequestId = 0;
+      const mesesSemDecir = [0, 1, 2, 3, 10, 11];
+      const monthsCard = document.querySelector(".months-card");
+      const btnBack = document.getElementById("btnBackToMonths");
+      const scalesSubtitle = document.getElementById("scalesSubtitle");
+      function hideAllServiceCards() {
+        document.getElementById("servicesCard").style.display = "none";
+        document.getElementById("picketsSection").style.display = "none";
+        document.getElementById("decirSection").style.display = "none";
+        document.getElementById("extrasSection").style.display = "none";
+        document.getElementById("nextServicesCard").style.display = "none";
+        document.getElementById("nextserv-info-title").style.display = "none";
+        const noServicesCard = document.getElementById("noServicesCard");
+        if (noServicesCard) noServicesCard.remove();
       }
+      function resetToMonthsView() {
+        currentFetchRequestId++;
+        selectedMonth = null;
+        document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
+        btnBack.style.display = "none";
+        hideAllServiceCards();
+        monthsCard.style.display = "block";
+        if (scalesSubtitle) scalesSubtitle.style.display = "block";
+        toggleMobileMonthLayout(false);
+      }
+      btnBack.addEventListener("click", resetToMonthsView);
+      document.querySelectorAll(".scales-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const month = parseInt(btn.dataset.month, 10);
+          const requestId = ++currentFetchRequestId;
+          document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          selectedMonth = month;
+          monthsCard.style.display = "none";
+          if (scalesSubtitle) scalesSubtitle.style.display = "none";
+          btnBack.style.display = "inline-flex";
+          await toggleMobileMonthLayout(true);
+          hideAllServiceCards();
+          if (requestId !== currentFetchRequestId) return;
+          const today = new Date();
+          await loadPicketsMonth(month);
+          if (requestId !== currentFetchRequestId) return;
+          if (!mesesSemDecir.includes(month)) {
+            await loadDecirMonth(month);
+            if (requestId !== currentFetchRequestId) return;
+          }
+          await loadExtrasMonth(month);
+          if (requestId !== currentFetchRequestId) return;
+          if (month >= today.getMonth()) {
+            await loadNextServicesUnified(month);
+            if (requestId !== currentFetchRequestId) return;
+          }
+          const hasPickets = document.getElementById("picketsSection").style.display !== "none";
+          const hasDecir = document.getElementById("decirSection").style.display !== "none";
+          const hasExtras = document.getElementById("extrasSection").style.display !== "none";
+          const hasNext = document.getElementById("nextServicesCard").style.display !== "none" && document.getElementById("nextServicesCard").children.length > 0;
+          if (!hasPickets && !hasDecir && !hasExtras && !hasNext) {
+            document.getElementById("nextserv-info-title").style.display = "none";
+            const mainContainer = document.querySelector(".main-content");
+            const noServicesCard = document.createElement("div");
+            noServicesCard.id = "noServicesCard";
+            noServicesCard.className = "scales-card";
+            noServicesCard.style.marginTop = "0px";
+            noServicesCard.innerHTML = `
+              <span class="card-title" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span class="material-icons" style="font-size: 18px; color: var(--red-icon);">info</span> Informação</span>
+                <span class="values" style="margin-top: 4px;">Nenhum serviço registado neste mês.</span>
+              `;
+            mainContainer.appendChild(noServicesCard);
+          }
+        });
+      });
     });
-  });
-});
   </script>
 </body>
 </html>
