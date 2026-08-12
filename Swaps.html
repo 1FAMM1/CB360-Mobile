@@ -18,11 +18,13 @@
            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
            --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+    
     /* ============================================================
     DARK MODE
     ============================================================ */
     .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
                 --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    
     /* ============================================================
     RESET & BASE
     ============================================================ */
@@ -30,6 +32,18 @@
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
     body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
           user-select: none; transition: background var(--ease), color var(--ease);}
+    
+    /* ============================================================
+    ANIMATIONS & TRANSITIONS
+    ============================================================ */
+    @keyframes fadeInSmooth {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-content {
+      animation: fadeInSmooth 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
     /* ============================================================
     HEADER
     ============================================================ */
@@ -39,6 +53,7 @@
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
@@ -47,6 +62,7 @@
     .main-content::-webkit-scrollbar {display:none;}
     .main-content.slide-out,.main-content.slide-in {transform:none;}
     .content-blur {filter:blur(2px); opacity:1; pointer-events:none;}
+    
     /* ============================================================
    BACK HEADER
    ============================================================ */
@@ -57,6 +73,7 @@
     #back-header:active {transform: scale(0.97);}
     .back-arrow {font-size: 18px !important; color: var(--red-icon) !important;}
     .back-text {font-size: 13px; font-weight: 600 !important;}
+    
     /* ============================================================
     MAIN MENU CARDS
     ============================================================ */
@@ -72,6 +89,7 @@
     .swap-options-btn.option-disabled {opacity:0.4; cursor:not-allowed; pointer-events:none;}    
     .swap-options-btn:hover .material-icons,
     .swap-options-btn.selected .material-icons {transform:scale(1.08);}
+    
     /* ============================================================
     PENDING SWAPS 
     ============================================================ */
@@ -91,6 +109,7 @@
     .swap-actions button:hover { transform:scale(1.04);}
     .approve-btn {background:#2e7d32; color:#fff;}
     .reject-btn {background:var(--red); color:#fff;}
+    
     /* ============================================================
     SWAP AREA 
     ============================================================ */
@@ -113,10 +132,11 @@
     .swap-month-btn div,.swap-month-btn span {position:relative; z-index:2; line-height:1.2;}
     .month-icon {font-size:21px !important; color:var(--red-icon);}
     .swap-month-btn.selected .month-icon {transform:scale(1.08);}
+    
     /* ============================================================
     SHIFT / SELECT CARDS
     ============================================================ */
-    .shifts-container,.combobox-container {width:100%; max-width:100%; margin:0 0 5px; padding:15px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface); box-shadow:var(--sh-md);
+    .shifts-container,.combobox-container {width:100%; max-width:100%; margin:0 0 10px; padding:15px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface); box-shadow:var(--sh-md);
                                            display:none; opacity:0; transition:opacity var(--ease),background var(--ease),box-shadow var(--ease);}
     .shifts-container.show,.combobox-container.show {display:block; opacity:1;}
     .shifts-label,.combobox-label {display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--txt-2); margin-bottom:10px; text-align:left;}
@@ -144,16 +164,18 @@
     .shifts-btn.btn-blocked-conflict .shift-type {color: var(--red) !important; font-weight: 700;}
     .btn-shiftsBackToMonths {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px;
                border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease);
-               margin-top: 5px; margin-bottom: 5px; margin-right: auto; display: none;}
+               margin-top: 5px; margin-bottom: 10px; margin-right: auto; display: none;}
     .btn-shiftsBackToMonths:hover {background: var(--surface-2);}
     .btn-shiftsBackToMonths:active {transform: scale(0.97);}
     .btn-shiftsBackToMonths .material-icons {font-size: 18px; color: var(--red-icon);}
+    
     /* ============================================================
     TOAST
     ============================================================ */
     .toast {position:fixed; left:50%; bottom:calc(var(--footer-h) + 22px); transform:translateX(-50%) translateY(10px); background:rgba(198,40,40,.95); color:#fff; padding:12px 18px; border-radius:var(--r-md);
             font-size:13px; font-weight:600; width:max-content; max-width:90%; text-align:center; z-index:9999; opacity:0; box-shadow:var(--sh-lg); transition:opacity .25s ease,transform .25s ease;}
     .toast.show {opacity:1; transform:translateX(-50%) translateY(0);}
+    
     /* ============================================================
     MODAL
     ============================================================ */
@@ -170,6 +192,7 @@
     .modal-close:hover {opacity:.88;}
     .modal-close:active {transform:scale(.98);}
     @keyframes modalIn {from{opacity:0;transform:scale(.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)}}
+    
     /* ============================================================
     FOOTER
     ============================================================ */
@@ -181,6 +204,7 @@
     @keyframes spin {to {transform: rotate(360deg);}}
     @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
     .footer strong { color:inherit; }
+    
     /* ============================================================
     RESPONSIVE
     ============================================================ */
@@ -312,7 +336,7 @@
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzMxMzcxMDJ9.qCZRvn436c4EK7lY7TmBI9p9ml84qYVK6G596SmztXY';
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -399,18 +423,19 @@
     }
     function backToMonthsSelection() {
       const comboboxContainer = document.getElementById('comboboxContainer');
-      const bakToMonths = document.getElementById('btnBackToMonths');
+      const btnBackToMonths = document.getElementById('btnBackToMonths');
       const shiftsContainer = document.getElementById('shiftsContainer');
       const elementsShiftsContainer = document.getElementById('elementsShiftsContainer');
-      const swapbtn = document.getElementById('swap-btn');
+      const swapBtn = document.getElementById('swap-btn');
       const monthButtons = document.querySelector('.swap-month-buttons');
       const subtitle = document.querySelector('.swap-subtitle');
 
-      if (comboboxContainer) comboboxContainer.style.display = 'none';
-      if (shiftsContainer) shiftsContainer.style.display = 'none';
-      if (elementsShiftsContainer) elementsShiftsContainer.style.display = 'none';
-      if (swapbtn) swapbtn.style.display = 'none';
-      if (bakToMonths) bakToMonths.style.display = 'none';
+      [btnBackToMonths, shiftsContainer, comboboxContainer, elementsShiftsContainer, swapBtn].forEach(el => {
+        if (el) {
+          el.style.display = 'none';
+          el.classList.remove('show', 'fade-in-content');
+        }
+      });
 
       document.body.classList.remove('mobile-month-selected');
       document.querySelectorAll('.swap-month-btn').forEach(btn => btn.classList.remove('selected'));
@@ -615,40 +640,44 @@
         showToast("Não é possível selecionar um mês anterior ao atual.");
         return;
       }
+
       const comboboxContainer = document.getElementById('comboboxContainer');
-      const bakToMonths = document.getElementById('btnBackToMonths');
+      const btnBackToMonths = document.getElementById('btnBackToMonths');
       const shiftsContainer = document.getElementById('shiftsContainer');
       const elementsShiftsContainer = document.getElementById('elementsShiftsContainer');
-      const swapbtn = document.getElementById('swap-btn');
+      const swapBtn = document.getElementById('swap-btn');
       const monthButtons = document.querySelector('.swap-month-buttons');
       const subtitle = document.querySelector('.swap-subtitle');
       const backHeader = document.querySelector('.back-header');
+
       if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
-        button.classList.remove('selected');
-        comboboxContainer.style.display = 'none';
-        shiftsContainer.style.display = 'none';
-        elementsShiftsContainer.style.display = 'none';
-        swapbtn.style.display = 'none';  
-        document.body.classList.remove('mobile-month-selected');
-        currentMonthIndex = null;
-        if (monthButtons) monthButtons.style.display = 'grid';
+        backToMonthsSelection();
         return;
       }
+
       currentMonthIndex = monthIndex;
       document.querySelectorAll('.swap-month-btn').forEach(btn => btn.classList.remove('selected'));
       button.classList.add('selected');
       document.body.classList.add('mobile-month-selected');
-      elementsShiftsContainer.style.display = 'none';
+
       if (monthButtons) monthButtons.style.display = 'none';
       if (subtitle) subtitle.style.display = 'none';
       if (backHeader) backHeader.style.display = 'none';
+      if (elementsShiftsContainer) elementsShiftsContainer.style.display = 'none';
+      if (swapBtn) swapBtn.style.display = 'none';
+
       await loadShifts(monthIndex);
-      comboboxContainer.style.display = 'block';
-      bakToMonths.style.display = 'flex';
       await loadElements();
-      setTimeout(() => {
-        comboboxContainer.classList.add('show');
-      }, 100);      
+
+      const blocksToAnimate = [btnBackToMonths, shiftsContainer, comboboxContainer];
+      blocksToAnimate.forEach(el => {
+        if (el) {
+          el.classList.remove('fade-in-content');
+          void el.offsetWidth;
+          el.style.display = (el === btnBackToMonths) ? 'inline-flex' : 'block';
+          el.classList.add('show', 'fade-in-content');
+        }
+      });
     }
     async function loadShifts(monthIndex) {
       const nint = localStorage.getItem("currentCorpNint") || "205";
@@ -656,7 +685,7 @@
       const shiftsContainer = document.getElementById("shiftsContainer");
       const shiftsButtons = document.getElementById("shiftsButtons");
       if (!nint || !corpOperNr || !shiftsContainer) return;
-      shiftsContainer.style.display = "block";
+
       const year = getWorkYear(monthIndex);
       try {
         const response = await fetch(
@@ -706,7 +735,6 @@
             shiftsButtons.appendChild(btn);
           });
         }
-        shiftsContainer.classList.add("show");
       } catch (err) {
         console.error("Erro ao carregar turnos:", err);
         shiftsButtons.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
@@ -769,10 +797,8 @@
         document.querySelectorAll("#shiftsButtons .shifts-btn").forEach(btn => {
           const day = parseInt(btn.querySelector(".shift-day")?.textContent, 10);
           const typeText = btn.querySelector(".shift-type")?.textContent;
-          
           const reverseValueMap = { "Piquete": "PN", "ECIN Dia": "ED", "ECIN Noite": "EN", "ECIN 24 H": "ET" };
           const code = reverseValueMap[typeText] || typeText;
-          
           if (day && code) {
             myShiftsMap.set(day, code);
           }
@@ -844,7 +870,7 @@
             buttonsDiv.appendChild(btn);
           });
         }
-        container.classList.add("show");
+        container.classList.add("show", "fade-in-content");
       } catch (err) {
         console.error("Erro ao carregar turnos do bombeiro:", err);
         buttonsDiv.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
@@ -862,9 +888,9 @@
         showToast("Seleciona o turno do elemento com quem quer trocar!");
         return;
       }
-      const myShiftDay = parseInt(myShiftBtn.dataset.day);
+      const myShiftDay = parseInt(myShiftBtn.dataset.day, 10);
       const myShiftType = myShiftBtn.dataset.value;
-      const targetShiftDay = parseInt(targetShiftBtn.dataset.day);
+      const targetShiftDay = parseInt(targetShiftBtn.dataset.day, 10);
       const targetShiftType = targetShiftBtn.dataset.value;
       const myNInt = localStorage.getItem("currentCorpNint");
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -887,16 +913,32 @@
           showToast("Já existe um pedido de troca idêntico entre estes turnos.");
           return;
         }
+
+        const swapPayload = [{
+          corp_oper_nr: String(corpOperNr),
+          n_int: String(myNInt),
+          start_shift_day: myShiftDay,
+          start_shift_month: monthNumber,
+          start_shift_year: year,
+          n_int_end: String(targetNInt),
+          end_shift_day: targetShiftDay,
+          end_shift_month: monthNumber,
+          end_shift_year: year,
+          created_at: new Date().toISOString()
+        }];
+
         const swapResp = await fetch(`${SUPABASE_URL}/rest/v1/reg_swaps`, {
           method: "POST",
           headers: supabaseHeaders,
-          body: JSON.stringify([{corp_oper_nr: corpOperNr, n_int: myNInt, start_shift_day: myShiftDay, start_shift_month: monthNumber, start_shift_year: year, n_int_end: targetNInt, end_shift_day: targetShiftDay,
-                                 end_shift_month: monthNumber, end_shift_year: year, created_at: new Date().toISOString()}])});
+          body: JSON.stringify(swapPayload)
+        });
+
         if (!swapResp.ok) {
-  const errorData = await swapResp.json();
-  console.error("Detalhes do erro Supabase:", errorData); // Imprime o motivo exato no console
-  throw new Error(errorData.message || "Erro ao gravar troca");
-}
+          const errorData = await swapResp.json();
+          console.error("Erro Supabase:", errorData);
+          throw new Error(errorData.message || "Erro ao gravar troca");
+        }
+
         const nameResp = await fetch(
           `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${myNInt}`, {
             headers: supabaseHeaders
@@ -920,7 +962,7 @@
         showToast("Pedido de troca enviado com sucesso!");
       } catch (err) {
         console.error("Erro no pedido de troca:", err);
-        showToast("Erro ao enviar pedido de troca.");
+        showToast(err.message || "Erro ao enviar pedido de troca.");
       }
     }
     function handleSwapClick() {
