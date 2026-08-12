@@ -39,7 +39,7 @@
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-title .material-icons {font-size: 1.1em;}
-    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    .header-sub {font-size: 9px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
@@ -93,7 +93,7 @@
          onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">VEÍCULOS</span>
-      <span class="header-sub">Status · SITOP · Ficha Veículo</span>
+      <span class="header-sub">Status · SITOP · Ficha Veículo · Anomalias</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
@@ -104,14 +104,14 @@
         <div>Gestão de Status</div>
       </button>
       <button class="vehicles-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='VeicSitop.html', 300);">
-        <span class="material-icons">local_shipping</span>
+        <span class="material-icons">fire_truck</span>
         <div>Situação Operacional</div>
       </button>
       <button class="vehicles-btn" onclick="toggleButton(this);" disabled>
-        <span class="material-icons">search</span>
+        <span class="material-icons">list_alt</span>
         <div>Ficha de Veículos</div>
       </button>
-      <button class="vehicles-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='VehicAnomalies.html', 300);">
+      <button class="vehicles-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='VeicAnomalias.html', 300);">
         <span class="material-icons">report_problem</span>
         <div>Reportar Anomalias</div>
       </button>
@@ -140,8 +140,8 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
-    function getNInt() {return localStorage.getItem("currentCorpNint")}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
