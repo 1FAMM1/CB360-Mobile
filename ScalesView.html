@@ -157,7 +157,9 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';" onload="this.style.display='block';">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">ESCALAS</span>
       <span class="header-sub">Piquetes · Decir · Extras · SBA · OPAT</span>
@@ -166,12 +168,12 @@
   </header>
   <div class="main-content">
     <div class="scales-header">
-      <p class="scales-subtitle" id="scalesSubtitle">Selecione o mês:</p>
-      <button id="btnBackToMonths" class="btn-back" style="display: none;">
-        <span class="material-icons">arrow_back</span>
-        <span>Voltar aos Meses</span>
-      </button>
-    </div>
+  <p class="scales-subtitle" id="scalesSubtitle">Selecione o mês:</p>
+  <button id="btnBackToMonths" class="btn-back" style="display: none;">
+    <span class="material-icons">arrow_back</span>
+    <span>Voltar aos Meses</span>
+  </button>
+</div>
     <div class="months-card">
       <div class="scales-buttons">
         <button class="scales-btn" data-month="0"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
@@ -204,6 +206,10 @@
       <div id="sbaSection" class="services-section" style="display:none;">
         <div class="services-section-title"><span class="material-icons">flight</span>Serviço de Brigadas de Aeródromo Atribuídos</div>
         <div id="sbaChips" class="chips-row"></div>
+      </div>
+      <div id="opatSection" class="services-section" style="display:none;">
+        <div class="services-section-title"><span class="material-icons">cell_tower</span>Operador Auxiliar de Telecomunicações Atribuídos</div>
+        <div id="opatChips" class="chips-row"></div>
       </div>
     </div>
     <div id="nextserv-info-title" class="nextserv-info-title" style="display:none; margin:0 0 -5px 0;">📅 Próximos(s) Serviços(s)</div>
@@ -245,7 +251,7 @@
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getNInt() {return localStorage.getItem("currentCorpNint"); }
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
@@ -279,7 +285,7 @@
       card.innerHTML = `<span class="error-message">⚠️ ${message}</span>`;
     }    
     function validateCorpData() {
-      const nintCorpStr = localStorage.getItem("currentCorpNint") || "205";
+      const nintCorpStr = localStorage.getItem("currentCorpNint");
       if (!nintCorpStr || isNaN(parseInt(nintCorpStr, 10))) {
         return null;
       }
@@ -360,7 +366,7 @@
     }
     /* ===================== SECTION DIVIDERS ===================== */
     function updateSectionDividers() {
-      const order = ["picketsSection", "decirSection", "extrasSection", "sbaSection"];
+      const order = ["picketsSection", "decirSection", "extrasSection", "sbaSection", "opatSection"];
       let firstVisibleFound = false;
       order.forEach(id => {
         const el = document.getElementById(id);
@@ -380,22 +386,25 @@
     }
     /* ===================== RENDER SERVICE CHIPS ===================== */
     function renderServiceChips(sectionId, chipsId, items) {
-      const monthsCard = document.querySelector(".months-card");
-      if (monthsCard && monthsCard.style.display !== "none") return;
-      const wrapper = document.getElementById("servicesCard");
-      const section = document.getElementById(sectionId);
-      const chipsEl = document.getElementById(chipsId);
-      if (!items || items.length === 0) {
-        section.style.display = "none";
-        const anyVisible = ["picketsSection", "decirSection", "extrasSection", "sbaSection"]
-        .some(id => document.getElementById(id).style.display !== "none");
-        wrapper.style.display = anyVisible ? "flex" : "none";
-        return;
-      }
-      chipsEl.innerHTML = items.map(it => `<span class="day-chip type-${it.type}">${it.day}${it.suffix || ''}</span>`).join('');
-      section.style.display = "flex";
-      wrapper.style.display = "flex";
-    }
+  // TRAVA DE SEGURANÇA: Se o utilizador já clicou "Voltar", aborta o desenho
+  const monthsCard = document.querySelector(".months-card");
+  if (monthsCard && monthsCard.style.display !== "none") return;
+
+  const wrapper = document.getElementById("servicesCard");
+  const section = document.getElementById(sectionId);
+  const chipsEl = document.getElementById(chipsId);
+  
+  if (!items || items.length === 0) {
+    section.style.display = "none";
+    const anyVisible = ["picketsSection", "decirSection", "extrasSection", "sbaSection", "opatSection"]
+      .some(id => document.getElementById(id).style.display !== "none");
+    wrapper.style.display = anyVisible ? "flex" : "none";
+    return;
+  }
+  chipsEl.innerHTML = items.map(it => `<span class="day-chip type-${it.type}">${it.day}${it.suffix || ''}</span>`).join('');
+  section.style.display = "flex";
+  wrapper.style.display = "flex";
+}
     /* ========================= PICKETS LOADING ========================= */
     async function loadPicketsMonth(monthIndex) {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -428,7 +437,7 @@
         if (!response.ok) return renderServiceChips("decirSection", "decirChips", []);
         const data = await response.json();
         const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
-        .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
+          .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
         renderServiceChips("decirSection", "decirChips", items);
       } catch (err) {
         console.error("Erro ao carregar decir/outros", err);
@@ -454,25 +463,46 @@
         console.error("Erro ao carregar extras", err);
         renderServiceChips("extrasSection", "extrasChips", []);
       }
-    } 
-    /* ========================== SBA / OPAT LOADING ========================== */
-    async function loadSbaOpatMonth(monthIndex) {
+    }
+ 
+    /* ============================= SBA LOADING =========================== */
+    async function loadSbaMonth(monthIndex) {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const nintCorp = validateCorpData();
       if (!nintCorp) return;
       const month = monthIndex + 1;
       const yearToFetch = getWorkYear(monthIndex);
       try {
-        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=in.(SB,OP)&corp_oper_nr=eq.${corpOperNr}`;
+        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.SB&corp_oper_nr=eq.${corpOperNr}`;
         const response = await fetch(url, { headers: getSupabaseHeaders() });
         if (!response.ok) return renderServiceChips("sbaSection", "sbaChips", []);
         const data = await response.json();
         const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
-        .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
+          .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
         renderServiceChips("sbaSection", "sbaChips", items);
       } catch (err) {
-        console.error("Erro ao carregar SBA/OPAT", err);
+        console.error("Erro ao carregar SBA", err);
         renderServiceChips("sbaSection", "sbaChips", []);
+      }
+    }
+    /* ============================ OPAT LOADING ============================ */
+    async function loadOpatMonth(monthIndex) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nintCorp = validateCorpData();
+      if (!nintCorp) return;
+      const month = monthIndex + 1;
+      const yearToFetch = getWorkYear(monthIndex);
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.OP&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) return renderServiceChips("opatSection", "opatChips", []);
+        const data = await response.json();
+        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
+          .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
+        renderServiceChips("opatSection", "opatChips", items);
+      } catch (err) {
+        console.error("Erro ao carregar OPAT", err);
+        renderServiceChips("opatSection", "opatChips", []);
       }
     }
     /* ===================== CREATE NEXT SERVICE CARD ==================== */
@@ -587,7 +617,7 @@
                            EN: {bg: 'linear-gradient(135deg, #3949ab, #2c387e, #1a237e)', text: '#fff'}, ET: {bg: 'linear-gradient(135deg, #ab47bc, #9c27b0, #8e24aa)', text: '#fff'},
                            EX: {bg: 'linear-gradient(135deg, #c62828, #8b0000)', text: '#fff'}, SB: {bg: 'linear-gradient(135deg, #00897b, #00695c, #004d40)', text: '#fff'},
                            OP: {bg: 'linear-gradient(135deg, #78909c, #607d8b, #455a64)', text: '#fff'}
-                          };  
+                          };
     function openServiceModal(title, elements) {
       const modal = document.getElementById('serviceModal');
       const container = document.getElementById('modalElementsContainer');
@@ -752,11 +782,12 @@
         document.getElementById("decirSection").style.display = "none";
         document.getElementById("extrasSection").style.display = "none";
         document.getElementById("sbaSection").style.display = "none";
+        document.getElementById("opatSection").style.display = "none";
         document.getElementById("nextServicesCard").style.display = "none";
         document.getElementById("nextserv-info-title").style.display = "none";
         const noServicesCard = document.getElementById("noServicesCard");
         if (noServicesCard) noServicesCard.remove();
-        ["picketsSection", "decirSection", "extrasSection", "sbaSection"].forEach(id => {
+        ["picketsSection", "decirSection", "extrasSection", "sbaSection", "opatSection"].forEach(id => {
           document.getElementById(id).classList.remove("section-divider");
         });
       }
@@ -793,7 +824,9 @@
           }
           await loadExtrasMonth(month);
           if (requestId !== currentFetchRequestId) return;
-          await loadSbaOpatMonth(month);
+          await loadSbaMonth(month);
+          if (requestId !== currentFetchRequestId) return;
+          await loadOpatMonth(month);
           if (requestId !== currentFetchRequestId) return;
           updateSectionDividers();
           if (month >= today.getMonth()) {
@@ -804,8 +837,9 @@
           const hasDecir = document.getElementById("decirSection").style.display !== "none";
           const hasExtras = document.getElementById("extrasSection").style.display !== "none";
           const hasSba = document.getElementById("sbaSection").style.display !== "none";
+          const hasOpat = document.getElementById("opatSection").style.display !== "none";
           const hasNext = document.getElementById("nextServicesCard").style.display !== "none" && document.getElementById("nextServicesCard").children.length > 0;
-          if (!hasPickets && !hasDecir && !hasExtras && !hasSba && !hasNext) {
+          if (!hasPickets && !hasDecir && !hasExtras && !hasSba && !hasOpat && !hasNext) {
             document.getElementById("nextserv-info-title").style.display = "none";
             const mainContainer = document.querySelector(".main-content");
             const noServicesCard = document.createElement("div");
