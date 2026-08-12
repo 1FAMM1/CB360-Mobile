@@ -116,10 +116,8 @@
     #made-swap {width:100%;}
     .swap-header {width:100%; text-align:center; flex-shrink:0;}
     .swap-subtitle {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px;
-                    border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease);
-                    margin-top: 15px; margin-bottom: 5px; margin-right: auto;}
-    .swap-subtitle:hover {background: var(--surface-2);}
-    .swap-subtitle:active {transform: scale(0.97);}
+                    border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease);
+                    margin-top: 5px; margin-bottom: 5px; margin-right: auto;}
     .swap-month-buttons, .own-shifts-buttons, 
     .other-shifts-buttons {display:grid; gap:1px; width:100%; grid-template-columns:repeat(3,1fr); background:var(--border); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden;
                            margin-bottom:10px; box-shadow:var(--sh-md);}
@@ -228,7 +226,7 @@
     <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">TROCAS DE SERVIÇO</span>
-      <span class="header-sub">Piquetes · Decir · Extras</span>
+      <span class="header-sub">Piquetes · Decir · Extras · SBA · OPAT</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
@@ -244,7 +242,7 @@
       </button>
       <button class="swap-options-btn option-disabled" onclick="selectOption(1, this)" disabled>
         <span class="material-icons" style="margin-bottom:4px;">swap_horiz</span>
-        <span>Trocas Profissionais</span>
+        <span>Trocas Regime Profissional</span>
       </button>
       <button class="swap-options-btn" onclick="selectOption(2, this)">
         <span class="material-icons" style="margin-bottom:4px;">compare_arrows</span>
@@ -751,7 +749,7 @@
       }      
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,n_int&corp_oper_nr=eq.${corpOperNr}&order=n_int.asc`, {
+          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,n_int,elem_state,type_quad&corp_oper_nr=eq.${corpOperNr}&elem_state=eq.true&type_quad=not.is.null&type_quad=neq.&order=n_int.asc`, {
             headers: getSupabaseHeaders()
           }
         );
@@ -991,7 +989,7 @@
       currentMonthIndex = null;
       document.body.classList.remove("mobile-month-selected");
     }
-    function showToast(message) {
+    function showToast(message, isSuccess = false) {
       const toast = document.createElement("div");
       toast.className = "toast";
       toast.textContent = message;
@@ -1002,10 +1000,12 @@
       setTimeout(() => {
         toast.classList.remove("show");
         if (content) content.classList.remove("content-blur");
-        resetSwapUI();
-        goBackToMain();
+        if (isSuccess) {
+          resetSwapUI();
+          goBackToMain();
+        }
         setTimeout(() => toast.remove(), 300);
-      }, 4500);
+      }, 3000);
     }
     document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
