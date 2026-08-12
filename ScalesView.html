@@ -48,7 +48,7 @@
     .main-content::-webkit-scrollbar {display: none;}
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
-    .scales-header {flex-shrink: 0; text-align: center; width: 100%;}
+    .scales-header {flex-shrink: 0; text-align: left; width: 100%;}
     .scales-card {flex-shrink: 0;}
     .nextserv-info-title {flex-shrink: 0;}
     .scales-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
@@ -70,36 +70,12 @@
     .scales-btn.selected {background: var(--red-light); color: var(--red);}
     .scales-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
     .scales-btn div, .scales-btn span {position: relative; z-index: 2; line-height: 1.2;}
-    .btn-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface);
-  color: var(--txt-1);
-  border: 1px solid var(--border);
-  padding: 8px 16px;
-  border-radius: var(--r-sm);
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--sh-sm);
-  transition: background var(--ease), transform var(--ease);
-  margin-bottom: 8px;
-}
-
-.btn-back:hover {
-  background: var(--surface-2);
-}
-
-.btn-back:active {
-  transform: scale(0.97);
-}
-
-.btn-back .material-icons {
-  font-size: 18px;
-  color: var(--red-icon);
-}
+    .btn-back {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px;
+               border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease);
+               margin-top: 5px; margin-right: auto;}
+    .btn-back:hover {background: var(--surface-2);}
+    .btn-back:active {transform: scale(0.97);}
+    .btn-back .material-icons {font-size: 18px; color: var(--red-icon);}
     /* ============================================================
     RESULT CARDS (piquetes / decir / extras)
     ============================================================ */
@@ -204,7 +180,7 @@
          onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">ESCALAS</span>
-      <span class="header-sub">Piquetes · Decir · Extras</span>
+      <span class="header-sub">Piquetes · Decir · Extras · SBA · OPAT</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
