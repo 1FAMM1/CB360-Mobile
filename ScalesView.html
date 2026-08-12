@@ -70,6 +70,36 @@
     .scales-btn.selected {background: var(--red-light); color: var(--red);}
     .scales-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
     .scales-btn div, .scales-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    .btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  color: var(--txt-1);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--sh-sm);
+  transition: background var(--ease), transform var(--ease);
+  margin-bottom: 8px;
+}
+
+.btn-back:hover {
+  background: var(--surface-2);
+}
+
+.btn-back:active {
+  transform: scale(0.97);
+}
+
+.btn-back .material-icons {
+  font-size: 18px;
+  color: var(--red-icon);
+}
     /* ============================================================
     RESULT CARDS (piquetes / decir / extras)
     ============================================================ */
@@ -80,6 +110,20 @@
     .loading-spinner {display: inline-block; width: 14px; height: 14px; border: 2px solid var(--red); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
                       margin-right: 8px; vertical-align: middle;}
     .error-message {color: #e74c3c; font-weight: 600; font-size: 13px;}
+    .services-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); width: 100%; max-width: 100%; padding: 14px 16px;
+                    display: flex; flex-direction: column; gap: 14px;}
+    .services-section {display: flex; flex-direction: column; gap: 9px;}
+    .services-section + .services-section {padding-top: 14px; border-top: 1px solid var(--border);}
+    .services-section-title {display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.5px;}
+    .services-section-title .material-icons {font-size: 15px; color: var(--red-icon);}
+    .chips-row {display: flex; flex-wrap: wrap; gap: 6px;}
+    .day-chip {display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 26px; padding: 0 8px; border-radius: 8px; font-size: 12px; font-weight: 700;
+               box-shadow: var(--sh-sm); letter-spacing: 0.2px;}
+    .day-chip.type-PN {background: linear-gradient(135deg, var(--blue), #1aa9c5); color: #fff;}
+    .day-chip.type-ED {background: linear-gradient(135deg, #ffd54f, #ffca28, #ffa726); color: #444;}
+    .day-chip.type-EN {background: linear-gradient(135deg, #3949ab, #2c387e, #1a237e); color: #fff;}
+    .day-chip.type-ET {background: linear-gradient(135deg, #ab47bc, #9c27b0, #8e24aa); color: #fff;}
+    .day-chip.type-EX {background: linear-gradient(135deg, #c62828, #8b0000); color: #fff;}
     /* ============================================================
     NEXT SERVICES
     ============================================================ */
@@ -166,8 +210,12 @@
   </header>
   <div class="main-content">
     <div class="scales-header">
-      <p class="scales-subtitle">Selecione o mês:</p>
-    </div>
+  <p class="scales-subtitle" id="scalesSubtitle">Selecione o mês:</p>
+  <button id="btnBackToMonths" class="btn-back" style="display: none;">
+    <span class="material-icons">arrow_back</span>
+    <span>Voltar aos Meses</span>
+  </button>
+</div>
     <div class="months-card">
       <div class="scales-buttons">
         <button class="scales-btn" data-month="0"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
@@ -184,9 +232,20 @@
         <button class="scales-btn" data-month="11"><span class="material-icons">celebration</span><div>Dezembro</div></button>
       </div>
     </div>
-    <div id="picketsCard" class="scales-card" style="display:none; margin:-5px 0 0 0;"></div>
-    <div id="decirCard" class="scales-card" style="display:none; margin:-5px 0 0 0;"></div>
-    <div id="extrasCard" class="scales-card" style="display:none;"></div>
+    <div id="servicesCard" class="services-card" style="display:none;">
+      <div id="picketsSection" class="services-section" style="display:none;">
+        <div class="services-section-title"><span class="material-icons">local_fire_department</span>Piquetes Atribuídos</div>
+        <div id="picketsChips" class="chips-row"></div>
+      </div>
+      <div id="decirSection" class="services-section" style="display:none;">
+        <div class="services-section-title"><span class="material-icons">bolt</span>ECINs Atribuídos</div>
+        <div id="decirChips" class="chips-row"></div>
+      </div>
+      <div id="extrasSection" class="services-section" style="display:none;">
+        <div class="services-section-title"><span class="material-icons">add_circle</span>Extras Atribuídos</div>
+        <div id="extrasChips" class="chips-row"></div>
+      </div>
+    </div>
     <div id="nextserv-info-title" class="nextserv-info-title" style="display:none; margin:0 0 -5px 0;">📅 Próximos(s) Serviços(s)</div>
     <div id="nextServicesCard" style="display:none;"></div>
   </div>
@@ -225,12 +284,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr")}
-    function getNInt() {return localStorage.getItem("currentCorpNint")}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "205"; }
     function getSupabaseHeaders(options = {}) {
-      const corp = getCorp();
-      const nint = getNInt();
-      const token = localStorage.getItem("authToken");
+      const corp  = getCorp();
+      const nint  = getNInt();
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -260,7 +319,7 @@
       card.innerHTML = `<span class="error-message">⚠️ ${message}</span>`;
     }    
     function validateCorpData() {
-      const nintCorpStr = localStorage.getItem("currentCorpNint");
+      const nintCorpStr = localStorage.getItem("currentCorpNint") || "205";
       if (!nintCorpStr || isNaN(parseInt(nintCorpStr, 10))) {
         return null;
       }
@@ -268,7 +327,7 @@
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -307,7 +366,7 @@
     }
     /* ===================== GENERIC DATA LOADER ===================== */
     async function loadMonthData(config, monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();      
       if (!nintCorp) {
         showError(config.cardId, "Elemento e Corporação não definidos.");
@@ -339,44 +398,80 @@
         showError(config.cardId, "Erro de ligação ao servidor");
       }
     }
+    /* ===================== RENDER SERVICE CHIPS ===================== */
+    function renderServiceChips(sectionId, chipsId, items) {
+      const wrapper = document.getElementById("servicesCard");
+      const section = document.getElementById(sectionId);
+      const chipsEl = document.getElementById(chipsId);
+      if (!items || items.length === 0) {
+        section.style.display = "none";
+        const anyVisible = ["picketsSection", "decirSection", "extrasSection"]
+          .some(id => document.getElementById(id).style.display !== "none");
+        wrapper.style.display = anyVisible ? "flex" : "none";
+        return;
+      }
+      chipsEl.innerHTML = items.map(it => `<span class="day-chip type-${it.type}">${it.day}${it.suffix || ''}</span>`).join('');
+      section.style.display = "flex";
+      wrapper.style.display = "flex";
+    }
     /* ========================= PICKETS LOADING ========================= */
     async function loadPicketsMonth(monthIndex) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const nintCorp = validateCorpData();
+      if (!nintCorp) return;
+      const month = monthIndex + 1;
       const yearToFetch = getWorkYear(monthIndex);
-      const currentYear = new Date().getFullYear();
-      const dynamicLabel = yearToFetch > currentYear 
-        ? `PIQUETES ATRIBUÍDOS - ${yearToFetch}`
-        : "PIQUETES ATRIBUÍDOS";      
-      await loadMonthData({cardId: "picketsCard", table: "reg_serv", select: "day", filter: "value=eq.PN", label: dynamicLabel, formatData: (data) => {
-          return data
-            .map(d => d.day)
-            .filter(Boolean)
-            .sort((a, b) => a - b)
-            .map(d => d + "N")
-            .join(", ");
-        }
-      }, monthIndex);
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.PN&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) return renderServiceChips("picketsSection", "picketsChips", []);
+        const data = await response.json();
+        const items = data.map(d => d.day).filter(Boolean).sort((a, b) => a - b).map(day => ({ day, type: "PN", suffix: "N" }));
+        renderServiceChips("picketsSection", "picketsChips", items);
+      } catch (err) {
+        console.error("Erro ao carregar piquetes", err);
+        renderServiceChips("picketsSection", "picketsChips", []);
+      }
     }
     /* ========================== DECIR LOADING ========================== */
     async function loadDecirMonth(monthIndex) {
-      await loadMonthData({cardId: "decirCard", table: "reg_serv", select: "day,value", filter: "value=in.(ED,EN,ET,EP)", label: "ECINS ATRIBUÍDOS", formatData: (data) => {
-          return data
-            .filter(d => d.day && d.value)
-            .sort((a, b) => a.day - b.day)
-            .map(d => `${d.day}${d.value}`)
-            .join(", ");
-        }
-      }, monthIndex);
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const nintCorp = validateCorpData();
+      if (!nintCorp) return;
+      const month = monthIndex + 1;
+      const yearToFetch = getWorkYear(monthIndex);
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=in.(ED,EN,ET,EP)&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) return renderServiceChips("decirSection", "decirChips", []);
+        const data = await response.json();
+        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
+          .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
+        renderServiceChips("decirSection", "decirChips", items);
+      } catch (err) {
+        console.error("Erro ao carregar decir", err);
+        renderServiceChips("decirSection", "decirChips", []);
+      }
     }
     /* ========================= EXTRAS LOADING ========================== */
     async function loadExtrasMonth(monthIndex) {
-      await loadMonthData({cardId: "extrasCard", table: "reg_extras", select: "day,value", filter: "value=eq.EX", hideIfEmpty: true, label: "EXTRAS ATRIBUÍDOS", formatData: (data) => {
-          return data
-            .filter(d => d.day && d.value)
-            .sort((a, b) => a.day - b.day)
-            .map(d => `${d.day}${d.value === "EX" ? "D" : d.value}`)
-            .join(", ");
-        }
-      }, monthIndex);
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const nintCorp = validateCorpData();
+      if (!nintCorp) return;
+      const month = monthIndex + 1;
+      const yearToFetch = getWorkYear(monthIndex);
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_extras?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.EX&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) return renderServiceChips("extrasSection", "extrasChips", []);
+        const data = await response.json();
+        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
+          .map(d => ({ day: d.day, type: "EX", suffix: "D" }));
+        renderServiceChips("extrasSection", "extrasChips", items);
+      } catch (err) {
+        console.error("Erro ao carregar extras", err);
+        renderServiceChips("extrasSection", "extrasChips", []);
+      }
     }
     /* ===================== CREATE NEXT SERVICE CARD ==================== */
     function createServiceCard(service, index = 0) {
@@ -441,7 +536,7 @@
     }
     async function fetchServiceElements(day, month, value) {
       try {
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
         const nintCorp = validateCorpData();
         if (!nintCorp || !corpOperNr) return [];
         const valuesToMatch = getServiceValuesToMatch(value);
@@ -554,7 +649,7 @@
       document.getElementById('serviceModal').style.display = 'none';
     });
     async function loadNextServicesUnified(selectedMonth) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const container = document.getElementById("nextServicesCard");
       const title = document.getElementById("nextserv-info-title");
       container.innerHTML = "";
@@ -588,17 +683,19 @@
         container.style.display = "block";
         let index = 0;
         for (const service of services) {
-  const valuesToMatch = getServiceValuesToMatch(service.value);
-  const table = service.value === "EX" ? "reg_extras" : "reg_serv";
-  const countUrl = `${SUPABASE_URL}/rest/v1/${table}?select=n_int&month=eq.${service.month}&year=eq.${yearToFetch}&day=eq.${service.day}&value=in.(${valuesToMatch.join(',')})&corp_oper_nr=eq.${corpOperNr}`;
-  const countResponse = await fetch(countUrl, { headers: getSupabaseHeaders() });
-  const countData = await countResponse.json();
-  const uniqueNInts = new Set((countData || []).map(d => d.n_int));
-  const totalElements = uniqueNInts.size;
-  const card = createServiceCard({ day: service.day, month: service.month, value: service.value, totalElements, year: yearToFetch }, index);
-  container.appendChild(card);
-  index++;
-}
+          const valuesToMatch = getServiceValuesToMatch(service.value);
+          const table = service.value === "EX" ? "reg_extras" : "reg_serv";
+          const countUrl = `${SUPABASE_URL}/rest/v1/${table}?select=n_int&month=eq.${service.month}&year=eq.${yearToFetch}&day=eq.${service.day}&value=in.(${valuesToMatch.join(',')})&corp_oper_nr=eq.${corpOperNr}`;
+          const countResponse = await fetch(countUrl, {
+            headers: getSupabaseHeaders()
+          });
+          const countData = await countResponse.json();
+          const uniqueNInts = new Set((countData || []).map(d => d.n_int));
+          const totalElements = uniqueNInts.size;
+          const card = createServiceCard({ day: service.day, month: service.month, value: service.value, totalElements, year: yearToFetch }, index);
+          container.appendChild(card);
+          index++;
+        }
       } catch (err) {
         console.error("Erro ao carregar próximos serviços:", err);
       }
@@ -632,49 +729,84 @@
     }
     /* ========================== INITIALIZATION ========================== */
     document.addEventListener('DOMContentLoaded', function() {
-      loadCorpInfo();
-      const savedTheme = localStorage.getItem('sgo-theme');
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
+  loadCorpInfo();
+  const savedTheme = localStorage.getItem('sgo-theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+
+  let selectedMonth = null;
+  const mesesSemDecir = [0, 1, 2, 3, 10, 11];
+
+  const monthsCard = document.querySelector(".months-card");
+  const btnBack = document.getElementById("btnBackToMonths");
+  const scalesSubtitle = id => document.getElementById("scalesSubtitle");
+
+  // Função para resetar a vista e voltar a mostrar o calendário de meses
+  function resetToMonthsView() {
+    selectedMonth = null;
+    document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
+
+    // Ocultar os blocos de serviços e o botão voltar
+    btnBack.style.display = "none";
+    document.getElementById("servicesCard").style.display = "none";
+    document.getElementById("picketsSection").style.display = "none";
+    document.getElementById("decirSection").style.display = "none";
+    document.getElementById("extrasSection").style.display = "none";
+    document.getElementById("nextServicesCard").style.display = "none";
+    document.getElementById("nextserv-info-title").style.display = "none";
+
+    // Reexibir a grelha de meses e repor o texto do subtítulo
+    monthsCard.style.display = "block";
+    if (scalesSubtitle()) scalesSubtitle().style.display = "block";
+
+    toggleMobileMonthLayout(false);
+  }
+
+  // Evento de clique no botão "Voltar"
+  btnBack.addEventListener("click", resetToMonthsView);
+
+  // Evento de clique nos botões dos meses
+  document.querySelectorAll(".scales-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const month = parseInt(btn.dataset.month, 10);
+
+      document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedMonth = month;
+
+      // Ocultar a grelha de meses e o subtítulo original
+      monthsCard.style.display = "none";
+      if (scalesSubtitle()) scalesSubtitle().style.display = "none";
+
+      // Mostrar o botão "Voltar"
+      btnBack.style.display = "inline-flex";
+
+      await toggleMobileMonthLayout(true);
+
+      document.getElementById("servicesCard").style.display = "none";
+      document.getElementById("picketsSection").style.display = "none";
+      document.getElementById("decirSection").style.display = "none";
+      document.getElementById("extrasSection").style.display = "none";
+      document.getElementById("nextServicesCard").style.display = "none";
+      document.getElementById("nextserv-info-title").style.display = "none";
+
+      const today = new Date();
+      await loadPicketsMonth(month);
+
+      if (!mesesSemDecir.includes(month)) {
+        await loadDecirMonth(month);
       }
-      let selectedMonth = null;
-      const mesesSemDecir = [0, 1, 2, 3, 10, 11];
-      document.querySelectorAll(".scales-btn").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const month = parseInt(btn.dataset.month, 10);
-          if (selectedMonth === month) {
-            btn.classList.remove("selected");
-            selectedMonth = null;
-            toggleMobileMonthLayout(false);
-            document.getElementById("picketsCard").style.display = "none";
-            document.getElementById("decirCard").style.display = "none";
-            document.getElementById("extrasCard").style.display = "none";
-            document.getElementById("nextServicesCard").style.display = "none";
-            document.getElementById("nextserv-info-title").style.display = "none";
-            return;
-          }
-          document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
-          btn.classList.add("selected");
-          selectedMonth = month;
-          await toggleMobileMonthLayout(true);
-          document.getElementById("picketsCard").style.display = "none";
-          document.getElementById("decirCard").style.display = "none";
-          document.getElementById("extrasCard").style.display = "none";
-          document.getElementById("nextServicesCard").style.display = "none";
-          document.getElementById("nextserv-info-title").style.display = "none";
-          const today = new Date();
-          await loadPicketsMonth(month);
-          if (!mesesSemDecir.includes(month)) {
-            await loadDecirMonth(month);
-          }
-          await loadExtrasMonth(month);
-          if (month >= today.getMonth()) {
-            document.getElementById("nextserv-info-title").style.display = "block";
-            await loadNextServicesUnified(month);
-          }
-        });
-      });
+
+      await loadExtrasMonth(month);
+
+      if (month >= today.getMonth()) {
+        document.getElementById("nextserv-info-title").style.display = "block";
+        await loadNextServicesUnified(month);
+      }
     });
+  });
+});
   </script>
 </body>
 </html>
