@@ -17,89 +17,65 @@
     :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
-           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
-    
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}    
     /* ============================================================
     DARK MODE
     ============================================================ */
-    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
-                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
-    
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}  
     /* ============================================================
     RESET & BASE
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
-          user-select: none; transition: background var(--ease), color var(--ease);}
-    
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     ANIMATIONS & TRANSITIONS
     ============================================================ */
-    @keyframes fadeInSmooth {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .fade-in-content {
-      animation: fadeInSmooth 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
+    @keyframes fadeInSmooth {from {opacity: 0; transform: translateY(8px);} to {opacity: 1; transform: translateY(0);}}
+    .fade-in-content {animation: fadeInSmooth 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;}
     /* ============================================================
     HEADER
     ============================================================ */
-    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
-    
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex:1; width:100%; max-width:700px; margin:0 auto; overflow-y:auto; overflow-x:hidden; padding:calc(var(--header-h) + 10px) 16px 115px; display:flex; flex-direction:column;
-           align-items:center; justify-content:flex-start; background:var(--bg); scrollbar-width:none; transition:padding-top 0.9s cubic-bezier(0.4,0,0.2,1), background var(--ease);}
+    .main-content {flex:1; width:100%; max-width:700px; margin:0 auto; overflow-y:auto; overflow-x:hidden; padding:calc(var(--header-h) + 10px) 16px 115px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; background:var(--bg); scrollbar-width:none; transition:padding-top 0.9s cubic-bezier(0.4,0,0.2,1), background var(--ease);}
     .main-content::-webkit-scrollbar {display:none;}
     .main-content.slide-out,.main-content.slide-in {transform:none;}
-    .content-blur {filter:blur(2px); opacity:1; pointer-events:none;}
-    
+    .content-blur {filter:blur(2px); opacity:1; pointer-events:none;}    
     /* ============================================================
    BACK HEADER
    ============================================================ */
-    #back-header {position: sticky; top: 0; z-index: 10; display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1);
-                  border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm);
-                  transition: background var(--ease), transform var(--ease); margin-top: 5px; margin-bottom: 5px; margin-right: auto;}
+    #back-header {position: sticky; top: 0; z-index: 10; display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin-top: 5px; margin-bottom: 5px; margin-right: auto;}
     #back-header:hover {background: var(--surface-2);}
     #back-header:active {transform: scale(0.97);}
     .back-arrow {font-size: 18px !important; color: var(--red-icon) !important;}
-    .back-text {font-size: 13px; font-weight: 600 !important;}
-    
+    .back-text {font-size: 13px; font-weight: 600 !important;}    
     /* ============================================================
     MAIN MENU CARDS
     ============================================================ */
-    .swap-options-buttons {width:100%; max-width:100%; margin:auto 4px; display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); border:1px solid var(--border);
-                           border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-md);}
-    .swap-options-btn {position:relative; min-width:0; max-width:none; min-height:120px; padding:16px 10px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
-                       font-size:13px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:8px; line-height:1.2;
-                       box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
+    .swap-options-buttons {width:100%; max-width:100%; margin:auto 4px; display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-md);}
+    .swap-options-btn {position:relative; min-width:0; max-width:none; min-height:120px; padding:16px 10px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:8px; line-height:1.2; box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
     .swap-options-btn:hover {background:var(--surface-2); color:var(--txt-1);}
     .swap-options-btn:active {background:var(--surface-2); transform:scale(.98);}
     .swap-options-btn.selected {background:var(--red-light); color:var(--red);}
     .swap-options-btn .material-icons {font-size:22px; color:var(--red-icon); transition:transform var(--ease),color var(--ease);}
     .swap-options-btn.option-disabled {opacity:0.4; cursor:not-allowed; pointer-events:none;}    
     .swap-options-btn:hover .material-icons,
-    .swap-options-btn.selected .material-icons {transform:scale(1.08);}
-    
+    .swap-options-btn.selected .material-icons {transform:scale(1.08);}    
     /* ============================================================
     PENDING SWAPS 
     ============================================================ */
     .pending-swaps-container {width:100%; max-width:100%; margin:0; display:none; flex-direction:column; gap:10px; align-self:stretch;}
-    .pending-swaps-title {color:var(--txt-2); background:var(--surface); text-align:left; font-size:12px; font-weight:700; padding:7px 10px; border:1px solid var(--border); 
-                          border-radius:var(--r-sm); box-shadow:var(--sh-sm);}
+    .pending-swaps-title {color:var(--txt-2); background:var(--surface); text-align:left; font-size:12px; font-weight:700; padding:7px 10px; border:1px solid var(--border);  border-radius:var(--r-sm); box-shadow:var(--sh-sm);}
     .pending-swaps-list {max-height:600px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; scrollbar-width:none;}
     .pending-swaps-list::-webkit-scrollbar {display:none;}
-    .swap-card {display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; border:1px solid var(--border); border-radius:var(--r-md); padding:12px; background:var(--surface);
-                color:var(--txt-1); box-shadow:var(--sh-sm); transition:transform var(--ease),box-shadow var(--ease),background var(--ease);}
+    .swap-card {display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; border:1px solid var(--border); border-radius:var(--r-md); padding:12px; background:var(--surface); color:var(--txt-1); box-shadow:var(--sh-sm); transition:transform var(--ease),box-shadow var(--ease),background var(--ease);}
     .swap-card:hover {transform:translateY(-1px); box-shadow:var(--sh-md);}
     .swap-info {min-width:0; }
     .swap-info p {margin:3px 0; font-size:12px; color:var(--txt-2);}
@@ -108,44 +84,33 @@
     .swap-actions button {font-size:18px; border:0; border-radius:10px; padding:7px 11px; cursor:pointer; transition:transform var(--ease),opacity var(--ease);}
     .swap-actions button:hover { transform:scale(1.04);}
     .approve-btn {background:#2e7d32; color:#fff;}
-    .reject-btn {background:var(--red); color:#fff;}
-    
+    .reject-btn {background:var(--red); color:#fff;}    
     /* ============================================================
     SWAP AREA 
     ============================================================ */
     #made-swap {width:100%;}
     .swap-header {width:100%; text-align:center; flex-shrink:0;}
-    .swap-subtitle {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px;
-                    border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease);
-                    margin-top: 5px; margin-bottom: 5px; margin-right: auto;}
+    .swap-subtitle {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin-top: 5px; margin-bottom: 5px; margin-right: auto;}
     .swap-month-buttons, .own-shifts-buttons, 
-    .other-shifts-buttons {display:grid; gap:1px; width:100%; grid-template-columns:repeat(3,1fr); background:var(--border); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden;
-                           margin-bottom:10px; box-shadow:var(--sh-md);}
-    .swap-month-btn {position:relative; min-width:0; max-width:none; min-height:64px; padding:10px 6px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
-                     font-size:11px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; line-height:1.2;
-                     box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
+    .other-shifts-buttons {display:grid; gap:1px; width:100%; grid-template-columns:repeat(3,1fr); background:var(--border); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; margin-bottom:10px; box-shadow:var(--sh-md);}
+    .swap-month-btn {position:relative; min-width:0; max-width:none; min-height:64px; padding:10px 6px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif; font-size:11px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; line-height:1.2; box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
     .swap-month-btn:hover:not(.selected) {background:var(--surface-2); color:var(--txt-1);}
     .swap-month-btn:active:not(.selected) {background:var(--surface-2); transform:scale(.98);}
     .swap-month-btn.selected {background:var(--red-light); color:var(--red); transform:none; box-shadow:none;}
     .swap-month-btn div,.swap-month-btn span {position:relative; z-index:2; line-height:1.2;}
     .month-icon {font-size:21px !important; color:var(--red-icon);}
-    .swap-month-btn.selected .month-icon {transform:scale(1.08);}
-    
+    .swap-month-btn.selected .month-icon {transform:scale(1.08);}    
     /* ============================================================
     SHIFT / SELECT CARDS
     ============================================================ */
-    .shifts-container,.combobox-container {width:100%; max-width:100%; margin:0 0 10px; padding:15px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface); box-shadow:var(--sh-md);
-                                           display:none; opacity:0; transition:opacity var(--ease),background var(--ease),box-shadow var(--ease);}
+    .shifts-container,.combobox-container {width:100%; max-width:100%; margin:0 0 10px; padding:15px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface); box-shadow:var(--sh-md); display:none; opacity:0; transition:opacity var(--ease),background var(--ease),box-shadow var(--ease);}
     .shifts-container.show,.combobox-container.show {display:block; opacity:1;}
     .shifts-label,.combobox-label {display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--txt-2); margin-bottom:10px; text-align:left;}
     .shifts-label::before,.combobox-label::before {content:''; width:3px; height:13px; border-radius:2px; background:var(--red); display:inline-block;}
-    .combobox-select {width:100%; padding:10px 12px; font-family:'Inter',sans-serif; font-size:12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface-2); color:var(--txt-1);
-                      cursor:pointer; appearance:auto; transition:border-color var(--ease),box-shadow var(--ease),background var(--ease);}
+    .combobox-select {width:100%; padding:10px 12px; font-family:'Inter',sans-serif; font-size:12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface-2); color:var(--txt-1); cursor:pointer; appearance:auto; transition:border-color var(--ease),box-shadow var(--ease),background var(--ease);}
     .combobox-select:focus {outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-light);}
     .combobox-select option {background:var(--surface); color:var(--txt-1);}
-    .shifts-btn {min-width:0; max-width:none; height:auto; min-height:48px; padding:8px 6px; border:1px solid var(--border); border-radius:12px; background:var(--surface-2); color:var(--txt-2);
-                 font-family:'Inter',sans-serif; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:2px; box-shadow:none;
-                 transition:background var(--ease),color var(--ease),transform var(--ease),border-color var(--ease);}
+    .shifts-btn {min-width:0; max-width:none; height:auto; min-height:48px; padding:8px 6px; border:1px solid var(--border); border-radius:12px; background:var(--surface-2); color:var(--txt-2); font-family:'Inter',sans-serif; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:2px; box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease),border-color var(--ease);}
     .shifts-btn .shift-day {font-size:15px; font-weight:700; line-height:1.1;}
     .shifts-btn .shift-type {font-size:9.5px; font-weight:600; opacity:0.7; text-transform:uppercase; letter-spacing:0.3px;}
     .shifts-btn:hover:not(.selected) {background:var(--red-light); color:var(--txt-1); border-color:var(--red-light);}
@@ -153,56 +118,44 @@
     .shifts-btn.selected .shift-type {opacity:0.9;}
     .shifts-btn:disabled {cursor:not-allowed;}
     .swap-btn {display:none; text-align:center; margin-top:4px;}
-    .swap-btn button {width:100%; max-width:260px; padding:10px 22px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; border-radius:50px; border:0; color:#fff; cursor:pointer; box-shadow:var(--sh-md);
-                      background:linear-gradient(to right,var(--red-dark),var(--red)); transition:opacity var(--ease),transform var(--ease);}
+    .swap-btn button {width:100%; max-width:260px; padding:10px 22px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; border-radius:50px; border:0; color:#fff; cursor:pointer; box-shadow:var(--sh-md); background:linear-gradient(to right,var(--red-dark),var(--red)); transition:opacity var(--ease),transform var(--ease);}
     .swap-btn button:hover {opacity:.88;}
     .swap-btn button:active {transform:scale(.98);}
     .swap-month-btn.month-past {opacity: 0.35 !important; pointer-events: none;}
     .shifts-btn.btn-blocked-conflict {background: rgba(198, 40, 40, 0.15) !important; border-color: rgba(198, 40, 40, 0.3) !important; color: var(--red) !important; opacity: 0.6 !important; cursor: not-allowed !important;}
     .shifts-btn.btn-blocked-conflict .shift-type {color: var(--red) !important; font-weight: 700;}
-    .btn-shiftsBackToMonths {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px;
-               border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease);
-               margin-top: 5px; margin-bottom: 10px; margin-right: auto; display: none;}
+    .btn-shiftsBackToMonths {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin-top: 5px; margin-bottom: 10px; margin-right: auto; display: none;}
     .btn-shiftsBackToMonths:hover {background: var(--surface-2);}
     .btn-shiftsBackToMonths:active {transform: scale(0.97);}
-    .btn-shiftsBackToMonths .material-icons {font-size: 18px; color: var(--red-icon);}
-    
+    .btn-shiftsBackToMonths .material-icons {font-size: 18px; color: var(--red-icon);}    
     /* ============================================================
     TOAST
     ============================================================ */
-    .toast {position:fixed; left:50%; bottom:calc(var(--footer-h) + 22px); transform:translateX(-50%) translateY(10px); background:rgba(198,40,40,.95); color:#fff; padding:12px 18px; border-radius:var(--r-md);
-            font-size:13px; font-weight:600; width:max-content; max-width:90%; text-align:center; z-index:9999; opacity:0; box-shadow:var(--sh-lg); transition:opacity .25s ease,transform .25s ease;}
-    .toast.show {opacity:1; transform:translateX(-50%) translateY(0);}
-    
+    .toast {position:fixed; left:50%; bottom:calc(var(--footer-h) + 22px); transform:translateX(-50%) translateY(10px); background:rgba(198,40,40,.95); color:#fff; padding:12px 18px; border-radius:var(--r-md); font-size:13px; font-weight:600; width:max-content; max-width:90%; text-align:center; z-index:9999; opacity:0; box-shadow:var(--sh-lg); transition:opacity .25s ease,transform .25s ease;}
+    .toast.show {opacity:1; transform:translateX(-50%) translateY(0);}    
     /* ============================================================
     MODAL
     ============================================================ */
     .modal {display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.45); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:20px;}
     .modal.show {display:flex;}
-    .modal-content {background:var(--surface); color:var(--txt-1); width:100%; max-width:460px; max-height:78%; border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-lg); border:1px solid var(--border);
-                    display:flex; flex-direction:column; animation:modalIn .25s cubic-bezier(.34,1.2,.64,1);}    
-    .modal-header {background:linear-gradient(to right,var(--red-dark),var(--red)); color:#fff; padding:15px 18px; display:flex; align-items:center; justify-content:center; font-size:15px; 
-                   font-weight:600; flex-shrink:0;}
+    .modal-content {background:var(--surface); color:var(--txt-1); width:100%; max-width:460px; max-height:78%; border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-lg); border:1px solid var(--border); display:flex; flex-direction:column; animation:modalIn .25s cubic-bezier(.34,1.2,.64,1);}    
+    .modal-header {background:linear-gradient(to right,var(--red-dark),var(--red)); color:#fff; padding:15px 18px; display:flex; align-items:center; justify-content:center; font-size:15px;  font-weight:600; flex-shrink:0;}
     .modal-body {padding:16px; max-height:60vh; overflow-y:auto; color:var(--txt-1); font-size:13px;}
     .modal-footer {background:var(--surface-2); padding:12px 18px; border-top:1px solid var(--border); display:flex; justify-content:flex-end;}
-    .modal-close {background:linear-gradient(to right,var(--red-dark),var(--red)); color:#fff; border:0; padding:9px 24px; border-radius:50px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px;
-                  font-weight:600; transition:opacity var(--ease),transform var(--ease);}
+    .modal-close {background:linear-gradient(to right,var(--red-dark),var(--red)); color:#fff; border:0; padding:9px 24px; border-radius:50px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; transition:opacity var(--ease),transform var(--ease);}
     .modal-close:hover {opacity:.88;}
     .modal-close:active {transform:scale(.98);}
-    @keyframes modalIn {from{opacity:0;transform:scale(.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)}}
-    
+    @keyframes modalIn {from{opacity:0;transform:scale(.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)}}    
     /* ============================================================
     FOOTER
     ============================================================ */
-    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
     @keyframes spin {to {transform: rotate(360deg);}}
     @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
-    .footer strong { color:inherit; }
-    
+    .footer strong { color:inherit; }    
     /* ============================================================
     RESPONSIVE
     ============================================================ */
@@ -329,12 +282,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
-    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -377,7 +330,7 @@
       hideBackHeader();
     }
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -434,14 +387,11 @@
           el.classList.remove('show', 'fade-in-content');
         }
       });
-
       document.body.classList.remove('mobile-month-selected');
       document.querySelectorAll('.swap-month-btn').forEach(btn => btn.classList.remove('selected'));
       currentMonthIndex = null;
-
       if (monthButtons) monthButtons.style.display = 'grid';
       if (subtitle) subtitle.style.display = 'block';
-
       showBackHeader("Voltar", () => {
         goBackToMain();
       });
@@ -508,8 +458,8 @@
       }
     }
     async function loadPendingSwaps() {
-      const nint = localStorage.getItem("currentCorpNint") || "205";
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const nint = localStorage.getItem("currentCorpNint");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       if (!nint || !corpOperNr) return;
       const container = document.getElementById("pending-swaps-container");
       const list = document.getElementById("pending-swaps-list");
@@ -638,7 +588,6 @@
         showToast("Não é possível selecionar um mês anterior ao atual.");
         return;
       }
-
       const comboboxContainer = document.getElementById('comboboxContainer');
       const btnBackToMonths = document.getElementById('btnBackToMonths');
       const shiftsContainer = document.getElementById('shiftsContainer');
@@ -647,26 +596,21 @@
       const monthButtons = document.querySelector('.swap-month-buttons');
       const subtitle = document.querySelector('.swap-subtitle');
       const backHeader = document.querySelector('.back-header');
-
       if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
         backToMonthsSelection();
         return;
       }
-
       currentMonthIndex = monthIndex;
       document.querySelectorAll('.swap-month-btn').forEach(btn => btn.classList.remove('selected'));
       button.classList.add('selected');
       document.body.classList.add('mobile-month-selected');
-
       if (monthButtons) monthButtons.style.display = 'none';
       if (subtitle) subtitle.style.display = 'none';
       if (backHeader) backHeader.style.display = 'none';
       if (elementsShiftsContainer) elementsShiftsContainer.style.display = 'none';
       if (swapBtn) swapBtn.style.display = 'none';
-
       await loadShifts(monthIndex);
       await loadElements();
-
       const blocksToAnimate = [btnBackToMonths, shiftsContainer, comboboxContainer];
       blocksToAnimate.forEach(el => {
         if (el) {
@@ -678,12 +622,11 @@
       });
     }
     async function loadShifts(monthIndex) {
-      const nint = localStorage.getItem("currentCorpNint") || "205";
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const nint = localStorage.getItem("currentCorpNint");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const shiftsContainer = document.getElementById("shiftsContainer");
       const shiftsButtons = document.getElementById("shiftsButtons");
       if (!nint || !corpOperNr || !shiftsContainer) return;
-
       const year = getWorkYear(monthIndex);
       try {
         const response = await fetch(
@@ -740,8 +683,8 @@
     }
     let currentMonthIndex = null;
     async function loadElements() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
-      const myNInt = localStorage.getItem("currentCorpNint") || "205";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const myNInt = localStorage.getItem("currentCorpNint");
       const select = document.getElementById("elementsSelect");
       if (!corpOperNr) {
         select.innerHTML = '<option value="">Corporação não definida</option>';
@@ -775,22 +718,19 @@
       }
     }
     async function loadElementShifts(nint, monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const container = document.getElementById("elementsShiftsContainer");
       const buttonsDiv = document.getElementById("elementsShiftsButtons");
-      const switchBtn = document.getElementById("swap-btn");
-      
+      const switchBtn = document.getElementById("swap-btn");      
       container.style.display = "block";
       if (switchBtn) switchBtn.style.display = "none";
       const year = getWorkYear(monthIndex);
-
       const myShiftsMap = new Map();
       document.querySelectorAll("#shiftsButtons .shifts-btn").forEach(btn => {
         if (btn.dataset.day && btn.dataset.value) {
           myShiftsMap.set(parseInt(btn.dataset.day, 10), btn.dataset.value);
         }
       });
-
       if (myShiftsMap.size === 0) {
         document.querySelectorAll("#shiftsButtons .shifts-btn").forEach(btn => {
           const day = parseInt(btn.querySelector(".shift-day")?.textContent, 10);
@@ -802,22 +742,18 @@
           }
         });
       }
-
       try {
         const response = await fetch(
           `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nint}&month=eq.${monthIndex + 1}&year=eq.${year}&value=in.(PN,ED,EN,ET)&order=day.asc`, {
             headers: getSupabaseHeaders()
           }
         );
-
         if (!response.ok) {
           buttonsDiv.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
           return;
         }
-
         const data = await response.json();
         buttonsDiv.innerHTML = "";
-
         if (!Array.isArray(data) || data.length === 0) {
           const noShiftsMsg = document.createElement("div");
           noShiftsMsg.textContent = "Sem turnos disponíveis";
@@ -827,16 +763,13 @@
           const today = new Date();
           const currentMonth = today.getMonth();
           const valueMap = { PN: "Piquete", ED: "ECIN Dia", EN: "ECIN Noite", ET: "ECIN 24 H" };
-
           data.forEach(row => {
             const btn = document.createElement("button");
             btn.className = "shifts-btn";
             const displayValue = valueMap[row.value] || row.value;
             btn.innerHTML = `<span class="shift-day">${String(row.day).padStart(2, "0")}</span><span class="shift-type">${displayValue}</span>`;
-
             const isPastDay = (monthIndex === currentMonth) && (row.day < today.getDate());
             const hasConflictWithMe = myShiftsMap.has(row.day) && myShiftsMap.get(row.day) === row.value;
-
             if (isPastDay) {
               btn.disabled = true;
               btn.style.opacity = "0.35";
@@ -846,12 +779,10 @@
               btn.classList.add("btn-blocked-conflict");
               btn.title = "Indisponível: Ambos já têm o mesmo turno neste dia.";
             }
-
             btn.addEventListener("click", () => {
               if (btn.disabled) return;
               const isAlreadySelected = btn.classList.contains("selected");
-              document.querySelectorAll("#elementsShiftsButtons .shifts-btn").forEach(b => b.classList.remove("selected"));
-              
+              document.querySelectorAll("#elementsShiftsButtons .shifts-btn").forEach(b => b.classList.remove("selected"));              
               if (!isAlreadySelected) {
                 btn.classList.add("selected");
                 btn.dataset.day = row.day;
@@ -864,7 +795,6 @@
                 if (switchBtn) switchBtn.style.display = anySelected ? "block" : "none";
               }
             });
-
             buttonsDiv.appendChild(btn);
           });
         }
@@ -893,8 +823,7 @@
       const myNInt = localStorage.getItem("currentCorpNint");
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const monthNumber = currentMonthIndex + 1;
-      const year = getWorkYear(currentMonthIndex);
-      
+      const year = getWorkYear(currentMonthIndex);      
       if (String(targetNInt) === String(myNInt)) {
         showToast("Não podes solicitar uma troca contigo próprio 😄");
         return;
@@ -911,32 +840,17 @@
           showToast("Já existe um pedido de troca idêntico entre estes turnos.");
           return;
         }
-
-        const swapPayload = [{
-          corp_oper_nr: String(corpOperNr),
-          n_int: String(myNInt),
-          start_shift_day: myShiftDay,
-          start_shift_month: monthNumber,
-          start_shift_year: year,
-          n_int_end: String(targetNInt),
-          end_shift_day: targetShiftDay,
-          end_shift_month: monthNumber,
-          end_shift_year: year,
-          created_at: new Date().toISOString()
-        }];
-
+        const swapPayload = [{corp_oper_nr: String(corpOperNr), n_int: String(myNInt), start_shift_day: myShiftDay, start_shift_month: monthNumber, start_shift_year: year, n_int_end: String(targetNInt), end_shift_day: targetShiftDay, end_shift_month: monthNumber, end_shift_year: year, created_at: new Date().toISOString()}];
         const swapResp = await fetch(`${SUPABASE_URL}/rest/v1/reg_swaps`, {
           method: "POST",
           headers: supabaseHeaders,
           body: JSON.stringify(swapPayload)
         });
-
         if (!swapResp.ok) {
           const errorData = await swapResp.json();
           console.error("Erro Supabase:", errorData);
           throw new Error(errorData.message || "Erro ao gravar troca");
         }
-
         const nameResp = await fetch(
           `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${myNInt}`, {
             headers: supabaseHeaders
@@ -953,9 +867,7 @@
         await fetch('https://cb-360-app.vercel.app/api/sendPush', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({recipient_nint: targetNInt, corp_nr: corpOperNr, sender_name: 'Pedido de Troca', message_text: `O elemento ${myName} solicitou uma troca: Dia ${targetShiftDay} por Dia ${myShiftDay}.`,
-                                sender_nint: myNInt
-                               })
+          body: JSON.stringify({recipient_nint: targetNInt, corp_nr: corpOperNr, sender_name: 'Pedido de Troca', message_text: `O elemento ${myName} solicitou uma troca: Dia ${targetShiftDay} por Dia ${myShiftDay}.`, sender_nint: myNInt})
         });
         showToast("Pedido de troca enviado com sucesso!");
       } catch (err) {
