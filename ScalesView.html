@@ -21,17 +21,20 @@
     /* ============================================================
     DARK MODE
     ============================================================ */
-    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
     /* ============================================================
     RESET & BASE
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+          user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER
     ============================================================ */
-    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
@@ -39,7 +42,9 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 0px); padding-left: 16px; padding-right: 16px;
+                   display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px;
+                   transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
     .main-content::-webkit-scrollbar {display: none;}
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
@@ -52,7 +57,10 @@
     ============================================================ */
     .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 4px; flex-shrink: 0;}
     .scales-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
-    .scales-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; line-height: 1.2; transition: background var(--ease), color var(--ease);}
+    .scales-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+                 padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2);
+                 cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
+                 line-height: 1.2; transition: background var(--ease), color var(--ease);}
     .scales-btn:nth-child(3n) {border-right: none;}
     .scales-btn:nth-child(n+10) {border-bottom: none;}
     .scales-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
@@ -62,37 +70,45 @@
     .scales-btn.selected {background: var(--red-light); color: var(--red);}
     .scales-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
     .scales-btn div, .scales-btn span {position: relative; z-index: 2; line-height: 1.2;}
-    .btn-back {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin-top: 5px; margin-right: auto; display: none;}
+    .btn-back {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px;
+               border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease);
+               margin-top: 5px; margin-right: auto; display: none;}
     .btn-back:hover {background: var(--surface-2);}
     .btn-back:active {transform: scale(0.97);}
     .btn-back .material-icons {font-size: 18px; color: var(--red-icon);}
     /* ============================================================
     RESULT CARDS (piquetes / decir / extras)
     ============================================================ */
-    .scales-card {display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%;}
+    .scales-card {display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px; border-radius: var(--r-md); background: var(--surface);
+                  border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%;}
     .scales-card span.card-title {font-weight: 700; margin-bottom: 0; font-size: 13px; color: var(--txt-1); letter-spacing: 0.3px;}
     .scales-card span.values {display: block; font-size: 13px; color: var(--txt-2);}
-    .loading-spinner {display: inline-block; width: 14px; height: 14px; border: 2px solid var(--red); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle;}
+    .loading-spinner {display: inline-block; width: 14px; height: 14px; border: 2px solid var(--red); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+                      margin-right: 8px; vertical-align: middle;}
     .error-message {color: #e74c3c; font-weight: 600; font-size: 13px;}
-    .services-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); width: 100%; max-width: 100%; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px;}
+    .services-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); width: 100%; max-width: 100%; padding: 14px 16px;
+                    display: flex; flex-direction: column; gap: 14px;}
     .services-section {display: flex; flex-direction: column; gap: 9px;}
     .services-section.section-divider {padding-top: 14px; border-top: 1px solid var(--border);}
     .services-section-title {display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.5px;}
     .services-section-title .material-icons {font-size: 15px; color: var(--red-icon);}
     .chips-row {display: flex; flex-wrap: wrap; gap: 6px;}
-    .day-chip {display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 26px; padding: 0 8px; border-radius: 8px; font-size: 12px; font-weight: 700; box-shadow: var(--sh-sm); letter-spacing: 0.2px;}
+    .day-chip {display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 26px; padding: 0 8px; border-radius: 8px; font-size: 12px; font-weight: 700;
+               box-shadow: var(--sh-sm); letter-spacing: 0.2px;}
     .day-chip.type-PN {background: linear-gradient(135deg, var(--blue), #1aa9c5); color: #fff;}
     .day-chip.type-ED {background: linear-gradient(135deg, #ffd54f, #ffca28, #ffa726); color: #444;}
     .day-chip.type-EN {background: linear-gradient(135deg, #3949ab, #2c387e, #1a237e); color: #fff;}
     .day-chip.type-ET {background: linear-gradient(135deg, #ab47bc, #9c27b0, #8e24aa); color: #fff;}
     .day-chip.type-EX {background: linear-gradient(135deg, #c62828, #8b0000); color: #fff;}
-    .day-chip.type-SB {background: linear-gradient(135deg, #00897b, #00695c, #004d40); color: #fff;}
-    .day-chip.type-OP {background: linear-gradient(135deg, #78909c, #607d8b, #455a64); color: #fff;}
+    .day-chip.type-SB {background: linear-gradient(135deg, #26a69a, #00897b); color: #fff;}
+    .day-chip.type-OP {background: linear-gradient(135deg, #ef6c00, #e65100); color: #fff;}
     /* ============================================================
     NEXT SERVICES
     ============================================================ */
-    .nextserv-info-title {font-size: 12px; font-weight: 700; text-align: left; color: var(--txt-2); margin: 0; background: var(--surface); padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); width: 100%; max-width: 100%; box-shadow: var(--sh-sm);}
-    .nextserv-card {margin-bottom: 5px; background: var(--surface); border-radius: var(--r-md); border: 1px solid var(--border); padding: 12px; box-shadow: var(--sh-sm); width: 100%; box-sizing: border-box; transition: transform var(--ease), box-shadow var(--ease); animation: slideDown 0.3s ease forwards; cursor: pointer;}
+    .nextserv-info-title {font-size: 12px; font-weight: 700; text-align: left; color: var(--txt-2); margin: 0; background: var(--surface); padding: 5px 10px; border: 1px solid var(--border);
+                          border-radius: var(--r-sm); width: 100%; max-width: 100%; box-shadow: var(--sh-sm);}
+    .nextserv-card {margin-bottom: 5px; background: var(--surface); border-radius: var(--r-md); border: 1px solid var(--border); padding: 12px; box-shadow: var(--sh-sm); width: 100%; box-sizing: border-box;
+                    transition: transform var(--ease), box-shadow var(--ease); animation: slideDown 0.3s ease forwards; cursor: pointer;}
     .nextserv-card:hover {box-shadow: var(--sh-md); transform: translateY(-1px);}
     .nextserv-type {text-align: left; margin-bottom: 4px;}
     .nextserv-type .label {font-size: 12.5px; font-weight: 700; color: var(--txt-2);}
@@ -108,20 +124,23 @@
     SERVICE MODAL
     ============================================================ */
     .service-modal {position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px;}
-    .service-modal-content {background: var(--surface); border-radius: var(--r-lg); width: 100%; max-width: 460px; max-height: 78%; box-shadow: var(--sh-lg); border: 1px solid var(--border); position: relative; display: flex; flex-direction: column; overflow: hidden; animation: mIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);}
+    .service-modal-content {background: var(--surface); border-radius: var(--r-lg); width: 100%; max-width: 460px; max-height: 78%; box-shadow: var(--sh-lg); border: 1px solid var(--border);
+                            position: relative; display: flex; flex-direction: column; overflow: hidden; animation: mIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);}
     @keyframes mIn {from {opacity: 0; transform: scale(0.95) translateY(10px);} to {opacity: 1; transform: scale(1) translateY(0);}}
     .modal-header {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 15px 18px; font-size: 15px; font-weight: 600; text-align: center; flex-shrink: 0;}
     .modal-close {position: absolute; top: 12px; right: 14px; font-size: 20px; cursor: pointer; color: #fff;}
     .modal-elements-container {padding: 14px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; flex: 1; scrollbar-width: none;}
     .modal-elements-container::-webkit-scrollbar {display: none;}
     .modal-footer {background: var(--surface-2); padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; flex-shrink: 0;}
-    .modal-footer-btn {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; border: none; padding: 9px 24px; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity var(--ease);}
+    .modal-footer-btn {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; border: none; padding: 9px 24px; border-radius: 50px; font-size: 13px; font-weight: 600;
+                       cursor: pointer; transition: opacity var(--ease);}
     .modal-footer-btn:hover {opacity: 0.88;}
     .modal-footer-btn:active {transform: scale(0.98);}
     /* ============================================================
     ELEMENT CARDS (dentro do modal)
     ============================================================ */
-    .element-card {display: flex; justify-content: flex-start; align-items: center; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px; background: var(--surface-2); box-shadow: var(--sh-sm); gap: 5px;}
+    .element-card {display: flex; justify-content: flex-start; align-items: center; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px; background: var(--surface-2);
+                   box-shadow: var(--sh-sm); gap: 5px;}
     .element-info {display: flex; flex-direction: column; gap: 2px;}
     .element-info .element-name {font-size: 15px; font-weight: 700; color: var(--txt-1);}
     .element-info span {font-size: 13px; color: var(--txt-2);}
@@ -134,7 +153,8 @@
     /* ============================================================
     FOOTER
     ============================================================ */
-    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
@@ -250,12 +270,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint"); }
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "205"; }
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -285,7 +305,7 @@
       card.innerHTML = `<span class="error-message">⚠️ ${message}</span>`;
     }    
     function validateCorpData() {
-      const nintCorpStr = localStorage.getItem("currentCorpNint");
+      const nintCorpStr = localStorage.getItem("currentCorpNint") || "205";
       if (!nintCorpStr || isNaN(parseInt(nintCorpStr, 10))) {
         return null;
       }
@@ -293,7 +313,7 @@
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -332,7 +352,7 @@
     }
     /* ===================== GENERIC DATA LOADER ===================== */
     async function loadMonthData(config, monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();      
       if (!nintCorp) {
         showError(config.cardId, "Elemento e Corporação não definidos.");
@@ -407,7 +427,7 @@
 }
     /* ========================= PICKETS LOADING ========================= */
     async function loadPicketsMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();
       if (!nintCorp) return;
       const month = monthIndex + 1;
@@ -426,27 +446,27 @@
     }
     /* ========================== DECIR LOADING ========================== */
     async function loadDecirMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
-      const nintCorp = validateCorpData();
-      if (!nintCorp) return;
-      const month = monthIndex + 1;
-      const yearToFetch = getWorkYear(monthIndex);
-      try {
-        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=in.(ED,EN,ET,EP)&corp_oper_nr=eq.${corpOperNr}`;
-        const response = await fetch(url, { headers: getSupabaseHeaders() });
-        if (!response.ok) return renderServiceChips("decirSection", "decirChips", []);
-        const data = await response.json();
-        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
-          .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
-        renderServiceChips("decirSection", "decirChips", items);
-      } catch (err) {
-        console.error("Erro ao carregar decir/outros", err);
-        renderServiceChips("decirSection", "decirChips", []);
-      }
-    }
+  const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+  const nintCorp = validateCorpData();
+  if (!nintCorp) return;
+  const month = monthIndex + 1;
+  const yearToFetch = getWorkYear(monthIndex);
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=in.(ED,EN,ET,EP)&corp_oper_nr=eq.${corpOperNr}`;
+    const response = await fetch(url, { headers: getSupabaseHeaders() });
+    if (!response.ok) return renderServiceChips("decirSection", "decirChips", []);
+    const data = await response.json();
+    const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
+      .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
+    renderServiceChips("decirSection", "decirChips", items);
+  } catch (err) {
+    console.error("Erro ao carregar decir/outros", err);
+    renderServiceChips("decirSection", "decirChips", []);
+  }
+}
     /* ========================= EXTRAS LOADING ========================== */
     async function loadExtrasMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();
       if (!nintCorp) return;
       const month = monthIndex + 1;
@@ -467,44 +487,44 @@
  
     /* ============================= SBA LOADING =========================== */
     async function loadSbaMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
-      const nintCorp = validateCorpData();
-      if (!nintCorp) return;
-      const month = monthIndex + 1;
-      const yearToFetch = getWorkYear(monthIndex);
-      try {
-        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.SB&corp_oper_nr=eq.${corpOperNr}`;
-        const response = await fetch(url, { headers: getSupabaseHeaders() });
-        if (!response.ok) return renderServiceChips("sbaSection", "sbaChips", []);
-        const data = await response.json();
-        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
-          .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
-        renderServiceChips("sbaSection", "sbaChips", items);
-      } catch (err) {
-        console.error("Erro ao carregar SBA", err);
-        renderServiceChips("sbaSection", "sbaChips", []);
-      }
-    }
+  const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+  const nintCorp = validateCorpData();
+  if (!nintCorp) return;
+  const month = monthIndex + 1;
+  const yearToFetch = getWorkYear(monthIndex);
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.SB&corp_oper_nr=eq.${corpOperNr}`;
+    const response = await fetch(url, { headers: getSupabaseHeaders() });
+    if (!response.ok) return renderServiceChips("sbaSection", "sbaChips", []);
+    const data = await response.json();
+    const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
+      .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
+    renderServiceChips("sbaSection", "sbaChips", items);
+  } catch (err) {
+    console.error("Erro ao carregar SBA", err);
+    renderServiceChips("sbaSection", "sbaChips", []);
+  }
+}
     /* ============================ OPAT LOADING ============================ */
     async function loadOpatMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
-      const nintCorp = validateCorpData();
-      if (!nintCorp) return;
-      const month = monthIndex + 1;
-      const yearToFetch = getWorkYear(monthIndex);
-      try {
-        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.OP&corp_oper_nr=eq.${corpOperNr}`;
-        const response = await fetch(url, { headers: getSupabaseHeaders() });
-        if (!response.ok) return renderServiceChips("opatSection", "opatChips", []);
-        const data = await response.json();
-        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
-          .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
-        renderServiceChips("opatSection", "opatChips", items);
-      } catch (err) {
-        console.error("Erro ao carregar OPAT", err);
-        renderServiceChips("opatSection", "opatChips", []);
-      }
-    }
+  const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+  const nintCorp = validateCorpData();
+  if (!nintCorp) return;
+  const month = monthIndex + 1;
+  const yearToFetch = getWorkYear(monthIndex);
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.OP&corp_oper_nr=eq.${corpOperNr}`;
+    const response = await fetch(url, { headers: getSupabaseHeaders() });
+    if (!response.ok) return renderServiceChips("opatSection", "opatChips", []);
+    const data = await response.json();
+    const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
+      .map(d => ({ day: d.day, type: d.value, suffix: d.value }));
+    renderServiceChips("opatSection", "opatChips", items);
+  } catch (err) {
+    console.error("Erro ao carregar OPAT", err);
+    renderServiceChips("opatSection", "opatChips", []);
+  }
+}
     /* ===================== CREATE NEXT SERVICE CARD ==================== */
     function createServiceCard(service, index = 0) {
       const card = document.createElement("div");
@@ -568,7 +588,7 @@
     }
     async function fetchServiceElements(day, month, value) {
       try {
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
         const nintCorp = validateCorpData();
         if (!nintCorp || !corpOperNr) return [];
         const valuesToMatch = getServiceValuesToMatch(value);
@@ -615,8 +635,8 @@
                           "Bº Especialista": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Esp.png",};
     const serviceColors = {PN: {bg: 'linear-gradient(135deg, var(--blue), #1aa9c5)', text: '#fff'}, ED: {bg: 'linear-gradient(135deg, #ffd54f, #ffca28, #ffa726)', text: '#444'},
                            EN: {bg: 'linear-gradient(135deg, #3949ab, #2c387e, #1a237e)', text: '#fff'}, ET: {bg: 'linear-gradient(135deg, #ab47bc, #9c27b0, #8e24aa)', text: '#fff'},
-                           EX: {bg: 'linear-gradient(135deg, #c62828, #8b0000)', text: '#fff'}, SB: {bg: 'linear-gradient(135deg, #00897b, #00695c, #004d40)', text: '#fff'},
-                           OP: {bg: 'linear-gradient(135deg, #78909c, #607d8b, #455a64)', text: '#fff'}
+                           EX: {bg: 'linear-gradient(135deg, #c62828, #8b0000)', text: '#fff'}, SB: {bg: 'linear-gradient(135deg, #26a69a, #00897b)', text: '#fff'},
+                           OP: {bg: 'linear-gradient(135deg, #ef6c00, #e65100)', text: '#fff'}
                           };
     function openServiceModal(title, elements) {
       const modal = document.getElementById('serviceModal');
@@ -682,7 +702,7 @@
       document.getElementById('serviceModal').style.display = 'none';
     });
     async function loadNextServicesUnified(selectedMonth) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const container = document.getElementById("nextServicesCard");
       const title = document.getElementById("nextserv-info-title");
       container.innerHTML = "";
@@ -816,17 +836,16 @@
           hideAllServiceCards();
           if (requestId !== currentFetchRequestId) return;
           const today = new Date();
-          await loadPicketsMonth(month);
-          if (requestId !== currentFetchRequestId) return;
+          const loaders = [
+            loadPicketsMonth(month),
+            loadExtrasMonth(month),
+            loadSbaMonth(month),
+            loadOpatMonth(month)
+          ];
           if (!mesesSemDecir.includes(month)) {
-            await loadDecirMonth(month);
-            if (requestId !== currentFetchRequestId) return;
+            loaders.push(loadDecirMonth(month));
           }
-          await loadExtrasMonth(month);
-          if (requestId !== currentFetchRequestId) return;
-          await loadSbaMonth(month);
-          if (requestId !== currentFetchRequestId) return;
-          await loadOpatMonth(month);
+          await Promise.all(loaders);
           if (requestId !== currentFetchRequestId) return;
           updateSectionDividers();
           if (month >= today.getMonth()) {
