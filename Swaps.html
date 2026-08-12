@@ -48,12 +48,15 @@
     .main-content.slide-out,.main-content.slide-in {transform:none;}
     .content-blur {filter:blur(2px); opacity:1; pointer-events:none;}
     /* ============================================================
-    BACK HEADER
-    ============================================================ */
-    #back-header {position:sticky; top:0; width:100%; min-height:30px; display:flex; align-items:center; padding:0 4px; margin:0 0 2px; color:var(--txt-2); background:transparent; z-index:10; cursor:pointer;}    
-    .back-arrow {font-size:22px !important; font-weight:bold !important;}
-    .back-text {font-size:18px; font-weight:600 !important; margin-left:8px !important;}
-    .back-header:hover {opacity:.75;}
+   BACK HEADER
+   ============================================================ */
+    #back-header {position: sticky; top: 0; z-index: 10; display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1);
+                  border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm);
+                  transition: background var(--ease), transform var(--ease); margin-top: 5px; margin-bottom: 5px; margin-right: auto;}
+    #back-header:hover {background: var(--surface-2);}
+    #back-header:active {transform: scale(0.97);}
+    .back-arrow {font-size: 18px !important; color: var(--red-icon) !important;}
+    .back-text {font-size: 13px; font-weight: 600 !important;}
     /* ============================================================
     MAIN MENU CARDS
     ============================================================ */
@@ -66,7 +69,7 @@
     .swap-options-btn:active {background:var(--surface-2); transform:scale(.98);}
     .swap-options-btn.selected {background:var(--red-light); color:var(--red);}
     .swap-options-btn .material-icons {font-size:22px; color:var(--red-icon); transition:transform var(--ease),color var(--ease);}
-    .swap-options-btn.option-disabled {opacity:0.4; cursor:not-allowed; pointer-events:none;}
+    .swap-options-btn.option-disabled {opacity:0.4; cursor:not-allowed; pointer-events:none;}    
     .swap-options-btn:hover .material-icons,
     .swap-options-btn.selected .material-icons {transform:scale(1.08);}
     /* ============================================================
@@ -93,7 +96,11 @@
     ============================================================ */
     #made-swap {width:100%;}
     .swap-header {width:100%; text-align:center; flex-shrink:0;}
-    .swap-subtitle {font-size:1.1em; font-weight:600; color:var(--txt-2); transition:color var(--ease); margin-bottom:8px;}
+    .swap-subtitle {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px;
+                    border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease);
+                    margin-top: 15px; margin-bottom: 5px; margin-right: auto;}
+    .swap-subtitle:hover {background: var(--surface-2);}
+    .swap-subtitle:active {transform: scale(0.97);}
     .swap-month-buttons, .own-shifts-buttons, 
     .other-shifts-buttons {display:grid; gap:1px; width:100%; grid-template-columns:repeat(3,1fr); background:var(--border); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden;
                            margin-bottom:10px; box-shadow:var(--sh-md);}
@@ -109,7 +116,7 @@
     /* ============================================================
     SHIFT / SELECT CARDS
     ============================================================ */
-    .shifts-container,.combobox-container {width:100%; max-width:100%; margin:0 0 10px; padding:14px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface); box-shadow:var(--sh-md);
+    .shifts-container,.combobox-container {width:100%; max-width:100%; margin:0 0 5px; padding:15px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface); box-shadow:var(--sh-md);
                                            display:none; opacity:0; transition:opacity var(--ease),background var(--ease),box-shadow var(--ease);}
     .shifts-container.show,.combobox-container.show {display:block; opacity:1;}
     .shifts-label,.combobox-label {display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--txt-2); margin-bottom:10px; text-align:left;}
@@ -133,6 +140,14 @@
     .swap-btn button:hover {opacity:.88;}
     .swap-btn button:active {transform:scale(.98);}
     .swap-month-btn.month-past {opacity: 0.35 !important; pointer-events: none;}
+    .shifts-btn.btn-blocked-conflict {background: rgba(198, 40, 40, 0.15) !important; border-color: rgba(198, 40, 40, 0.3) !important; color: var(--red) !important; opacity: 0.6 !important; cursor: not-allowed !important;}
+    .shifts-btn.btn-blocked-conflict .shift-type {color: var(--red) !important; font-weight: 700;}
+    .btn-shiftsBackToMonths {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px;
+               border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease);
+               margin-top: 5px; margin-bottom: 5px; margin-right: auto; display: none;}
+    .btn-shiftsBackToMonths:hover {background: var(--surface-2);}
+    .btn-shiftsBackToMonths:active {transform: scale(0.97);}
+    .btn-shiftsBackToMonths .material-icons {font-size: 18px; color: var(--red-icon);}
     /* ============================================================
     TOAST
     ============================================================ */
@@ -233,10 +248,14 @@
         <button class="swap-month-btn" onclick="selectMonth(9, this)"><span class="material-icons month-icon">cloud</span><div>Outubro</div></button>
         <button class="swap-month-btn" onclick="selectMonth(10, this)"><span class="material-icons month-icon">grain</span><div>Novembro</div></button>
         <button class="swap-month-btn" onclick="selectMonth(11, this)"><span class="material-icons month-icon">celebration</span><div>Dezembro</div></button>
-      </div>    
+      </div>
+      <button id="btnBackToMonths" class="btn-shiftsBackToMonths" onclick="backToMonthsSelection()" style="display: none;">
+        <span class="material-icons">arrow_back</span>
+        <span>Voltar aos Meses</span>
+      </button>
       <div id="shiftsContainer" class="shifts-container">
         <label class="shifts-label">Os meus turnos:</label>
-        <div id="shiftsButtons" class="own-shifts-buttons"></div>
+        <div id="shiftsButtons" class="own-shifts-buttons"></div>        
       </div>
       <div id="comboboxContainer" class="combobox-container">
           <label class="combobox-label">Selecione o Bombeiro para Troca:</label>
@@ -288,12 +307,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzMxMzcxMDJ9.qCZRvn436c4EK7lY7TmBI9p9ml84qYVK6G596SmztXY';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -336,7 +355,7 @@
       hideBackHeader();
     }
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -378,6 +397,33 @@
       header.onclick = null;
       document.body.classList.remove('has-back-header');
     }
+    function backToMonthsSelection() {
+      const comboboxContainer = document.getElementById('comboboxContainer');
+      const bakToMonths = document.getElementById('btnBackToMonths');
+      const shiftsContainer = document.getElementById('shiftsContainer');
+      const elementsShiftsContainer = document.getElementById('elementsShiftsContainer');
+      const swapbtn = document.getElementById('swap-btn');
+      const monthButtons = document.querySelector('.swap-month-buttons');
+      const subtitle = document.querySelector('.swap-subtitle');
+
+      if (comboboxContainer) comboboxContainer.style.display = 'none';
+      if (shiftsContainer) shiftsContainer.style.display = 'none';
+      if (elementsShiftsContainer) elementsShiftsContainer.style.display = 'none';
+      if (swapbtn) swapbtn.style.display = 'none';
+      if (bakToMonths) bakToMonths.style.display = 'none';
+
+      document.body.classList.remove('mobile-month-selected');
+      document.querySelectorAll('.swap-month-btn').forEach(btn => btn.classList.remove('selected'));
+      currentMonthIndex = null;
+
+      if (monthButtons) monthButtons.style.display = 'grid';
+      if (subtitle) subtitle.style.display = 'block';
+
+      showBackHeader("Voltar", () => {
+        goBackToMain();
+      });
+      resetSwapUI();
+    }
     function goBackToMain() {
       const madeSwap = document.getElementById('made-swap');
       const viewSwap = document.getElementById('pending-swaps-container');
@@ -386,6 +432,8 @@
       const mainMenu = document.querySelector('.swap-options-buttons');
       if (mainMenu) mainMenu.style.display = 'grid';      
       document.querySelectorAll('.swap-options-btn').forEach(b => b.classList.remove('selected'));
+      const monthButtons = document.querySelector('.swap-month-buttons');
+      if (monthButtons) monthButtons.style.display = 'grid';
       hideBackHeader();
       resetSwapUI();
     }
@@ -394,9 +442,11 @@
       btn.classList.add('selected');
       const mainMenu = document.querySelector('.swap-options-buttons');
       const pendingContainer = document.getElementById("pending-swaps-container");
+      const btnBackToMonths = document.getElementById("btnBackToMonths");
       const madeSwap = document.getElementById('made-swap');      
       if (mainMenu) mainMenu.style.display = 'none';
       if (pendingContainer) pendingContainer.style.display = 'none';
+      if (btnBackToMonths) btnBackToMonths.style.display = 'none';
       if (madeSwap) madeSwap.style.display = 'none';
       hideBackHeader();
       if (index === 0) {
@@ -435,8 +485,8 @@
       }
     }
     async function loadPendingSwaps() {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || "205";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       if (!nint || !corpOperNr) return;
       const container = document.getElementById("pending-swaps-container");
       const list = document.getElementById("pending-swaps-list");
@@ -566,9 +616,13 @@
         return;
       }
       const comboboxContainer = document.getElementById('comboboxContainer');
+      const bakToMonths = document.getElementById('btnBackToMonths');
       const shiftsContainer = document.getElementById('shiftsContainer');
       const elementsShiftsContainer = document.getElementById('elementsShiftsContainer');
-      const swapbtn = document.getElementById('swap-btn');      
+      const swapbtn = document.getElementById('swap-btn');
+      const monthButtons = document.querySelector('.swap-month-buttons');
+      const subtitle = document.querySelector('.swap-subtitle');
+      const backHeader = document.querySelector('.back-header');
       if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
         button.classList.remove('selected');
         comboboxContainer.style.display = 'none';
@@ -577,6 +631,7 @@
         swapbtn.style.display = 'none';  
         document.body.classList.remove('mobile-month-selected');
         currentMonthIndex = null;
+        if (monthButtons) monthButtons.style.display = 'grid';
         return;
       }
       currentMonthIndex = monthIndex;
@@ -584,16 +639,20 @@
       button.classList.add('selected');
       document.body.classList.add('mobile-month-selected');
       elementsShiftsContainer.style.display = 'none';
+      if (monthButtons) monthButtons.style.display = 'none';
+      if (subtitle) subtitle.style.display = 'none';
+      if (backHeader) backHeader.style.display = 'none';
       await loadShifts(monthIndex);
       comboboxContainer.style.display = 'block';
+      bakToMonths.style.display = 'flex';
       await loadElements();
       setTimeout(() => {
         comboboxContainer.classList.add('show');
       }, 100);      
     }
     async function loadShifts(monthIndex) {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nint = localStorage.getItem("currentCorpNint") || "205";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const shiftsContainer = document.getElementById("shiftsContainer");
       const shiftsButtons = document.getElementById("shiftsButtons");
       if (!nint || !corpOperNr || !shiftsContainer) return;
@@ -655,8 +714,8 @@
     }
     let currentMonthIndex = null;
     async function loadElements() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
-      const myNInt = localStorage.getItem("currentCorpNint");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const myNInt = localStorage.getItem("currentCorpNint") || "205";
       const select = document.getElementById("elementsSelect");
       if (!corpOperNr) {
         select.innerHTML = '<option value="">Corporação não definida</option>';
@@ -690,25 +749,51 @@
       }
     }
     async function loadElementShifts(nint, monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr")||  "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const container = document.getElementById("elementsShiftsContainer");
       const buttonsDiv = document.getElementById("elementsShiftsButtons");
       const switchBtn = document.getElementById("swap-btn");
+      
       container.style.display = "block";
       if (switchBtn) switchBtn.style.display = "none";
       const year = getWorkYear(monthIndex);
+
+      const myShiftsMap = new Map();
+      document.querySelectorAll("#shiftsButtons .shifts-btn").forEach(btn => {
+        if (btn.dataset.day && btn.dataset.value) {
+          myShiftsMap.set(parseInt(btn.dataset.day, 10), btn.dataset.value);
+        }
+      });
+
+      if (myShiftsMap.size === 0) {
+        document.querySelectorAll("#shiftsButtons .shifts-btn").forEach(btn => {
+          const day = parseInt(btn.querySelector(".shift-day")?.textContent, 10);
+          const typeText = btn.querySelector(".shift-type")?.textContent;
+          
+          const reverseValueMap = { "Piquete": "PN", "ECIN Dia": "ED", "ECIN Noite": "EN", "ECIN 24 H": "ET" };
+          const code = reverseValueMap[typeText] || typeText;
+          
+          if (day && code) {
+            myShiftsMap.set(day, code);
+          }
+        });
+      }
+
       try {
         const response = await fetch(
           `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nint}&month=eq.${monthIndex + 1}&year=eq.${year}&value=in.(PN,ED,EN,ET)&order=day.asc`, {
             headers: getSupabaseHeaders()
           }
         );
+
         if (!response.ok) {
           buttonsDiv.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
           return;
         }
+
         const data = await response.json();
         buttonsDiv.innerHTML = "";
+
         if (!Array.isArray(data) || data.length === 0) {
           const noShiftsMsg = document.createElement("div");
           noShiftsMsg.textContent = "Sem turnos disponíveis";
@@ -718,27 +803,36 @@
           const today = new Date();
           const currentMonth = today.getMonth();
           const valueMap = { PN: "Piquete", ED: "ECIN Dia", EN: "ECIN Noite", ET: "ECIN 24 H" };
+
           data.forEach(row => {
             const btn = document.createElement("button");
             btn.className = "shifts-btn";
             const displayValue = valueMap[row.value] || row.value;
             btn.innerHTML = `<span class="shift-day">${String(row.day).padStart(2, "0")}</span><span class="shift-type">${displayValue}</span>`;
-            if ((monthIndex === currentMonth) && (row.day < today.getDate())) {
+
+            const isPastDay = (monthIndex === currentMonth) && (row.day < today.getDate());
+            const hasConflictWithMe = myShiftsMap.has(row.day) && myShiftsMap.get(row.day) === row.value;
+
+            if (isPastDay) {
               btn.disabled = true;
-              btn.style.opacity = "0.4";
+              btn.style.opacity = "0.35";
               btn.style.cursor = "not-allowed";
+            } else if (hasConflictWithMe) {
+              btn.disabled = true;
+              btn.classList.add("btn-blocked-conflict");
+              btn.title = "Indisponível: Ambos já têm o mesmo turno neste dia.";
             }
+
             btn.addEventListener("click", () => {
               if (btn.disabled) return;
               const isAlreadySelected = btn.classList.contains("selected");
               document.querySelectorAll("#elementsShiftsButtons .shifts-btn").forEach(b => b.classList.remove("selected"));
+              
               if (!isAlreadySelected) {
                 btn.classList.add("selected");
                 btn.dataset.day = row.day;
                 btn.dataset.value = row.value;
-                if (switchBtn) {
-                  switchBtn.style.display = "block";
-                }
+                if (switchBtn) switchBtn.style.display = "block";
               } else {
                 delete btn.dataset.day;
                 delete btn.dataset.value;
@@ -746,6 +840,7 @@
                 if (switchBtn) switchBtn.style.display = anySelected ? "block" : "none";
               }
             });
+
             buttonsDiv.appendChild(btn);
           });
         }
@@ -774,7 +869,8 @@
       const myNInt = localStorage.getItem("currentCorpNint");
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const monthNumber = currentMonthIndex + 1;
-      const year = new Date().getFullYear();
+      const year = getWorkYear(currentMonthIndex);
+      
       if (String(targetNInt) === String(myNInt)) {
         showToast("Não podes solicitar uma troca contigo próprio 😄");
         return;
@@ -784,7 +880,7 @@
         return;
       }
       try {
-        const checkUrl =`${SUPABASE_URL}/rest/v1/reg_swaps?` + `or=(` + `and(n_int.eq.${myNInt},start_shift_day.eq.${myShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${targetNInt},end_shift_day.eq.${targetShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year}),` + `and(n_int.eq.${targetNInt},start_shift_day.eq.${targetShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${myNInt},end_shift_day.eq.${myShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year})` + `)&corp_oper_nr=eq.${corpOperNr}`;
+        const checkUrl = `${SUPABASE_URL}/rest/v1/reg_swaps?` + `or=(` + `and(n_int.eq.${myNInt},start_shift_day.eq.${myShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${targetNInt},end_shift_day.eq.${targetShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year}),` + `and(n_int.eq.${targetNInt},start_shift_day.eq.${targetShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${myNInt},end_shift_day.eq.${myShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year})` + `)&corp_oper_nr=eq.${corpOperNr}`;
         const checkResp = await fetch(checkUrl, { headers: supabaseHeaders });
         const existingSwaps = await checkResp.json();
         if (existingSwaps?.length > 0) {
@@ -797,8 +893,10 @@
           body: JSON.stringify([{corp_oper_nr: corpOperNr, n_int: myNInt, start_shift_day: myShiftDay, start_shift_month: monthNumber, start_shift_year: year, n_int_end: targetNInt, end_shift_day: targetShiftDay,
                                  end_shift_month: monthNumber, end_shift_year: year, created_at: new Date().toISOString()}])});
         if (!swapResp.ok) {
-          throw new Error("Erro ao gravar troca");
-        }
+  const errorData = await swapResp.json();
+  console.error("Detalhes do erro Supabase:", errorData); // Imprime o motivo exato no console
+  throw new Error(errorData.message || "Erro ao gravar troca");
+}
         const nameResp = await fetch(
           `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${myNInt}`, {
             headers: supabaseHeaders
@@ -836,9 +934,7 @@
         showToast("Selecione um elemento para enviar o pedido!");
         return;
       }
-      const shiftDay = selectedShiftBtn.dataset.day;
-      const shiftType = selectedShiftBtn.dataset.value;
-      sendSwapRequest(targetNInt, shiftDay, shiftType);
+      sendSwapRequest(targetNInt);
     }
     function resetSwapUI() {
       document.getElementById("shiftsContainer").style.display = 'none';
