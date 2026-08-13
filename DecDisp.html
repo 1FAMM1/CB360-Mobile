@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ============================================================
-    VARIABLES (alinhadas com a página Escalas / Disponibilidades Piquetes)
+    VARIABLES (alinhadas com a página Escalas)
     ============================================================ */
     :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
@@ -35,17 +35,18 @@
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
-    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    .header-sub {font-size: 9.5px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
     .main-content::-webkit-scrollbar {display: none;}
-    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
-    .main-content.slide-out, .main-content.slide-in {transform: none;}
+    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
     .main-content.content-blur {filter: blur(2px); pointer-events: none;}
-    .availability-dec-header {flex-shrink: 0; text-align: center; width: 100%;}
-    .availability-dec-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
+    .availability-dec-header {flex-shrink: 0; text-align: center; width: 100%; display: flex; flex-direction: column; align-items: flex-start;}
+    .availability-dec-card {flex-shrink: 0;}
+    .availability-dec-info-title {flex-shrink: 0;}
+    .availability-dec-subtitle {display: flex; align-items: center; justify-content: center; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin: 0 auto 0 auto;}
     /* ============================================================
     MONTH BUTTONS
     ============================================================ */
@@ -65,8 +66,11 @@
     /* ============================================================
     CALENDAR CARD
     ============================================================ */
-    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%; display: none;}
-    .calendar-container.show {display: block; animation: slideDown 0.3s ease;}
+    .collapse-wrapper {display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(-10px); width: 100%; transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
+    .collapse-wrapper > * {min-height: 0; overflow: hidden;}
+    .collapse-wrapper.show {grid-template-rows: 1fr; opacity: 1; transform: translateY(0);}
+    .collapse-wrapper.legend-wrapper {transition-delay: 0.06s;}
+    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%;}
     .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
     .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
     .calendar-day-header {text-align: center; font-weight: 700; padding: 6px 0; font-size: 11px; color: var(--txt-3);}
@@ -85,8 +89,7 @@
     /* ============================================================
     LEGEND
     ============================================================ */
-    .calendar-legend {display: none; width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm); justify-content: center; align-items: center; padding: 10px 14px; gap: 20px; font-size: 12px; flex-wrap: wrap;}
-    .calendar-legend.show {display: flex;}
+    .calendar-legend {width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm); display: flex; justify-content: center; align-items: center; padding: 10px 14px; gap: 20px; font-size: 12px; flex-wrap: wrap;}
     .legend-item {display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: var(--txt-2); font-weight: 600;}
     .legend-color {width: 17px; height: 17px; border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);}
     .legend-color.day {background: linear-gradient(135deg, #ffd54f, #ffca28, #ffa726);}
@@ -119,12 +122,10 @@
     /* ============================================================
     FOOTER
     ============================================================ */
-    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
-    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
     /* ============================================================
     RESPONSIVE
     ============================================================ */
@@ -133,7 +134,7 @@
       .availability-dec-subtitle {font-size: 0.95em;}
       .availability-dec-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
       .availability-dec-btn .material-icons {font-size: 19px;}
-      .main-content {padding-left: 14px; padding-right: 14px; justify-content: center; align-items: center;}
+      .main-content {padding-left: 14px; padding-right: 14px;}
     }
     @media (min-width: 769px) {
       .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
@@ -171,22 +172,26 @@
         <button class="availability-dec-btn" data-month="11" onclick="showCalendar(11, this)"><span class="material-icons">celebration</span><div>Dezembro</div></button>
       </div>
     </div>
-    <div id="calendarContainer" class="calendar-container">
-      <div class="calendar-header" id="calendarHeader"></div>
-      <div class="calendar-grid" id="calendarGrid"></div>
+    <div id="calendarOuter" class="collapse-wrapper">
+      <div id="calendarContainer" class="calendar-container">
+        <div class="calendar-header" id="calendarHeader"></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
     </div>
-    <div id="legend" class="calendar-legend">
-      <div class="legend-item">
-        <span class="legend-color day"></span>
-        <span class="legend-text">ECIN Dia</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color night"></span>
-        <span class="legend-text">ECIN Noite</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color daynight"></span>
-        <span class="legend-text">ECIN 24h</span>
+    <div id="legendOuter" class="collapse-wrapper legend-wrapper">
+      <div id="legend" class="calendar-legend">
+        <div class="legend-item">
+          <span class="legend-color day"></span>
+          <span class="legend-text">ECIN Dia</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color night"></span>
+          <span class="legend-text">ECIN Noite</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color daynight"></span>
+          <span class="legend-text">ECIN 24h</span>
+        </div>
       </div>
     </div>
   </div>
@@ -274,11 +279,24 @@
         console.error('Erro silencioso:', err);
       }
     }
+    /* ==================== MOBILE MONTH TRANSITION ==================== */
+    function toggleMobileMonthLayout(active) {
+      if (window.innerWidth > 480) return Promise.resolve();
+      return new Promise(resolve => {
+        if (active) {
+          document.body.classList.add('mobile-month-active');
+        } else {
+          document.body.classList.remove('mobile-month-active');
+        }
+        setTimeout(resolve, 500);
+      });
+    }
     /* ========================== GLOBAL STATE =========================== */
     let currentMonthIndex = null;
     let selectedDays = {};
     let selectedDayElement = null;
     let selectedDayNumber = null;
+    let isLoadingCalendar = false;
     /* ========================== LOADING DAYS =========================== */
     async function loadSelectedDaysFromSupabase(monthIndex) {
       const nint = localStorage.getItem("currentCorpNint");
@@ -318,34 +336,43 @@
       }
       return true;
     }
-    function resetCalendarUI() {
+    async function resetCalendarUI() {
       document.querySelectorAll('.availability-dec-btn')
         .forEach(b => b.classList.remove('selected'));
-      document.getElementById('calendarContainer')
-        .classList.remove('show');
-      document.getElementById('legend')
-        .classList.remove('show');
-      document.body.classList.remove('mobile-month-active');
+      document.getElementById('calendarOuter').classList.remove('show');
+      document.getElementById('legendOuter').classList.remove('show');
       currentMonthIndex = null;
+      toggleMobileMonthLayout(false);
+      if (window.applyMonthsCentering) window.applyMonthsCentering();
     }
     const BLOCKED_MONTHS = [0, 1, 2, 3, 10, 11];
     async function showCalendar(monthIndex, button) {
+      if (isLoadingCalendar) return;
       if (BLOCKED_MONTHS.includes(monthIndex)) {
-        resetCalendarUI();
+        await resetCalendarUI();
         showToast('Não é possível dar disponibilidades para DECIR no mês selecionado.', 4500);
         return;
       }
+      const calendarOuter = document.getElementById('calendarOuter');
+      const legendOuter = document.getElementById('legendOuter');
+      isLoadingCalendar = true;
       if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
         button.classList.remove('selected');
-        document.getElementById('calendarContainer').classList.remove('show');
-        document.body.classList.remove('mobile-month-active');
-        document.getElementById('legend').classList.remove('show');
+        calendarOuter.classList.remove('show');
+        legendOuter.classList.remove('show');
         currentMonthIndex = null;
+        toggleMobileMonthLayout(false);
+        if (window.applyMonthsCentering) window.applyMonthsCentering();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        isLoadingCalendar = false;
         return;
       }
       currentMonthIndex = monthIndex;
       document.querySelectorAll('.availability-dec-btn').forEach(b => b.classList.remove('selected'));
-      document.body.classList.add('mobile-month-active');
+      calendarOuter.classList.remove('show');
+      legendOuter.classList.remove('show');
+      const mainContentEl = document.querySelector('.main-content');
+      if (mainContentEl) mainContentEl.style.paddingTop = "";
       button.classList.add('selected');
       const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
       const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -354,7 +381,6 @@
       const lastDay = new Date(year, monthIndex + 1, 0);
       const calendarGrid = document.getElementById('calendarGrid');
       const calendarHeader = document.getElementById('calendarHeader');
-      const calendarContainer = document.getElementById('calendarContainer');
       calendarHeader.textContent = `${monthNames[monthIndex]} ${year}`;
       calendarGrid.innerHTML = '';
       dayNames.forEach(d => {
@@ -403,11 +429,16 @@
         calendarGrid.appendChild(el);
         dayElementsByDay[day] = el;
       }
-      calendarContainer.classList.add('show');
-      document.getElementById('legend').classList.add('show');
+      toggleMobileMonthLayout(true);
+      calendarOuter.classList.add('show');
+      legendOuter.classList.add('show');
+      calendarOuter.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
       const requestedMonth = monthIndex;
       selectedDays = await loadSelectedDaysFromSupabase(monthIndex);
-      if (currentMonthIndex !== requestedMonth) { return; }
+      if (currentMonthIndex !== requestedMonth) { isLoadingCalendar = false; return; }
       Object.keys(selectedDays).forEach(dayStr => {
         const day = parseInt(dayStr, 10);
         const value = selectedDays[dayStr];
@@ -417,6 +448,7 @@
           el.dataset.value = value;
         }
       });
+      isLoadingCalendar = false;
     }
     /* ============================== MODAL ============================== */
     function closeDispModal() {
@@ -583,6 +615,26 @@
         if (BLOCKED_MONTHS.includes(month)) {
           btn.classList.add('month-blocked');
         }
+      });
+      const monthsCard = document.querySelector('.months-card');
+      const decHeader = document.querySelector('.availability-dec-header');
+      const mainContent = document.querySelector('.main-content');
+      window.applyMonthsCentering = function applyMonthsCentering() {
+        if (window.innerWidth > 480) {
+          mainContent.style.paddingTop = "";
+          return;
+        }
+        if (currentMonthIndex !== null) return;
+        const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 60;
+        const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footer-h")) || 50;
+        const contentHeight = (decHeader ? decHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
+        const availableHeight = window.innerHeight - headerH - footerH;
+        const extra = Math.max(18, (availableHeight - contentHeight) / 2);
+        mainContent.style.paddingTop = `calc(var(--header-h) + ${extra}px)`;
+      };
+      requestAnimationFrame(() => window.applyMonthsCentering());
+      window.addEventListener('resize', () => {
+        if (currentMonthIndex === null) window.applyMonthsCentering();
       });
     });
   </script>
