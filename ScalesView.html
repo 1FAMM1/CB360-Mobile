@@ -41,12 +41,12 @@
     ============================================================ */
     .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
     .main-content::-webkit-scrollbar {display: none;}
-    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
+    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
     .scales-header {flex-shrink: 0; text-align: center; width: 100%; display: flex; flex-direction: column; align-items: flex-start;} 
     .scales-card {flex-shrink: 0;}
-    .nextserv-info-title {flex-shrink: 0;}
-    .scales-subtitle {width: 100%; text-align: center; font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
+    .scales-info-title {flex-shrink: 0;}
+    .scales-subtitle {display: flex; align-items: center; justify-content: center; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin: 0 auto -25px auto;}
     /* ============================================================
     MONTH BUTTONS (estilo grid-card / mbtn do menu principal)
     ============================================================ */
@@ -62,7 +62,13 @@
     .scales-btn.selected {background: var(--red-light); color: var(--red);}
     .scales-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
     .scales-btn div, .scales-btn span {position: relative; z-index: 2; line-height: 1.2;}
-    .btn-back {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin-top: 5px; margin-right: auto; display: none;}
+    .btn-back-wrapper {display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; width: 100%;}
+    .btn-back-wrapper.show {grid-template-rows: 1fr;}
+    .btn-back-wrapper.no-transition {transition: none !important;}
+    .btn-back-wrapper.no-transition .btn-back {transition: none !important;}
+    .btn-back-wrapper > .btn-back {min-height: 0; overflow: hidden;}
+    .btn-back {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); margin-top: 5px; margin-right: auto; opacity: 0; pointer-events: none; transition: opacity 0.25s ease, background var(--ease), transform var(--ease);}
+    .btn-back-wrapper.show .btn-back {opacity: 1; pointer-events: auto;}
     .btn-back:hover {background: var(--surface-2);}
     .btn-back:active {transform: scale(0.97);}
     .btn-back .material-icons {font-size: 18px; color: var(--red-icon);}
@@ -92,7 +98,7 @@
     NEXT SERVICES
     ============================================================ */
     .nextserv-info-title {font-size: 12px; font-weight: 700; text-align: left; color: var(--txt-2); margin: 0; background: var(--surface); padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); width: 100%; max-width: 100%; box-shadow: var(--sh-sm);}
-    .nextserv-card {margin-bottom: 5px; background: var(--surface); border-radius: var(--r-md); border: 1px solid var(--border); padding: 12px; box-shadow: var(--sh-sm); width: 100%; box-sizing: border-box; transition: transform var(--ease), box-shadow var(--ease); animation: slideDown 0.3s ease forwards; cursor: pointer;}
+    .nextserv-card {margin-bottom: 5px; background: var(--surface); border-radius: var(--r-md); border: 1px solid var(--border); padding: 12px; box-shadow: var(--sh-sm); width: 100%; box-sizing: border-box; transition: transform var(--ease), box-shadow var(--ease); animation: slideDown 0.18s ease forwards; cursor: pointer;}
     .nextserv-card:hover {box-shadow: var(--sh-md); transform: translateY(-1px);}
     .nextserv-type {text-align: left; margin-bottom: 4px;}
     .nextserv-type .label {font-size: 12.5px; font-weight: 700; color: var(--txt-2);}
@@ -149,7 +155,7 @@
       .scales-subtitle {font-size: 0.95em;}
       .scales-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
       .scales-btn .material-icons {font-size: 19px;}
-      .main-content {padding-left: 14px; padding-right: 14px; justify-content: center; align-items: center;}
+      .main-content {padding-left: 14px; padding-right: 14px;}
     }
     @media (min-width: 769px) {
       .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
@@ -158,7 +164,9 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';" onload="this.style.display='block';">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">ESCALAS</span>
       <span class="header-sub">Piquetes · Decir · Extras · SBA · OPAT</span>
@@ -168,10 +176,12 @@
   <div class="main-content">
     <div class="scales-header">
   <p class="scales-subtitle" id="scalesSubtitle">Selecione o mês:</p>
-  <button id="btnBackToMonths" class="btn-back" style="display: none;">
-    <span class="material-icons">arrow_back</span>
-    <span>Voltar aos Meses</span>
-  </button>
+  <div id="btnBackWrapper" class="btn-back-wrapper">
+    <button id="btnBackToMonths" class="btn-back">
+      <span class="material-icons">arrow_back</span>
+      <span>Voltar aos Meses</span>
+    </button>
+  </div>
 </div>
     <div class="months-card">
       <div class="scales-buttons">
@@ -252,9 +262,9 @@
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
     function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
-      const corp  = getCorp();
-      const nint  = getNInt();
-      const token = localStorage.getItem("authToken");
+      const corp = getCorp();
+      const nint = getNInt();
+      const token = localStorage.getItem("authToken")';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -459,7 +469,8 @@
         console.error("Erro ao carregar extras", err);
         renderServiceChips("extrasSection", "extrasChips", []);
       }
-    } 
+    }
+ 
     /* ============================= SBA LOADING =========================== */
     async function loadSbaMonth(monthIndex) {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -534,10 +545,10 @@
         openServiceModal(`${info.tipo} - ${dateText}`, elements);
       });      
       setTimeout(() => {
-        card.style.transition = 'all 0.3s ease';
+        card.style.transition = 'all 0.18s ease';
         card.style.opacity = '1';
         card.style.transform = 'translateY(0)';
-      }, index * 150);      
+      }, index * 60);      
       return card;
     }
     function getServiceInfo(code) {
@@ -770,7 +781,32 @@
       const mesesSemDecir = [0, 1, 2, 3, 10, 11];
       const monthsCard = document.querySelector(".months-card");
       const btnBack = document.getElementById("btnBackToMonths");
+      const btnBackWrapper = document.getElementById("btnBackWrapper");
       const scalesSubtitle = document.getElementById("scalesSubtitle");
+      const scalesHeader = document.querySelector(".scales-header");
+      const mainContent = document.querySelector(".main-content");
+      function applyMonthsCentering() {
+        if (window.innerWidth > 480) {
+          mainContent.style.paddingTop = "";
+          return;
+        }
+        const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 60;
+        const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footer-h")) || 50;
+        const contentHeight = (scalesHeader ? scalesHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
+        const availableHeight = window.innerHeight - headerH - footerH;
+        const extra = Math.max(18, (availableHeight - contentHeight) / 2);
+        mainContent.style.paddingTop = `calc(var(--header-h) + ${extra}px)`;
+      }
+      function hideBackButtonInstant() {
+        btnBackWrapper.classList.add("no-transition");
+        btnBackWrapper.classList.remove("show");
+        void btnBackWrapper.offsetHeight;
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            btnBackWrapper.classList.remove("no-transition");
+          });
+        });
+      }
       function hideAllServiceCards() {
         document.getElementById("servicesCard").style.display = "none";
         document.getElementById("picketsSection").style.display = "none";
@@ -790,13 +826,18 @@
         currentFetchRequestId++;
         selectedMonth = null;
         document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
-        btnBack.style.display = "none";
+        hideBackButtonInstant();
         hideAllServiceCards();
         monthsCard.style.display = "block";
         if (scalesSubtitle) scalesSubtitle.style.display = "block";
         toggleMobileMonthLayout(false);
+        requestAnimationFrame(() => applyMonthsCentering());
       }
       btnBack.addEventListener("click", resetToMonthsView);
+      requestAnimationFrame(() => applyMonthsCentering());
+      window.addEventListener("resize", () => {
+        if (selectedMonth === null) applyMonthsCentering();
+      });
       document.querySelectorAll(".scales-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
           const month = parseInt(btn.dataset.month, 10);
@@ -806,7 +847,8 @@
           selectedMonth = month;
           monthsCard.style.display = "none";
           if (scalesSubtitle) scalesSubtitle.style.display = "none";
-          btnBack.style.display = "inline-flex";
+          hideBackButtonInstant();
+          mainContent.style.paddingTop = "";
           await toggleMobileMonthLayout(true);
           hideAllServiceCards();
           if (requestId !== currentFetchRequestId) return;
@@ -823,6 +865,7 @@
           await Promise.all(loaders);
           if (requestId !== currentFetchRequestId) return;
           updateSectionDividers();
+          btnBackWrapper.classList.add("show");
           if (month >= today.getMonth()) {
             await loadNextServicesUnified(month);
             if (requestId !== currentFetchRequestId) return;
