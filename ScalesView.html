@@ -39,18 +39,18 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 7px; transition: padding-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
     .main-content::-webkit-scrollbar {display: none;}
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
     .scales-header {flex-shrink: 0; text-align: center; width: 100%; display: flex; flex-direction: column; align-items: flex-start;} 
     .scales-card {flex-shrink: 0;}
     .scales-info-title {flex-shrink: 0;}
-    .scales-subtitle {display: flex; align-items: center; justify-content: center; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin: 0 auto -25px auto;}
+    .scales-subtitle {display: flex; align-items: center; justify-content: center; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin: -3px auto -9px auto;}
     /* ============================================================
     MONTH BUTTONS (estilo grid-card / mbtn do menu principal)
     ============================================================ */
-    .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; margin-bottom: 4px; flex-shrink: 0; animation: fadeInSoft 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+    .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; flex-shrink: 0;}
     .scales-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
     .scales-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; line-height: 1.2; transition: background var(--ease), color var(--ease);}
     .scales-btn:nth-child(3n) {border-right: none;}
@@ -66,21 +66,25 @@
     .btn-back-wrapper.show {grid-template-rows: 1fr;}
     .btn-back-wrapper.no-transition {transition: none !important;}
     .btn-back-wrapper.no-transition .btn-back {transition: none !important;}
-    .btn-back-wrapper > .btn-back {min-height: 0; overflow: hidden;}
-    .btn-back {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); margin-top: 5px; margin-right: auto; opacity: 0; pointer-events: none; transition: opacity 0.25s ease, background var(--ease), transform var(--ease);}
+    .btn-back-wrapper > .btn-back-row {min-height: 0; overflow: hidden;}
+    .btn-back-row {display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 8px; margin-top: 5px;}
+    .btn-back {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); opacity: 0; pointer-events: none; transition: opacity 0.25s ease, background var(--ease), transform var(--ease);}
     .btn-back-wrapper.show .btn-back {opacity: 1; pointer-events: auto;}
     .btn-back:hover {background: var(--surface-2);}
     .btn-back:active {transform: scale(0.97);}
     .btn-back .material-icons {font-size: 18px; color: var(--red-icon);}
+    .month-badge {cursor: default;}
+    .month-badge:hover {background: var(--surface);}
+    .month-badge:active {transform: none;}
     /* ============================================================
     RESULT CARDS (piquetes / decir / extras)
     ============================================================ */
-    .scales-card {display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%;}
+    .scales-card {display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%; margin: -10px 0 -4px 0;}
     .scales-card span.card-title {font-weight: 700; margin-bottom: 0; font-size: 13px; color: var(--txt-1); letter-spacing: 0.3px;}
     .scales-card span.values {display: block; font-size: 13px; color: var(--txt-2);}
     .loading-spinner {display: inline-block; width: 14px; height: 14px; border: 2px solid var(--red); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle;}
     .error-message {color: #e74c3c; font-weight: 600; font-size: 13px;}
-    .services-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); width: 100%; max-width: 100%; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; animation: fadeInSoft 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+    .services-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); width: 100%; max-width: 100%; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; animation: fadeInSoft 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin:-5px 0 5px 0;}
     .services-section {display: flex; flex-direction: column; gap: 9px; animation: fadeInSoft 0.35s cubic-bezier(0.4, 0, 0.2, 1);}
     .services-section.section-divider {padding-top: 14px; border-top: 1px solid var(--border);}
     .services-section-title {display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.5px;}
@@ -164,9 +168,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
-         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
-         onload="this.style.display='block';">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">ESCALAS</span>
       <span class="header-sub">Piquetes · Decir · Extras · SBA · OPAT</span>
@@ -177,10 +179,16 @@
     <div class="scales-header">
   <p class="scales-subtitle" id="scalesSubtitle">Selecione o mês:</p>
   <div id="btnBackWrapper" class="btn-back-wrapper">
-    <button id="btnBackToMonths" class="btn-back">
-      <span class="material-icons">arrow_back</span>
-      <span>Voltar aos Meses</span>
-    </button>
+    <div class="btn-back-row">
+      <button id="btnBackToMonths" class="btn-back">
+        <span class="material-icons">arrow_back</span>
+        <span>Voltar aos Meses</span>
+      </button>
+      <div id="selectedMonthBadge" class="btn-back month-badge">
+        <span id="selectedMonthIcon" class="material-icons"></span>
+        <span id="selectedMonthName"></span>
+      </div>
+    </div>
   </div>
 </div>
     <div class="months-card">
@@ -260,10 +268,10 @@
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getNInt() {return localStorage.getItem("currentCorpNint"); }
     function getSupabaseHeaders(options = {}) {
-      const corp = getCorp();
-      const nint = getNInt();
+      const corp  = getCorp();
+      const nint  = getNInt();
       const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
@@ -450,6 +458,26 @@
         renderServiceChips("decirSection", "decirChips", []);
       }
     }
+    /* ========================= EXTRAS LOADING ========================== */
+    async function loadExtrasMonth(monthIndex) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nintCorp = validateCorpData();
+      if (!nintCorp) return;
+      const month = monthIndex + 1;
+      const yearToFetch = getWorkYear(monthIndex);
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_extras?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.EX&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) return renderServiceChips("extrasSection", "extrasChips", []);
+        const data = await response.json();
+        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
+          .map(d => ({ day: d.day, type: "EX", suffix: "D" }));
+        renderServiceChips("extrasSection", "extrasChips", items);
+      } catch (err) {
+        console.error("Erro ao carregar extras", err);
+        renderServiceChips("extrasSection", "extrasChips", []);
+      }
+    } 
     /* ============================= SBA LOADING =========================== */
     async function loadSbaMonth(monthIndex) {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -458,7 +486,7 @@
       const month = monthIndex + 1;
       const yearToFetch = getWorkYear(monthIndex);
       try {
-        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.SB&corp_oper_nr=eq.${corpOperNr}`;        
+        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.SB&corp_oper_nr=eq.${corpOperNr}`;
         const response = await fetch(url, { headers: getSupabaseHeaders() });
         if (!response.ok) return renderServiceChips("sbaSection", "sbaChips", []);
         const data = await response.json();
@@ -490,26 +518,6 @@
         renderServiceChips("opatSection", "opatChips", []);
       }
     }
-    /* ========================= EXTRAS LOADING ========================== */
-    async function loadExtrasMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
-      const nintCorp = validateCorpData();
-      if (!nintCorp) return;
-      const month = monthIndex + 1;
-      const yearToFetch = getWorkYear(monthIndex);
-      try {
-        const url = `${SUPABASE_URL}/rest/v1/reg_extras?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.EX&corp_oper_nr=eq.${corpOperNr}`;
-        const response = await fetch(url, { headers: getSupabaseHeaders() });
-        if (!response.ok) return renderServiceChips("extrasSection", "extrasChips", []);
-        const data = await response.json();
-        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
-          .map(d => ({ day: d.day, type: "EX", suffix: "D" }));
-        renderServiceChips("extrasSection", "extrasChips", items);
-      } catch (err) {
-        console.error("Erro ao carregar extras", err);
-        renderServiceChips("extrasSection", "extrasChips", []);
-      }
-    } 
     /* ===================== CREATE NEXT SERVICE CARD ==================== */
     function createServiceCard(service, index = 0) {
       const card = document.createElement("div");
@@ -784,6 +792,8 @@
       const scalesSubtitle = document.getElementById("scalesSubtitle");
       const scalesHeader = document.querySelector(".scales-header");
       const mainContent = document.querySelector(".main-content");
+      const selectedMonthIcon = document.getElementById("selectedMonthIcon");
+      const selectedMonthName = document.getElementById("selectedMonthName");
       function applyMonthsCentering() {
         if (window.innerWidth > 480) {
           mainContent.style.paddingTop = "";
@@ -844,6 +854,10 @@
           document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
           btn.classList.add("selected");
           selectedMonth = month;
+          const btnIconText = btn.querySelector(".material-icons") ? btn.querySelector(".material-icons").textContent : "";
+          const btnNameText = btn.querySelector("div") ? btn.querySelector("div").textContent : "";
+          if (selectedMonthIcon) selectedMonthIcon.textContent = btnIconText;
+          if (selectedMonthName) selectedMonthName.textContent = btnNameText;
           monthsCard.style.display = "none";
           if (scalesSubtitle) scalesSubtitle.style.display = "none";
           hideBackButtonInstant();
