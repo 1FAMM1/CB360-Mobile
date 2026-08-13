@@ -3,11 +3,11 @@
   "short_name": "CB360 Mobile",
   "description": "Sistema de Gestão CB360",
   "start_url": "index.html",
-  "scope": "/", 
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#2c3e50",
-  "theme_color": "#2c3e50",
+  "background_color": "#f4f3f1",
+  "theme_color": "#c62828",
   "icons": [
     {
       "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360.png",
