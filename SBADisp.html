@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
   <meta name="theme-color" content="#c62828">
-  <title>CB360 Mobile - Disponibilidades SPA/PAT</title>
+  <title>CB360 Mobile - Disponibilidades SBA</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -35,17 +35,17 @@
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
-    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    .header-sub {font-size: 9.5px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
     .main-content::-webkit-scrollbar {display: none;}
-    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px); justify-content: flex-start !important; align-items: stretch !important;}
-    .main-content.slide-out, .main-content.slide-in {transform: none;}
-    .main-content.content-blur {filter: blur(2px); pointer-events: none;}
-    .availability-sbas-header {flex-shrink: 0; text-align: center; width: 100%;}
-    .availability-sbas-subtitle {font-size: 1.1em; font-weight: 600; color: var(--txt-2); transition: color var(--ease);}
+    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
+    .availability-sbas-header {flex-shrink: 0; text-align: center; width: 100%; display: flex; flex-direction: column; align-items: flex-start;} 
+    .availability-sbas-card {flex-shrink: 0;}
+    .availability-sbas-info-title {flex-shrink: 0;}
+    .availability-sbas-subtitle {display: flex; align-items: center; justify-content: center; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin: 0 auto 0 auto;}
     /* ============================================================
     MONTH BUTTONS (mesmo estilo grid-card / mbtn da página Escalas)
     ============================================================ */
@@ -64,8 +64,11 @@
     /* ============================================================
     CALENDAR CARD
     ============================================================ */
-    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%; display: none;}
-    .calendar-container.show {display: block; animation: slideDown 0.3s ease;}
+    .collapse-wrapper {display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(-10px); width: 100%; transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
+    .collapse-wrapper > * {min-height: 0; overflow: hidden;}
+    .collapse-wrapper.show {grid-template-rows: 1fr; opacity: 1; transform: translateY(0);}
+    .collapse-wrapper.legend-wrapper {transition-delay: 0.06s;}
+    .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%;}
     .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
     .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
     .calendar-day-header {text-align: center; font-weight: 700; padding: 6px 0; font-size: 11px; color: var(--txt-3);}
@@ -79,8 +82,7 @@
     /* ============================================================
     LEGEND
     ============================================================ */
-    .calendar-legend {display: none; width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm); justify-content: center; align-items: center; padding: 10px 16px; gap: 30px; font-size: 12.5px;}
-    .calendar-legend.show {display: flex;}
+    .calendar-legend {width: 100%; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm); display: flex; justify-content: center; align-items: center; padding: 10px 16px; gap: 30px; font-size: 12.5px;}
     .legend-item {display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--txt-2); font-weight: 600;}
     .legend-color {width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);}
     .legend-color.sbas {background: linear-gradient(135deg, #00897b, #00695c, #004d40);}
@@ -96,7 +98,6 @@
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
-    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
     /* ============================================================
     RESPONSIVE
     ============================================================ */
@@ -105,7 +106,7 @@
       .availability-sbas-subtitle {font-size: 0.95em;}
       .availability-sbas-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
       .availability-sbas-btn .material-icons {font-size: 19px;}
-      .main-content {padding-left: 14px; padding-right: 14px; justify-content: center; align-items: center;}
+      .main-content {padding-left: 14px; padding-right: 14px;}
     }
     @media (min-width: 769px) {
       .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
@@ -143,15 +144,19 @@
         <button class="availability-sbas-btn" data-month="11" onclick="showCalendar(11, this)"><span class="material-icons">celebration</span><div>Dezembro</div></button>
       </div>
     </div>
-    <div id="calendarContainer" class="calendar-container">
-      <div class="calendar-header" id="calendarHeader"></div>
-      <div class="calendar-grid" id="calendarGrid"></div>
+    <div id="calendarOuter" class="collapse-wrapper">
+      <div id="calendarContainer" class="calendar-container">
+        <div class="calendar-header" id="calendarHeader"></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
     </div>
-    <div id="legend" class="calendar-legend">
-      <div class="legend-item">
-        <span class="legend-color sbas"></span>
-        <span class="legend-text">SBA</span>
-       </div>      
+    <div id="legendOuter" class="collapse-wrapper legend-wrapper">
+      <div id="legend" class="calendar-legend">
+        <div class="legend-item">
+          <span class="legend-color sbas"></span>
+          <span class="legend-text">SBA</span>
+         </div>      
+      </div>
     </div>
   </div>
   <footer class="footer">
@@ -224,6 +229,18 @@
         console.error('Erro silencioso:', err);
       }
     }
+    /* ==================== MOBILE MONTH TRANSITION ==================== */
+    function toggleMobileMonthLayout(active) {
+      if (window.innerWidth > 480) return Promise.resolve();
+      return new Promise(resolve => {
+        if (active) {
+          document.body.classList.add('mobile-month-active');
+        } else {
+          document.body.classList.remove('mobile-month-active');
+        }
+        setTimeout(resolve, 500);
+      });
+    }
     /* ======================== CALENDAR DISPLAY ========================= */
     let currentMonthIndex = null;
     let selectedDays = [];
@@ -263,20 +280,26 @@
     async function showCalendar(monthIndex, button) {
       if (isLoadingCalendar) return;
       const calendarContainer = document.getElementById('calendarContainer');
-      const legend = document.getElementById('legend');
+      const calendarOuter = document.getElementById('calendarOuter');
+      const legendOuter = document.getElementById('legendOuter');
       isLoadingCalendar = true;
       if (currentMonthIndex === monthIndex && button.classList.contains('selected')) {
         button.classList.remove('selected');
-        calendarContainer.classList.remove('show');
-        legend.classList.remove('show');
-        document.body.classList.remove('mobile-month-active');
+        calendarOuter.classList.remove('show');
+        legendOuter.classList.remove('show');
         currentMonthIndex = null;
+        toggleMobileMonthLayout(false);
+        if (window.applyMonthsCentering) window.applyMonthsCentering();
+        await new Promise(resolve => setTimeout(resolve, 500));
         isLoadingCalendar = false;
         return;
       }
       currentMonthIndex = monthIndex;
       document.querySelectorAll('.availability-sbas-btn').forEach(btn => btn.classList.remove('selected'));
-      document.body.classList.add('mobile-month-active');
+      calendarOuter.classList.remove('show');
+      legendOuter.classList.remove('show');
+      const mainContentEl = document.querySelector('.main-content');
+      if (mainContentEl) mainContentEl.style.paddingTop = "";
       button.classList.add('selected');
       const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
       const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -370,9 +393,10 @@
         calendarGrid.appendChild(dayElement);
         dayElementsByDate[dateStr] = dayElement;
       }
-      calendarContainer.classList.add('show');
-      legend.classList.add('show');
-      calendarContainer.scrollIntoView({
+      toggleMobileMonthLayout(true);
+      calendarOuter.classList.add('show');
+      legendOuter.classList.add('show');
+      calendarOuter.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest'
       });
@@ -518,6 +542,26 @@
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
       }
+      const monthsCard = document.querySelector('.months-card');
+      const sbasHeader = document.querySelector('.availability-sbas-header');
+      const mainContent = document.querySelector('.main-content');
+      window.applyMonthsCentering = function applyMonthsCentering() {
+        if (window.innerWidth > 480) {
+          mainContent.style.paddingTop = "";
+          return;
+        }
+        if (currentMonthIndex !== null) return;
+        const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 60;
+        const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footer-h")) || 50;
+        const contentHeight = (sbasHeader ? sbasHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
+        const availableHeight = window.innerHeight - headerH - footerH;
+        const extra = Math.max(18, (availableHeight - contentHeight) / 2);
+        mainContent.style.paddingTop = `calc(var(--header-h) + ${extra}px)`;
+      };
+      requestAnimationFrame(() => window.applyMonthsCentering());
+      window.addEventListener('resize', () => {
+        if (currentMonthIndex === null) window.applyMonthsCentering();
+      });
     });
   </script>
 </body>
