@@ -10,13 +10,13 @@
   "theme_color": "#c62828",
   "icons": [
     {
-      "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360.png",
+      "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_app_Background.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360.png",
+      "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_app_Background.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
