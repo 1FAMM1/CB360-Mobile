@@ -39,7 +39,7 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
     .main-content::-webkit-scrollbar {display: none;}
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
     .main-content.content-blur {filter: blur(2px); pointer-events: none;}    
@@ -92,7 +92,7 @@
     /* ============================================================
     VACATIONS SUMMARY CARD (novo)
     ============================================================ */
-    .vacations-summary-card {width: 100%; margin-top: -40px; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: var(--r-md); padding: 14px 16px; box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), transform var(--ease), box-shadow var(--ease), opacity 0.3s ease;}
+    .vacations-summary-card {width: 100%; margin-top: -35px; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: var(--r-md); padding: 14px 16px; box-shadow: var(--sh-sm); cursor: pointer; transition: background var(--ease), transform var(--ease), box-shadow var(--ease), opacity 0.3s ease;}
     .vacations-summary-card:hover {background: var(--surface-2); transform: translateY(-1px); box-shadow: var(--sh-md);}
     .vacations-summary-card:active {transform: translateY(0);}
     .vacations-summary-card.hidden {display: none;}
