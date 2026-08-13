@@ -264,7 +264,7 @@
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken")';
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -450,27 +450,6 @@
         renderServiceChips("decirSection", "decirChips", []);
       }
     }
-    /* ========================= EXTRAS LOADING ========================== */
-    async function loadExtrasMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
-      const nintCorp = validateCorpData();
-      if (!nintCorp) return;
-      const month = monthIndex + 1;
-      const yearToFetch = getWorkYear(monthIndex);
-      try {
-        const url = `${SUPABASE_URL}/rest/v1/reg_extras?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.EX&corp_oper_nr=eq.${corpOperNr}`;
-        const response = await fetch(url, { headers: getSupabaseHeaders() });
-        if (!response.ok) return renderServiceChips("extrasSection", "extrasChips", []);
-        const data = await response.json();
-        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
-          .map(d => ({ day: d.day, type: "EX", suffix: "D" }));
-        renderServiceChips("extrasSection", "extrasChips", items);
-      } catch (err) {
-        console.error("Erro ao carregar extras", err);
-        renderServiceChips("extrasSection", "extrasChips", []);
-      }
-    }
- 
     /* ============================= SBA LOADING =========================== */
     async function loadSbaMonth(monthIndex) {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -479,7 +458,7 @@
       const month = monthIndex + 1;
       const yearToFetch = getWorkYear(monthIndex);
       try {
-        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.SB&corp_oper_nr=eq.${corpOperNr}`;
+        const url = `${SUPABASE_URL}/rest/v1/reg_serv?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.SB&corp_oper_nr=eq.${corpOperNr}`;        
         const response = await fetch(url, { headers: getSupabaseHeaders() });
         if (!response.ok) return renderServiceChips("sbaSection", "sbaChips", []);
         const data = await response.json();
@@ -511,6 +490,26 @@
         renderServiceChips("opatSection", "opatChips", []);
       }
     }
+    /* ========================= EXTRAS LOADING ========================== */
+    async function loadExtrasMonth(monthIndex) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nintCorp = validateCorpData();
+      if (!nintCorp) return;
+      const month = monthIndex + 1;
+      const yearToFetch = getWorkYear(monthIndex);
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_extras?select=day,value&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&value=eq.EX&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) return renderServiceChips("extrasSection", "extrasChips", []);
+        const data = await response.json();
+        const items = data.filter(d => d.day && d.value).sort((a, b) => a.day - b.day)
+          .map(d => ({ day: d.day, type: "EX", suffix: "D" }));
+        renderServiceChips("extrasSection", "extrasChips", items);
+      } catch (err) {
+        console.error("Erro ao carregar extras", err);
+        renderServiceChips("extrasSection", "extrasChips", []);
+      }
+    } 
     /* ===================== CREATE NEXT SERVICE CARD ==================== */
     function createServiceCard(service, index = 0) {
       const card = document.createElement("div");
