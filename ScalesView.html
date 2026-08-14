@@ -36,10 +36,10 @@
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}    
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);}    
     .main-content::-webkit-scrollbar {display: none;}
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
@@ -84,12 +84,14 @@
     .scales-card span.values {display: block; font-size: 13px; color: var(--txt-2);}
     .loading-spinner {display: inline-block; width: 14px; height: 14px; border: 2px solid var(--red); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle;}
     .error-message {color: #e74c3c; font-weight: 600; font-size: 13px;}
-    .attendance-card {display: flex; flex-direction: row; align-items: stretch; justify-content: center; gap: 10px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%; margin: 0px 0 0px 0; padding: 12px;}
-    .attendance-stat {flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px 6px; border-radius: var(--r-sm);}
-    .attendance-stat + .attendance-stat {border-left: 1px solid var(--border);}
+    .attendance-card {display: flex; flex-direction: row; align-items: stretch; justify-content: center; gap: 5px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%; margin: 0px 0 0px 0; padding: 12px;}
+    .attendance-stat {flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 6px 6px 10px; border-radius: var(--r-sm); background: var(--surface-2); border-left: 3px solid transparent;}
+    .attendance-stat.comparencias-stat { border-left-color: #2ecc71; }
+    .attendance-stat.faltas-stat { border-left-color: #e74c3c; }
+    .attendance-stat.dispensas-stat { border-left-color: #ffffff; }
     .attendance-stat .attendance-label {font-size: 11.5px; font-weight: 700; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.3px;}
     .attendance-stat .attendance-value {font-size: 20px; font-weight: 700; color: var(--red); margin-top: 2px;}
-    .services-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); width: 100%; max-width: 100%; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; animation: fadeInSoft 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin:-5px 0 5px 0;}
+    .services-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); width: 100%; max-width: 100%; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; animation: fadeInSoft 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin:-5px 0 1px 0;}
     .services-section {display: flex; flex-direction: column; gap: 9px; animation: fadeInSoft 0.35s cubic-bezier(0.4, 0, 0.2, 1);}
     .services-section.section-divider {padding-top: 14px; border-top: 1px solid var(--border);}
     .services-section-title {display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.5px;}
@@ -223,13 +225,17 @@
       </div>
     </div>
     <div id="attendanceCard" class="attendance-card" style="display:none;">
-      <div class="attendance-stat">
+      <div class="attendance-stat comparencias-stat">
         <span class="attendance-label">Comparências</span>
-        <span class="attendance-value" id="attendancePresences">0</span>
+        <span class="attendance-value" id="attendancePresences" style="color: #2ecc71;">0</span>
       </div>
-      <div class="attendance-stat">
+      <div class="attendance-stat faltas-stat">
         <span class="attendance-label">Faltas</span>
         <span class="attendance-value" id="attendanceAbsences">0</span>
+      </div>
+      <div class="attendance-stat dispensas-stat">
+        <span class="attendance-label">Dispensas</span>
+        <span class="attendance-value" id="attendanceDispensas" style="color: #ffffff;">0</span>
       </div>
     </div>
     <div id="servicesCard" class="services-card" style="display:none;">
@@ -474,6 +480,7 @@
         const norm = (s) => (s || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         let appearances = 0;
         let absences = 0;
+        let dispensas = 0;
         data.forEach(row => {
           const dayNum = parseInt(row.day, 10);
           const t = norm(row.shift_type);
@@ -484,11 +491,13 @@
             absences++;
             if (dayNum) currentMonthAttendanceMap[dayNum] = 'red';
           } else if (t.includes("dispensa")) {
+            dispensas++;
             if (dayNum) currentMonthAttendanceMap[dayNum] = 'white';
           }
         });
         document.getElementById("attendancePresences").textContent = appearances;
         document.getElementById("attendanceAbsences").textContent = absences;
+        document.getElementById("attendanceDispensas").textContent = dispensas;
         const isPastOrCurrent = (yearToFetch < currentYear) || (yearToFetch === currentYear && monthIndex <= currentMonth);
         if (isPastOrCurrent) {
           card.style.display = "flex";
