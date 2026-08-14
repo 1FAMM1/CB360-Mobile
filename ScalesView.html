@@ -17,11 +17,11 @@
     :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
-           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa; --dispensa: #607d8b;}
     /* ============================================================
     DARK MODE
     ============================================================ */
-    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff; --dispensa: #ffffff;}
     /* ============================================================
     RESET & BASE
     ============================================================ */
@@ -86,9 +86,9 @@
     .error-message {color: #e74c3c; font-weight: 600; font-size: 13px;}
     .attendance-card {display: flex; flex-direction: row; align-items: stretch; justify-content: center; gap: 5px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%; margin: 0px 0 0px 0; padding: 12px;}
     .attendance-stat {flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 6px 6px 10px; border-radius: var(--r-sm); background: var(--surface-2); border-left: 3px solid transparent;}
-    .attendance-stat.comparencias-stat { border-left-color: #2ecc71; }
-    .attendance-stat.faltas-stat { border-left-color: #e74c3c; }
-    .attendance-stat.dispensas-stat { border-left-color: #ffffff; }
+    .attendance-stat.comparencias-stat {border-left-color: #2ecc71;}
+    .attendance-stat.faltas-stat {border-left-color: #e74c3c;}
+    .attendance-stat.dispensas-stat {border-left-color: var(--dispensa);}
     .attendance-stat .attendance-label {font-size: 11.5px; font-weight: 700; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.3px;}
     .attendance-stat .attendance-value {font-size: 20px; font-weight: 700; color: var(--red); margin-top: 2px;}
     .services-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); width: 100%; max-width: 100%; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; animation: fadeInSoft 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin:-5px 0 1px 0;}
@@ -101,7 +101,7 @@
     .day-chip .attendance-dot {position: absolute;top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%; border: 0px solid #666;}
     .day-chip .attendance-dot.green {background-color: #2ecc71; box-shadow: 0 0 5px 1px rgba(46, 204, 113, 0.85); animation: dotPulse-green 1.8s ease-in-out infinite;}
     .day-chip .attendance-dot.red {background-color: #e74c3c; box-shadow: 0 0 5px 1px rgba(231, 76, 60, 0.85); animation: dotPulse-red 1.8s ease-in-out infinite;}
-    .day-chip .attendance-dot.white {background-color: #ffffff; box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.9); animation: dotPulse-white 1.8s ease-in-out infinite;}
+    .day-chip .attendance-dot.white {background-color: var(--dispensa); box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.9); animation: dotPulse-white 1.8s ease-in-out infinite;}
     @keyframes dotPulse-green {0%, 100% {box-shadow: 0 0 2px 1px rgba(46, 204, 113, 0.7); transform: scale(1);} 50% {box-shadow: 0 0 5px 2px rgba(46, 204, 113, 1); transform: scale(1.15);}}
     @keyframes dotPulse-red {0%, 100% {box-shadow: 0 0 2px 1px rgba(231, 76, 60, 0.7); transform: scale(1);} 50% {box-shadow: 0 0 5px 2px rgba(231, 76, 60, 1); transform: scale(1.15);}}
     @keyframes dotPulse-white {0%, 100% {box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.75); transform: scale(1);} 50% {box-shadow: 0 0 5px 2px rgba(255, 255, 255, 1); transform: scale(1.15);}}
@@ -235,7 +235,7 @@
       </div>
       <div class="attendance-stat dispensas-stat">
         <span class="attendance-label">Dispensas</span>
-        <span class="attendance-value" id="attendanceDispensas" style="color: #ffffff;">0</span>
+        <span class="attendance-value" id="attendanceDispensas" style="color: var(--dispensa);">0</span>
       </div>
     </div>
     <div id="servicesCard" class="services-card" style="display:none;">
@@ -962,10 +962,10 @@
           await toggleMobileMonthLayout(true);
           hideAllServiceCards();
           if (requestId !== currentFetchRequestId) return;
-          const today = new Date();
-          await loadAttendanceMonth(month);
+          const today = new Date();          
           if (requestId !== currentFetchRequestId) return;
           const loaders = [
+            loadAttendanceMonth(month),
             loadPicketsMonth(month),
             loadExtrasMonth(month),
             loadSbaMonth(month),
