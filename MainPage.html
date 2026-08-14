@@ -21,33 +21,27 @@
     /* ============================================================
     DARK MODE (classe .dark aplicada ao <body>)
     ============================================================ */
-    .dark {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
-           --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
+    .dark {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
     /* ============================================================
     RESET & BASE
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100vh; height: 100svh; overflow: hidden; display: flex; flex-direction: column;
-          user-select: none; transition: background var(--ease), color var(--ease);}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100vh; height: 100svh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER
     ============================================================ */
-    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; align-items: baseline; gap: 7px;}
     .header-title {font-size: 20px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 2.5px; color: rgba(255,255,255,0.65); text-transform: uppercase;}
     .header-controls {position: fixed; top: 0; right: 12px; height: var(--header-h); display: flex; align-items: center; gap: 8px; z-index: 101;}
-    .hctrl {width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.20); display: flex; align-items: center;
-            justify-content: center; cursor: pointer; color: white; font-size: 15px; transition: background var(--ease), transform var(--ease);}
+    .hctrl {width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.20); display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 15px; transition: background var(--ease), transform var(--ease);}
     .hctrl:hover {background: rgba(255,255,255,0.25);}
     .hctrl:active {transform: scale(0.92);}
-    .theme-pill {width: 46px; height: 24px; border-radius: 20px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.22); position: relative; cursor: pointer;
-                 transition: background var(--ease);}
-    .theme-pill::before {content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left var(--ease);
-                         box-shadow: 0 1px 3px rgba(0,0,0,0.2);}
+    .theme-pill {width: 46px; height: 24px; border-radius: 20px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.22); position: relative; cursor: pointer; transition: background var(--ease);}
+    .theme-pill::before {content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left var(--ease); box-shadow: 0 1px 3px rgba(0,0,0,0.2);}
     .dark .theme-pill::before {left: 25px;}
     .theme-pill .t-sun {position: absolute; left: 5px;  top: 50%; transform: translateY(-50%); font-size: 12px; color:#fff;}
     .theme-pill .t-moon {position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-size: 12px; opacity: 0.5; color:#fff;}
@@ -57,19 +51,15 @@
     /* ============================================================
     DROPDOWN MENU
     ============================================================ */
-    .menu-dropdown {position: fixed; top: calc(var(--header-h) + 8px); right: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
-                    box-shadow: var(--sh-lg); padding: 5px; min-width: 200px; opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.98); transform-origin: top right;
-                    transition: all var(--ease); z-index: 102;}
+    .menu-dropdown {position: fixed; top: calc(var(--header-h) + 8px); right: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-lg); padding: 5px; min-width: 200px; opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.98); transform-origin: top right; transition: all var(--ease); z-index: 102;}
     .menu-dropdown.open {opacity: 1; visibility: visible; transform: translateY(0) scale(1);}
-    .menu-item {display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--r-sm); font-size:13px; font-weight:500; color:var(--txt-2); cursor:pointer; 
-                transition:background var(--ease), color var(--ease);}
+    .menu-item {display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--r-sm); font-size:13px; font-weight:500; color:var(--txt-2); cursor:pointer;  transition:background var(--ease), color var(--ease);}
     .menu-item:hover {background:var(--surface-2); color:var(--txt-1);}
     .menu-item .material-icons {font-size:16px; width:18px; text-align:center; color:var(--txt-2); flex-shrink:0;}
     /* ============================================================
     MAIN SCROLL AREA
     ============================================================ */
-    .main {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 16px); padding-bottom: calc(var(--footer-h) + 16px); padding-left: 14px; padding-right: 14px;
-           display: flex; flex-direction: column; gap: 12px;}
+    .main {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 16px); padding-bottom: calc(var(--footer-h) + 16px); padding-left: 14px; padding-right: 14px; display: flex; flex-direction: column; gap: 12px;}
     .main::-webkit-scrollbar {display: none;}
     /* ============================================================
     WELCOME ROW
@@ -78,19 +68,16 @@
     .welcome-text .label {font-size: 14px; font-weight: 400; color: var(--txt-3); margin-bottom: 2px;}
     .welcome-text .name {font-size: 18px; font-weight: 600; color: var(--txt-1); letter-spacing: -0.2px;}
     .welcome-right {display: flex; align-items: center; gap: 9px;}
-    .bell-wrap {position: relative; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center;
-                justify-content: center; cursor: pointer; box-shadow: var(--sh-sm); transition: box-shadow var(--ease), background var(--ease);}
+    .bell-wrap {position: relative; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--sh-sm); transition: box-shadow var(--ease), background var(--ease);}
     .bell-wrap:hover {box-shadow: var(--sh-md); background: var(--surface-2);}
     .bell-wrap .material-icons {font-size: 18px; color: var(--txt-2);}
-    .bell-dot {position: absolute; top: -2px; right: -2px; background: var(--red); color: white; border-radius: 50%; min-width: 15px; height: 15px; font-size: 9px; font-weight: 700;
-               display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 1.5px solid var(--bg);}
+    .bell-dot {position: absolute; top: -2px; right: -2px; background: var(--red); color: white; border-radius: 50%; min-width: 15px; height: 15px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 1.5px solid var(--bg);}
     .avatar {width: 55px; height: 55px; border-radius: 50%; overflow: hidden; border: 2px solid var(--border); box-shadow: var(--sh-sm); background: var(--surface-2); flex-shrink: 0;}
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
     /* ============================================================
     NEXT SERVICE PILL
     ============================================================ */
-    .next-pill {display: inline-flex; align-items: center; gap: 7px; background: var(--surface); border: 1px solid var(--border); border-radius: 50px; padding: 6px 13px; font-size: 11.5px;
-                font-weight: 500; color: var(--txt-2); box-shadow: var(--sh-sm); align-self: flex-start;}
+    .next-pill {display: inline-flex; align-items: center; gap: 7px; background: var(--surface); border: 1px solid var(--border); border-radius: 50px; padding: 6px 13px; font-size: 11.5px; font-weight: 500; color: var(--txt-2); box-shadow: var(--sh-sm); align-self: flex-start;}
     .next-pill .material-icons {font-size: 14px; color: var(--red);}
     /* ============================================================
     GRID CARD CONTAINER
@@ -100,9 +87,7 @@
     /* ============================================================
     MENU BUTTONS
     ============================================================ */
-    .mbtn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 8px; display: flex;
-           flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--txt-2);
-           line-height: 1.2; text-align: center; height: 100%; min-height: 0; overflow: hidden; transition: background var(--ease), color var(--ease);}    
+    .mbtn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--txt-2); line-height: 1.2; text-align: center; height: 100%; min-height: 0; overflow: hidden; transition: background var(--ease), color var(--ease);}    
     .mbtn:nth-child(3n) {border-right: none;}
     .mbtn:nth-last-child(-n+2) {border-bottom: none;}
     .mbtn:hover {background: var(--surface-2); color: var(--txt-1);}
@@ -112,44 +97,43 @@
     .mbtn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
     .mbtn:hover .material-icons {transform: scale(1.08);}
     .mbtn.sel .material-icons {transform: scale(1.1);}
-    .mbtn .bdg {position: absolute; top: 7px; right: 7px; background: var(--red); color: white; border-radius: 10px; min-width: 16px; height: 16px; font-size: 9px; font-weight: 700;
-                display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 1.5px solid var(--surface);}
+    .mbtn .bdg {position: absolute; top: 7px; right: 7px; background: var(--red); color: white; border-radius: 10px; min-width: 16px; height: 16px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 1.5px solid var(--surface);}
+    /* ============================================================
+    LOCKED / RESTRICTED BUTTONS (bloqueio visual de acesso)
+    ============================================================ */
+    .mbtn.locked {opacity: 0.42; filter: grayscale(0.7); cursor: not-allowed;}
+    .mbtn.locked:hover {background: var(--surface); color: var(--txt-2);}
+    .mbtn.locked:hover .material-icons {transform: none;}
+    .mbtn .lock-icon {position: absolute; bottom: 6px; right: 6px; font-size: 12px; color: var(--txt-3); background: var(--surface); border-radius: 50%; padding: 3px; box-shadow: var(--sh-sm); line-height: 1;}
     /* ============================================================
     BOTTOM SWITCH
     ============================================================ */
     .switch-row {display: flex; justify-content: center; flex-shrink: 0; padding: 4px 0 2px;}
-    .switch-track {position: relative; display: flex; width: 230px; height: 46px; background: var(--surface); border: 1px solid var(--border); border-radius: 50px; box-shadow: var(--sh-sm);
-                   overflow: hidden;}
-    .sw-indicator {position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: linear-gradient(to right, var(--red-dark), var(--red)); border-radius: 50px;
-                   transition: transform var(--ease); box-shadow: 0 2px 6px rgba(198,40,40,0.30); z-index: 1;}
-    .sw-btn {flex: 1; border: none; background: transparent; z-index: 2; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer; color: var(--txt-3);
-             display: flex; align-items: center; justify-content: center; gap: 5px; text-transform: uppercase; transition: color var(--ease);}
+    .switch-track {position: relative; display: flex; width: 230px; height: 46px; background: var(--surface); border: 1px solid var(--border); border-radius: 50px; box-shadow: var(--sh-sm); overflow: hidden;}
+    .sw-indicator {position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: linear-gradient(to right, var(--red-dark), var(--red)); border-radius: 50px; transition: transform var(--ease); box-shadow: 0 2px 6px rgba(198,40,40,0.30); z-index: 1;}
+    .sw-btn {flex: 1; border: none; background: transparent; z-index: 2; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer; color: var(--txt-3); display: flex; align-items: center; justify-content: center; gap: 5px; text-transform: uppercase; transition: color var(--ease);}
     .sw-btn.active {color: white;}
     .sw-btn .material-icons {font-size: 16px;}
     /* ============================================================
     FOOTER
     ============================================================ */
-    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
     .footer-inner {text-align: center;}
     .f-powered {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .f-year {font-size: 9px;  color: rgba(255,255,255,0.45); margin-top: 1px;}
     /* ============================================================
     TOAST
     ============================================================ */
-    .toast {position: fixed; bottom: calc(var(--footer-h) + 12px); left: 50%; transform: translateX(-50%) translateY(8px); background: var(--txt-1); color: var(--bg); padding: 8px 18px;
-            border-radius: 50px; font-size: 12.5px; font-weight: 500; opacity: 0; pointer-events: none; transition: all var(--ease); z-index: 999; white-space: nowrap; box-shadow: var(--sh-lg);}
+    .toast {position: fixed; bottom: calc(var(--footer-h) + 12px); left: 50%; transform: translateX(-50%) translateY(8px); background: var(--txt-1); color: var(--bg); padding: 8px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 500; opacity: 0; pointer-events: none; transition: all var(--ease); z-index: 999; white-space: nowrap; box-shadow: var(--sh-lg);}
     .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
     /* ============================================================
     MODALS
     ============================================================ */
     .modal {display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; padding: 20px;}
     .modal.show {display: flex;}
-    .modal-box {background: var(--surface); width: 100%; max-width: 430px; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--sh-lg); display: flex;
-                flex-direction: column; animation: mIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);}
+    .modal-box {background: var(--surface); width: 100%; max-width: 430px; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--sh-lg); display: flex; flex-direction: column; animation: mIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);}
     @keyframes mIn {from {opacity: 0; transform: scale(0.95) translateY(10px);} to {opacity: 1; transform: scale(1) translateY(0);}}
-    .modal-head {background: linear-gradient(to right, var(--red-dark), var(--red)); color: white; padding: 15px 18px; font-size: 15px; font-weight: 600; letter-spacing: 0.2px;
-                 display: flex; align-items: center; gap: 8px;}
+    .modal-head {background: linear-gradient(to right, var(--red-dark), var(--red)); color: white; padding: 15px 18px; font-size: 15px; font-weight: 600; letter-spacing: 0.2px; display: flex; align-items: center; gap: 8px;}
     .modal-head h3 {font-size: 15px; font-weight: 600;}
     .modal-body {padding: 18px; max-height: 56vh; overflow-y: auto; color: var(--txt-1); font-size: 13px; line-height: 1.65;}
     .modal-body::-webkit-scrollbar {width: 3px;}
@@ -158,8 +142,7 @@
     .modal-body h4 {font-size: 11px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 0.6px; margin: 14px 0 4px;}
     .modal-body p {color: var(--txt-2);}
     .modal-foot {padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px;}
-    .btn-close {background: linear-gradient(to right, var(--red-dark), var(--red)); color: white; border: none; padding: 9px 22px; border-radius: 50px; font-size: 13px; font-weight: 600;
-                cursor: pointer; transition: opacity var(--ease);}
+    .btn-close {background: linear-gradient(to right, var(--red-dark), var(--red)); color: white; border: none; padding: 9px 22px; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity var(--ease);}
     .btn-close:hover {opacity: 0.88;}
     .notif-item {background: var(--surface-2); border-left: 3px solid var(--red); padding: 11px 13px; border-radius: var(--r-sm); margin-bottom: 8px;}
     .notif-item strong {display: block; font-size: 12.5px; color: var(--txt-1); margin-bottom: 2px;}
@@ -170,14 +153,12 @@
     .cfg-avatar img {width: 100%; height: 100%; object-fit: cover;}
     .cfg-name {font-size: 17px; font-weight: 600;}
     .cfg-rank {font-size: 12px; color: var(--txt-3);}
-    .btn-action {background: var(--surface-2); color: var(--txt-1); border: 1px solid var(--border); padding: 9px 20px; border-radius: 50px; font-size: 13px; font-weight: 500; cursor: pointer;
-                 transition: background var(--ease); margin-top: 4px;}
+    .btn-action {background: var(--surface-2); color: var(--txt-1); border: 1px solid var(--border); padding: 9px 20px; border-radius: 50px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background var(--ease); margin-top: 4px;}
     .btn-action:hover {background: var(--border);}
     .pw-block {width: 100%; max-width: 290px; text-align: left;}
     .pw-label {display: block; font-size: 10.5px; font-weight: 600; color: var(--txt-3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;}
     .pw-wrap {position: relative; margin-bottom: 11px;}
-    .pw-wrap input {width: 100%; padding: 9px 36px 9px 11px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--txt-1);
-                    font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: border-color var(--ease);}
+    .pw-wrap input {width: 100%; padding: 9px 36px 9px 11px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--txt-1); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: border-color var(--ease);}
     .pw-wrap input:focus {border-color: var(--red);}
     .pw-wrap .material-icons {position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font-size: 17px; color: var(--txt-3); cursor: pointer;}
     /* ============================================================
@@ -247,78 +228,78 @@
     </div>
     <div class="grid-card">
       <div class="btn-grid">
-        <button class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='ScalesView.html', 280)">
+        <button class="mbtn" data-module="scales" onclick="selBtn(this); setTimeout(()=> location.href='ScalesView.html', 280)">
           <span class="material-icons">calendar_month</span>
           <div>Escalas</div>
         </button>
-        <button id="changes" class="mbtn" onclick="selBtn(this); setTimeout(() => window.location.href='Swaps.html', 300);">
+        <button id="changes" class="mbtn" data-module="swaps" onclick="selBtn(this); setTimeout(() => window.location.href='Swaps.html', 300);">
           <span class="material-icons">multiple_stop</span>
           <div>Trocas de Serviço</div>
           <span class="bdg">0</span>
         </button>
-        <button class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='MainPageEl.html', 280)">
+        <button class="mbtn" data-module="availability" onclick="selBtn(this); setTimeout(()=> location.href='MainPageEl.html', 280)">
           <span class="material-icons">free_cancellation</span>
           <div>Disponibilidades</div>
         </button>
-        <button class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='SolVacat.html', 280)">
+        <button class="mbtn" data-module="vacation_request" onclick="selBtn(this); setTimeout(()=> location.href='SolVacat.html', 280)">
           <span class="material-icons">beach_access</span>
           <div>Pedido Férias</div>
         </button>
-        <button class="mbtn" onclick="showEmDesenvolvimento()">
+        <button class="mbtn" data-module="uniform_request" onclick="showEmDesenvolvimento()">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">checkroom</span>
           <div>Pedido Fardamento</div>
         </button>
-        <button class="mbtn" onclick="selBtn(this); setTimeout(() => window.location.href='Attendance.html', 300);">
+        <button class="mbtn" data-module="attendance" onclick="selBtn(this); setTimeout(() => window.location.href='Attendance.html', 300);">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">fingerprint</span>
           <div>Assíduidade</div>
         </button>
-        <button id="ongoingBtn" class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='OnGoingOcr.html', 280)">
+        <button id="ongoingBtn" class="mbtn" data-module="ongoing_occurrences" onclick="selBtn(this); setTimeout(()=> location.href='OnGoingOcr.html', 280)">
           <span class="material-icons">crisis_alert</span>
           <div>Ocorrências em Curso</div>
           <span class="bdg">0</span>
         </button>
-        <button class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='FomioPage.html', 280)">
+        <button class="mbtn" data-module="fomio" onclick="selBtn(this); setTimeout(()=> location.href='FomioPage.html', 280)">
           <span class="material-icons">diversity_3</span>
           <div>Equipa de Serviço</div>
         </button>
-        <button id="events" class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='Events.html', 280)">
+        <button id="events" class="mbtn" data-module="events" onclick="selBtn(this); setTimeout(()=> location.href='Events.html', 280)">
           <span class="material-icons">today</span>
           <div>Eventos</div>
           <span class="bdg">0</span>
         </button>
-        <button id="reports" class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='MissReport.html', 280)">
+        <button id="reports" class="mbtn" data-module="reports" onclick="selBtn(this); setTimeout(()=> location.href='MissReport.html', 280)">
           <span class="material-icons">insert_chart</span>
           <div>Relatórios de Ocorrência</div>
           <span class="bdg">0</span>
         </button>
-        <button class="mbtn" onclick="selBtn(this); setTimeout(() => window.location.href='Documents.html', 300);">
+        <button class="mbtn" data-module="documents" onclick="selBtn(this); setTimeout(() => window.location.href='Documents.html', 300);">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">description</span>
           <div>Documentos</div>
         </button>
-        <button id="comunicates" class="mbtn" onclick="selBtn(this); setTimeout(() => window.location.href='Comunic.html', 300);">
+        <button id="comunicates" class="mbtn" data-module="comunicates" onclick="selBtn(this); setTimeout(() => window.location.href='Comunic.html', 300);">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">assignment_add</span>
           <div>Comunicados</div>
           <span class="bdg">0</span>
         </button>
-        <button id="meteoadv" class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='MeteoAdv.html', 280)">
+        <button id="meteoadv" class="mbtn" data-module="meteo" onclick="selBtn(this); setTimeout(()=> location.href='MeteoAdv.html', 280)">
           <span class="material-icons">storm</span>
           <div>Avisos METEO</div>
           <span class="bdg">0</span>
         </button>
-        <button id="hospadv" class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='NoHospital.html', 280)">
+        <button id="hospadv" class="mbtn" data-module="hospital_restrictions" onclick="selBtn(this); setTimeout(()=> location.href='NoHospital.html', 280)">
           <span class="material-icons">local_hospital</span>
           <div>Constrangimentos Hospitalares</div>
           <span class="bdg">0</span>
         </button>
-        <button class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='MainPageVe.html', 280)">
+        <button class="mbtn" data-module="vehicles" onclick="selBtn(this); setTimeout(()=> location.href='MainPageVe.html', 280)">
           <span class="material-icons">fire_truck</span>
           <div>Veículos</div>
         </button>
-        <button class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='Tools.html', 280)">
+        <button class="mbtn" data-module="tools" onclick="selBtn(this); setTimeout(()=> location.href='Tools.html', 280)">
           <span class="material-icons">construction</span>
           <div>Ferramentas Úteis</div>
         </button>
-        <button id="internalChat" class="mbtn" onclick="selBtn(this); setTimeout(()=> location.href='InterChat.html', 280)">
+        <button id="internalChat" class="mbtn" data-module="internal_chat" onclick="selBtn(this); setTimeout(()=> location.href='InterChat.html', 280)">
           <span class="material-icons">chat</span>
           <div>Chat Interno</div>
           <span class="bdg">0</span>
@@ -684,7 +665,6 @@
         headers: { ...getSupabaseHeaders(), Prefer: "resolution=merge-duplicates" },
         body: JSON.stringify(payload)
       });
-      console.log("✅ Push registado/atualizado no Supabase");
     }
     /* ======================= FUNCTION FIX LAYOUT ======================= */
     function ajustarMainContent() {
@@ -919,7 +899,6 @@
       const corpOperNr = getCorp();
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
-      console.log('🔎 loadCorpInfo — corpOperNr usado na query:', corpOperNr);
       if (!corpOperNr) {
         if (h2) h2.textContent = "Não definido";
         return;
@@ -927,7 +906,6 @@
       try {
         const url = `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`;
         const response = await fetch(url, { headers: getSupabaseHeaders() });
-        console.log('🔎 loadCorpInfo — status HTTP:', response.status);
         if (!response.ok) {
           const errText = await response.text();
           console.error('❌ loadCorpInfo — erro na resposta:', errText);
@@ -935,7 +913,6 @@
           return;
         }
         const data = await response.json();
-        console.log('🔎 loadCorpInfo — dados recebidos:', data);
         if (data && data.length > 0) {
           const corp = data[0];
           if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
@@ -956,22 +933,40 @@
     /* ======================== USERNAME LOADING ========================= */
     async function loadUserName() {
       const nInt = getNInt();
+      const corpOperNr = getCorp();
       const welcomeNameEl = document.querySelector('.welcome-text .name');
       const avatarEl = document.getElementById('userAvatar');
       try {
         const url = `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,photo_url&n_int=eq.${nInt}`;
         const response = await fetch(url, { headers: getSupabaseHeaders() });
         const data = await response.json();
-        if (welcomeNameEl) welcomeNameEl.textContent = data[0]?.abv_name || 'Utilizador';
-        if (avatarEl) avatarEl.src = data[0]?.photo_url || "https://www.gravatar.com/avatar/?d=mp";
+        if (data[0]?.abv_name) {
+          welcomeNameEl.textContent = data[0].abv_name;
+          avatarEl.src = data[0].photo_url || "https://www.gravatar.com/avatar/?d=mp";
+          return;
+        }
+        const fbUrl = `${SUPABASE_URL}/rest/v1/users_mobile?select=username&corp_oper_nr=eq.${corpOperNr}&nint_corp=eq.${nInt}`;
+        const fbRes = await fetch(fbUrl, { headers: getSupabaseHeaders() });
+        const fbData = await fbRes.json();
+        const fbUser = fbData[0];
+        welcomeNameEl.textContent = fbUser?.username || 'Utilizador';
+        if (fbUser?.username) {
+          const vehUrl = `${SUPABASE_URL}/rest/v1/vehicle_status?select=photo_url&corp_oper_nr=eq.${corpOperNr}&vehicle=eq.${fbUser.username}`;
+          const vehRes = await fetch(vehUrl, { headers: getSupabaseHeaders() });
+          const vehData = await vehRes.json();
+          const rawPath = vehData[0]?.photo_url;
+          avatarEl.src = rawPath
+            ? (rawPath.startsWith('http') ? rawPath : `${SUPABASE_URL}/storage/v1/object/public/NOME_BUCKET/${rawPath}`)
+            : "https://www.gravatar.com/avatar/?d=mp";
+        } else {
+          avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
+        }
       } catch (error) {
         if (welcomeNameEl) welcomeNameEl.textContent = 'Utilizador';
         if (avatarEl) avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
       }
     }
     /* ====================== NEXT SERVICE (ATUALIZADO) =================== */
-    /* Hora limite de cada tipo de turno: ED corta às 08:00, os restantes (PN/EN/ET/EP) às 20:00.
-       Rótulos para os tipos de ECIN, tal como usados em Escalas/Trocas Serviço. */
     const SERVICE_LIMIT_HOUR = { ED: 8, EN: 20, ET: 20, PN: 20, EP: 20 };
     const ECIN_LABELS = { ED: 'ECIN Dia', EN: 'ECIN Noite', ET: 'ECIN 24H', EP: 'ECIN Dia' };
     function getServiceTypeLabel(values) {
@@ -986,9 +981,14 @@
       return '-';
     }
     async function loadNextService() {
-      const nintCorp = parseInt(getNInt(), 10);
+      const rawNInt = getNInt();
+      const nintCorp = parseInt(rawNInt, 10);
       const container = document.querySelector(".next-pill");
       const textSpan = container.querySelector(".next-service-text");
+      if (isNaN(nintCorp)) {
+        container.style.display = "none";
+        return;
+      }
       textSpan.textContent = "A carregar...";
       try {
         const response = await fetch(
@@ -1011,21 +1011,24 @@
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const futureDates = Object.keys(servicesByDate)
-          .map(dateStr => {
-            const [y, m, d] = dateStr.split('-').map(Number);
-            return {dateObj: new Date(y, m - 1, d), values: servicesByDate[dateStr]};
-          })
-          .filter(d => {
-            if (d.dateObj > today) return true;
-            if (d.dateObj < today) return false;
-            /* É hoje: só conta se pelo menos um dos turnos do dia ainda não passou da hora limite. */
-            const maxLimitHour = Math.max(...d.values.map(v => SERVICE_LIMIT_HOUR[v] ?? 20));
-            const limitDate = new Date(d.dateObj);
-            limitDate.setHours(maxLimitHour, 0, 0, 0);
-            return limitDate > now;
-          })
-          .sort((a, b) => a.dateObj - b.dateObj);
-        if (futureDates.length === 0) { textSpan.textContent = "Próximo Serviço: Não existem registos"; return; }
+        .map(dateStr => {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          return {dateObj: new Date(y, m - 1, d), values: servicesByDate[dateStr]};
+        })
+        .filter(d => {
+          if (d.dateObj > today) return true;
+          if (d.dateObj < today) return false;
+          const maxLimitHour = Math.max(...d.values.map(v => SERVICE_LIMIT_HOUR[v] ?? 20));
+          const limitDate = new Date(d.dateObj);
+          limitDate.setHours(maxLimitHour, 0, 0, 0);
+          return limitDate > now;
+        })
+        .sort((a, b) => a.dateObj - b.dateObj);
+        if (futureDates.length === 0) {
+          container.style.display = "none";
+          return;
+        }
+        container.style.display = "inline-flex";
         const nextService = futureDates[0];
         const day = String(nextService.dateObj.getDate()).padStart(2,'0');
         const month = String(nextService.dateObj.getMonth() + 1).padStart(2,'0');
@@ -1124,6 +1127,40 @@
     }
     function clearAllSelections() {
       document.querySelectorAll('.mbtn').forEach(btn => btn.classList.remove('sel'));
+    }
+    /* ======================= ACCESS RESTRICTIONS ======================= */
+    async function loadAccessRestrictions() {
+      const corpOperNr = getCorp();
+      const nInt = getNInt();
+      if (!corpOperNr || !nInt) return;
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/user_accesses?select=module_key&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nInt}&can_access=eq.false`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) return;
+        const data = await response.json();
+        const lockedModules = new Set(data.map(d => d.module_key));
+        document.querySelectorAll('.mbtn[data-module]').forEach(btn => {
+          if (lockedModules.has(btn.dataset.module)) lockBtn(btn);
+        });
+      } catch (err) {
+        console.error('Erro ao carregar restrições de acesso:', err);
+      }
+    }
+    function lockBtn(btn) {
+      btn.classList.add('locked');
+      btn.setAttribute('aria-disabled', 'true');
+      btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showToast('🔒 Sem acesso a esta funcionalidade');
+        if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
+      };
+      if (!btn.querySelector('.lock-icon')) {
+        const lock = document.createElement('span');
+        lock.className = 'material-icons lock-icon';
+        lock.textContent = 'lock';
+        btn.appendChild(lock);
+      }
     }
     /* ======================= OCCURRENCE LOADING ======================== */
     async function updateOccurrencesBadge() {
@@ -1269,6 +1306,7 @@
       loadCorpInfo();
       loadUserName();
       loadNextService();
+      loadAccessRestrictions();
       updateOccurrencesBadge();
       updateEventsBadge();
       updateOccurrenceReportsBadge();
