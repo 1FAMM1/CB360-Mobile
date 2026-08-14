@@ -39,7 +39,7 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
     .main-content::-webkit-scrollbar {display: none;}
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
     .availability-sbas-header {flex-shrink: 0; text-align: center; width: 100%; display: flex; flex-direction: column; align-items: flex-start;} 
@@ -245,8 +245,8 @@
     let currentMonthIndex = null;
     let selectedDays = [];
     async function loadSelectedDaysFromSupabase(monthIndex) {
-      const currentNintCorpStr = localStorage.getItem("currentCorpNint");
-      const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
+      const currentNintCorpStr = localStorage.getItem("currentCorpNint");;
+      const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");;
       if (!currentNintCorpStr || !currentCorpOperNrStr) return [];
       const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
       const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
@@ -356,8 +356,8 @@
               return;
             }
           }
-          const currentNintCorpStr = localStorage.getItem("currentCorpNint");
-          const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
+          const currentNintCorpStr = localStorage.getItem("currentCorpNint");;
+          const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");;
           const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
           const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
           const month = currentMonthIndex + 1;
@@ -461,8 +461,8 @@
           return false;
         }
       }
-      const currentNintCorpStr = localStorage.getItem("currentCorpNint");
-      const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
+      const currentNintCorpStr = localStorage.getItem("currentCorpNint");;
+      const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");;
       if (!currentNintCorpStr || !currentCorpOperNrStr) {
         return false;
       }
