@@ -694,7 +694,19 @@
       }, 2500);
     }
     /* =========================== SWITCH TAB ============================ */
+    function lockConfigTab() {
+      const cfgBtn = document.getElementById('swCfg');
+      if (!cfgBtn) return;
+      cfgBtn.style.opacity = '0.42';
+      cfgBtn.style.pointerEvents = 'none';
+      cfgBtn.setAttribute('aria-disabled', 'true');
+    }
     function switchTab(tab) {
+      if (tab === 'config' && window.isVehicleUser) {
+        showToast('🔒 Sem acesso a esta funcionalidade');
+        if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
+        return;
+      }
       const indicator = document.getElementById('swIndicator');
       const buttons = document.querySelectorAll('.sw-btn');
       buttons.forEach(btn => btn.classList.remove('active'));
@@ -941,10 +953,12 @@
         const response = await fetch(url, { headers: getSupabaseHeaders() });
         const data = await response.json();
         if (data[0]?.abv_name) {
+          window.isVehicleUser = false;
           welcomeNameEl.textContent = data[0].abv_name;
           avatarEl.src = data[0].photo_url || "https://www.gravatar.com/avatar/?d=mp";
           return;
         }
+        window.isVehicleUser = true;
         const fbUrl = `${SUPABASE_URL}/rest/v1/users_mobile?select=username&corp_oper_nr=eq.${corpOperNr}&nint_corp=eq.${nInt}`;
         const fbRes = await fetch(fbUrl, { headers: getSupabaseHeaders() });
         const fbData = await fbRes.json();
@@ -961,6 +975,7 @@
         } else {
           avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
         }
+        lockConfigTab();
       } catch (error) {
         if (welcomeNameEl) welcomeNameEl.textContent = 'Utilizador';
         if (avatarEl) avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
