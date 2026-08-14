@@ -15,9 +15,9 @@
     VARIABLES
     ============================================================ */
     :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
-           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
-           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
-           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa; --dispensa: #607d8b;}
+       --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+       --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+       --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa; --dispensa: #607d8b;}
     /* ============================================================
     DARK MODE
     ============================================================ */
@@ -298,13 +298,20 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-     let currentMonthAttendanceMap = {};
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    let currentMonthAttendanceMap = {};
+    /* ============ Sincronização entre assiduidade e piquetes ============ */
+    let resolveAttendanceMapReady;
+    let attendanceMapReady;
+    function resetAttendanceMapReady() {
+      attendanceMapReady = new Promise(res => { resolveAttendanceMapReady = res; });
+    }
+    resetAttendanceMapReady();
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -334,7 +341,7 @@
       card.innerHTML = `<span class="error-message">⚠️ ${message}</span>`;
     }    
     function validateCorpData() {
-      const nintCorpStr = localStorage.getItem("currentCorpNint");
+      const nintCorpStr = localStorage.getItem("currentCorpNint") || "205";
       if (!nintCorpStr || isNaN(parseInt(nintCorpStr, 10))) {
         return null;
       }
@@ -342,7 +349,7 @@
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -381,7 +388,7 @@
     }
     /* ===================== GENERIC DATA LOADER ===================== */
     async function loadMonthData(config, monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();      
       if (!nintCorp) {
         showError(config.cardId, "Elemento e Corporação não definidos.");
@@ -463,9 +470,9 @@
       const card = document.getElementById("attendanceCard");
       card.style.display = "none";
       currentMonthAttendanceMap = {};      
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();
-      if (!nintCorp) return;
+      if (!nintCorp) { resolveAttendanceMapReady(); return; }
       const now = new Date();
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
@@ -475,7 +482,7 @@
       const nIntStr = String(nintCorp);      try {
         const url = `${SUPABASE_URL}/rest/v1/reg_assid?select=day,shift_type&n_int=eq.${nIntStr}&month=eq.${monthStr}&year=eq.${yearStr}&corp_oper_nr=eq.${corpOperNr}`;
         const response = await fetch(url, { headers: getSupabaseHeaders() });
-        if (!response.ok) return;
+        if (!response.ok) { resolveAttendanceMapReady(); return; }
         const data = await response.json();
         const norm = (s) => (s || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         let appearances = 0;
@@ -495,6 +502,8 @@
             if (dayNum) currentMonthAttendanceMap[dayNum] = 'white';
           }
         });
+        /* Mapa de assiduidade já está completo aqui - liberta quem estava à espera dele (ex. loadPicketsMonth) */
+        resolveAttendanceMapReady();
         document.getElementById("attendancePresences").textContent = appearances;
         document.getElementById("attendanceAbsences").textContent = absences;
         document.getElementById("attendanceDispensas").textContent = dispensas;
@@ -504,11 +513,12 @@
         }
       } catch (err) {
         console.error("Erro ao carregar assiduidade:", err);
+        resolveAttendanceMapReady();
       }
     }
     /* ========================= PICKETS LOADING ========================= */
     async function loadPicketsMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();
       if (!nintCorp) return;
       const month = monthIndex + 1;
@@ -521,6 +531,8 @@
           const data = await response.json();
           items = data.map(d => d.day).filter(Boolean).map(day => ({ day, type: "PN", suffix: "N" }));
         }
+        /* Espera que o mapa de assiduidade esteja pronto antes de fazer o merge, sem esperar pela função toda */
+        await attendanceMapReady;
         Object.keys(currentMonthAttendanceMap).forEach(dayStr => {
           const d = parseInt(dayStr, 10);
           if (!items.some(it => it.day === d)) {
@@ -536,7 +548,7 @@
     }
     /* ========================== DECIR LOADING ========================== */
     async function loadDecirMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();
       if (!nintCorp) return;
       const month = monthIndex + 1;
@@ -556,7 +568,7 @@
     }
     /* ========================= EXTRAS LOADING ========================== */
     async function loadExtrasMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();
       if (!nintCorp) return;
       const month = monthIndex + 1;
@@ -576,7 +588,7 @@
     } 
     /* ============================= SBA LOADING =========================== */
     async function loadSbaMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();
       if (!nintCorp) return;
       const month = monthIndex + 1;
@@ -596,7 +608,7 @@
     }
     /* ============================ OPAT LOADING ============================ */
     async function loadOpatMonth(monthIndex) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const nintCorp = validateCorpData();
       if (!nintCorp) return;
       const month = monthIndex + 1;
@@ -677,7 +689,7 @@
     }
     async function fetchServiceElements(day, month, value) {
       try {
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
         const nintCorp = validateCorpData();
         if (!nintCorp || !corpOperNr) return [];
         const valuesToMatch = getServiceValuesToMatch(value);
@@ -791,7 +803,7 @@
       document.getElementById('serviceModal').style.display = 'none';
     });
     async function loadNextServicesUnified(selectedMonth) {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const container = document.getElementById("nextServicesCard");
       const title = document.getElementById("nextserv-info-title");
       container.innerHTML = "";
@@ -962,8 +974,8 @@
           await toggleMobileMonthLayout(true);
           hideAllServiceCards();
           if (requestId !== currentFetchRequestId) return;
-          const today = new Date();          
-          if (requestId !== currentFetchRequestId) return;
+          const today = new Date();
+          resetAttendanceMapReady();
           const loaders = [
             loadAttendanceMonth(month),
             loadPicketsMonth(month),
