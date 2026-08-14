@@ -36,10 +36,10 @@
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}    
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);}
     .main-content::-webkit-scrollbar {display: none;}
     body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
     .main-content.slide-out, .main-content.slide-in {transform: none;}
@@ -96,12 +96,14 @@
     .services-section-title .material-icons {font-size: 15px; color: var(--red-icon);}
     .chips-row {display: flex; flex-wrap: wrap; gap: 6px;}
     .day-chip {position: relative; overflow: visible !important; display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 26px; padding: 0 8px; border-radius: 8px; font-size: 12px; font-weight: 700; box-shadow: var(--sh-sm); letter-spacing: 0.2px;}
-    .day-chip .attendance-dot {position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; border: 0px solid var(--surface);}
-    .day-chip .attendance-dot.green {background-color: #2ecc71; box-shadow: 0 0 6px rgba(46, 204, 113, 0.8);}
-    .day-chip .attendance-dot.red {background-color: #e74c3c; box-shadow: 0 0 6px rgba(231, 76, 60, 0.8);}
-    .day-chip .attendance-dot.white {background-color: #2ecc71; box-shadow: 0 0 6px rgba(220, 220, 220, 0.8);}    
-    .day-chip .attendance-dot.black {background-color: #2ecc71; box-shadow: 0 0 6px rgba(0, 0, 0, 0.8);}
-    .day-chip .attendance-dot.orange {background-color: #2ecc71; box-shadow: 0 0 6px rgba(0, 0, 0, 0.8);}
+    .day-chip .attendance-dot {position: absolute;top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%; border: 0px solid #666;}
+    .day-chip .attendance-dot.green {background-color: #2ecc71; box-shadow: 0 0 5px 1px rgba(46, 204, 113, 0.85); animation: dotPulse-green 1.8s ease-in-out infinite;}
+    .day-chip .attendance-dot.red {background-color: #e74c3c; box-shadow: 0 0 5px 1px rgba(231, 76, 60, 0.85); animation: dotPulse-red 1.8s ease-in-out infinite;}
+    .day-chip .attendance-dot.white {background-color: #ffffff; box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.9); animation: dotPulse-white 1.8s ease-in-out infinite;}
+    @keyframes dotPulse-green {0%, 100% {box-shadow: 0 0 2px 1px rgba(46, 204, 113, 0.7); transform: scale(1);} 50% {box-shadow: 0 0 5px 2px rgba(46, 204, 113, 1); transform: scale(1.15);}}
+    @keyframes dotPulse-red {0%, 100% {box-shadow: 0 0 2px 1px rgba(231, 76, 60, 0.7); transform: scale(1);} 50% {box-shadow: 0 0 5px 2px rgba(231, 76, 60, 1); transform: scale(1.15);}}
+    @keyframes dotPulse-white {0%, 100% {box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.75); transform: scale(1);} 50% {box-shadow: 0 0 5px 2px rgba(255, 255, 255, 1); transform: scale(1.15);}}
+    .day-chip.no-record {background: linear-gradient(135deg, #9e9e9e, #757575) !important; color: #fff !important;}
     .day-chip.type-PN {background: linear-gradient(135deg, var(--blue), #1aa9c5); color: #fff;}
     .day-chip.type-ED {background: linear-gradient(135deg, #ffd54f, #ffca28, #ffa726); color: #444;}
     .day-chip.type-EN {background: linear-gradient(135deg, #3949ab, #2c387e, #1a237e); color: #fff;}
@@ -223,7 +225,7 @@
     <div id="attendanceCard" class="attendance-card" style="display:none;">
       <div class="attendance-stat">
         <span class="attendance-label">Comparências</span>
-        <span class="attendance-value" id="attendancePresences" style="color: lime;">0</span>
+        <span class="attendance-value" id="attendancePresences">0</span>
       </div>
       <div class="attendance-stat">
         <span class="attendance-label">Faltas</span>
@@ -290,7 +292,7 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    let currentMonthAttendanceMap = {};
+     let currentMonthAttendanceMap = {};
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
     function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
@@ -439,10 +441,13 @@
         wrapper.style.display = anyVisible ? "flex" : "none";
         return;
       }
+      const isPicketsSection = sectionId === "picketsSection";
       chipsEl.innerHTML = items.map(it => {
-        const statusColor = currentMonthAttendanceMap[it.day];
+        const statusColor = isPicketsSection ? currentMonthAttendanceMap[it.day] : null;
         const dotHtml = statusColor ? `<span class="attendance-dot ${statusColor}"></span>` : '';
-        return `<span class="day-chip type-${it.type}">${it.day}${it.suffix || ''}${dotHtml}</span>`;
+        const hasRecord = isPicketsSection ? Object.prototype.hasOwnProperty.call(currentMonthAttendanceMap, it.day) : true;
+        const noRecordClass = (isPicketsSection && !hasRecord) ? ' no-record' : '';
+        return `<span class="day-chip type-${it.type}${noRecordClass}">${it.day}${it.suffix || ''}${dotHtml}</span>`;
       }).join('');
       section.style.display = "flex";
       wrapper.style.display = "flex";
@@ -461,8 +466,7 @@
       const yearToFetch = getWorkYear(monthIndex);      
       const monthStr = String(monthIndex + 1).padStart(2, '0');
       const yearStr = String(yearToFetch);
-      const nIntStr = String(nintCorp);
-      try {
+      const nIntStr = String(nintCorp);      try {
         const url = `${SUPABASE_URL}/rest/v1/reg_assid?select=day,shift_type&n_int=eq.${nIntStr}&month=eq.${monthStr}&year=eq.${yearStr}&corp_oper_nr=eq.${corpOperNr}`;
         const response = await fetch(url, { headers: getSupabaseHeaders() });
         if (!response.ok) return;
@@ -479,6 +483,8 @@
           } else if (t.includes("falta") || t.includes("ausen")) {
             absences++;
             if (dayNum) currentMonthAttendanceMap[dayNum] = 'red';
+          } else if (t.includes("dispensa")) {
+            if (dayNum) currentMonthAttendanceMap[dayNum] = 'white';
           }
         });
         document.getElementById("attendancePresences").textContent = appearances;
@@ -948,12 +954,8 @@
           hideAllServiceCards();
           if (requestId !== currentFetchRequestId) return;
           const today = new Date();
-          
-          // 1. Carrega PRIMEIRO a assiduidade para preencher o mapa de presenças
           await loadAttendanceMonth(month);
           if (requestId !== currentFetchRequestId) return;
-
-          // 2. Carrega as restantes secções de serviços
           const loaders = [
             loadPicketsMonth(month),
             loadExtrasMonth(month),
@@ -965,7 +967,6 @@
           }
           await Promise.all(loaders);
           if (requestId !== currentFetchRequestId) return;
-
           updateSectionDividers();
           btnBackWrapper.classList.add("show");
           if (month >= today.getMonth()) {
