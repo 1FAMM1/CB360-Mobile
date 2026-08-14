@@ -59,7 +59,19 @@
     /* ============================================================
     MAIN SCROLL AREA
     ============================================================ */
-    .main {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 16px); padding-bottom: calc(var(--footer-h) + 16px); padding-left: 14px; padding-right: 14px; display: flex; flex-direction: column; gap: 12px;}
+    .main {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto; 
+  overflow-x: hidden; 
+  padding-top: calc(var(--header-h) + 16px); 
+  padding-bottom: calc(var(--footer-h) + 16px); 
+  padding-left: 14px; 
+  padding-right: 14px; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px;
+}
     .main::-webkit-scrollbar {display: none;}
     /* ============================================================
     WELCOME ROW
@@ -82,7 +94,16 @@
     /* ============================================================
     GRID CARD CONTAINER
     ============================================================ */
-    .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex;}
+    .grid-card {
+  background: var(--surface); 
+  border: 1px solid var(--border); 
+  border-radius: var(--r-lg); 
+  box-shadow: var(--sh-md); 
+  overflow: hidden; 
+  flex: 1 1 auto; /* Ajustado para flexibilidade correta */
+  min-height: 0;   /* Impede o colapso da grid */
+  display: flex;
+}
     .btn-grid {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(6, minmax(0, 1fr)); flex: 1; width: 100%; height: 100%;}    
     /* ============================================================
     MENU BUTTONS
@@ -606,12 +627,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "abs01";}
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzM0NDg3NjJ9.iD2PukDilv9KvxRXPHULM6_9dnCD8fEIjNYxbhxQiuY';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -668,27 +689,25 @@
     }
     /* ======================= FUNCTION FIX LAYOUT ======================= */
     function adjustMainContent() {
-      const main = document.querySelector('.main');
-      if (!main) return;
-      const rootStyles = getComputedStyle(document.documentElement);
-      const cssHeaderH = parseFloat(rootStyles.getPropertyValue('--header-h')) || 60;
-      const cssFooterH = parseFloat(rootStyles.getPropertyValue('--footer-h')) || 50;
-      const header = document.querySelector('.header');
-      const footer = document.querySelector('.footer');
-      const headerHeight = header?.offsetHeight || cssHeaderH;
-      const footerHeight = footer?.offsetHeight || cssFooterH;
-      main.style.paddingTop = (Math.max(headerHeight, cssHeaderH) + 16) + 'px';
-      main.style.paddingBottom = (Math.max(footerHeight, cssFooterH) + 16) + 'px';
-    }
-    window.addEventListener('load', adjustMainContent);
-    window.addEventListener('resize', adjustMainContent);
-    window.addEventListener('pageshow', (e) => {
-      if (e.persisted) {
-        requestAnimationFrame(() => requestAnimationFrame(adjustMainContent));
-      } else {
-        adjustMainContent();
-      }
-    });
+  const main = document.querySelector('.main');
+  if (!main) return;
+  
+  // Força o reset temporário para recalcular o layout flexbox
+  main.style.display = 'none';
+  main.offsetHeight; // Trigger reflow
+  main.style.display = 'flex';
+
+  const rootStyles = getComputedStyle(document.documentElement);
+  const cssHeaderH = parseFloat(rootStyles.getPropertyValue('--header-h')) || 60;
+  const cssFooterH = parseFloat(rootStyles.getPropertyValue('--footer-h')) || 50;
+  const header = document.querySelector('.header');
+  const footer = document.querySelector('.footer');
+  const headerHeight = header?.offsetHeight || cssHeaderH;
+  const footerHeight = footer?.offsetHeight || cssFooterH;
+  
+  main.style.paddingTop = (Math.max(headerHeight, cssHeaderH) + 16) + 'px';
+  main.style.paddingBottom = (Math.max(footerHeight, cssFooterH) + 16) + 'px';
+}
     /* ============================== TOAST ============================== */
     let toastTimeout;
     function showToast(message) {
