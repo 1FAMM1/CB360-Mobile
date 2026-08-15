@@ -7,25 +7,46 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
   <meta name="theme-color" content="#c62828">
-  <title>CB360 Mobile - [TÍTULO DA PÁGINA]</title>
+  <title>CB360 Mobile - Picagem de Ponto</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    @view-transition {navigation: auto;}
+    /* ============================================================
+    VARIABLES (alinhadas com a página Escalas)
+    ============================================================ */
     :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
            --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+    ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
+    .header, .footer {view-transition-name: none;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */   
     .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
     body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
     .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-sub {font-size: 9.5px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
     .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
     .main-content::-webkit-scrollbar {display: none;}
+    /* ============================================================
+    SECTION
+    ============================================================ */
     .section-label {width: 100%; font-size: 12px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px; margin-bottom: 2px;}
     .seg-icon {font-size: 16px; line-height: 1;}
     .icon-branco {color: var(--txt-3);}
@@ -37,26 +58,39 @@
     .segmented-btn {display: flex; align-items: center; justify-content: center; gap: 4px; flex: 1; border: none; background: transparent; padding: 11px 8px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; transition: background var(--ease), color var(--ease);}
     .segmented-btn + .segmented-btn {border-left: 1px solid var(--border);}
     .segmented-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
-    .segmented-btn.selected {background: var(--red-light); color: var(--red);}
+    .segmented-btn.selected {background: var(--red); color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.35);}
+    .segmented-btn.selected .seg-icon {color: #fff !important;}
+    .dark-mode .segmented-btn.selected {background: var(--red); color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.45), 0 0 8px rgba(198,40,40,0.55);}
     .form-row {display: flex; gap: 10px; width: 100%;}
     .form-field {flex: 1; display: flex; flex-direction: column; gap: 6px;}
+    .justif-field {flex: 0 0 auto;}
     .form-field label {font-size: 11.5px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px;}
     .form-field input {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--txt-1); outline: none; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
     .form-field input:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
     .dark-mode .form-field input::-webkit-calendar-picker-indicator {filter: invert(1) brightness(1.8);}
-    .form-field textarea {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--txt-1); outline: none; resize: none; overflow: hidden; min-height: 250px; max-height: 500px; line-height: 1.4; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
+    .form-field textarea {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--txt-1); outline: none; resize: none; overflow: hidden; min-height: 250px; line-height: 1.4; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
     .form-field textarea:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
     .form-field textarea::placeholder {color: var(--txt-3);}
-    .btn-submit {display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(to right, var(--red-dark), var(--red)); border: none; border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 13px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; color: #fff; letter-spacing: 0.3px; cursor: pointer; transition: filter var(--ease), transform 0.15s ease;}
+    .btn-submit {display: flex; align-items: center; justify-content: center; gap: 8px; width: 75%; background: linear-gradient(to right, var(--red-dark), var(--red)); border: none; border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 13px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; color: #fff; letter-spacing: 0.3px; cursor: pointer; transition: filter var(--ease), transform 0.15s ease; margin-top: 5px;}
     .btn-submit:hover {filter: brightness(1.08);}
     .btn-submit:active {transform: scale(0.98);}
+    .btn-submit:disabled {opacity: 0.7; cursor: not-allowed;}
     .btn-submit .material-icons {font-size: 18px;}
+    /* ============================================================
+    TOAST
+    ============================================================ */
     .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
     .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
     .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
     @media (max-width: 480px) {
       .header-title {font-size: 16px;}
       .main-content {padding-left: 14px; padding-right: 14px;}
@@ -80,7 +114,7 @@
   <div class="main-content">
     <p class="section-label">Selecione o Tipo de Picagem:</p>
     <div class="segmented-control" id="tipoRegistoControl">
-      <button type="button" class="segmented-btn selected" data-tipo="branco" onclick="selectTipoRegisto('branco', this)">
+      <button type="button" class="segmented-btn" data-tipo="branco" onclick="selectTipoRegisto('branco', this)">
         <span class="material-icons seg-icon icon-branco">close</span>Sem Picagem
       </button>
       <button type="button" class="segmented-btn" data-tipo="entrada" onclick="selectTipoRegisto('entrada', this)">
@@ -100,12 +134,12 @@
         <input type="time" id="fieldTime">
       </div>
     </div>
-    <div class="form-field" style="width: 100%; margin-top: 15px;">
+    <div class="form-field justif-field" style="width: 100%; margin-top: 15px;">
       <label for="fieldJustificacao">Justificação:</label>
       <textarea id="fieldJustificacao" placeholder="Escreva aqui a justificação..." rows="2" oninput="autoResizeTextarea(this)"></textarea>
     </div>
-    <button type="button" class="btn-submit" onclick="enviarJustificacao()">
-      <span class="material-icons">send</span>Enviar Justificação
+    <button type="button" class="btn-submit" id="submitJustifBtn" onclick="enviarJustificacao()">
+      <span class="material-icons">send</span><span id="submitJustifBtnText">Enviar Justificação</span>
     </button>
   </div>
   <footer class="footer">
@@ -190,7 +224,7 @@
         setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
-    let selectedTipoRegisto = 'branco';
+    let selectedTipoRegisto = null;
     function selectTipoRegisto(tipo, button) {
       selectedTipoRegisto = tipo;
       document.querySelectorAll('#tipoRegistoControl .segmented-btn').forEach(btn => btn.classList.remove('selected'));
@@ -218,16 +252,8 @@
           }
         );
         const corpData = await corpRes.json();
-        if (corpData.length) {
-          cb_name = corpData[0].cb_name || "";
-          logoUrl = corpData[0].logo_url || "";
-          corpAddress = corpData[0].corp_address || "";
-          corpCp = corpData[0].corp_cp || "";
-          corpLocalitie = corpData[0].corp_localitie || "";
-          corpPhoneMobile = corpData[0].corp_phone_mobile || "";
-          corpPhoneLandline = corpData[0].corp_phone_landline || "";
-          corpEmail = corpData[0].corp_email || "";
-        }
+        if (corpData.length) {cb_name = corpData[0].cb_name || ""; logoUrl = corpData[0].logo_url || ""; corpAddress = corpData[0].corp_address || ""; corpCp = corpData[0].corp_cp || ""; corpLocalitie = corpData[0].corp_localitie || "";
+                              corpPhoneMobile = corpData[0].corp_phone_mobile || ""; corpPhoneLandline = corpData[0].corp_phone_landline || ""; corpEmail = corpData[0].corp_email || "";}
       } catch (err) {
         console.error("Erro ao carregar dados da corporação:", err);
       }
@@ -269,88 +295,96 @@
       if (tipo === 'saida') return 'Saída';
       return 'Sem Picagem';
     }
+    function formatDateBR(isoDate) {
+      if (!isoDate) return "";
+      const [year, month, day] = isoDate.split("-");
+      return `${day}-${month}-${year}`;
+    }
     /* ===================== ENVIAR JUSTIFICAÇÃO ===================== */
     async function enviarJustificacao() {
       const texto = document.getElementById('fieldJustificacao').value.trim();
       const data = document.getElementById('fieldDate').value;
       const hora = document.getElementById('fieldTime').value;
-      if (!texto) {
-        showToast("Por favor escreva uma justificação.");
+      if (!selectedTipoRegisto) {
+        showToast("Selecione um tipo.");
         return;
       }
       if (!data) {
-        showToast("Por favor selecione a data da picagem.");
+        showToast("Selecione a data.");
+        return;
+      }
+      if (!texto) {
+        showToast("Indique uma justificação.");
         return;
       }
       const corpOperNr = getCorp();
       const nInt = getNInt();
-      let abv_name = "N/D";
+      let full_name = "N/D";
+      let senderEmail = "";
       try {
         const userRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${nInt}`, {
+          `${SUPABASE_URL}/rest/v1/reg_elems?select=full_name,email&n_int=eq.${nInt}`, {
             headers: getSupabaseHeaders()
           }
         );
         if (userRes.ok) {
           const userData = await userRes.json();
-          if (userData.length > 0) abv_name = userData[0].abv_name;
+          if (userData.length > 0) {
+            full_name = userData[0].full_name;
+            senderEmail = userData[0].email || "";
+          }
         }
       } catch (err) {
         console.error("Erro ao obter nome do elemento:", err);
       }
-      const submitBtn = document.querySelector('.btn-submit');
+      const submitBtn = document.getElementById('submitJustifBtn');
+      const submitBtnText = document.getElementById('submitJustifBtnText');
       if (submitBtn) submitBtn.disabled = true;
+      if (submitBtnText) submitBtnText.textContent = "A Enviar Justificação";
       try {
-        const { to, cc, bcc } = await fetchJustifRecipientsFromSupabase(corpOperNr);
+        const {to, cc, bcc} = await fetchJustifRecipientsFromSupabase(corpOperNr);
+        if (senderEmail && !cc.includes(senderEmail)) {
+          cc.push(senderEmail);
+        }
         if (!to.length) {
           showToast("Não existem destinatários configurados para este envio.");
-          if (submitBtn) submitBtn.disabled = false;
           return;
         }
         const corpData = await _getJustifEmailCommonData(corpOperNr);
         const greeting = getGreeting();
+        const dataFormatada = formatDateBR(data);
         const emailBodyHTML = `
           ${greeting}<br><br>
-          Informa-se que ${abv_name} apresentou uma justificação de picagem de ponto com os seguintes dados:<br><br>
-          <strong>Tipo:</strong> ${tipoLabel(selectedTipoRegisto)}<br>
-          <strong>Data:</strong> ${data}<br>
-          <strong>Hora:</strong> ${hora || 'N/D'}<br><br>
+          Informa-se que <strong>${full_name}</strong> apresentou uma justificação de picagem de ponto com os seguintes dados:<br><br>
+          <strong>Tipo de Picagem:</strong> ${tipoLabel(selectedTipoRegisto)}<br>
+          <strong>Data da Picagem:</strong> ${dataFormatada}<br>
+          <strong>Hora da Picagem:</strong> ${hora || 'N/D'}<br><br>
           <strong>Justificação:</strong><br>${texto.replace(/\n/g, '<br>')}<br><br>
           Com os melhores cumprimentos,<br>
           <span style="font-family: 'Arial'; font-size: 10px; color: gray;">
-          Este email foi processado automaticamente por: CB360 Online
+          Este email foi processado automaticamente por: CB360 Mobile
           </span>`;
         const emailRes = await fetch('https://cb360-online.vercel.app/api/send_email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            recipients: to,
-            ccRecipients: cc,
-            bccRecipients: bcc,
-            emailSubject: `Justificação de Picagem - ${abv_name}_${corpOperNr}`,
-            emailBody: emailBodyHTML,
-            title: corpData.cb_name,
-            subtitle: "Justificação de Picagem de Ponto",
-            corp_oper_nr: corpOperNr,
-            logoUrl: corpData.logoUrl,
-            corpName: corpData.cb_name,
-            corpAddress: corpData.corpAddress,
-            corpCp: corpData.corpCp,
-            corpLocalitie: corpData.corpLocalitie,
-            corpPhoneMobile: corpData.corpPhoneMobile,
-            corpPhoneLandline: corpData.corpPhoneLandline,
-            corpEmail: corpData.corpEmail,
-          })
-        });
+          body: JSON.stringify({recipients: to, ccRecipients: cc, bccRecipients: bcc, emailSubject: `Justificação de Picagem - ${full_name}_${corpOperNr}`, emailBody: emailBodyHTML, title: corpData.cb_name, 
+                                subtitle: "Justificação de Picagem de Ponto", corp_oper_nr: corpOperNr, logoUrl: corpData.logoUrl, corpName: corpData.cb_name, corpAddress: corpData.corpAddress, corpCp: corpData.corpCp,
+                                corpLocalitie: corpData.corpLocalitie, corpPhoneMobile: corpData.corpPhoneMobile, corpPhoneLandline: corpData.corpPhoneLandline, corpEmail: corpData.corpEmail,
+                               })});
         if (!emailRes.ok) throw new Error("Erro ao enviar email.");
         showToast("Justificação enviada com sucesso!");
         document.getElementById('fieldJustificacao').value = "";
         autoResizeTextarea(document.getElementById('fieldJustificacao'));
+        document.getElementById('fieldDate').value = "";
+        document.getElementById('fieldTime').value = "";
+        document.querySelectorAll('#tipoRegistoControl .segmented-btn').forEach(btn => btn.classList.remove('selected'));
+        selectedTipoRegisto = null;
       } catch (err) {
         console.error(err);
         showToast("Erro ao enviar a justificação: " + err.message);
       } finally {
         if (submitBtn) submitBtn.disabled = false;
+        if (submitBtnText) submitBtnText.textContent = "Enviar Justificação";
       }
     }
     document.addEventListener('DOMContentLoaded', function() {
