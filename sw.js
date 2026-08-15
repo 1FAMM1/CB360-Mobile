@@ -1,25 +1,61 @@
-    /* =========================================================
+   /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.1.5 - Fix: catch() do fetch handler já não deixa a
-    promise resolver para undefined (Failed to convert value
-    to 'Response'); devolve sempre um Response válido, com
-    fallback para index.html em navegações offline.
+    v5.1.6 - Fix: Instalação resiliente em cache (substituído
+    cache.addAll por adição individual) e correção do fetch handler.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.1.5';
-    const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', 
-                             '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', 
-                             '/MissReport.html', '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', 
-                             '/VeicSitop.html', '/Tools.html', '/GCIncRural.html', '/DecirTeam.html',
-                             '/InterChat.html', '/manifest.json'];
+    const CACHE_NAME = 'cb360-cache-v5.1.6';
+    const ASSETS_TO_CACHE = [
+      '/',
+      '/index.html',
+      '/MainPage.html',
+      '/ScalesView.html',
+      '/Swaps.html',
+      '/MainPageEl.html',
+      '/PiqDisp.html',
+      '/DecDisp.html',
+      '/ExtDisp.html',
+      '/DispView.html',
+      '/SolVacat.html',
+      '/Attendance.html',
+      '/OnGoingOcr.html',
+      '/FomioPage.html',
+      '/Events.html',
+      '/MissReport.html',
+      '/Documents.html',
+      '/Comunic.html',
+      '/MeteoAdv.html',
+      '/NoHospital.html',
+      '/MainPageVe.html',
+      '/VeicStat.html',
+      '/VeicSitop.html',
+      '/Tools.html',
+      '/GCIncRural.html',
+      '/DecirTeam.html',
+      '/InterChat.html',
+      '/manifest.json'
+    ];
+
     let activeChats = new Map();
+
     self.addEventListener('install', (event) => {
       self.skipWaiting();
       event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-          return cache.addAll(ASSETS_TO_CACHE);
+        caches.open(CACHE_NAME).then(async (cache) => {
+          // Adiciona os assets de forma individual para que uma falha isolada 
+          // (ex: ficheiro em falta) não impeça os restantes de entrarem na cache.
+          await Promise.all(
+            ASSETS_TO_CACHE.map(async (url) => {
+              try {
+                await cache.add(url);
+              } catch (err) {
+                console.warn(`[Service Worker] Falhou ao colocar em cache o recurso: ${url}`, err);
+              }
+            })
+          );
         })
       );
     });
+
     self.addEventListener('activate', (event) => {
       event.waitUntil(
         Promise.all([
@@ -36,6 +72,7 @@
         ])
       );
     });
+
     self.addEventListener('fetch', (event) => {
       if (event.request.method !== 'GET') {
         return;
@@ -76,6 +113,7 @@
         );
       }
     });
+
     self.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'SET_ACTIVE_CHAT') {
         activeChats.set(event.source.id, String(event.data.chatId));
@@ -87,6 +125,7 @@
         activeChats.clear();
       }
     });
+
     self.addEventListener('push', function(event) {
       let data = { title: 'CB360 Mobile', message: 'Nova atualização no sistema!' };
       try {
@@ -120,13 +159,14 @@
         self.registration.showNotification(data.title || 'CB360 Mobile', options)
       );
     });
+
     self.addEventListener('notificationclick', function(event) {
       event.notification.close();
       event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
           for (const client of clientList) {
             if (client.url.includes(self.location.origin) && 'focus' in client) {
-              if (event.notification.data.chatNint) {
+              if (event.notification.data && event.notification.data.chatNint) {
                 client.postMessage({
                   type: 'OPEN_CHAT',
                   chatNint: event.notification.data.chatNint
@@ -136,7 +176,8 @@
             }
           }
           if (clients.openWindow) {
-            return clients.openWindow(event.notification.data.url || '/');
+            const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : '/';
+            return clients.openWindow(targetUrl);
           }
         })
       );
