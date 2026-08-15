@@ -19,12 +19,8 @@
            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
            --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
-    ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.05s;}
+    ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
     .header, .footer {view-transition-name: none;}
-    /* ============================================================
-    DARK MODE (classe .dark aplicada ao <body>)
-    ============================================================ */
-    .dark {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
     /* ============================================================
     DARK MODE (classe .dark aplicada ao <body>)
     ============================================================ */
@@ -94,7 +90,7 @@
     /* ============================================================
     MENU BUTTONS
     ============================================================ */
-    .mbtn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--txt-2); line-height: 1.2; text-align: center; height: 100%; min-height: 0; overflow: hidden; transition: background var(--ease), color var(--ease);}    
+    .mbtn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--txt-2); line-height: 1.2; text-align: center; height: 100%; min-height: 0; overflow: hidden; transition: background var(--ease), color var(--ease); text-decoration: none;}    
     .mbtn:nth-child(3n) {border-right: none;}
     .mbtn:nth-last-child(-n+2) {border-bottom: none;}
     .mbtn:hover {background: var(--surface-2); color: var(--txt-1);}
@@ -235,86 +231,86 @@
     </div>
     <div class="grid-card">
       <div class="btn-grid">
-        <button class="mbtn" data-module="scales" onclick="selBtn(this); setTimeout(()=> location.href='ScalesView.html', 300)">
+        <a class="mbtn" data-module="scales" href="ScalesView.html" onclick="selBtn(this)">
           <span class="material-icons">calendar_month</span>
           <div>Escalas</div>
-        </button>
-        <button id="changes" class="mbtn" data-module="swaps" onclick="selBtn(this); setTimeout(() => window.location.href='Swaps.html', 300);">
+        </a>
+        <a id="changes" class="mbtn" data-module="swaps" href="Swaps.html" onclick="selBtn(this)">
           <span class="material-icons">multiple_stop</span>
           <div>Trocas de Serviço</div>
           <span class="bdg">0</span>
-        </button>
-        <button class="mbtn" data-module="availability" onclick="selBtn(this); setTimeout(()=> location.href='MainPageEl.html', 300)">
+        </a>
+        <a class="mbtn" data-module="availability" href="MainPageEl.html" onclick="selBtn(this)">
           <span class="material-icons">free_cancellation</span>
           <div>Disponibilidades</div>
-        </button>
-        <button class="mbtn" data-module="vacation_request" onclick="selBtn(this); setTimeout(()=> location.href='SolVacat.html', 300)">
+        </a>
+        <a class="mbtn" data-module="vacation_request" href="SolVacat.html" onclick="selBtn(this)">
           <span class="material-icons">beach_access</span>
           <div>Pedido Férias</div>
-        </button>
-        <button class="mbtn" data-module="uniform_request" onclick="selBtn(this); setTimeout(() => window.location.href='SolFardam.html', 300);">
+        </a>
+        <a class="mbtn" data-module="uniform_request" href="SolFardam.html" onclick="selBtn(this)">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">checkroom</span>
           <div>Pedido Fardamento</div>
-        </button>
-        <button class="mbtn" data-module="attendance" onclick="selBtn(this); setTimeout(() => window.location.href='Attendance.html', 300);">
+        </a>
+        <a class="mbtn" data-module="attendance" href="Attendance.html" onclick="selBtn(this)">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">fingerprint</span>
           <div>Assíduidade</div>
-        </button>
-        <button id="ongoingBtn" class="mbtn" data-module="ongoing_occurrences" onclick="selBtn(this); setTimeout(()=> location.href='OnGoingOcr.html', 300)">
+        </a>
+        <a id="ongoingBtn" class="mbtn" data-module="ongoing_occurrences" href="OnGoingOcr.html" onclick="selBtn(this)">
           <span class="material-icons">crisis_alert</span>
           <div>Ocorrências em Curso</div>
           <span class="bdg">0</span>
-        </button>
-        <button class="mbtn" data-module="fomio" onclick="selBtn(this); setTimeout(()=> location.href='FomioPage.html', 300)">
+        </a>
+        <a class="mbtn" data-module="fomio" href="FomioPage.html" onclick="selBtn(this)">
           <span class="material-icons">diversity_3</span>
           <div>Equipa de Serviço</div>
-        </button>
-        <button id="events" class="mbtn" data-module="events" onclick="selBtn(this); setTimeout(()=> location.href='Events.html', 300)">
+        </a>
+        <a id="events" class="mbtn" data-module="events" href="Events.html" onclick="selBtn(this)">
           <span class="material-icons">today</span>
           <div>Eventos</div>
           <span class="bdg">0</span>
-        </button>
-        <button id="reports" class="mbtn" data-module="reports" onclick="selBtn(this); setTimeout(()=> location.href='MissReport.html', 300)">
+        </a>
+        <a id="reports" class="mbtn" data-module="reports" href="MissReport.html" onclick="selBtn(this)">
           <span class="material-icons">insert_chart</span>
           <div>Relatórios de Ocorrência</div>
           <span class="bdg">0</span>
-        </button>
-        <button class="mbtn" data-module="documents" onclick="selBtn(this); setTimeout(() => window.location.href='Documents.html', 300);">
+        </a>
+        <a class="mbtn" data-module="documents" href="Documents.html" onclick="selBtn(this)">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">description</span>
           <div>Documentos</div>
-        </button>
-        <button id="comunicates" class="mbtn" data-module="comunicates" onclick="selBtn(this); setTimeout(() => window.location.href='Comunic.html', 300);">
+        </a>
+        <a id="comunicates" class="mbtn" data-module="comunicates" href="Comunic.html" onclick="selBtn(this)">
           <span class="material-icons" style="font-size: 24px; margin-bottom: 8px;">assignment_add</span>
           <div>Comunicados</div>
           <span class="bdg">0</span>
-        </button>
-        <button id="meteoadv" class="mbtn" data-module="meteo" onclick="selBtn(this); setTimeout(()=> location.href='MeteoAdv.html', 300)">
+        </a>
+        <a id="meteoadv" class="mbtn" data-module="meteo" href="MeteoAdv.html" onclick="selBtn(this)">
           <span class="material-icons">storm</span>
           <div>Avisos METEO</div>
           <span class="bdg">0</span>
-        </button>
-        <button id="hospadv" class="mbtn" data-module="hospital_restrictions" onclick="selBtn(this); setTimeout(()=> location.href='NoHospital.html', 300)">
+        </a>
+        <a id="hospadv" class="mbtn" data-module="hospital_restrictions" href="NoHospital.html" onclick="selBtn(this)">
           <span class="material-icons">local_hospital</span>
           <div>Constrangimentos Hospitalares</div>
           <span class="bdg">0</span>
-        </button>
-        <button class="mbtn" data-module="vehicles" onclick="selBtn(this); setTimeout(()=> location.href='MainPageVe.html', 300)">
+        </a>
+        <a class="mbtn" data-module="vehicles" href="MainPageVe.html" onclick="selBtn(this)">
           <span class="material-icons">fire_truck</span>
           <div>Veículos</div>
-        </button>
-        <button class="mbtn" data-module="tools" onclick="selBtn(this); setTimeout(()=> location.href='Tools.html', 300)">
+        </a>
+        <a class="mbtn" data-module="tools" href="Tools.html" onclick="selBtn(this)">
           <span class="material-icons">construction</span>
           <div>Ferramentas Úteis</div>
-        </button>
-        <button id="internalChat" class="mbtn" data-module="internal_chat" onclick="selBtn(this); setTimeout(()=> location.href='InterChat.html', 300)">
+        </a>
+        <a id="internalChat" class="mbtn" data-module="internal_chat" href="InterChat.html" onclick="selBtn(this)">
           <span class="material-icons">chat</span>
           <div>Chat Interno</div>
           <span class="bdg">0</span>
-        </button>
-        <button id="pointJustif" class="mbtn" data-module="point_justif" style="background: var(--red-dark); color: #fff;" onclick="selBtn(this); setTimeout(()=> location.href='PointJustif.html', 300)">
+        </a>
+        <a id="pointJustif" class="mbtn" data-module="point_justif" style="background: var(--red-dark); color: #fff;" href="PointJustif.html" onclick="selBtn(this)">
           <span class="material-icons" style="color: #fff;">how_to_reg</span>
           <div>Justificação de Picagens</div>
-        </button>
+        </a>
       </div>
     </div>
     <div class="switch-row">
@@ -414,7 +410,6 @@
         <p><strong>Vigência:</strong> Agosto 2026</p>
         <h4>1. Aceitação dos Termos</h4>
         <p>Ao aceder ou utilizar o CB360, o utilizador declara ter lido, compreendido e aceite estes Termos de Uso, bem como a respetiva Política de Privacidade. Caso não concorde, não deverá utilizar a aplicação.</p>
-
         <h4>2. Elegibilidade e Uso Autorizado</h4>
         <p>
           • O acesso é exclusivo a elementos autorizados da corporação de bombeiros<br>
@@ -440,7 +435,6 @@
         </p>
         <h4>5. Dados de Localização e Operacionais</h4>
         <p>Determinadas funcionalidades (como o V-Status) dependem do registo de dados de localização e estado de viaturas. Ao utilizar estas funcionalidades, o utilizador aceita o tratamento destes dados nos termos descritos na Política de Privacidade.</p>
-
         <h4>6. Disponibilidade do Serviço</h4>
         <p>
           • O CB360 é fornecido "como está" e "conforme disponível"<br>
@@ -633,6 +627,12 @@
   </script>
   <script>
     /* ===================== SUPABASE CONFIGURATION ====================== */
+    window._cb360Intervals = window._cb360Intervals || [];
+    function trackInterval(id) { window._cb360Intervals.push(id); }
+    function clearAllTrackedIntervals() {
+      window._cb360Intervals.forEach(clearInterval);
+      window._cb360Intervals = [];
+    }
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
@@ -1201,6 +1201,7 @@
     function lockBtn(btn) {
       btn.classList.add('locked');
       btn.setAttribute('aria-disabled', 'true');
+      btn.removeAttribute('href');
       btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -1312,7 +1313,7 @@
       const corpOperNr = getCorp();
       const badge = document.querySelector('#hospadv .bdg');
       if (!badge) return;
-      if (!corpOperNr) { badge.textontent = '0'; return; }
+      if (!corpOperNr) { badge.textContent = '0'; return; }
       try {
         const response = await fetch(
           `${SUPABASE_URL}/rest/v1/hospital_restrictions?select=service,hospital&corp_oper_nr=eq.${corpOperNr}&service=not.is.null&hospital=neq.EMPTY`, { 
@@ -1353,7 +1354,7 @@
       }
     }
     /* ============================= INIT ================================ */
-    document.addEventListener('DOMContentLoaded', () => {
+    function initPage() {
       loadTheme();
       loadCorpInfo();
       loadUserName();
@@ -1367,14 +1368,17 @@
       updateNohospitalBadge();
       updateChatBadge();
       checkRealNotifications();
-      setInterval(updateOccurrencesBadge, 10000);
-      setInterval(updateEventsBadge, 10000);
-      setInterval(updateOccurrenceReportsBadge, 10000);
-      setInterval(updateComunicatesBadge, 10000);
-      setInterval(countIPMAWarningsFromSite, 10 * 60 * 1000);
-      setInterval(updateNohospitalBadge, 10000);
-      setInterval(updateChatBadge, 10000);
-      setInterval(checkRealNotifications, 10000);
+
+      clearAllTrackedIntervals();
+      trackInterval(setInterval(updateOccurrencesBadge, 10000));
+      trackInterval(setInterval(updateEventsBadge, 10000));
+      trackInterval(setInterval(updateOccurrenceReportsBadge, 10000));
+      trackInterval(setInterval(updateComunicatesBadge, 10000));
+      trackInterval(setInterval(countIPMAWarningsFromSite, 10 * 60 * 1000));
+      trackInterval(setInterval(updateNohospitalBadge, 10000));
+      trackInterval(setInterval(updateChatBadge, 10000));
+      trackInterval(setInterval(checkRealNotifications, 10000));
+
       const buttons = document.querySelectorAll('.mbtn');
       buttons.forEach((button, index) => {
         button.style.opacity = '0';
@@ -1385,16 +1389,24 @@
           button.style.transform = 'translateY(0)';
         }, index * 100);
       });
-      document.addEventListener('touchstart', e => {
-        if (e.touches.length > 1) e.preventDefault();
-      });
-      let lastTouchEnd = 0;
-      document.addEventListener('touchend', e => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) e.preventDefault();
-        lastTouchEnd = now;
-      }, false);
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+    document.addEventListener('pageReady', initPage);
+
+    document.addEventListener('touchstart', e => {
+      if (e.touches.length > 1) e.preventDefault();
     });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', e => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) e.preventDefault();
+      lastTouchEnd = now;
+    }, false);
+
     window.addEventListener('click', event => {
       const isButtonClick = event.target.closest('.mbtn');
       const isThemeToggle = event.target.closest('.theme-pill');
@@ -1405,5 +1417,6 @@
     document.addEventListener('selectstart', e => e.preventDefault());
     document.addEventListener('contextmenu', e => e.preventDefault());
   </script>
+  <script src="app-nav.js"></script>
 </body>
 </html>
