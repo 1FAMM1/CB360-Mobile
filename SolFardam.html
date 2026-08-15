@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <meta name="theme-color" content="#c62828">
+  <title>CB360 Mobile - Pedidos de Fardamento</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @view-transition {navigation: auto;}
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+    ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
+    .header, .footer {view-transition-name: none;}
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 9.5px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
+    .main-content::-webkit-scrollbar {display: none;}
+    .section-label {width: 100%; font-size: 12px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px; margin-bottom: 2px;}
+    /* ============================================================
+    LISTA DINÂMICA DE ARTIGOS
+    ============================================================ */
+    .items-list {display: flex; flex-direction: column; gap: 10px; width: 100%;}
+    .item-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%;
+                position: relative; transition: background var(--ease), border-color var(--ease);}
+    .item-card-header {display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;}
+    .item-card-title {font-size: 11.5px; font-weight: 700; color: var(--red); letter-spacing: 0.4px; text-transform: uppercase;}
+    .item-remove-btn {background: transparent; border: none; color: var(--txt-3); cursor: pointer; display: flex; align-items: center; justify-content: center;
+                       width: 26px; height: 26px; border-radius: 50%; transition: background var(--ease), color var(--ease);}
+    .item-remove-btn:hover {background: var(--red-light); color: var(--red);}
+    .item-remove-btn .material-icons {font-size: 18px;}
+    .item-row {display: flex; gap: 10px; width: 100%;}
+    .item-row + .item-row {margin-top: 10px;}
+    .item-field {flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;}
+    .item-field.qty-field {flex: 0 0 78px;}
+    .item-field label {font-size: 10.5px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px;}
+    .item-field select, .item-field input {width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm);
+                                            padding: 10px 10px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--txt-1); outline: none;
+                                            appearance: none; -webkit-appearance: none; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
+    .item-field select {background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235c5651' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+                        background-repeat: no-repeat; background-position: right 8px center; padding-right: 28px;}
+    .dark-mode .item-field select {background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a09890' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");}
+    .item-field select:focus, .item-field input:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
+    .item-field input::placeholder {color: var(--txt-3);}
+    .empty-state {width: 100%; text-align: center; padding: 26px 10px; color: var(--txt-3); font-size: 12.5px; font-weight: 500;}
+    .btn-add-item {display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--r-sm);
+                   padding: 12px 16px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--red); letter-spacing: 0.3px; cursor: pointer;
+                   transition: background var(--ease), border-color var(--ease); margin-top: 4px;}
+    .btn-add-item:hover {background: var(--red-light); border-color: var(--red);}
+    .btn-add-item .material-icons {font-size: 18px;}
+    /* ============================================================
+    JUSTIFICAÇÃO
+    ============================================================ */
+    .justif-field {flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px;}
+    .justif-field label {font-size: 11.5px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px;}
+    .justif-field textarea {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px;
+                             font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--txt-1); outline: none; resize: none; overflow: hidden;
+                             min-height: 90px; max-height: 500px; line-height: 1.4; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
+    .justif-field textarea:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
+    .justif-field textarea::placeholder {color: var(--txt-3);}
+    /* ============================================================
+    SUBMIT
+    ============================================================ */
+    .btn-submit {display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(to right, var(--red-dark), var(--red)); border: none;
+                 border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 13px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; color: #fff;
+                 letter-spacing: 0.3px; cursor: pointer; transition: filter var(--ease), transform 0.15s ease;}
+    .btn-submit:hover {filter: brightness(1.08);}
+    .btn-submit:active {transform: scale(0.98);}
+    .btn-submit:disabled {opacity: 0.7; cursor: not-allowed;}
+    .btn-submit .material-icons {font-size: 18px;}
+    /* ============================================================
+    TOAST
+    ============================================================ */
+    .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red));
+            color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center;
+            z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
+    @media (max-width: 480px) {
+      .header-title {font-size: 16px;}
+      .main-content {padding-left: 14px; padding-right: 14px;}
+      .item-row {flex-wrap: wrap;}
+      .item-field.qty-field {flex: 0 0 70px;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">PEDIDOS DE FARDAMENTO</span>
+      <span class="header-sub">Requisição de Artigos</span>
+    </div>
+    <h2 id="corpInfo" style="display: none;"></h2>
+  </header>
+
+  <div class="main-content">
+    <p class="section-label">Artigos:</p>
+    <div class="items-list" id="itemsList">
+      <!-- Estado vazio; linhas são inseridas dinamicamente via JS -->
+      <p class="empty-state" id="itemsEmptyState">Ainda não adicionou nenhum artigo.</p>
+    </div>
+    <button type="button" class="btn-add-item" onclick="addItemRow()">
+      <span class="material-icons">add_circle_outline</span>Adicionar Artigo
+    </button>
+
+    <div class="justif-field" style="width: 100%; margin-top: 15px;">
+      <label for="fieldObservacoes">Observações (opcional):</label>
+      <textarea id="fieldObservacoes" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="2" oninput="autoResizeTextarea(this)"></textarea>
+    </div>
+
+    <button type="button" class="btn-submit" id="submitFardBtn" onclick="enviarPedidoFardamento()">
+      <span class="material-icons">send</span><span id="submitFardBtnText">Enviar Pedido</span>
+    </button>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023–2025 · Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getSupabaseHeaders(options = {}) {
+      const corp = getCorp();
+      const nint = getNInt();
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint,
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) return;
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) {
+        logoEl.src = cachedLogo;
+      }
+      if (h2) h2.textContent = corpOperNr;
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (corp.logo_url && corp.logo_url !== cachedLogo) {
+            localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+            if (logoEl) logoEl.src = corp.logo_url.trim();
+          }
+        }
+      } catch (err) {
+        console.error('Erro silencioso:', err);
+      }
+    }
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = message;
+      const content = document.querySelector(".main-content");
+      document.body.appendChild(toast);
+      if (content) content.classList.add("content-blur");
+      setTimeout(() => toast.classList.add("show"), 50);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        if (content) content.classList.remove("content-blur");
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    function autoResizeTextarea(el) {
+      const maxHeight = 500;
+      el.style.height = 'auto';
+      const contentHeight = el.scrollHeight;
+      if (contentHeight > maxHeight) {
+        el.style.height = maxHeight + 'px';
+        el.style.overflowY = 'auto';
+      } else {
+        el.style.height = contentHeight + 'px';
+        el.style.overflowY = 'hidden';
+      }
+    }
+
+    /* ==================== ARTIGOS DISPONÍVEIS ==================== */
+    /* sizeType: 'letter' (S-XXL) | 'numeric' (numeração, ex: calçado) | 'none' (sem tamanho) */
+    const FARDAMENTO_ITEMS = [
+      { value: "farda_operacional", label: "Farda Operacional", sizeType: "letter" },
+      { value: "farda_gala", label: "Farda de Gala", sizeType: "letter" },
+      { value: "casaco_impermeavel", label: "Casaco Impermeável", sizeType: "letter" },
+      { value: "polo", label: "Polo", sizeType: "letter" },
+      { value: "sweatshirt", label: "Sweatshirt", sizeType: "letter" },
+      { value: "botas", label: "Botas", sizeType: "numeric" },
+      { value: "sapatilhas", label: "Sapatilhas", sizeType: "numeric" },
+      { value: "luvas", label: "Luvas", sizeType: "letter" },
+      { value: "capacete", label: "Capacete", sizeType: "none" },
+      { value: "cinto", label: "Cinto", sizeType: "none" },
+    ];
+    const LETTER_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+
+    let itemRowCounter = 0;
+
+    function buildItemOptionsHTML(selectedValue) {
+      return FARDAMENTO_ITEMS.map(item =>
+        `<option value="${item.value}" ${item.value === selectedValue ? "selected" : ""}>${item.label}</option>`
+      ).join("");
+    }
+    function buildSizeFieldHTML(rowId, sizeType, currentValue) {
+      if (sizeType === "letter") {
+        const options = LETTER_SIZES.map(s =>
+          `<option value="${s}" ${s === currentValue ? "selected" : ""}>${s}</option>`
+        ).join("");
+        return `<select id="itemSize_${rowId}">${options}</select>`;
+      }
+      if (sizeType === "numeric") {
+        return `<input type="number" id="itemSize_${rowId}" placeholder="Ex: 42" min="30" max="50" value="${currentValue || ''}">`;
+      }
+      return `<input type="text" id="itemSize_${rowId}" value="N/A" disabled style="opacity:0.5;">`;
+    }
+    function getSizeTypeForItem(value) {
+      const found = FARDAMENTO_ITEMS.find(i => i.value === value);
+      return found ? found.sizeType : "letter";
+    }
+
+    function addItemRow() {
+      const list = document.getElementById('itemsList');
+      const emptyState = document.getElementById('itemsEmptyState');
+      if (emptyState) emptyState.remove();
+
+      itemRowCounter++;
+      const rowId = itemRowCounter;
+      const defaultItem = FARDAMENTO_ITEMS[0];
+
+      const card = document.createElement('div');
+      card.className = 'item-card';
+      card.id = `itemCard_${rowId}`;
+      card.innerHTML = `
+        <div class="item-card-header">
+          <span class="item-card-title">Artigo ${rowId}</span>
+          <button type="button" class="item-remove-btn" onclick="removeItemRow(${rowId})">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+        <div class="item-row">
+          <div class="item-field" style="flex: 2;">
+            <label for="itemArtigo_${rowId}">Artigo</label>
+            <select id="itemArtigo_${rowId}" onchange="onItemArtigoChange(${rowId})">
+              ${buildItemOptionsHTML(defaultItem.value)}
+            </select>
+          </div>
+          <div class="item-field" id="itemSizeField_${rowId}">
+            <label for="itemSize_${rowId}">Tamanho</label>
+            ${buildSizeFieldHTML(rowId, defaultItem.sizeType, "M")}
+          </div>
+          <div class="item-field qty-field">
+            <label for="itemQty_${rowId}">Qtd.</label>
+            <input type="number" id="itemQty_${rowId}" min="1" value="1">
+          </div>
+        </div>
+      `;
+      list.appendChild(card);
+    }
+
+    function onItemArtigoChange(rowId) {
+      const select = document.getElementById(`itemArtigo_${rowId}`);
+      const sizeType = getSizeTypeForItem(select.value);
+      const sizeFieldWrapper = document.getElementById(`itemSizeField_${rowId}`);
+      sizeFieldWrapper.innerHTML = `
+        <label for="itemSize_${rowId}">Tamanho</label>
+        ${buildSizeFieldHTML(rowId, sizeType, "M")}
+      `;
+    }
+
+    function removeItemRow(rowId) {
+      const card = document.getElementById(`itemCard_${rowId}`);
+      if (card) card.remove();
+      const list = document.getElementById('itemsList');
+      if (!list.querySelector('.item-card')) {
+        const emptyState = document.createElement('p');
+        emptyState.className = 'empty-state';
+        emptyState.id = 'itemsEmptyState';
+        emptyState.textContent = 'Ainda não adicionou nenhum artigo.';
+        list.appendChild(emptyState);
+      }
+    }
+
+    function collectItemsData() {
+      const cards = document.querySelectorAll('#itemsList .item-card');
+      const items = [];
+      cards.forEach(card => {
+        const rowId = card.id.replace('itemCard_', '');
+        const artigoSelect = document.getElementById(`itemArtigo_${rowId}`);
+        const sizeEl = document.getElementById(`itemSize_${rowId}`);
+        const qtyEl = document.getElementById(`itemQty_${rowId}`);
+        const artigoLabel = FARDAMENTO_ITEMS.find(i => i.value === artigoSelect.value)?.label || artigoSelect.value;
+        items.push({
+          artigo: artigoSelect.value,
+          artigoLabel,
+          tamanho: sizeEl ? sizeEl.value : "N/A",
+          quantidade: qtyEl ? parseInt(qtyEl.value, 10) || 1 : 1,
+        });
+      });
+      return items;
+    }
+
+    /* ===================== ENVIAR PEDIDO ===================== */
+    async function enviarPedidoFardamento() {
+      const items = collectItemsData();
+      if (items.length === 0) {
+        showToast("Adicione pelo menos um artigo.");
+        return;
+      }
+      const invalidQty = items.some(i => !i.quantidade || i.quantidade < 1);
+      if (invalidQty) {
+        showToast("Verifique as quantidades introduzidas.");
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitFardBtn');
+      const submitBtnText = document.getElementById('submitFardBtnText');
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitBtnText) submitBtnText.textContent = "A Enviar Pedido";
+
+      const observacoes = document.getElementById('fieldObservacoes').value.trim();
+      const corpOperNr = getCorp();
+
+      try {
+        // TODO: gravar pedido no Supabase e enviar email via /api/send_email
+        console.log({ corpOperNr, items, observacoes });
+        showToast("Pedido de fardamento enviado com sucesso!");
+        document.getElementById('itemsList').innerHTML = '<p class="empty-state" id="itemsEmptyState">Ainda não adicionou nenhum artigo.</p>';
+        document.getElementById('fieldObservacoes').value = "";
+        autoResizeTextarea(document.getElementById('fieldObservacoes'));
+      } catch (err) {
+        console.error(err);
+        showToast("Erro ao enviar o pedido: " + err.message);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitBtnText) submitBtnText.textContent = "Enviar Pedido";
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCorpInfo();
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+      addItemRow();
+    });
+  </script>
+</body>
+</html>
