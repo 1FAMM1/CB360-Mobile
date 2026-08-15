@@ -289,15 +289,6 @@
     </div>
   </footer>
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('App pronta: ', reg.scope))
-          .catch(err => console.log('Erro no motor da App: ', err));
-      });
-    }
-  </script>
-  <script>
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
@@ -505,7 +496,6 @@
             if (dayNum) currentMonthAttendanceMap[dayNum] = 'white';
           }
         });
-        /* Mapa de assiduidade já está completo aqui - liberta quem estava à espera dele (ex. loadPicketsMonth) */
         resolveAttendanceMapReady();
         document.getElementById("attendancePresences").textContent = appearances;
         document.getElementById("attendanceAbsences").textContent = absences;
@@ -534,7 +524,6 @@
           const data = await response.json();
           items = data.map(d => d.day).filter(Boolean).map(day => ({ day, type: "PN", suffix: "N" }));
         }
-        /* Espera que o mapa de assiduidade esteja pronto antes de fazer o merge, sem esperar pela função toda */
         await attendanceMapReady;
         Object.keys(currentMonthAttendanceMap).forEach(dayStr => {
           const d = parseInt(dayStr, 10);
@@ -866,7 +855,6 @@
       const main = document.querySelector('.main-content');
       if (!main) return Promise.resolve();
       return new Promise(resolve => {
-        const topOffset = 70;
         const currentScroll = main.scrollTop;
         main.classList.remove('slide-in');
         main.classList.add('slide-out');
@@ -878,8 +866,7 @@
           }
           main.classList.remove('slide-out');
           main.classList.add('slide-in');
-          const targetScroll = currentScroll;
-          main.scrollTo({top: targetScroll, behavior: 'smooth'});
+          main.scrollTo({top: currentScroll, behavior: 'smooth'});
           setTimeout(() => {
             main.classList.remove('slide-in');
             resolve();
@@ -888,14 +875,18 @@
       });
     }
     /* ========================== INITIALIZATION ========================== */
-    document.addEventListener('DOMContentLoaded', function() {
+    let selectedMonth = null;
+    let currentFetchRequestId = 0;
+    function initPage() {
       loadCorpInfo();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
       }
-      let selectedMonth = null;
-      let currentFetchRequestId = 0;
+      selectedMonth = null;
+      currentFetchRequestId = 0;
       const mesesSemDecir = [0, 1, 2, 3, 10, 11];
       const monthsCard = document.querySelector(".months-card");
       const btnBack = document.getElementById("btnBackToMonths");
@@ -1020,7 +1011,18 @@
           }
         });
       });
-    });
+    }
+    if (window.__cb360NavInit) {
+      document.addEventListener('pageReady', initPage);
+    } else {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPage);
+      } else {
+        initPage();
+      }
+      document.addEventListener('pageReady', initPage);
+    }
   </script>
+  <script src="app-nav.js"></script>
 </body>
 </html>
