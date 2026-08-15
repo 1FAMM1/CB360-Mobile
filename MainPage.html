@@ -27,7 +27,7 @@
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100vh; height: 100svh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: calc(var(--vh, 1vh) * 100); overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER
     ============================================================ */
@@ -603,15 +603,33 @@
     }
   </script>
   <script>
+    function setVH() {
+      document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+    }
+    function setVHWithSettle() {
+      setVH();
+      setTimeout(setVH, 100);
+      setTimeout(setVH, 300);
+      setTimeout(setVH, 600);
+    }
+    setVHWithSettle();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVHWithSettle);
+    window.addEventListener('pageshow', setVHWithSettle);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') setVHWithSettle();
+    });
+  </script>
+  <script>
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
     function getSupabaseHeaders(options = {}) {
       const corp  = getCorp();
       const nint  = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzM2MDk1OTF9.Eiawxo2UpKRGPc8AtW1_ks3lTNs_eLJDaVKT-udtIV8';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
