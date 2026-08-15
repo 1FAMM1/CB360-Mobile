@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>CB360 Mobile - Status Veículos</title>
   <style>
+    @view-transition {navigation: auto;}
     /* ============================================================
     VARIABLES
     ============================================================ */
@@ -19,6 +20,8 @@
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
            --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;
            --green: #22c55e; --orange: #ff9800;}
+    ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
+    .header, .footer {view-transition-name: none;}
     /* ============================================================
     DARK MODE
     ============================================================ */
