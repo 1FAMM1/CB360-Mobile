@@ -1,11 +1,11 @@
     /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v4.9.5 - Fix: catch() do fetch handler já não deixa a
+    v4.9.6 - Fix: catch() do fetch handler já não deixa a
     promise resolver para undefined (Failed to convert value
     to 'Response'); devolve sempre um Response válido, com
     fallback para index.html em navegações offline.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v4.9.5';
+    const CACHE_NAME = 'cb360-cache-v4.9.6';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', 
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', 
                              '/MissReport.html', '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', 
