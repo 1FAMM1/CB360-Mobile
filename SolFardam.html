@@ -12,21 +12,36 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     @view-transition {navigation: auto;}
+    /* ============================================================
+    VARIABLES (alinhadas com a página Escalas)
+    ============================================================ */
     :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
            --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
            --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
     ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
     .header, .footer {view-transition-name: none;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
     .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
     body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
     .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
     .header-sub {font-size: 9.5px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
     .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
     .main-content::-webkit-scrollbar {display: none;}
     .section-label {width: 100%; font-size: 12px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px; margin-bottom: 2px;}
@@ -34,12 +49,10 @@
     LISTA DINÂMICA DE ARTIGOS
     ============================================================ */
     .items-list {display: flex; flex-direction: column; gap: 10px; width: 100%;}
-    .item-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%;
-                position: relative; transition: background var(--ease), border-color var(--ease);}
+    .item-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; position: relative; transition: background var(--ease), border-color var(--ease);}
     .item-card-header {display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;}
     .item-card-title {font-size: 11.5px; font-weight: 700; color: var(--red); letter-spacing: 0.4px; text-transform: uppercase;}
-    .item-remove-btn {background: transparent; border: none; color: var(--txt-3); cursor: pointer; display: flex; align-items: center; justify-content: center;
-                       width: 26px; height: 26px; border-radius: 50%; transition: background var(--ease), color var(--ease);}
+    .item-remove-btn {background: transparent; border: none; color: var(--txt-3); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; transition: background var(--ease), color var(--ease);}
     .item-remove-btn:hover {background: var(--red-light); color: var(--red);}
     .item-remove-btn .material-icons {font-size: 18px;}
     .item-row {display: flex; gap: 10px; width: 100%;}
@@ -47,36 +60,27 @@
     .item-field {flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;}
     .item-field.qty-field {flex: 0 0 78px;}
     .item-field label {font-size: 10.5px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px;}
-    .item-field select, .item-field input {width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm);
-                                            padding: 10px 10px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--txt-1); outline: none;
-                                            appearance: none; -webkit-appearance: none; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
-    .item-field select {background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235c5651' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
-                        background-repeat: no-repeat; background-position: right 8px center; padding-right: 28px;}
+    .item-field select, .item-field input {width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 10px 10px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--txt-1); outline: none; appearance: none; -webkit-appearance: none; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
+    .item-field select {background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235c5651' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 28px;}
     .dark-mode .item-field select {background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a09890' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");}
     .item-field select:focus, .item-field input:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
     .item-field input::placeholder {color: var(--txt-3);}
     .empty-state {width: 100%; text-align: center; padding: 26px 10px; color: var(--txt-3); font-size: 12.5px; font-weight: 500;}
-    .btn-add-item {display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--r-sm);
-                   padding: 12px 16px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--red); letter-spacing: 0.3px; cursor: pointer;
-                   transition: background var(--ease), border-color var(--ease); margin-top: 4px;}
+    .btn-add-item {display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--r-sm); padding: 12px 16px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--red); letter-spacing: 0.3px; cursor: pointer; transition: background var(--ease), border-color var(--ease); margin-top: 4px;}
     .btn-add-item:hover {background: var(--red-light); border-color: var(--red);}
     .btn-add-item .material-icons {font-size: 18px;}
     /* ============================================================
     JUSTIFICAÇÃO
     ============================================================ */
-    .justif-field {flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px;}
-    .justif-field label {font-size: 11.5px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px;}
-    .justif-field textarea {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px;
-                             font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--txt-1); outline: none; resize: none; overflow: hidden;
-                             min-height: 90px; max-height: 500px; line-height: 1.4; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
-    .justif-field textarea:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
-    .justif-field textarea::placeholder {color: var(--txt-3);}
+    .oberv-field {flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px;}
+    .oberv-field label {font-size: 11.5px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px;}
+    .oberv-field textarea {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--txt-1); outline: none; resize: none; overflow: hidden; min-height: 90px; max-height: 500px; line-height: 1.4; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
+    .oberv-field textarea:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
+    .oberv-field textarea::placeholder {color: var(--txt-3);}
     /* ============================================================
     SUBMIT
     ============================================================ */
-    .btn-submit {display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(to right, var(--red-dark), var(--red)); border: none;
-                 border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 13px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; color: #fff;
-                 letter-spacing: 0.3px; cursor: pointer; transition: filter var(--ease), transform 0.15s ease;}
+    .btn-submit {display: flex; align-items: center; justify-content: center; gap: 8px; width: 75%; background: linear-gradient(to right, var(--red-dark), var(--red)); border: none; border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 13px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; color: #fff; letter-spacing: 0.3px; cursor: pointer; transition: filter var(--ease), transform 0.15s ease; margin-top: 5px;}
     .btn-submit:hover {filter: brightness(1.08);}
     .btn-submit:active {transform: scale(0.98);}
     .btn-submit:disabled {opacity: 0.7; cursor: not-allowed;}
@@ -84,15 +88,12 @@
     /* ============================================================
     TOAST
     ============================================================ */
-    .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red));
-            color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center;
-            z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
     .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
     /* ============================================================
     FOOTER
     ============================================================ */
-    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
@@ -121,18 +122,15 @@
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
-
   <div class="main-content">
     <p class="section-label">Artigos:</p>
     <div class="items-list" id="itemsList">
-      <!-- Estado vazio; linhas são inseridas dinamicamente via JS -->
       <p class="empty-state" id="itemsEmptyState">Ainda não adicionou nenhum artigo.</p>
     </div>
     <button type="button" class="btn-add-item" onclick="addItemRow()">
       <span class="material-icons">add_circle_outline</span>Adicionar Artigo
     </button>
-
-    <div class="justif-field" style="width: 100%; margin-top: 15px;">
+    <div class="oberv-field" style="width: 100%; margin-top: 15px;">
       <label for="fieldObservacoes">Observações (opcional):</label>
       <textarea id="fieldObservacoes" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="2" oninput="autoResizeTextarea(this)"></textarea>
     </div>
@@ -141,7 +139,6 @@
       <span class="material-icons">send</span><span id="submitFardBtnText">Enviar Pedido</span>
     </button>
   </div>
-
   <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
@@ -152,7 +149,6 @@
       </div>
     </div>
   </footer>
-
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -237,25 +233,14 @@
         el.style.overflowY = 'hidden';
       }
     }
-
     /* ==================== ARTIGOS DISPONÍVEIS ==================== */
-    /* sizeType: 'letter' (S-XXL) | 'numeric' (numeração, ex: calçado) | 'none' (sem tamanho) */
-    const FARDAMENTO_ITEMS = [
-      { value: "farda_operacional", label: "Farda Operacional", sizeType: "letter" },
-      { value: "farda_gala", label: "Farda de Gala", sizeType: "letter" },
-      { value: "casaco_impermeavel", label: "Casaco Impermeável", sizeType: "letter" },
-      { value: "polo", label: "Polo", sizeType: "letter" },
-      { value: "sweatshirt", label: "Sweatshirt", sizeType: "letter" },
-      { value: "botas", label: "Botas", sizeType: "numeric" },
-      { value: "sapatilhas", label: "Sapatilhas", sizeType: "numeric" },
-      { value: "luvas", label: "Luvas", sizeType: "letter" },
-      { value: "capacete", label: "Capacete", sizeType: "none" },
-      { value: "cinto", label: "Cinto", sizeType: "none" },
-    ];
+    const FARDAMENTO_ITEMS = [{value: "capacte_florestal", label: "Capacete Florestal", sizeType: "letter"}, {value: "cogula_florestal", label: "Cógula EPI Florestal", sizeType: "letter"}, {value: "dolman_florestal", label: "Dolman EPI Florestal", sizeType: "letter"}, {value: "sweatshirt_florestal", label: "Sweatshirt EPI Florestal", sizeType: "letter"},
+                              {value: "calca_florestal", label: "Calças EPI Florestal", sizeType: "letter"}, {value: "luva_florestal", label: "Luvas EPI Florestal", sizeType: "numeric"}, {value: "bota_florestal", label: "Botas EPI Florestal", sizeType: "numeric"}, {value: "capacte_urbano", label: "Capacete Urbano", sizeType: "letter"},
+                              {value: "cogula_urbano", label: "Cógula EPI Urbano", sizeType: "letter"}, {value: "casaco_urbano", label: "Casaco EPI Urbano", sizeType: "letter"}, {value: "calca_urbano", label: "Calças EPI Urbano", sizeType: "letter"}, {value: "luva_urbano", label: "Luvas EPI Urbano", sizeType: "letter"},
+                              {value: "bota_urbano", label: "Botas EPI Urbano", sizeType: "letter"}, {value: "polo_vermelho_mct", label: "Polo Vermelho Manga Curta", sizeType: "letter"}, {value: "polo_vermelho_mcp", label: "Polo Vermelho Manga Comprida", sizeType: "letter"}, {value: "tshir_azul", label: "T-Shirt Azul Bombeiros", sizeType: "letter"},
+                              {value: "calca_3", label: "Calças Uniforme Nr. 3", sizeType: "letter"}, {value: "cinturao", label: "Cinturão Vermelho", sizeType: "letter"}, {value: "bone", label: "Boné Vermelho Bombeiros", sizeType: "letter"},];
     const LETTER_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
-
     let itemRowCounter = 0;
-
     function buildItemOptionsHTML(selectedValue) {
       return FARDAMENTO_ITEMS.map(item =>
         `<option value="${item.value}" ${item.value === selectedValue ? "selected" : ""}>${item.label}</option>`
@@ -277,16 +262,13 @@
       const found = FARDAMENTO_ITEMS.find(i => i.value === value);
       return found ? found.sizeType : "letter";
     }
-
     function addItemRow() {
       const list = document.getElementById('itemsList');
       const emptyState = document.getElementById('itemsEmptyState');
       if (emptyState) emptyState.remove();
-
       itemRowCounter++;
       const rowId = itemRowCounter;
       const defaultItem = FARDAMENTO_ITEMS[0];
-
       const card = document.createElement('div');
       card.className = 'item-card';
       card.id = `itemCard_${rowId}`;
@@ -316,7 +298,6 @@
       `;
       list.appendChild(card);
     }
-
     function onItemArtigoChange(rowId) {
       const select = document.getElementById(`itemArtigo_${rowId}`);
       const sizeType = getSizeTypeForItem(select.value);
@@ -326,7 +307,6 @@
         ${buildSizeFieldHTML(rowId, sizeType, "M")}
       `;
     }
-
     function removeItemRow(rowId) {
       const card = document.getElementById(`itemCard_${rowId}`);
       if (card) card.remove();
@@ -339,7 +319,6 @@
         list.appendChild(emptyState);
       }
     }
-
     function collectItemsData() {
       const cards = document.querySelectorAll('#itemsList .item-card');
       const items = [];
@@ -349,16 +328,10 @@
         const sizeEl = document.getElementById(`itemSize_${rowId}`);
         const qtyEl = document.getElementById(`itemQty_${rowId}`);
         const artigoLabel = FARDAMENTO_ITEMS.find(i => i.value === artigoSelect.value)?.label || artigoSelect.value;
-        items.push({
-          artigo: artigoSelect.value,
-          artigoLabel,
-          tamanho: sizeEl ? sizeEl.value : "N/A",
-          quantidade: qtyEl ? parseInt(qtyEl.value, 10) || 1 : 1,
-        });
+        items.push({artigo: artigoSelect.value, artigoLabel, tamanho: sizeEl ? sizeEl.value : "N/A", quantidade: qtyEl ? parseInt(qtyEl.value, 10) || 1 : 1,});
       });
       return items;
     }
-
     /* ===================== ENVIAR PEDIDO ===================== */
     async function enviarPedidoFardamento() {
       const items = collectItemsData();
@@ -371,17 +344,13 @@
         showToast("Verifique as quantidades introduzidas.");
         return;
       }
-
       const submitBtn = document.getElementById('submitFardBtn');
       const submitBtnText = document.getElementById('submitFardBtnText');
       if (submitBtn) submitBtn.disabled = true;
       if (submitBtnText) submitBtnText.textContent = "A Enviar Pedido";
-
       const observacoes = document.getElementById('fieldObservacoes').value.trim();
       const corpOperNr = getCorp();
-
       try {
-        // TODO: gravar pedido no Supabase e enviar email via /api/send_email
         console.log({ corpOperNr, items, observacoes });
         showToast("Pedido de fardamento enviado com sucesso!");
         document.getElementById('itemsList').innerHTML = '<p class="empty-state" id="itemsEmptyState">Ainda não adicionou nenhum artigo.</p>';
@@ -395,7 +364,6 @@
         if (submitBtnText) submitBtnText.textContent = "Enviar Pedido";
       }
     }
-
     document.addEventListener('DOMContentLoaded', function() {
       loadCorpInfo();
       const savedTheme = localStorage.getItem('sgo-theme');
