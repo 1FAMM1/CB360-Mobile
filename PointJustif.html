@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <meta name="theme-color" content="#c62828">
+  <title>CB360 Mobile - [TÍTULO DA PÁGINA]</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 9.5px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
+    .main-content::-webkit-scrollbar {display: none;}
+    .section-label {width: 100%; font-size: 12px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px; margin-bottom: 2px;}
+    .seg-icon {font-size: 16px; line-height: 1;}
+    .icon-branco {color: var(--txt-3);}
+    .icon-entrada {color: #2e7d32;}
+    .icon-saida {color: #c62828;}
+    .dark-mode .icon-entrada {color: #66bb6a;}
+    .dark-mode .icon-saida {color: #ef5350;}
+    .segmented-control {display: flex; width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); overflow: hidden;}
+    .segmented-btn {display: flex; align-items: center; justify-content: center; gap: 4px; flex: 1; border: none; background: transparent; padding: 11px 8px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; transition: background var(--ease), color var(--ease);}
+    .segmented-btn + .segmented-btn {border-left: 1px solid var(--border);}
+    .segmented-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
+    .segmented-btn.selected {background: var(--red-light); color: var(--red);}
+    .form-row {display: flex; gap: 10px; width: 100%;}
+    .form-field {flex: 1; display: flex; flex-direction: column; gap: 6px;}
+    .form-field label {font-size: 11.5px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px;}
+    .form-field input {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--txt-1); outline: none; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
+    .form-field input:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
+    .dark-mode .form-field input::-webkit-calendar-picker-indicator {filter: invert(1) brightness(1.8);}
+    .form-field textarea {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--txt-1); outline: none; resize: none; overflow: hidden; min-height: 250px; max-height: 500px; line-height: 1.4; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
+    .form-field textarea:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
+    .form-field textarea::placeholder {color: var(--txt-3);}
+    .btn-submit {display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(to right, var(--red-dark), var(--red)); border: none; border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 13px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; color: #fff; letter-spacing: 0.3px; cursor: pointer; transition: filter var(--ease), transform 0.15s ease;}
+    .btn-submit:hover {filter: brightness(1.08);}
+    .btn-submit:active {transform: scale(0.98);}
+    .btn-submit .material-icons {font-size: 18px;}
+    .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;}
+    .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    @media (max-width: 480px) {
+      .header-title {font-size: 16px;}
+      .main-content {padding-left: 14px; padding-right: 14px;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">PICAGEM DE PONTO</span>
+      <span class="header-sub">Justificação de Piagens Erradas</span>
+    </div>
+    <h2 id="corpInfo" style="display: none;"></h2>
+  </header>
+  <div class="main-content">
+    <p class="section-label">Selecione o Tipo de Picagem:</p>
+    <div class="segmented-control" id="tipoRegistoControl">
+      <button type="button" class="segmented-btn selected" data-tipo="branco" onclick="selectTipoRegisto('branco', this)">
+        <span class="material-icons seg-icon icon-branco">close</span>Sem Picagem
+      </button>
+      <button type="button" class="segmented-btn" data-tipo="entrada" onclick="selectTipoRegisto('entrada', this)">
+        <span class="material-icons seg-icon icon-entrada">arrow_forward</span>Entrada
+      </button>
+      <button type="button" class="segmented-btn" data-tipo="saida" onclick="selectTipoRegisto('saida', this)">
+        <span class="material-icons seg-icon icon-saida">arrow_back</span>Saída
+      </button>
+    </div>
+    <div class="form-row" style="margin-top: 15px;">
+      <div class="form-field">
+        <label for="fieldDate">Data da Picagem:</label>
+        <input type="date" id="fieldDate">
+      </div>
+      <div class="form-field">
+        <label for="fieldTime">Hora da Picagem:</label>
+        <input type="time" id="fieldTime">
+      </div>
+    </div>
+    <div class="form-field" style="width: 100%; margin-top: 15px;">
+      <label for="fieldJustificacao">Justificação:</label>
+      <textarea id="fieldJustificacao" placeholder="Escreva aqui a justificação..." rows="2" oninput="autoResizeTextarea(this)"></textarea>
+    </div>
+    <button type="button" class="btn-submit" onclick="enviarJustificacao()">
+      <span class="material-icons">send</span>Enviar Justificação
+    </button>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023–2025 · Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  </script>
+  <script>
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getSupabaseHeaders(options = {}) {
+      const corp = getCorp();
+      const nint = getNInt();
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint,
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) return;
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) {
+        logoEl.src = cachedLogo;
+      }
+      if (h2) h2.textContent = corpOperNr;
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (corp.logo_url && corp.logo_url !== cachedLogo) {
+            localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+            if (logoEl) logoEl.src = corp.logo_url.trim();
+          }
+        }
+      } catch (err) {
+        console.error('Erro silencioso:', err);
+      }
+    }
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = message;
+      const content = document.querySelector(".main-content");
+      document.body.appendChild(toast);
+      if (content) content.classList.add("content-blur");
+      setTimeout(() => toast.classList.add("show"), 50);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        if (content) content.classList.remove("content-blur");
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    let selectedTipoRegisto = 'branco';
+    function selectTipoRegisto(tipo, button) {
+      selectedTipoRegisto = tipo;
+      document.querySelectorAll('#tipoRegistoControl .segmented-btn').forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+    }
+    function autoResizeTextarea(el) {
+      const maxHeight = 500;
+      el.style.height = 'auto';
+      const contentHeight = el.scrollHeight;
+      if (contentHeight > maxHeight) {
+        el.style.height = maxHeight + 'px';
+        el.style.overflowY = 'auto';
+      } else {
+        el.style.height = contentHeight + 'px';
+        el.style.overflowY = 'hidden';
+      }
+    }
+    /* ==================== JUSTIFICAÇÃO - DADOS AUXILIARES ==================== */
+    async function _getJustifEmailCommonData(corpOperNr) {
+      let logoUrl = "", corpAddress = "", corpCp = "", corpLocalitie = "", corpPhoneMobile = "", corpPhoneLandline = "", corpEmail = "", cb_name = "";
+      try {
+        const corpRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?corp_oper_nr=eq.${corpOperNr}&select=cb_name,logo_url,corp_address,corp_cp,corp_localitie,corp_phone_mobile,corp_phone_landline,corp_email`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const corpData = await corpRes.json();
+        if (corpData.length) {
+          cb_name = corpData[0].cb_name || "";
+          logoUrl = corpData[0].logo_url || "";
+          corpAddress = corpData[0].corp_address || "";
+          corpCp = corpData[0].corp_cp || "";
+          corpLocalitie = corpData[0].corp_localitie || "";
+          corpPhoneMobile = corpData[0].corp_phone_mobile || "";
+          corpPhoneLandline = corpData[0].corp_phone_landline || "";
+          corpEmail = corpData[0].corp_email || "";
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados da corporação:", err);
+      }
+      return { cb_name, logoUrl, corpAddress, corpCp, corpLocalitie, corpPhoneMobile, corpPhoneLandline, corpEmail };
+    }
+    async function fetchJustifRecipientsFromSupabase(corpOperNr) {
+      const categories = ['point_reg_justif_to', 'point_reg_justif_cc', 'point_reg_justif_bcc'];
+      const url = `${SUPABASE_URL}/rest/v1/mails_config?category=in.(${categories.join(',')})&corp_oper_nr=eq.${corpOperNr}&select=category,value`;
+      try {
+        const response = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!response.ok) throw new Error("Falha ao conectar ao Supabase.");
+        const data = await response.json();
+        const recipients = { to: [], cc: [], bcc: [] };
+        data.forEach(row => {
+          const emails = row.value?.split(",").map(e => e.trim()).filter(e => e) || [];
+          if (row.category.endsWith("_to")) recipients.to = emails;
+          if (row.category.endsWith("_cc")) recipients.cc = emails;
+          if (row.category.endsWith("_bcc")) recipients.bcc = emails;
+        });
+        return recipients;
+      } catch (err) {
+        console.error("Erro ao buscar e-mails:", err);
+        return { to: [], cc: [], bcc: [] };
+      }
+    }
+    function getGreeting(customDate) {
+      const now = customDate ? new Date(customDate) : new Date();
+      const hour = now.getHours();
+      if (hour >= 6 && hour < 12) {
+        return "Bom dia,";
+      } else if (hour >= 12 && hour < 20) {
+        return "Boa tarde,";
+      } else {
+        return "Boa noite,";
+      }
+    }
+    function tipoLabel(tipo) {
+      if (tipo === 'entrada') return 'Entrada';
+      if (tipo === 'saida') return 'Saída';
+      return 'Sem Picagem';
+    }
+    /* ===================== ENVIAR JUSTIFICAÇÃO ===================== */
+    async function enviarJustificacao() {
+      const texto = document.getElementById('fieldJustificacao').value.trim();
+      const data = document.getElementById('fieldDate').value;
+      const hora = document.getElementById('fieldTime').value;
+      if (!texto) {
+        showToast("Por favor escreva uma justificação.");
+        return;
+      }
+      if (!data) {
+        showToast("Por favor selecione a data da picagem.");
+        return;
+      }
+      const corpOperNr = getCorp();
+      const nInt = getNInt();
+      let abv_name = "N/D";
+      try {
+        const userRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${nInt}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          if (userData.length > 0) abv_name = userData[0].abv_name;
+        }
+      } catch (err) {
+        console.error("Erro ao obter nome do elemento:", err);
+      }
+      const submitBtn = document.querySelector('.btn-submit');
+      if (submitBtn) submitBtn.disabled = true;
+      try {
+        const { to, cc, bcc } = await fetchJustifRecipientsFromSupabase(corpOperNr);
+        if (!to.length) {
+          showToast("Não existem destinatários configurados para este envio.");
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
+        const corpData = await _getJustifEmailCommonData(corpOperNr);
+        const greeting = getGreeting();
+        const emailBodyHTML = `
+          ${greeting}<br><br>
+          Informa-se que ${abv_name} apresentou uma justificação de picagem de ponto com os seguintes dados:<br><br>
+          <strong>Tipo:</strong> ${tipoLabel(selectedTipoRegisto)}<br>
+          <strong>Data:</strong> ${data}<br>
+          <strong>Hora:</strong> ${hora || 'N/D'}<br><br>
+          <strong>Justificação:</strong><br>${texto.replace(/\n/g, '<br>')}<br><br>
+          Com os melhores cumprimentos,<br>
+          <span style="font-family: 'Arial'; font-size: 10px; color: gray;">
+          Este email foi processado automaticamente por: CB360 Online
+          </span>`;
+        const emailRes = await fetch('https://cb360-online.vercel.app/api/send_email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipients: to,
+            ccRecipients: cc,
+            bccRecipients: bcc,
+            emailSubject: `Justificação de Picagem - ${abv_name}_${corpOperNr}`,
+            emailBody: emailBodyHTML,
+            title: corpData.cb_name,
+            subtitle: "Justificação de Picagem de Ponto",
+            corp_oper_nr: corpOperNr,
+            logoUrl: corpData.logoUrl,
+            corpName: corpData.cb_name,
+            corpAddress: corpData.corpAddress,
+            corpCp: corpData.corpCp,
+            corpLocalitie: corpData.corpLocalitie,
+            corpPhoneMobile: corpData.corpPhoneMobile,
+            corpPhoneLandline: corpData.corpPhoneLandline,
+            corpEmail: corpData.corpEmail,
+          })
+        });
+        if (!emailRes.ok) throw new Error("Erro ao enviar email.");
+        showToast("Justificação enviada com sucesso!");
+        document.getElementById('fieldJustificacao').value = "";
+        autoResizeTextarea(document.getElementById('fieldJustificacao'));
+      } catch (err) {
+        console.error(err);
+        showToast("Erro ao enviar a justificação: " + err.message);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCorpInfo();
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+      const justificacaoEl = document.getElementById('fieldJustificacao');
+      if (justificacaoEl) autoResizeTextarea(justificacaoEl);
+    });
+  </script>
+</body>
+</html>
