@@ -88,19 +88,19 @@
     .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex;}
     .btn-grid {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(6, minmax(0, 1fr)); flex: 1; width: 100%; height: 100%;}    
     /* ============================================================
-    MENU BUTTONS
-    ============================================================ */
-    .mbtn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--txt-2); line-height: 1.2; text-align: center; height: 100%; min-height: 0; overflow: hidden; transition: background var(--ease), color var(--ease);}    
-    .mbtn:nth-child(3n) {border-right: none;}
-    .mbtn:nth-last-child(-n+2) {border-bottom: none;}
-    .mbtn:hover {background: var(--surface-2); color: var(--txt-1);}
-    .mbtn:active {background: var(--surface-2);}
-    .mbtn.sel {background: var(--red-light); color: var(--red);}
-    .mbtn.sel .material-icons {color: var(--red);}
-    .mbtn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
-    .mbtn:hover .material-icons {transform: scale(1.08);}
-    .mbtn.sel .material-icons {transform: scale(1.1);}
-    .mbtn .bdg {position: absolute; top: 7px; right: 7px; background: var(--red); color: white; border-radius: 10px; min-width: 16px; height: 16px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 1.5px solid var(--surface);}
+MENU BUTTONS
+============================================================ */
+.mbtn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--txt-2); line-height: 1.2; text-align: center; height: 100%; min-height: 0; overflow: hidden; transition: background var(--ease), color var(--ease); text-decoration: none;}    
+.mbtn:nth-child(3n) {border-right: none;}
+.mbtn:nth-last-child(-n+2) {border-bottom: none;}
+.mbtn:hover {background: var(--surface-2); color: var(--txt-1);}
+.mbtn:active {background: var(--surface-2);}
+.mbtn.sel {background: var(--red-light); color: var(--red);}
+.mbtn.sel .material-icons {color: var(--red);}
+.mbtn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
+.mbtn:hover .material-icons {transform: scale(1.08);}
+.mbtn.sel .material-icons {transform: scale(1.1);}
+.mbtn .bdg {position: absolute; top: 7px; right: 7px; background: var(--red); color: white; border-radius: 10px; min-width: 16px; height: 16px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 1.5px solid var(--surface);}
     /* ============================================================
     LOCKED / RESTRICTED BUTTONS (bloqueio visual de acesso)
     ============================================================ */
@@ -1191,21 +1191,22 @@
       }
     }
     function lockBtn(btn) {
-      btn.classList.add('locked');
-      btn.setAttribute('aria-disabled', 'true');
-      btn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showToast('🔒 Sem acesso a esta funcionalidade');
-        if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
-      };
-      if (!btn.querySelector('.lock-icon')) {
-        const lock = document.createElement('span');
-        lock.className = 'material-icons lock-icon';
-        lock.textContent = 'lock';
-        btn.appendChild(lock);
-      }
-    }
+  btn.classList.add('locked');
+  btn.setAttribute('aria-disabled', 'true');
+  btn.removeAttribute('href');   // <-- adiciona isto: impede navegação por completo em <a> bloqueados
+  btn.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showToast('🔒 Sem acesso a esta funcionalidade');
+    if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
+  };
+  if (!btn.querySelector('.lock-icon')) {
+    const lock = document.createElement('span');
+    lock.className = 'material-icons lock-icon';
+    lock.textContent = 'lock';
+    btn.appendChild(lock);
+  }
+}
     /* ======================= OCCURRENCE LOADING ======================== */
     async function updateOccurrencesBadge() {
       const corpOperNr = getCorp();
