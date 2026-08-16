@@ -1,48 +1,18 @@
    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.1.9 - Fix: Instalação resiliente em cache (substituído
+    v5.2.0 - Fix: Instalação resiliente em cache (substituído
     cache.addAll por adição individual) e correção do fetch handler.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.1.9';
-    const ASSETS_TO_CACHE = [
-      '/',
-      '/index.html',
-      '/MainPage.html',
-      '/ScalesView.html',
-      '/Swaps.html',
-      '/MainPageEl.html',
-      '/PiqDisp.html',
-      '/DecDisp.html',
-      '/ExtDisp.html',
-      '/DispView.html',
-      '/SolVacat.html',
-      '/Attendance.html',
-      '/OnGoingOcr.html',
-      '/FomioPage.html',
-      '/Events.html',
-      '/MissReport.html',
-      '/Documents.html',
-      '/Comunic.html',
-      '/MeteoAdv.html',
-      '/NoHospital.html',
-      '/MainPageVe.html',
-      '/VeicStat.html',
-      '/VeicSitop.html',
-      '/Tools.html',
-      '/GCIncRural.html',
-      '/DecirTeam.html',
-      '/InterChat.html',
-      '/manifest.json'
-    ];
-
+    const CACHE_NAME = 'cb360-cache-v5.2.0';
+    const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
+                             '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
+                             '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
+                             '/Tools.html', '/GCIncRural.html', '/DecirTeam.html', '/InterChat.html', '/PointJustif.html', '/manifest.json'];
     let activeChats = new Map();
-
     self.addEventListener('install', (event) => {
       self.skipWaiting();
       event.waitUntil(
         caches.open(CACHE_NAME).then(async (cache) => {
-          // Adiciona os assets de forma individual para que uma falha isolada 
-          // (ex: ficheiro em falta) não impeça os restantes de entrarem na cache.
           await Promise.all(
             ASSETS_TO_CACHE.map(async (url) => {
               try {
@@ -55,7 +25,6 @@
         })
       );
     });
-
     self.addEventListener('activate', (event) => {
       event.waitUntil(
         Promise.all([
@@ -72,7 +41,6 @@
         ])
       );
     });
-
     self.addEventListener('fetch', (event) => {
       if (event.request.method !== 'GET') {
         return;
@@ -113,7 +81,6 @@
         );
       }
     });
-
     self.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'SET_ACTIVE_CHAT') {
         activeChats.set(event.source.id, String(event.data.chatId));
@@ -125,7 +92,6 @@
         activeChats.clear();
       }
     });
-
     self.addEventListener('push', function(event) {
       let data = { title: 'CB360 Mobile', message: 'Nova atualização no sistema!' };
       try {
@@ -159,7 +125,6 @@
         self.registration.showNotification(data.title || 'CB360 Mobile', options)
       );
     });
-
     self.addEventListener('notificationclick', function(event) {
       event.notification.close();
       event.waitUntil(
