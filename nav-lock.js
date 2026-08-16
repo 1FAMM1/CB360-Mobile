@@ -8,16 +8,16 @@
    ========================================================= */
 (function() {
   let isNavigating = false;
+  window.addEventListener('pageshow', function() {
+    isNavigating = false;
+  }); 
   document.addEventListener('click', function(e) {
     const trigger = e.target.closest('a[href], .mbtn, [data-module]');
     if (!trigger) return;
- 
-    // Ignora âncoras internas, javascript: e novas abas
     if (trigger.tagName === 'A') {
       const href = trigger.getAttribute('href');
       if (!href || href.startsWith('#') || href.startsWith('javascript:') || trigger.target === '_blank') return;
-    }
- 
+    } 
     if (isNavigating) {
       e.preventDefault();
       e.stopImmediatePropagation();
