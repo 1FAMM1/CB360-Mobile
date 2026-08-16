@@ -7,7 +7,7 @@
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
                              '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
-                             '/Tools.html', '/GCIncRural.html', '/DecirTeam.html', '/InterChat.html', '/PointJustif.html', '/manifest.json'];
+                             '/Tools.html', '/GCIncRural.html', '/DecirTeam.html', '/InterChat.html', '/PointJustif.html', '/manifest.json', '/nav-lock.js'];
     let activeChats = new Map();
     self.addEventListener('install', (event) => {
       self.skipWaiting();
