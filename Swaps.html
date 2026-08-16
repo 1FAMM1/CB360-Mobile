@@ -4,11 +4,8 @@
   <script>
     (function() {
       try {
-        const savedTheme = localStorage.getItem('sgo-theme');
-        if (savedTheme === 'dark') {
+        if (localStorage.getItem('sgo-theme') === 'dark') {
           document.documentElement.classList.add('dark-mode');
-        } else {
-          document.documentElement.classList.remove('dark-mode');
         }
       } catch (e) {}
     })();
@@ -934,38 +931,35 @@
         setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCorpInfo();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
       }
-      loadCorpInfo();
-    });
-    document.querySelectorAll('.swap-month-btn').forEach((btn, i) => {
-      btn.style.opacity = '0';
-      btn.style.transform = 'translateY(15px)';
-      btn.style.transition = 'all 0.4s ease';
-      if (isPastMonth(i)) {
-        btn.disabled = true;
-        btn.style.cursor = 'not-allowed';
-        btn.classList.add('month-past');
-      }
-      setTimeout(() => {
-        btn.style.opacity = '1';
-        btn.style.transform = 'translateY(0)';
-      }, i * 80);
-    });
-    const elementsSelect = document.getElementById("elementsSelect");
-    elementsSelect.addEventListener("change", async () => {
-      const nint = elementsSelect.value;
-      if (!nint || currentMonthIndex === null) {
-        document.getElementById("elementsShiftsContainer").classList.remove("show");
-        return;
-      }
+      document.querySelectorAll('.swap-month-btn').forEach((btn, i) => {
+        btn.style.opacity = '0';
+        btn.style.transform = 'translateY(15px)';
+        btn.style.transition = 'all 0.4s ease';
+        if (isPastMonth(i)) {
+          btn.disabled = true;
+          btn.style.cursor = 'not-allowed';
+          btn.classList.add('month-past');
+        }
+        setTimeout(() => {
+          btn.style.opacity = '1';
+          btn.style.transform = 'translateY(0)';
+        }, i * 80);
+      });
+      const elementsSelect = document.getElementById("elementsSelect");
+      elementsSelect.addEventListener("change", async () => {
+        const nint = elementsSelect.value;
+        if (!nint || currentMonthIndex === null) {
+          document.getElementById("elementsShiftsContainer").classList.remove("show");
+          return;
+        }
         await loadElementShifts(nint, currentMonthIndex);
-    });
+      });
     });
   </script>
 </body>
