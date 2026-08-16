@@ -235,16 +235,16 @@
     </div>
     <div class="grid-card">
       <div class="btn-grid">
-        <button class="mbtn" data-module="scales" onclick="selBtn(this); setTimeout(()=> goToPage('ScalesView.html'), 100)">
+        <button class="mbtn" data-module="scales" onclick="selBtn(this); setTimeout(()=> window.location.href='ScalesView.html', 100)">
           <span class="material-icons">calendar_month</span>
           <div>Escalas</div>
         </button>
-        <button id="changes" class="mbtn" data-module="swaps" onclick="selBtn(this); setTimeout(() => goToPage('Swaps.html'), 100);">
+        <button id="changes" class="mbtn" data-module="swaps" onclick="selBtn(this); setTimeout(() => window.location.href='Swaps.html', 100);">
           <span class="material-icons">multiple_stop</span>
           <div>Trocas de Serviço</div>
           <span class="bdg">0</span>
         </button>
-        <button class="mbtn" data-module="availability" onclick="selBtn(this); setTimeout(()=> goToPage('MainPageEl.html'), 100)">
+        <button class="mbtn" data-module="availability" onclick="selBtn(this); setTimeout(()=> window.location.href='MainPageEl.html', 100);">
           <span class="material-icons">free_cancellation</span>
           <div>Disponibilidades</div>
         </button>
@@ -1405,6 +1405,5 @@
     document.addEventListener('selectstart', e => e.preventDefault());
     document.addEventListener('contextmenu', e => e.preventDefault());
   </script>
-  <script src="navigation.js"></script>
 </body>
 </html>
