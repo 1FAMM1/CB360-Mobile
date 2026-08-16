@@ -4,8 +4,11 @@
   <script>
     (function() {
       try {
-        if (localStorage.getItem('sgo-theme') === 'dark') {
+        const savedTheme = localStorage.getItem('sgo-theme');
+        if (savedTheme === 'dark') {
           document.documentElement.classList.add('dark-mode');
+        } else {
+          document.documentElement.classList.remove('dark-mode');
         }
       } catch (e) {}
     })();
@@ -898,91 +901,94 @@
     }
     /* ========================== INITIALIZATION ========================== */
     document.addEventListener('DOMContentLoaded', function() {
-      loadCorpInfo();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
       }
-      let selectedMonth = null;
-      let currentFetchRequestId = 0;
-      const mesesSemDecir = [0, 1, 2, 3, 10, 11];
-      const monthsCard = document.querySelector(".months-card");
-      const btnBack = document.getElementById("btnBackToMonths");
-      const btnBackWrapper = document.getElementById("btnBackWrapper");
-      const scalesSubtitle = document.getElementById("scalesSubtitle");
-      const scalesHeader = document.querySelector(".scales-header");
-      const mainContent = document.querySelector(".main-content");
-      const selectedMonthIcon = document.getElementById("selectedMonthIcon");
-      const selectedMonthName = document.getElementById("selectedMonthName");
-      function applyMonthsCentering() {
-        if (window.innerWidth > 480) {
-          mainContent.style.paddingTop = "";
-          return;
-        }
-        const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 60;
-        const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footer-h")) || 50;
-        const contentHeight = (scalesHeader ? scalesHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
-        const availableHeight = window.innerHeight - headerH - footerH;
-        const extra = Math.max(18, (availableHeight - contentHeight) / 2);
-        mainContent.style.paddingTop = `calc(var(--header-h) + ${extra}px)`;
+      loadCorpInfo();
+    });
+    let selectedMonth = null;
+    let currentFetchRequestId = 0;
+    const mesesSemDecir = [0, 1, 2, 3, 10, 11];
+    const monthsCard = document.querySelector(".months-card");
+    const btnBack = document.getElementById("btnBackToMonths");
+    const btnBackWrapper = document.getElementById("btnBackWrapper");
+    const scalesSubtitle = document.getElementById("scalesSubtitle");
+    const scalesHeader = document.querySelector(".scales-header");
+    const mainContent = document.querySelector(".main-content");
+    const selectedMonthIcon = document.getElementById("selectedMonthIcon");
+    const selectedMonthName = document.getElementById("selectedMonthName");
+    function applyMonthsCentering() {
+      if (window.innerWidth > 480) {
+        mainContent.style.paddingTop = "";
+        return;
       }
-      function hideBackButtonInstant() {
-        btnBackWrapper.classList.add("no-transition");
-        btnBackWrapper.classList.remove("show");
-        void btnBackWrapper.offsetHeight;
+      const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 60;
+      const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footer-h")) || 50;
+      const contentHeight = (scalesHeader ? scalesHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
+      const availableHeight = window.innerHeight - headerH - footerH;
+      const extra = Math.max(18, (availableHeight - contentHeight) / 2);
+      mainContent.style.paddingTop = `calc(var(--header-h) + ${extra}px)`;
+    }
+    function hideBackButtonInstant() {
+      btnBackWrapper.classList.add("no-transition");
+      btnBackWrapper.classList.remove("show");
+      void btnBackWrapper.offsetHeight;
+      requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            btnBackWrapper.classList.remove("no-transition");
-          });
+          btnBackWrapper.classList.remove("no-transition");
         });
-      }
-      function hideAllServiceCards() {
-        document.getElementById("servicesCard").style.display = "none";
-        document.getElementById("picketsSection").style.display = "none";
-        document.getElementById("decirSection").style.display = "none";
-        document.getElementById("extrasSection").style.display = "none";
-        document.getElementById("sbaSection").style.display = "none";
-        document.getElementById("opatSection").style.display = "none";
-        document.getElementById("nextServicesCard").style.display = "none";
-        document.getElementById("nextserv-info-title").style.display = "none";
-        document.getElementById("attendanceCard").style.display = "none";
-        const noServicesCard = document.getElementById("noServicesCard");
-        if (noServicesCard) noServicesCard.remove();
-        ["picketsSection", "decirSection", "extrasSection", "sbaSection", "opatSection"].forEach(id => {
-          document.getElementById(id).classList.remove("section-divider");
-        });
-      }
-      function resetToMonthsView() {
-        currentFetchRequestId++;
-        selectedMonth = null;
-        document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
-        hideBackButtonInstant();
-        hideAllServiceCards();
-        monthsCard.style.display = "block";
-        if (scalesSubtitle) scalesSubtitle.style.display = "block";
-        toggleMobileMonthLayout(false);
-        requestAnimationFrame(() => applyMonthsCentering());
-      }
-      btnBack.addEventListener("click", resetToMonthsView);
-      requestAnimationFrame(() => applyMonthsCentering());
-      window.addEventListener("resize", () => {
-        if (selectedMonth === null) applyMonthsCentering();
       });
-      document.querySelectorAll(".scales-btn").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const month = parseInt(btn.dataset.month, 10);
-          const requestId = ++currentFetchRequestId;
-          document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
-          btn.classList.add("selected");
-          selectedMonth = month;
-          const btnIconText = btn.querySelector(".material-icons") ? btn.querySelector(".material-icons").textContent : "";
-          const btnNameText = btn.querySelector("div") ? btn.querySelector("div").textContent : "";
-          if (selectedMonthIcon) selectedMonthIcon.textContent = btnIconText;
-          if (selectedMonthName) selectedMonthName.textContent = btnNameText;
-          monthsCard.style.display = "none";
-          if (scalesSubtitle) scalesSubtitle.style.display = "none";
-          hideBackButtonInstant();
-          mainContent.style.paddingTop = "";
+    }
+    function hideAllServiceCards() {
+      document.getElementById("servicesCard").style.display = "none";
+      document.getElementById("picketsSection").style.display = "none";
+      document.getElementById("decirSection").style.display = "none";
+      document.getElementById("extrasSection").style.display = "none";
+      document.getElementById("sbaSection").style.display = "none";
+      document.getElementById("opatSection").style.display = "none";
+      document.getElementById("nextServicesCard").style.display = "none";
+      document.getElementById("nextserv-info-title").style.display = "none";
+      document.getElementById("attendanceCard").style.display = "none";
+      const noServicesCard = document.getElementById("noServicesCard");
+      if (noServicesCard) noServicesCard.remove();
+      ["picketsSection", "decirSection", "extrasSection", "sbaSection", "opatSection"].forEach(id => {
+        document.getElementById(id).classList.remove("section-divider");
+      });
+    }
+    function resetToMonthsView() {
+      currentFetchRequestId++;
+      selectedMonth = null;
+      document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
+      hideBackButtonInstant();
+      hideAllServiceCards();
+      monthsCard.style.display = "block";
+      if (scalesSubtitle) scalesSubtitle.style.display = "block";
+      toggleMobileMonthLayout(false);
+      requestAnimationFrame(() => applyMonthsCentering());
+    }
+    btnBack.addEventListener("click", resetToMonthsView);
+    requestAnimationFrame(() => applyMonthsCentering());
+    window.addEventListener("resize", () => {
+      if (selectedMonth === null) applyMonthsCentering();
+    });
+    document.querySelectorAll(".scales-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const month = parseInt(btn.dataset.month, 10);
+        const requestId = ++currentFetchRequestId;
+        document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedMonth = month;
+        const btnIconText = btn.querySelector(".material-icons") ? btn.querySelector(".material-icons").textContent : "";
+        const btnNameText = btn.querySelector("div") ? btn.querySelector("div").textContent : "";
+        if (selectedMonthIcon) selectedMonthIcon.textContent = btnIconText;
+        if (selectedMonthName) selectedMonthName.textContent = btnNameText;
+        monthsCard.style.display = "none";
+        if (scalesSubtitle) scalesSubtitle.style.display = "none";
+        hideBackButtonInstant();
+        mainContent.style.paddingTop = "";
           await toggleMobileMonthLayout(true);
           hideAllServiceCards();
           if (requestId !== currentFetchRequestId) return;
@@ -1030,7 +1036,6 @@
         });
       });
     });
-  </script>
-  <script src="nav-lock.js"></script>
+  </script>  
 </body>
 </html>
