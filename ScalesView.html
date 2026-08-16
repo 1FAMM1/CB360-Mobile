@@ -1031,22 +1031,5 @@
       });
     });
   </script>
-
-
-
-  <script>
-  // Interceta cliques para usar a transição nativa sem piscar o ecrã
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('a');
-    if (link && link.href && link.origin === window.location.origin && !link.target) {
-      if (document.startViewTransition) {
-        e.preventDefault();
-        document.startViewTransition(async () => {
-          window.location.href = link.href;
-        });
-      }
-    }
-  });
-</script>
 </body>
 </html>
