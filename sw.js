@@ -1,29 +1,46 @@
    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.2.7 - Adicionado nav-lock.js aos assets pré-cacheados e
-    cache-first também para CDNs externas (Google Fonts, pdf.js,
-    supabase-js), para evitar que a barra de progresso do browser
-    fique visível por mais tempo em rede lenta.
+    v5.2.8 - Bump de versão para forçar refresh de cache em todos
+    os dispositivos (corrige páginas com dark mode inconsistente
+    devido a falhas silenciosas de cache.add na v5.2.7). Adicionado
+    retry automático (3 tentativas) para assets que falhem o
+    pré-cache no install, para não ficarem permanentemente de fora.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.2.7';
+    const CACHE_NAME = 'cb360-cache-v5.2.8';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
                              '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
                              '/Tools.html', '/GCIncRural.html', '/DecirTeam.html', '/InterChat.html', '/PointJustif.html', '/manifest.json', '/nav-lock.js'];
     const CDN_DOMAINS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
+    const CACHE_ADD_RETRIES = 3;
+    const CACHE_ADD_RETRY_DELAY_MS = 1000;
     let activeChats = new Map();
+
+    function delay(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    /* Tenta colocar um recurso em cache várias vezes antes de desistir,
+       para evitar que uma rede instável no momento do install deixe
+       páginas permanentemente fora do cache até ao próximo deploy. */
+    async function cacheAddWithRetry(cache, url, attempt = 1) {
+      try {
+        await cache.add(url);
+      } catch (err) {
+        if (attempt < CACHE_ADD_RETRIES) {
+          await delay(CACHE_ADD_RETRY_DELAY_MS * attempt);
+          return cacheAddWithRetry(cache, url, attempt + 1);
+        }
+        console.warn(`[Service Worker] Falhou ao colocar em cache o recurso após ${CACHE_ADD_RETRIES} tentativas: ${url}`, err);
+      }
+    }
+
     self.addEventListener('install', (event) => {
       self.skipWaiting();
       event.waitUntil(
         caches.open(CACHE_NAME).then(async (cache) => {
           await Promise.all(
-            ASSETS_TO_CACHE.map(async (url) => {
-              try {
-                await cache.add(url);
-              } catch (err) {
-                console.warn(`[Service Worker] Falhou ao colocar em cache o recurso: ${url}`, err);
-              }
-            })
+            ASSETS_TO_CACHE.map((url) => cacheAddWithRetry(cache, url))
           );
         })
       );
