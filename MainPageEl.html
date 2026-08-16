@@ -4,8 +4,11 @@
   <script>
     (function() {
       try {
-        if (localStorage.getItem('sgo-theme') === 'dark') {
+        const savedTheme = localStorage.getItem('sgo-theme');
+        if (savedTheme === 'dark') {
           document.documentElement.classList.add('dark-mode');
+        } else {
+          document.documentElement.classList.remove('dark-mode');
         }
       } catch (e) {}
     })();
@@ -245,6 +248,5 @@
     document.addEventListener('selectstart', e => e.preventDefault());
     document.addEventListener('contextmenu', e => e.preventDefault());    
   </script>
-  <script src="nav-lock.js"></script>
 </body>
 </html>
