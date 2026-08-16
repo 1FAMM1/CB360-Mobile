@@ -1,13 +1,16 @@
    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.2.5 - Fix: Instalação resiliente em cache (substituído
-    cache.addAll por adição individual) e correção do fetch handler.
+    v5.2.6 - Adicionado nav-lock.js aos assets pré-cacheados e
+    cache-first também para CDNs externas (Google Fonts, pdf.js,
+    supabase-js), para evitar que a barra de progresso do browser
+    fique visível por mais tempo em rede lenta.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.2.5';
+    const CACHE_NAME = 'cb360-cache-v5.2.6';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
                              '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
                              '/Tools.html', '/GCIncRural.html', '/DecirTeam.html', '/InterChat.html', '/PointJustif.html', '/manifest.json', '/nav-lock.js'];
+    const CDN_DOMAINS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
     let activeChats = new Map();
     self.addEventListener('install', (event) => {
       self.skipWaiting();
@@ -45,14 +48,21 @@
       if (event.request.method !== 'GET') {
         return;
       }
-      if (event.request.url.includes(self.location.origin)) {
+      const requestUrl = new URL(event.request.url);
+      const isOwnOrigin = requestUrl.origin === self.location.origin;
+      const isCdnAsset = CDN_DOMAINS.includes(requestUrl.hostname);
+      if (isOwnOrigin || isCdnAsset) {
         event.respondWith(
           caches.match(event.request).then((cachedResponse) => {
             if (cachedResponse) {
               return cachedResponse;
             }
             return fetch(event.request).then((networkResponse) => {
-              if (networkResponse && networkResponse.status === 200) {
+              /* Pedidos cross-origin (CDN) costumam vir como 'opaque' (status 0)
+                 devido a não usarem CORS explícito — mesmo assim são válidos para
+                 cache, só não conseguimos ler o seu conteúdo/status. */
+              const isCacheable = networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque');
+              if (isCacheable) {
                 const responseToCache = networkResponse.clone();
                 caches.open(CACHE_NAME).then((cache) => {
                   cache.put(event.request, responseToCache);
