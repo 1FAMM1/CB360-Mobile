@@ -2,7 +2,7 @@
   "name": "CB360 Mobile",
   "short_name": "CB360 Mobile",
   "description": "Sistema de Gestão CB360",
-  "start_url": "index.html",
+  "start_url": "/",
   "scope": "/", 
   "display": "standalone",
   "orientation": "portrait",
