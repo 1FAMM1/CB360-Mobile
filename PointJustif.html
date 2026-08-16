@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('sgo-theme') === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
