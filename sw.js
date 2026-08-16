@@ -1,12 +1,12 @@
    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.3.4 - Bump de versão para forçar refresh de cache em todos
+    v5.3.5 - Bump de versão para forçar refresh de cache em todos
     os dispositivos (corrige páginas com dark mode inconsistente
     devido a falhas silenciosas de cache.add na v5.2.7). Adicionado
     retry automático (3 tentativas) para assets que falhem o
     pré-cache no install, para não ficarem permanentemente de fora.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.3.4';
+    const CACHE_NAME = 'cb360-cache-v5.3.5';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
                              '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
@@ -19,10 +19,6 @@
     function delay(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
-
-    /* Tenta colocar um recurso em cache várias vezes antes de desistir,
-       para evitar que uma rede instável no momento do install deixe
-       páginas permanentemente fora do cache até ao próximo deploy. */
     async function cacheAddWithRetry(cache, url, attempt = 1) {
       try {
         await cache.add(url);
@@ -34,7 +30,6 @@
         console.warn(`[Service Worker] Falhou ao colocar em cache o recurso após ${CACHE_ADD_RETRIES} tentativas: ${url}`, err);
       }
     }
-
     self.addEventListener('install', (event) => {
       self.skipWaiting();
       event.waitUntil(
@@ -75,9 +70,6 @@
               return cachedResponse;
             }
             return fetch(event.request).then((networkResponse) => {
-              /* Pedidos cross-origin (CDN) costumam vir como 'opaque' (status 0)
-                 devido a não usarem CORS explícito — mesmo assim são válidos para
-                 cache, só não conseguimos ler o seu conteúdo/status. */
               const isCacheable = networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque');
               if (isCacheable) {
                 const responseToCache = networkResponse.clone();
