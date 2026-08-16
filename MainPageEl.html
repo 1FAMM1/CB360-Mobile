@@ -4,11 +4,8 @@
   <script>
     (function() {
       try {
-        const savedTheme = localStorage.getItem('sgo-theme');
-        if (savedTheme === 'dark') {
+        if (localStorage.getItem('sgo-theme') === 'dark') {
           document.documentElement.classList.add('dark-mode');
-        } else {
-          document.documentElement.classList.remove('dark-mode');
         }
       } catch (e) {}
     })();
