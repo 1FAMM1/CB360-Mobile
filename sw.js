@@ -1,9 +1,9 @@
    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.2.2 - Fix: Instalação resiliente em cache (substituído
+    v5.2.5 - Fix: Instalação resiliente em cache (substituído
     cache.addAll por adição individual) e correção do fetch handler.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.2.4';
+    const CACHE_NAME = 'cb360-cache-v5.2.5';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
                              '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
