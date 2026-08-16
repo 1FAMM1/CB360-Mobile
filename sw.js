@@ -1,11 +1,11 @@
    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.2.6 - Adicionado nav-lock.js aos assets pré-cacheados e
+    v5.2.7 - Adicionado nav-lock.js aos assets pré-cacheados e
     cache-first também para CDNs externas (Google Fonts, pdf.js,
     supabase-js), para evitar que a barra de progresso do browser
     fique visível por mais tempo em rede lenta.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.2.6';
+    const CACHE_NAME = 'cb360-cache-v5.2.7';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
                              '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
