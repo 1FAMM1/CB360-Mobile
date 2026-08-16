@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT">
 <head>
   <script>
     (function() {
@@ -15,7 +15,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#c62828">
   <title>CB360 Mobile - Pedidos de Fardamento</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -58,7 +58,7 @@
     /* ============================================================
     DYNAMIC LIST OF ARTICLES
     ============================================================ */
-    .items-list {display: flex; flex-direction: column; gap: 10px; width: 100%;}
+    .items-list {display: flex; flex-direction: column; gap: 5px; width: 100%;}
     .item-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; position: relative; transition: background var(--ease), border-color var(--ease);}
     .item-card-header {display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;}
     .item-card-title {font-size: 11.5px; font-weight: 700; color: var(--red); letter-spacing: 0.4px; text-transform: uppercase;}
@@ -90,7 +90,7 @@
     /* ============================================================
     SUBMIT
     ============================================================ */
-    .btn-submit {display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(to right, var(--red-dark), var(--red)); border: none; border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 13px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; color: #fff; letter-spacing: 0.3px; cursor: pointer; transition: filter var(--ease), transform 0.15s ease;}
+    .btn-submit {display: flex; align-items: center; justify-content: center; gap: 8px; width: 75%; background: linear-gradient(to right, var(--red-dark), var(--red)); border: none; border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 13px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; color: #fff; letter-spacing: 0.3px; cursor: pointer; transition: filter var(--ease), transform 0.15s ease; margin-top: 5px;}
     .btn-submit:hover {filter: brightness(1.08);}
     .btn-submit:active {transform: scale(0.98);}
     .btn-submit:disabled {opacity: 0.7; cursor: not-allowed;}
@@ -144,7 +144,7 @@
       <label for="fieldObservacoes">Observações (opcional):</label>
       <textarea id="fieldObservacoes" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="2" oninput="autoResizeTextarea(this)"></textarea>
     </div>
-    <button type="button" class="btn-submit" id="submitFardBtn" onclick="enviarPedidoFardamento()">
+    <button type="button" class="btn-submit" id="submitFardBtn" onclick="submitUniformOrder()">
       <span class="material-icons">send</span><span id="submitFardBtnText">Enviar Pedido</span>
     </button>
     <div class="scroll-spacer"></div>
@@ -184,12 +184,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
+    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -204,7 +204,7 @@
     }
     /* ======================= INICIALIZAÇÃO ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -260,10 +260,10 @@
       }
     }
     /* ====================== AVAILABLE ITEMS ====================== */
-    const UNIFORM_ITEMS = [{value: "capacte_florestal", label: "Capacete Florestal", sizeType: "letter"}, {value: "cogula_florestal", label: "Cógula EPI Florestal", sizeType: "letter"}, {value: "dolman_florestal", label: "Dolman EPI Florestal", sizeType: "letter"}, {value: "sweatshirt_florestal", label: "Sweatshirt EPI Florestal", sizeType: "letter"},
-                              {value: "calca_florestal", label: "Calças EPI Florestal", sizeType: "letter"}, {value: "luva_florestal", label: "Luvas EPI Florestal", sizeType: "numeric"}, {value: "bota_florestal", label: "Botas EPI Florestal", sizeType: "numeric"}, {value: "capacte_urbano", label: "Capacete Urbano", sizeType: "letter"},
-                              {value: "cogula_urbano", label: "Cógula EPI Urbano", sizeType: "letter"}, {value: "casaco_urbano", label: "Casaco EPI Urbano", sizeType: "letter"}, {value: "calca_urbano", label: "Calças EPI Urbano", sizeType: "letter"}, {value: "luva_urbano", label: "Luvas EPI Urbano", sizeType: "letter"},
-                              {value: "bota_urbano", label: "Botas EPI Urbano", sizeType: "letter"}, {value: "polo_vermelho_mct", label: "Polo Vermelho Manga Curta", sizeType: "letter"}, {value: "polo_vermelho_mcp", label: "Polo Vermelho Manga Comprida", sizeType: "letter"}, {value: "tshir_azul", label: "T-Shirt Azul Bombeiros", sizeType: "letter"},
+    const UNIFORM_ITEMS = [{value: "capacte_florestal", label: "Capacete Florestal"}, {value: "cogula_florestal", label: "Cógula EPI Florestal"}, {value: "dolman_florestal", label: "Dolman EPI Florestal", sizeType: "letter"}, {value: "sweatshirt_florestal", label: "Sweatshirt EPI Florestal", sizeType: "letter"},
+                              {value: "calca_florestal", label: "Calças EPI Florestal", sizeType: "letter"}, {value: "luva_florestal", label: "Luvas EPI Florestal", sizeType: "numeric"}, {value: "bota_florestal", label: "Botas EPI Florestal", sizeType: "numeric"}, {value: "capacte_urbano", label: "Capacete Urbano"},
+                              {value: "cogula_urbano", label: "Cógula EPI Urbano"}, {value: "casaco_urbano", label: "Casaco EPI Urbano", sizeType: "letter"}, {value: "calca_urbano", label: "Calças EPI Urbano", sizeType: "letter"}, {value: "luva_urbano", label: "Luvas EPI Urbano", sizeType: "letter"},
+                              {value: "bota_urbano", label: "Botas EPI Urbano", sizeType: "numeric"}, {value: "polo_vermelho_mct", label: "Polo Vermelho Manga Curta", sizeType: "letter"}, {value: "polo_vermelho_mcp", label: "Polo Vermelho Manga Comprida", sizeType: "letter"}, {value: "tshir_azul", label: "T-Shirt Azul Bombeiros", sizeType: "letter"},
                               {value: "calca_3", label: "Calças Uniforme Nr. 3", sizeType: "letter"}, {value: "cinturao", label: "Cinturão Vermelho", sizeType: "letter"}, {value: "bone", label: "Boné Vermelho Bombeiros", sizeType: "letter"},];
     const LETTER_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
     let itemRowCounter = 0;
@@ -301,15 +301,15 @@
       card.id = `itemCard_${rowId}`;
       card.innerHTML = `
         <div class="item-card-header">
-          <span class="item-card-title">Artigo ${rowId}</span>
+          <span class="item-card-title">${rowId}º Artigo</span>
           <button type="button" class="item-remove-btn" onclick="removeItemRow(${rowId})">
             <span class="material-icons">close</span>
           </button>
         </div>
         <div class="item-row">
           <div class="item-field" style="flex: 2;">
-            <label for="itemArtigo_${rowId}">Artigo</label>
-            <select id="itemArtigo_${rowId}" onchange="onItemArtigoChange(${rowId})">
+            <label for="itemArticle_${rowId}">Artigo</label>
+            <select id="itemArticle_${rowId}" onchange="onItemArticleChange(${rowId})">
               ${buildItemOptionsHTML(defaultItem.value)}
             </select>
           </div>
@@ -325,8 +325,8 @@
       `;
       list.appendChild(card);
     }
-    function onItemArtigoChange(rowId) {
-      const select = document.getElementById(`itemArtigo_${rowId}`);
+    function onItemArticleChange(rowId) {
+      const select = document.getElementById(`itemArticle_${rowId}`);
       const sizeType = getSizeTypeForItem(select.value);
       const sizeFieldWrapper = document.getElementById(`itemSizeField_${rowId}`);
       sizeFieldWrapper.innerHTML = `
@@ -339,6 +339,7 @@
       if (card) card.remove();
       const list = document.getElementById('itemsList');
       if (!list.querySelector('.item-card')) {
+        itemRowCounter = 0;
         const emptyState = document.createElement('p');
         emptyState.className = 'empty-state';
         emptyState.id = 'itemsEmptyState';
@@ -351,21 +352,21 @@
       const items = [];
       cards.forEach(card => {
         const rowId = card.id.replace('itemCard_', '');
-        const artigoSelect = document.getElementById(`itemArtigo_${rowId}`);
+        const articleSelect = document.getElementById(`itemArticle_${rowId}`);
         const sizeEl = document.getElementById(`itemSize_${rowId}`);
         const qtyEl = document.getElementById(`itemQty_${rowId}`);
-        const artigoLabel = UNIFORM_ITEMS.find(i => i.value === artigoSelect.value)?.label || artigoSelect.value;
+        const articleLabel = UNIFORM_ITEMS.find(i => i.value === articleSelect.value)?.label || articleSelect.value;
         items.push({
-          artigo: artigoSelect.value,
-          artigoLabel,
-          tamanho: sizeEl ? sizeEl.value : "N/A",
-          quantidade: qtyEl ? parseInt(qtyEl.value, 10) || 1 : 1,
+          article: articleSelect.value,
+          articleLabel,
+          size: sizeEl ? sizeEl.value : "N/A",
+          quantity: qtyEl ? parseInt(qtyEl.value, 10) || 1 : 1,
         });
       });
       return items;
     }
     /* ======================= SUBMIT ORDER ======================== */
-    async function enviarPedidoFardamento() {
+    async function submitUniformOrder() {
       const items = collectItemsData();
       if (items.length === 0) {
         showToast("Adicione pelo menos um artigo.");
@@ -406,5 +407,6 @@
       addItemRow();
     });
   </script>
+  <script src="nav-lock.js"></script>
 </body>
 </html>
