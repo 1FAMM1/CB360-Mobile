@@ -21,26 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    @view-transition {navigation: auto;}
-
-    /* Animação suave nativa de transição entre páginas */
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-::view-transition-old(root) {
-  animation: 0.2s ease-in-out both fade-out;
-}
-
-::view-transition-new(root) {
-  animation: 0.2s ease-in-out both fade-in;
-}
+    @view-transition {navigation: auto;}    
     /* ============================================================
     VARIABLES
     ============================================================ */
@@ -4227,23 +4208,5 @@
       }
     }
   </script>
-
-
-
-
-  <script>
-  // Interceta cliques para usar a transição nativa sem piscar o ecrã
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('a');
-    if (link && link.href && link.origin === window.location.origin && !link.target) {
-      if (document.startViewTransition) {
-        e.preventDefault();
-        document.startViewTransition(async () => {
-          window.location.href = link.href;
-        });
-      }
-    }
-  });
-</script>
 </body>
 </html>
