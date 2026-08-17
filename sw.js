@@ -1,12 +1,12 @@
    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.3.9 - Bump de versão para forçar refresh de cache em todos
+    v5.4.0 - Bump de versão para forçar refresh de cache em todos
     os dispositivos (corrige páginas com dark mode inconsistente
     devido a falhas silenciosas de cache.add na v5.2.7). Adicionado
     retry automático (3 tentativas) para assets que falhem o
     pré-cache no install, para não ficarem permanentemente de fora.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.3.9';
+    const CACHE_NAME = 'cb360-cache-v5.4.0';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
                              '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
