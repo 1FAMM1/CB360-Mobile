@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-PT" style="background-color: #d32f2f;">
 <head>
-  <script>
-    (function() {
-      try {
-        if (localStorage.getItem('sgo-theme') === 'dark') {
-          document.documentElement.classList.add('dark-mode');
-        }
-      } catch (e) {}
-    })();
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +11,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>CB360 Mobile - Status Veículos</title>
   <style>
-    @view-transition {navigation: auto;}
     /* ============================================================
     VARIABLES
     ============================================================ */
@@ -29,26 +19,21 @@
            --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
            --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;
            --green: #22c55e; --orange: #ff9800;}
-    ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
-    .header, .footer {view-transition-name: none;}
     /* ============================================================
     DARK MODE
     ============================================================ */
-    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
-                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
     .dark-mode .warning {background: rgba(255, 82, 82, 0.16); color: #ff6b6b; border-color: rgba(255, 82, 82, 0.35);}
     /* ============================================================
     RESET & BASE
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
-          user-select: none; transition: background var(--ease), color var(--ease);}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER
     ============================================================ */
-    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
     .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
     .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
     .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
@@ -56,8 +41,7 @@
     /* ============================================================
     MAIN CONTENT
     ============================================================ */
-    .main-content {flex:1; width:100%; max-width:700px; margin:0 auto; overflow-y:auto; overflow-x:hidden; padding:calc(var(--header-h) + 14px) 16px calc(var(--footer-h) + 24px); display:flex;
-               flex-direction:column; align-items:center; gap:14px; background:var(--bg); scrollbar-width:none; transition:background var(--ease);}
+    .main-content {flex:1; width:100%; max-width:700px; margin:0 auto; overflow-y:auto; overflow-x:hidden; padding:calc(var(--header-h) + 14px) 16px calc(var(--footer-h) + 24px); display:flex; flex-direction:column; align-items:center; gap:14px; background:var(--bg); scrollbar-width:none; transition:background var(--ease);}
     .main-content::-webkit-scrollbar {display:none;}
     /* ============================================================
     VEHICLE SELECTOR CARD
@@ -69,9 +53,7 @@
     VEHICLE GRID / BUTTONS
     ============================================================ */
     .vehicle-grid {display:grid; grid-template-columns:repeat(3,1fr); gap:6px;}
-    .vehicle-btn {position:relative; min-height:88px; padding:24px 6px 8px; border:1px solid var(--border); border-left:3px solid var(--txt-3); border-radius:var(--r-md); background:var(--surface-2);
-                 cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:var(--sh-sm);
-                 transition:transform var(--ease), box-shadow var(--ease), background var(--ease), border-color var(--ease), padding var(--ease);}
+    .vehicle-btn {position:relative; min-height:88px; padding:24px 6px 8px; border:1px solid var(--border); border-left:3px solid var(--txt-3); border-radius:var(--r-md); background:var(--surface-2); cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:var(--sh-sm); transition:transform var(--ease), box-shadow var(--ease), background var(--ease), border-color var(--ease), padding var(--ease);}
     .vehicle-btn:hover:not(.selected):not(.inop) {transform:translateY(-0px); box-shadow:var(--sh-md); background:var(--surface);}
     .vehicle-btn:active:not(.selected):not(.inop) {transform:translateY(-1px);}
     .vehicle-icon {font-size:20px; line-height:1; transition:transform var(--ease);}
@@ -82,8 +64,7 @@
     .vehicle-btn.selected .vehicle-code {color:#fff;}
     .vehicle-btn.selected .vehicle-icon {transform:scale(1.1);}
     .vehicle-btn.selected::before {content:'✓'; position:absolute; top:5px; left:6px; font-size:10px; font-weight:700; color:#fff;}
-    .status-badge {position:absolute; top:5px; left:50%; transform:translateX(-50%); font-size:7px; font-weight:800; letter-spacing:0.4px; padding:2.5px 7px; border-radius:20px; color:#fff;
-                   white-space:nowrap; text-transform:uppercase; box-shadow:0 1px 3px rgba(0,0,0,0.25);}
+    .status-badge {position:absolute; top:5px; left:50%; transform:translateX(-50%); font-size:7px; font-weight:800; letter-spacing:0.4px; padding:2.5px 7px; border-radius:20px; color:#fff; white-space:nowrap; text-transform:uppercase; box-shadow:0 1px 3px rgba(0,0,0,0.25);}
     .vehicle-btn.em-parque .status-badge {background:var(--green);}
     .vehicle-btn.em-servico {background: rgba(255, 152, 0, 0.16); border-left-color: var(--orange);}
     .vehicle-btn.em-servico .status-badge {background:var(--orange); animation:statusPulse 1.6s infinite;}
@@ -97,15 +78,12 @@
     ============================================================ */
     .container {width:100%; display:flex; flex-direction:column; align-items:center; gap:10px;}
     .button-grid {display:grid; grid-template-columns:repeat(3,1fr); gap:6px; width:100%;}
-    .geostat-btn {position:relative; min-height:84px; padding:5px 5px; border:1px solid rgba(255,255,255,0.18); border-radius:var(--r-md); color:#fff; font-family:'Inter',sans-serif;
-                  font-size:10.5px; font-weight:700; letter-spacing:0.2px; text-transform:uppercase; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center;
-                  justify-content:center; gap:8px; box-shadow:var(--sh-md); overflow:hidden; transition:transform var(--ease), box-shadow var(--ease), opacity var(--ease), filter var(--ease);}
+    .geostat-btn {position:relative; min-height:84px; padding:5px 5px; border:1px solid rgba(255,255,255,0.18); border-radius:var(--r-md); color:#fff; font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:0.2px; text-transform:uppercase; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; box-shadow:var(--sh-md); overflow:hidden; transition:transform var(--ease), box-shadow var(--ease), opacity var(--ease), filter var(--ease);}
     .geostat-btn::before {content:''; position:absolute; inset:0; background:linear-gradient(to bottom, rgba(255,255,255,0.20), rgba(255,255,255,0) 55%); pointer-events:none;}
     .geostat-btn:hover:not(:disabled) {transform:translateY(-2px); box-shadow:var(--sh-lg); filter:brightness(1.06);}
     .geostat-btn:active:not(:disabled) {transform:translateY(0) scale(0.98);}
     .geostat-btn:disabled {opacity:0.35; cursor:not-allowed;}
-    .btn-icon {position:relative; z-index:1; font-size:19px; line-height:1; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.20); display:flex; align-items:center; justify-content:center;
-              box-shadow:inset 0 1px 2px rgba(255,255,255,0.35), 0 1px 3px rgba(0,0,0,0.15);}
+    .btn-icon {position:relative; z-index:1; font-size:19px; line-height:1; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.20); display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 2px rgba(255,255,255,0.35), 0 1px 3px rgba(0,0,0,0.15);}
     .btn-icon-flipped {transform:scaleX(-1); display:inline-block;}
     .geostat-btn strong {position:relative; z-index:1; font-size:10.5px; line-height:1.2;}
     .btn-saida {background:linear-gradient(135deg, #e74c3c, #c0392b);}
@@ -122,13 +100,11 @@
     POPUP
     ============================================================ */
     .popup-overlay {position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; padding:20px;}
-    .popup-content {background:var(--surface); color:var(--txt-1); width:100%; max-width:380px; border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-lg); border:1px solid var(--border);
-                    animation:bounceIn 0.3s ease-out; padding:0;}
+    .popup-content {background:var(--surface); color:var(--txt-1); width:100%; max-width:380px; border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-lg); border:1px solid var(--border); animation:bounceIn 0.3s ease-out; padding:0;}
     .popup-content h3 {background:linear-gradient(to right, var(--red-dark), var(--red)); color:#fff; margin:0; padding:16px; font-size:15px; font-weight:700; text-align:center;}
     .popup-content p {padding:0 20px; margin:12px 0 0; color:var(--txt-2); font-size:13px;}
     .popup-content p:first-of-type {margin-top:16px; font-weight:700; color:var(--txt-1);}
-    .popup-content input {width:calc(100% - 40px); margin:10px 20px 0; padding:12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface-2); color:var(--txt-1);
-                          font-size:15px; text-align:center; font-weight:700; transition:border-color var(--ease), box-shadow var(--ease);}
+    .popup-content input {width:calc(100% - 40px); margin:10px 20px 0; padding:12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface-2); color:var(--txt-1); font-size:15px; text-align:center; font-weight:700; transition:border-color var(--ease), box-shadow var(--ease);}
     .popup-content input:focus {outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-light);}
     .popup-content > div[style] {padding:0 20px !important;}
     .popup-buttons {display:flex; gap:10px; padding:16px 20px 20px; margin-top:6px !important;}
@@ -141,8 +117,7 @@
     TOASTS
     ============================================================ */
     .toast-container {position:fixed; top:calc(var(--header-h) + 10px); right:14px; z-index:9999; display:flex; flex-direction:column; gap:8px;}
-    .toast {min-width:200px; max-width:320px; padding:10px 14px; border-radius:var(--r-md); color:#fff; font-weight:600; font-size:13px; box-shadow:var(--sh-lg); display:flex; align-items:center;
-            opacity:0; transform:translateX(100%); animation:toastslideIn 0.4s forwards, toastfadeOut 0.4s forwards 3s; cursor:pointer;}
+    .toast {min-width:200px; max-width:320px; padding:10px 14px; border-radius:var(--r-md); color:#fff; font-weight:600; font-size:13px; box-shadow:var(--sh-lg); display:flex; align-items:center; opacity:0; transform:translateX(100%); animation:toastslideIn 0.4s forwards, toastfadeOut 0.4s forwards 3s; cursor:pointer;}
     .toast.success {background:linear-gradient(135deg, var(--green), #189349);}
     .toast.error {background:linear-gradient(135deg, var(--red), var(--red-dark));}
     .toast.warning {background:linear-gradient(135deg, var(--orange), #e67e22);}
@@ -157,8 +132,7 @@
     /* ============================================================
     FOOTER
     ============================================================ */
-    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
     .footer-content {text-align: center;}
     .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
     .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
@@ -250,12 +224,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getCorp() { return localStorage.getItem("currentCorpOperNr") || "0805"; }
+    function getNInt() { return localStorage.getItem("currentCorpNint") || "205";}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5NzMwNTB9.CcE8nI1bbWcL0PlJaVkKdm74UZEyzweZfsv2i0M-zmg';
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -709,7 +683,7 @@
             <div style="padding:0px 0px 0px 0px !important;">
               <h3 style="display:flex; align-items:center; justify-content:center; gap:10px; margin:0; padding:15px;">
                 <span class="material-icons" style="font-size:18px;">block</span>
-                Motivo de Retenção
+                Motivo da Retenção
               </h3>
             </div>
             <div style="padding:16px 20px 24px 20px !important; display:flex; flex-direction:column; gap:16px;">
@@ -725,6 +699,10 @@
                 <label style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--txt-1); cursor:pointer;">
                   <input type="radio" name="retencaoMotivo" value="Retido por Aguarda Triagem" style="width:auto; margin:0;">
                   Aguarda Triagem
+                </label>
+                <label style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--txt-1); cursor:pointer;">
+                  <input type="radio" name="retencaoMotivo" value="Fim de Retenção" style="width:auto; margin:0;">
+                  Fim de Retenção
                 </label>
               </div>
             </div>
