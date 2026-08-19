@@ -56,6 +56,49 @@
     .scroll-spacer {flex-shrink: 0; width: 100%; height: calc(var(--footer-h) + env(safe-area-inset-bottom, 0px)); pointer-events: none;}
     .section-label {width: 100%; font-size: 12px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px; margin-bottom: 2px;}
     /* ============================================================
+    CONSULTAR PEDIDOS - CARD
+    ============================================================ */
+    .consult-card {display: flex; align-items: center; gap: 12px; width: 100%; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; cursor: pointer; transition: background var(--ease), transform 0.15s ease;}
+    .consult-card:hover {background: var(--red-light);}
+    .consult-card:active {transform: scale(0.98);}
+    .consult-card-icon {display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background: var(--red-light); color: var(--red); flex-shrink: 0;}
+    .consult-card-icon .material-icons {font-size: 20px;}
+    .consult-card-text {display: flex; flex-direction: column; gap: 1px;}
+    .consult-card-title {font-size: 13.5px; font-weight: 700; color: var(--txt-1);}
+    .consult-card-sub {font-size: 11px; font-weight: 500; color: var(--txt-2);}
+    .consult-card-arrow {margin-left: auto; color: var(--txt-3); display: flex; align-items: center;}
+    /* ============================================================
+    PEDIDOS MODAL
+    ============================================================ */
+    .main-content, .header, .footer {transition: filter 0.25s ease;}
+    .content-blur {filter: blur(6px); pointer-events: none;}
+    .modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 24px;}
+    .modal-overlay.show {opacity: 1; pointer-events: auto;}
+    .modal-sheet {width: 100%; max-width: 480px; max-height: 65vh; background: var(--bg); border-radius: var(--r-lg); box-shadow: var(--sh-lg); display: flex; flex-direction: column; transform: scale(0.94); opacity: 0; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease; overflow: hidden;}
+    .modal-overlay.show .modal-sheet {transform: scale(1); opacity: 1;}
+    .modal-header {display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); flex-shrink: 0;}
+    .modal-title {font-size: 15px; font-weight: 700; color: var(--txt-1);}
+    .modal-close-btn {background: transparent; border: none; color: var(--txt-2); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; transition: background var(--ease);}
+    .modal-close-btn:hover {background: var(--surface-2);}
+    .modal-body {flex: 1; min-height: 0; max-height: 65vh; overflow-y: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--red) transparent; padding: 14px 18px calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 10px; mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);}
+    .modal-body::-webkit-scrollbar {width: 5px;}
+    .modal-body::-webkit-scrollbar-track {background: transparent;}
+    .modal-body::-webkit-scrollbar-thumb {background: var(--red); border-radius: 10px;}
+    .modal-body::-webkit-scrollbar-thumb:hover {background: var(--red-dark);}
+    .order-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 13px;}
+    .order-card-top {display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;}
+    .order-date {font-size: 11.5px; font-weight: 600; color: var(--txt-2);}
+    .status-badge {font-size: 10px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; padding: 4px 9px; border-radius: 20px; white-space: nowrap;}
+    .status-badge.status-aprovacao {background: rgba(255, 179, 0, 0.16); color: #b26a00;}
+    .status-badge.status-aprovado {background: rgba(2, 130, 250, 0.14); color: var(--blue);}
+    .status-badge.status-entregue {background: rgba(46, 160, 67, 0.16); color: #2ea043;}
+    .status-badge.status-rejeitado {background: var(--red-light); color: var(--red);}
+    .order-items {display: flex; flex-direction: column; gap: 3px; margin-bottom: 6px;}
+    .order-item-line {font-size: 12.5px; font-weight: 500; color: var(--txt-1);}
+    .order-item-line b {font-weight: 700;}
+    .order-meta {font-size: 11px; font-weight: 500; color: var(--txt-3); border-top: 1px solid var(--border); padding-top: 7px; margin-top: 3px;}
+    .modal-loading, .modal-empty {text-align: center; padding: 30px 10px; color: var(--txt-3); font-size: 12.5px; font-weight: 500;}
+    /* ============================================================
     DYNAMIC LIST OF ARTICLES
     ============================================================ */
     .items-list {display: flex; flex-direction: column; gap: 5px; width: 100%;}
@@ -82,11 +125,11 @@
     /* ============================================================
     JUSTIFICATION
     ============================================================ */
-    .justif-field {flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px;}
-    .justif-field label {font-size: 11.5px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px;}
-    .justif-field textarea {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--txt-1); outline: none; resize: none; overflow: hidden; min-height: 90px; max-height: 500px; line-height: 1.4; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
-    .justif-field textarea:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
-    .justif-field textarea::placeholder {color: var(--txt-3);}
+    .notes-field {flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px;}
+    .notes-field label {font-size: 11.5px; font-weight: 600; color: var(--txt-2); letter-spacing: 0.3px; padding-left: 2px;}
+    .notes-field textarea {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--txt-1); outline: none; resize: none; overflow: hidden; min-height: 90px; max-height: 500px; line-height: 1.4; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);}
+    .notes-field textarea:focus {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
+    .notes-field textarea::placeholder {color: var(--txt-3);}
     /* ============================================================
     SUBMIT
     ============================================================ */
@@ -133,6 +176,14 @@
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
   <div class="main-content">
+    <div class="consult-card" onclick="openOrdersModal()">
+      <div class="consult-card-icon"><span class="material-icons">fact_check</span></div>
+      <div class="consult-card-text">
+        <span class="consult-card-title">Consultar Pedidos</span>
+        <span class="consult-card-sub">Ver os meus pedidos e respetivo estado</span>
+      </div>
+      <div class="consult-card-arrow"><span class="material-icons">chevron_right</span></div>
+    </div>
     <p class="section-label">Artigos:</p>
     <div class="items-list" id="itemsList">
       <p class="empty-state" id="itemsEmptyState">Ainda não adicionou nenhum artigo.</p>
@@ -140,12 +191,12 @@
     <button type="button" class="btn-add-item" onclick="addItemRow()">
       <span class="material-icons">add_circle_outline</span>Adicionar Artigo
     </button>
-    <div class="justif-field" style="width: 100%; margin-top: 15px;">
-      <label for="fieldObservacoes">Observações (opcional):</label>
-      <textarea id="fieldObservacoes" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="2" oninput="autoResizeTextarea(this)"></textarea>
+    <div class="notes-field" style="width: 100%; margin-top: 15px;">
+      <label for="fieldNotes">Observações (opcional):</label>
+      <textarea id="fieldNotes" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="2" oninput="autoResizeTextarea(this)"></textarea>
     </div>
-    <button type="button" class="btn-submit" id="submitFardBtn" onclick="submitUniformOrder()">
-      <span class="material-icons">send</span><span id="submitFardBtnText">Enviar Pedido</span>
+    <button type="button" class="btn-submit" id="submitOrderBtn" onclick="submitUniformOrder()">
+      <span class="material-icons">send</span><span id="submitOrderBtnText">Enviar Pedido</span>
     </button>
     <div class="scroll-spacer"></div>
   </div>
@@ -184,12 +235,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
-    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -204,7 +255,7 @@
     }
     /* ======================= INICIALIZAÇÃO ======================= */
     async function loadCorpInfo() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr") || "0805";
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
       if (!corpOperNr) return;
@@ -261,11 +312,11 @@
     }
     /* ====================== AVAILABLE ITEMS ====================== */
     const UNIFORM_ITEMS = [{value: "capacte_florestal", label: "Capacete Florestal"}, {value: "cogula_florestal", label: "Cógula EPI Florestal"}, {value: "dolman_florestal", label: "Dolman EPI Florestal", sizeType: "letter"}, {value: "sweatshirt_florestal", label: "Sweatshirt EPI Florestal", sizeType: "letter"},
-                              {value: "calca_florestal", label: "Calças EPI Florestal", sizeType: "letter"}, {value: "luva_florestal", label: "Luvas EPI Florestal", sizeType: "numeric"}, {value: "bota_florestal", label: "Botas EPI Florestal", sizeType: "numeric"}, {value: "capacte_urbano", label: "Capacete Urbano"},
-                              {value: "cogula_urbano", label: "Cógula EPI Urbano"}, {value: "casaco_urbano", label: "Casaco EPI Urbano", sizeType: "letter"}, {value: "calca_urbano", label: "Calças EPI Urbano", sizeType: "letter"}, {value: "luva_urbano", label: "Luvas EPI Urbano", sizeType: "letter"},
+                              {value: "calca_florestal", label: "Calças EPI Florestal", sizeType: "numeric"}, {value: "luva_florestal", label: "Luvas EPI Florestal", sizeType: "numeric"}, {value: "bota_florestal", label: "Botas EPI Florestal", sizeType: "numeric"}, {value: "capacte_urbano", label: "Capacete Urbano"},
+                              {value: "cogula_urbano", label: "Cógula EPI Urbano"}, {value: "casaco_urbano", label: "Casaco EPI Urbano", sizeType: "letter"}, {value: "calca_urbano", label: "Calças EPI Urbano", sizeType: "numeric"}, {value: "luva_urbano", label: "Luvas EPI Urbano", sizeType: "numeric"},
                               {value: "bota_urbano", label: "Botas EPI Urbano", sizeType: "numeric"}, {value: "polo_vermelho_mct", label: "Polo Vermelho Manga Curta", sizeType: "letter"}, {value: "polo_vermelho_mcp", label: "Polo Vermelho Manga Comprida", sizeType: "letter"}, {value: "tshir_azul", label: "T-Shirt Azul Bombeiros", sizeType: "letter"},
-                              {value: "calca_3", label: "Calças Uniforme Nr. 3", sizeType: "letter"}, {value: "cinturao", label: "Cinturão Vermelho", sizeType: "letter"}, {value: "bone", label: "Boné Vermelho Bombeiros", sizeType: "letter"},];
-    const LETTER_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+                              {value: "calca_3", label: "Calças Trabalho", sizeType: "numeric"}, {value: "cinturao", label: "Cinturão Vermelho"}, {value: "cinto", label: "Cinto Vermelho"}, {value: "bone", label: "Boné Vermelho Bombeiros", sizeType: "letter"}, {value: "boina_vermelha", label: "Boina Lista Vermelha", sizeType: "numeric"}, {value: "boina_dourada", label: "Boina Lista Dourada", sizeType: "numeric"},];
+    const LETTER_SIZES = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"];
     let itemRowCounter = 0;
     /* ======================= BUILD OPTIONS ======================= */
     function buildItemOptionsHTML(selectedValue) {
@@ -307,11 +358,17 @@
           </button>
         </div>
         <div class="item-row">
-          <div class="item-field" style="flex: 2;">
+          <div class="item-field">
             <label for="itemArticle_${rowId}">Artigo</label>
             <select id="itemArticle_${rowId}" onchange="onItemArticleChange(${rowId})">
               ${buildItemOptionsHTML(defaultItem.value)}
             </select>
+          </div>
+        </div>
+        <div class="item-row">
+          <div class="item-field" style="flex: 2;">
+            <label for="itemBrand_${rowId}">Marca</label>
+            <input type="text" id="itemBrand_${rowId}" value="Não Aplicável" disabled style="opacity:0.5;">
           </div>
           <div class="item-field" id="itemSizeField_${rowId}">
             <label for="itemSize_${rowId}">Tamanho</label>
@@ -324,6 +381,7 @@
         </div>
       `;
       list.appendChild(card);
+      renumberItemCards();
     }
     function onItemArticleChange(rowId) {
       const select = document.getElementById(`itemArticle_${rowId}`);
@@ -338,14 +396,24 @@
       const card = document.getElementById(`itemCard_${rowId}`);
       if (card) card.remove();
       const list = document.getElementById('itemsList');
-      if (!list.querySelector('.item-card')) {
+      const remainingCards = list.querySelectorAll('.item-card');
+      if (remainingCards.length === 0) {
         itemRowCounter = 0;
         const emptyState = document.createElement('p');
         emptyState.className = 'empty-state';
         emptyState.id = 'itemsEmptyState';
         emptyState.textContent = 'Ainda não adicionou nenhum artigo.';
         list.appendChild(emptyState);
+        return;
       }
+      renumberItemCards();
+    }
+    function renumberItemCards() {
+      const cards = document.querySelectorAll('#itemsList .item-card');
+      cards.forEach((card, index) => {
+        const titleEl = card.querySelector('.item-card-title');
+        if (titleEl) titleEl.textContent = `${index + 1}º Artigo`;
+      });
     }
     function collectItemsData() {
       const cards = document.querySelectorAll('#itemsList .item-card');
@@ -356,12 +424,7 @@
         const sizeEl = document.getElementById(`itemSize_${rowId}`);
         const qtyEl = document.getElementById(`itemQty_${rowId}`);
         const articleLabel = UNIFORM_ITEMS.find(i => i.value === articleSelect.value)?.label || articleSelect.value;
-        items.push({
-          article: articleSelect.value,
-          articleLabel,
-          size: sizeEl ? sizeEl.value : "N/A",
-          quantity: qtyEl ? parseInt(qtyEl.value, 10) || 1 : 1,
-        });
+        items.push({article: articleSelect.value, articleLabel, brand: "Não Aplicável", size: sizeEl ? sizeEl.value : "N/A", quantity: qtyEl ? parseInt(qtyEl.value, 10) || 1 : 1,});
       });
       return items;
     }
@@ -372,23 +435,34 @@
         showToast("Adicione pelo menos um artigo.");
         return;
       }
-      const invalidQty = items.some(i => !i.quantidade || i.quantidade < 1);
+      const invalidQty = items.some(i => !i.quantity || i.quantity < 1);
       if (invalidQty) {
         showToast("Verifique as quantidades introduzidas.");
         return;
       }
-      const submitBtn = document.getElementById('submitFardBtn');
-      const submitBtnText = document.getElementById('submitFardBtnText');
+      const submitBtn = document.getElementById('submitOrderBtn');
+      const submitBtnText = document.getElementById('submitOrderBtnText');
       if (submitBtn) submitBtn.disabled = true;
       if (submitBtnText) submitBtnText.textContent = "A Enviar Pedido";
-      const observacoes = document.getElementById('fieldObservacoes').value.trim();
+      const notesValue = document.getElementById('fieldNotes').value.trim();
       const corpOperNr = getCorp();
+      const nInt = getNInt();
       try {
-        console.log({ corpOperNr, items, observacoes });
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/uniform_orders`, {
+          method: 'POST',
+          headers: getSupabaseHeaders({ returnRepresentation: true }),
+          body: JSON.stringify({corp_oper_nr: corpOperNr, n_int: nInt, items: items, notes: notesValue || null, status: 'Em Aprovação',}),
+        });
+        if (!response.ok) {
+          const errBody = await response.text();
+          throw new Error(errBody || `Erro ${response.status}`);
+        }
         showToast("Pedido de fardamento enviado com sucesso!");
-        document.getElementById('itemsList').innerHTML = '<p class="empty-state" id="itemsEmptyState">Ainda não adicionou nenhum artigo.</p>';
-        document.getElementById('fieldObservacoes').value = "";
-        autoResizeTextarea(document.getElementById('fieldObservacoes'));
+        document.getElementById('itemsList').innerHTML = '';
+        itemRowCounter = 0;
+        addItemRow();
+        document.getElementById('fieldNotes').value = "";
+        autoResizeTextarea(document.getElementById('fieldNotes'));
       } catch (err) {
         console.error(err);
         showToast("Erro ao enviar o pedido: " + err.message);
@@ -397,16 +471,96 @@
         if (submitBtnText) submitBtnText.textContent = "Enviar Pedido";
       }
     }
+    /* ====================== CONSULTAR PEDIDOS ===================== */
+    const STATUS_CLASS_MAP = {"Em Aprovação": "status-aprovacao", "Aprovado": "status-aprovado", "Entregue": "status-entregue", "Rejeitado": "status-rejeitado",};
+    function formatDate(iso) {
+      if (!iso) return null;
+      const d = new Date(iso);
+      return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+        ' ' + d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+    }
+    function renderOrderCard(order) {
+      const statusClass = STATUS_CLASS_MAP[order.status] || "status-aprovacao";
+      const itemsHTML = (order.items || []).map(item =>
+        `<div class="order-item-line">${item.quantity}x <b>${item.articleLabel || item.article}</b>${item.size && item.size !== 'N/A' ? ' · Tam. ' + item.size : ''}</div>`
+      ).join("");
+      const metaLines = [];
+      if (order.approved_date) metaLines.push(`Aprovado em ${formatDate(order.approved_date)}`);
+      if (order.delivery_date) metaLines.push(`Entregue em ${formatDate(order.delivery_date)}${order.delivery_n_int ? ' · Nº ' + order.delivery_n_int : ''}`);
+      return `
+        <div class="order-card">
+          <div class="order-card-top">
+            <span class="order-date">${formatDate(order.order_date)}</span>
+            <span class="status-badge ${statusClass}">${order.status}</span>
+          </div>
+          <div class="order-items">${itemsHTML}</div>
+          ${order.notes ? `<div class="order-item-line" style="color: var(--txt-2); font-style: italic;">"${order.notes}"</div>` : ''}
+          ${metaLines.length ? `<div class="order-meta">${metaLines.join(' · ')}</div>` : ''}
+        </div>
+      `;
+    }
+    async function loadOrders() {
+      const body = document.getElementById('ordersModalBody');
+      body.innerHTML = '<p class="modal-loading">A carregar pedidos...</p>';
+      const corp = getCorp();
+      const nint = getNInt();
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/uniform_orders?select=*&corp_oper_nr=eq.${corp}&n_int=eq.${nint}&order=order_date.desc`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        if (!response.ok) {
+          const errBody = await response.text();
+          throw new Error(errBody || `Erro ${response.status}`);
+        }
+        const orders = await response.json();
+        if (!orders || orders.length === 0) {
+          body.innerHTML = '<p class="modal-empty">Ainda não tem pedidos registados.</p>';
+          return;
+        }
+        body.innerHTML = orders.map(renderOrderCard).join("");
+      } catch (err) {
+        console.error(err);
+        body.innerHTML = `<p class="modal-empty">Erro ao carregar pedidos: ${err.message}</p>`;
+      }
+    }
+    function openOrdersModal() {
+      const overlay = document.getElementById('ordersModalOverlay');
+      overlay.classList.add('show');
+      document.querySelector('.header')?.classList.add('content-blur');
+      document.querySelector('.main-content')?.classList.add('content-blur');
+      document.querySelector('.footer')?.classList.add('content-blur');
+      loadOrders();
+    }
+    function closeOrdersModal() {
+      document.getElementById('ordersModalOverlay').classList.remove('show');
+      document.querySelector('.header')?.classList.remove('content-blur');
+      document.querySelector('.main-content')?.classList.remove('content-blur');
+      document.querySelector('.footer')?.classList.remove('content-blur');
+    }
     /* ====================== INITIALIZATION ======================= */
-    document.addEventListener('DOMContentLoaded', function() {
-      loadCorpInfo();
+    document.addEventListener('DOMContentLoaded', function() {      
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
       }
       addItemRow();
+      loadCorpInfo();
     });
   </script>
-  <script src="nav-lock.js"></script>
+  <div class="modal-overlay" id="ordersModalOverlay" onclick="if(event.target===this) closeOrdersModal()">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span class="modal-title">Os Meus Pedidos</span>
+        <button type="button" class="modal-close-btn" onclick="closeOrdersModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body" id="ordersModalBody">
+        <p class="modal-loading">A carregar pedidos...</p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
