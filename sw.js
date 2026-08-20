@@ -1,186 +1,166 @@
    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.4.8 - Otimização estrita de navegação: Força o uso exclusivo
+    v5.4.9 - Otimização estrita de navegação: Força o uso exclusivo
     da cache para pedidos do tipo 'navigate', eliminando o reload
     intermitente (flash) ao mudar entre ficheiros HTML.
     ========================================================= */
-const CACHE_NAME = 'cb360-cache-v5.4.8';
-const ASSETS_TO_CACHE = [
-  '/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', 
-  '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
-  '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', 
-  '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
-  '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', 
-  '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
-  '/Tools.html', '/GCIncRural.html', '/DecirTeam.html', '/InterChat.html', '/PointJustif.html', 
-  '/manifest.json', '/nav-lock.js'
-];
-const CDN_DOMAINS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
-const CACHE_ADD_RETRIES = 3;
-const CACHE_ADD_RETRY_DELAY_MS = 1000;
-let activeChats = new Map();
-
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function cacheAddWithRetry(cache, url, attempt = 1) {
-  try {
-    await cache.add(url);
-  } catch (err) {
-    if (attempt < CACHE_ADD_RETRIES) {
-      await delay(CACHE_ADD_RETRY_DELAY_MS * attempt);
-      return cacheAddWithRetry(cache, url, attempt + 1);
+    const CACHE_NAME = 'cb360-cache-v5.4.9';
+    const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
+                             '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
+                             '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
+                             '/Tools.html', '/GCIncRural.html', '/DecirTeam.html', '/InterChat.html', '/PointJustif.html', '/manifest.json', '/nav-lock.js'];
+    const CDN_DOMAINS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
+    const CACHE_ADD_RETRIES = 3;
+    const CACHE_ADD_RETRY_DELAY_MS = 1000;
+    let activeChats = new Map();
+    function delay(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
-    console.warn(`[Service Worker] Falhou ao colocar em cache o recurso após ${CACHE_ADD_RETRIES} tentativas: ${url}`, err);
-  }
-}
-
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      await Promise.all(
-        ASSETS_TO_CACHE.map((url) => cacheAddWithRetry(cache, url))
+    async function cacheAddWithRetry(cache, url, attempt = 1) {
+      try {
+        await cache.add(url);
+      } catch (err) {
+        if (attempt < CACHE_ADD_RETRIES) {
+          await delay(CACHE_ADD_RETRY_DELAY_MS * attempt);
+          return cacheAddWithRetry(cache, url, attempt + 1);
+        }
+        console.warn(`[Service Worker] Falhou ao colocar em cache o recurso após ${CACHE_ADD_RETRIES} tentativas: ${url}`, err);
+      }
+    }
+    self.addEventListener('install', (event) => {
+      self.skipWaiting();
+      event.waitUntil(
+        caches.open(CACHE_NAME).then(async (cache) => {
+          await Promise.all(
+            ASSETS_TO_CACHE.map((url) => cacheAddWithRetry(cache, url))
+          );
+        })
       );
-    })
-  );
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    Promise.all([
-      clients.claim(),
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cache) => {
-            if (cache !== CACHE_NAME) {
-              return caches.delete(cache);
+    });
+    self.addEventListener('activate', (event) => {
+      event.waitUntil(
+        Promise.all([
+          clients.claim(), 
+          caches.keys().then((cacheNames) => {
+            return Promise.all(
+              cacheNames.map((cache) => {
+                if (cache !== CACHE_NAME) {
+                  return caches.delete(cache);
+                }
+              })
+            );
+          })
+        ])
+      );
+    });
+    self.addEventListener('fetch', (event) => {
+      if (event.request.method !== 'GET') {
+        return;
+      }
+      const requestUrl = new URL(event.request.url)
+      const isOwnOrigin = requestUrl.origin === self.location.origin;
+      const isCdnAsset = CDN_DOMAINS.includes(requestUrl.hostname);
+      if (isOwnOrigin && event.request.mode === 'navigate') {
+        event.respondWith(
+          caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
             }
+            return caches.match('/index.html').then((fallback) => {
+              return fallback || fetch(event.request);
+            });
           })
         );
-      })
-    ])
-  );
-});
-
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') {
-    return;
-  }
-  
-  const requestUrl = new URL(event.request.url);
-  const isOwnOrigin = requestUrl.origin === self.location.origin;
-  const isCdnAsset = CDN_DOMAINS.includes(requestUrl.hostname);
-
-  // Tratamento prioritário e estrito para mudança de páginas HTML (Navegação)
-  if (isOwnOrigin && event.request.mode === 'navigate') {
-    event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        // Se não estiver na cache exata, tenta o index.html ou vai à rede como último recurso
-        return caches.match('/index.html').then((fallback) => {
-          return fallback || fetch(event.request);
-        });
-      })
-    );
-    return;
-  }
-
-  // Comportamento normal para assets estáticos e CDNs
-  if (isOwnOrigin || isCdnAsset) {
-    event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        return fetch(event.request).then((networkResponse) => {
-          const isCacheable = networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque');
-          if (isCacheable) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
+        return;
+      }
+      if (isOwnOrigin || isCdnAsset) {
+        event.respondWith(
+          caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            return fetch(event.request).then((networkResponse) => {
+              const isCacheable = networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque');
+              if (isCacheable) {
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(event.request, responseToCache);
+                });
+              }
+              return networkResponse;
+            }).catch(() => {
+              return new Response('', {
+                status: 504,
+                statusText: 'Gateway Timeout'
+              });
             });
-          }
-          return networkResponse;
-        }).catch(() => {
-          return new Response('', {
-            status: 504,
-            statusText: 'Gateway Timeout'
-          });
-        });
-      })
-    );
-  }
-});
-
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SET_ACTIVE_CHAT') {
-    activeChats.set(event.source.id, String(event.data.chatId));
-  }  
-  if (event.data && event.data.type === 'CLEAR_ACTIVE_CHAT') {
-    activeChats.delete(event.source.id);
-  }  
-  if (event.data && event.data.type === 'CLEANUP') {
-    activeChats.clear();
-  }
-});
-
-self.addEventListener('push', function(event) {
-  let data = { title: 'CB360 Mobile', message: 'Nova atualização no sistema!' };
-  try {
-    if (event.data) {
-      data = event.data.json();
-    }
-  } catch (err) {
-    data.message = event.data.text();
-  }
-  const chatNint = String(data.chatNint || data.chatId || '');
-  if (chatNint) {
-    const isActiveInAnyTab = Array.from(activeChats.values())
-    .map(id => String(id))
-    .includes(chatNint);
-    if (isActiveInAnyTab) {
-      return;
-    }
-  }
-  const options = {
-    body: data.message || data.body || 'Tens uma nova mensagem.',
-    icon: '/icon-192.png',
-    vibrate: [200, 100, 200, 100, 200],
-    data: {
-      url: data.url || '/',
-      chatNint: chatNint
-    },
-    tag: 'cb360-notification',
-    renotify: true
-  };
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'CB360 Mobile', options)
-  );
-});
-
-self.addEventListener('notificationclick', function(event) {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          if (event.notification.data && event.notification.data.chatNint) {
-            client.postMessage({
-              type: 'OPEN_CHAT',
-              chatNint: event.notification.data.chatNint
-            });
-          }
-          return client.focus();
+          })
+        );
+      }
+    });
+    self.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'SET_ACTIVE_CHAT') {
+        activeChats.set(event.source.id, String(event.data.chatId));
+      }  
+      if (event.data && event.data.type === 'CLEAR_ACTIVE_CHAT') {
+        activeChats.delete(event.source.id);
+      }  
+      if (event.data && event.data.type === 'CLEANUP') {
+        activeChats.clear();
+      }
+    });
+    self.addEventListener('push', function(event) {
+      let data = { title: 'CB360 Mobile', message: 'Nova atualização no sistema!' };
+      try {
+        if (event.data) {
+          data = event.data.json();
+        }
+      } catch (err) {
+        data.message = event.data.text();
+      }
+      const chatNint = String(data.chatNint || data.chatId || '');
+      if (chatNint) {
+        const isActiveInAnyTab = Array.from(activeChats.values())
+        .map(id => String(id))
+        .includes(chatNint);
+        if (isActiveInAnyTab) {
+          return;
         }
       }
-      if (clients.openWindow) {
-        const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : '/';
-        return clients.openWindow(targetUrl);
-      }
-    })
-  );
-});
+      const options = {
+        body: data.message || data.body || 'Tens uma nova mensagem.',
+        icon: '/icon-192.png',
+        vibrate: [200, 100, 200, 100, 200],
+        data: {
+          url: data.url || '/',
+          chatNint: chatNint
+        },
+        tag: 'cb360-notification',
+        renotify: true
+      };
+      event.waitUntil(
+        self.registration.showNotification(data.title || 'CB360 Mobile', options)
+      );
+    });
+    self.addEventListener('notificationclick', function(event) {
+      event.notification.close();
+      event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+          for (const client of clientList) {
+            if (client.url.includes(self.location.origin) && 'focus' in client) {
+              if (event.notification.data && event.notification.data.chatNint) {
+                client.postMessage({
+                  type: 'OPEN_CHAT',
+                  chatNint: event.notification.data.chatNint
+                });
+              }
+              return client.focus();
+            }
+          }
+          if (clients.openWindow) {
+            const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : '/';
+            return clients.openWindow(targetUrl);
+          }
+        })
+      );
+    });
