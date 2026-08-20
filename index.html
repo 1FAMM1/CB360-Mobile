@@ -11,40 +11,43 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <title>Login - CB360 Mobile</title>
-  <style> 
-    *, *::before, *::after {margin: 0; padding: 0; box-sizing: border-box;}    
-    /* Tom vermelho equilibrado definido no :root */
-    :root {
-        --accent: #c0392b; 
-        --accent-hover: #a93226; 
-        --bg-base: #0f1117; 
-        --card-bg: rgba(245, 247, 250, 0.92); 
-        --card-border: rgba(255, 255, 255, 0.8);  
-        --text-main: #1e2229; 
-        --text-muted: #646f82; 
-        --input-bg: #ffffff; 
-        --input-border: #dcdfe6; 
-        --font-main: 'Inter', sans-serif;
-    }
+  <style>
+    /* ============================================================
+    VARIABLES
+    ============================================================ */
+    *, *::before, *::after {margin: 0; padding: 0; box-sizing: border-box;}
+    :root {--accent: #c0392b; --accent-hover: #a93226; --bg-base: #171b24; --card-bg: rgba(245, 247, 250, 0.92); --card-border: rgba(255, 255, 255, 0.8); --text-main: #1e2229; --text-muted: #646f82; --input-bg: #ffffff; --input-border: #dcdfe6; --font-main: 'Inter', sans-serif;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
     html, body {height: 100%; background: var(--bg-base); color: var(--text-main); font-family: var(--font-main); overflow-x: hidden; overflow-y: auto; user-select: none; -webkit-user-select: none;}
-    body::before {content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(192, 57, 43, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(192, 57, 43, 0.1) 1px, transparent 1px); background-size: 48px 48px; z-index: 0; animation: bgGridMove 20s linear infinite;}
-    @keyframes bgGridMove {from {background-position: 0 0;} to {background-position: 48px 48px;}}
+    /* ============================================================
+    BACKGROUND
+    ============================================================ */
+    .embers-container {position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none;}
+    .ember {position: absolute; bottom: -10px; width: 4px; height: 4px; border-radius: 50%; background: radial-gradient(circle, #ffffff, #ffc266 55%, #c0392b 100%); box-shadow: 0 0 14px 4px rgba(255, 194, 102, 0.9); opacity: 0; animation: emberRise linear infinite;}
+    @keyframes emberRise {0% {transform: translateY(0) translateX(0); opacity: 0;} 10% {opacity: 1;} 70% {opacity: 0.9;} 100% {transform: translateY(-105vh) translateX(var(--drift)); opacity: 0;}}
+    .smoke {position: absolute; bottom: -20%; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(200, 200, 210, 0.10), transparent 70%); filter: blur(10px); opacity: 0; animation: smokeRise linear infinite;}
+    @keyframes smokeRise {0% {transform: translateY(0) translateX(0) scale(0.8); opacity: 0;} 15% {opacity: 0.5;} 100% {transform: translateY(-120vh) translateX(var(--drift)) scale(1.6); opacity: 0;}}
     .ambient-glow-1 {position: fixed; top: -20%; left: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(192, 57, 43, 0.2) 0%, transparent 70%); filter: blur(70px); z-index: 0; pointer-events: none;}
     .ambient-glow-2 {position: fixed; bottom: -20%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(52, 152, 219, 0.15) 0%, transparent 70%); filter: blur(70px); z-index: 0; pointer-events: none;}
     .stage {position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px;}
-    
-    .header-box {text-align: center; margin-bottom: -30px; animation: fadeIn 0.8s ease both;}
+    /* ============================================================
+    WELCOME HEADER
+    ============================================================ */
+    .header-box {text-align: center; margin-bottom: 0px; animation: fadeIn 0.8s ease both;}
     .system-title {font-size: clamp(22px, 4.5vw, 28px); font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 12px;}
-    
-    .external-logo-container {text-align: center; margin-bottom: -15px; animation: fadeIn 0.8s ease both; animation-delay: 0.05s;}
+    /* ============================================================
+    SYSTEM LOGO
+    ============================================================ */
+    .external-logo-container {text-align: center; margin-bottom: 5px; animation: fadeIn 0.8s ease both; animation-delay: 0.05s;}
     .external-logo {display: inline-block; width: 140px; height: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));}
-
+    /* ============================================================
+    LOGIN CARD
+    ============================================================ */
     .login-container {background: var(--card-bg); border: 1px solid var(--card-border); padding: 36px 28px 28px 28px; border-radius: 20px; width: 100%; max-width: 370px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.6) inset; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); position: relative; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.1s; z-index: 1; margin: 0;}
-    
     .login-container h2 {font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
-    /* Cadeado usando cor de acento */
     .login-container h2 i {color: var(--accent);}
-
     .login-container label {display: block; margin-bottom: 5px; text-align: left; font-size: 12.5px; color: var(--text-muted); letter-spacing: 0.3px;}
     .login-container input {width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; color: var(--text-main); font-family: var(--font-main); font-size: 14px; outline: none; transition: all 0.25s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset; margin-bottom: 16px; box-sizing: border-box;}
     .login-container input:focus {border-color: var(--accent); background: #ffffff;}
@@ -52,72 +55,59 @@
     .password-wrapper input {margin-bottom: 0; padding-right: 40px;}
     .password-wrapper i {position: absolute; right: 16px; font-size: 14px; color: var(--text-muted); cursor: pointer; margin-bottom: 0; transition: color 0.2s;}
     .password-wrapper i:hover {color: var(--text-main);}
-    
     .remember-container {display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 5px; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset;}
     .remember-container:hover {border-color: var(--accent);}
-    .remember-container:has(input[type="checkbox"]:checked) {
-  background: rgba(192, 57, 43, 0.08);
-  border-color: var(--accent);
-}
+    .remember-container:has(input[type="checkbox"]:checked) {background: rgba(192, 57, 43, 0.08); border-color: var(--accent);}
     .remember-left {display: flex; align-items: center; gap: 12px;}
-    .remember-container input[type="checkbox"] {appearance: none; -webkit-appearance: none;
-  box-sizing: border-box;
-  width: 30px; height: 30px;
-  min-width: 30px; max-width: 30px;
-  aspect-ratio: 1 / 1;
-  flex-shrink: 0;
-  border: 2px solid var(--input-border);
-  border-radius: 6px; background: #fff; outline: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0; padding: 0;
-  transition: all 0.2s ease;
-}
+    .remember-container input[type="checkbox"] {appearance: none; -webkit-appearance: none; box-sizing: border-box; width: 30px; height: 30px; min-width: 30px; max-width: 30px; aspect-ratio: 1 / 1; flex-shrink: 0; border: 2px solid var(--input-border); border-radius: 6px; background: #fff; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; transition: all 0.2s ease;}
     .remember-container input[type="checkbox"]:checked {background: var(--accent); border-color: var(--accent);}
     .remember-container input[type="checkbox"]:checked::after {content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 11px; color: #fff;}
     .remember-text-box {display: flex; flex-direction: column;}
     .remember-title {font-size: 13px; font-weight: 600; color: var(--text-main); line-height: 1.2;}
     .remember-desc {font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.2;}
-    .remember-icon {font-size: 18px; color: var(--text-muted); opacity: 0.7;}
-
-    /* Botão Entrar usando cor de acento */
-    .login-container button {width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(192, 57, 43, 0.35); margin-top: 6px;}
-    .login-container button:hover {background: var(--accent-hover); box-shadow: 0 6px 16px rgba(169, 50, 38, 0.45);}
+    .remember-icon {font-size: 18px; color: var(--text-muted); opacity: 0.6; transition: opacity 0.25s ease;}
+    .remember-container:has(input[type="checkbox"]:checked) .remember-icon {opacity: 1;}
+    .login-container button {width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; margin-top: 0px;}
+    .login-container button:hover {background: var(--accent-hover);}
     .login-container button:active {transform: scale(0.98);}
-    
+    /* ============================================================
+    FOOTER
+    ============================================================ */
     .external-footer {font-size: 11px; color: #94a3b8; text-align: center; margin-top: 24px; font-weight: 400; z-index: 1; animation: fadeIn 0.8s ease both; animation-delay: 0.15s;}
-
+    /* ============================================================
+    TOAST
+    ============================================================ */
     .toast {position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(30, 35, 45, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); font-size: 13px; font-weight: 400; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); width: 90%; max-width: 480px;}
     .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
-    .toast.success {border-color: rgba(46, 204, 113, 0.4);}    
+    .toast.success {border-color: rgba(46, 204, 113, 0.4);}
+    /* ============================================================
+    ANIMATIONS
+    ============================================================ */
     @keyframes fadeIn {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
     @keyframes slideUp {from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);}}
   </style>
 </head>
 <body>
+  <div class="embers-container" id="embers"></div>
   <div class="ambient-glow-1"></div>
   <div class="ambient-glow-2"></div>
   <div class="stage">
-    
     <div class="header-box">
       <div class="system-title">Seja Bem-Vindo</div>
     </div>
-
     <div class="external-logo-container">
-      <img class="external-logo" src="https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_Mobile.png" alt="Logo CB 360">
+      <img class="external-logo" src="https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_Mobile_White.png">
     </div>
-
     <div class="login-container">
       <h2><i class="fa-solid fa-lock"></i> Acesso</h2>
       <form id="loginForm">
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="Insira o seu utilizador" required autocomplete="username">        
-        
+        <label for="username">ID Utilizador</label>
+        <input type="text" id="username" placeholder="Insira o seu utilizador" required autocomplete="username">
         <label for="password">Password</label>
         <div class="password-wrapper">
-          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+          <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
           <i class="fa-solid fa-eye" id="togglePassword"></i>
         </div>
-
         <div class="remember-container" onclick="document.getElementById('rememberMe').click()">
           <div class="remember-left">
             <input type="checkbox" id="rememberMe" onclick="event.stopPropagation()">
@@ -128,29 +118,60 @@
           </div>
           <i class="fa-solid fa-shield-halved remember-icon"></i>
         </div>
-
         <button type="submit">Entrar</button>
       </form>
     </div>
-
     <div class="external-footer">
-      2023-<span id="login-footer-year"></span> © Fábio Martins | Sistemas de Informação
+      <span id="login-footer-year"></span> © Fábio Martins | Sistemas de Informação
     </div>
-
   </div>
   <div id="toast" class="toast"></div>
-
 <script>
+  /* ===================== SUPABASE CONFIGURATION ====================== */
   const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-  
   window.addEventListener('DOMContentLoaded', () => {
     const savedRemember = localStorage.getItem("cb360_remember_me");
     if (savedRemember === "true") {
       document.getElementById("rememberMe").checked = true;
+      document.getElementById("username").value = localStorage.getItem("cb360_saved_user") || "";
+      document.getElementById("password").value = localStorage.getItem("cb360_saved_pass") || "";
+    }
+    const embersContainer = document.getElementById('embers');
+
+    // Geração dinâmica das faíscas (embers) — posição, duração, atraso e deriva lateral aleatórios
+    const EMBER_COUNT = 22;
+    for (let i = 0; i < EMBER_COUNT; i++) {
+      const ember = document.createElement('div');
+      ember.className = 'ember';
+      const left = Math.random() * 100;
+      const duration = 6 + Math.random() * 8;
+      const delay = Math.random() * 10;
+      const drift = (Math.random() * 80 - 40) + 'px';
+      const size = 2 + Math.random() * 3;
+      ember.style.left = left + '%';
+      ember.style.width = size + 'px';
+      ember.style.height = size + 'px';
+      ember.style.animationDuration = duration + 's';
+      ember.style.animationDelay = delay + 's';
+      ember.style.setProperty('--drift', drift);
+      embersContainer.appendChild(ember);
+    }
+    const SMOKE_COUNT = 6;
+    for (let i = 0; i < SMOKE_COUNT; i++) {
+      const smoke = document.createElement('div');
+      smoke.className = 'smoke';
+      const left = Math.random() * 100;
+      const duration = 18 + Math.random() * 10;
+      const delay = Math.random() * 15;
+      const drift = (Math.random() * 120 - 60) + 'px';
+      smoke.style.left = left + '%';
+      smoke.style.animationDuration = duration + 's';
+      smoke.style.animationDelay = delay + 's';
+      smoke.style.setProperty('--drift', drift);
+      embersContainer.appendChild(smoke);
     }
   });
-
   async function loginUser(user, pass, remember) {
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-login-mobile`, {
@@ -160,10 +181,15 @@
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Erro de login");
-      
-      if (remember) localStorage.setItem("cb360_remember_me", "true");
-      else localStorage.removeItem("cb360_remember_me");
-
+      if (remember) {
+        localStorage.setItem("cb360_remember_me", "true");
+        localStorage.setItem("cb360_saved_user", user);
+        localStorage.setItem("cb360_saved_pass", pass);
+      } else {
+        localStorage.removeItem("cb360_remember_me");
+        localStorage.removeItem("cb360_saved_user");
+        localStorage.removeItem("cb360_saved_pass");
+      }
       const storage = remember ? localStorage : sessionStorage;
       sessionStorage.clear();
       storage.setItem("currentUserName", data.username || user);
@@ -175,29 +201,23 @@
       showToast(err.message, 3000, "error");
     }
   }
-
   document.getElementById("loginForm").addEventListener("submit", e => {
     e.preventDefault();
     loginUser(document.getElementById("username").value, document.getElementById("password").value, document.getElementById("rememberMe").checked);
   });
-
   document.getElementById("togglePassword").addEventListener("click", function() {
     const p = document.getElementById("password");
     p.type = p.type === "password" ? "text" : "password";
     this.classList.toggle("fa-eye");
     this.classList.toggle("fa-eye-slash");
   });
-
   function showToast(message, duration, type) {
     const toast = document.getElementById("toast");
     toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check' : 'fa-exclamation'}"></i> <span>${message}</span>`;
     toast.className = `toast show ${type}`;
     setTimeout(() => toast.classList.remove("show"), duration);
   }
-
   document.getElementById('login-footer-year').textContent = new Date().getFullYear();
 </script>
-</body>
-</html>
 </body>
 </html>
