@@ -11,41 +11,84 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <title>Login - CB360 Mobile</title>
-  <style>
+  <style> 
     *, *::before, *::after {margin: 0; padding: 0; box-sizing: border-box;}    
-    :root {--accent: #e55039; --accent-hover: #d63031; --bg-base: #0f1117; --card-bg: rgba(245, 247, 250, 0.92); --card-border: rgba(255, 255, 255, 0.8);  --text-main: #1e2229; --text-muted: #646f82; --input-bg: #ffffff; --input-border: #dcdfe6; --font-main: 'Inter', sans-serif;}
+    /* Tom vermelho equilibrado definido no :root */
+    :root {
+        --accent: #c0392b; 
+        --accent-hover: #a93226; 
+        --bg-base: #0f1117; 
+        --card-bg: rgba(245, 247, 250, 0.92); 
+        --card-border: rgba(255, 255, 255, 0.8);  
+        --text-main: #1e2229; 
+        --text-muted: #646f82; 
+        --input-bg: #ffffff; 
+        --input-border: #dcdfe6; 
+        --font-main: 'Inter', sans-serif;
+    }
     html, body {height: 100%; background: var(--bg-base); color: var(--text-main); font-family: var(--font-main); overflow-x: hidden; overflow-y: auto; user-select: none; -webkit-user-select: none;}
-    body::before {content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(229, 80, 57, 0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 80, 57, 0.18) 1px, transparent 1px); background-size: 48px 48px; z-index: 0; animation: bgGridMove 20s linear infinite;}
+    body::before {content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(192, 57, 43, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(192, 57, 43, 0.1) 1px, transparent 1px); background-size: 48px 48px; z-index: 0; animation: bgGridMove 20s linear infinite;}
     @keyframes bgGridMove {from {background-position: 0 0;} to {background-position: 48px 48px;}}
-    .ambient-glow-1 {position: fixed; top: -20%; left: -10%; width: 500px; height: 500px;background: radial-gradient(circle, rgba(229, 80, 57, 0.25) 0%, transparent 70%); filter: blur(70px); z-index: 0; pointer-events: none;}
-    .ambient-glow-2 {position: fixed; bottom: -20%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(52, 152, 219, 0.18) 0%, transparent 70%); filter: blur(70px); z-index: 0; pointer-events: none;}
+    .ambient-glow-1 {position: fixed; top: -20%; left: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(192, 57, 43, 0.2) 0%, transparent 70%); filter: blur(70px); z-index: 0; pointer-events: none;}
+    .ambient-glow-2 {position: fixed; bottom: -20%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(52, 152, 219, 0.15) 0%, transparent 70%); filter: blur(70px); z-index: 0; pointer-events: none;}
     .stage {position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px;}
-    .header-box {text-align: center; margin-bottom: 24px; animation: fadeIn 0.8s ease both;}
-    .greeting {font-size: 13px; color: #94a3b8; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 400;}
-    #clock {color: #f1f5f9; font-weight: 500; margin-left: 4px;}
-    .system-title {font-size: clamp(22px, 4.5vw, 28px); font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; text-transform: uppercase;}
+    
+    .header-box {text-align: center; margin-bottom: -30px; animation: fadeIn 0.8s ease both;}
+    .system-title {font-size: clamp(22px, 4.5vw, 28px); font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 12px;}
+    
+    .external-logo-container {text-align: center; margin-bottom: -15px; animation: fadeIn 0.8s ease both; animation-delay: 0.05s;}
+    .external-logo {display: inline-block; width: 140px; height: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));}
+
     .login-container {background: var(--card-bg); border: 1px solid var(--card-border); padding: 36px 28px 28px 28px; border-radius: 20px; width: 100%; max-width: 370px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.6) inset; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); position: relative; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.1s; z-index: 1; margin: 0;}
-    .login-container h1 {font-size: clamp(14px, 1.5vw, 16px); font-weight: 600; text-align: left; color: var(--text-main); margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;}
-    .login-container h1 i {color: var(--accent);}
-    .logo-container {text-align: center; margin-bottom: 20px;}
-    .login-container .logo {display: inline-block; width: 130px; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));}
-    .login-container .separator {width: calc(100% + 56px); height: 1px; background: rgba(0, 0, 0, 0.08); margin: 20px -28px;}
-    .login-container label {display: block; margin-bottom: 8px; text-align: left; font-weight: 600; font-size: 12px; color: var(--text-muted); letter-spacing: 0.3px;}
+    
+    .login-container h2 {font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
+    /* Cadeado usando cor de acento */
+    .login-container h2 i {color: var(--accent);}
+
+    .login-container label {display: block; margin-bottom: 5px; text-align: left; font-size: 12.5px; color: var(--text-muted); letter-spacing: 0.3px;}
     .login-container input {width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; color: var(--text-main); font-family: var(--font-main); font-size: 14px; outline: none; transition: all 0.25s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset; margin-bottom: 16px; box-sizing: border-box;}
-    .login-container input:focus {border-color: var(--accent); background: #ffffff; box-shadow: 0 0 0 4px rgba(229, 80, 57, 0.15), 0 2px 4px rgba(0,0,0,0.02) inset;}
-    .password-wrapper {position: relative; display: flex; align-items: center; margin-bottom: 16px;}
+    .login-container input:focus {border-color: var(--accent); background: #ffffff;}
+    .password-wrapper {position: relative; display: flex; align-items: center; margin-bottom: 5px;}
     .password-wrapper input {margin-bottom: 0; padding-right: 40px;}
     .password-wrapper i {position: absolute; right: 16px; font-size: 14px; color: var(--text-muted); cursor: pointer; margin-bottom: 0; transition: color 0.2s;}
     .password-wrapper i:hover {color: var(--text-main);}
-    .login-container button {width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(229, 80, 57, 0.35); margin-top: 6px;}
-    .login-container button:hover {background: var(--accent-hover); box-shadow: 0 6px 16px rgba(213, 48, 49, 0.45);}
+    
+    .remember-container {display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 5px; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset;}
+    .remember-container:hover {border-color: var(--accent);}
+    .remember-container:has(input[type="checkbox"]:checked) {
+  background: rgba(192, 57, 43, 0.08);
+  border-color: var(--accent);
+}
+    .remember-left {display: flex; align-items: center; gap: 12px;}
+    .remember-container input[type="checkbox"] {appearance: none; -webkit-appearance: none;
+  box-sizing: border-box;
+  width: 30px; height: 30px;
+  min-width: 30px; max-width: 30px;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  border: 2px solid var(--input-border);
+  border-radius: 6px; background: #fff; outline: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0; padding: 0;
+  transition: all 0.2s ease;
+}
+    .remember-container input[type="checkbox"]:checked {background: var(--accent); border-color: var(--accent);}
+    .remember-container input[type="checkbox"]:checked::after {content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 11px; color: #fff;}
+    .remember-text-box {display: flex; flex-direction: column;}
+    .remember-title {font-size: 13px; font-weight: 600; color: var(--text-main); line-height: 1.2;}
+    .remember-desc {font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.2;}
+    .remember-icon {font-size: 18px; color: var(--text-muted); opacity: 0.7;}
+
+    /* Botão Entrar usando cor de acento */
+    .login-container button {width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(192, 57, 43, 0.35); margin-top: 6px;}
+    .login-container button:hover {background: var(--accent-hover); box-shadow: 0 6px 16px rgba(169, 50, 38, 0.45);}
     .login-container button:active {transform: scale(0.98);}
-    .login-footer {font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 4px; font-weight: 400;}
+    
+    .external-footer {font-size: 11px; color: #94a3b8; text-align: center; margin-top: 24px; font-weight: 400; z-index: 1; animation: fadeIn 0.8s ease both; animation-delay: 0.15s;}
+
     .toast {position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(30, 35, 45, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); font-size: 13px; font-weight: 400; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); width: 90%; max-width: 480px;}
     .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
     .toast.success {border-color: rgba(46, 204, 113, 0.4);}    
-    .toast::before {display: none !important;}
-    .toast::after {display: none !important;}
     @keyframes fadeIn {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
     @keyframes slideUp {from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);}}
   </style>
@@ -54,196 +97,107 @@
   <div class="ambient-glow-1"></div>
   <div class="ambient-glow-2"></div>
   <div class="stage">
+    
     <div class="header-box">
-      <div id="greeting" class="greeting">
-        <span id="greetingText"></span> — <span id="clock">--:--</span>
-      </div>
-      <div class="system-title">Seja, Bem-Vindo</div>
+      <div class="system-title">Seja Bem-Vindo</div>
     </div>
+
+    <div class="external-logo-container">
+      <img class="external-logo" src="https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_Mobile.png" alt="Logo CB 360">
+    </div>
+
     <div class="login-container">
-      <h1><i class="fa-solid fa-right-to-bracket"></i> ACESSO AO SISTEMA</h1>
-      <div class="logo-container">
-        <img class="logo" src="https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_Mobile.png" alt="Logo CB 360">
-      </div>
-      <div class="separator"></div>      
+      <h2><i class="fa-solid fa-lock"></i> Acesso</h2>
       <form id="loginForm">
         <label for="username">Username</label>
         <input type="text" id="username" placeholder="Insira o seu utilizador" required autocomplete="username">        
+        
         <label for="password">Password</label>
         <div class="password-wrapper">
           <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
           <i class="fa-solid fa-eye" id="togglePassword"></i>
         </div>
+
+        <div class="remember-container" onclick="document.getElementById('rememberMe').click()">
+          <div class="remember-left">
+            <input type="checkbox" id="rememberMe" onclick="event.stopPropagation()">
+            <div class="remember-text-box">
+              <span class="remember-title">Manter sessão iniciada</span>
+              <span class="remember-desc">Usar apenas num dispositivo confiável.</span>
+            </div>
+          </div>
+          <i class="fa-solid fa-shield-halved remember-icon"></i>
+        </div>
+
         <button type="submit">Entrar</button>
       </form>
-      <div class="separator"></div>
-      <div class="login-footer">2023-<span id="login-footer-year"></span> © Fábio Martins | Sistemas de Informação</div>
     </div>
+
+    <div class="external-footer">
+      2023-<span id="login-footer-year"></span> © Fábio Martins | Sistemas de Informação
+    </div>
+
   </div>
   <div id="toast" class="toast"></div>
+
 <script>
   const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-  function getSupabaseHeaders(options = {}) {
-    const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
-    const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
-    const username = localStorage.getItem("currentUserName") || "";
-    const authToken = localStorage.getItem("authToken") || SUPABASE_ANON_KEY;
-    const headers = {
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${authToken}`,
-      'Content-Type': 'application/json',
-      'x-my-corpo': corp || '',
-      'x-my-nint': nint || '',
-      'x-username': username
-    };
-    if (options.returnRepresentation) {
-      headers['Prefer'] = 'return=representation';
+  
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedRemember = localStorage.getItem("cb360_remember_me");
+    if (savedRemember === "true") {
+      document.getElementById("rememberMe").checked = true;
     }
-    return headers;
-  }
+  });
 
-  async function loginUser(user, pass) {
+  async function loginUser(user, pass, remember) {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/functions/v1/auth-login-mobile`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            username: user,
-            password: pass
-          })
-        }
-      );
-      let data = null;
-      try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error("❌ Resposta inválida da Edge Function:", jsonError);
-        throw new Error("Resposta inválida do servidor.");
-      }
-      if (!response.ok) {
-        if (response.status === 401) {
-          showToast(data?.error || "Utilizador ou password incorretos.", 2500, "error");
-          return;
-        }
-        throw new Error(data?.error || `Erro na autenticação: ${response.status}`);
-      }
-      if (!data || !data.token) {
-        console.error("❌ A Edge Function não devolveu token:", data);
-        showToast("O servidor não devolveu o token de autenticação.", 3000, "error");
-        return;
-      }
-      const corp = String(data.corp_oper_nr || "").padStart(4, "0");
-      const nintCorp = String(data.nint_corp || "").padStart(3, "0");
-      const username = data.username || user;
-      localStorage.setItem("currentUserDisplay", username);
-      localStorage.setItem("currentUserName", username);
-      localStorage.setItem("currentCorpOperNr", corp);
-      localStorage.setItem("currentCorpNint", nintCorp);
-      localStorage.setItem("currentNInt", nintCorp);
-      localStorage.setItem("authToken", data.token);
-      sessionStorage.setItem("currentUserDisplay", username);
-      sessionStorage.setItem("currentUserName", username);
-      sessionStorage.setItem("currentCorpOperNr", corp);
-      sessionStorage.setItem("currentCorpNint", nintCorp);
-      sessionStorage.setItem("currentNInt", nintCorp);
-      if (corp === "0000") {
-        localStorage.setItem("isMasterUser", "true");
-        showToast("Bem-vindo à administração do CB360!", 2000, "success");
-        setTimeout(() => {
-          window.location.href = "system_admin.html";
-        }, 1500);
-        return;
-      }
-      showToast("Login efetuado com sucesso!", 2000, "success");
-      setTimeout(() => {
-        window.location.href = "MainPage.html";
-      }, 1500);
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-login-mobile`, {
+        method: 'POST',
+        headers: {'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json'},
+        body: JSON.stringify({username: user, password: pass})
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Erro de login");
+      
+      if (remember) localStorage.setItem("cb360_remember_me", "true");
+      else localStorage.removeItem("cb360_remember_me");
 
+      const storage = remember ? localStorage : sessionStorage;
+      sessionStorage.clear();
+      storage.setItem("currentUserName", data.username || user);
+      storage.setItem("authToken", data.token);
+
+      showToast("Login efetuado com sucesso!", 2000, "success");
+      setTimeout(() => window.location.href = "MainPage.html", 1500);
     } catch (err) {
-      console.error("❌ ERRO LOGIN MOBILE:", err);
-      showToast(err?.message || "Erro de conexão ao validar acesso.", 3000, "error");
+      showToast(err.message, 3000, "error");
     }
   }
+
   document.getElementById("loginForm").addEventListener("submit", e => {
     e.preventDefault();
-    const user = document.getElementById("username").value.trim();
-    const pass = document.getElementById("password").value.trim();
-    if (!user || !pass) {
-      showToast("Preencha todos os campos.", 2000, "error");
-      return;
-    }
-    loginUser(user, pass);
+    loginUser(document.getElementById("username").value, document.getElementById("password").value, document.getElementById("rememberMe").checked);
   });
-  const togglePassword = document.getElementById("togglePassword");
-  const passwordInput = document.getElementById("password");
-  if (togglePassword && passwordInput) {
-    togglePassword.addEventListener("click", () => {
-      const type = passwordInput.type === "password" ? "text" : "password";
-      passwordInput.type = type;
-      togglePassword.classList.toggle("fa-eye");
-      togglePassword.classList.toggle("fa-eye-slash");
-    });
-  }
-  function showToast(message, duration = 2000, type = "error") {
-    let toast = document.getElementById("toast");
-    if (!toast) {
-      toast = document.createElement("div");
-      toast.id = "toast";
-      toast.className = "toast";
-      document.body.appendChild(toast);
-    }
-    const iconClass = type === "success" ? "fa-circle-check" : "fa-circle-exclamation";
-    toast.innerHTML = `<i class="fa-solid ${iconClass}" style="color: ${type === 'success' ? '#2ecc71' : 'var(--accent)'};"></i> <span>${message}</span>`;
+
+  document.getElementById("togglePassword").addEventListener("click", function() {
+    const p = document.getElementById("password");
+    p.type = p.type === "password" ? "text" : "password";
+    this.classList.toggle("fa-eye");
+    this.classList.toggle("fa-eye-slash");
+  });
+
+  function showToast(message, duration, type) {
+    const toast = document.getElementById("toast");
+    toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check' : 'fa-exclamation'}"></i> <span>${message}</span>`;
     toast.className = `toast show ${type}`;
-    setTimeout(() => {
-      toast.classList.remove("show");
-    }, duration);
+    setTimeout(() => toast.classList.remove("show"), duration);
   }
-  function updateGreeting() {
-    const now = new Date();
-    const hour = now.getHours();
-    let greetingText = "Boa noite";
-    if (hour >= 6 && hour < 12) {
-      greetingText = "Bom dia";
-    } else if (hour >= 12 && hour < 19) {
-      greetingText = "Boa tarde";
-    }
-    const greetingEl = document.getElementById("greetingText");
-    const clockEl = document.getElementById("clock");
-    if (greetingEl) {
-      greetingEl.textContent = greetingText;
-    }
-    if (clockEl) {
-      clockEl.textContent = now.toLocaleTimeString('pt-PT', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-    }
-  }
-  function startClock() {
-    updateGreeting();
-    const now = new Date();
-    setTimeout(() => {
-      updateGreeting();
-      setInterval(updateGreeting, 1000);
-    }, 1000 - now.getMilliseconds());
-  }
-  startClock();
-  const usernameInput = document.getElementById("username");
-  if (usernameInput) {
-    usernameInput.focus();
-  }
-  const footerYear = document.getElementById('login-footer-year');
-  if (footerYear) {
-    footerYear.textContent = new Date().getFullYear();
-  }
+
+  document.getElementById('login-footer-year').textContent = new Date().getFullYear();
 </script>
+</body>
+</html>
 </body>
 </html>
