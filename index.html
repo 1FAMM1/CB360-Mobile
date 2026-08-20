@@ -11,8 +11,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <title>Login - CB360 Mobile</title>
-  <link rel="prefetch" href="MainPage.html">
-  <link rel="prerender" href="MainPage.html">
   <style>
     /* ============================================================
     VARIABLES
@@ -128,27 +126,12 @@
       <span id="login-footer-year"></span> © Fábio Martins | Sistemas de Informação
     </div>
   </div>
-  <div id="toast" class="toast"></div>  
+  <div id="toast" class="toast"></div>
 <script>
   /* ===================== SUPABASE CONFIGURATION ====================== */
   const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-  function getSupabaseHeaders(options = {}) {
-    const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
-    const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
-    const username = localStorage.getItem("currentUserName") || "";
-    const authToken = localStorage.getItem("authToken") || SUPABASE_ANON_KEY;
-    const headers = {
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${authToken}`,
-      'Content-Type': 'application/json',
-      'x-my-corpo': corp || '',
-      'x-my-nint': nint || '',
-      'x-username': username
-    };
-    if (options.returnRepresentation) {
-      headers['Prefer'] = 'return=representation';
-  
+
   window.addEventListener('DOMContentLoaded', () => {
     const savedRemember = localStorage.getItem("cb360_remember_me");
     if (savedRemember === "true") {
@@ -189,15 +172,67 @@
       embersContainer.appendChild(smoke);
     }
   });
+
+  /* ===================== HEADERS PARA CHAMADAS SUPABASE ====================== */
+  function getSupabaseHeaders(options = {}) {
+    const corp = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+    const nint = localStorage.getItem("currentCorpNint") || sessionStorage.getItem("currentNInt");
+    const username = localStorage.getItem("currentUserName") || sessionStorage.getItem("currentUserName") || "";
+    const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken") || SUPABASE_ANON_KEY;
+    const headers = {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+      'x-my-corpo': corp || '',
+      'x-my-nint': nint || '',
+      'x-username': username
+    };
+    if (options.returnRepresentation) {
+      headers['Prefer'] = 'return=representation';
+    }
+    return headers;
+  }
+
+  /* ===================== LOGIN ====================== */
   async function loginUser(user, pass, remember) {
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-login-mobile`, {
         method: 'POST',
-        headers: {'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json'},
-        body: JSON.stringify({username: user, password: pass})
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: user, password: pass })
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Erro de login");
+
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error("❌ Resposta inválida da Edge Function:", jsonError);
+        throw new Error("Resposta inválida do servidor.");
+      }
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          showToast(data?.error || "Utilizador ou password incorretos.", 2500, "error");
+          return;
+        }
+        throw new Error(data?.error || `Erro na autenticação: ${response.status}`);
+      }
+
+      if (!data || !data.token) {
+        console.error("❌ A Edge Function não devolveu token:", data);
+        showToast("O servidor não devolveu o token de autenticação.", 3000, "error");
+        return;
+      }
+
+      const corp = String(data.corp_oper_nr || "").padStart(4, "0");
+      const nintCorp = String(data.nint_corp || "").padStart(3, "0");
+      const username = data.username || user;
+
+      // Guardar/limpar credenciais de "Manter sessão iniciada"
       if (remember) {
         localStorage.setItem("cb360_remember_me", "true");
         localStorage.setItem("cb360_saved_user", user);
@@ -207,33 +242,65 @@
         localStorage.removeItem("cb360_saved_user");
         localStorage.removeItem("cb360_saved_pass");
       }
+
+      // Guardar sessão (todos os campos necessários aos pedidos seguintes)
       const storage = remember ? localStorage : sessionStorage;
       sessionStorage.clear();
-      storage.setItem("currentUserName", data.username || user);
+      storage.setItem("currentUserDisplay", username);
+      storage.setItem("currentUserName", username);
+      storage.setItem("currentCorpOperNr", corp);
+      storage.setItem("currentCorpNint", nintCorp);
+      storage.setItem("currentNInt", nintCorp);
       storage.setItem("authToken", data.token);
+
+      if (corp === "0000") {
+        storage.setItem("isMasterUser", "true");
+        showToast("Bem-vindo à administração do CB360!", 2000, "success");
+        setTimeout(() => {
+          window.location.href = "system_admin.html";
+        }, 1500);
+        return;
+      }
+
       showToast("Login efetuado com sucesso!", 2000, "success");
-      setTimeout(() => window.location.href = "MainPage.html", 1500);
+      setTimeout(() => {
+        window.location.href = "MainPage.html";
+      }, 1500);
+
     } catch (err) {
-      showToast(err.message, 3000, "error");
+      console.error("❌ ERRO LOGIN MOBILE:", err);
+      showToast(err?.message || "Erro de conexão ao validar acesso.", 3000, "error");
     }
   }
+
   document.getElementById("loginForm").addEventListener("submit", e => {
     e.preventDefault();
-    loginUser(document.getElementById("username").value, document.getElementById("password").value, document.getElementById("rememberMe").checked);
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
+    const remember = document.getElementById("rememberMe").checked;
+    if (!user || !pass) {
+      showToast("Preencha todos os campos.", 2000, "error");
+      return;
+    }
+    loginUser(user, pass, remember);
   });
+
   document.getElementById("togglePassword").addEventListener("click", function() {
     const p = document.getElementById("password");
     p.type = p.type === "password" ? "text" : "password";
     this.classList.toggle("fa-eye");
     this.classList.toggle("fa-eye-slash");
   });
-  function showToast(message, duration, type) {
+
+  function showToast(message, duration = 2000, type = "error") {
     const toast = document.getElementById("toast");
-    toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check' : 'fa-exclamation'}"></i> <span>${message}</span>`;
+    const iconClass = type === "success" ? "fa-circle-check" : "fa-circle-exclamation";
+    toast.innerHTML = `<i class="fa-solid ${iconClass}"></i> <span>${message}</span>`;
     toast.className = `toast show ${type}`;
     setTimeout(() => toast.classList.remove("show"), duration);
   }
-  document.getElementById('login-footer-year').textContent = new Date().getFullYear();  
+
+  document.getElementById('login-footer-year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
