@@ -84,17 +84,32 @@
     /* ============================================================
     EXIT CONFIRM MODAL
     ============================================================ */
-    .exit-modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px); padding: 20px;}
-    .exit-modal-overlay.show {display: flex;}
-    .exit-modal {background: #ffffff; border-radius: 22px; padding: 32px 28px 28px; width: 100%; max-width: 340px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: slideUp 0.3s ease both;}
-    .exit-modal-icon {width: 84px; height: 84px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 34px; color: #fff;}
-    .exit-modal h3 {font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 10px;}
-    .exit-modal p {font-size: 15px; color: var(--text-muted); margin-bottom: 24px; font-weight: 400;}
-    .exit-modal-buttons {display: flex; gap: 12px;}
-    .exit-modal-buttons button {flex: 1; padding: 15px; border: none; border-radius: 14px; font-family: var(--font-main); font-size: 15px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent;}
-    .exit-modal-cancel {background: #eef1f5; color: var(--text-main);}
-    .exit-modal-confirm {background: var(--accent); color: #fff;}
-    .exit-modal-confirm:hover {background: var(--accent-hover);}
+    .exit-modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center;
+  z-index: 10000; backdrop-filter: blur(4px); padding: 20px;
+}
+.exit-modal-overlay.show {display: flex;}
+.exit-modal {
+  background: #ffffff; border-radius: 22px; padding: 32px 28px 28px;
+  width: 100%; max-width: 340px; text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+  animation: slideUp 0.3s ease both;
+}
+.exit-modal-icon {
+  width: 84px; height: 84px; border-radius: 50%; background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px; font-size: 34px; color: #fff;
+}
+.exit-modal h3 {font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 10px;}
+.exit-modal p {font-size: 15px; color: var(--text-muted); margin-bottom: 24px; font-weight: 400;}
+.exit-modal-buttons {display: flex; gap: 12px;}
+.exit-modal-buttons button {
+  flex: 1; padding: 15px; border: none; border-radius: 14px;
+  font-family: var(--font-main); font-size: 15px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.exit-modal-cancel {background: #eef1f5; color: var(--text-main);}
+.exit-modal-confirm {background: var(--accent); color: #fff;}
+.exit-modal-confirm:hover {background: var(--accent-hover);}
     /* ============================================================
     ANIMATIONS
     ============================================================ */
@@ -103,12 +118,6 @@
   </style>
 </head>
 <body>
-  <script>
-    // Regista já, o mais cedo possível, uma entrada extra no histórico —
-    // garante que mesmo o PRIMEIRO "voltar" (logo ao abrir a app) é intercetado
-    history.pushState({ appGuard: true }, '');
-  </script>
-
   <div class="embers-container" id="embers"></div>
   <div class="ambient-glow-1"></div>
   <div class="ambient-glow-2"></div>
@@ -148,44 +157,20 @@
   </div>
   <div id="toast" class="toast"></div>
   <div class="exit-modal-overlay" id="exitModalOverlay">
-    <div class="exit-modal">
-      <div class="exit-modal-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
-      <h3>Sair da aplicação</h3>
-      <p>Queres mesmo sair da aplicação?</p>
-      <div class="exit-modal-buttons">
-        <button class="exit-modal-cancel" id="exitCancelBtn">Cancelar</button>
-        <button class="exit-modal-confirm" id="exitConfirmBtn">Sair</button>
-      </div>
+  <div class="exit-modal">
+    <div class="exit-modal-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
+    <h3>Sair da aplicação</h3>
+    <p>Queres mesmo sair da aplicação?</p>
+    <div class="exit-modal-buttons">
+      <button class="exit-modal-cancel" id="exitCancelBtn">Cancelar</button>
+      <button class="exit-modal-confirm" id="exitConfirmBtn">Sair</button>
     </div>
   </div>
+</div>
 <script>
   /* ===================== SUPABASE CONFIGURATION ====================== */
   const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-
-  // ===================== INTERCEÇÃO DO BOTÃO "VOLTAR" DO ANDROID =====================
-  // (a primeira entrada de histórico já foi registada logo no início do <body>)
-  let isExiting = false;
-
-  window.addEventListener('popstate', () => {
-    if (isExiting) return; // já estamos a confirmar a saída, não voltar a mostrar o modal
-    document.getElementById('exitModalOverlay').classList.add('show');
-    // repõe a entrada extra, para voltar a intercetar o próximo "voltar"
-    history.pushState({ appGuard: true }, '');
-  });
-
-  document.getElementById('exitCancelBtn').addEventListener('click', () => {
-    document.getElementById('exitModalOverlay').classList.remove('show');
-  });
-
-  document.getElementById('exitConfirmBtn').addEventListener('click', () => {
-    isExiting = true;
-    document.getElementById('exitModalOverlay').classList.remove('show');
-    // recua 2 posições: sai da entrada-guarda e da entrada original desta página,
-    // esgotando a pilha do WebView — em TWA isto faz o Android fechar mesmo a app
-    history.go(-2);
-  });
-
   window.addEventListener('DOMContentLoaded', () => {
     const savedRemember = localStorage.getItem("cb360_remember_me");
     if (savedRemember === "true") {
@@ -228,7 +213,6 @@
       embersContainer.appendChild(smoke);
     }
   });
-
   async function loginUser(user, pass, remember) {
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-login-mobile`, {
@@ -275,6 +259,32 @@
     setTimeout(() => toast.classList.remove("show"), duration);
   }
   document.getElementById('login-footer-year').textContent = new Date().getFullYear();
+  // ===================== INTERCEÇÃO DO BOTÃO "VOLTAR" DO ANDROID =====================
+// Adiciona um estado extra ao histórico para conseguir "apanhar" o evento voltar
+history.pushState({ exitGuard: true }, "");
+
+let isExiting = false;
+
+window.addEventListener('popstate', () => {
+  if (isExiting) return; // já estamos a confirmar a saída, não voltar a mostrar o modal
+  // Sempre que o utilizador tenta voltar, mostra o modal em vez de deixar navegar
+  document.getElementById('exitModalOverlay').classList.add('show');
+  // Repõe o estado para continuar a interceptar futuros "voltar"
+  history.pushState({ exitGuard: true }, "");
+});
+
+document.getElementById('exitCancelBtn').addEventListener('click', () => {
+  document.getElementById('exitModalOverlay').classList.remove('show');
+});
+
+document.getElementById('exitConfirmBtn').addEventListener('click', () => {
+  isExiting = true;
+  document.getElementById('exitModalOverlay').classList.remove('show');
+  // Recua 2 posições: sai da entrada-guarda (exitGuard) e da entrada original da página,
+  // esgotando a pilha de histórico da WebView — é isto que faz o Android
+  // interpretar "não há mais para onde voltar" e fechar/esconder a app.
+  history.go(-2);
+});
 </script>
 </body>
 </html>
