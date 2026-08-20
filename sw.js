@@ -1,46 +1,29 @@
-   /* =========================================================
+      /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.6.3 - Otimização estrita de navegação: Força o uso exclusivo
-    da cache para pedidos do tipo 'navigate', eliminando o reload
-    intermitente (flash) ao mudar entre ficheiros HTML.
+    v5.6.4 - Fix: catch() do fetch handler já não deixa a
+    promise resolver para undefined (Failed to convert value
+    to 'Response'); devolve sempre um Response válido, com
+    fallback para index.html em navegações offline.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.6.3';
-    const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
-                             '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
-                             '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
-                             '/Tools.html', '/GCIncRural.html', '/DecirTeam.html', '/InterChat.html', '/PointJustif.html', '/manifest.json', '/nav-lock.js'];
-    const CDN_DOMAINS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
-    const CACHE_ADD_RETRIES = 3;
-    const CACHE_ADD_RETRY_DELAY_MS = 1000;
+    const CACHE_NAME = 'cb360-cache-v5.6.4';
+    const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', 
+                             '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', 
+                             '/MissReport.html', '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', 
+                             '/VeicSitop.html', '/Tools.html', '/GCIncRural.html', '/DecirTeam.html',
+                             '/InterChat.html', '/manifest.json'];
     let activeChats = new Map();
-    function delay(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-    async function cacheAddWithRetry(cache, url, attempt = 1) {
-      try {
-        await cache.add(url);
-      } catch (err) {
-        if (attempt < CACHE_ADD_RETRIES) {
-          await delay(CACHE_ADD_RETRY_DELAY_MS * attempt);
-          return cacheAddWithRetry(cache, url, attempt + 1);
-        }
-        console.warn(`[Service Worker] Falhou ao colocar em cache o recurso após ${CACHE_ADD_RETRIES} tentativas: ${url}`, err);
-      }
-    }
     self.addEventListener('install', (event) => {
       self.skipWaiting();
       event.waitUntil(
-        caches.open(CACHE_NAME).then(async (cache) => {
-          await Promise.all(
-            ASSETS_TO_CACHE.map((url) => cacheAddWithRetry(cache, url))
-          );
+        caches.open(CACHE_NAME).then((cache) => {
+          return cache.addAll(ASSETS_TO_CACHE);
         })
       );
     });
     self.addEventListener('activate', (event) => {
       event.waitUntil(
         Promise.all([
-          clients.claim(), 
+          clients.claim(),
           caches.keys().then((cacheNames) => {
             return Promise.all(
               cacheNames.map((cache) => {
@@ -57,31 +40,14 @@
       if (event.request.method !== 'GET') {
         return;
       }
-      const requestUrl = new URL(event.request.url)
-      const isOwnOrigin = requestUrl.origin === self.location.origin;
-      const isCdnAsset = CDN_DOMAINS.includes(requestUrl.hostname);
-      if (isOwnOrigin && event.request.mode === 'navigate') {
-        event.respondWith(
-          caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            return caches.match('/index.html').then((fallback) => {
-              return fallback || fetch(event.request);
-            });
-          })
-        );
-        return;
-      }
-      if (isOwnOrigin || isCdnAsset) {
+      if (event.request.url.includes(self.location.origin)) {
         event.respondWith(
           caches.match(event.request).then((cachedResponse) => {
             if (cachedResponse) {
               return cachedResponse;
             }
             return fetch(event.request).then((networkResponse) => {
-              const isCacheable = networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque');
-              if (isCacheable) {
+              if (networkResponse && networkResponse.status === 200) {
                 const responseToCache = networkResponse.clone();
                 caches.open(CACHE_NAME).then((cache) => {
                   cache.put(event.request, responseToCache);
@@ -89,6 +55,18 @@
               }
               return networkResponse;
             }).catch(() => {
+              if (event.request.mode === 'navigate') {
+                return caches.match('/index.html').then((fallback) => {
+                  return fallback || new Response(
+                    'Sem ligação à rede e sem versão em cache desta página.',
+                    {
+                      status: 503,
+                      statusText: 'Service Unavailable',
+                      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                    }
+                  );
+                });
+              }
               return new Response('', {
                 status: 504,
                 statusText: 'Gateway Timeout'
@@ -148,7 +126,7 @@
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
           for (const client of clientList) {
             if (client.url.includes(self.location.origin) && 'focus' in client) {
-              if (event.notification.data && event.notification.data.chatNint) {
+              if (event.notification.data.chatNint) {
                 client.postMessage({
                   type: 'OPEN_CHAT',
                   chatNint: event.notification.data.chatNint
@@ -158,8 +136,7 @@
             }
           }
           if (clients.openWindow) {
-            const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : '/';
-            return clients.openWindow(targetUrl);
+            return clients.openWindow(event.notification.data.url || '/');
           }
         })
       );
