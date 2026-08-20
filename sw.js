@@ -1,10 +1,10 @@
    /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.5.9 - Otimização estrita de navegação: Força o uso exclusivo
+    v5.6.0 - Otimização estrita de navegação: Força o uso exclusivo
     da cache para pedidos do tipo 'navigate', eliminando o reload
     intermitente (flash) ao mudar entre ficheiros HTML.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v5.5.9';
+    const CACHE_NAME = 'cb360-cache-v5.6.0';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/MainPage.html', '/ScalesView.html', '/Swaps.html', '/MainPageEl.html', '/PiqDisp.html', '/DecDisp.html', '/SBADisp.html', '/OPATDisp.html',
                              '/ExtDisp.html', '/DispView.html', '/SolVacat.html', '/SolFardam.html', '/Attendance.html', '/OnGoingOcr.html', '/FomioPage.html', '/Events.html', '/MissReport.html',
                              '/Documents.html', '/Comunic.html', '/MeteoAdv.html', '/NoHospital.html', '/MainPageVe.html', '/VeicStat.html', '/VeicSitop.html', '/VeicData.html', '/VeicAnomalies.html',
