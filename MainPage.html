@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-PT" style="background-color: #d32f2f;">
 <head>
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('sgo-theme') === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch(e) {}
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1111,20 +1120,20 @@
     }
     /* ================= TOGGLE THEME AND MENU DROPDOWN ================= */
     function toggleTheme() {
-      const body = document.body;
-      const isDark = body.classList.contains('dark');
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
       if (isDark) {
-        body.classList.remove('dark');
+        html.classList.remove('dark');
         localStorage.setItem('sgo-theme', 'light');
       } else {
-        body.classList.add('dark');
+        html.classList.add('dark');
         localStorage.setItem('sgo-theme', 'dark');
       }
       if (navigator.vibrate) navigator.vibrate(30);
     }
     function loadTheme() {
       if (localStorage.getItem('sgo-theme') === 'dark') {
-        document.body.classList.add('dark');
+        document.documentElement.classList.add('dark');
       }
     }
     function toggleMenu() {
