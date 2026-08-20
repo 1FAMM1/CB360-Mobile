@@ -2,6 +2,8 @@
   "git": {
     "deploymentEnabled": false
   },
+  "cleanUrls": false,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
