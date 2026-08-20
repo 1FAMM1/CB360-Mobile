@@ -55,11 +55,11 @@
     .password-wrapper input {margin-bottom: 0; padding-right: 40px;}
     .password-wrapper i {position: absolute; right: 16px; font-size: 14px; color: var(--text-muted); cursor: pointer; margin-bottom: 0; transition: color 0.2s;}
     .password-wrapper i:hover {color: var(--text-main);}
-    .remember-container {display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 5px; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset;}
+    .remember-container {display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 5px; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset; -webkit-tap-highlight-color: transparent;}
     .remember-container:hover {border-color: var(--accent);}
     .remember-container:has(input[type="checkbox"]:checked) {background: rgba(192, 57, 43, 0.08); border-color: var(--accent);}
     .remember-left {display: flex; align-items: center; gap: 12px;}
-    .remember-container input[type="checkbox"] {appearance: none; -webkit-appearance: none; box-sizing: border-box; width: 30px; height: 30px; min-width: 30px; max-width: 30px; aspect-ratio: 1 / 1; flex-shrink: 0; border: 2px solid var(--input-border); border-radius: 6px; background: #fff; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; transition: all 0.2s ease;}
+    .remember-container input[type="checkbox"] {appearance: none; -webkit-appearance: none; box-sizing: border-box; width: 30px; height: 30px; min-width: 30px; max-width: 30px; aspect-ratio: 1 / 1; flex-shrink: 0; border: 2px solid var(--input-border); border-radius: 6px; background: #fff; outline: none; -webkit-tap-highlight-color: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; transition: all 0.2s ease;}
     .remember-container input[type="checkbox"]:checked {background: var(--accent); border-color: var(--accent);}
     .remember-container input[type="checkbox"]:checked::after {content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 11px; color: #fff;}
     .remember-text-box {display: flex; flex-direction: column;}
@@ -67,6 +67,7 @@
     .remember-desc {font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.2;}
     .remember-icon {font-size: 18px; color: var(--text-muted); opacity: 0.6; transition: opacity 0.25s ease;}
     .remember-container:has(input[type="checkbox"]:checked) .remember-icon {opacity: 1;}
+    .remember-left, .remember-text-box, .remember-icon {-webkit-tap-highlight-color: transparent;}
     .login-container button {width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; margin-top: 0px;}
     .login-container button:hover {background: var(--accent-hover);}
     .login-container button:active {transform: scale(0.98);}
