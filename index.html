@@ -82,35 +82,6 @@
     .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
     .toast.success {border-color: rgba(46, 204, 113, 0.4);}
     /* ============================================================
-    EXIT CONFIRM MODAL
-    ============================================================ */
-    .exit-modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center;
-  z-index: 10000; backdrop-filter: blur(4px); padding: 20px;
-}
-.exit-modal-overlay.show {display: flex;}
-.exit-modal {
-  background: #ffffff; border-radius: 22px; padding: 32px 28px 28px;
-  width: 100%; max-width: 340px; text-align: center;
-  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-  animation: slideUp 0.3s ease both;
-}
-.exit-modal-icon {
-  width: 84px; height: 84px; border-radius: 50%; background: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 20px; font-size: 34px; color: #fff;
-}
-.exit-modal h3 {font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 10px;}
-.exit-modal p {font-size: 15px; color: var(--text-muted); margin-bottom: 24px; font-weight: 400;}
-.exit-modal-buttons {display: flex; gap: 12px;}
-.exit-modal-buttons button {
-  flex: 1; padding: 15px; border: none; border-radius: 14px;
-  font-family: var(--font-main); font-size: 15px; font-weight: 700;
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-}
-.exit-modal-cancel {background: #eef1f5; color: var(--text-main);}
-.exit-modal-confirm {background: var(--accent); color: #fff;}
-.exit-modal-confirm:hover {background: var(--accent-hover);}
-    /* ============================================================
     ANIMATIONS
     ============================================================ */
     @keyframes fadeIn {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
@@ -155,18 +126,7 @@
       <span id="login-footer-year"></span> © Fábio Martins | Sistemas de Informação
     </div>
   </div>
-  <div id="toast" class="toast"></div>
-  <div class="exit-modal-overlay" id="exitModalOverlay">
-  <div class="exit-modal">
-    <div class="exit-modal-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
-    <h3>Sair da aplicação</h3>
-    <p>Queres mesmo sair da aplicação?</p>
-    <div class="exit-modal-buttons">
-      <button class="exit-modal-cancel" id="exitCancelBtn">Cancelar</button>
-      <button class="exit-modal-confirm" id="exitConfirmBtn">Sair</button>
-    </div>
-  </div>
-</div>
+  <div id="toast" class="toast"></div>  
 <script>
   /* ===================== SUPABASE CONFIGURATION ====================== */
   const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
@@ -179,8 +139,6 @@
       document.getElementById("password").value = localStorage.getItem("cb360_saved_pass") || "";
     }
     const embersContainer = document.getElementById('embers');
-
-    // Geração dinâmica das faíscas (embers) — posição, duração, atraso e deriva lateral aleatórios
     const EMBER_COUNT = 22;
     for (let i = 0; i < EMBER_COUNT; i++) {
       const ember = document.createElement('div');
@@ -235,7 +193,6 @@
       sessionStorage.clear();
       storage.setItem("currentUserName", data.username || user);
       storage.setItem("authToken", data.token);
-
       showToast("Login efetuado com sucesso!", 2000, "success");
       setTimeout(() => window.location.href = "MainPage.html", 1500);
     } catch (err) {
@@ -258,32 +215,7 @@
     toast.className = `toast show ${type}`;
     setTimeout(() => toast.classList.remove("show"), duration);
   }
-  document.getElementById('login-footer-year').textContent = new Date().getFullYear();
-  // ===================== INTERCEÇÃO DO BOTÃO "VOLTAR" DO ANDROID =====================
-// Adiciona UMA entrada extra ao histórico para conseguir "apanhar" o próximo "voltar"
-let guardArmed = true;
-history.pushState({ exitGuard: true }, "");
-
-window.addEventListener('popstate', () => {
-  if (!guardArmed) return; // a guarda já foi consumida, não voltar a mostrar o modal
-  // Este "voltar" consumiu a entrada-guarda: é a 1ª tentativa de sair
-  guardArmed = false;
-  document.getElementById('exitModalOverlay').classList.add('show');
-});
-
-document.getElementById('exitCancelBtn').addEventListener('click', () => {
-  document.getElementById('exitModalOverlay').classList.remove('show');
-  // Volta a armar a guarda para intercetar o próximo "voltar"
-  guardArmed = true;
-  history.pushState({ exitGuard: true }, "");
-});
-
-document.getElementById('exitConfirmBtn').addEventListener('click', () => {
-  document.getElementById('exitModalOverlay').classList.remove('show');
-  // NÃO voltamos a empurrar a guarda: deixamos o "voltar" real acontecer,
-  // tal como já acontecia sozinho (a esconder a app) antes de termos qualquer interceção.
-  history.back();
-});
+  document.getElementById('login-footer-year').textContent = new Date().getFullYear();  
 </script>
 </body>
 </html>
