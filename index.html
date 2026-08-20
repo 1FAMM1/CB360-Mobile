@@ -259,15 +259,17 @@
     setTimeout(() => toast.classList.remove("show"), duration);
   }
   document.getElementById('login-footer-year').textContent = new Date().getFullYear();
-  // ===================== INTERCEÇÃO DO BOTÃO "VOLTAR" DO ANDROID =====================
-// Adiciona um estado extra ao histórico para conseguir "apanhar" o evento voltar
-history.pushState({ exitGuard: true }, "");
+ // ===================== INTERCEÇÃO DO BOTÃO "VOLTAR" DO ANDROID =====================
+let isExiting = false;
+
+// Adiciona uma entrada extra ao histórico assim que a página carrega
+history.pushState({ appGuard: true }, '');
 
 window.addEventListener('popstate', () => {
-  // Sempre que o utilizador tenta voltar, mostra o modal em vez de deixar navegar
+  if (isExiting) return; // já estamos a confirmar a saída, não voltar a mostrar o modal
   document.getElementById('exitModalOverlay').classList.add('show');
-  // Repõe o estado para continuar a interceptar futuros "voltar"
-  history.pushState({ exitGuard: true }, "");
+  // repõe a entrada extra, para voltar a intercetar o próximo "voltar"
+  history.pushState({ appGuard: true }, '');
 });
 
 document.getElementById('exitCancelBtn').addEventListener('click', () => {
@@ -275,11 +277,11 @@ document.getElementById('exitCancelBtn').addEventListener('click', () => {
 });
 
 document.getElementById('exitConfirmBtn').addEventListener('click', () => {
-  // Tenta fechar a app/aba. Só funciona se a janela foi aberta via script;
-  // em PWAs instaladas o browser normalmente ignora este pedido.
-  window.close();
-  // Fallback: se window.close() não funcionar (app não fecha), ao menos esconde o modal
+  isExiting = true;
   document.getElementById('exitModalOverlay').classList.remove('show');
+  // recua 2 posições: sai da entrada-guarda e da entrada original desta página,
+  // esgotando a pilha do WebView — em TWA isto faz o Android fechar mesmo a app
+  history.go(-2);
 });
 </script>
 </body>
