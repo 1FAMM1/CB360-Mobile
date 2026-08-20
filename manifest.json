@@ -1,31 +1,25 @@
 {
   "name": "CB360 Mobile",
-  "short_name": "CB360",
+  "short_name": "CB360 Mobile",
   "description": "Sistema de Gestão CB360",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "index.html",
+  "scope": "/", 
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1d1d1d",
-  "theme_color": "#d32f2f",
+  "background_color": "#d1d1d1",
+  "theme_color": "#c62828",
   "icons": [
     {
-      "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_app_192.png",
+      "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_app_Background.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_app_512.png",
+      "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_app_Background.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_app_maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }
