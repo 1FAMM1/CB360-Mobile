@@ -201,23 +201,23 @@
     </div>
     <div id="buttonsContainer" class="container" style="display: none;">
       <div class="button-grid">
-        <button class="geostat-btn btn-saida" onclick="sendGeostat('Saída Und.')">
+        <button class="geostat-btn btn-saida" onclick="sendGeostat('Saída Und.', this)">
           <span class="btn-icon"><span class="material-icons">fire_truck</span></span>
           <strong>Saída do Quartel</strong>
         </button>
-        <button class="geostat-btn btn-chegada-to" onclick="sendGeostat('Chegada TO')">
+        <button class="geostat-btn btn-chegada-to" onclick="sendGeostat('Chegada TO', this)">
           <span class="btn-icon"><span class="material-icons">local_fire_department</span></span>
           <strong>Chegada ao TO</strong>
         </button>
-        <button class="geostat-btn btn-saida-to" onclick="sendGeostat('Saída TO')">
+        <button class="geostat-btn btn-saida-to" onclick="sendGeostat('Saída TO', this)">
           <strong>Saída do TO</strong>
           <span class="btn-icon"><span class="material-icons">fire_truck</span></span>
         </button>
-        <button class="geostat-btn btn-chegada-und" onclick="sendArrivalHeadquarters()">
+        <button class="geostat-btn btn-chegada-und" onclick="sendArrivalHeadquarters(this)">
           <span class="btn-icon"><span class="material-icons">warehouse</span></span>
           <strong style="font-size:8.5px;">Chegada ao Quartel</strong>
         </button>
-        <button class="geostat-btn btn-retido" id="retidoMacasBtn" style="display:none;" onclick="showRetencaoPopup()">
+        <button class="geostat-btn btn-retido" id="retidoMacasBtn" style="display:none;" onclick="showRetencaoPopup(this)">
           <span class="btn-icon"><span class="material-icons">block</span></span>
           <strong style="font-size:8.5px;">Retenção</strong>
         </button>
@@ -251,12 +251,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() { return localStorage.getItem("currentCorpOperNr") || "0805"; }
-    function getNInt() { return localStorage.getItem("currentCorpNint") || "205";}
+    function getCorp() { return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() { return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5NzMwNTB9.CcE8nI1bbWcL0PlJaVkKdm74UZEyzweZfsv2i0M-zmg';
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -294,6 +294,7 @@
     let vehicleStatuses = {};
     let vehicleINOP = {};
     let currentVehicleList = [];
+    let pendingStatusButton = null;
     /* ============================= EVENTS ============================== */
     document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
@@ -604,12 +605,34 @@
       if (warningMessage) warningMessage.style.display = 'block';
       toggleRetidoMacasButton(null);
     }
+    /* ===================== STATUS BUTTON LOCK/UNLOCK ==================== */
+    function lockStatusButton(btn) {
+      if (!btn) return;
+      const strongEl = btn.querySelector('strong');
+      if (strongEl && btn.dataset.originalText === undefined) {
+        btn.dataset.originalText = strongEl.textContent;
+      }
+      if (strongEl) strongEl.textContent = 'A Enviar Status...';
+      btn.disabled = true;
+      btn.classList.add('sending');
+    }
+    function unlockStatusButton(btn) {
+      if (!btn) return;
+      const strongEl = btn.querySelector('strong');
+      if (strongEl && btn.dataset.originalText !== undefined) {
+        strongEl.textContent = btn.dataset.originalText;
+        delete btn.dataset.originalText;
+      }
+      btn.disabled = false;
+      btn.classList.remove('sending');
+    }
     /* ========================== STATUS EVENT =========================== */
-    async function sendGeostat(action) {
+    async function sendGeostat(action, btnEl = null) {
       if (!selectedVehicle) {
         showToast('Selecione uma viatura primeiro!', 'error');
         return;
       }
+      lockStatusButton(btnEl);
       const now = new Date();
       const time = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
       const date = now.toLocaleDateString('pt-PT');
@@ -632,13 +655,16 @@
       } catch (err) {
         console.error('❌ Erro ao enviar:', err);
         showToast(`Erro ao enviar ${action}: ${err.message}`, 'error');
+      } finally {
+        unlockStatusButton(btnEl);
       }
     }
-    function sendArrivalHeadquarters() {
+    function sendArrivalHeadquarters(btnEl) {
       if (!selectedVehicle) {
         showToast('Selecione um veículo primeiro!', 'error');
         return;
       }
+      pendingStatusButton = btnEl;
       showKilometersPopup();
     }
     function showKilometersPopup() {
@@ -696,11 +722,12 @@
     function closeKmPopup() {
       document.getElementById('kmPopup')?.remove();
     }   
-    function showRetencaoPopup() {
+    function showRetencaoPopup(btnEl) {
       if (!selectedVehicle) {
         showToast('Selecione uma viatura primeiro!', 'error');
         return;
       }
+      pendingStatusButton = btnEl;
       const popupHTML = `
         <div id="retencaoPopup" class="popup-overlay">
           <style>#retencaoPopup input[type="radio"] {width:20px; height:20px; accent-color: var(--red);}
@@ -759,13 +786,15 @@
       }
       const action = selected.value;
       closeRetencaoPopup();
-      await sendGeostat(action);
+      await sendGeostat(action, pendingStatusButton);
+      pendingStatusButton = null;
     }
     async function sendGeostatWithKmAndTime(action, kilometers, hours, minutes, hasPump) {
       if (!selectedVehicle) {
         showToast('Selecione uma viatura primeiro!', 'error');
         return;
       }
+      lockStatusButton(pendingStatusButton);
       const now = new Date();
       const time = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
       const date = now.toLocaleDateString('pt-PT');
@@ -791,6 +820,9 @@
       } catch (err) {
         console.error('❌ Erro ao enviar:', err);
         showToast(`Erro ao enviar ${action}: ${err.message}`, 'error');
+      } finally {
+        unlockStatusButton(pendingStatusButton);
+        pendingStatusButton = null;
       }
     } 
   </script>
