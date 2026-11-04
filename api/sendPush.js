@@ -1,6 +1,6 @@
-const webpush = require('web-push');
-const { createClient } = require('@supabase/supabase-js');
-const ws = require('ws');
+import webpush from 'web-push';
+import { createClient } from '@supabase/supabase-js';
+import ws from 'ws';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
