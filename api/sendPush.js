@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     'mailto:fmartins.ahbfaro@gmail.com',
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
-  );    
+  );
   // Adicionado o transporte ws para compatibilidade com Node.js 20 na Vercel
   const supabase = createClient(
     process.env.SUPABASE_URL, 
