@@ -215,10 +215,10 @@
     <div class="disp-modal-content">
       <div class="disp-modal-header" id="dispModalTitle">DISPONIBILIDADE</div>
       <div class="disp-modal-body">
-        <button class="disp-btn d" onclick="confirmDisp('ED')">Dia</button>
-        <button class="disp-btn n" onclick="confirmDisp('EN')">Noite</button>
-        <button class="disp-btn dn" onclick="confirmDisp('ET')">Dia/Noite</button>
-        <button class="disp-btn nd" onclick="confirmDisp('N/D')">Não Disponível</button>
+        <button class="disp-btn d" data-value="ED" onclick="confirmDisp('ED')">Dia</button>
+        <button class="disp-btn n" data-value="EN" onclick="confirmDisp('EN')">Noite</button>
+        <button class="disp-btn dn" data-value="ET" onclick="confirmDisp('ET')">Dia/Noite</button>
+        <button class="disp-btn nd" data-value="N/D" onclick="confirmDisp('N/D')">Não Disponível</button>
       </div>
       <div class="disp-modal-footer">
         <button class="disp-cancel" onclick="closeDispModal()">Cancelar</button>
@@ -231,7 +231,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -278,12 +278,7 @@
       }
       if (h2) h2.textContent = corpOperNr;
       try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        const data = await response.json();
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`);
         if (data && data.length > 0) {
           const corp = data[0];
           if (corp.logo_url && corp.logo_url !== cachedLogo) {
@@ -326,13 +321,14 @@
             headers: getSupabaseHeaders()
           }
         );
-        if (!res.ok) return {};
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const map = {};
         data.forEach(r => map[r.day] = r.value);
         return map;
       } catch (e) {
         console.error("Erro load dec_disp:", e);
+        showToast("Erro ao carregar as disponibilidades deste mês.");
         return {};
       }
     }
@@ -347,7 +343,7 @@
         return false;
       }
       if (monthIndex === currentMonth) {
-        showToast("Não é possível alterar registos do mês atual. Para alterações a efetue-as partir do menu 'Trocas de Serviço'. Obrigado.");
+        showToast("Não é possível alterar registos do mês atual. Para alterações, efetue-as a partir do menu 'Trocas de Serviço'. Obrigado.");
         return false;
       }
       return true;
@@ -474,8 +470,7 @@
     }
     function highlightSelectedButton(value) {
       document.querySelectorAll('.disp-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.textContent === value) btn.classList.add('active');
+        btn.classList.toggle('active', !!value && btn.dataset.value === value);
       });
     }
     /* ============================== TOAST ============================== */
@@ -483,7 +478,7 @@
       const toast = document.createElement("div");
       toast.className = "toast";
       toast.textContent = message;
-      const content = document.querySelector(".main-content"); 
+      const content = document.querySelector(".main-content");
       document.body.appendChild(toast);
       if (content) content.classList.add("content-blur");
       setTimeout(() => toast.classList.add("show"), 50);
@@ -493,135 +488,110 @@
         setTimeout(() => toast.remove(), 300);
       }, 4500);
     }
+    /* ============================ HELPERS ============================== */
+    async function sbJson(url, options = {}) {
+      const res = await fetch(url, {headers: getSupabaseHeaders(), ...options});
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { const e = await res.json(); msg = e.message || msg; } catch (_) {}
+        throw new Error(msg);
+      }
+      const txt = await res.text();
+      return txt ? JSON.parse(txt) : null;
+    }
+    function getIds() {
+      const nint = localStorage.getItem("currentCorpNint");
+      const corp = localStorage.getItem("currentCorpOperNr");
+      if (!nint || !corp) return null;
+      return {nint: parseInt(nint, 10), corp: corp.padStart(4, "0")};
+    }
     /* ============================== SAVE =============================== */
     const DISP_CLASS_MAP = {'ED': 'disp-D', 'EN': 'disp-N', 'ET': 'disp-DN'};
+    const DECIR_VALUES = 'ED,EN,ET';
+    let isSavingDisp = false;
     async function confirmDisp(value) {
-      if (!selectedDayElement || selectedDayNumber === null) return;
+      if (isSavingDisp || !selectedDayElement || selectedDayNumber === null) return;
+      const ids = getIds();
+      if (!ids || currentMonthIndex === null) return showToast("Sessão inválida. Volte a iniciar sessão.");
+      const el = selectedDayElement;
+      const day = selectedDayNumber;
       const month = currentMonthIndex + 1;
-      if ((value === 'EN' || value === 'ET')) {
-        const pnExists = await checkPNExists(selectedDayNumber, month);
-        if (pnExists) {
-          showToast(`ATENÇÃO! Já deu disponibilidade para PIQUETE no dia (${selectedDayNumber}/${month}). Não pode dar disponibilidade para ECIN Noite.`);
-          return;
+      const year = new Date().getFullYear();
+      const dm = `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}`;
+      isSavingDisp = true;
+      document.querySelectorAll('.disp-btn').forEach(b => b.disabled = true);
+      try {
+        if (value === 'EN' || value === 'ET') {
+          if (await checkPNExists(ids, year, month, day)) {
+            showToast(`ATENÇÃO! Já deu disponibilidade para PIQUETE no dia ${dm}. Não pode dar disponibilidade para ${value === 'EN' ? 'ECIN Noite' : 'ECIN 24h'}.`);
+            return;
+          }
         }
-      }
-      const currentValue = selectedDays[selectedDayNumber] || null;
-      if (value === 'N/D') {
-        await deleteDayFromTables(selectedDayNumber);
-        selectedDayElement.classList.remove('disp-D', 'disp-N', 'disp-DN', 'disp-ND');
-        delete selectedDays[selectedDayNumber];
+        // Apaga só os valores DECIR deste dia (nunca piquetes, SBA, OPAT, extras ou outros registos)
+        await deleteDayFromTables(ids, year, month, day);
+        if (value !== 'N/D') {
+          await saveDayToDecDisp(ids, year, month, day, value);
+        }
+        el.classList.remove('disp-D', 'disp-N', 'disp-DN', 'disp-ND');
+        if (value === 'N/D') {
+          delete selectedDays[day];
+          delete el.dataset.value;
+        } else {
+          el.classList.add(DISP_CLASS_MAP[value]);
+          el.dataset.value = value;
+          selectedDays[day] = value;
+        }
         closeDispModal();
-        return;
-      }
-      let finalValue = value;
-      if (currentValue === 'ED' && value === 'EN') {
-        finalValue = 'EN';
-      } else if (currentValue === 'EN' && value === 'ED') {
-        finalValue = 'ED';
-      } else if (currentValue === 'ET' && (value === 'ED' || value === 'EN')) {
-        finalValue = value;
-      } else if (currentValue === 'ET' && value === 'ET') {
-        finalValue = 'ET';
-      }
-      await deleteDayFromTables(selectedDayNumber, 'ED,EN,ET');
-      selectedDayElement.classList.remove('disp-D', 'disp-N', 'disp-DN', 'disp-ND');
-      selectedDayElement.classList.add(DISP_CLASS_MAP[finalValue]);
-      selectedDayElement.dataset.value = finalValue;
-      selectedDays[selectedDayNumber] = finalValue;
-      await saveDayToDecDisp(selectedDayNumber, finalValue);
-      closeDispModal();
-    }
-    async function checkPNExists(day, month) {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp = localStorage.getItem("currentCorpOperNr");
-      if (!nint || !corp || currentMonthIndex === null) return false;
-      const year = new Date().getFullYear();
-      try {
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_serv?select=value&n_int=eq.${parseInt(nint,10)}&corp_oper_nr=eq.${corp.padStart(4,"0")}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=eq.PN`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (!res.ok) return false;
-        const data = await res.json();
-        return data && data.length > 0;
       } catch (e) {
-        console.error("Erro checkPNExists:", e);
-        return false;
+        console.error("Erro ao gravar disponibilidade DECIR:", e);
+        showToast("Erro ao gravar a disponibilidade. Tente novamente.");
+        // Recarrega o mês para o ecrã refletir o que está realmente gravado
+        const btn = document.querySelector(`.availability-dec-btn[data-month="${currentMonthIndex}"]`);
+        closeDispModal();
+        if (btn) { const m = currentMonthIndex; currentMonthIndex = null; showCalendar(m, btn); }
+      } finally {
+        isSavingDisp = false;
+        document.querySelectorAll('.disp-btn').forEach(b => b.disabled = false);
       }
     }
-    async function deleteDayFromTables(day, value = null) {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp = localStorage.getItem("currentCorpOperNr");
-      if (!nint || !corp || currentMonthIndex === null) return;    
-      const nintInt = parseInt(nint, 10);
-      const corpPadded = corp.padStart(4, "0");
-      const year = new Date().getFullYear();
-      const month = currentMonthIndex + 1;    
-      try {
-        let commonFilter = `n_int=eq.${nintInt}&corp_oper_nr=eq.${corpPadded}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=neq.PN`;    
-        let regServUrl = `${SUPABASE_URL}/rest/v1/reg_serv?${commonFilter}`;
-        let regDispUrl = `${SUPABASE_URL}/rest/v1/reg_disp?${commonFilter}`;
-        const [res1, res2] = await Promise.all([
-          fetch(regServUrl, { method: 'DELETE', headers: getSupabaseHeaders() }),
-          fetch(regDispUrl, { method: 'DELETE', headers: getSupabaseHeaders() })
-        ]);    
-        if (res1.ok) console.log("Eliminado de reg_serv");
-        if (res2.ok) console.log("Eliminado de reg_disp");    
-      } catch (e) {
-        console.error("Erro ao apagar registros:", e);
-      }
+    async function checkPNExists(ids, year, month, day) {
+      const data = await sbJson(`${SUPABASE_URL}/rest/v1/reg_serv?select=value&n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=eq.PN`);
+      return Array.isArray(data) && data.length > 0;
     }
-    async function getAbvNameFromRegElems() {
-      const nint = localStorage.getItem("currentCorpNint");
-      if (!nint) return null;
+    async function deleteDayFromTables(ids, year, month, day) {
+      const filter = `n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=in.(${DECIR_VALUES})`;
+      await Promise.all([
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_serv?${filter}`, {method: 'DELETE'}),
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_disp?${filter}`, {method: 'DELETE'})
+      ]);
+    }
+    async function getAbvName(ids) {
       try {
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${parseInt(nint, 10)}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (!res.ok) return null;
-        const data = await res.json();
-        if (data && data.length > 0) {
-          return data[0].abv_name || null;
-        }
-        return null;
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}`);
+        return data?.[0]?.abv_name || null;
       } catch (e) {
         console.error("Erro ao buscar abv_name:", e);
         return null;
       }
     }
-    async function saveDayToDecDisp(day, value) {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp = localStorage.getItem("currentCorpOperNr");
-      if (!nint || !corp || currentMonthIndex === null) return;
-      const nintInt = parseInt(nint, 10);
-      const corpPadded = corp.padStart(4, "0");
-      const year = new Date().getFullYear();
-      const month = currentMonthIndex + 1;
-      try {
-        await deleteDayFromTables(day);
-        const abvName = await getAbvNameFromRegElems() || 'N/A';
-        const payloadServ = { n_int: nintInt, corp_oper_nr: corpPadded, abv_name: abvName, section: 'DECIR', year, month, day, value };
-        await fetch(`${SUPABASE_URL}/rest/v1/reg_serv`, {
-          method: 'POST',
-          headers: getSupabaseHeaders(),
-          body: JSON.stringify(payloadServ)
-        });
-        const payloadDisp = { n_int: nintInt, corp_oper_nr: corpPadded, year, month, day, value };
-        await fetch(`${SUPABASE_URL}/rest/v1/reg_disp`, {
-          method: 'POST',
-          headers: getSupabaseHeaders(),
-          body: JSON.stringify(payloadDisp)
-        });
-      } catch (e) {
-        console.error("Erro saveDayToDecDisp:", e);
-      }
+    async function saveDayToDecDisp(ids, year, month, day, value) {
+      const abvName = await getAbvName(ids) || 'N/A';
+      const payloadServ = { n_int: ids.nint, corp_oper_nr: ids.corp, abv_name: abvName, section: 'DECIR', year, month, day, value };
+      const payloadDisp = { n_int: ids.nint, corp_oper_nr: ids.corp, year, month, day, value };
+      const results = await Promise.allSettled([
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_serv`, {method: 'POST', body: JSON.stringify(payloadServ)}),
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_disp`, {method: 'POST', body: JSON.stringify(payloadDisp)})
+      ]);
+      if (results.every(r => r.status === "fulfilled")) return;
+      // Uma das gravações falhou: desfaz a outra para não ficar meio gravado
+      await deleteDayFromTables(ids, year, month, day).catch(() => {});
+      throw results.find(r => r.status === "rejected").reason;
     }
     /* ============================== INIT =============================== */
     document.addEventListener('DOMContentLoaded', function() {
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
