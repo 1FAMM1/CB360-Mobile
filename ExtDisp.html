@@ -95,6 +95,7 @@
     .calendar-day.empty:hover {transform: none; background: transparent;}
     .calendar-day.today {background: var(--red-dark); color: #fff; font-weight: 700; border: 2px solid #e67e22;}
     .calendar-day.selected {background: linear-gradient(135deg, var(--red), var(--red-dark)); color: #fff; font-weight: 700; border: 2px solid var(--red-dark);}
+    .calendar-day.processing {opacity: 0.55; pointer-events: none;}
     .calendar-day.selected.today {background: linear-gradient(135deg, #27ae60, #1e8449); border: 2px solid #f39c12;}
     /* ============================================================
     LEGEND
@@ -182,7 +183,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -229,12 +230,7 @@
       }
       if (h2) h2.textContent = corpOperNr;
       try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        const data = await response.json();
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`);
         if (data && data.length > 0) {
           const corp = data[0];
           if (corp.logo_url && corp.logo_url !== cachedLogo) {
@@ -284,6 +280,7 @@
         );
         if (!response.ok) {
           console.error('Erro ao ler Supabase:', await response.text());
+          showToast("Erro ao carregar as disponibilidades deste mês.");
           return [];
         }
         const data = await response.json();
@@ -361,54 +358,7 @@
         if (headerYear === currentYear && monthIndex === currentMonth && day === currentDay) {
           dayElement.classList.add('today');
         }
-        dayElement.addEventListener('click', async () => {
-          const year = getWorkYear(currentMonthIndex);
-          const now = new Date();
-          const nowDay = now.getDate();
-          if (!allowPiqPastMonthsEdit) {
-            if (isPastMonth(currentMonthIndex, year)) {
-              showToast("Não é possível alterar registos de meses anteriores.");
-              return;
-            }
-            if (currentMonthIndex === now.getMonth() && year === now.getFullYear() && day <= nowDay) {
-              showToast("Não é possível alterar registos de dias anteriores ou do dia atual.");
-              return;
-            }
-          }
-          const currentNintCorpStr = localStorage.getItem("currentCorpNint");
-          const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
-          const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
-          const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
-          const month = currentMonthIndex + 1;
-          if (selectedDays.includes(dateStr)) {
-            selectedDays = selectedDays.filter(d => d !== dateStr);
-            dayElement.classList.remove('selected');
-            try {
-              const resServ = await fetch(
-                `${SUPABASE_URL}/rest/v1/reg_extras?n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&month=eq.${month}&day=eq.${day}&value=eq.EX`, {
-                  method: 'DELETE',
-                  headers: getSupabaseHeaders()
-                }
-              );
-              if (!resServ.ok) console.error(await resServ.text());
-              const resDisp = await fetch(
-                `${SUPABASE_URL}/rest/v1/reg_disp?n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&month=eq.${month}&day=eq.${day}&value=eq.EX`, {
-                  method: 'DELETE',
-                  headers: getSupabaseHeaders()
-                }
-              );
-              if (!resDisp.ok) console.error(await resDisp.text());
-            } catch (err) {
-              console.error(err);
-            }
-          } else {
-            const saved = await saveDayToPiqDisp(day);
-            if (saved) {
-              selectedDays.push(dateStr);
-              dayElement.classList.add('selected');
-            }
-          }
-        });
+        dayElement.addEventListener('click', () => handleDayClick(day, dateStr, dayElement));
         calendarGrid.appendChild(dayElement);
         dayElementsByDate[dateStr] = dayElement;
       }
@@ -427,6 +377,60 @@
         if (el) el.classList.add('selected');
       });
       isLoadingCalendar = false;
+    }
+    /* ============================ HELPERS ============================== */
+    async function sbJson(url, options = {}) {
+      const res = await fetch(url, {headers: getSupabaseHeaders(), ...options});
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { const e = await res.json(); msg = e.message || msg; } catch (_) {}
+        throw new Error(msg);
+      }
+      const txt = await res.text();
+      return txt ? JSON.parse(txt) : null;
+    }
+    function getIds() {
+      const nint = localStorage.getItem("currentCorpNint");
+      const corp = localStorage.getItem("currentCorpOperNr");
+      if (!nint || !corp) return null;
+      return {nint: parseInt(nint, 10), corp: corp.padStart(4, "0")};
+    }
+    const SPAOPAT_VALUE = "EX";
+    /* ======================== HANDLE DAY CLICK ========================= */
+    async function handleDayClick(day, dateStr, dayElement) {
+      if (dayElement.classList.contains('processing')) return;
+      if (currentMonthIndex === null) return;
+      const year = getWorkYear(currentMonthIndex);
+      const now = new Date();
+      if (!allowPiqPastMonthsEdit) {
+        if (isPastMonth(currentMonthIndex, year)) return showToast("Não é possível alterar registos de meses anteriores.");
+        if (currentMonthIndex === now.getMonth() && year === now.getFullYear() && day <= now.getDate()) {
+          return showToast("Não é possível alterar registos de dias anteriores ou do dia atual. Para alterações efetue-as a partir do menu 'Trocas de Serviço'. Obrigado.");
+        }
+      }
+      const ids = getIds();
+      if (!ids) return showToast("Sessão inválida. Volte a iniciar sessão.");
+      const month = currentMonthIndex + 1;
+      dayElement.classList.add('processing');
+      try {
+        if (selectedDays.includes(dateStr)) {
+          const filter = `n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=eq.${SPAOPAT_VALUE}`;
+          await Promise.all([
+            sbJson(`${SUPABASE_URL}/rest/v1/reg_extras?${filter}`, {method: 'DELETE'}),
+            sbJson(`${SUPABASE_URL}/rest/v1/reg_disp?${filter}`, {method: 'DELETE'})
+          ]);
+          selectedDays = selectedDays.filter(d => d !== dateStr);
+          dayElement.classList.remove('selected');
+        } else if (await saveDayToExtras(ids, year, month, day)) {
+          selectedDays.push(dateStr);
+          dayElement.classList.add('selected');
+        }
+      } catch (err) {
+        console.error("Erro ao alterar disponibilidade:", err);
+        showToast("Erro ao alterar a disponibilidade. Tente novamente.");
+      } finally {
+        dayElement.classList.remove('processing');
+      }
     }
     /* =========================== SHOW TOAST ============================ */
     function showToast(message) {
@@ -464,99 +468,42 @@
       }
       return currentYear;
     }
-    async function saveDayToPiqDisp(day) {
-      if (currentMonthIndex === null) return false;
-      const year = getWorkYear(currentMonthIndex);
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentDay = now.getDate();
-      if (!allowPiqPastMonthsEdit) {
-        if (isPastMonth(currentMonthIndex, year)) {
-          showToast("Não é possível alterar registos de meses anteriores.");
-          return false;
-        }
-        if (currentMonthIndex === currentMonth && year === now.getFullYear() && day <= currentDay) {
-          showToast("Não é possível alterar registos de dias anteriores ou do dia atual. Para alterações efetue-as a partir do menu 'Trocas de Serviço'. Obrigado.");
-          return false;
-        }
-      }
-      const currentNintCorpStr = localStorage.getItem("currentCorpNint");
-      const currentCorpOperNrStr = localStorage.getItem("currentCorpOperNr");
-      if (!currentNintCorpStr || !currentCorpOperNrStr) {
+    async function saveDayToExtras(ids, year, month, day) {
+      const base = `n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}&day=eq.${day}&month=eq.${month}&year=eq.${year}`;
+      const [existsServ, existsDisp, userData] = await Promise.all([
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_extras?select=value&${base}&value=eq.${SPAOPAT_VALUE}`),
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_disp?select=value&${base}`),
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}`)
+      ]);
+      if ((existsServ || []).length > 0) {
+        showToast("Já tem disponibilidade para EXTRA registada neste dia.");
         return false;
       }
-      const currentNintCorp = parseInt(currentNintCorpStr, 10) || 0;
-      const currentCorpOperNr = currentCorpOperNrStr.padStart(4, "0");
-      const month = currentMonthIndex + 1;
-      const value = "EX";
-      try {
-        const checkServRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_extras?select=value&n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=eq.EX`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (checkServRes.ok) {
-          const existsServ = await checkServRes.json();
-          if (existsServ.length > 0) {
-            showToast("Já existe uma disponibilidade para EXTRA registada para este dia.");
-            return false;
-          }
-        }
-        const checkDispRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_disp?select=value&n_int=eq.${currentNintCorp}&corp_oper_nr=eq.${currentCorpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (checkDispRes.ok) {
-          const existsDisp = await checkDispRes.json();
-          const blocking = existsDisp.filter(r => r.value === "ED" || r.value === "ET");
-          if (blocking.length > 0) {
-            showToast("Já existe uma disponibilidade registada para outro tipo de serviço neste dia. Por favor verifique o menú VISUALIZAR DISPONIBILIDADES.");
-            return false;
-          }
-        }
-        let abv_name = "N/D";
-        const userRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${currentNintCorp}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          if (userData.length > 0) {
-            abv_name = userData[0].abv_name;
-          }
-        }
-        const payloadRegServ = {n_int: currentNintCorp, abv_name, day, month, year, value, corp_oper_nr: currentCorpOperNr};
-        const resServ = await fetch(`${SUPABASE_URL}/rest/v1/reg_extras`, {
-          method: "POST",
-          headers: getSupabaseHeaders({
-            returnRepresentation: true
-          }),
-          body: JSON.stringify(payloadRegServ)
-        });
-        const payloadRegDisp = {n_int: currentNintCorp, day, month, year, value, corp_oper_nr: currentCorpOperNr};
-        const resDisp = await fetch(`${SUPABASE_URL}/rest/v1/reg_disp`, {
-          method: "POST",
-          headers: getSupabaseHeaders({
-            returnRepresentation: true
-          }),
-          body: JSON.stringify(payloadRegDisp)
-        });
-        if (resServ.ok && resDisp.ok) {
-          return true;
-        } else {
-          console.error("Erro numa das gravações");
-          return false;
-        }
-      } catch (err) {
-        console.error("Erro geral:", err);
+      if ((existsDisp || []).some(r => ["ED", "ET"].includes(r.value))) {
+        showToast("Já existe uma disponibilidade registada para outro tipo de serviço neste dia. Por favor verifique o menu VISUALIZAR DISPONIBILIDADES.");
         return false;
       }
+      const abv_name = userData?.[0]?.abv_name || "N/D";
+      const payloadServ = {n_int: ids.nint, abv_name, day, month, year, value: SPAOPAT_VALUE, corp_oper_nr: ids.corp};
+      const payloadDisp = {n_int: ids.nint, day, month, year, value: SPAOPAT_VALUE, corp_oper_nr: ids.corp};
+      const results = await Promise.allSettled([
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_extras`, {method: "POST", body: JSON.stringify(payloadServ)}),
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_disp`, {method: "POST", body: JSON.stringify(payloadDisp)})
+      ]);
+      if (results.every(r => r.status === "fulfilled")) return true;
+      // Uma das gravações falhou: desfaz a outra para não ficar meio gravado
+      const del = `${base}&value=eq.${SPAOPAT_VALUE}`;
+      await Promise.allSettled([
+        results[0].status === "fulfilled" ? sbJson(`${SUPABASE_URL}/rest/v1/reg_extras?${del}`, {method: "DELETE"}) : null,
+        results[1].status === "fulfilled" ? sbJson(`${SUPABASE_URL}/rest/v1/reg_disp?${del}`, {method: "DELETE"}) : null
+      ]);
+      throw results.find(r => r.status === "rejected").reason;
     }
     /* ============================== INIT =============================== */
     document.addEventListener('DOMContentLoaded', function() {
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
