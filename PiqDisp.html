@@ -183,7 +183,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -246,12 +246,7 @@
       }
       if (h2) h2.textContent = corpOperNr;
       try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        const data = await response.json();
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`);
         if (data && data.length > 0) {
           const corp = data[0];
           if (corp.logo_url && corp.logo_url !== cachedLogo) {
@@ -268,21 +263,36 @@
     let selectedDays = [];
     let isLoadingCalendar = false;
     let allowPiqPastMonthsEdit = false;
+    /* ========================== HELPERS =========================== */
+    async function sbJson(url, options = {}) {
+      const res = await fetch(url, {headers: getSupabaseHeaders(), ...options});
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { const e = await res.json(); msg = e.message || msg; } catch (_) {}
+        throw new Error(msg);
+      }
+      const txt = await res.text();
+      return txt ? JSON.parse(txt) : null;
+    }
+    function getIds() {
+      const nint = localStorage.getItem("currentCorpNint");
+      const corpRaw = localStorage.getItem("currentCorpOperNr");
+      if (!nint || !corpRaw) return null;
+      return {nint, corp: corpRaw.padStart(4, "0")};
+    }
+    const DISP_VALUE_NAMES = {PN: "PIQUETE", EN: "ECIN Noite", ET: "ECIN 24 H", ED: "ECIN Dia"};
     /* ========================== LOADING DAYS =========================== */
     async function loadSelectedDaysFromSupabase(monthIndex) {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
-      if (!nint || !corp) return [];
+      const ids = getIds();
+      if (!ids) return [];
       const month = monthIndex + 1;
       const year = getWorkYear(monthIndex);
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/reg_serv?select=day&n_int=eq.${nint}&corp_oper_nr=eq.${corp}&month=eq.${month}&year=eq.${year}&value=eq.PN`, {
-          headers: getSupabaseHeaders()
-        });
-        const data = await res.json();
-        return data.map(d => `${year}-${String(month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`);
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/reg_serv?select=day&n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}&month=eq.${month}&year=eq.${year}&value=eq.PN`) || [];
+        return [...new Set(data.map(d => `${year}-${String(month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`))];
       } catch (err) {
         console.error('Erro ao ler dias selecionados:', err);
+        showToast("Erro ao carregar as disponibilidades deste mês.");
         return [];
       }
     }
@@ -375,85 +385,76 @@
     }
     /* ======================== HANDLE DAY CLICK ========================= */
     async function handleDayClick(day, dateStr, element) {
+      if (element.classList.contains('processing')) return;
+      const ids = getIds();
+      if (!ids) return showToast("Sessão inválida. Volte a iniciar sessão.");
       const year = getWorkYear(currentMonthIndex);
       const month = currentMonthIndex + 1;
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
       if (!allowPiqPastMonthsEdit) {
         if (isPastMonth(currentMonthIndex, year)) return showToast("Não permitido alterar meses passados.");
         if (currentMonthIndex === new Date().getMonth() && year === new Date().getFullYear()) {
           return showToast("Não pode efetuar alteração às disponibilidades do mês atual. Use a opção TROCAS DE SERVIÇO para efetuar uma troca com outro Bombeiro.");
         }
       }
-      if (selectedDays.includes(dateStr)) {
-        element.classList.add('processing');
-        try {
-          const query = `n_int=eq.${nint}&corp_oper_nr=eq.${corp}&month=eq.${month}&day=eq.${day}&value=eq.PN`;
+      element.classList.add('processing');
+      try {
+        if (selectedDays.includes(dateStr)) {
+          const query = `n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}&year=eq.${year}&month=eq.${month}&day=eq.${day}&value=eq.PN`;
           await Promise.all([
-            fetch(`${SUPABASE_URL}/rest/v1/reg_serv?${query}`, {method: 'DELETE', headers: getSupabaseHeaders()}),
-            fetch(`${SUPABASE_URL}/rest/v1/reg_disp?${query}`, {method: 'DELETE', headers: getSupabaseHeaders()})
+            sbJson(`${SUPABASE_URL}/rest/v1/reg_serv?${query}`, {method: 'DELETE'}),
+            sbJson(`${SUPABASE_URL}/rest/v1/reg_disp?${query}`, {method: 'DELETE'})
           ]);
           selectedDays = selectedDays.filter(d => d !== dateStr);
-          element.classList.remove('selected', 'processing');
-        } catch (err) {
-          showToast("Erro ao remover disponibilidade.");
+          element.classList.remove('selected');
+        } else if (await saveDayToPiqDisp(day, ids)) {
+          selectedDays.push(dateStr);
+          element.classList.add('selected');
         }
-        return;
-      }
-      const success = await saveDayToPiqDisp(day);
-      if (success) {
-        selectedDays.push(dateStr);
-        element.classList.add('selected');
+      } catch (err) {
+        console.error("Erro ao alterar disponibilidade:", err);
+        showToast("Erro ao alterar a disponibilidade. Tente novamente.");
+      } finally {
+        element.classList.remove('processing');
       }
     }
     /* ============================== SAVE =============================== */
-    async function saveDayToPiqDisp(day) {
+    async function saveDayToPiqDisp(day, ids) {
       const year = getWorkYear(currentMonthIndex);
       const month = currentMonthIndex + 1;
-      const nint = parseInt(localStorage.getItem("currentCorpNint"), 10) || 0;
-      const corp = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
-      try {
-        const checkServ = await fetch(`${SUPABASE_URL}/rest/v1/reg_serv?select=value&n_int=eq.${nint}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=in.(EN,ET)`, {
-          headers: getSupabaseHeaders()
-        });
-        const servData = await checkServ.json();
-        if (servData.length > 0) return showToast(`ATENÇÃO! Já deu disponibilidade para ECIN Noite no dia (${day}/${month}). Não pode dar disponibilidade para PIQUETE.`);
-        const checkDisp = await fetch(`${SUPABASE_URL}/rest/v1/reg_disp?select=value&n_int=eq.${nint}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=in.(ET,PN)`, {
-          headers: getSupabaseHeaders()
-        });
-        const dispData = await checkDisp.json();
-        if (dispData.length > 0) return showToast(`ATENÇÃO! Já deu disponibilidade para ECIN Noite no dia (${day}/${month}). Não pode dar disponibilidade para PIQUETE.`);
-        const userRes = await fetch(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,section&n_int=eq.${nint}`, {
-          headers: getSupabaseHeaders()
-        });
-        const userData = await userRes.json();
-        const { abv_name = "N/D", section = "N/D" } = userData[0] || {};
-        const payloadServ = { n_int: nint, abv_name, section, day, month, year, value: "PN", corp_oper_nr: corp };
-        const payloadDisp = { n_int: nint, day, month, year, value: "PN", corp_oper_nr: corp };
-        const [res1, res2] = await Promise.all([
-          fetch(`${SUPABASE_URL}/rest/v1/reg_serv`, {
-            method: "POST",
-            headers: getSupabaseHeaders({returnRepresentation: true}),
-            body: JSON.stringify(payloadServ)
-          }),
-          fetch(`${SUPABASE_URL}/rest/v1/reg_disp`, {
-            method: "POST",
-            headers: getSupabaseHeaders({returnRepresentation: true}),
-            body: JSON.stringify(payloadDisp)
-          })
-        ]);
-        if (res1.ok && res2.ok) {
-          return true;
-        } else {
-          const errorText = await res2.text();
-          console.error("Erro Supabase:", errorText);
-          showToast("Erro ao gravar na base de dados.");
-          return false;
-        }
-      } catch (err) {
-        console.error("Erro na função saveDayToPiqDisp:", err);
+      const base = `n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}&day=eq.${day}&month=eq.${month}&year=eq.${year}`;
+      const dm = `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}`;
+      const [servData, dispData, userData] = await Promise.all([
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_serv?select=value&${base}&value=in.(EN,ET,PN)`),
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_disp?select=value&${base}&value=in.(ET,PN)`),
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,section&n_int=eq.${ids.nint}&corp_oper_nr=eq.${ids.corp}`)
+      ]);
+      const conflict = [...(servData || []), ...(dispData || [])].find(r => r.value !== "PN");
+      if (conflict) {
+        showToast(`ATENÇÃO! Já tem ${DISP_VALUE_NAMES[conflict.value] || conflict.value} no dia ${dm}. Não pode dar disponibilidade para PIQUETE.`);
         return false;
       }
+      if ([...(servData || []), ...(dispData || [])].some(r => r.value === "PN")) {
+        showToast(`Já tem disponibilidade para PIQUETE no dia ${dm}.`);
+        return false;
+      }
+      const { abv_name = "N/D", section = "N/D" } = userData?.[0] || {};
+      const nintNum = parseInt(ids.nint, 10);
+      const payloadServ = { n_int: nintNum, abv_name, section, day, month, year, value: "PN", corp_oper_nr: ids.corp };
+      const payloadDisp = { n_int: nintNum, day, month, year, value: "PN", corp_oper_nr: ids.corp };
+      const results = await Promise.allSettled([
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_serv`, {method: "POST", body: JSON.stringify(payloadServ)}),
+        sbJson(`${SUPABASE_URL}/rest/v1/reg_disp`, {method: "POST", body: JSON.stringify(payloadDisp)})
+      ]);
+      if (results.every(r => r.status === "fulfilled")) return true;
+      // Uma das gravações falhou: desfaz a outra para não ficar meio gravado
+      console.error("Erro Supabase:", results.filter(r => r.status === "rejected").map(r => r.reason));
+      const del = `${base}&value=eq.PN`;
+      await Promise.allSettled([
+        results[0].status === "fulfilled" ? sbJson(`${SUPABASE_URL}/rest/v1/reg_serv?${del}`, {method: "DELETE"}) : null,
+        results[1].status === "fulfilled" ? sbJson(`${SUPABASE_URL}/rest/v1/reg_disp?${del}`, {method: "DELETE"}) : null
+      ]);
+      showToast("Erro ao gravar na base de dados.");
+      return false;
     }
     /* ============================== TOAST ============================== */
     function showToast(message) {
@@ -473,6 +474,8 @@
     /* ============================== INIT =============================== */
     document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
