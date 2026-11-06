@@ -281,7 +281,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -316,6 +316,20 @@
       }
       return headers;
     }
+    async function sbJson(url, options = {}) {
+      const res = await fetch(url, {headers: getSupabaseHeaders(), ...options});
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { const e = await res.json(); msg = e.message || msg; } catch (_) {}
+        throw new Error(msg);
+      }
+      const txt = await res.text();
+      return txt ? JSON.parse(txt) : null;
+    }
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    function fmtDM(d, m) {return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}`;}
     function getWorkYear(selectedMonthIndex) {
       const now = new Date();
       const currentMonth = now.getMonth();
@@ -356,12 +370,7 @@
       }
       if (h2) h2.textContent = corpOperNr;
       try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        const data = await response.json();
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`);
         if (data && data.length > 0) {
           const corp = data[0];
           if (corp.logo_url && corp.logo_url !== cachedLogo) {
@@ -474,28 +483,19 @@
       }
     }
     async function loadPendingSwaps() {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nint = getNInt();
+      const corpOperNr = getCorp();
       if (!nint || !corpOperNr) return;
       const container = document.getElementById("pending-swaps-container");
       const list = document.getElementById("pending-swaps-list");
       list.innerHTML = "";
       container.style.display = "flex";
-      const supabaseHeaders = getSupabaseHeaders({ returnRepresentation: true });
       try {
-        const myResp = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${nint}`, {
-            headers: supabaseHeaders
-          }
-        );
-        const myData = await myResp.json();
+        const [myData, swaps] = await Promise.all([
+          sbJson(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${nint}&corp_oper_nr=eq.${corpOperNr}`),
+          sbJson(`${SUPABASE_URL}/rest/v1/reg_swaps?select=id,n_int,n_int_end,start_shift_day,start_shift_month,start_shift_year,end_shift_day,end_shift_month,end_shift_year&n_int_end=eq.${nint}&element_approval=is.null&corp_oper_nr=eq.${corpOperNr}&order=created_at.asc`)
+        ]);
         const myName = myData?.[0]?.abv_name || "Elemento";
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_swaps?select=*,n_int,n_int_end,start_shift_day,start_shift_month,start_shift_year,end_shift_day,end_shift_month,end_shift_year&n_int_end=eq.${nint}&element_approval=is.null&corp_oper_nr=eq.${corpOperNr}`, {
-            headers: supabaseHeaders
-          }
-        );
-        const swaps = await response.json();
         if (!Array.isArray(swaps) || swaps.length === 0) {
           const emptyCard = document.createElement("div");
           emptyCard.className = "swap-card";
@@ -511,24 +511,22 @@
           list.appendChild(emptyCard);
           return;
         }
+        // Um único pedido para os nomes de todos os elementos envolvidos
+        const ids = [...new Set(swaps.flatMap(s => [s.n_int, s.n_int_end]))];
+        const elems = await sbJson(`${SUPABASE_URL}/rest/v1/reg_elems?select=n_int,abv_name&n_int=in.(${ids.join(",")})&corp_oper_nr=eq.${corpOperNr}`) || [];
+        const nameOf = n => elems.find(e => String(e.n_int) === String(n))?.abv_name || "Desconhecido";
         for (const swap of swaps) {
-          const namesResp = await fetch(
-            `${SUPABASE_URL}/rest/v1/reg_elems?select=n_int,abv_name&n_int=in.(${swap.n_int},${swap.n_int_end})&corp_oper_nr=eq.${corpOperNr}`, {
-              headers: supabaseHeaders
-            }
-          );
-          const elems = await namesResp.json();
-          const proponente = elems.find(e => e.n_int == swap.n_int)?.abv_name || "Desconhecido";
-          const proposto = elems.find(e => e.n_int == swap.n_int_end)?.abv_name || "Desconhecido";
+          const proponente = nameOf(swap.n_int);
+          const proposto = nameOf(swap.n_int_end);
           const swapCard = document.createElement("div");
           swapCard.className = "swap-card";
           const swapInfo = document.createElement("div");
           swapInfo.className = "swap-info";
           swapInfo.innerHTML = `
-            <p><strong>Proponente:</strong> ${proponente}</p>
-            <p><strong>Piquete:</strong> ${String(swap.start_shift_day).padStart(2, "0")}/${String(swap.start_shift_month).padStart(2, "0")}/${swap.start_shift_year}</p>
-            <p><strong>Proposto:</strong> ${proposto}</p>
-            <p><strong>Piquete:</strong> ${String(swap.end_shift_day).padStart(2, "0")}/${String(swap.end_shift_month).padStart(2, "0")}/${swap.end_shift_year}</p>
+            <p><strong>Proponente:</strong> ${escapeHtml(proponente)}</p>
+            <p><strong>Piquete:</strong> ${fmtDM(swap.start_shift_day, swap.start_shift_month)}/${swap.start_shift_year}</p>
+            <p><strong>Proposto:</strong> ${escapeHtml(proposto)}</p>
+            <p><strong>Piquete:</strong> ${fmtDM(swap.end_shift_day, swap.end_shift_month)}/${swap.end_shift_year}</p>
           `;
           const swapActions = document.createElement("div");
           swapActions.className = "swap-actions";
@@ -545,12 +543,16 @@
           list.appendChild(swapCard);
           const sendNotification = async (accepted) => {
             const title = accepted ? "Troca de Serviço Aceite" : "Troca de Serviço Rejeitada";
-            const msg = accepted ? `O elemento ${myName} aceitou a tua solicitação de troca de serviço do dia ${swap.start_shift_day} para o dia ${swap.end_shift_day}.` : `O elemento ${myName} rejeitou a tua solicitação de troca de serviço do dia ${swap.start_shift_day} para o dia ${swap.end_shift_day}.`;
-            await fetch(`${SUPABASE_URL}/rest/v1/user_notifications`, {
-              method: "POST",
-              headers: supabaseHeaders,
-              body: JSON.stringify([{n_int: swap.n_int, corp_oper_nr: corpOperNr, title, message: msg, is_read: false, created_at: new Date().toISOString()}])
-            });
+            const verb = accepted ? "aceitou" : "rejeitou";
+            const msg = `O elemento ${myName} ${verb} a tua solicitação de troca de serviço do dia ${fmtDM(swap.start_shift_day, swap.start_shift_month)} para o dia ${fmtDM(swap.end_shift_day, swap.end_shift_month)}.`;
+            try {
+              await sbJson(`${SUPABASE_URL}/rest/v1/user_notifications`, {
+                method: "POST",
+                body: JSON.stringify([{n_int: swap.n_int, corp_oper_nr: corpOperNr, title, message: msg, is_read: false, created_at: new Date().toISOString()}])
+              });
+            } catch (e) {
+              console.error("Erro ao gravar notificação de resposta:", e);
+            }
             try {
               await fetch('https://cb-360-app.vercel.app/api/sendPush', {
                 method: 'POST',
@@ -561,38 +563,32 @@
               console.error("Erro ao enviar push de resposta:", e);
             }
           };
-          approveBtn.onclick = async () => {
+          const respond = async (accepted) => {
+            approveBtn.disabled = true;
+            rejectBtn.disabled = true;
             try {
-              await fetch(`${SUPABASE_URL}/rest/v1/reg_swaps?id=eq.${swap.id}`, {
-                method: "PATCH",
-                headers: supabaseHeaders,
-                body: JSON.stringify({element_approval: true})
-              });
-              swapCard.style.background = "#d4edda";
-              swapCard.style.color ="#444"
-              approveBtn.disabled = true;
-              rejectBtn.disabled = true;
-              await sendNotification(true);
+              const updated = await sbJson(
+                `${SUPABASE_URL}/rest/v1/reg_swaps?id=eq.${swap.id}&n_int_end=eq.${nint}&corp_oper_nr=eq.${corpOperNr}&element_approval=is.null`, {
+                  method: "PATCH",
+                  headers: getSupabaseHeaders({ returnRepresentation: true }),
+                  body: JSON.stringify({element_approval: accepted})
+                }
+              );
+              if (!Array.isArray(updated) || updated.length === 0) {
+                throw new Error("Este pedido já não está disponível.");
+              }
+              swapCard.style.background = accepted ? "#d4edda" : "#f8d7da";
+              swapCard.style.color = "#444";
+              await sendNotification(accepted);
             } catch (err) {
               console.error(err);
+              approveBtn.disabled = false;
+              rejectBtn.disabled = false;
+              showToast(err.message || "Erro ao responder ao pedido.");
             }
           };
-          rejectBtn.onclick = async () => {
-            try {
-              await fetch(`${SUPABASE_URL}/rest/v1/reg_swaps?id=eq.${swap.id}`, {
-                method: "PATCH",
-                headers: supabaseHeaders,
-                body: JSON.stringify({element_approval: false})
-              });
-              swapCard.style.background = "#f8d7da";
-              swapCard.style.color ="#444"
-              approveBtn.disabled = true;
-              rejectBtn.disabled = true;
-              await sendNotification(false);
-            } catch (err) {
-              console.error(err);
-            }
-          };
+          approveBtn.onclick = () => respond(true);
+          rejectBtn.onclick = () => respond(false);
         }
       } catch (err) {
         console.error(err);
@@ -707,12 +703,7 @@
         return;
       }      
       try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,n_int,elem_state,type_quad&corp_oper_nr=eq.${corpOperNr}&elem_state=eq.true&type_quad=not.is.null&type_quad=neq.&order=n_int.asc`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        const data = await response.json();
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,n_int&corp_oper_nr=eq.${corpOperNr}&elem_state=eq.true&type_quad=not.is.null&type_quad=neq.&order=n_int.asc`);
         if (data && data.length > 0) {
           select.innerHTML = '<option value="">Selecione um bombeiro...</option>';
           data.forEach(bombeiro => {
@@ -820,8 +811,9 @@
         buttonsDiv.innerHTML = "<p style='text-align:center;font-weight:bold;'>Erro ao carregar turnos</p>";
       }
     }
+    let swapSending = false;
     async function sendSwapRequest(targetNInt) {
-      const supabaseHeaders = getSupabaseHeaders({ returnRepresentation: true });
+      if (swapSending) return;
       const myShiftBtn = document.querySelector("#shiftsButtons .shifts-btn.selected");
       if (!myShiftBtn) {
         showToast("Seleciona o teu turno antes de enviar!");
@@ -836,10 +828,10 @@
       const myShiftType = myShiftBtn.dataset.value;
       const targetShiftDay = parseInt(targetShiftBtn.dataset.day, 10);
       const targetShiftType = targetShiftBtn.dataset.value;
-      const myNInt = localStorage.getItem("currentCorpNint");
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const myNInt = getNInt();
+      const corpOperNr = getCorp();
       const monthNumber = currentMonthIndex + 1;
-      const year = getWorkYear(currentMonthIndex);      
+      const year = getWorkYear(currentMonthIndex);
       if (String(targetNInt) === String(myNInt)) {
         showToast("Não podes solicitar uma troca contigo próprio 😄");
         return;
@@ -848,47 +840,48 @@
         showToast("Não é possível trocar turnos no mesmo dia.");
         return;
       }
+      const sendBtn = document.querySelector("#swap-btn button");
+      swapSending = true;
+      if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = "A enviar..."; }
       try {
-        const checkUrl = `${SUPABASE_URL}/rest/v1/reg_swaps?` + `or=(` + `and(n_int.eq.${myNInt},start_shift_day.eq.${myShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${targetNInt},end_shift_day.eq.${targetShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year}),` + `and(n_int.eq.${targetNInt},start_shift_day.eq.${targetShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${myNInt},end_shift_day.eq.${myShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year})` + `)&corp_oper_nr=eq.${corpOperNr}`;
-        const checkResp = await fetch(checkUrl, { headers: supabaseHeaders });
-        const existingSwaps = await checkResp.json();
+        // Só bloqueia se já houver um pedido idêntico pendente ou aceite (um rejeitado pode voltar a ser pedido)
+        const checkUrl = `${SUPABASE_URL}/rest/v1/reg_swaps?select=id&` + `or=(` + `and(n_int.eq.${myNInt},start_shift_day.eq.${myShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${targetNInt},end_shift_day.eq.${targetShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year}),` + `and(n_int.eq.${targetNInt},start_shift_day.eq.${targetShiftDay},start_shift_month.eq.${monthNumber},start_shift_year.eq.${year},n_int_end.eq.${myNInt},end_shift_day.eq.${myShiftDay},end_shift_month.eq.${monthNumber},end_shift_year.eq.${year})` + `)&element_approval=not.is.false&corp_oper_nr=eq.${corpOperNr}`;
+        const existingSwaps = await sbJson(checkUrl);
         if (existingSwaps?.length > 0) {
           showToast("Já existe um pedido de troca idêntico entre estes turnos.");
           return;
         }
         const swapPayload = [{corp_oper_nr: String(corpOperNr), n_int: String(myNInt), start_shift_day: myShiftDay, start_shift_month: monthNumber, start_shift_year: year, n_int_end: String(targetNInt), end_shift_day: targetShiftDay, end_shift_month: monthNumber, end_shift_year: year, created_at: new Date().toISOString()}];
-        const swapResp = await fetch(`${SUPABASE_URL}/rest/v1/reg_swaps`, {
+        await sbJson(`${SUPABASE_URL}/rest/v1/reg_swaps`, {
           method: "POST",
-          headers: supabaseHeaders,
           body: JSON.stringify(swapPayload)
         });
-        if (!swapResp.ok) {
-          const errorData = await swapResp.json();
-          console.error("Erro Supabase:", errorData);
-          throw new Error(errorData.message || "Erro ao gravar troca");
-        }
-        const nameResp = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${myNInt}`, {
-            headers: supabaseHeaders
-          }
-        );
-        const nameData = await nameResp.json();
-        const myName = nameData?.[0]?.abv_name || "Elemento";
-        const message = `O elemento ${myName} solicitou uma troca de serviço contigo:\n` + `• Dia ${targetShiftDay} (${targetShiftType}) por\n` + `• Dia ${myShiftDay} (${myShiftType}).`;
-        await fetch(`${SUPABASE_URL}/rest/v1/user_notifications`, {
-          method: "POST",
-          headers: supabaseHeaders,
-          body: JSON.stringify([{n_int: targetNInt, corp_oper_nr: corpOperNr, title: "📢 Pedido de Troca de Serviço", message, is_read: false, created_at: new Date().toISOString()}])
-        });
-        await fetch('https://cb-360-app.vercel.app/api/sendPush', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({recipient_nint: targetNInt, corp_nr: corpOperNr, sender_name: 'Pedido de Troca', message_text: `O elemento ${myName} solicitou uma troca: Dia ${targetShiftDay} por Dia ${myShiftDay}.`, sender_nint: myNInt})
-        });
-        showToast("Pedido de troca enviado com sucesso!");
+        let myName = "Elemento";
+        try {
+          const nameData = await sbJson(`${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name&n_int=eq.${myNInt}&corp_oper_nr=eq.${corpOperNr}`);
+          myName = nameData?.[0]?.abv_name || myName;
+        } catch (e) { console.warn("Nome não carregado:", e); }
+        const message = `O elemento ${myName} solicitou uma troca de serviço contigo:\n` + `• Dia ${fmtDM(targetShiftDay, monthNumber)} (${targetShiftType}) por\n` + `• Dia ${fmtDM(myShiftDay, monthNumber)} (${myShiftType}).`;
+        try {
+          await sbJson(`${SUPABASE_URL}/rest/v1/user_notifications`, {
+            method: "POST",
+            body: JSON.stringify([{n_int: targetNInt, corp_oper_nr: corpOperNr, title: "📢 Pedido de Troca de Serviço", message, is_read: false, created_at: new Date().toISOString()}])
+          });
+        } catch (e) { console.error("Erro ao gravar notificação:", e); }
+        try {
+          await fetch('https://cb-360-app.vercel.app/api/sendPush', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({recipient_nint: targetNInt, corp_nr: corpOperNr, sender_name: 'Pedido de Troca', message_text: `O elemento ${myName} solicitou uma troca: Dia ${fmtDM(targetShiftDay, monthNumber)} por Dia ${fmtDM(myShiftDay, monthNumber)}.`, sender_nint: myNInt})
+          });
+        } catch (e) { console.error("Erro ao enviar push:", e); }
+        showToast("Pedido de troca enviado com sucesso!", true);
       } catch (err) {
         console.error("Erro no pedido de troca:", err);
         showToast(err.message || "Erro ao enviar pedido de troca.");
+      } finally {
+        swapSending = false;
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = "Enviar Pedido"; }
       }
     }
     function handleSwapClick() {
@@ -937,6 +930,8 @@
     }
     document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
