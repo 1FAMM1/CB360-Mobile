@@ -300,7 +300,10 @@
             headers: getSupabaseHeaders()
           }
         );
-        if (!res.ok) return {};
+        if (!res.ok) {
+          showToast("Erro ao carregar as disponibilidades deste mês.");
+          return {};
+        }
         const data = await res.json();
         const daysMap = {};
         data.forEach(d => {
@@ -398,11 +401,8 @@
           const dayValues = selectedDaysMap[day];
           const dayType = getDayType(dayValues);
           if (dayType) {
-            let message = `${TYPE_LABEL_MAP[dayType]} - Dia ${day}`;
-            if (dayValues && dayValues.length > 1) {
-              message += ` (${dayValues.join(' + ')})`;
-            }
-            showToast(message);
+            const labels = [...new Set(dayValues)].map(v => TYPE_LABEL_MAP[v] || v);
+            showToast(`Dia ${day}: ${labels.join(' + ')}`);
           } else {
             showToast("Sem disponibilidade registada.");
           }
