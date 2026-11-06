@@ -322,6 +322,24 @@
       attendanceMapReady = new Promise(res => { resolveAttendanceMapReady = res; });
     }
     resetAttendanceMapReady();
+    /* ===== Fotos dos elementos: link antigo (http...) ou caminho no bucket privado "elem-photos" ===== */
+    async function mobileLoadPhoto(imgEl, photoUrl, fallback = "") {
+      if (!imgEl) return;
+      if (!photoUrl) { if (fallback) imgEl.src = fallback; return; }
+      if (/^https?:\/\//i.test(photoUrl)) { imgEl.src = photoUrl; return; }
+      try {
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/elem-photos/${photoUrl}`, {
+          headers: {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${localStorage.getItem("authToken")}`}
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const url = URL.createObjectURL(await res.blob());
+        imgEl.onload = () => URL.revokeObjectURL(url);
+        imgEl.src = url;
+      } catch (e) {
+        console.warn("Não foi possível carregar a foto:", e);
+        if (fallback) imgEl.src = fallback;
+      }
+    }
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
     function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
@@ -672,7 +690,7 @@
       `;      
       card.addEventListener('click', async () => {
         openServiceModal(`${info.tipo} - ${dateText}`, null);
-        const elements = await fetchServiceElements(service.day, service.month, service.value);
+        const elements = await fetchServiceElements(service.day, service.month, service.value, year);
         openServiceModal(`${info.tipo} - ${dateText}`, elements);
       });      
       setTimeout(() => {
@@ -703,14 +721,14 @@
       const mm = String(month).padStart(2, "0");
       return `${dd}-${mm}-${year} (${weekdays[date.getDay()]})`;
     }
-    async function fetchServiceElements(day, month, value) {
+    async function fetchServiceElements(day, month, value, year = new Date().getFullYear()) {
       try {
         const corpOperNr = localStorage.getItem("currentCorpOperNr");
         const nintCorp = validateCorpData();
         if (!nintCorp || !corpOperNr) return [];
         const valuesToMatch = getServiceValuesToMatch(value);
         const table = value === "EX" ? "reg_extras" : "reg_serv";
-        const regServUrl = `${SUPABASE_URL}/rest/v1/${table}?select=n_int,value&corp_oper_nr=eq.${corpOperNr}&day=eq.${day}&month=eq.${month}&value=in.(${valuesToMatch.join(',')})`;
+        const regServUrl = `${SUPABASE_URL}/rest/v1/${table}?select=n_int,value&corp_oper_nr=eq.${corpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=in.(${valuesToMatch.join(',')})`;
         const servResponse = await fetch(regServUrl, { headers: getSupabaseHeaders() });
         const servData = await servResponse.json();
         if (!Array.isArray(servData) || servData.length === 0) return [];
@@ -785,7 +803,7 @@
           card.style.position = 'relative';
           const avatar = document.createElement('img');
           avatar.className = 'element-avatar';
-          avatar.src = e.photo_url || 'https://www.gravatar.com/avatar/?d=mp';
+          mobileLoadPhoto(avatar, e.photo_url, 'https://www.gravatar.com/avatar/?d=mp');
           avatar.alt = e.full_name || 'Avatar';
           const info = document.createElement('div');
           info.className = 'element-info';
