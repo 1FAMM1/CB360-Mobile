@@ -644,6 +644,24 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    /* ===== Fotos dos elementos: link antigo (http...) ou caminho no bucket privado "elem-photos" ===== */
+    async function mobileLoadPhoto(imgEl, photoUrl, fallback = "") {
+      if (!imgEl) return;
+      if (!photoUrl) { if (fallback) imgEl.src = fallback; return; }
+      if (/^https?:\/\//i.test(photoUrl)) { imgEl.src = photoUrl; return; }
+      try {
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/elem-photos/${photoUrl}`, {
+          headers: {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${localStorage.getItem("authToken")}`}
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const url = URL.createObjectURL(await res.blob());
+        imgEl.onload = () => URL.revokeObjectURL(url);
+        imgEl.src = url;
+      } catch (e) {
+        console.warn("Não foi possível carregar a foto:", e);
+        if (fallback) imgEl.src = fallback;
+      }
+    }
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
     function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
@@ -780,7 +798,7 @@
         const data = await response.json();
         const user = data[0];
         if (user) {
-          document.getElementById('configUserAvatar').src = user.photo_url || "https://www.gravatar.com/avatar/?d=mp";
+          mobileLoadPhoto(document.getElementById('configUserAvatar'), user.photo_url, "https://www.gravatar.com/avatar/?d=mp");
           document.getElementById('configUserName').textContent = user.full_name || "Utilizador";
           document.getElementById('configUserRank').textContent = user.patent || "-";
         } else {
@@ -1001,7 +1019,7 @@
         if (data[0]?.abv_name) {
           window.isVehicleUser = false;
           welcomeNameEl.textContent = data[0].abv_name;
-          avatarEl.src = data[0].photo_url || "https://www.gravatar.com/avatar/?d=mp";
+          mobileLoadPhoto(avatarEl, data[0].photo_url, "https://www.gravatar.com/avatar/?d=mp");
           return;
         }
         window.isVehicleUser = true;
