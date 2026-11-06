@@ -673,6 +673,24 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
     function getNInt() {return localStorage.getItem("currentCorpNint");}
+    /* ===== Fotos dos elementos: link antigo (http...) ou caminho no bucket privado "elem-photos" ===== */
+    async function mobileLoadPhoto(imgEl, photoUrl, fallback = "") {
+      if (!imgEl) return;
+      if (!photoUrl) { if (fallback) imgEl.src = fallback; return; }
+      if (/^https?:\/\//i.test(photoUrl)) { imgEl.src = photoUrl; return; }
+      try {
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/elem-photos/${photoUrl}`, {
+          headers: {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${localStorage.getItem("authToken")}`}
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const url = URL.createObjectURL(await res.blob());
+        imgEl.onload = () => URL.revokeObjectURL(url);
+        imgEl.src = url;
+      } catch (e) {
+        console.warn("Não foi possível carregar a foto:", e);
+        if (fallback) imgEl.src = fallback;
+      }
+    }
     function getAuthToken() {return localStorage.getItem("authToken");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
@@ -1796,7 +1814,7 @@
           e.preventDefault();
           openContactMenu(user.n_int, user.abv_name);
         });
-        const avatarContent = user.photo_url ? `<img src="${user.photo_url}">` : firstLetter;
+        const avatarContent = user.photo_url ? `<img data-photo="${user.photo_url}">` : firstLetter;
         div.innerHTML = `
           <div class="contact-avatar" style="background-color: ${user.photo_url ? 'transparent' : avatarColor};">
             ${avatarContent}
@@ -1810,6 +1828,8 @@
             <div class="contact-status" id="status-${contactId}"></div>
             <div class="unread-slot"></div>
           </div>`;
+        const avatarImg = div.querySelector('img[data-photo]');
+        if (avatarImg) mobileLoadPhoto(avatarImg, avatarImg.dataset.photo);
         listEl.appendChild(div);
       });
       const contactNints = users
