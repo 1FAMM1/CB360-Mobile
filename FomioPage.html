@@ -45,7 +45,7 @@
     ============================================================ */
     html {scrollbar-width: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100vh; overflow: hidden; display: flex;
+    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
           flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
     /* ============================================================
     HEADER
@@ -70,7 +70,7 @@
     MAIN CONTENT
     ============================================================ */
     .main-content {flex: 1; background: var(--bg); padding: calc(var(--header-h) + var(--planning-h) + 15px) 16px calc(var(--footer-h) + 25px); display: flex; flex-direction: column;
-                   height: 100vh; overflow: hidden; transition: background var(--ease);}
+                   height: 100dvh; overflow: hidden; transition: background var(--ease);}
     .tables-scroll-area {flex: 1; overflow-y: scroll; overflow-x: hidden; padding-bottom: 20px; scrollbar-width: none; -ms-overflow-style: none; min-height: 0;}
     .tables-scroll-area::-webkit-scrollbar {display: none; width: 0; height: 0;}
     .tables-container {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; max-width: 1200px; margin: 0 auto; width: 100%; padding-bottom: 40px;}
@@ -122,7 +122,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">EQUIPA DE SERVIÇO</span>
       <span class="header-sub">Força Mínima de Intervenção</span>
@@ -147,7 +147,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -195,10 +195,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -211,15 +212,25 @@
         console.error('Erro silencioso:', err);
       }
     }
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    function getCorpPadded() {
+      const c = getCorp();
+      return c ? c.padStart(4, "0") : null;
+    }
     /* ======================= LEITURA DIRETA (SUBSTITUI API) ======================= */
     async function loadPlanningHeader() {
       try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/fomio_date?select=header_text&limit=1`, {
+        const corp = getCorpPadded();
+        if (!corp) throw new Error('Sessão inválida');
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/fomio_date?select=header_text&corp_oper_nr=eq.${corp}&order=updated_at.desc.nullslast&limit=1`, {
           method: 'GET',
           headers: getSupabaseHeaders()
         });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        if (data && data.length > 0) {
+        if (data && data.length > 0 && data[0].header_text) {
           const headerText = data[0].header_text.replace(/^Dia:\s*/i, '');
           document.getElementById('planning-info').textContent = headerText;
         } else {
@@ -232,11 +243,15 @@
     }
     async function loadAllTeams() {
       try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/fomio_teams?select=*`, {
+        const corp = getCorpPadded();
+        if (!corp) throw new Error('Sessão inválida');
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/fomio_teams?select=team_name,patente,nome,n_int,observ&corp_oper_nr=eq.${corp}`, {
           method: 'GET',
           headers: getSupabaseHeaders()
         });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const allMembers = await response.json();
+        document.querySelectorAll('#tables-container .load-error').forEach(e => e.remove());
         if (allMembers && Array.isArray(allMembers)) {
           const grouped = allMembers.reduce((acc, m) => {
             if (!acc[m.team_name]) acc[m.team_name] = [];
@@ -249,6 +264,10 @@
         }
       } catch (error) {
         console.error('Erro ao carregar equipas:', error);
+        const container = document.getElementById('tables-container');
+        if (container && !container.querySelector('.load-error')) {
+          container.insertAdjacentHTML('afterbegin', '<p class="load-error" style="grid-column:1/-1;text-align:center;font-weight:700;color:var(--red);padding:20px;">Erro ao carregar as equipas. Tente novamente.</p>');
+        }
       }
     }
     /* ======================= UTILS & RENDER ======================= */
@@ -296,7 +315,7 @@
         const obs = (member.observ || '').toLowerCase();
         if (blockedWords.some(word => obs.includes(word))) return;
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${member.patente || ''}</td><td>${member.nome || ''}</td>`;
+        row.innerHTML = `<td>${escapeHtml(member.patente)}</td><td>${escapeHtml(member.nome)}</td>`;
         tbody.appendChild(row);
       });
       tableWrapper.style.display = tbody.children.length > 0 ? 'block' : 'none';
@@ -318,12 +337,15 @@
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
       }
-      await loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
+      loadCorpInfo();
       createTables();
       loadPlanningHeader();
       loadAllTeams();
     });
     setInterval(() => {
+      if (document.hidden) return;
       loadAllTeams();
       loadPlanningHeader();
     }, 10 * 60 * 1000);
