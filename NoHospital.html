@@ -124,10 +124,10 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">CONSTRANGIMENTOS ULS</span>
-      <span class="header-sub">Algarve (Faro/Portimão)</span>
+      <span class="header-sub">Restrições Hospitalares</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
@@ -140,7 +140,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -188,10 +188,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -204,19 +205,32 @@
         console.error('Erro silencioso:', err);
       }
     }
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    // Restrição já terminada? (end_date + end_time no passado)
+    function isExpired(item) {
+      if (!item.end_date) return false;
+      const end = new Date(`${item.end_date}T${(item.end_time || "23:59").substring(0, 5)}:00`);
+      return !isNaN(end) && end.getTime() < Date.now();
+    }
     /* ======================= HOSPITAL WARNINGS ========================= */
     async function updateWarnings() {
       const container = document.getElementById("hosp-alerts");
       if (!container) return;
-      container.innerHTML = '<div class="loading-msg"><span class="material-icons">autorenew</span>A carregar restrições...</div>';
+      if (!container.querySelector('.hosp-card')) {
+        container.innerHTML = '<div class="loading-msg"><span class="material-icons">autorenew</span>A carregar restrições...</div>';
+      }
       try {
         const response = await fetch(
           `${SUPABASE_URL}/rest/v1/hospital_restrictions?select=service,hospital,start_date,start_time,end_date,end_time,next_hospital&service=not.is.null&hospital=neq.EMPTY`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const rawData = await response.json();
-        const data = (rawData || []).filter(item => item.service && item.service.trim() !== "" && item.hospital && item.hospital.trim().toUpperCase() !== "EMPTY");
+        if (!Array.isArray(rawData)) throw new Error("Resposta inválida");
+        const data = rawData.filter(item => item.service && item.service.trim() !== "" && item.hospital && item.hospital.trim().toUpperCase() !== "EMPTY" && !isExpired(item));
         container.innerHTML = "";
         if (!data || data.length === 0) {
           const card = document.createElement("div");
@@ -226,7 +240,7 @@
             <div class="hosp-card-body">
               <div class="hosp-icon-circle"><span class="material-icons">check_circle</span></div>
               <div class="hosp-title">Sem Constrangimentos</div>
-              <div class="hosp-ulssubtitle"><span class="material-icons">place</span>Não existem constrangimentos nas ULS do Algarve</div>
+              <div class="hosp-ulssubtitle"><span class="material-icons">place</span>Não existem constrangimentos hospitalares registados</div>
             </div>
           `;
           container.appendChild(card);
@@ -259,8 +273,8 @@
                 <div class="hosp-type-row">
                   <div class="hosp-icon-circle"><span class="material-icons">medical_services</span></div>
                   <div>
-                    <div class="hosp-title">${item.service || "Serviço não definido"}</div>
-                    <div class="hosp-ulssubtitle"><span class="material-icons">local_hospital</span>${hospitalName}</div>
+                    <div class="hosp-title">${escapeHtml(item.service || "Serviço não definido")}</div>
+                    <div class="hosp-ulssubtitle"><span class="material-icons">local_hospital</span>${escapeHtml(hospitalName)}</div>
                   </div>
                 </div>
                 <span class="hosp-level-badge"><span class="material-icons">block</span>Com Constrangimento</span>
@@ -270,14 +284,14 @@
                   <span class="material-icons">event</span>
                   <div>
                     <span class="hosp-time-label">Início</span>
-                    <span class="hosp-time-value">${startTime}</span>
+                    <span class="hosp-time-value">${escapeHtml(startTime)}</span>
                   </div>
                 </div>
                 <div class="hosp-time-box">
                   <span class="material-icons">event_available</span>
                   <div>
                     <span class="hosp-time-label">Fim</span>
-                    <span class="hosp-time-value">${endTime}</span>
+                    <span class="hosp-time-value">${escapeHtml(endTime)}</span>
                   </div>
                 </div>
               </div>
@@ -285,7 +299,7 @@
                 <span class="material-icons">alt_route</span>
                 <div>
                   <span class="hosp-next-label">Referência Mais Próxima</span>
-                  <span class="hosp-next-value">${nextHospital}</span>
+                  <span class="hosp-next-value">${escapeHtml(nextHospital)}</span>
                 </div>
               </div>
             </div>
@@ -297,7 +311,8 @@
         });
       } catch (err) {
         console.error("Erro ao carregar restrições:", err);
-        container.innerHTML = '<div class="loading-msg"><span class="material-icons">error</span>Erro ao carregar restrições.</div>';
+        // Nunca mostrar "Sem constrangimentos" quando não foi possível confirmar
+        container.innerHTML = '<div class="loading-msg"><span class="material-icons">cloud_off</span>Não foi possível obter os constrangimentos. Tente novamente.</div>';
       }
     }  
     document.addEventListener('DOMContentLoaded', function() {
@@ -306,8 +321,10 @@
         document.body.classList.add('dark-mode');
       }
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       updateWarnings();
-      setInterval(updateWarnings, 10 * 60 * 1000);
+      setInterval(() => { if (!document.hidden) updateWarnings(); }, 10 * 60 * 1000);
     });
   </script>
 </body>
