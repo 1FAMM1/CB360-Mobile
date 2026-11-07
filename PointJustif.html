@@ -116,7 +116,7 @@
          onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">PICAGEM DE PONTO</span>
-      <span class="header-sub">Justificação de Piagens Erradas</span>
+      <span class="header-sub">Justificação de Picagens Erradas</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
@@ -157,7 +157,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -203,10 +203,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -260,6 +261,7 @@
             headers: getSupabaseHeaders()
           }
         );
+        if (!corpRes.ok) throw new Error(`HTTP ${corpRes.status}`);
         const corpData = await corpRes.json();
         if (corpData.length) {cb_name = corpData[0].cb_name || ""; logoUrl = corpData[0].logo_url || ""; corpAddress = corpData[0].corp_address || ""; corpCp = corpData[0].corp_cp || ""; corpLocalitie = corpData[0].corp_localitie || "";
                               corpPhoneMobile = corpData[0].corp_phone_mobile || ""; corpPhoneLandline = corpData[0].corp_phone_landline || ""; corpEmail = corpData[0].corp_email || "";}
@@ -299,6 +301,13 @@
         return "Boa noite,";
       }
     }
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    function todayStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
     function tipoLabel(tipo) {
       if (tipo === 'entrada') return 'Entrada';
       if (tipo === 'saida') return 'Saída';
@@ -322,17 +331,31 @@
         showToast("Selecione a data.");
         return;
       }
+      if (data > todayStr()) {
+        showToast("A data da picagem não pode ser futura.");
+        return;
+      }
       if (!texto) {
         showToast("Indique uma justificação.");
         return;
       }
-      const corpOperNr = getCorp();
+      const corpRaw = getCorp();
+      const corpOperNr = corpRaw ? corpRaw.padStart(4, "0") : null;
       const nInt = getNInt();
+      if (!corpOperNr || !nInt) {
+        showToast("Sessão inválida. Volte a iniciar sessão.");
+        return;
+      }
+      const submitBtn = document.getElementById('submitJustifBtn');
+      const submitBtnText = document.getElementById('submitJustifBtnText');
+      if (submitBtn?.disabled) return;
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitBtnText) submitBtnText.textContent = "A Enviar Justificação";
       let full_name = "N/D";
       let senderEmail = "";
       try {
         const userRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/reg_elems?select=full_name,email&n_int=eq.${nInt}`, {
+          `${SUPABASE_URL}/rest/v1/reg_elems?select=full_name,email&n_int=eq.${nInt}&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
@@ -346,10 +369,6 @@
       } catch (err) {
         console.error("Erro ao obter nome do elemento:", err);
       }
-      const submitBtn = document.getElementById('submitJustifBtn');
-      const submitBtnText = document.getElementById('submitJustifBtnText');
-      if (submitBtn) submitBtn.disabled = true;
-      if (submitBtnText) submitBtnText.textContent = "A Enviar Justificação";
       try {
         const {to, cc, bcc} = await fetchJustifRecipientsFromSupabase(corpOperNr);
         if (senderEmail && !cc.includes(senderEmail)) {
@@ -364,11 +383,11 @@
         const dataFormatada = formatDateBR(data);
         const emailBodyHTML = `
           ${greeting}<br><br>
-          Informa-se que <strong>${full_name}</strong> apresentou uma justificação de picagem de ponto com os seguintes dados:<br><br>
+          Informa-se que <strong>${escapeHtml(full_name)}</strong> (Nº ${escapeHtml(nInt)}) apresentou uma justificação de picagem de ponto com os seguintes dados:<br><br>
           <strong>Tipo de Picagem:</strong> ${tipoLabel(selectedTipoRegisto)}<br>
           <strong>Data da Picagem:</strong> ${dataFormatada}<br>
-          <strong>Hora da Picagem:</strong> ${hora || 'N/D'}<br><br>
-          <strong>Justificação:</strong><br>${texto.replace(/\n/g, '<br>')}<br><br>
+          <strong>Hora da Picagem:</strong> ${escapeHtml(hora || 'N/D')}<br><br>
+          <strong>Justificação:</strong><br>${escapeHtml(texto).replace(/\n/g, '<br>')}<br><br>
           Com os melhores cumprimentos,<br>
           <span style="font-family: 'Arial'; font-size: 10px; color: gray;">
           Este email foi processado automaticamente por: CB360 Mobile
@@ -390,7 +409,7 @@
         selectedTipoRegisto = null;
       } catch (err) {
         console.error(err);
-        showToast("Erro ao enviar a justificação: " + err.message);
+        showToast("Erro ao enviar a justificação. Tente novamente.");
       } finally {
         if (submitBtn) submitBtn.disabled = false;
         if (submitBtnText) submitBtnText.textContent = "Enviar Justificação";
@@ -402,6 +421,10 @@
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
       }
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
+      const dateEl = document.getElementById('fieldDate');
+      if (dateEl) dateEl.max = todayStr();
       const justificacaoEl = document.getElementById('fieldJustificacao');
       if (justificacaoEl) autoResizeTextarea(justificacaoEl);
     });
