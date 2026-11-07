@@ -279,7 +279,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -296,12 +296,12 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    function getCorp() {return localStorage.getItem("currentCorpOperNr") || "0805";}
-    function getNInt() {return localStorage.getItem("currentCorpNint") || "205";}
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
       const corp = getCorp();
       const nint = getNInt();
-      const token = localStorage.getItem("authToken") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDUiLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImNvcnBfb3Blcl9uciI6IjA4MDUiLCJuX2ludCI6IjIwNSIsInVzZXJuYW1lIjoiRk1hcnRpbnMiLCJleHAiOjM1NzE5ODA2MTF9.waezVLnc39qQheouIKe805KQZBIChiIyQyj4v0Bf5A0';
+      const token = localStorage.getItem("authToken");
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`,
@@ -319,27 +319,24 @@
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
       const h2 = document.getElementById("corpInfo");
       const logoEl = document.getElementById("corpLogo");
-      if (!corpOperNr) {
-        if (h2) h2.textContent = "Não definido";
-        return;
-      }
+      if (!corpOperNr) return;
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) logoEl.src = cachedLogo;
+      if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
-        if (data && data.length > 0) {
-          const corp = data[0];
-          if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
-          if (logoEl && corp.logo_url) logoEl.src = corp.logo_url.trim();
-        } else {
-          if (h2) h2.textContent = "Não encontrado";
+        if (data && data.length > 0 && data[0].logo_url && data[0].logo_url.trim() !== cachedLogo) {
+          localStorage.setItem("cached_logo_url", data[0].logo_url.trim());
+          if (logoEl) logoEl.src = data[0].logo_url.trim();
         }
       } catch (err) {
         console.error('Erro no loadCorpInfo:', err);
-        if (h2) h2.textContent = corpOperNr;
       }
     }
     /* ========================= TEAM DISPLAY ============================ */
@@ -379,7 +376,10 @@
     /* ===================== TELEGRAM CONFIGURATION ====================== */
     const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendToTelegram';
     const MIN_ELEMENTS = 4;    
-    function debugLog(message, data = null) { console.log(`🔍 DEBUG: ${message}`, data);}    
+    function debugLog() {}
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }    
     /* ==================== TELEGRAM MESSAGE ====================== */
     function createTelegramMessage(data) {
       debugLog('Criando mensagem Telegram', data);
@@ -441,7 +441,16 @@
       return fields.filter(f=>f && f.trim()!=='').length;
     }
     function validateTeamsBeforeSend(data) {
-      if (!currentTeamType) return false;    
+      if (!currentTeamType) return false;
+      // O mesmo número interno não pode estar em dois lugares
+      const all = [data.chief, data.driver, data.element01, data.element02, data.element03, data.chief2, data.driver2,
+                   data.element01_2, data.element02_2, data.element03_2, data.elacChief, data.elacDriver]
+                  .filter(v => v).map(v => String(parseInt(v, 10)));
+      const dup = all.find((v, i) => all.indexOf(v) !== i);
+      if (dup) {
+        showPopup('🚫 Elemento Repetido', `<strong>O Nº ${escapeHtml(dup)} está em mais do que um lugar.</strong>`, [{text:'❌ Fechar',class:'cancel',action:hidePopup}], 'error');
+        return false;
+      }    
       const ecin1Count = countTeamElements([data.chief, data.driver, data.element01, data.element02, data.element03]);
       const ecin2Count = countTeamElements([data.chief2, data.driver2, data.element01_2, data.element02_2, data.element03_2]);
       const elacCount = countTeamElements([data.elacChief, data.elacDriver]);    
@@ -526,12 +535,17 @@
     }
     function showSuccessPopup(){
       showPopup('✅ Sucesso!','<strong>Mensagem enviada com sucesso para a SALOC!</strong>',[{text:'👍 OK',class:'ok',action:()=> {hidePopup();document.getElementById('telegramForm').reset(); showTeam('1-ecin');}}],'success');}
-    function showErrorPopup(errorMessage){ showPopup('❌ Erro no Envio',`<strong>Não foi possível enviar a mensagem!</strong><br><strong>Erro:</strong> ${errorMessage}`,[{text:'🔄 Tentar Novamente',class:'confirm',action: ()=>{hidePopup();processFormSubmission();}},{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error');}
+    function showErrorPopup(errorMessage){ showPopup('❌ Erro no Envio',`<strong>Não foi possível enviar a mensagem!</strong><br>${escapeHtml(errorMessage)}`,[{text:'🔄 Tentar Novamente',class:'confirm',action: ()=>{hidePopup();processFormSubmission();}},{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error');}
     /* =================== SEND TELEGRAM =================== */
     async function sendTelegramMessage(message) {
+      const corpRaw = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
+      if (!corpRaw) {
+        showErrorPopup('Sessão inválida. Volte a iniciar sessão.');
+        return;
+      }
+      const corpOperNr = corpRaw.padStart(4, "0");
       showLoading(true);
       try {
-        const corpOperNr = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
         const response = await fetch(TELEGRAM_API, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -540,15 +554,17 @@
         showLoading(false);
         if (response.ok) showSuccessPopup();
         else {
-          const data = await response.json();
-          showErrorPopup(data.error || 'Erro desconhecido');
+          console.error('Erro Telegram:', response.status, await response.text().catch(() => ''));
+          showErrorPopup(response.status === 413 ? 'Mensagem demasiado grande.' : 'O servidor não aceitou o envio. Tente novamente.');
         }
       } catch (err) {
         showLoading(false);
-        showErrorPopup(err.message || 'Erro de conexão');
+        console.error(err);
+        showErrorPopup('Sem ligação ao servidor. Verifique a rede e tente novamente.');
       }
     }
     function processFormSubmission(){
+      if (document.getElementById('sendButton')?.disabled) return;
       const data=getFormData();
       if(!data.shift){ showPopup('⚠️ Turno Obrigatório','<strong>Por favor selecione o turno!</strong>',[{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error'); return; }
       if(!validateTeamsBeforeSend(data)) return;
@@ -561,7 +577,9 @@
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
       }      
-      loadCorpInfo();      
+      loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       document.querySelectorAll('input[type="text"]').forEach(validateNumericInput);      
       const sendButton = document.getElementById('sendButton');
       if (sendButton) {
