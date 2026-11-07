@@ -1,6 +1,6 @@
     /* =========================================================
     CB360 Mobile - Complete Service Worker
-    v5.7.2 - Fix: catch() do fetch handler já não deixa a
+    v5.7.3 - Fix: catch() do fetch handler já não deixa a
     promise resolver para undefined (Failed to convert value
     to 'Response'); devolve sempre um Response válido, com
     fallback para index.html em navegações offline.
