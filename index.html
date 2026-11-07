@@ -14204,6 +14204,9 @@
         if (h2) h2.textContent = "Não definido";
         return;
       }
+      /* Mostra logo guardado de imediato (evita o "piscar" ao voltar ao menu) */
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) logoEl.src = cachedLogo;
       try {
         const url = `${SUPABASE_URL}/rest/v1/corporation_data?select=corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`;
         const response = await fetch(url, { headers: getSupabaseHeaders() });
@@ -14218,7 +14221,9 @@
           const corp = data[0];
           if (h2) h2.textContent = corp.corp_oper_nr || "N/D";
           if (logoEl && corp.logo_url) {
-            logoEl.src = corp.logo_url.trim();
+            const newLogo = corp.logo_url.trim();
+            try { localStorage.setItem("cached_logo_url", newLogo); } catch (e) {}
+            if (logoEl.getAttribute('src') !== newLogo) logoEl.src = newLogo;
           } else {
             console.warn('⚠️ loadCorpInfo — registo encontrado mas sem logo_url:', corp);
           }
@@ -14237,6 +14242,20 @@
       const corpOperNr = getCorp();
       const welcomeNameEl = document.querySelector('.welcome-text .name');
       const avatarEl = document.getElementById('userAvatar');
+      /* Nome e foto guardados da última vez: aparecem logo, sem "piscar" ao voltar ao menu */
+      const cName = localStorage.getItem('cb360_user_name_' + nInt);
+      const cPhoto = localStorage.getItem('cb360_user_photo_' + nInt);
+      if (cName && welcomeNameEl) welcomeNameEl.textContent = cName;
+      if (cPhoto && avatarEl) avatarEl.src = cPhoto;
+      avatarEl.addEventListener('load', () => {
+        try {
+          if (!avatarEl.naturalWidth || /gravatar\.com/.test(avatarEl.src) || avatarEl.src.startsWith('data:')) return;
+          const s = Math.min(avatarEl.naturalWidth, avatarEl.naturalHeight), c = document.createElement('canvas');
+          c.width = c.height = 120;
+          c.getContext('2d').drawImage(avatarEl, (avatarEl.naturalWidth - s) / 2, (avatarEl.naturalHeight - s) / 2, s, s, 0, 0, 120, 120);
+          localStorage.setItem('cb360_user_photo_' + nInt, c.toDataURL('image/jpeg', 0.82));
+        } catch (e) { /* imagem de outro domínio sem CORS: não guarda, fica como antes */ }
+      });
       try {
         const url = `${SUPABASE_URL}/rest/v1/reg_elems?select=abv_name,photo_url&n_int=eq.${nInt}&corp_oper_nr=eq.${getCorpPadded()}`;
         const response = await fetch(url, { headers: getSupabaseHeaders() });
@@ -14245,6 +14264,7 @@
         if (data[0]?.abv_name) {
           window.isVehicleUser = false;
           welcomeNameEl.textContent = data[0].abv_name;
+          try { localStorage.setItem('cb360_user_name_' + nInt, data[0].abv_name); } catch (e) {}
           mobileLoadPhoto(avatarEl, data[0].photo_url, "https://www.gravatar.com/avatar/?d=mp");
           return;
         }
@@ -14265,8 +14285,9 @@
         }
         lockConfigTab();
       } catch (error) {
-        if (welcomeNameEl) welcomeNameEl.textContent = 'Utilizador';
-        if (avatarEl) avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
+        /* sem rede: mantém nome/foto guardados em vez de os apagar */
+        if (welcomeNameEl && !cName) welcomeNameEl.textContent = 'Utilizador';
+        if (avatarEl && !cPhoto) avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
       }
     }
     /* ====================== NEXT SERVICE (ATUALIZADO) =================== */
@@ -25234,7 +25255,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v4 - 2026-11-07 - MainPage limpo + chat 1 entrada de historico + SW rede primeiro';
+  window.CB360_BUILD='v6 - 2026-11-07 - barra de estado #8b0000 (+ v5: logo/foto em cache)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#c62828;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
@@ -25283,7 +25304,8 @@
         if(t)document.title=t;
         var tc=d.querySelector('meta[name="theme-color"]');
         var m=document.querySelector('meta[name="theme-color"]');
-        if(tc&&m)m.setAttribute('content',tc.getAttribute('content'));
+        /* barra de estado: igual ao início do cabeçalho (#8b0000); o login mantém o seu escuro */
+        if(tc&&m)m.setAttribute('content',name===DEFAULT?tc.getAttribute('content'):'#8b0000');
         var bg=getComputedStyle(d.documentElement).backgroundColor;
         if(!bg||bg==='rgba(0, 0, 0, 0)')bg=getComputedStyle(d.body).backgroundColor;
         if(bg&&bg!=='rgba(0, 0, 0, 0)')document.documentElement.style.background=bg;
