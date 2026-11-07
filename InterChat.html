@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT" style="background-color: #d32f2f;">
+<html lang="pt-PT" style="background-color: #8b0000;">
 <head>
   <script>
     (function() {
@@ -15,7 +15,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-  <meta name="theme-color" content="#d32f2f">
+  <meta name="theme-color" content="#8b0000">
   <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript>
@@ -28,93 +28,41 @@
     /* ============================================================
     VARIABLES
     ============================================================ */
-    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, .1); --red-icon: #c62828; --bg: #f4f3f1; --surface: #ddd; --surface-2: #edecea; --border: rgba(0, 0, 0, .07); --txt-1: #1c1b1a;
-           --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04); --sh-md: 0 4px 12px rgba(0, 0, 0, .08), 0 1px 4px rgba(0, 0, 0, .04);
-           --sh-lg: 0 8px 24px rgba(0, 0, 0, .1), 0 2px 8px rgba(0, 0, 0, .05); --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: .2s cubic-bezier(.4, 0, .2, 1);
-           --blue: #0282fa; --green: #2e7d32; --green-state: #2e7d32; --red-state: #c62828; --kb: 0px; --gap: 10px; --safe: env(safe-area-inset-bottom, 0px); --selection-color: #bcd9ff;}
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+           --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+           --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+           --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;
+           --green: #2e7d32; --green-state: #2e7d32; --red-state: #c62828; --kb: 0px; --gap: 10px; --safe: env(safe-area-inset-bottom, 0px);
+           --selection-color: #bcd9ff; --bubble-self: #c62828; --bubble-self-txt: #ffffff; --bubble-other: #dddddd; --bubble-other-txt: #1c1b1a; --overlay-bg: rgba(255,255,255,0.97);}
     ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
     .header, .footer {view-transition-name: none;}
     /* ============================================================
+    DARK MODE (mesmas variáveis das restantes páginas)
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;
+                --green: #66bb6a; --green-state: #66bb6a; --red-state: #ff6b6b; --selection-color: #2b5278;
+                --bubble-self: #8b1a1a; --bubble-self-txt: #f0ede8; --bubble-other: #2a2826; --bubble-other-txt: #f0ede8; --overlay-bg: rgba(31,30,28,0.97);}
+    /* ============================================================
     RESET & BASE
     ============================================================ */
-    html {background: #d32f2f !important; scrollbar-width: none; -ms-overflow-style: none;}
+    html {scrollbar-width: none; -ms-overflow-style: none; background: var(--red-dark);}
     * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; -webkit-touch-callout: none !important;}
-    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f5f5, #e8e8e8); min-height: 100vh; height: 100vh;
-          height: 100dvh; user-select: none; transition: all .3s ease; display: flex; flex-direction: column; overflow: hidden;}
-    /* ============================================================
-    DARK MODE
-    ============================================================ */
-    .dark-mode {--selection-color: #2b5278; background: linear-gradient(135deg, #1a1a1a, #2d2d2d); color: #fff;}
-    .dark-mode .main-content {background: linear-gradient(135deg, #1a1a1a, #2d2d2d);}
-    .dark-mode .msg-sender-name {color: #fff !important;}
-    .dark-mode #contact-list::-webkit-scrollbar-thumb, .dark-mode #chat-messages::-webkit-scrollbar-thumb {background: rgba(255, 255, 255, .15);}
-    .dark-mode #contact-list::-webkit-scrollbar-thumb:hover, .dark-mode #chat-messages::-webkit-scrollbar-thumb:hover {background: rgba(255, 255, 255, .3);}
-    .dark-mode .contact-id-info {color: #ddd;}
-    .dark-mode {background: transparent; color: #fff;}
-    .dark-mode .contact:hover {background: rgba(255, 255, 255, .12);}
-    .dark-mode .unread-badge {background: #f44336; box-shadow: 0 0 8px rgba(244, 67, 54, .4);}
-    .dark-mode .chat-input-bar, .dark-mode .chat-input-bar textarea {background: transparent;}
-    .dark-mode .chat-input-bar .input-wrapper {background: rgba(255, 255, 255, .15);}
-    .dark-mode .chat-input-bar button {color: #ddd;}
-    .dark-mode .chat-input-bar textarea {border: none; color: #fff !important;}
-    .dark-mode .chat-input-bar.keyboard-active {background: rgba(0, 0, 0, .15);}
-    .dark-mode .chat-id-info {color: #f9a825; background: rgba(255, 255, 255, .1); border-left-color: #f9a825;}
-    .dark-mode #back-header {color: #ddd;}
-    .dark-mode .pinned-banner {background: rgba(68, 68, 68, .95); border-bottom-color: #555; color: #f9a825;}
-    .dark-mode #messages div[style*="color: #888"] {color: #aaa !important;}
-    .dark-mode .date-divider span {background: rgba(255, 255, 255, .1); color: #ddd;}
-    .dark-mode .message.self {background: #005c4b; color: #e9edef;}
-    .dark-mode .message.self::after {border-left-color: #005c4b;}
-    .dark-mode .message.other {background: #386580; color: #e9edef;}
-    .dark-mode .message.other::after {border-right-color: #386580;}
-    .dark-mode .message.other .msg-meta {color: rgba(255, 255, 255, .5) !important;}
-    .dark-mode .message.deleted .msg-text-content {color: #aaa !important;}
+    body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; user-select: none;
+          transition: background var(--ease), color var(--ease); display: flex; flex-direction: column; overflow: hidden;}
+    .dark-mode .msg-sender-name {color: #ff8a80 !important;}
+    .dark-mode .message.deleted .msg-text-content {color: var(--txt-3) !important;}
     .dark-mode .message.selected {color: #fff !important;}
     .dark-mode .message.selected .status-checks {color: rgba(255, 255, 255, .7) !important;}
-    .dark-mode .typing-indicator {background: rgba(40, 40, 40, .5); color: #bbb !important; border-color: rgba(255, 255, 255, .1);}
-    .dark-mode .action-bar {background: #2d2d2d; border-bottom-color: #f9a825;}
-    .dark-mode .action-bar-close, .dark-mode .action-btn {color: #f9a825;}
-    .dark-mode .action-btn:active {background: rgba(249, 168, 37, .1);}
-    .dark-mode .action-bar-counter {color: #fff;}
-    .dark-mode .reply-bar {background: rgba(45, 45, 45, .95); border-top-color: #555;}
-    .dark-mode .reply-icon, .dark-mode .reply-to-name, .dark-mode .reply-preview-name {color: #f9a825;}
-    .dark-mode .reply-to-text, .dark-mode .reply-preview-text {color: #aaa;}
-    .dark-mode .reply-preview {background: rgba(255, 255, 255, .1); border-left-color: #f9a825;}
+    .dark-mode .pinned-banner {background: rgba(68, 68, 68, .95); border-bottom-color: #555; color: #f9a825;}
     .dark-mode .edit-bar {background: rgba(249, 168, 37, .2); border-top-color: #f9a825;}
     .dark-mode .edit-icon, .dark-mode .edit-text-preview {color: #ffa726;}
     .dark-mode .edit-label, .dark-mode .edit-cancel {color: #ffb74d;}
-    .dark-mode .reaction-menu {background: #232d36; box-shadow: 0 4px 20px rgba(0, 0, 0, .4);}
-    .dark-mode .plus-button {background: #3b4a54; box-shadow: -8px 0 12px #232d36;}
-    .dark-mode .plus-button .material-icons {color: #aebac1;}
-    .dark-mode .reaction-badge {background: transparent; border-color: transparent;}
-    .dark-mode .reaction-badge.my-reaction {background: transparent; border-color: transparent; color: #fff;}
     .dark-mode .reaction-count {background: rgba(0,0,0,.5); color: #ddd;}
     .dark-mode .reaction-badge:hover {box-shadow: 0 2px 5px rgba(0, 0, 0, .6);}
-    .dark-mode .custom-confirm-card {background: #2b2b2b; color: #fff;}
-    .dark-mode .confirm-text {color: #eee;}
-    .dark-mode .btn-confirm-action:active, .dark-mode .btn-confirm-cancel:active {background: rgba(255, 255, 255, .05);}
-    .dark-mode .draft-preview {color: #aaa !important;}
     .dark-mode .attach-modal {background: rgba(0, 0, 0, .92);}
-    .dark-mode .attach-card {background: #2b2b2b; color: #fff; box-shadow: 0 10px 40px rgba(0, 0, 0, .6);}
-    .dark-mode .attach-header {color: #f9a825; border-bottom-color: rgba(255, 255, 255, .08);}
-    .dark-mode .attach-x {color: #ddd;}
-    .dark-mode .attach-x:hover {color: #fff; background: rgba(255, 255, 255, .08); border-radius: 6px;}
     .dark-mode .attach-preview, .dark-mode .attach-preview img {background: #000;}
-    .dark-mode #attach-caption {background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .15); color: #fff;}
-    .dark-mode #attach-caption::placeholder {color: #aaa;}
-    .dark-mode #attach-send {background: #f9a825; color: #1a1a1a;}
-    .dark-mode #attach-send:hover {background: #ffb300;}
-    .dark-mode #attach-send:disabled {opacity: .6;}
-    .dark-mode .attach-loading {background: rgba(0, 0, 0, .7); color: #fff;}
-    .dark-mode .attach-file-card {background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .12);}
-    .dark-mode .attach-file-card .material-icons {color: #f9a825;}
-    .dark-mode .attach-file-name {color: #fff;}
-    .dark-mode .attach-file-type {color: #bbb;}
-    .dark-mode .filter-btn-item {background: #444; color: #ddd; border-color: #555;}
-    .dark-mode .filter-btn-item .material-icons {color: #ddd;}
-    .dark-mode .search-box {background: #444; border-color: #555;}
-    .dark-mode .search-icon {color: #bbb;}
-    .dark-mode #global-search {color: #ddd;}
+    .dark-mode .unread-badge {box-shadow: 0 0 8px rgba(244, 67, 54, .4);}
     /* ============================================================
     PWA / KEYBOARD
     ============================================================ */
@@ -141,31 +89,31 @@
     MAIN / CONTACTS
     ============================================================ */
     .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; padding-top: calc(var(--header-h) + 10px); background: var(--bg); transition: background var(--ease);}
-    .contact-id-info {padding: 10px 20px; font-size: 20px; font-weight: bold; color: #444;}
+    .contact-id-info {padding: 10px 20px; font-size: 20px; font-weight: bold; color: var(--txt-1);}
     #contact-list {display: flex; flex-direction: column; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0; margin: 10px 0 50px;} 
-    .contact {display: flex; align-items: center; gap: 5px; padding: 5px 12px; margin: 0; background: rgba(0, 0, 0, .15); color: #777; cursor: pointer; transition: background .2s, transform .2s;}
-    .contact:hover {background: #ddd;}
-    .contact-avatar {width: 40px; height: 40px; border-radius: 50%; border: 2px solid #666; background: #d32f2f; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; text-transform: uppercase; overflow: visible; position: relative;}
+    .contact {display: flex; align-items: center; gap: 8px; padding: 8px 14px; margin: 0; background: var(--surface); border-bottom: 1px solid var(--border); color: var(--txt-2); cursor: pointer; transition: background var(--ease), transform .2s;}
+    .contact:hover {background: var(--surface-2);}
+    .contact-avatar {width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; text-transform: uppercase; overflow: visible; position: relative;}
     .contact-avatar img {width: 100%; height: 100%; object-fit: cover; border-radius: 50%;}
     .contact-info {display: flex; flex-direction: column; justify-content: center; flex: 1; min-width: 0;}
     .contact-info .nint {font-size: 14px; opacity: .6;}
-    .contact-info .name {font-size: 14px; font-weight: bold;}
+    .contact-info .name {font-size: 14px; font-weight: 700; color: var(--txt-1);}
     .contact-right {display: flex; align-items: center; gap: 8px; margin-left: 8px;}
     .contact-status {display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: .85; order: 2;}
     .unread-slot {order: 1;}
-    .status-dot {width: 13px; height: 13px; background: #bbb; border-radius: 50%; border: 2.5px solid #fff; position: absolute; bottom: -1px; right: -1px; transition: all .3s ease; z-index: 2;}
+    .status-dot {width: 13px; height: 13px; background: #bbb; border-radius: 50%; border: 2.5px solid var(--surface); position: absolute; bottom: -1px; right: -1px; transition: all .3s ease; z-index: 2;}
     .status-dot.online {background: #0f0; box-shadow: 0 0 8px #0f0, 0 0 12px rgba(0, 255, 0, .5); animation: pulse-green 2s infinite;}
-    .unread-badge {background: #d32f2f; color: #fff; font-size: 13px; font-weight: bold; padding: 0 6px; min-width: 30px; height: 20px; line-height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-left: auto; box-shadow: 0 2px 4px rgba(0, 0, 0, .2);}
+    .unread-badge {background: var(--red); color: #fff; font-size: 13px; font-weight: bold; padding: 0 6px; min-width: 30px; height: 20px; line-height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-left: auto; box-shadow: 0 2px 4px rgba(0, 0, 0, .2);}
     /* ============================================================
     BACK / CHAT
     ============================================================ */
-    .back-header {font-size: 20px; color: #444; text-align: left; display: flex; align-items: center; height: 40px; margin: 2px 0;}
-    #back-header {position: relative; padding: 0 5px; z-index: 1001; color: #444;}
+    .back-header {font-size: 20px; color: var(--txt-2); text-align: left; display: flex; align-items: center; height: 40px; margin: 2px 0;}
+    #back-header {position: relative; padding: 0 5px; z-index: 1001; color: var(--txt-2);}
     .back-text {font-weight: bold !important;}
     .back-header.show {opacity: 1; pointer-events: auto;}
     .back-header:hover {opacity: .75;}
     .back-arrow {font-size: 25px !important; margin: 4px 0 0; font-weight: bold !important;}
-    .chat-id-info {padding: 5px 20px; font-size: 15px; font-weight: bold; color: #d32f2f; background: rgba(0, 0, 0, .1); border-left: 4px solid #d32f2f;}
+    .chat-id-info {padding: 8px 20px; font-size: 15px; font-weight: 700; color: var(--red); background: var(--surface); border-left: 4px solid var(--red); box-shadow: var(--sh-sm);}
     .message-container {display: none; flex-direction: column; gap: 0; padding: 15px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 60px; max-height: calc(100dvh - 220px); padding-bottom: calc(var(--footer-h) + 60px + var(--kb) + var(--safe)); transition: max-height .3s ease, margin-bottom .3s ease;}
     .message-container.keyboard-active {scroll-behavior: auto;}
     .pinned-banner {background: rgba(255, 248, 225, .95); border-bottom: 1px solid #ffe082; padding: 10px 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #856404; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); max-height: 100px; overflow-y: auto;}
@@ -175,23 +123,23 @@
     ============================================================ */
     .message {max-width: 75%; padding: 10px; border-radius: 7.5px; margin-bottom: 4px; position: relative; font-size: 14.5px; line-height: 1.5; box-shadow: 0 1px .5px rgba(0, 0, 0, .13); word-wrap: break-word;}
     .msg-text-content {white-space: pre-wrap;}
-    .message.self {align-self: flex-end; background: #6b9e59; color: #fff; margin-right: 10px; border-top-right-radius: 0;}
-    .message.other {align-self: flex-start; background: #ddd; color: #000; margin-left: 10px; border-top-left-radius: 0;}
+    .message.self {align-self: flex-end; background: var(--bubble-self); color: var(--bubble-self-txt); margin-right: 10px; border-top-right-radius: 0;}
+    .message.other {align-self: flex-start; background: var(--bubble-other); color: var(--bubble-other-txt); margin-left: 10px; border-top-left-radius: 0;}
     .message.self::after, .message.other::after {content: ""; position: absolute; top: 0; width: 0; height: 0; border-bottom: 10px solid transparent;}
-    .message.self::after {right: -10px; border-left: 10px solid #6b9e59;}
-    .message.other::after {left: -10px; border-right: 10px solid #ddd;}
+    .message.self::after {right: -10px; border-left: 10px solid var(--bubble-self);}
+    .message.other::after {left: -10px; border-right: 10px solid var(--bubble-other);}
     .message.grouped::after {display: none;}
     .message.self.grouped {border-top-right-radius: 7.5px;}
     .message.other.grouped {border-top-left-radius: 7.5px;}
-    .msg-sender-name {font-size: 12px; font-weight: bold; color: #d32f2f; margin-bottom: 2px;}
+    .msg-sender-name {font-size: 12px; font-weight: bold; color: var(--red); margin-bottom: 2px;}
     .msg-meta {float: right; margin: 10px 0 0 25px; font-size: 11px; color: rgba(255, 255, 255, .6); white-space: nowrap; display: flex; align-items: center; position: relative; z-index: 1;}
-    .message.other .msg-meta {color: rgba(0, 0, 0, .45);}
+    .message.other .msg-meta {color: var(--txt-3);}
     .status-checks {font-size: 16px !important; margin-left: 5px; line-height: 1; vertical-align: middle; display: inline-flex;}
     .status-checks.sent, .status-checks.delivered {color: rgba(255, 255, 255, .5) !important;}
     .status-checks.read {color: #07e5f5 !important;}
     .message.other .status-checks {display: none;}
     .date-divider {text-align: center; margin: 20px 0 10px; clear: both; width: 100%; display: flex; justify-content: center;}
-    .date-divider span {background: rgba(0, 0, 0, .05); color: #555; padding: 5px 15px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: .5px;}
+    .date-divider span {background: var(--surface); color: var(--txt-2); box-shadow: var(--sh-sm); padding: 5px 15px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: .5px;}
     .message.selected {background: var(--selection-color) !important; position: relative; box-shadow: none !important; color: #000 !important;}
     .message.selected .status-checks {color: rgba(0, 0, 0, .5) !important;}
     .message.self.selected::after {border-left-color: var(--selection-color) !important; border-right-color: transparent !important; filter: none !important;}
@@ -210,12 +158,12 @@
     INPUT / SCROLL
     ============================================================ */
     .chat-input-bar {position: fixed; left: 0; right: 0; bottom: calc(var(--footer-h) + var(--kb) + var(--gap) + var(--safe)); z-index: 10001; display: none; align-items: flex-end; gap: 8px; padding: 8px 10px; background: transparent; width: 100%; max-width: 100%; box-sizing: border-box; transition: bottom .12s ease;}
-    .chat-input-bar.keyboard-active {box-shadow: 0 -4px 12px rgba(0, 0, 0, .12); background: rgba(255, 255, 255, .98);}
-    .input-wrapper {display: flex; flex: 1; min-width: 0; align-items: center; background: #ccc; border-radius: 25px; padding: 5px 12px; gap: 2px; min-height: 40px; transition: all .3s ease;}
-    #chat-input {color: #444; flex: 1; min-width: 0; border: none; background: transparent; outline: none; resize: none; padding: 10px 5px; font-size: 15px; max-height: 100px; overflow-y: auto; font-family: inherit; scrollbar-width: none; -ms-overflow-style: none;}
+    .chat-input-bar.keyboard-active {box-shadow: 0 -4px 12px rgba(0, 0, 0, .12); background: var(--overlay-bg);}
+    .input-wrapper {display: flex; flex: 1; min-width: 0; align-items: center; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm); border-radius: 25px; padding: 5px 12px; gap: 2px; min-height: 40px; transition: all .3s ease;}
+    #chat-input {color: var(--txt-1); flex: 1; min-width: 0; border: none; background: transparent; outline: none; resize: none; padding: 10px 5px; font-size: 15px; max-height: 100px; overflow-y: auto; font-family: inherit; scrollbar-width: none; -ms-overflow-style: none;}
     #chat-input::-webkit-scrollbar {width: 0; background: transparent;}
-    .chat-input-bar button {height: 40px; width: 40px; padding: 4px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent; color: #54656f; transition: transform .1s ease, background .2s; flex-shrink: 0;}
-    #chat-send-btn {background: #00a884; color: #fff; border-radius: 50%; width: 50px; height: 50px; flex-shrink: 0;}
+    .chat-input-bar button {height: 40px; width: 40px; padding: 4px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--txt-2); transition: transform .1s ease, background .2s; flex-shrink: 0;}
+    #chat-send-btn {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; box-shadow: var(--sh-md); border-radius: 50%; width: 50px; height: 50px; flex-shrink: 0;}
     #send-icon {display: inline-block; transition: transform .3s cubic-bezier(.175, .885, .32, 1.275), opacity .2s;}
     .icon-spin {transform: rotate(360deg) scale(.5); opacity: 0;}
     #camera-btn {display: flex; width: 30px; opacity: 1; overflow: hidden; transition: width .3s ease, opacity .2s ease, margin .3s ease;}
@@ -227,14 +175,14 @@
     /* ============================================================
     ACTION / TYPING
     ============================================================ */
-    .typing-indicator {position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #888; font-style: italic; background: rgba(255, 255, 255, .95); padding: 6px 16px; border-radius: 20px; z-index: 1100; display: none; pointer-events: none; border: 1px solid rgba(0, 0, 0, .08); box-shadow: 0 4px 12px rgba(0, 0, 0, .1); transition: opacity .2s ease; white-space: nowrap; max-width: 80%;}
-    .action-bar {position: fixed; top: 100px; left: 0; right: 0; background: #f0f0f0; border-bottom: 2px solid #d32f2f; padding: 8px 15px; display: none; align-items: center; gap: 15px; z-index: 2000; box-shadow: 0 2px 8px rgba(0, 0, 0, .15); transform: translateY(-100%); transition: transform .3s ease;}
+    .typing-indicator {position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--txt-2); font-style: italic; background: var(--overlay-bg); padding: 6px 16px; border-radius: 20px; z-index: 1100; display: none; pointer-events: none; border: 1px solid var(--border); box-shadow: var(--sh-md); transition: opacity .2s ease; white-space: nowrap; max-width: 80%;}
+    .action-bar {position: fixed; top: 100px; left: 0; right: 0; background: var(--surface); border-bottom: 2px solid var(--red); padding: 8px 15px; display: none; align-items: center; gap: 15px; z-index: 2000; box-shadow: 0 2px 8px rgba(0, 0, 0, .15); transform: translateY(-100%); transition: transform .3s ease;}
     .action-bar.show {display: flex; transform: translateY(0); animation: slideDown .3s ease;}
-    .action-bar-close {background: none; border: none; color: #d32f2f; font-size: 24px; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: transform .2s;}
+    .action-bar-close {background: none; border: none; color: var(--red); font-size: 24px; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: transform .2s;}
     .action-bar-close:active {transform: scale(.9);}
-    .action-bar-counter {flex: 1; font-size: 15px; font-weight: 500; color: #333;}
+    .action-bar-counter {flex: 1; font-size: 15px; font-weight: 600; color: var(--txt-1);}
     .action-bar-actions {display: flex; gap: 8px; align-items: center;}
-    .action-btn {background: none; border: none; color: #d32f2f; font-size: 22px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all .2s; min-width: 35px; min-height: 35px;}
+    .action-btn {background: none; border: none; color: var(--red); font-size: 22px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all .2s; min-width: 35px; min-height: 35px;}
     .action-btn:active {transform: scale(.9); background: rgba(211, 47, 47, .1);}
     .action-btn.disabled {opacity: .3; pointer-events: none;}
     /* ============================================================
@@ -242,7 +190,7 @@
    ============================================================ */
     .edit-bar, .reply-bar {position: fixed; left: 0; right: 0; bottom: 100px; padding: 10px 15px; display: none; backdrop-filter: blur(10px);}
     .edit-bar {background: rgba(255, 235, 59, .95); border-top: 2px solid #f9a825; z-index: 1002; box-shadow: 0 -2px 8px rgba(0, 0, 0, .2);}
-    .reply-bar {background: rgba(255, 255, 255, .95); border-top: 1px solid #ddd; z-index: 5000; box-shadow: 0 -2px 8px rgba(0, 0, 0, .1);}
+    .reply-bar {background: var(--overlay-bg); border-top: 1px solid var(--border); z-index: 5000; box-shadow: 0 -2px 8px rgba(0, 0, 0, .1);}
     .edit-bar-content, .reply-bar-content {display: flex; align-items: center; gap: 10px;}
     .edit-info, .reply-info {flex: 1; min-width: 0;}
     .edit-icon {font-size: 20px; color: #f57c00;}
@@ -250,34 +198,34 @@
     .edit-text-preview {font-size: 13px; color: #f57c00; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
     .edit-cancel, .reply-cancel {background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px; line-height: 1;}
     .edit-cancel {color: #e65100;}
-    .reply-cancel {color: #888;}
+    .reply-cancel {color: var(--txt-3);}
     .edit-cancel:active, .reply-cancel:active {transform: scale(.9);}
-    .reply-icon {font-size: 20px; color: #d32f2f;}
-    .reply-to-name {font-size: 12px; font-weight: bold; color: #d32f2f; margin-bottom: 2px;}
-    .reply-to-text {font-size: 13px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-    .reply-preview {background: rgba(0, 0, 0, .08); border-left: 3px solid #d32f2f; padding: 6px 10px; margin-bottom: 6px; border-radius: 4px; font-size: 12px; cursor: pointer;}
+    .reply-icon {font-size: 20px; color: var(--red);}
+    .reply-to-name {font-size: 12px; font-weight: bold; color: var(--red); margin-bottom: 2px;}
+    .reply-to-text {font-size: 13px; color: var(--txt-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+    .reply-preview {background: rgba(0, 0, 0, .10); border-left: 3px solid var(--red); padding: 6px 10px; margin-bottom: 6px; border-radius: 4px; font-size: 12px; cursor: pointer;}
     .reply-preview:active {opacity: .7;}
-    .reply-preview-name {font-weight: bold; color: #d32f2f; margin-bottom: 2px;}
-    .reply-preview-text {color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;}
+    .reply-preview-name {font-weight: bold; color: inherit; margin-bottom: 2px;}
+    .reply-preview-text {color: inherit; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;}
     /* ============================================================
     IMAGENS / REACTIONS
     ============================================================ */
     .chat-img {max-width: 230px; width: 100%; height: auto; border-radius: 10px; display: block; cursor: pointer; -webkit-touch-callout: none !important; -webkit-user-select: none !important; -moz-user-select: none !important; -ms-user-select: none !important; user-select: none !important; pointer-events: auto; -webkit-user-drag: none !important;}
     .img-caption {line-height: 1.35; opacity: .95; word-wrap: break-word;}
-    .reaction-menu {display: none; position: fixed; z-index: 10000; background: #fff; border-radius: 30px; padding: 3px 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, .15); align-items: center; justify-content: space-between; animation: popScale .1s ease-out; width: 215px;}
+    .reaction-menu {display: none; position: fixed; z-index: 10000; background: var(--surface); border-radius: 30px; padding: 3px 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, .15); align-items: center; justify-content: space-between; animation: popScale .1s ease-out; width: 215px;}
     .emoji-scroll-container {display: flex; gap: 5px; overflow-x: auto; padding-right: 8px; scrollbar-width: none; -ms-overflow-style: none; flex: 1;}
     .emoji-scroll-container::-webkit-scrollbar {display: none;}
     .reaction-emoji-container {font-size: 25px; cursor: pointer; margin: 0 0 5px; flex-shrink: 0; transition: transform .1s cubic-bezier(.175, .885, .32, 1.275);}
-    .plus-button {display: flex !important; align-items: center; justify-content: center; width: 28px; height: 28px; background: #f0f2f5; border-radius: 50%; cursor: pointer; flex-shrink: 0;  margin-left: 5px; box-shadow: -8px 0 12px #fff;}
-    .plus-button .material-icons {font-size: 20px; color: #667781;}
+    .plus-button {display: flex !important; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--surface-2); border-radius: 50%; cursor: pointer; flex-shrink: 0;  margin-left: 5px; box-shadow: -8px 0 12px var(--surface);}
+    .plus-button .material-icons {font-size: 20px; color: var(--txt-2);}
     .message-reactions {position: absolute; bottom: -12px; right: -6px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 5; pointer-events: all;}
     .message.self .message-reactions {right: 10px;}
     .message.other .message-reactions {left: 10px;}
     .reaction-badge {display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 20px; height: 21px; width: 21px; padding: 0 5px; box-shadow: 0 1px 2px rgba(0, 0, 0, .18); transition: all .2s; cursor: pointer; flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15));}
     .reaction-badge.my-reaction {background: transparent; border: none;}
-    .reaction-badge.my-reaction .reaction-count {color: #d32f2f; font-weight: 700;}
+    .reaction-badge.my-reaction .reaction-count {color: var(--red); font-weight: 700;}
     .reaction-emoji {font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;}
-    .reaction-count {font-size: 11px; font-weight: 700; margin-left: 2px; color: #444; background: rgba(255,255,255,.85); border-radius: 8px; padding: 0 3px;}
+    .reaction-count {font-size: 11px; font-weight: 700; margin-left: 2px; color: #333; background: rgba(255,255,255,.85); border-radius: 8px; padding: 0 3px;}
     .reaction-badge:hover {transform: scale(1.1);}
     .reaction-badge:active {transform: scale(.95);}
     .thumb-emoji {margin-bottom: 5px;}
@@ -287,16 +235,16 @@
     CONFIRM / EMOJI / DRAFT
     ============================================================ */
     .custom-confirm-overlay {position: fixed; inset: 0; background: rgba(0, 0, 0, .7); z-index: 10000; display: flex; align-items: center; justify-content: center;}
-    .custom-confirm-card {background: #fff; padding: 24px; border-radius: 15px; width: 85%; max-width: 450px; box-shadow: 0 10px 25px rgba(0, 0, 0, .3);}
-    .confirm-text {margin-bottom: 30px; font-size: 14px; color: #333;}
+    .custom-confirm-card {background: var(--surface); color: var(--txt-1); padding: 24px; border-radius: var(--r-lg); border: 1px solid var(--border); width: 85%; max-width: 450px; box-shadow: 0 10px 25px rgba(0, 0, 0, .3);}
+    .confirm-text {margin-bottom: 30px; font-size: 14px; color: var(--txt-1);}
     .confirm-buttons-stack {display: flex; flex-direction: column; gap: 8px; width: 100%;}
-    .btn-confirm-action, .btn-confirm-cancel {background: none; border: none; padding: 12px 0; text-align: right; color: #55cf29; font-size: 16px; font-weight: 500; cursor: pointer; width: 100%;}
+    .btn-confirm-action, .btn-confirm-cancel {background: none; border: none; padding: 12px 0; text-align: right; color: var(--red); font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;}
     .btn-confirm-action {display: block;}
     .btn-confirm-cancel {margin-top: 10px;}
     .btn-confirm-action:active, .btn-confirm-cancel:active {background: rgba(0, 0, 0, .05);}
     #full-emoji-picker-container {display: none; position: fixed; bottom: 0; width: 100%; height: 300px; z-index: 10001; box-shadow: 0 -5px 25px rgba(0, 0, 0, .2); overflow: hidden; animation: slideUp .3s ease-out; transition: opacity .2s ease-in-out;}
     emoji-picker {width: 100%; height: 100%;}
-    .draft-preview {color: #444 !important; font-size: .85em; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;}
+    .draft-preview {color: var(--txt-3) !important; font-size: .85em; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;}
     /* ============================================================
     AUDIO
     ============================================================ */
@@ -325,14 +273,14 @@
     ATTACHMENTS
     ============================================================ */
     .attach-modal {position: fixed; inset: 0; background: rgba(0, 0, 0, .9); z-index: 999999; display: none; align-items: center; justify-content: center;}
-    .attach-card {background: #fff; width: min(500px, 95vw); border-radius: 16px; overflow: hidden;}
-    .attach-header {display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; font-weight: 700;}
-    .attach-x {border: none; background: transparent; font-size: 18px; padding: 8px 10px;}
+    .attach-card {background: var(--surface); color: var(--txt-1); width: min(500px, 95vw); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--sh-lg);}
+    .attach-header {display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; font-weight: 700; color: #fff; background: linear-gradient(to right, var(--red-dark), var(--red));}
+    .attach-x {border: none; background: transparent; color: #fff; font-size: 18px; padding: 8px 10px;}
     .attach-preview {position: relative; background: #000; min-height: 240px; display: flex; align-items: center; justify-content: center;}
     .attach-preview img {max-width: 100%; max-height: 65vh; object-fit: contain;}
     .attach-footer {display: flex; gap: 8px; padding: 12px;}
-    #attach-caption {flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px;}
-    #attach-send {background: #00a884; color: #fff; border: none; border-radius: 8px; padding: 0 15px; font-weight: 700;}
+    #attach-caption {flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-2); color: var(--txt-1);}
+    #attach-send {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; border: none; border-radius: var(--r-sm); padding: 0 15px; font-weight: 700;}
     .attach-loading {position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0, 0, 0, .55); color: #fff; font-weight: 700;}
     .attach-file-card {display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; background: rgba(255, 255, 255, .08); color: #fff; max-width: 90%;}
     .attach-file-card .material-icons {font-size: 32px;}
@@ -360,14 +308,14 @@
     .filter-btn-container {padding: 0 10px 10px;}
     .filter-btn {display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;}
     .filter-btn::-webkit-scrollbar {display: none;}
-    .filter-btn-item {display: flex; flex-wrap: wrap; align-items: center; gap: 6px; background: #ccc; color: #444; border: 1px solid #aaa; border-radius: 50px; padding: 2px 5px; font-size: 12px; cursor: pointer; flex-shrink: 0;}
-    .filter-btn-item .material-icons {font-size: 18px; color: #444;}
+    .filter-btn-item {display: flex; flex-wrap: wrap; align-items: center; gap: 6px; background: var(--surface); color: var(--txt-2); border: 1px solid var(--border); box-shadow: var(--sh-sm); border-radius: 50px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0;}
+    .filter-btn-item .material-icons {font-size: 18px; color: var(--red-icon);}
     .filter-btn-item.active-filter {background: var(--red); color: #fff; border-color: var(--red);}
     .filter-btn-item.active-filter .material-icons {color: #fff;}
-    .search-box {background: #ccc; border: 1px solid #aaa; border-radius: 50px; display: flex; align-items: center; padding: 5px 12px;}
-    .search-icon {color: #444; margin-right: 8px; font-size: 20px;}
-    #global-search {border: none; background: transparent; width: 100%; outline: none; font-size: 15px; color: #444;}
-    .filter-badge {border-radius: 50%; background: red; font-size: 12px; min-width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #ddd;}
+    .search-box {background: var(--surface); border: 1px solid var(--border); box-shadow: var(--sh-sm); border-radius: 50px; display: flex; align-items: center; padding: 5px 12px;}
+    .search-icon {color: var(--txt-3); margin-right: 8px; font-size: 20px;}
+    #global-search {border: none; background: transparent; width: 100%; outline: none; font-size: 15px; color: var(--txt-1);}
+    .filter-badge {border-radius: 50%; background: var(--red); font-size: 12px; min-width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff;}
     /* ============================================================
     ANIMATIONS
     ============================================================ */
@@ -377,7 +325,7 @@
     @keyframes slideDown {from {transform: translateY(-100%); opacity: 0} to {transform: translateY(0); opacity: 1}}
     @keyframes pulse-select {0%, 100% {background: inherit} 50% {opacity: .7; transform: scale(1.02)}}
     @keyframes highlight-fade {0% {background: rgba(211, 47, 47, .3)} 100% {background: inherit}}
-    @keyframes gentle-pulse {0%, 100% {box-shadow: 0 4px 12px rgba(52, 183, 241, .5), 0 2px 6px rgba(52, 183, 241, .3)} 50% {box-shadow: 0 6px 16px rgba(52, 183, 241, .7), 0 3px 8px rgba 52, 183, 241, .5)}}
+    @keyframes gentle-pulse {0%, 100% {box-shadow: 0 4px 12px rgba(52, 183, 241, .5), 0 2px 6px rgba(52, 183, 241, .3)} 50% {box-shadow: 0 6px 16px rgba(52, 183, 241, .7), 0 3px 8px rgba(52, 183, 241, .5)}}
     @keyframes shimmer {0% {background-position: -200% 0} 100% {background-position: 200% 0}}
     /* ============================================================
     RESPONSIVE
@@ -569,9 +517,9 @@
     <div class="custom-confirm-card">
       <p class="confirm-text" id="contact-menu-title">Opções</p>
       <div class="confirm-buttons-stack">
-        <button id="contact-menu-block" class="btn-confirm-action" style="color:#ccc;"><span class="material-icons">block</span>Bloquear</button>
-        <button id="contact-menu-mute" class="btn-confirm-action" style="color:#ccc;"><span class="material-icons">notifications_active</span>Silenciar</button>
-        <button id="contact-menu-clear" class="btn-confirm-action" style="color: #ccc;">
+        <button id="contact-menu-block" class="btn-confirm-action" style="color:var(--txt-1);"><span class="material-icons">block</span>Bloquear</button>
+        <button id="contact-menu-mute" class="btn-confirm-action" style="color:var(--txt-1);"><span class="material-icons">notifications_active</span>Silenciar</button>
+        <button id="contact-menu-clear" class="btn-confirm-action" style="color:var(--txt-1);">
           <span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">delete</span>Limpar Conversa
         </button>
         <button onclick="closeContactMenu()" class="btn-confirm-cancel">Cancelar</button>
@@ -584,7 +532,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -736,19 +684,6 @@
     let recordingTimer;
     const currentUserNint = String(localStorage.getItem("currentCorpNint"));
 
-    function getSupabaseHeaders(options = {}) {
-      const corp = localStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint");
-      const headers = {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        'x-my-corpo': corp,
-        'x-my-nint': nint
-      };
-      if (options.returnRepresentation) headers['Prefer'] = 'return=representation';
-      return headers;
-    }
     const searchInput = document.getElementById('global-search');
     const searchBtnContainer = document.getElementById('filter-btn-container');
     const contactList = document.getElementById('contact-list');
@@ -887,7 +822,7 @@
         contactList.style.display = 'none';
         resultsContainer.style.display = 'block';
         searchBtnContainer.style.display = 'block';
-        resultsList.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5; color: #444;">A pesquisar...</div>';
+        resultsList.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.6; color: var(--txt-2);">A pesquisar...</div>';
         searchTimeout = setTimeout(async () => {
           const {
             data,
@@ -922,10 +857,11 @@
       }
     });
     function highlightSearchTerm(text, term) {
-      if (!term) return text;
-      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const safeText = escapeHTML(text || '');
+      if (!term) return safeText;
+      const escapedTerm = escapeHTML(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`(${escapedTerm})`, 'gi');
-      return String(text || '').replace(
+      return safeText.replace(
         regex,
         '<mark style="background:#ffeb3b; padding:2px 4px; border-radius:3px;">$1</mark>'
       );
@@ -946,10 +882,10 @@
         div.style.marginBottom = "8px";
         div.innerHTML = `
           <div class="contact-info">
-            <div class="name" style="font-size: 14px; margin-bottom: 10px; font-weight: 600; color: #d32f2f;">
-              ${displayName}${String(contactNint) === 'geral' ? ' (Geral)' : ''}
+            <div class="name" style="font-size: 14px; margin-bottom: 10px; font-weight: 600; color: var(--red);">
+              ${escapeHTML(displayName)}${String(contactNint) === 'geral' ? ' (Geral)' : ''}
             </div>
-            <div class="nint" style="opacity:0.8; color:#333; font-size: 13px;">
+            <div class="nint" style="opacity:0.85; color: var(--txt-2); font-size: 13px;">
               ${highlightedText}
             </div>
           </div>
@@ -997,7 +933,7 @@
     async function runTypeFilter(type, btn) {
       contactList.style.display = 'none';
       resultsContainer.style.display = 'block';
-      resultsList.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5; color: #444;">A carregar...</div>';
+      resultsList.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.6; color: var(--txt-2);">A carregar...</div>';
       applyActiveFilterStyle(btn);
       let query;
       if (type === 'unread') {
@@ -1208,7 +1144,7 @@
     window.addEventListener('touchend', stopAudioLogic);
     async function uploadAudioToSupabase(blob) {
       const fileName = `audio_${Date.now()}.webm`;
-      const filePath = `${currentChat}/${fileName}`;
+      const filePath = `${localStorage.getItem("currentCorpOperNr")}/${currentChat}/${fileName}`;
       try {
         const {
           data,
@@ -1508,7 +1444,7 @@
       if (file.type && !file.type.startsWith("image/")) throw new Error("Ficheiro não é imagem.");
       const ext = (file.name?.split(".").pop() || "jpg").toLowerCase();
       const fileName = `photo_${Date.now()}.${ext}`;
-      const filePath = `${currentChat}/${fileName}`;
+      const filePath = `${localStorage.getItem("currentCorpOperNr")}/${currentChat}/${fileName}`;
       const {
         error
       } = await supabaseClient
@@ -1600,7 +1536,7 @@
       const now = Date.now();
       const safeName = (file.name || 'ficheiro').replace(/[^\w.\-() ]+/g, '_');
       const rand = (crypto.randomUUID?.() || Math.random().toString(16).slice(2));
-      const basePath = `${chatId}/${now}_${rand}_${safeName}`;
+      const basePath = `${localStorage.getItem("currentCorpOperNr")}/${chatId}/${now}_${rand}_${safeName}`;
       try {
         let previewUrl = null;
         const isPdf = file.type === 'application/pdf' || (file.name || '').toLowerCase().endsWith('.pdf');
@@ -1609,7 +1545,7 @@
           try {
             const thumbBlob = await renderPdfFirstPageToBlob(file, {scale: 0.35, quality: 0.7});
             if (thumbBlob) {
-              const thumbPath = `${chatId}/previews/${now}_${rand}_thumb.jpg`;
+              const thumbPath = `${localStorage.getItem("currentCorpOperNr")}/${chatId}/previews/${now}_${rand}_thumb.jpg`;
               const {
                 error: upThumbErr
               } = await supabaseClient.storage
@@ -1704,10 +1640,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -1723,6 +1660,8 @@
     /* ========================== LOADING THEME ========================== */
     function loadTheme() {
       if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
     }
     /* ======================== LOADING CONTACTS ========================= */
     let blockedSetCache = new Set();
@@ -1770,9 +1709,9 @@
         openContactMenu('geral', 'Chat Geral');
       });
       const draftGeral = localStorage.getItem("draft_geral");
-      const subTextGeral = draftGeral ? `<div class="draft-preview">Rascunho: ${draftGeral}</div>` : `<div class="nint">Broadcast</div>`;
+      const subTextGeral = draftGeral ? `<div class="draft-preview">Rascunho: ${escapeHTML(draftGeral)}</div>` : `<div class="nint">Broadcast</div>`;
       geral.innerHTML = `
-        <div class="contact-avatar" style="background-color: #444;">G</div>
+        <div class="contact-avatar" style="background-color: var(--red-dark);">G</div>
         <div class="contact-info">
           <div class="name">Chat Geral</div>
           ${subTextGeral}
@@ -1789,8 +1728,8 @@
         const avatarColor = colors[firstLetter] || '#d32f2f';
         const savedDraft = localStorage.getItem(`draft_${contactId}`);
         const subText = savedDraft ?
-          `<div class="draft-preview">Rascunho: ${savedDraft}</div>` :
-          `<div class="nint">ID: ${user.n_int}</div>`;
+          `<div class="draft-preview">Rascunho: ${escapeHTML(savedDraft)}</div>` :
+          `<div class="nint">ID: ${escapeHTML(user.n_int)}</div>`;
         const div = document.createElement("div");
         div.className = "contact";
         div.setAttribute('data-nint', contactId);
@@ -1821,7 +1760,7 @@
             <div class="status-dot"></div>
           </div>
           <div class="contact-info">
-            <div class="name">${user.abv_name}</div>
+            <div class="name">${escapeHTML(user.abv_name)}</div>
             ${subText}
           </div>
           <div class="contact-right">
@@ -1866,7 +1805,7 @@
         s.className = 'material-icons';
         s.title = 'Bloqueado';
         s.textContent = 'block';
-        s.style.color = '#ccc';
+        s.style.color = 'var(--txt-3)';
         s.style.fontSize = '18px';
         el.appendChild(s);
       }
@@ -1875,7 +1814,7 @@
         s.className = 'material-icons';
         s.title = 'Silenciado';
         s.textContent = 'notifications_off';
-        s.style.color = '#ccc';
+        s.style.color = 'var(--txt-3)';
         s.style.fontSize = '18px';
         el.appendChild(s);
       }
@@ -2748,7 +2687,7 @@
           emptyMsg.innerHTML = `
             <div style="text-align: center; width: 100%; padding: 20px;">
               <span class="material-icons" style="font-size: 48px; display: block; margin: 0 auto 10px auto; opacity: 0.3;">chat_bubble_outline</span>
-              <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${currentChatName || 'este contacto'}</strong></span>
+              <span style="opacity: 0.3;">Ainda não iniciou nenhuma conversa com<br><strong>${escapeHTML(currentChatName || 'este contacto')}</strong></span>
             </div>
           `;
           messagesEl.appendChild(emptyMsg);
@@ -2778,7 +2717,8 @@
       } = await supabaseClient
         .from('chat_message_reads')
         .select('message_id')
-        .eq('n_int', currentUserNint);
+        .eq('n_int', currentUserNint)
+        .eq('corp_oper_nr', currentCorp);
       const readIds = new Set(alreadyRead?.map(r => r.message_id) || []);
       const toInsert = messages
         .filter(m => !readIds.has(m.id))
@@ -3278,7 +3218,7 @@
       await loadContacts();
       updateUnreadBadges();
       const currentCorp = localStorage.getItem("currentCorpOperNr");
-      supabaseClient.channel('chat_realtime')
+      supabaseClient.channel(`chat_realtime-${localStorage.getItem("currentCorpOperNr")}`)
         .on('postgres_changes', {
           event: 'INSERT',
           schema: 'public',
@@ -3391,7 +3331,7 @@
             }
           }
         }).subscribe();
-      supabaseClient.channel('reads_realtime')
+      supabaseClient.channel(`reads_realtime-${localStorage.getItem("currentCorpOperNr")}`)
         .on('postgres_changes', {
           event: 'INSERT',
           schema: 'public',
@@ -3400,7 +3340,7 @@
         }, () => {
           updateUnreadBadges();
         }).subscribe();
-      const readReceiptChannel = supabaseClient.channel('read-receipts');
+      const readReceiptChannel = supabaseClient.channel(`read-receipts-${localStorage.getItem("currentCorpOperNr")}`);
       readReceiptChannel.on('broadcast', {
         event: 'read'
       }, (payload) => {
@@ -3414,7 +3354,7 @@
           });
         }
       }).subscribe();
-      const typingChannel = supabaseClient.channel('typing-status', {
+      const typingChannel = supabaseClient.channel(`typing-status-${localStorage.getItem("currentCorpOperNr")}`, {
         config: {
           broadcast: {
             ack: true,
@@ -3434,7 +3374,7 @@
         }
       }).subscribe();
       window.readReceiptChannel = readReceiptChannel;
-      const presenceChannel = supabaseClient.channel('presence-cb360', {
+      const presenceChannel = supabaseClient.channel(`presence-cb360-${localStorage.getItem("currentCorpOperNr")}`, {
         config: {
           presence: {
             key: String(currentUserNint)
@@ -3903,17 +3843,17 @@
       const clearBtn = document.getElementById('contact-menu-clear');
       if (blockData) {
         blockBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">lock_open</span>Desbloquear';
-        blockBtn.style.color = '#ccc';
+        blockBtn.style.color = 'var(--txt-1)';
       } else {
         blockBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">block</span>Bloquear';
-        blockBtn.style.color = '#ccc';
+        blockBtn.style.color = 'var(--txt-1)';
       }
       if (muteData) {
         muteBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">notifications_active</span>Ativar notificações';
-        muteBtn.style.color = '#ccc';
+        muteBtn.style.color = 'var(--txt-1)';
       } else {
         muteBtn.innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-bottom: 4px; margin-right: 8px;">notifications_off</span>Silenciar';
-        muteBtn.style.color = '#ccc';
+        muteBtn.style.color = 'var(--txt-1)';
       }
       if (String(contactNint) === 'geral') {
         document.getElementById('contact-menu-overlay').style.display = 'flex';
@@ -4206,7 +4146,7 @@
         if (modalSistema) {
           modalSistema.style.display = 'none';
         }
-        mensagem.innerHTML = `Isto irá eliminar <b>TODA</b> a conversa com <strong>${userName}</strong>.<br><br><span style="color: #ef4444;">
+        mensagem.innerHTML = `Isto irá eliminar <b>TODA</b> a conversa com <strong>${escapeHTML(userName)}</strong>.<br><br><span style="color: #ef4444;">
                               Esta ação NÃO PODE ser desfeita!</span>`;
         criticalModal.style.display = 'flex';
         btnEliminar.onclick = () => {
