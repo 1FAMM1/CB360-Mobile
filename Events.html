@@ -125,7 +125,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">EVENTOS</span>
       <span class="header-sub">Prevenções · Disponibilidades</span>
@@ -151,7 +151,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -198,10 +198,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -214,17 +215,33 @@
         console.error('Erro silencioso:', err);
       }
     }
+    const EVENT_SHIFTS_CORP_FILTER = true;
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    function getCorpPadded() {
+      const c = getCorp();
+      return c ? c.padStart(4, "0") : null;
+    }
+    async function sbJson(url, options = {}) {
+      const res = await fetch(url, {headers: getSupabaseHeaders(), ...options});
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { const e = await res.json(); msg = e.message || msg; } catch (_) {}
+        throw new Error(msg);
+      }
+      const txt = await res.text();
+      return txt ? JSON.parse(txt) : null;
+    }
     /* ======================= EVENTS LOADING ======================= */
     async function loadEventList() {
       const container = document.getElementById("events-container");
       if (!container) return;
       container.innerHTML = '<div class="section-title"><span class="material-icons">event</span>Eventos a Decorrer</div>';
       try {
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
-        const resp = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=event,event_type,value,location,date_start,date_end,is_ended&corp_oper_nr=eq.${corpOperNr}&is_ended=eq.false`, {
-          headers: getSupabaseHeaders()
-        });
-        const data = await resp.json();
+        const corpOperNr = getCorpPadded();
+        if (!corpOperNr) throw new Error('Sessão inválida');
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/event_list?select=event,event_type,location,date_start,date_end&corp_oper_nr=eq.${corpOperNr}&is_ended=eq.false&order=date_start.asc`);
         if (!data || data.length === 0) {
           const card = document.createElement("div");
           card.className = "empty-card";
@@ -268,12 +285,12 @@
       }
       card.innerHTML = `
         <div class="event-card-header">
-          <span class="event-title">${event.event}</span>
-          <span class="event-type-badge">${event.event_type || ''}</span>
+          <span class="event-title">${escapeHtml(event.event)}</span>
+          <span class="event-type-badge">${escapeHtml(event.event_type || '')}</span>
         </div>
         <div class="event-card-body">
-          <div class="event-row"><span class="material-icons">event</span><span class="value">${datesText}</span></div>
-          <div class="event-row"><span class="material-icons">place</span><span class="value">${event.location}</span></div>
+          <div class="event-row"><span class="material-icons">event</span><span class="value">${escapeHtml(datesText)}</span></div>
+          <div class="event-row"><span class="material-icons">place</span><span class="value">${escapeHtml(event.location)}</span></div>
         </div>
       `;
       card.addEventListener('click', () => showEventShiftCards(event.event));
@@ -282,35 +299,32 @@
     function createMainEventCard(event) {
       const card = document.createElement("div");
       card.className = "main-event-card";
-      let datesText = `${event.date_start}`;
-      if (event.date_end) datesText += ` até ${event.date_end}`;
       card.innerHTML = `
         <div class="main-event-card-header">
           <span class="material-icons">place</span>
-          <span class="main-event-location">${event.location}</span>
+          <span class="main-event-location">${escapeHtml(event.location)}</span>
         </div>
         <div class="main-event-card-body">
-          <div class="main-event-type">${event.event}</div>
-          <div class="main-event-value-badge"><span class="material-icons">payments</span>${event.value} €/h</div>
+          <div class="main-event-type">${escapeHtml(event.event)}</div>
+          ${event.value != null && event.value !== '' ? `<div class="main-event-value-badge"><span class="material-icons">payments</span>${escapeHtml(event.value)} €/h</div>` : ''}
         </div>
       `;
       return card;
     }
-    async function createEventShiftCards(shift) {
+    function shiftKey(date, shift) {return `${date}|${shift}`;}
+    function createEventShiftCards(shift, myState) {
       const card = document.createElement("div");
       card.className = "shift-event-card";
       card.dataset.event = shift.event;
       card.dataset.rawDate = shift.event_shift_date;
       card.dataset.shift = shift.event_shift;
-      const isClosed = shift.act_oper >= shift.nec_oper;
-      const closedHTML = isClosed
-        ? `<div class="shift-closed">🔒 FECHADO ${shift.nec_oper} OP</div>`
-        : '';
+      const isClosed = Number(shift.act_oper || 0) >= Number(shift.nec_oper || 0) && Number(shift.nec_oper || 0) > 0;
+      const closedHTML = isClosed ? `<div class="shift-closed">🔒 FECHADO ${escapeHtml(shift.nec_oper)} OP</div>` : '';
       card.innerHTML = `
         <div class="shift-content">
-          <div class="shift-row"><span class="label">Data:</span><span class="shift-dates-value">${formatDateWithWeekday(shift.event_shift_date)}</span></div>
+          <div class="shift-row"><span class="label">Data:</span><span class="shift-dates-value">${escapeHtml(formatDateWithWeekday(shift.event_shift_date))}</span></div>
           ${closedHTML}
-          <div class="shift-row" style="margin-top:4px;"><span class="label">Turno:</span><span class="shift-location-value">${shift.event_shift}</span></div>
+          <div class="shift-row" style="margin-top:4px;"><span class="label">Turno:</span><span class="shift-location-value">${escapeHtml(shift.event_shift)}</span></div>
           <div class="shift-event-state shift-row" style="display:none; margin-top:4px;">
             <span class="label">Estado:</span>
             <span class="shift-state-value"></span>
@@ -318,46 +332,34 @@
         </div>
         <button class="shift-add">+</button>
       `;
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp_oper_nr = localStorage.getItem("currentCorpOperNr");
       const addBtn = card.querySelector('.shift-add');
       const stateDiv = card.querySelector('.shift-event-state');
-      if (isClosed) {
+      const stateValue = card.querySelector('.shift-state-value');
+      // O estado do elemento mostra-se sempre (mesmo com o turno fechado — pode ter sido ele a fechá-lo)
+      if (myState) {
+        stateValue.textContent = myState;
+        stateDiv.style.display = 'flex';
+        if (myState === "Em Aprovação") {
+          addBtn.style.display = 'none';
+          stateValue.classList.add('shift-state-pending-approval');
+        } else if (myState === "Aprovado") {
+          addBtn.textContent = "✓";
+          addBtn.disabled = true;
+          addBtn.classList.add('shift-state-approved');
+          stateValue.classList.add('shift-state-approved');
+        } else if (myState === "Não Aprovado") {
+          addBtn.textContent = "X";
+          addBtn.disabled = true;
+          addBtn.classList.add('shift-state-not-approved');
+          stateValue.classList.add('shift-state-not-approved');
+        } else {
+          addBtn.style.display = 'none';
+        }
+      } else if (isClosed) {
         addBtn.textContent = "🔒";
         addBtn.disabled = true;
         addBtn.classList.add('shift-closed-btn');
-      }
-      try {
-        const resp = await fetch(
-          `${SUPABASE_URL}/rest/v1/event_disp?select=shift_state&event=eq.${encodeURIComponent(shift.event)}&n_int=eq.${nint}&corp_oper_nr=eq.${corp_oper_nr}&event_shift_date=eq.${shift.event_shift_date}&event_shift=eq.${encodeURIComponent(shift.event_shift)}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        const data = await resp.json();
-        const stateValue = card.querySelector('.shift-state-value');
-        if (!isClosed && data && data.length > 0) {
-          const state = data[0].shift_state;
-          stateValue.textContent = state;
-          stateDiv.style.display = 'flex';
-          if (state === "Em Aprovação") {
-            addBtn.style.display = 'none';
-            stateValue.classList.add('shift-state-pending-approval');
-          } else if (state === "Aprovado") {
-            addBtn.textContent = "✓";
-            addBtn.disabled = true;
-            addBtn.classList.add('shift-state-approved');
-            stateValue.classList.add('shift-state-approved');
-          } else if (state === "Não Aprovado") {
-            addBtn.textContent = "X";
-            addBtn.disabled = true;
-            addBtn.classList.add('shift-state-not-approved');
-            stateValue.classList.add('shift-state-not-approved');
-          }
-        }
-      } catch (err) {
-        console.error("Erro ao verificar estado do turno:", err);
-      }
-      if (!isClosed) {
+      } else {
         addBtn.addEventListener('click', () => registerShift(card));
       }
       return card;
@@ -376,27 +378,29 @@
         eventsContainer.style.display = 'block';
         backHeader.style.display = 'none';
       };
+      const corp = getCorpPadded();
+      const nint = getNInt();
+      if (!corp || !nint) {
+        shiftsList.innerHTML = '<div class="error-card">Sessão inválida. Volte a iniciar sessão.</div>';
+        return;
+      }
+      const ev = encodeURIComponent(eventName);
       try {
-        const eventResp = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=*&event=eq.${encodeURIComponent(eventName)}&is_ended=eq.false`, {
-          headers: getSupabaseHeaders()
-        });
-        const eventData = await eventResp.json();
+        // 3 pedidos em paralelo (antes era 1 pedido por cada turno)
+        const [eventData, data, myDisp] = await Promise.all([
+          sbJson(`${SUPABASE_URL}/rest/v1/event_list?select=event,location,value&event=eq.${ev}&corp_oper_nr=eq.${corp}&is_ended=eq.false`),
+          sbJson(`${SUPABASE_URL}/rest/v1/event_shifts?select=event,event_shift_date,event_shift,nec_oper,act_oper&event=eq.${ev}${EVENT_SHIFTS_CORP_FILTER ? `&corp_oper_nr=eq.${corp}` : ''}`),
+          sbJson(`${SUPABASE_URL}/rest/v1/event_disp?select=event_shift_date,event_shift,shift_state&event=eq.${ev}&n_int=eq.${nint}&corp_oper_nr=eq.${corp}`)
+        ]);
         if (!eventData || eventData.length === 0) {
           shiftsList.innerHTML = '<div class="error-card">Este evento já terminou.</div>';
           return;
         }
-        const resp = await fetch(`${SUPABASE_URL}/rest/v1/event_shifts?select=event,event_shift_date,event_shift,nec_oper,act_oper&event=eq.${encodeURIComponent(eventName)}`, {
-          headers: getSupabaseHeaders()
-        });
-        const data = await resp.json();
-        if (eventData && eventData.length > 0) {
-          const mainEventCard = createMainEventCard(eventData[0]);
-          shiftsList.appendChild(mainEventCard);
-          const datesDiv = document.createElement('div');
-          datesDiv.id = 'event-shifts-title';
-          datesDiv.innerHTML = '<span class="material-icons">event</span>Datas';
-          shiftsList.appendChild(datesDiv);
-        }
+        shiftsList.appendChild(createMainEventCard(eventData[0]));
+        const datesDiv = document.createElement('div');
+        datesDiv.id = 'event-shifts-title';
+        datesDiv.innerHTML = '<span class="material-icons">event</span>Datas';
+        shiftsList.appendChild(datesDiv);
         if (!data || !data.length) {
           const noShiftsCard = document.createElement('div');
           noShiftsCard.className = 'empty-card';
@@ -404,33 +408,31 @@
           shiftsList.appendChild(noShiftsCard);
           return;
         }
+        const stateMap = new Map((myDisp || []).map(d => [shiftKey(d.event_shift_date, d.event_shift), d.shift_state]));
         data.sort((a, b) => new Date(a.event_shift_date) - new Date(b.event_shift_date));
         const shiftCardsContainer = document.createElement('div');
         shiftCardsContainer.id = 'shift-cards-container';
         shiftsList.appendChild(shiftCardsContainer);
-        const shiftCards = await Promise.all(data.map(shift => createEventShiftCards(shift)));
-        shiftCards.forEach((card, index) => {
+        data.forEach((shift, index) => {
+          const card = createEventShiftCards(shift, stateMap.get(shiftKey(shift.event_shift_date, shift.event_shift)));
           card.classList.add('fade-in-card');
           shiftCardsContainer.appendChild(card);
           setTimeout(() => card.classList.add('show'), index * 50);
         });
       } catch (err) {
         console.error(err);
-        const errorCard = document.createElement('div');
-        errorCard.className = 'error-card';
-        errorCard.textContent = 'Erro ao carregar turnos';
-        shiftsList.innerHTML = "";
-        shiftsList.appendChild(errorCard);
+        shiftsList.innerHTML = '<div class="error-card">Erro ao carregar turnos</div>';
       }
     }
     async function registerShift(card) {
-      const nint = localStorage.getItem("currentCorpNint");
-      const corp_oper_nr = localStorage.getItem("currentCorpOperNr");
+      const nint = getNInt();
+      const corp_oper_nr = getCorpPadded();
       if (!nint || !corp_oper_nr) {
         showToast('Dados de utilizador em falta', 'error');
         return;
       }
       const addBtn = card.querySelector('.shift-add');
+      if (addBtn && addBtn.disabled) return;
       if (addBtn) addBtn.disabled = true;
       const rawDate = card.dataset.rawDate;
       const shift = card.dataset.shift;
@@ -466,7 +468,7 @@
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
-      toast.innerHTML = `<span class="icon">${icon}</span><span>${message}</span>`;
+      toast.innerHTML = `<span class="icon">${icon}</span><span>${escapeHtml(message)}</span>`;
       toast.addEventListener('click', () => {
         toast.style.animation = 'toastSlideOut 0.3s forwards ease-in';
         setTimeout(() => toast.remove(), 300);
@@ -486,6 +488,8 @@
         document.body.classList.add('dark-mode');
       }
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       loadEventList();
     });
   </script>
