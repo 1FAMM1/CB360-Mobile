@@ -156,7 +156,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">DOCUMENTOS</span>
       <span class="header-sub">Visualização · Envio</span>
@@ -232,7 +232,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -246,7 +246,6 @@
     }
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     if (typeof pdfjsLib !== 'undefined') {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -254,7 +253,6 @@
     /* ===================== SUPABASE CONFIGURATION ====================== */
     const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     function getCorp() {return localStorage.getItem("currentCorpOperNr");}
     function getNInt() {return localStorage.getItem("currentCorpNint");}
     function getSupabaseHeaders(options = {}) {
@@ -286,10 +284,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -332,26 +331,57 @@
         btnOk.onclick = () => {cleanUp(); resolve(true);};
       });
     }
+    /* ===================== STORAGE PRIVADO (token do utilizador) ===================== */
+    const DOCS_BUCKET = "personal_docs";
+    const MAX_DOC_BYTES = 10 * 1024 * 1024;
+    function getCorpPadded() {
+      const c = getCorp();
+      return c ? c.padStart(4, "0") : null;
+    }
+    function storageHeaders(extra = {}) {
+      return {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${localStorage.getItem("authToken")}`, ...extra};
+    }
+    function encodePath(path) {
+      return path.split('/').map(encodeURIComponent).join('/');
+    }
+    // doc_url guarda o caminho no bucket (ex.: 0805/205/1730930000_nome.pdf)
+    function docPath(docUrl) {
+      if (!docUrl) return null;
+      const m = docUrl.match(/\/personal_docs\/(.+)$/);
+      return m ? decodeURIComponent(m[1]) : docUrl;
+    }
+    async function fetchDocBytes(path) {
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/${DOCS_BUCKET}/${encodePath(path)}`, {headers: storageHeaders()});
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return new Uint8Array(await res.arrayBuffer());
+    }
     /* ======================== DOCUMENTS LOADING ======================== */
-    function markAsRead(url) {
-      let viewedDocs = JSON.parse(localStorage.getItem("viewed_documents") || "[]");
-      if (!viewedDocs.includes(url)) {
-        viewedDocs.push(url);
+    function markAsRead(key) {
+      let viewedDocs = [];
+      try { viewedDocs = JSON.parse(localStorage.getItem("viewed_documents") || "[]"); } catch (_) {}
+      if (!viewedDocs.includes(key)) {
+        viewedDocs.push(key);
         localStorage.setItem("viewed_documents", JSON.stringify(viewedDocs));
       }
     }
     async function loadUserDocuments() {
-      const corp = localStorage.getItem("currentCorpOperNr");
-      const nint = localStorage.getItem("currentCorpNint");
+      const corp = getCorpPadded();
+      const nint = getNInt();
       const list = document.getElementById("documents-list");
       list.innerHTML = "<p style='text-align:center; padding:20px; color:var(--txt-2);'>A carregar documentos...</p>";
-      const viewedDocs = JSON.parse(localStorage.getItem("viewed_documents") || "[]");
+      if (!corp || !nint) {
+        list.innerHTML = `<div class="empty-card">Sessão inválida. Volte a iniciar sessão.</div>`;
+        return;
+      }
+      let viewedDocs = [];
+      try { viewedDocs = JSON.parse(localStorage.getItem("viewed_documents") || "[]"); } catch (_) {}
       try {
         const resp = await fetch(
-          `${SUPABASE_URL}/rest/v1/personal_docs?select=doc_title,doc_url&corp_oper_nr=eq.${corp}&n_int=eq.${nint}&order=created_at.desc`, {
+          `${SUPABASE_URL}/rest/v1/personal_docs?select=id,doc_title,doc_url&corp_oper_nr=eq.${corp}&n_int=eq.${nint}&order=created_at.desc`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const documents = await resp.json();
         list.innerHTML = "";
         if (!Array.isArray(documents) || documents.length === 0) {
@@ -359,11 +389,9 @@
           return;
         }
         documents.forEach(doc => {
-          if (!doc.doc_url) return;
-          const publicUrl = doc.doc_url.startsWith('http')
-          ? doc.doc_url
-          : `${SUPABASE_URL}/storage/v1/object/public/personal_docs/${doc.doc_url}`;
-          const isRead = viewedDocs.includes(publicUrl);
+          const path = docPath(doc.doc_url);
+          if (!path) return;
+          const isRead = viewedDocs.includes(path);
           const row = document.createElement("div");
           row.className = "doc-row";
           const card = document.createElement("div");
@@ -372,21 +400,22 @@
             <div class="comun-icon-wrap ${isRead ? 'read' : ''}">
               <span class="material-icons">${isRead ? 'check_circle' : 'picture_as_pdf'}</span>
             </div>
-            <div class="comun-title">${doc.doc_title}</div>
+            <div class="comun-title"></div>
           `;
+          card.querySelector('.comun-title').textContent = doc.doc_title || 'Documento';
           card.onclick = () => {
-            markAsRead(publicUrl);
+            markAsRead(path);
             const iconWrap = card.querySelector('.comun-icon-wrap');
             iconWrap.classList.add('read');
             iconWrap.querySelector('.material-icons').innerText = 'check_circle';
-            openPdfViewer(publicUrl, doc.doc_title);
+            openPdfViewer(path, doc.doc_title);
           };
           const deleteCard = document.createElement("div");
           deleteCard.className = "delete-card";
           deleteCard.innerHTML = `<span class="material-icons">delete</span>`;
           deleteCard.onclick = async (e) => {
             e.stopPropagation();
-            await deleteDocument(publicUrl, row);
+            await deleteDocument(doc.id, path, row);
           };
           row.appendChild(card);
           row.appendChild(deleteCard);
@@ -402,7 +431,7 @@
     let pinchScale = 1;
     let lastPinchDistance = 0;
     let isPinching = false;
-    async function openPdfViewer(pdfUrl, title) {
+    async function openPdfViewer(docPathValue, title) {
       const viewerContainer = document.getElementById("pdf-viewer-container");
       const pdfViewer = document.getElementById("pdf-viewer");
       const pdfTitle = document.getElementById("pdf-title");
@@ -419,7 +448,7 @@
       commTitle.style.display = "none";
       if (uploadBar) uploadBar.style.display = "none";
       viewerContainer.style.display = "flex";
-      pdfTitle.textContent = title;
+      pdfTitle.textContent = title || 'Documento';
       pdfViewer.innerHTML = "<p style='text-align:center; padding:20px;'>A carregar PDF...</p>";
       currentScale = 0.75;
       pinchScale = 1;
@@ -433,43 +462,37 @@
         currentPdf = null;
       };
       try {
-        currentPdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        const bytes = await fetchDocBytes(docPathValue);
+        currentPdf = await pdfjsLib.getDocument({data: bytes}).promise;
         await renderPdf();
       } catch (err) {
+        console.error("Erro ao abrir PDF:", err);
         pdfViewer.innerHTML = "<p style='text-align:center; font-weight:bold; padding:20px; color:var(--red);'>Não foi possível carregar o PDF.</p>";
       }
     }
     /* ======================= DELETING DOCUMENTS ======================== */
-    async function deleteDocument(publicUrl, rowElement) {
+    async function deleteDocument(docId, path, rowElement) {
       try {
         const confirmDelete = await showConfirmModal("Tem a certeza que deseja apagar este documento? Esta ação é irreversível.");
         if (!confirmDelete) return true;
-        const fileName = publicUrl.split('/').pop();
-        const { data: storageData, error: storageError } = await supabaseClient
-        .storage
-        .from('personal_docs')
-        .remove([fileName]);
-        if (storageError) {
-          console.warn("Aviso Supabase Storage:", storageError.message);
-          if (!storageError.message.includes("file not found")) throw storageError;
-        }
-        /* Apagar na tabela usando o JWT customizado (com claims corp_oper_nr/n_int),
-           em vez do supabaseClient (que usa a anon key e é bloqueado pelas policies de RLS
-           sem devolver erro — parecia "apagar" mas não apagava nada). */
+        const corp = getCorpPadded();
+        const nint = getNInt();
+        // 1) registo na tabela (a RLS confirma que é da corporação do utilizador)
         const deleteResp = await fetch(
-          `${SUPABASE_URL}/rest/v1/personal_docs?doc_url=eq.${encodeURIComponent(publicUrl)}`, {
+          `${SUPABASE_URL}/rest/v1/personal_docs?id=eq.${docId}&corp_oper_nr=eq.${corp}&n_int=eq.${nint}`, {
             method: 'DELETE',
             headers: getSupabaseHeaders({ returnRepresentation: true })
           }
         );
-        if (!deleteResp.ok) {
-          const errText = await deleteResp.text();
-          throw new Error(errText || `Erro HTTP ${deleteResp.status} ao apagar da tabela`);
-        }
+        if (!deleteResp.ok) throw new Error(`HTTP ${deleteResp.status}`);
         const deletedRows = await deleteResp.json();
-        if (!Array.isArray(deletedRows) || deletedRows.length === 0) {
-          throw new Error("Nenhum registo apagado — verifique as permissões (RLS) da tabela personal_docs.");
-        }
+        if (!Array.isArray(deletedRows) || deletedRows.length === 0) throw new Error("Documento não encontrado ou sem permissão.");
+        // 2) ficheiro no bucket privado (com o token do utilizador)
+        const fileResp = await fetch(`${SUPABASE_URL}/storage/v1/object/${DOCS_BUCKET}/${encodePath(path)}`, {
+          method: 'DELETE',
+          headers: storageHeaders()
+        });
+        if (!fileResp.ok && fileResp.status !== 404) console.warn("Ficheiro não apagado do storage:", fileResp.status);
         if (rowElement) rowElement.remove();
         const list = document.getElementById("documents-list");
         if (!list.querySelector('.comun-card')) {
@@ -479,7 +502,7 @@
         return true;
       } catch (err) {
         console.error("Erro ao apagar documento:", err);
-        showMessageModal(`Falha ao apagar documento: ${err.message}`, "Erro", "error");
+        showMessageModal("Não foi possível apagar o documento. Tente novamente.", "Erro", "error");
         return false;
       }
     }
@@ -487,33 +510,31 @@
     function sanitizeFileName(fileName) {
       return fileName
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[̀-ͯ]/g, "")
         .replace(/ /g, "_")
-        .replace(/[^a-zA-Z0-9_\-\.]/g, "");
+        .replace(/[^a-zA-Z0-9_\-\.]/g, "")
+        .slice(-80) || "documento.pdf";
     }
     async function uploadPdfToSupabase(file, corpOperNr, nint) {
-      try {
-        const safeFileName = `${nint}_${sanitizeFileName(file.name)}`;
-        const {data, error} = await supabaseClient.storage
-        .from("personal_docs")
-        .upload(safeFileName, file, { upsert: true });
-        if (error) throw error;
-        const { data: urlData, error: urlError } = supabaseClient.storage
-        .from("personal_docs")
-        .getPublicUrl(safeFileName);
-        if (urlError) throw urlError;
-        const publicUrl = urlData.publicUrl;
-        const resp = await fetch(`${SUPABASE_URL}/rest/v1/personal_docs`, {
-          method: "POST",
-          headers: getSupabaseHeaders({ returnRepresentation: true }),
-          body: JSON.stringify({n_int: nint, corp_oper_nr: corpOperNr, doc_title: file.name, doc_url: publicUrl})
-        });
-        if (!resp.ok) throw new Error("Falha ao registrar documento na tabela");
-        return publicUrl;
-      } catch (err) {
-        console.error("Erro ao enviar PDF:", err.message);
-        return null;
+      // Caminho único por corporação/elemento: nunca colide nem substitui ficheiros de outros
+      const path = `${corpOperNr}/${nint}/${Date.now()}_${sanitizeFileName(file.name)}`;
+      const up = await fetch(`${SUPABASE_URL}/storage/v1/object/${DOCS_BUCKET}/${encodePath(path)}`, {
+        method: "POST",
+        headers: storageHeaders({"Content-Type": "application/pdf", "x-upsert": "false"}),
+        body: file
+      });
+      if (!up.ok) throw new Error(`Upload HTTP ${up.status}`);
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/personal_docs`, {
+        method: "POST",
+        headers: getSupabaseHeaders({ returnRepresentation: true }),
+        body: JSON.stringify({n_int: nint, corp_oper_nr: corpOperNr, doc_title: file.name, doc_url: path})
+      });
+      if (!resp.ok) {
+        // desfaz o upload para não deixar ficheiros órfãos
+        await fetch(`${SUPABASE_URL}/storage/v1/object/${DOCS_BUCKET}/${encodePath(path)}`, {method: "DELETE", headers: storageHeaders()}).catch(() => {});
+        throw new Error(`Registo HTTP ${resp.status}`);
       }
+      return path;
     }
     /* =========================== ZOOM PINCH ============================ */
     function setupPinchZoom(element) {
@@ -615,6 +636,8 @@
         document.body.classList.add('dark-mode');
       }
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       loadUserDocuments();
       document.getElementById("zoom-in").onclick = async () => {
         if (currentPdf && currentScale < 7.5) {
@@ -649,8 +672,14 @@
       document.getElementById("upload-submit-btn").onclick = async () => {
         const fileInput = document.getElementById("upload-file-input");
         const statusEl = document.getElementById("upload-status");
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
-        const nint = localStorage.getItem("currentCorpNint");
+        const corpOperNr = getCorpPadded();
+        const nint = getNInt();
+        const submitBtn = document.getElementById("upload-submit-btn");
+        if (submitBtn.disabled) return;
+        if (!corpOperNr || !nint) {
+          statusEl.textContent = "Sessão inválida. Volte a iniciar sessão.";
+          return;
+        }
         if (!fileInput.files.length) {
           statusEl.textContent = "Escolha um ficheiro para enviar.";
           return;
@@ -660,14 +689,22 @@
           statusEl.textContent = "Apenas ficheiros PDF são permitidos.";
           return;
         }
+        if (file.size > MAX_DOC_BYTES) {
+          statusEl.textContent = "O ficheiro excede o limite de 10 MB.";
+          return;
+        }
         statusEl.textContent = "A enviar documento...";
-        const result = await uploadPdfToSupabase(file, corpOperNr, nint);
-        if (result) {
+        submitBtn.disabled = true;
+        try {
+          await uploadPdfToSupabase(file, corpOperNr, nint);
           statusEl.textContent = "Upload concluído!";
           await loadUserDocuments();
           setTimeout(() => document.getElementById("upload-modal").style.display = "none", 1000);
-        } else {
-          statusEl.textContent = "Erro ao enviar documento. Veja console.";
+        } catch (err) {
+          console.error("Erro ao enviar PDF:", err);
+          statusEl.textContent = "Erro ao enviar o documento. Tente novamente.";
+        } finally {
+          submitBtn.disabled = false;
         }
       };
     });
