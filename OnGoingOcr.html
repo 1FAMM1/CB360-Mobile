@@ -221,7 +221,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">OCORRÊNCIAS</span>
       <span class="header-sub">Visualização · Gestão em Tempo Real</span>
@@ -300,10 +300,10 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="powered-by">
-        <strong>Powered by:</strong> Fábio Martins | Sistemas de Informação - Grupo CB360
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023-2025 - Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -341,6 +341,36 @@
       }
       return headers;
     }
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    // Telegram (parse_mode HTML) rejeita a mensagem se o texto tiver < > & por escapar
+    function tgEscape(v) {
+      return String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    // Reduz fotos do telemóvel (5-10 MB) para ~300 KB: o Vercel recusa pedidos acima de 4,5 MB
+    function compressImage(file, maxSide = 1600, quality = 0.8) {
+      return new Promise((resolve) => {
+        if (!file.type || !file.type.startsWith("image/")) return resolve(file);
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(blob => {
+            if (!blob || blob.size >= file.size) return resolve(file);
+            const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+            resolve(new File([blob], name, {type: "image/jpeg"}));
+          }, "image/jpeg", quality);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+      });
+    }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -354,10 +384,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -426,7 +457,7 @@
         const headers = getSupabaseHeaders();
         headers['x-my-corpo'] = corpOperNr;
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/occurrences_control?select=*&corp_oper_nr=eq.${corpOperNr}&order=id.desc`, {
+          `${SUPABASE_URL}/rest/v1/occurrences_control?select=id,occorrence,local,status,vehicles,elements&corp_oper_nr=eq.${corpOperNr}&order=id.desc&limit=100`, {
             signal: controllerOcorrencias.signal,
             headers: headers
           }
@@ -441,7 +472,7 @@
         statsBadge.style.display = 'none';
         noMsg.style.display = 'none';
         if (!ocorrencias || ocorrencias.length === 0) {
-          noMsg.style.display = 'block';
+          noMsg.style.display = 'flex';
           return;
         }
         const ocorrenciasEmCurso = ocorrencias.filter(occ => occ.status && occ.status.toLowerCase() === 'em curso');
@@ -463,17 +494,17 @@
           const elements = Number(item.elements || 0);
           card.innerHTML = `
             <div class="card-header">
-              <span class="card-header-id"><span class="material-icons">tag</span>#${item.id ?? ''}</span>
-              <span class="status-badge ${statusClass}"><span class="material-icons">${statusIcon}</span>${item.status || 'N/D'}</span>
+              <span class="card-header-id"><span class="material-icons">tag</span>#${escapeHtml(item.id)}</span>
+              <span class="status-badge ${statusClass}"><span class="material-icons">${statusIcon}</span>${escapeHtml(item.status || 'N/D')}</span>
             </div>
             <div class="card-body">
               <div class="card-title-row">
                 <div class="card-icon"><span class="material-icons">local_fire_department</span></div>
-                <h3>${item.occorrence || 'Sem Nome'}</h3>
+                <h3>${escapeHtml(item.occorrence || 'Sem Nome')}</h3>
               </div>
               <div class="location-wrapper">
                 <span class="material-icons">place</span>
-                <span class="location-text">${item.local || 'Localização não disponível'}</span>
+                <span class="location-text">${escapeHtml(item.local || 'Localização não disponível')}</span>
               </div>
               <div class="card-meta">
                 <span class="meta-chip"><span class="material-icons">local_shipping</span>${vehicles}</span>
@@ -497,7 +528,7 @@
       const iconMap = {success: 'check_circle', error: 'error', warning: 'warning', info: 'info'};
       const toast = document.createElement('div');
       toast.className = `toast toast-${type}`;
-      toast.innerHTML = `<span class="material-icons">${iconMap[type] || 'info'}</span><span>${message}</span>`;
+      toast.innerHTML = `<span class="material-icons">${iconMap[type] || 'info'}</span><span>${escapeHtml(message)}</span>`;
       toast.onclick = () => {
         container.removeChild(toast);
       };
@@ -513,8 +544,8 @@
     /* ======================== OCCURRENCE POPUP ========================= */
     function openOccurrencePopup(occurrence) {
       currentOccurrence = occurrence;
-      document.getElementById('detailOccurrence').textContent = occurrence.occorrence;
-      document.getElementById('detailLocal').textContent = occurrence.local;
+      document.getElementById('detailOccurrence').textContent = occurrence.occorrence || '-';
+      document.getElementById('detailLocal').textContent = occurrence.local || '-';
       const statusSelect = document.getElementById('detailStatus');
       statusSelect.value = occurrence.status;
       document.getElementById('messageText').value = '';
@@ -573,7 +604,7 @@
           infoDiv.style.display = 'flex';
           infoDiv.style.flexDirection = 'column';
           infoDiv.style.justifyContent = 'center';
-          infoDiv.innerHTML = `<span class="attachment-name">${file.name}</span>`;
+          infoDiv.innerHTML = `<span class="attachment-name">${escapeHtml(file.name)}</span>`;
           const removeBtn = document.createElement('button');
           removeBtn.className = 'remove-attachment';
           removeBtn.textContent = '×';
@@ -609,6 +640,7 @@
         return;
       }
       const sendBtn = document.querySelector('.send-btn');
+      if (sendBtn.disabled) return;
       sendBtn.disabled = true;
       sendBtn.innerHTML = '<span class="icon-btn-text"><span class="material-icons spin">autorenew</span><span>A Enviar...</span></span>';
       try {
@@ -622,18 +654,21 @@
         });
         const date = now.toLocaleDateString('pt-PT');
         let message = `🚨 <b>ATUALIZAÇÃO DE OCORRÊNCIA</b>\n\n`;
-        message += `📋 <b>Ocorrência:</b> ${currentOccurrence.occorrence}\n`;
-        message += `📍 <b>Local:</b> ${currentOccurrence.local}\n`;
-        message += `📊 <b>Estado:</b> ${selectedStatus}\n`;
+        message += `📋 <b>Ocorrência:</b> ${tgEscape(currentOccurrence.occorrence)}\n`;
+        message += `📍 <b>Local:</b> ${tgEscape(currentOccurrence.local)}\n`;
+        message += `📊 <b>Estado:</b> ${tgEscape(selectedStatus)}\n`;
         message += `⏰ ${time}\n`;
         message += `📅 ${date}`;
         if (messageText) {
-          message += `\n\n💬 <b>Descrição:</b>\n\n<i>${messageText}</i>`;
+          message += `\n\n💬 <b>Descrição:</b>\n\n<i>${tgEscape(messageText)}</i>`;
         }
         const formData = new FormData();
         formData.append('corp_oper_nr', corpOperNr);
         formData.append('message', message);
-        selectedFiles.forEach((file) => {
+        const photos = await Promise.all(selectedFiles.map(f => compressImage(f)));
+        const totalBytes = photos.reduce((t, f) => t + f.size, 0);
+        if (totalBytes > 4 * 1024 * 1024) throw new Error('As fotos são demasiado grandes. Envie menos fotos de cada vez.');
+        photos.forEach((file) => {
           formData.append('photos', file, file.name);
         });
         const res = await fetch(TELEGRAM_API, {
@@ -641,14 +676,14 @@
           body: formData
         });
         if (!res.ok) {
-          throw new Error(`O servidor respondeu com erro ${res.status} (${res.statusText || 'endpoint indisponível'})`);
+          throw new Error(res.status === 413 ? 'As fotos são demasiado grandes. Envie menos fotos de cada vez.' : 'Erro ao enviar o relatório. Tente novamente.');
         }
         const result = await res.json();
         if (result.success) {
           showToast('Relatório e anexos enviados com sucesso!', 'success');
           closeOccurrencePopup();
         } else {
-          showToast(`Erro ao enviar: ${JSON.stringify(result)}`, 'error', 8000);
+          showToast('Erro ao enviar o relatório. Tente novamente.', 'error', 8000);
           console.error('Resposta completa do backend:', result);
         }
       } catch (err) {
@@ -665,10 +700,16 @@
         document.body.classList.add('dark-mode');
       }
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       LoadEPE();
       LoadOccurrences();
-      setInterval(LoadEPE, 8000);
-      setInterval(LoadOccurrences, 8000);
+      // Só atualiza com a app visível (poupa bateria, dados e pedidos ao Supabase)
+      setInterval(() => { if (!document.hidden) LoadEPE(); }, 8000);
+      setInterval(() => { if (!document.hidden) LoadOccurrences(); }, 8000);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) { LoadEPE(); LoadOccurrences(); }
+      });
     });
     document.getElementById('occurrencePopup').addEventListener('click', function(e) {
       if (e.target === this) {
