@@ -147,8 +147,8 @@
          onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
          onload="this.style.display='block';">
     <div class="header-center">
-      <span class="header-title">SITVEÍC</span>
-      <span class="header-sub">Situação Operacional de Veículos</span>
+      <span class="header-title">FICHA DE VEÍCULOS</span>
+      <span class="header-sub">Dados · Prazos · Manutenção</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>  
@@ -168,8 +168,8 @@
         <div class="modal-title-area">
           <div class="modal-vehicle-icon" id="modalIcon">🚒</div>
           <div>
-            <div class="modal-vehicle-title" id="modalTitle">VCOT-01</div>
-            <div class="modal-vehicle-subtitle" id="modalSubtitle">Veículo de Comando</div>
+            <div class="modal-vehicle-title" id="modalTitle"></div>
+            <div class="modal-vehicle-subtitle" id="modalSubtitle"></div>
           </div>
         </div>
         <button class="modal-close-btn" onclick="closeVehicleModal()"><span class="material-icons">close</span></button>
@@ -226,25 +226,25 @@
         <div class="tab-pane" id="tabDocumentos">
           <div class="info-card">
             <span class="info-label">Validade do Seguro</span>
-            <span class="info-value" id="modalInsuranceValue">Em dia (Até 12/2026)</span>
+            <span class="info-value" id="modalInsuranceValue">--</span>
           </div>
           <div class="info-card">
             <span class="info-label">Próxima Inspeção (IPO)</span>
-            <span class="info-value" id="modalIpoValue">Maio de 2027</span>
+            <span class="info-value" id="modalIpoValue">--</span>
           </div>
           <div class="info-card">
             <span class="info-label">Imposto Único de Circulação (IUC)</span>
-            <span class="info-value" id="modalIucValue">Pago (Mês: Março)</span>
+            <span class="info-value" id="modalIucValue">--</span>
           </div>
         </div>
         <div class="tab-pane" id="tabManutencao">
           <div class="info-card">
             <span class="info-label">Última Revisão / Intervenção</span>
-            <span class="info-value" id="modalLastMaintValue">Troca de óleo e filtros (15.200 km)</span>
+            <span class="info-value" id="modalLastMaintValue">--</span>
           </div>
           <div class="info-card">
             <span class="info-label">Próxima Manutenção Recomendada</span>
-            <span class="info-value" id="modalNextMaintValue">20.000 km ou Revisão Geral</span>
+            <span class="info-value" id="modalNextMaintValue">--</span>
           </div>
         </div>
       </div>
@@ -259,7 +259,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -302,6 +302,8 @@
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') document.body.classList.add('dark-mode');
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       loadVehicleData();
     });
     /* ======================= CARREGAR INFO CORP ======================= */
@@ -317,10 +319,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -334,9 +337,25 @@
       }
     }
     /* ======================= CARREGAR DADOS VEÍCULOS ======================= */
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    function showListMessage(html) {
+      const list = document.getElementById('vehicleList');
+      document.getElementById('loading').style.display = 'none';
+      list.style.display = 'flex';
+      list.innerHTML = `<div class="loading">${html}</div>`;
+    }
+    function fmtDate(v) {
+      if (!v) return null;
+      const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return m ? `${m[3]}/${m[2]}/${m[1]}` : String(v);
+    }
     async function loadVehicleData() {
       try {
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const corpRaw = localStorage.getItem("currentCorpOperNr");
+        if (!corpRaw) throw new Error("Sessão inválida");
+        const corpOperNr = corpRaw.padStart(4, "0");
         const response = await fetch(
           `${SUPABASE_URL}/rest/v1/vehicle_status?select=*&corp_oper_nr=eq.${corpOperNr}&order=vehicle.asc`, {
             headers: getSupabaseHeaders()
@@ -344,7 +363,6 @@
         );
         if (!response.ok) throw new Error("Erro na resposta do Supabase");
         const data = await response.json();        
-        console.log("Dados recebidos do Supabase (veículos):", data);
         if (data && data.length > 0) {
           vehicleStatuses = {};
           vehicleINOP = {};
@@ -355,14 +373,16 @@
             vehiclesDataMap[v.vehicle] = v;
           });          
           processVehicleList(data.map(d => d.vehicle));
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('vehicleList').style.display = 'flex';
           renderVehicles();
+        } else {
+          vehicles = [];
+          showListMessage('<span>Sem veículos configurados para esta corporação.</span>');
         }
       } catch (error) {
         console.error('❌ Erro ao carregar dados:', error);
-        document.getElementById('loading').innerHTML = '<span>❌ Erro ao ligar ao servidor</span>';
-      } finally {
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('vehicleList').style.display = 'flex';
+        if (vehicles.length === 0) showListMessage('<span>❌ Erro ao carregar os veículos. Tente atualizar.</span>');
       }
     }
     /* ======================= PROCESSAR E ORDENAR ======================= */
@@ -419,8 +439,8 @@
           <div class="vehicle-header">
             <div class="vehicle-icon-large">${v.icon}</div>
             <div>
-              <div class="vehicle-name">${v.code}</div>
-              <div class="vehicle-type">${v.type}</div>
+              <div class="vehicle-name">${escapeHtml(v.code)}</div>
+              <div class="vehicle-type">${escapeHtml(v.type)}</div>
             </div>
           </div>
           <span class="vehicle-status ${statusClass}">${statusText}</span>
@@ -434,7 +454,6 @@
       document.getElementById('modalTitle').textContent = v.code;
       document.getElementById('modalSubtitle').textContent = v.type;
       const vData = vehiclesDataMap[v.code] || {};
-      console.log("Dados abertos no modal para:", v.code, vData);
       const photoUrl = vData.photo_url || vData.foto || vData.image_url;
       const photoContainer = document.getElementById('modalPhotoContainer');
       const photoImg = document.getElementById('modalVehiclePhoto');
@@ -453,13 +472,22 @@
       setSafeText('modalModeloValue', vData.vehicle_model || vData.model || vData.modelo || 'Não especificado');
       setSafeText('modalFuelValue', vData.fuel_type || vData.combustivel || vData.fuel || 'Não especificado');
       setSafeText('modalNrMotorValue', vData.nr_motor || vData.motor_nr || vData.numero_motor || 'Não registado');
-      setSafeText('modalNrChassisValue', vData.nr_chassis || vData.chassis_nr || vData.nr_chassi || vData.numero_chassis || 'Não registado');
-      setSafeText('modalBuyDateValue', vData.buy_date || vData.data_compra || 'Não registada');
-      setSafeText('modalRegDateValue', vData.registration_date || vData.data_registo || 'Não registada');
+      setSafeText('modalNrChassiValue', vData.nr_chassis || vData.chassis_nr || vData.nr_chassi || vData.numero_chassis || 'Não registado');
+      setSafeText('modalBuyDateValue', fmtDate(vData.buy_date || vData.data_compra) || 'Não registada');
+      setSafeText('modalRegDateValue', fmtDate(vData.registration_date || vData.data_registo) || 'Não registada');
       const adblue = vData.has_adblue ?? vData.has_adbue ?? vData.adblue;
       setSafeText('modalAdblueValue', (adblue === true || adblue === 'Sim' || adblue === 'true') ? 'Sim' : ((adblue === false || adblue === 'Não' || adblue === 'false') ? 'Não' : 'Não especificado'));
       const km = vData.current_km || vData.km_atual || vData.km;
-      setSafeText('modalKmValue', km ? `${Number(km).toLocaleString()} km` : '-- km');      
+      setSafeText('modalKmValue', km ? `${Number(km).toLocaleString('pt-PT')} km` : '-- km');
+      // Prazos e manutenção: só mostra se existir informação real (nunca valores de exemplo)
+      setSafeText('modalInsuranceValue', fmtDate(vData.insurance_date || vData.insurance_valid_until) || 'Sem informação');
+      setSafeText('modalIpoValue', fmtDate(vData.ipo_date || vData.next_inspection) || 'Sem informação');
+      setSafeText('modalIucValue', vData.iuc_month || vData.iuc || 'Sem informação');
+      setSafeText('modalLastMaintValue', vData.last_maintenance || 'Sem informação');
+      setSafeText('modalNextMaintValue', vData.next_maintenance || 'Sem informação');
+      // abre sempre no separador "Geral"
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tabGeral'));
       document.getElementById('vehicleModal').classList.add('open');
     }
     function closeVehicleModal() {
@@ -473,11 +501,12 @@
     }
     async function refreshData() {
       const btn = document.getElementById('refreshBtn');
+      if (btn?.classList.contains('spinning')) return;
       btn?.classList.add('spinning');
       await loadVehicleData();
       btn?.classList.remove('spinning');
     }
-    setInterval(loadVehicleData, 30000);
+    setInterval(() => { if (!document.hidden) loadVehicleData(); }, 30000);
   </script>
 </body>
 </html>
