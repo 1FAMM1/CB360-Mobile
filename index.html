@@ -19211,7 +19211,7 @@
          onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">ESCALAS</span>
-      <span class="header-sub">Piquetes · Decir · Extras · SBA · OPAT</span>
+      <span class="header-sub">Profissional · Piquetes · Decir · Extras · SBA · OPAT</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
@@ -24465,7 +24465,7 @@
     const TIMERS = {VEHICLE_RELOAD_INTERVAL: 5000, STATUS_CHECK_INTERVAL: 1500, INITIAL_SELECT_DELAY: 1000,
                     RESELECT_DELAY: 100, ANIMATION_DURATION: 300, STATUS_DISPLAY_TIME: 3000, FOCUS_DELAY: 100};
     const TYPES_WITH_PUMP = ['VLCI', 'VUCI', 'VFCI', 'VECI', 'VFCI', 'VRCI', 'VSAE', 'VTTU', 'VTTF', 'VTTR', 'VALE', 'VTTR', 'VTGC'];
-    const HIDDEN_VEHICLE_TYPES = ['ABTM', 'ABTD', 'VDTD'];
+    const HIDDEN_VEHICLE_TYPES = ['ABTM', 'ABTD', 'VDTD', 'ATRL'];
     const VEHICLE_ICONS = {'VCOT': '🚒', 'VCOC': '🚒', 'VGEO': '🚒', 'VLCI': '🚒', 'VUCI': '🚒', 'VFCI': '🚒', 'VECI': '🚒', 'VRCI': '🚒', 'VE': '🚒', 'PE': '🚒', 
                            'VLSA': '🚒', 'VSAT': '🚒', 'VSAE': '🚒', 'VTTU': '🚒', 'VTTF': '🚒', 'VTTR': '🚒', 'VTGC': '🚒', 'VALE': '🚒', 'VOPE': '🚒', 'VPMA': '🚒', 
                            'VTTP': '🚒', 'VTPT': '🚒', 'ERST': '🚒', 'MRSA': '🚒', 'ATRL': '🚒', 'ABSC': '🚑', 'ABTM': '🚑', 'ABTD': '🚑', 'VDTD': '🚑'};
@@ -24485,7 +24485,7 @@
     let vehicleStatuses = {};
     let vehicleINOP = {};
     let currentVehicleList = [];
-    let pendingStatusButton = null;
+    let pendingStatusButton = null; 
     const SAVED_VEHICLE_KEY = 'geostat-vehicle-6';
     function getCorpPadded() {
       const c = getCorp();
