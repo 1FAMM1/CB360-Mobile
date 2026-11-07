@@ -25262,7 +25262,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v7 - 2026-11-07 - barras de estado e navegação escuras #0f1117 (+ v5: logo/foto em cache)';
+  window.CB360_BUILD='v8 - 2026-11-07 - fundo do shell escuro; barras de estado e navegação escuras #0f1117 (+ v5: logo/foto em cache)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#c62828;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
@@ -25313,9 +25313,8 @@
         var m=document.querySelector('meta[name="theme-color"]');
         /* barra de estado e de navegação: sempre escuras */
         if(m)m.setAttribute('content','#0f1117');
-        var bg=getComputedStyle(d.documentElement).backgroundColor;
-        if(!bg||bg==='rgba(0, 0, 0, 0)')bg=getComputedStyle(d.body).backgroundColor;
-        if(bg&&bg!=='rgba(0, 0, 0, 0)')document.documentElement.style.background=bg;
+        /* fundo do shell fica escuro (era copiado da página = vermelho por baixo da barra de navegação) */
+        document.documentElement.style.background='#0f1117';
       }catch(_){}
       document.getElementById('boot').classList.add('off');
     }
