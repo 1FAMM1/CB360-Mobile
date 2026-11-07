@@ -115,7 +115,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">COMUNICADOS</span>
       <span class="header-sub">Visualização de Comunicados</span>
@@ -148,7 +148,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -200,10 +200,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -216,23 +217,52 @@
         console.error('Erro silencioso:', err);
       }
     }
+    /* ===================== PDF COM TOKEN (pronto para bucket privado) ===================== */
+    const COMUN_BUCKET = "cb_pdf";
+    function encodePath(path) {return path.split('/').map(encodeURIComponent).join('/');}
+    function comunPath(url) {
+      if (!url) return null;
+      const m = url.match(/\/cb_pdf\/(.+)$/);
+      return m ? decodeURIComponent(m[1].split('?')[0]) : (url.startsWith('http') ? null : url);
+    }
+    // 1º tenta com o token do utilizador (funciona com bucket privado); se falhar, usa o link público
+    async function loadPdfSource(comunUrl) {
+      const path = comunPath(comunUrl);
+      if (path) {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/${COMUN_BUCKET}/${encodePath(path)}`, {
+            headers: {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${localStorage.getItem("authToken")}`}
+          });
+          if (res.ok) return {data: new Uint8Array(await res.arrayBuffer())};
+        } catch (_) {}
+      }
+      return comunUrl.startsWith('http') ? comunUrl : `${SUPABASE_URL}/storage/v1/object/public/${COMUN_BUCKET}/${encodePath(comunUrl)}`;
+    }
     /* ===================== PRESS RELEASES LOADING ====================== */
     function markAsRead(url) {
-      let viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]");
+      let viewedDocs = [];
+      try { viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]"); } catch (_) {}
       if (!viewedDocs.includes(url)) {
         viewedDocs.push(url);
         localStorage.setItem("viewed_communications", JSON.stringify(viewedDocs));
       }
     }
     async function loadComunicates() {
-      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const corpRaw = localStorage.getItem("currentCorpOperNr");
+      const corpOperNr = corpRaw ? corpRaw.padStart(4, "0") : null;
       const list = document.getElementById("communications-list");
       list.innerHTML = "<p style='text-align:center; padding:20px; color:var(--txt-2);'>A carregar comunicados...</p>";
-      const viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]");
+      if (!corpOperNr) {
+        list.innerHTML = `<div class="empty-card">Sessão inválida. Volte a iniciar sessão.</div>`;
+        return;
+      }
+      let viewedDocs = [];
+      try { viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]"); } catch (_) {}
       try {
         const resp = await fetch(`${SUPABASE_URL}/rest/v1/serv_comun?select=comun_title,comun_url&corp_oper_nr=eq.${corpOperNr}&order=created_at.desc`, {
           headers: getSupabaseHeaders()
         });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const comunicados = await resp.json();
         list.innerHTML = "";
         if (!Array.isArray(comunicados) || comunicados.length === 0) {
@@ -244,24 +274,27 @@
           const publicUrl = comun.comun_url.startsWith('http') ? comun.comun_url :
           `${SUPABASE_URL}/storage/v1/object/public/cb_pdf/${comun.comun_url}`;
           const isRead = viewedDocs.includes(publicUrl);
+          const sourceUrl = comun.comun_url;
           const card = document.createElement("div");
           card.className = "comun-card";
           card.innerHTML = `
             <div class="comun-icon-wrap ${isRead ? 'read' : ''}">
               <span class="material-icons">${isRead ? 'check_circle' : 'picture_as_pdf'}</span>
             </div>
-            <div class="comun-title">${comun.comun_title}</div>
+            <div class="comun-title"></div>
           `;
+          card.querySelector('.comun-title').textContent = comun.comun_title || 'Comunicado';
           card.onclick = () => {
             markAsRead(publicUrl);
             const iconWrap = card.querySelector('.comun-icon-wrap');
             iconWrap.classList.add('read');
             iconWrap.querySelector('.material-icons').innerText = 'check_circle';
-            openPdfViewer(publicUrl, comun.comun_title);
+            openPdfViewer(sourceUrl, comun.comun_title);
           };
           list.appendChild(card);
         });
       } catch (err) {
+        console.error("Erro ao carregar comunicados:", err);
         list.innerHTML = `<div class="empty-card">Erro ao carregar comunicados</div>`;
       }
     }
@@ -285,7 +318,7 @@
       commListContainer.style.display = "none";
       commTitle.style.display = "none";
       viewerContainer.style.display = "flex";
-      pdfTitle.textContent = title;
+      pdfTitle.textContent = title || 'Comunicado';
       pdfViewer.innerHTML = "<p style='text-align:center; padding:20px;'>A carregar PDF...</p>";
       currentScale = 0.75;
       pinchScale = 1;
@@ -298,9 +331,10 @@
         currentPdf = null;
       };
       try {
-        currentPdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        currentPdf = await pdfjsLib.getDocument(await loadPdfSource(pdfUrl)).promise;
         await renderPdf();
       } catch (err) {
+        console.error("Erro ao abrir PDF:", err);
         pdfViewer.innerHTML = "<p style='text-align:center; font-weight:bold; padding:20px; color:var(--red);'>Não foi possível carregar o PDF.</p>";
       }
     }
@@ -416,10 +450,10 @@
         }
       };
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       loadComunicates();
     });
   </script>
 </body>
 </html>
-
-
