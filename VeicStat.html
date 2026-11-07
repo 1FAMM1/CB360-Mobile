@@ -234,7 +234,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -280,14 +280,13 @@
     const VEHICLE_TYPE_ORDER = {'VCOT': 1, 'VCOC': 2, 'VGEO': 3, 'VLCI': 4, 'VUCI': 5, 'VFCI': 6, 'VECI': 7, 'VRCI': 8, 'VE': 9, 'PE': 10, 'VLSA': 11, 'VSAT': 12, 'VSAE': 13,
                                 'VTTU': 14, 'VTTF': 15, 'VTTR': 16, 'VTGC': 17, 'VALE': 18, 'VOPE': 19, 'VPMA': 20, 'VTTP': 21, 'VTPT': 22, 'ERST': 23, 'MRSA': 24,'ATRL': 25, 
                                 'ABSC': 26,  'ABTD': 27, 'ABTM': 28, 'VDTD': 29};
-    const BACKUP_VEHICLES = [ 'VCOT-01', 'VCOT-02', 'VTTP-01', 'VTTP-02', 'VTTP-03', 'VFCI-01', 'VFCI-02', 'VTTU-01', 'VTTF-02', 'ABSC-02', 'ABSC-03', 'ABSC-04'];
     const RETIDO_MACAS_TYPES = ['ABSC', 'ABCI', 'ABTD', 'ABTM', 'VDTD'];
     function toggleRetidoMacasButton(type) {
       const btn = document.getElementById('retidoMacasBtn');
       if (!btn) return;
       btn.style.display = (type && RETIDO_MACAS_TYPES.includes(type)) ? 'flex' : 'none';
     }
-    /* === VARIÁVEIS DE ESTADO GLOBAL ==*/    
+    /* === VARIÁVEIS DE ESTADO GLOBAL ==*/
     let selectedVehicle = null;
     let vehicleIcon = null;
     let vehicleType = null;
@@ -295,45 +294,50 @@
     let vehicleINOP = {};
     let currentVehicleList = [];
     let pendingStatusButton = null;
+    const SAVED_VEHICLE_KEY = 'geostat-vehicle-6';
+    function getCorpPadded() {
+      const c = getCorp();
+      return c ? c.padStart(4, "0") : null;
+    }
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    function tgEscape(v) {
+      return String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
     /* ============================= EVENTS ============================== */
     document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
-      } 
-      loadVehiclesFromAPI();
-      loadVehicleStatuses();
-      deselectVehicle();
-      const saved = localStorage.getItem('geostat-vehicle-6');
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          setTimeout(() => selectVehicle(data.vehicle, data.icon, data.type, false), TIMERS.INITIAL_SELECT_DELAY);
-        } catch (err) {
-          console.error('❌ Erro ao carregar veículo salvo:', err);
-          localStorage.removeItem('geostat-vehicle-6');
-        }
       }
-      startVehiclePolling();
-      startStatusPolling();
+      deselectVehicle(false);
+      startPolling(true);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) loadVehicles(); });
     });
-    async function startVehiclePolling() {
-      try {
-        await loadVehiclesFromAPI();
-      } catch (err) {
-        console.error('❌ Erro no polling de veículos:', err);
+    // Um único pedido (lista + estado + INOP) a cada 5 s, só com a app visível
+    async function startPolling(first = false) {
+      if (!document.hidden || first) {
+        await loadVehicles();
+        if (first) restoreSavedVehicle();
       }
-      setTimeout(startVehiclePolling, TIMERS.VEHICLE_RELOAD_INTERVAL);
+      setTimeout(() => startPolling(false), TIMERS.VEHICLE_RELOAD_INTERVAL);
     }
-    async function startStatusPolling() {
+    function restoreSavedVehicle() {
       try {
-        await loadVehicleStatuses();
-        checkSelectedVehicleINOP();
+        const data = JSON.parse(localStorage.getItem(SAVED_VEHICLE_KEY) || "null");
+        // só repõe se for da mesma corporação e o veículo existir
+        if (data && data.corp === getCorpPadded() && currentVehicleList.includes(data.vehicle)) {
+          selectVehicle(data.vehicle, data.icon, data.type, false);
+        } else {
+          localStorage.removeItem(SAVED_VEHICLE_KEY);
+        }
       } catch (err) {
-        console.error('❌ Erro no polling de status:', err);
+        localStorage.removeItem(SAVED_VEHICLE_KEY);
       }
-      setTimeout(startStatusPolling, TIMERS.STATUS_CHECK_INTERVAL);
     }
     /* ======================= CORPORATION LOADING ======================= */
     async function loadCorpInfo() {
@@ -348,10 +352,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -364,42 +369,47 @@
         console.error('Erro silencioso:', err);
       }
     }
-    window.addEventListener("DOMContentLoaded", loadCorpInfo);    
-    /* ======================== VEHICLES LOADING ========================= */
-    async function loadVehiclesFromAPI() {
+    /* ===================== VEHICLES + STATUS LOADING ===================== */
+    async function loadVehicles() {
+      const vehicleGrid = document.querySelector('.vehicle-grid');
       try {
-        const corpOperNr = localStorage.getItem('currentCorpOperNr');
+        const corpOperNr = getCorpPadded();
+        if (!corpOperNr) throw new Error("Sessão inválida");
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/vehicle_status?select=vehicle&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/vehicle_status?select=vehicle,current_status,is_inop&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
-        if (!response.ok) throw new Error("Erro Supabase");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        const vehicleCodes = data.map(v => v.vehicle);
-        if (vehicleCodes.length > 0) {
-          const newVehicleList = sortVehicles(vehicleCodes);
-          if (JSON.stringify(newVehicleList) !== JSON.stringify(sortVehicles(currentVehicleList))) {
-            const wasSelected = selectedVehicle;
-            const wasIcon = vehicleIcon;
-            const wasType = vehicleType;
-            currentVehicleList = [...vehicleCodes];
-            generateVehicleButtons(vehicleCodes);
-            if (wasSelected && vehicleCodes.includes(wasSelected)) {
-              setTimeout(() => selectVehicle(wasSelected, wasIcon, wasType, false), TIMERS.RESELECT_DELAY);
-            }
-          }
-        } else {
-          loadBackupVehicles();
+        const vehicleCodes = data.map(v => v.vehicle).filter(Boolean);
+        vehicleStatuses = {};
+        vehicleINOP = {};
+        data.forEach(item => {
+          vehicleStatuses[item.vehicle] = item.current_status || 'Disponível';
+          vehicleINOP[item.vehicle] = item.is_inop === true;
+        });
+        if (vehicleCodes.length === 0) {
+          currentVehicleList = [];
+          if (vehicleGrid) vehicleGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;font-weight:600;color:var(--txt-2);padding:12px;">Sem veículos configurados para esta corporação.</div>';
+          return;
         }
+        const newVehicleList = sortVehicles([...vehicleCodes]);
+        if (JSON.stringify(newVehicleList) !== JSON.stringify(currentVehicleList)) {
+          const wasSelected = selectedVehicle;
+          currentVehicleList = newVehicleList;
+          generateVehicleButtons(newVehicleList);
+          if (wasSelected && newVehicleList.includes(wasSelected)) markSelectedButton(wasSelected);
+        }
+        updateVehicleButtonColors();
+        checkSelectedVehicleINOP();
       } catch (err) {
         console.error('❌ Erro ao carregar veículos:', err);
-        loadBackupVehicles();
+        // Sem lista de recurso: nunca mostrar veículos que não são desta corporação
+        if (vehicleGrid && currentVehicleList.length === 0) {
+          vehicleGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;font-weight:600;color:var(--red);padding:12px;">Erro ao carregar veículos. A tentar novamente...</div>';
+        }
       }
-    }
-    function loadBackupVehicles() {
-      currentVehicleList = [...BACKUP_VEHICLES];
-      generateVehicleButtons(BACKUP_VEHICLES);
     }
     function generateVehicleButtons(vehicles) {
       const vehicleGrid = document.querySelector('.vehicle-grid');
@@ -409,15 +419,21 @@
         const type = code.split('-')[0];
         if (HIDDEN_VEHICLE_TYPES.includes(type)) return;
         const icon = getVehicleIcon(type);
-        const typeClass = type.toLowerCase();
-        vehicleGrid.insertAdjacentHTML('beforeend', `
-      <div class="vehicle-btn ${typeClass}" onclick="selectVehicle('${code}','${icon}','${type}', true, event)">
-        <span class="status-badge"></span>
-        <span class="vehicle-icon">${icon}</span>
-        <div class="vehicle-code">${code}</div>
-      </div>
-    `);
+        const btn = document.createElement('div');
+        btn.className = `vehicle-btn ${type.toLowerCase().replace(/[^a-z0-9_-]/g, '')}`;
+        btn.dataset.code = code;
+        btn.innerHTML = `<span class="status-badge"></span><span class="vehicle-icon">${icon}</span><div class="vehicle-code">${escapeHtml(code)}</div>`;
+        btn.addEventListener('click', (e) => selectVehicle(code, icon, type, true, e));
+        vehicleGrid.appendChild(btn);
       });
+    }
+    function findVehicleButton(code) {
+      return [...document.querySelectorAll('.vehicle-btn')].find(b => b.dataset.code === code) || null;
+    }
+    function markSelectedButton(code) {
+      document.querySelectorAll('.vehicle-btn').forEach(btn => btn.classList.remove('selected'));
+      const btn = findVehicleButton(code);
+      if (btn) btn.classList.add('selected');
     }
     function getVehicleIcon(type) {
       return VEHICLE_ICONS[type] || '🚗';
@@ -429,40 +445,16 @@
         const orderA = VEHICLE_TYPE_ORDER[typeA] || 999;
         const orderB = VEHICLE_TYPE_ORDER[typeB] || 999;
         if (orderA === orderB) {
-          return parseInt(numA) - parseInt(numB);
+          return (parseInt(numA) || 0) - (parseInt(numB) || 0);
         }
         return orderA - orderB;
       });
     }
-    /* ========================= STATUS LOADING ========================== */    
-    async function loadVehicleStatuses() {
-      try {
-        const corpOperNr = localStorage.getItem('currentCorpOperNr');
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/vehicle_status?select=vehicle,current_status,is_inop&corp_oper_nr=eq.${corpOperNr}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        if (!response.ok) throw new Error("Erro Status Supabase");
-        const data = await response.json();
-        vehicleStatuses = {};
-        vehicleINOP = {};
-        data.forEach(item => {
-          vehicleStatuses[item.vehicle] = item.current_status || 'Disponível';
-          vehicleINOP[item.vehicle] = item.is_inop === true;
-        });
-        updateVehicleButtonColors();
-      } catch (err) {
-        console.error('❌ Erro ao carregar status:', err);
-      }
-    }
+    /* ========================= STATUS DISPLAY ========================== */
     function updateVehicleButtonColors() {
       document.querySelectorAll('.vehicle-btn').forEach(btn => {
-        const onclickAttr = btn.getAttribute('onclick');
-        if (!onclickAttr) return;
-        const match = onclickAttr.match(/'([^']+)'/);
-        if (!match) return;
-        const code = match[1];
+        const code = btn.dataset.code;
+        if (!code) return;
         btn.classList.remove('inop', 'em-servico', 'em-parque');
         const badge = btn.querySelector('.status-badge');
         if (vehicleINOP[code] === true) {
@@ -483,32 +475,28 @@
         deselectVehicle();
       }
     }
+    // Devolve true só se a linha da PRÓPRIA corporação foi mesmo alterada
     async function updateVehicleStatus(vehicle, action) {
       const finalStatus = action === 'Chegada Und.' ? 'Disponível' : 'Em Serviço';
+      const corp = getCorpPadded();
       try {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/vehicle_status?vehicle=eq.${vehicle}`, {
+          `${SUPABASE_URL}/rest/v1/vehicle_status?vehicle=eq.${encodeURIComponent(vehicle)}&corp_oper_nr=eq.${corp}`, {
             method: 'PATCH',
-            headers: getSupabaseHeaders(),
+            headers: getSupabaseHeaders({returnRepresentation: true}),
             body: JSON.stringify({ current_status: finalStatus })
           }
         );
-        if (res.ok) {
-          vehicleStatuses[vehicle] = finalStatus;
-          updateVehicleButtonColors();
-          saveBackup();
-        } else {
-          throw new Error("Falha ao atualizar Supabase");
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const rows = await res.json();
+        if (!Array.isArray(rows) || rows.length === 0) throw new Error("Nenhuma linha atualizada");
+        vehicleStatuses[vehicle] = finalStatus;
+        updateVehicleButtonColors();
+        return true;
       } catch (err) {
         console.error('❌ Erro ao atualizar status:', err);
-        vehicleStatuses[vehicle] = finalStatus;
-        saveBackup();
+        return false;
       }
-    }
-    function saveBackup() {
-      localStorage.setItem('geostat-backup-statuses', JSON.stringify(vehicleStatuses));
-      localStorage.setItem('geostat-backup-inop', JSON.stringify(vehicleINOP));
     }
     function showToast(message, type = 'success', duration = 3000) {
       const container = document.getElementById('toastContainer');
@@ -553,9 +541,7 @@
         }
         return;
       }
-      const event = e || window.event;
-      const clickedButton = event?.target ? event.target.closest('.vehicle-btn') :
-        document.querySelector(`[onclick*="${vehicle}"]`);
+      const clickedButton = (e && e.target && e.target.closest('.vehicle-btn')) || findVehicleButton(vehicle);
       if (selectedVehicle === vehicle && clickedButton && clickedButton.classList.contains('selected')) {
         deselectVehicle();
         if (navigator.vibrate && animate) {
@@ -569,11 +555,7 @@
       selectedVehicle = vehicle;
       vehicleIcon = icon;
       vehicleType = type;
-      localStorage.setItem('geostat-vehicle-6', JSON.stringify({
-        vehicle: vehicle,
-        icon: icon,
-        type: type
-      }));
+      localStorage.setItem(SAVED_VEHICLE_KEY, JSON.stringify({vehicle, icon, type, corp: getCorpPadded()}));
       document.querySelectorAll('.vehicle-btn').forEach(btn => {
         btn.classList.remove('selected');
       });
@@ -590,11 +572,11 @@
         navigator.vibrate(100);
       }
     }
-    function deselectVehicle() {
+    function deselectVehicle(clearSaved = true) {
       selectedVehicle = null;
       vehicleIcon = null;
       vehicleType = null;
-      localStorage.removeItem('geostat-vehicle-6');
+      if (clearSaved) localStorage.removeItem(SAVED_VEHICLE_KEY);
       document.querySelectorAll('.vehicle-btn').forEach(btn => {
         btn.classList.remove('selected');
       });
@@ -632,29 +614,30 @@
         showToast('Selecione uma viatura primeiro!', 'error');
         return;
       }
+      if (btnEl && btnEl.disabled) return;
+      const corpOperNr = getCorpPadded();
+      if (!corpOperNr) {
+        showToast('Sessão inválida. Volte a iniciar sessão.', 'error');
+        return;
+      }
       lockStatusButton(btnEl);
       const now = new Date();
       const time = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
       const date = now.toLocaleDateString('pt-PT');
-      const message = `🚨 <b>ATUALIZAÇÃO DE STATUS</b>\n\n${vehicleIcon} <b>${selectedVehicle}</b>\n📍 <b>${action}</b>\n⏰ ${time}\n📅 ${date}`;
-      const corpOperNr = localStorage.getItem('currentCorpOperNr') || 'N/D';
+      const message = `🚨 <b>ATUALIZAÇÃO DE STATUS</b>\n\n${vehicleIcon} <b>${tgEscape(selectedVehicle)}</b>\n📍 <b>${tgEscape(action)}</b>\n⏰ ${time}\n📅 ${date}`;
       try {
         const res = await fetch(TELEGRAM_API, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({message, vehicle: selectedVehicle, action, corp_oper_nr: corpOperNr})
         });
-        if (res.ok) {
-          showToast(`${action} enviado!`, 'success');
-          await updateVehicleStatus(selectedVehicle, action);
-          deselectVehicle();
-        } else {
-          const text = await res.text();
-          throw new Error(text);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const ok = await updateVehicleStatus(selectedVehicle, action);
+        showToast(ok ? `${action} enviado!` : `${action} enviado, mas o estado do veículo não foi atualizado.`, ok ? 'success' : 'warning');
+        deselectVehicle();
       } catch (err) {
         console.error('❌ Erro ao enviar:', err);
-        showToast(`Erro ao enviar ${action}: ${err.message}`, 'error');
+        showToast(`Erro ao enviar ${action}. Tente novamente.`, 'error');
       } finally {
         unlockStatusButton(btnEl);
       }
@@ -674,9 +657,9 @@
       <div id="kmPopup" class="popup-overlay">
         <div class="popup-content">
           <h3>🏠 Chegada ao Quartel</h3>
-          <p><strong>${vehicleIcon} ${selectedVehicle}</strong></p>
+          <p><strong>${vehicleIcon} ${escapeHtml(selectedVehicle)}</strong></p>
           <p>Informe os quilómetros atuais:</p>
-          <input type="number" id="kmInput" placeholder="Ex: 12345" autofocus/>
+          <input type="number" inputmode="numeric" id="kmInput" placeholder="Ex: 12345" autofocus/>
           ${hasPump ? `
             <p style="margin-top:15px;">Tempo de Bomba:</p>
             <div style="display:flex;gap:10px;align-items:center;margin-bottom:15px;">
@@ -704,7 +687,7 @@
       const kmValue = document.getElementById('kmInput')?.value.trim();
       const tipoVeiculo = selectedVehicle.split('-')[0];
       const hasPump = TYPES_WITH_PUMP.includes(tipoVeiculo);
-      if (!kmValue || kmValue <= 0) {
+      if (!kmValue || !/^\d{1,7}$/.test(kmValue) || Number(kmValue) <= 0) {
         showToast('Insira os quilómetros válidos!', 'error');
         return;
       }
@@ -713,8 +696,12 @@
       if (hasPump) {
         const hoursInput = document.getElementById('hoursInput');
         const minutesInput = document.getElementById('minutesInput');
-        hours = parseInt(hoursInput?.value.trim() || '0');
-        minutes = parseInt(minutesInput?.value.trim() || '0');
+        hours = parseInt(hoursInput?.value.trim() || '0', 10);
+        minutes = parseInt(minutesInput?.value.trim() || '0', 10);
+        if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+          showToast('Tempo de bomba inválido (0-23 h, 0-59 min).', 'error');
+          return;
+        }
       }
       closeKmPopup();
       await sendGeostatWithKmAndTime('Chegada Und.', kmValue, hours, minutes, hasPump);
@@ -743,7 +730,7 @@
             <div style="padding:16px 20px 24px 20px !important; display:flex; flex-direction:column; gap:16px;">
               <div style="display:flex; align-items:center; gap:8px;">
                 <span style="font-size:19px; line-height:1;">${vehicleIcon}</span>
-                <strong style="font-size:15px; line-height:1;">${selectedVehicle}</strong>
+                <strong style="font-size:15px; line-height:1;">${escapeHtml(selectedVehicle)}</strong>
               </div>
               <div style="display:flex; flex-direction:column; gap:10px; margin: 10px 0 5px 30px;">
                 <label style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--txt-1); cursor:pointer;">
@@ -794,32 +781,32 @@
         showToast('Selecione uma viatura primeiro!', 'error');
         return;
       }
+      const corpOperNr = getCorpPadded();
+      if (!corpOperNr) {
+        showToast('Sessão inválida. Volte a iniciar sessão.', 'error');
+        return;
+      }
       lockStatusButton(pendingStatusButton);
       const now = new Date();
       const time = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
       const date = now.toLocaleDateString('pt-PT');
-      let message = `🚨 <b>ATUALIZAÇÃO DE STATUS</b>\n\n${vehicleIcon} <b>${selectedVehicle}</b>\n📍 <b>${action}</b>\n⏰ ${time}\n📅 ${date}\n🛣️ <b>KMs: ${kilometers}</b>`;
+      let message = `🚨 <b>ATUALIZAÇÃO DE STATUS</b>\n\n${vehicleIcon} <b>${tgEscape(selectedVehicle)}</b>\n📍 <b>${tgEscape(action)}</b>\n⏰ ${time}\n📅 ${date}\n🛣️ <b>KMs: ${tgEscape(kilometers)}</b>`;
       if (hasPump) {
         message += `\n⏱️ <b>Tempo Bomba: ${hours.toString().padStart(2,'0')}h${minutes.toString().padStart(2,'0')}m</b>`;
       }
-      const corpOperNr = localStorage.getItem('currentCorpOperNr') || 'N/D';
       try {
         const res = await fetch(TELEGRAM_API, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({message, vehicle: selectedVehicle, action, corp_oper_nr: corpOperNr})
         });
-        if (res.ok) {
-          showToast(`${action} enviado!`, 'success');
-          await updateVehicleStatus(selectedVehicle, action);
-          deselectVehicle();
-        } else {
-          const text = await res.text();
-          throw new Error(text);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const ok = await updateVehicleStatus(selectedVehicle, action);
+        showToast(ok ? `${action} enviado!` : `${action} enviado, mas o estado do veículo não foi atualizado.`, ok ? 'success' : 'warning');
+        deselectVehicle();
       } catch (err) {
         console.error('❌ Erro ao enviar:', err);
-        showToast(`Erro ao enviar ${action}: ${err.message}`, 'error');
+        showToast(`Erro ao enviar ${action}. Tente novamente.`, 'error');
       } finally {
         unlockStatusButton(pendingStatusButton);
         pendingStatusButton = null;
