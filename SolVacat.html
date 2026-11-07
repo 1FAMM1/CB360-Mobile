@@ -104,6 +104,7 @@
     ============================================================ */
     .save-vacation-btn {display: none; width: 100%; padding: 12px; background: linear-gradient(135deg, #27ae60, #229954); color: white; border: none; border-radius: var(--r-md); font-size: 13.5px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); text-align: center;}
     .save-vacation-btn:hover {background: linear-gradient(135deg, #229954, #1e8449); transform: translateY(-1px);}
+    .save-vacation-btn:disabled {opacity: 0.6; pointer-events: none;}
     .save-vacation-btn.show {display: block; animation: slideDown 0.3s ease;}
     /* ============================================================
     VACATIONS SUMMARY CARD (novo)
@@ -247,7 +248,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -298,12 +299,7 @@
       }
       if (h2) h2.textContent = corpOperNr;
       try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
-            headers: getSupabaseHeaders()
-          }
-        );
-        const data = await response.json();
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`);
         if (data && data.length > 0) {
           const corp = data[0];
           if (corp.logo_url && corp.logo_url !== cachedLogo) {
@@ -327,6 +323,25 @@
         setTimeout(resolve, 500);
       });
     }
+    /* ============================ HELPERS ============================== */
+    async function sbJson(url, options = {}) {
+      const res = await fetch(url, {headers: getSupabaseHeaders(), ...options});
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { const e = await res.json(); msg = e.message || msg; } catch (_) {}
+        throw new Error(msg);
+      }
+      const txt = await res.text();
+      return txt ? JSON.parse(txt) : null;
+    }
+    function getWorkYear(selectedMonthIndex) {
+      const now = new Date();
+      if (now.getMonth() === 11 && selectedMonthIndex === 0 && now.getDate() >= 15) return now.getFullYear() + 1;
+      return now.getFullYear();
+    }
+    function parseDays(str) {
+      return String(str || "").split(",").map(d => parseInt(d.trim(), 10)).filter(d => !isNaN(d));
+    }
     /* ======================== VACATIONS LOADING ======================== */
     async function loadVacations() {
       const n_int = localStorage.getItem("currentCorpNint");
@@ -336,15 +351,14 @@
       const yearLabel = document.getElementById('vacationsSummaryYear');
       if (yearLabel) yearLabel.textContent = currentYear;
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat?n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr.padStart(4, "0")}&order=year,month`, {
-          headers: getSupabaseHeaders()
-        });
-        const data = await res.json();
+        // Ano atual + seguinte (para pedidos de janeiro feitos em dezembro)
+        const data = await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?select=id,year,month,day,state&n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr.padStart(4, "0")}&year=in.(${currentYear},${currentYear + 1})&order=year,month`);
         vacationsData = data || [];
         renderVacationsSummary(currentYear);
         renderVacationsModalList(currentYear);
       } catch (err) {
         console.error("Erro Load:", err);
+        showToast("Erro ao carregar os pedidos de férias.");
       }
     }
     /* ==================== VACATIONS SUMMARY & MODAL ===================== */
@@ -372,7 +386,7 @@
       }
       yearRecords.forEach(v => {
         if (v.day) {
-          const daysArray = v.day.split(',').map(Number);
+          const daysArray = parseDays(v.day);
           showVacationCard(daysArray, v.month, v.year, v.state);
         }
       });
@@ -429,8 +443,7 @@
       selectedDays = [];
       const names = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
       const daysWeek = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];    
-      const now = new Date();
-      const year = now.getFullYear();
+      const year = getWorkYear(monthIndex);
       const month = monthIndex + 1;
       const todayRef = new Date();
       todayRef.setHours(0, 0, 0, 0);      
@@ -446,7 +459,7 @@
         grid.appendChild(Object.assign(document.createElement('div'), { className: 'calendar-day empty' }));
       }      
       const stateClass = {'Em Aprovação': 'state-pending', 'Aprovadas': 'state-approved', 'Recusadas': 'state-rejected'};
-      const monthRecords = vacationsData.filter(v => parseInt(v.month) === month);      
+      const monthRecords = vacationsData.filter(v => parseInt(v.month) === month && parseInt(v.year) === year);      
       for (let day = 1; day <= lastDay; day++) {
         const dayEl = document.createElement('div');
         dayEl.className = 'calendar-day';
@@ -461,10 +474,9 @@
         const isDayDecir = (month === 5 && day >= 15) || (month > 5 && month < 10) || (month === 10 && day <= 15);
         if (isDayDecir) dayEl.classList.add('decir-period');        
         monthRecords.forEach(r => {
-          const days = r.day.split(',').map(d => parseInt(d.trim()));
-          if (days.includes(day)) {
+          if (parseDays(r.day).includes(day)) {
             dayEl.classList.add(stateClass[r.state] || 'state-pending');
-            selectedDays.push(day);
+            if (!selectedDays.includes(day)) selectedDays.push(day);
           }
         });        
         dayEl.onclick = () => {
@@ -493,42 +505,51 @@
       header.textContent = `${names[monthIndex]} ${year}`;
     }
     /* ======================== SAVING VACATIONS ========================= */
+    let isSavingVacation = false;
     async function saveVacation() {
+      if (isSavingVacation) return;
       if (currentMonthIndex === null) return showToast("Selecione um mês.");
-      if (selectedDays.length === 0) return showToast("Selecione pelo menos um dia.");
-      const n_int = parseInt(localStorage.getItem("currentCorpNint"));
-      const corp_oper_nr = (localStorage.getItem("currentCorpOperNr")).padStart(4, "0");
-      const year = new Date().getFullYear();
+      const nintStr = localStorage.getItem("currentCorpNint");
+      const corpStr = localStorage.getItem("currentCorpOperNr");
+      if (!nintStr || !corpStr) return showToast("Sessão inválida. Volte a iniciar sessão.");
+      const n_int = parseInt(nintStr, 10);
+      const corp_oper_nr = corpStr.padStart(4, "0");
+      const year = getWorkYear(currentMonthIndex);
       const month = currentMonthIndex + 1;
-      const daysStr = selectedDays.sort((a, b) => a - b).join(',');
+      const btn = document.getElementById('saveVacationBtn');
+      isSavingVacation = true;
+      if (btn) btn.disabled = true;
       try {
-        const check = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat?n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr}&year=eq.${year}&month=eq.${month}`, {
-          headers: getSupabaseHeaders()
-        });
-        const existing = await check.json();
-        let res;
-        if (existing.length > 0) {
-          res = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat?id=eq.${existing[0].id}`, {
+        const existing = await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?select=id,day,state&n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr}&year=eq.${year}&month=eq.${month}`) || [];
+        // Dias já aprovados nunca voltam a "Em Aprovação"
+        const approvedDays = new Set(existing.filter(r => r.state === "Aprovadas").flatMap(r => parseDays(r.day)));
+        const editable = existing.find(r => r.state !== "Aprovadas");
+        const newDays = [...new Set(selectedDays)].filter(d => !approvedDays.has(d)).sort((a, b) => a - b);
+        if (newDays.length === 0) {
+          if (!editable) { showToast("Selecione pelo menos um dia."); return; }
+          await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?id=eq.${editable.id}`, {method: 'DELETE'});
+          showToast("Pedido de férias cancelado.");
+        } else if (editable) {
+          await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?id=eq.${editable.id}`, {
             method: 'PATCH',
-            headers: getSupabaseHeaders(),
-            body: JSON.stringify({
-              day: daysStr,
-              state: "Em Aprovação"
-            })
+            body: JSON.stringify({day: newDays.join(','), state: "Em Aprovação"})
           });
-        } else {
-          res = await fetch(`${SUPABASE_URL}/rest/v1/ped_vacat`, {
-            method: 'POST',
-            headers: getSupabaseHeaders(),
-            body: JSON.stringify({n_int, corp_oper_nr, year, month, day: daysStr, state: "Em Aprovação"})
-          });
-        }
-        if (res.ok) {
           showToast("Pedido de Férias Enviado!");
-          await loadVacations();
+        } else {
+          await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat`, {
+            method: 'POST',
+            body: JSON.stringify({n_int, corp_oper_nr, year, month, day: newDays.join(','), state: "Em Aprovação"})
+          });
+          showToast("Pedido de Férias Enviado!");
         }
+        await loadVacations();
+        if (currentMonthIndex !== null) renderCalendarGrid(currentMonthIndex);
       } catch (err) {
-        showToast("Erro de ligação.");
+        console.error("Erro ao gravar férias:", err);
+        showToast("Erro ao enviar o pedido de férias. Tente novamente.");
+      } finally {
+        isSavingVacation = false;
+        if (btn) btn.disabled = false;
       }
     }
     function showVacationCard(days, month, year, state) {
@@ -581,6 +602,8 @@
     /* ============================== INIT =============================== */
     document.addEventListener('DOMContentLoaded', () => {
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
