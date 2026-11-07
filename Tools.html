@@ -127,7 +127,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">FERRAMENTAS ÚTEIS</span>
       <span class="header-sub">Apoio à Decisão</span>
@@ -205,7 +205,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -272,10 +272,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -310,7 +311,9 @@
     document.addEventListener('DOMContentLoaded', function() {
       const savedTheme = localStorage.getItem('sgo-theme');
       if (savedTheme === 'dark') document.body.classList.add('dark-mode');      
-      loadCorpInfo();      
+      loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       document.addEventListener('touchstart', function(event) {
         if (event.touches.length > 1) {
           event.preventDefault();
