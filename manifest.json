@@ -6,8 +6,8 @@
   "scope": "/", 
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#d1d1d1",
-  "theme_color": "#c62828",
+  "background_color": "#0f1117",
+  "theme_color": "#0f1117",
   "icons": [
     {
       "src": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/logo_cb_360_app_Background.png",
