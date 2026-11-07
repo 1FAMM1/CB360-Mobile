@@ -210,7 +210,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -270,10 +270,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -285,6 +286,13 @@
       } catch (err) {
         console.error('Erro silencioso:', err);
       }
+    }
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    function getCorpPadded() {
+      const c = getCorp();
+      return c ? c.padStart(4, "0") : null;
     }
     /* ======================== SHOW TOAST ========================= */
     function showToast(message) {
@@ -336,7 +344,7 @@
         return `<select id="itemSize_${rowId}">${options}</select>`;
       }
       if (sizeType === "numeric") {
-        return `<input type="number" id="itemSize_${rowId}" placeholder="Ex: 42" min="30" max="50" value="${currentValue || ''}">`;
+        return `<input type="number" inputmode="numeric" id="itemSize_${rowId}" placeholder="Ex: 42" value="${currentValue && !isNaN(currentValue) ? currentValue : ''}">`;
       }
       return `<input type="text" id="itemSize_${rowId}" value="N/A" disabled style="opacity:0.5;">`;
     }
@@ -428,7 +436,7 @@
         const sizeEl = document.getElementById(`itemSize_${rowId}`);
         const qtyEl = document.getElementById(`itemQty_${rowId}`);
         const articleLabel = UNIFORM_ITEMS.find(i => i.value === articleSelect.value)?.label || articleSelect.value;
-        items.push({article: articleSelect.value, articleLabel, brand: "Não Aplicável", size: sizeEl ? sizeEl.value : "N/A", quantity: qtyEl ? parseInt(qtyEl.value, 10) || 1 : 1,});
+        items.push({article: articleSelect.value, articleLabel, brand: "Não Aplicável", size: sizeEl ? sizeEl.value.trim() : "N/A", sizeType: getSizeTypeForItem(articleSelect.value), quantity: qtyEl ? parseInt(qtyEl.value, 10) : 1});
       });
       return items;
     }
@@ -439,18 +447,31 @@
         showToast("Adicione pelo menos um artigo.");
         return;
       }
-      const invalidQty = items.some(i => !i.quantity || i.quantity < 1);
+      const invalidQty = items.some(i => !i.quantity || i.quantity < 1 || i.quantity > 20);
       if (invalidQty) {
-        showToast("Verifique as quantidades introduzidas.");
+        showToast("Verifique as quantidades introduzidas (1 a 20).");
         return;
       }
+      const missingSize = items.find(i => i.sizeType === "numeric" && !i.size);
+      if (missingSize) {
+        showToast(`Indique o tamanho de: ${missingSize.articleLabel}.`);
+        return;
+      }
+      items.forEach(i => delete i.sizeType);
+      const submitCheck = document.getElementById('submitOrderBtn');
+      if (submitCheck && submitCheck.disabled) return;
       const submitBtn = document.getElementById('submitOrderBtn');
       const submitBtnText = document.getElementById('submitOrderBtnText');
       if (submitBtn) submitBtn.disabled = true;
       if (submitBtnText) submitBtnText.textContent = "A Enviar Pedido";
       const notesValue = document.getElementById('fieldNotes').value.trim();
-      const corpOperNr = getCorp();
+      const corpOperNr = getCorpPadded();
       const nInt = getNInt();
+      if (!corpOperNr || !nInt) {
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitBtnText) submitBtnText.textContent = "Enviar Pedido";
+        return showToast("Sessão inválida. Volte a iniciar sessão.");
+      }
       try {
         const response = await fetch(`${SUPABASE_URL}/rest/v1/uniform_orders`, {
           method: 'POST',
@@ -469,7 +490,7 @@
         autoResizeTextarea(document.getElementById('fieldNotes'));
       } catch (err) {
         console.error(err);
-        showToast("Erro ao enviar o pedido: " + err.message);
+        showToast("Erro ao enviar o pedido. Tente novamente.");
       } finally {
         if (submitBtn) submitBtn.disabled = false;
         if (submitBtnText) submitBtnText.textContent = "Enviar Pedido";
@@ -486,19 +507,19 @@
     function renderOrderCard(order) {
       const statusClass = STATUS_CLASS_MAP[order.status] || "status-aprovacao";
       const itemsHTML = (order.items || []).map(item =>
-        `<div class="order-item-line">${item.quantity}x <b>${item.articleLabel || item.article}</b>${item.size && item.size !== 'N/A' ? ' · Tam. ' + item.size : ''}</div>`
+        `<div class="order-item-line">${escapeHtml(item.quantity)}x <b>${escapeHtml(item.articleLabel || item.article)}</b>${item.size && item.size !== 'N/A' ? ' · Tam. ' + escapeHtml(item.size) : ''}</div>`
       ).join("");
       const metaLines = [];
       if (order.approved_date) metaLines.push(`Aprovado em ${formatDate(order.approved_date)}`);
-      if (order.delivery_date) metaLines.push(`Entregue em ${formatDate(order.delivery_date)}${order.delivery_n_int ? ' · Nº ' + order.delivery_n_int : ''}`);
+      if (order.delivery_date) metaLines.push(`Entregue em ${formatDate(order.delivery_date)}${order.delivery_n_int ? ' · Nº ' + escapeHtml(order.delivery_n_int) : ''}`);
       return `
         <div class="order-card">
           <div class="order-card-top">
             <span class="order-date">${formatDate(order.order_date)}</span>
-            <span class="status-badge ${statusClass}">${order.status}</span>
+            <span class="status-badge ${statusClass}">${escapeHtml(order.status)}</span>
           </div>
           <div class="order-items">${itemsHTML}</div>
-          ${order.notes ? `<div class="order-item-line" style="color: var(--txt-2); font-style: italic;">"${order.notes}"</div>` : ''}
+          ${order.notes ? `<div class="order-item-line" style="color: var(--txt-2); font-style: italic;">"${escapeHtml(order.notes)}"</div>` : ''}
           ${metaLines.length ? `<div class="order-meta">${metaLines.join(' · ')}</div>` : ''}
         </div>
       `;
@@ -506,11 +527,12 @@
     async function loadOrders() {
       const body = document.getElementById('ordersModalBody');
       body.innerHTML = '<p class="modal-loading">A carregar pedidos...</p>';
-      const corp = getCorp();
+      const corp = getCorpPadded();
       const nint = getNInt();
+      if (!corp || !nint) { body.innerHTML = '<p class="modal-empty">Sessão inválida. Volte a iniciar sessão.</p>'; return; }
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/uniform_orders?select=*&corp_oper_nr=eq.${corp}&n_int=eq.${nint}&order=order_date.desc`, {
+          `${SUPABASE_URL}/rest/v1/uniform_orders?select=items,notes,status,order_date,approved_date,delivery_date,delivery_n_int&corp_oper_nr=eq.${corp}&n_int=eq.${nint}&order=order_date.desc`, {
             headers: getSupabaseHeaders()
           }
         );
@@ -526,7 +548,7 @@
         body.innerHTML = orders.map(renderOrderCard).join("");
       } catch (err) {
         console.error(err);
-        body.innerHTML = `<p class="modal-empty">Erro ao carregar pedidos: ${err.message}</p>`;
+        body.innerHTML = '<p class="modal-empty">Erro ao carregar pedidos. Tente novamente.</p>';
       }
     }
     function openOrdersModal() {
@@ -551,6 +573,8 @@
       }
       addItemRow();
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
     });
   </script>
   <div class="modal-overlay" id="ordersModalOverlay" onclick="if(event.target===this) closeOrdersModal()">
