@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
   </noscript>
-  <title>CB360 Mobile - Relatóriosa de Ocorrência</title>
+  <title>CB360 Mobile - Relatórios de Ocorrência</title>
   <style>
     @view-transition {navigation: auto;}
     /* ============================================================
@@ -130,7 +130,7 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">OS MEUS RELATÓRIOS</span>
       <span class="header-sub">Controlo de Pendentes</span>
@@ -159,7 +159,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -207,10 +207,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -223,25 +224,31 @@
         console.error('Erro silencioso:', err);
       }
     }
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
     /* ========================= REPORTS LOADING ========================= */
     async function loadUserReports() {
-      const corpNr = localStorage.getItem('currentCorpOperNr');
+      const corpRaw = localStorage.getItem('currentCorpOperNr');
+      const corpNr = corpRaw ? corpRaw.padStart(4, '0') : null;
       const nInt = localStorage.getItem('currentCorpNint');
       const container = document.getElementById('reportsCardsContainer');
       const counter = document.getElementById('totalPendingReports');
       const noReportsMsg = document.getElementById('noReportsMessage');
       const statsBadge = document.getElementById('statsBadge');
       container.innerHTML = '<div class="message loading">A atualizar lista...</div>';
+      if (!corpNr || !nInt) {
+        container.innerHTML = '<div class="message error">Sessão inválida. Volte a iniciar sessão.</div>';
+        return;
+      }
       try {
         const url = `${SUPABASE_URL}/rest/v1/reports_control?select=report_nr,report_date,report_state&corp_oper_nr=eq.${corpNr}&n_int=eq.${nInt}&report_state=eq.false&order=report_date.desc`;
         const response = await fetch(url, {
           headers: getSupabaseHeaders()
         });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        if (!Array.isArray(data)) {
-          container.innerHTML = `<div class="message error">Erro de Colunas: ${data.message}</div>`;
-          return;
-        }
+        if (!Array.isArray(data)) throw new Error('Resposta inválida');
         counter.textContent = data.length;
         statsBadge.classList.remove('has-reports', 'no-reports');
         if (data.length > 0) {
@@ -269,7 +276,7 @@
           return `
             <div class="report-card" onclick="openGescorp()">
               <div class="card-top">
-                <span class="report-nr">OCORRÊNCIA: ${report.report_nr || '---'}</span>
+                <span class="report-nr">OCORRÊNCIA: ${escapeHtml(report.report_nr || '---')}</span>
                 <span class="report-date"><span class="material-icons" style="font-size:13px;">event</span>${formattedDate}</span>
               </div>
               <div class="status-row">
@@ -280,17 +287,20 @@
           `;
         }).join('');
       } catch (err) {
-        container.innerHTML = '<div class="message error">Erro de ligação ao servidor.</div>';
+        console.error('Erro ao carregar relatórios:', err);
+        container.innerHTML = '<div class="message error">Erro ao carregar os relatórios. Tente novamente.</div>';
       }
     }
     /* ========================== GO TO GESCORP ========================== */
     function openGescorp() {
-      window.open('https://mobile.gescorp.pt/', '_blank');
+      window.open('https://mobile.gescorp.pt/', '_blank', 'noopener');
     }
     /* ========================= INITIALIZATION ========================== */
     document.addEventListener('DOMContentLoaded', async () => {
       if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       loadUserReports();
     });
   </script>
