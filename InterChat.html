@@ -1918,7 +1918,13 @@
       });
     }
     /* ====================== BACK TO CONTACT LIST ======================= */
-    function goBackToMain() {
+    function goBackToMain(fromPop) {
+      // Botão "Voltar" da app: recua no histórico (em vez de empilhar nova entrada);
+      // o popstate resultante volta a chamar esta função com fromPop = true.
+      if (fromPop !== true && history.state && history.state.cbChat) {
+        history.back();
+        return;
+      }
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
           type: 'CLEAR_ACTIVE_CHAT'
@@ -1945,12 +1951,11 @@
       document.getElementById("contact-list").style.display = 'flex';
       document.getElementById("contact-title").style.display = 'block';
       currentChat = 'null';
-      history.pushState(null, '', 'InterChat.html');
       loadContacts().then(() => applyPresenceState());
     }
     window.addEventListener('popstate', (event) => {
       if (currentChat && currentChat !== 'null') {
-        goBackToMain();
+        goBackToMain(true);
       }
     });
     /* ======================== SCROLL TO BOTTOM ========================= */
@@ -2561,7 +2566,12 @@
       }
       currentChat = String(n_int);
       currentChatName = name;
-      history.pushState(null, '', `?chatId=${currentChat}`);
+      // Uma única entrada de histórico para "chat aberto": ao mudar de chat substitui, não empilha
+      if (history.state && history.state.cbChat) {
+        history.replaceState({ cbChat: true }, '', `?chatId=${currentChat}`);
+      } else {
+        history.pushState({ cbChat: true }, '', `?chatId=${currentChat}`);
+      }
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
           type: 'SET_ACTIVE_CHAT',
