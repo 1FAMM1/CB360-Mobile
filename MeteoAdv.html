@@ -130,10 +130,10 @@
 </head>
 <body>
   <header class="header">
-    <img id="corpLogo" class="header-logo" alt="" src="">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">AVISOS METEOROLÓGICOS</span>
-      <span class="header-sub">Algarve</span>
+      <span class="header-sub">&nbsp;</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
@@ -146,7 +146,7 @@
         Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
       </div>
       <div class="footer-year">
-        © 2023–2025 · Sistema CB360 Mobile
+        © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
       </div>
     </div>
   </footer>
@@ -194,10 +194,11 @@
       if (h2) h2.textContent = corpOperNr;
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
             headers: getSupabaseHeaders()
           }
         );
+        if (!response.ok) return;
         const data = await response.json();
         if (data && data.length > 0) {
           const corp = data[0];
@@ -211,15 +212,40 @@
       }
     }
     /* ======================== WEATHER WARNINGS ========================= */
-    async function fetchIPMAWarnings() {
-      try {
-        const response = await fetch("https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json");
-        const data = await response.json();
-        return data.filter(a => a.idAreaAviso === "FAR" && a.awarenessLevelID !== "green");
-      } catch (err) {
-        console.error("Erro ao buscar avisos IPMA:", err);
-        return [];
-      }
+    // Área IPMA da corporação (corporation_data.ipma_area) — igual ao CB360 Online
+    const IPMA_AREA_NAMES = {
+      AVR: "Aveiro", BJA: "Beja", BRG: "Braga", BGC: "Bragança", CBO: "Castelo Branco", CBR: "Coimbra",
+      EVR: "Évora", FAR: "Faro", GDA: "Guarda", LRA: "Leiria", LSB: "Lisboa", PTG: "Portalegre",
+      PTO: "Porto", STM: "Santarém", STB: "Setúbal", VCT: "Viana do Castelo", VRL: "Vila Real", VIS: "Viseu",
+      MCN: "Madeira - Costa Norte", MCS: "Madeira - Costa Sul", MRM: "Madeira - Regiões Montanhosas", MPS: "Porto Santo",
+      AOC: "Açores - Grupo Ocidental", ACE: "Açores - Grupo Central", AOR: "Açores - Grupo Oriental"
+    };
+    function escapeHtml(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    let ipmaArea = null;
+    async function getIpmaArea() {
+      if (ipmaArea) return ipmaArea;
+      const corpRaw = getCorp();
+      if (!corpRaw) throw new Error("Sessão inválida");
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=ipma_area&corp_oper_nr=eq.${corpRaw.padStart(4, "0")}`, {headers: getSupabaseHeaders()});
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const area = (data?.[0]?.ipma_area || "").trim().toUpperCase();
+      if (!area) throw new Error("AREA_NAO_CONFIGURADA");
+      ipmaArea = area;
+      return area;
+    }
+    function ipmaAreaName(area) {
+      return IPMA_AREA_NAMES[area] || area;
+    }
+    async function fetchIPMAWarnings(area) {
+      const response = await fetch("https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json");
+      if (!response.ok) throw new Error(`IPMA HTTP ${response.status}`);
+      const data = await response.json();
+      if (!Array.isArray(data)) throw new Error("Resposta IPMA inválida");
+      const now = Date.now();
+      return data.filter(a => a.idAreaAviso === area && a.awarenessLevelID !== "green" && (!a.endTime || new Date(a.endTime).getTime() > now));
     }
     const levelLabelMap = { yellow: "Aviso Amarelo", orange: "Aviso Laranja", red: "Aviso Vermelho" };
     const levelIconMap = { yellow: "warning", orange: "warning", red: "error" };
@@ -237,7 +263,7 @@
       if (name.includes("incendio") || name.includes("fogo")) return "local_fire_department";
       return "warning";
     }
-    function createIPMAAlertCard(alert) {
+    function createIPMAAlertCard(alert, areaName) {
       const card = document.createElement("div");
       const levelClass = { yellow: "ipma-yellow", orange: "ipma-orange", red: "ipma-red" }[alert.awarenessLevelID];
       card.className = `ipma-card ${levelClass}`;
@@ -253,8 +279,8 @@
             <div class="ipma-type-row">
               <div class="ipma-icon-circle"><span class="material-icons">${typeIcon}</span></div>
               <div>
-                <div class="ipma-title">${alert.awarenessTypeName}</div>
-                <div class="ipma-subtitle"><span class="material-icons">place</span>Algarve (Faro)</div>
+                <div class="ipma-title">${escapeHtml(alert.awarenessTypeName)}</div>
+                <div class="ipma-subtitle"><span class="material-icons">place</span>${escapeHtml(areaName)}</div>
               </div>
             </div>
             <span class="ipma-level-badge"><span class="material-icons">${levelIcon}</span>${levelLabel}</span>
@@ -275,7 +301,7 @@
               </div>
             </div>
           </div>
-          ${alert.text ? `<div class="ipma-description">${alert.text}</div>` : ""}
+          ${alert.text ? `<div class="ipma-description">${escapeHtml(alert.text)}</div>` : ""}
         </div>
       `;
       return card;
@@ -283,8 +309,35 @@
     async function updateWarnings() {
       const container = document.getElementById("ipma-alerts");
       if (!container) return;
-      container.innerHTML = '<div class="loading-msg"><span class="material-icons">autorenew</span>A carregar avisos...</div>';
-      const warnings = await fetchIPMAWarnings();
+      if (!container.querySelector('.ipma-card')) {
+        container.innerHTML = '<div class="loading-msg"><span class="material-icons">autorenew</span>A carregar avisos...</div>';
+      }
+      let area, warnings;
+      try {
+        area = await getIpmaArea();
+        const sub = document.querySelector('.header-sub');
+        if (sub) sub.textContent = ipmaAreaName(area);
+        warnings = await fetchIPMAWarnings(area);
+      } catch (err) {
+        console.error("Erro ao carregar avisos IPMA:", err);
+        // Nunca mostrar "Sem avisos" quando não foi possível confirmar
+        const notConfigured = err.message === "AREA_NAO_CONFIGURADA";
+        container.innerHTML = "";
+        const card = document.createElement("div");
+        card.className = "ipma-card ipma-orange ipma-center";
+        card.innerHTML = `
+          <div class="ipma-card-accent"></div>
+          <div class="ipma-card-body">
+            <div class="ipma-icon-circle"><span class="material-icons">${notConfigured ? 'settings' : 'cloud_off'}</span></div>
+            <div class="ipma-title">${notConfigured ? 'Área IPMA não configurada' : 'Não foi possível obter os avisos'}</div>
+            <div class="ipma-subtitle">${notConfigured ? 'Configure a área IPMA da corporação no CB360 Online.' : 'Verifique a ligação e tente novamente. Consulte também ipma.pt.'}</div>
+          </div>
+        `;
+        container.appendChild(card);
+        requestAnimationFrame(() => card.classList.add("show"));
+        return;
+      }
+      const areaName = ipmaAreaName(area);
       container.innerHTML = "";
       if (warnings.length === 0) {
         const card = document.createElement("div");
@@ -294,7 +347,7 @@
           <div class="ipma-card-body">
             <div class="ipma-icon-circle"><span class="material-icons">check_circle</span></div>
             <div class="ipma-title">Sem avisos meteorológicos</div>
-            <div class="ipma-subtitle"><span class="material-icons">place</span>Não existem avisos ativos para o Algarve</div>
+            <div class="ipma-subtitle"><span class="material-icons">place</span>Não existem avisos ativos para ${escapeHtml(areaName)}</div>
           </div>
         `;
         container.appendChild(card);
@@ -303,7 +356,7 @@
       }
       warnings.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
       warnings.forEach((alert, index) => {
-        const card = createIPMAAlertCard(alert);
+        const card = createIPMAAlertCard(alert, areaName);
         container.appendChild(card);
         requestAnimationFrame(() => {
           setTimeout(() => card.classList.add("show"), index * 100);
@@ -316,8 +369,10 @@
         document.body.classList.add('dark-mode');
       }
       loadCorpInfo();
+      const fy = document.getElementById('footerYear');
+      if (fy) fy.textContent = new Date().getFullYear();
       updateWarnings();
-      setInterval(updateWarnings, 10 * 60 * 1000);
+      setInterval(() => { if (!document.hidden) updateWarnings(); }, 10 * 60 * 1000);
     });
   </script>
 </body>
