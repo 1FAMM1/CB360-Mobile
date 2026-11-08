@@ -35,6 +35,256 @@
 <div id="boot"><i></i></div>
 <noscript>Ative o JavaScript para usar o CB360 Mobile.</noscript>
 <!-- ===================== PÁGINAS (conteúdo original de cada .html) ===================== -->
+<script type="text/x-cb360" data-page="ScalesViewMenu"><!DOCTYPE html>
+  <html lang="pt-PT" style="background-color: #d32f2f;">
+    <head>
+      <\script>
+        (function() {
+          try {
+            if (localStorage.getItem('sgo-theme') === 'dark') {
+              document.documentElement.classList.add('dark-mode');
+            }
+          } catch (e) {}
+        })();
+      <\/script>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+      <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+      <meta name="theme-color" content="#d32f2f">
+      <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons" onload="this.onload=null;this.rel='stylesheet'">
+      <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+      <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+      </noscript>
+      <title>CB360 Mobile - Tipo de Escalas</title>
+      <style>
+        @view-transition {navigation: auto;}
+        /* ============================================================
+        VARIABLES
+        ============================================================ */
+        :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+               --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+               --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+               --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;}
+        ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
+        .header, .footer {view-transition-name: none;}
+        /* ============================================================
+        DARK MODE
+        ============================================================ */
+        .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                    --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
+        /* ============================================================
+        RESET & BASE
+        ============================================================ */
+        html {scrollbar-width: none; background: var(--red-dark);}
+        * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+        body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+              user-select: none; transition: background var(--ease), color var(--ease);}
+        /* ============================================================
+        HEADER
+        ============================================================ */
+        .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+                 justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+        .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+        .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+        .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+        .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+        /* ============================================================
+        MAIN CONTENT
+        ============================================================ */
+        .main-content {flex:1; width:100%; max-width:700px; margin:0 auto; overflow-y:auto; overflow-x:hidden; padding:calc(var(--header-h) + 10px) 16px 110px; display:flex; flex-direction:column;
+                   align-items:center; justify-content:flex-start; background:var(--bg); scrollbar-width:none; transition:background var(--ease);}
+        .main-content::-webkit-scrollbar {display:none;}
+        /* ============================================================
+        AVAILABILITY CARDS
+        ============================================================ */
+        .availability-buttons {width:100%; max-width:100%; margin:auto 4px; display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); border:1px solid var(--border);
+                               border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-md);}
+        .availability-btn {position:relative; min-width:0; max-width:none; min-height:120px; padding:16px 10px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
+                           font-size:13px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:8px; line-height:1.2;
+                           box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
+        .availability-btn:hover {background:var(--surface-2); color:var(--txt-1);}
+        .availability-btn:active {background:var(--surface-2); transform:scale(.98);}
+        .availability-btn.selected {background:var(--red-light); color:var(--red);}
+        .availability-btn .material-icons {font-size:28px; color:var(--red-icon); transition:transform var(--ease),color var(--ease);}
+        .availability-btn:hover .material-icons,
+        .availability-btn.selected .material-icons {transform:scale(1.08);}
+        .availability-btn:hover {background:var(--surface-2); color:var(--txt-1);}
+        .availability-btn:active {background:var(--surface-2); transform:scale(.98);}
+        .availability-btn:disabled {opacity: 0.3; cursor: not-allowed; pointer-events: none; filter: alpha(opacity=30);}
+        .availability-btn:disabled *, .availability-btn:disabled .material-icons {opacity: 0.3 !important;}
+        /* ============================================================
+        FOOTER
+        ============================================================ */
+        .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+                 justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+        .footer-content {text-align: center;}
+        .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+        .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+        .footer strong { color:inherit; }
+        /* ============================================================
+        RESPONSIVE
+        ============================================================ */
+        @media (max-width:480px) {
+          .header-title {font-size: 16px;}
+          .main-content {padding-left: 14px; padding-right: 14px;}
+          .availability-btn {min-height:104px; font-size:11.5px; padding:12px 8px;}
+          .availability-btn .material-icons {font-size:25px;}
+          .footer {height:var(--footer-h);}
+        }
+        @media (min-width:769px) {
+          .main-content { max-width:700px; }
+        }
+      }
+      </style>
+    </head>
+    <body>
+      <header class="header">
+        <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+             onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+             onload="this.style.display='block';">
+        <div class="header-center">
+          <span class="header-title">TIPO DE ESCALA</span>
+          <span class="header-sub">Profissionais · Voluntariado</span>
+        </div>
+        <h2 id="corpInfo" style="display: none;"></h2>
+      </header>
+      <div class="main-content">
+        <div class="availability-buttons">
+          <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='ScalesViewProf.html', 300);">
+            <span class="material-icons">local_fire_department</span>
+            <span>Profissionais</span>
+          </button>
+          <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='ScalesView.html', 300);">
+            <span class="material-icons">local_fire_department</span>
+            <span>Voluntariado</span>
+          </button>      
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="footer-content">
+          <div class="powered-by">
+            Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+          </div>
+          <div class="footer-year">
+            © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
+          </div>
+        </div>
+      </footer>
+      <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+              .then(reg => console.log('App pronta: ', reg.scope))
+              .catch(err => console.log('Erro no motor da App: ', err));
+          });
+        }
+      <\/script>
+      <\script>
+        /* ===================== SUPABASE CONFIGURATION ====================== */
+        const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+        function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+        function getNInt() {return localStorage.getItem("currentCorpNint");}
+        function getSupabaseHeaders(options = {}) {
+          const corp = getCorp();
+          const nint = getNInt();
+          const token = localStorage.getItem("authToken");
+          const headers = {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'x-my-corpo': corp,
+            'x-my-nint': nint,
+          };
+          if (options.returnRepresentation) {
+            headers['Prefer'] = 'return=representation';
+          }
+          return headers;
+        }
+        async function loadCorpInfo() {
+          const corpOperNr = localStorage.getItem("currentCorpOperNr");
+          const h2 = document.getElementById("corpInfo");
+          const logoEl = document.getElementById("corpLogo");
+          if (!corpOperNr) return;
+          const cachedLogo = localStorage.getItem("cached_logo_url");
+          if (cachedLogo && logoEl) {
+            logoEl.src = cachedLogo;
+          }
+          if (h2) h2.textContent = corpOperNr;
+          try {
+            const response = await fetch(
+              `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+                headers: getSupabaseHeaders()
+              }
+            );
+            if (!response.ok) return;
+            const data = await response.json();
+            if (data && data.length > 0) {
+              const corp = data[0];
+              if (corp.logo_url && corp.logo_url !== cachedLogo) {
+                localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+                if (logoEl) logoEl.src = corp.logo_url.trim();
+              }
+            }
+          } catch (err) {
+            console.error('Erro silencioso:', err);
+          }
+        }    
+        function toggleButton(button) {
+          document.querySelectorAll('.availability-btn').forEach(btn => {
+            if (btn !== button) btn.classList.remove('selected');
+          });
+          button.classList.add('selected');
+          if (navigator.vibrate) navigator.vibrate(100);
+          setTimeout(() => {
+            button.classList.remove('selected');
+          }, 2000);
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+          const savedTheme = localStorage.getItem('sgo-theme');
+          if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+          }    
+          loadCorpInfo();
+          const fy = document.getElementById('footerYear');
+          if (fy) fy.textContent = new Date().getFullYear();
+          document.querySelectorAll('.availability-btn').forEach((btn, i) => {
+            btn.style.opacity = '0';
+            btn.style.transform = 'translateY(15px)';
+            btn.style.transition = 'all 0.4s ease';
+            setTimeout(() => {
+              btn.style.opacity = '1';
+              btn.style.transform = 'translateY(0)';
+            }, i * 80);
+          });
+          document.addEventListener('touchstart', (event) => {
+            if (event.touches.length > 1) event.preventDefault();
+          }, { passive: false });
+          let lastTouchEnd = 0;
+          document.addEventListener('touchend', (event) => {
+            const now = new Date().getTime();
+            if (now - lastTouchEnd <= 300) event.preventDefault();
+            lastTouchEnd = now;
+          }, false);
+        });
+        document.addEventListener('selectstart', e => e.preventDefault());
+        document.addEventListener('contextmenu', e => e.preventDefault());    
+      <\/script>
+    </body>
+    </html>
+  </script>
+
+
+
+
+
+
+
+
 <script type="text/x-cb360" data-page="Attendance"><!DOCTYPE html>
 <html lang="pt-PT" style="background-color: #0f1117;">
 <head>
@@ -13467,7 +13717,7 @@
     </div>
     <div class="grid-card">
       <div class="btn-grid">
-        <button class="mbtn" data-module="scales" onclick="selBtn(this); setTimeout(()=> __go('ScalesView.html'), 100)">
+        <button class="mbtn" data-module="scales" onclick="selBtn(this); openScales()">
           <span class="material-icons">calendar_month</span>
           <div>Escalas Mensais</div>
         </button>
@@ -14456,6 +14706,41 @@
       if (navigator.vibrate) navigator.vibrate(100);
       setTimeout(() => button.classList.remove('sel'), 2000);
     }
+    let openingScales = false;
+async function openScales() {
+  if (openingScales) return;
+  openingScales = true;
+  const nInt = getNInt();
+  const corp = getCorpPadded();
+  const cacheKey = 'cb360_link_type_' + corp + '_' + nInt;
+  let linkType = null;
+
+  try {
+    if (nInt && corp) {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/reg_elems?select=link_type&n_int=eq.${nInt}&corp_oper_nr=eq.${corp}`,
+        { headers: getSupabaseHeaders() }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      linkType = data?.[0]?.link_type || null;
+      if (linkType) {
+        try { localStorage.setItem(cacheKey, linkType); } catch (e) {}
+      }
+    }
+  } catch (err) {
+    console.error('Erro ao verificar link_type:', err);
+    // sem rede: usa o último valor conhecido
+    try { linkType = localStorage.getItem(cacheKey); } catch (e) {}
+  }
+
+  const isProf = String(linkType || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().includes('profissional');
+
+  openingScales = false;
+  __go(isProf ? 'ScalesViewMenu.html' : 'ScalesView.html');
+}
     function clearAllSelections() {
       document.querySelectorAll('.mbtn').forEach(btn => btn.classList.remove('sel'));
     }
@@ -14816,7 +15101,7 @@
          onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">DISPONIBILIDADES</span>
-      <span class="header-sub">Piquetes · Decir · Extras · SBA · OPAT</span>
+      <span class="header-sub" id="headerSub">Piquetes · Extras</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
@@ -14888,6 +15173,17 @@
         headers['Prefer'] = 'return=representation';
       }
       return headers;
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    function updateHeaderSubtitle(flags = {}) {
+      const el = document.getElementById("headerSub");
+      if (!el) return;
+      const parts = ["Piquetes"];
+      if (flags.has_decir === true) parts.push("Decir");
+      parts.push("Extras");
+      if (flags.has_sba === true) parts.push("SBA");
+      if (flags.has_opat === true) parts.push("OPAT");
+      el.textContent = parts.join(" · ");
     }
     async function loadCorpInfo() {
       const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -19211,7 +19507,7 @@
          onload="this.style.display='block';">
     <div class="header-center">
       <span class="header-title">ESCALAS</span>
-      <span class="header-sub">Profissional · Piquetes · Decir · Extras · SBA · OPAT</span>
+      <span class="header-sub">Piquetes · Extras · Decir · SBA · OPAT</span>
     </div>
     <h2 id="corpInfo" style="display: none;"></h2>
   </header>
@@ -19876,24 +20172,32 @@
           return serviceDate > now;
         });
         if (!services.length) return;
+        async function fetchRows(path) {
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {headers: getSupabaseHeaders()});
+          return r.ok ? r.json() : [];
+        }
+        const monthParam = `month=eq.${selectedMonth + 1}&year=eq.${yearToFetch}&corp_oper_nr=eq.${corpOperNr}`;
+        const [servRows, extraRows] = await Promise.all([
+          fetchRows(`reg_serv?select=day,value,n_int&${monthParam}&value=in.(PN,ED,EN,ET,SB,OP)`),
+          fetchRows(`reg_extras?select=day,value,n_int&${monthParam}&value=eq.EX`)
+        ]);
+        if (monthsCard && monthsCard.style.display !== "none") return;
+        
+        const countFor = (service) => {
+          const rows = service.value === "EX" ? extraRows : servRows;
+          const wanted = getServiceValuesToMatch(service.value);
+          return new Set(
+            rows.filter(r => Number(r.day) === Number(service.day) && wanted.includes(r.value)).map(r => r.n_int)
+          ).size;
+        };        
         title.style.display = "block";
         container.style.display = "block";
-        let index = 0;
-        for (const service of services) {
-          if (monthsCard && monthsCard.style.display !== "none") return;
-          const valuesToMatch = getServiceValuesToMatch(service.value);
-          const table = service.value === "EX" ? "reg_extras" : "reg_serv";
-          const countUrl = `${SUPABASE_URL}/rest/v1/${table}?select=n_int&month=eq.${service.month}&year=eq.${yearToFetch}&day=eq.${service.day}&value=in.(${valuesToMatch.join(',')})&corp_oper_nr=eq.${corpOperNr}`;
-          const countResponse = await fetch(countUrl, {
-            headers: getSupabaseHeaders()
-          });
-          const countData = await countResponse.json();
-          const uniqueNInts = new Set((countData || []).map(d => d.n_int));
-          const totalElements = uniqueNInts.size;
-          const card = createServiceCard({ day: service.day, month: service.month, value: service.value, totalElements, year: yearToFetch }, index);
-          container.appendChild(card);
-          index++;
-        }
+        services.forEach((service, index) => {
+          container.appendChild(createServiceCard({
+            day: service.day, month: service.month, value: service.value,
+            totalElements: countFor(service), year: yearToFetch
+          }, index));
+        });
       } catch (err) {
         console.error("Erro ao carregar próximos serviços:", err);
       }
@@ -20063,6 +20367,1089 @@
 </body>
 </html>
 </script>
+
+
+
+
+
+
+
+<script type="text/x-cb360" data-page="ScalesViewProf"><!DOCTYPE html>
+<html lang="pt-PT" style="background-color: #d32f2f;">
+<head>
+  <\script>
+    (function() {
+      try {
+        if (localStorage.getItem('sgo-theme') === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+        }
+      } catch (e) {}
+    })();
+  <\/script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <meta name="theme-color" content="#d32f2f">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  </noscript>
+  <title>CB360 Mobile - Escalas Profissional</title>
+  <style>
+    @view-transition {navigation: auto;}
+    /* ============================================================
+    VARIABLES
+    ============================================================ */
+    :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+       --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+       --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+       --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa; --dispensa: #607d8b;}
+    ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
+    .header, .footer {view-transition-name: none;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450; --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff; --dispensa: #ffffff;}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    html {scrollbar-width: none; background: var(--red-dark);}
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+    body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease);}
+    /* ============================================================
+    HEADER
+    ============================================================ */
+    .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+    .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+    .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+    .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+    /* ============================================================
+    MAIN CONTENT
+    ============================================================ */
+    .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; transition: padding-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);}    
+    .main-content::-webkit-scrollbar {display: none;}
+    body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
+    .main-content.slide-out, .main-content.slide-in {transform: none;}
+    .scales-header {flex-shrink: 0; text-align: center; width: 100%; display: flex; flex-direction: column; align-items: flex-start;} 
+    .scales-card {flex-shrink: 0;}
+    .scales-info-title {flex-shrink: 0;}
+    .scales-subtitle {display: flex; align-items: center; justify-content: center; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; box-shadow: var(--sh-sm); transition: background var(--ease), transform var(--ease); margin: -3px auto -9px auto;}
+    /* ============================================================
+    MONTH BUTTONS
+    ============================================================ */
+    .months-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; width: 100%; flex-shrink: 0;}
+    .scales-buttons {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%;}
+    .scales-btn {position: relative; background: var(--surface); border: none; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 14px 8px; min-height: 64px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--txt-2); cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; line-height: 1.2; transition: background var(--ease), color var(--ease);}
+    .scales-btn:nth-child(3n) {border-right: none;}
+    .scales-btn:nth-child(n+10) {border-bottom: none;}
+    .scales-btn:hover:not(.selected) {background: var(--surface-2); color: var(--txt-1);}
+    .scales-btn:active:not(.selected) {background: var(--surface-2);}
+    .scales-btn .material-icons {font-size: 22px; color: var(--red-icon); transition: color var(--ease), transform var(--ease);}
+    .scales-btn:hover .material-icons {transform: scale(1.08);}
+    .scales-btn.selected {background: var(--red-light); color: var(--red);}
+    .scales-btn.selected .material-icons {color: var(--red); transform: scale(1.1);}
+    .scales-btn div, .scales-btn span {position: relative; z-index: 2; line-height: 1.2;}
+    .btn-back-wrapper {display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; width: 100%;}
+    .btn-back-wrapper.show {grid-template-rows: 1fr;}
+    .btn-back-wrapper.no-transition {transition: none !important;}
+    .btn-back-wrapper.no-transition .btn-back {transition: none !important;}
+    .btn-back-wrapper > .btn-back-row {min-height: 0; overflow: hidden;}
+    .btn-back-row {display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 8px; margin-top: 5px;}
+    .btn-back {display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; background: var(--surface); color: var(--txt-1); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm); opacity: 0; pointer-events: none; transition: opacity 0.25s ease, background var(--ease), transform var(--ease);}
+    .btn-back-wrapper.show .btn-back {opacity: 1; pointer-events: auto;}
+    .btn-back:hover {background: var(--surface-2);}
+    .btn-back:active {transform: scale(0.97);}
+    .btn-back .material-icons {font-size: 18px; color: var(--red-icon);}
+    .month-badge {cursor: default;}
+    .month-badge:hover {background: var(--surface);}
+    .month-badge:active {transform: none;}
+    /* ============================================================
+    RESULT CARDS
+    ============================================================ */
+    .scales-card {display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%; margin: -10px 0 -4px 0;}
+    .scales-card span.card-title {font-weight: 700; margin-bottom: 0; font-size: 13px; color: var(--txt-1); letter-spacing: 0.3px;}
+    .scales-card span.values {display: block; font-size: 13px; color: var(--txt-2);}
+    .loading-spinner {display: inline-block; width: 14px; height: 14px; border: 2px solid var(--red); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle;}
+    .error-message {color: #e74c3c; font-weight: 600; font-size: 13px;}
+    .attendance-card {display: flex; flex-direction: row; align-items: stretch; justify-content: center; gap: 5px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); box-shadow: var(--sh-sm); width: 100%; max-width: 100%; margin: 0px 0 0px 0; padding: 12px;}
+    .attendance-stat {flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 6px 6px 10px; border-radius: var(--r-sm); background: var(--surface-2); border-left: 3px solid transparent;}
+    .attendance-stat.comparencias-stat {border-left-color: #2ecc71;}
+    .attendance-stat.faltas-stat {border-left-color: #e74c3c;}
+    .attendance-stat.dispensas-stat {border-left-color: var(--dispensa);}
+    .attendance-stat .attendance-label {font-size: 11.5px; font-weight: 700; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.3px;}
+    .attendance-stat .attendance-value {font-size: 20px; font-weight: 700; color: var(--red); margin-top: 2px;}
+    .services-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); width: 100%; max-width: 100%; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; animation: fadeInSoft 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin:-5px 0 1px 0;}
+    .services-section {display: flex; flex-direction: column; gap: 9px; animation: fadeInSoft 0.35s cubic-bezier(0.4, 0, 0.2, 1);}
+    .services-section.section-divider {padding-top: 14px; border-top: 1px solid var(--border);}
+    .services-section-title {display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.5px;}
+    .services-section-title .material-icons {font-size: 15px; color: var(--red-icon);}
+    .chips-row {display: flex; flex-wrap: wrap; gap: 6px;}
+    .day-chip {position: relative; overflow: visible !important; display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 26px; padding: 0 8px; border-radius: 8px; font-size: 12px; font-weight: 700; box-shadow: var(--sh-sm); letter-spacing: 0.2px;}
+    .day-chip .attendance-dot {position: absolute;top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%; border: 0px solid #666;}
+    .day-chip .attendance-dot.green {background-color: #2ecc71; box-shadow: 0 0 5px 1px rgba(46, 204, 113, 0.85); animation: dotPulse-green 1.8s ease-in-out infinite;}
+    .day-chip .attendance-dot.red {background-color: #e74c3c; box-shadow: 0 0 5px 1px rgba(231, 76, 60, 0.85); animation: dotPulse-red 1.8s ease-in-out infinite;}
+    .day-chip .attendance-dot.white {background-color: var(--dispensa); box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.9); animation: dotPulse-white 1.8s ease-in-out infinite;}
+    @keyframes dotPulse-green {0%, 100% {box-shadow: 0 0 2px 1px rgba(46, 204, 113, 0.7); transform: scale(1);} 50% {box-shadow: 0 0 5px 2px rgba(46, 204, 113, 1); transform: scale(1.15);}}
+    @keyframes dotPulse-red {0%, 100% {box-shadow: 0 0 2px 1px rgba(231, 76, 60, 0.7); transform: scale(1);} 50% {box-shadow: 0 0 5px 2px rgba(231, 76, 60, 1); transform: scale(1.15);}}
+    @keyframes dotPulse-white {0%, 100% {box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.75); transform: scale(1);} 50% {box-shadow: 0 0 5px 2px rgba(255, 255, 255, 1); transform: scale(1.15);}}
+    .day-chip.no-record {background: linear-gradient(135deg, #9e9e9e, #757575) !important; color: #fff !important;}
+    .day-chip.type-D {background: linear-gradient(135deg, #fbc02d, #f9a825); color: #212121;}
+    .day-chip.type-N {background: linear-gradient(135deg, #3949ab, #2c387e, #1a237e); color: #fff;}
+    .day-chip.type-M {background: linear-gradient(135deg, #00897b, #00695c); color: #fff;}
+    .day-chip.past {background: linear-gradient(135deg, #9e9e9e, #757575) !important; color: #fff !important;}
+    .modal-group-title {display: flex; align-items: center; gap: 8px; margin-top: 4px; padding: 7px 10px; border-radius: 10px; border-left: 4px solid var(--gc); background: var(--surface-2); background: color-mix(in srgb, var(--gc) 14%, transparent); color: var(--txt-1); font-size: 12px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;}
+    .modal-group-title .material-icons {font-size: 18px; color: var(--gc);}
+    .modal-group-title .mg-count {margin-left: auto; min-width: 22px; height: 20px; padding: 0 7px; border-radius: 10px; background: var(--gc); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0; display: inline-flex; align-items: center; justify-content: center;}
+    /* ============================================================
+    NEXT SERVICES
+    ============================================================ */
+    .nextserv-info-title {font-size: 12px; font-weight: 700; text-align: left; color: var(--txt-2); margin: 0; background: var(--surface); padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); width: 100%; max-width: 100%; box-shadow: var(--sh-sm);}
+    .nextserv-card {margin-bottom: 5px; background: var(--surface); border-radius: var(--r-md); border: 1px solid var(--border); padding: 12px; box-shadow: var(--sh-sm); width: 100%; box-sizing: border-box; transition: transform var(--ease), box-shadow var(--ease); animation: slideDown 0.18s ease forwards; cursor: pointer;}
+    .nextserv-card:hover {box-shadow: var(--sh-md); transform: translateY(-1px);}
+    .nextserv-type {text-align: left; margin-bottom: 4px;}
+    .nextserv-type .label {font-size: 12.5px; font-weight: 700; color: var(--txt-2);}
+    .nextserv-type .nextserv-type-value {font-size: 13.5px; color: var(--red); font-weight: 700;}
+    .nextserv-dates {display: flex; align-items: center; gap: 8px; margin-bottom: 4px;}
+    .nextserv-dates .label {font-size: 12.5px; font-weight: 700; color: var(--txt-2);}
+    .nextserv-dates .nextserv-dates-value {font-size: 12.5px; color: var(--blue);}
+    .nextserv-location {text-align: left;}
+    .nextserv-location .label {font-size: 12.5px; font-weight: 700; color: var(--txt-2); text-align: left;}
+    .nextserv-location .location-value {font-size: 12.5px; color: var(--txt-1);}
+    .nextserv-prevention {margin-left: auto; background-color: var(--red-light); color: var(--red); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 15px; white-space: nowrap;}
+    /* ============================================================
+    SERVICE MODAL
+    ============================================================ */
+    .service-modal {position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px;}
+    .service-modal-content {background: var(--surface); border-radius: var(--r-lg); width: 100%; max-width: 460px; max-height: 78%; box-shadow: var(--sh-lg); border: 1px solid var(--border); position: relative; display: flex; flex-direction: column; overflow: hidden; animation: mIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);}
+    @keyframes mIn {from {opacity: 0; transform: scale(0.95) translateY(10px);} to {opacity: 1; transform: scale(1) translateY(0);}}
+    .modal-header {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 15px 18px; font-size: 15px; font-weight: 600; text-align: center; flex-shrink: 0;}
+    .modal-close {position: absolute; top: 12px; right: 14px; font-size: 20px; cursor: pointer; color: #fff;}
+    .modal-elements-container {padding: 14px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; flex: 1; scrollbar-width: none;}
+    .modal-elements-container::-webkit-scrollbar {display: none;}
+    .modal-footer {background: var(--surface-2); padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; flex-shrink: 0;}
+    .modal-footer-btn {background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; border: none; padding: 9px 24px; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity var(--ease);}
+    .modal-footer-btn:hover {opacity: 0.88;}
+    .modal-footer-btn:active {transform: scale(0.98);}
+    /* ============================================================
+    ELEMENT CARDS
+    ============================================================ */
+    .element-card {display: flex; justify-content: flex-start; align-items: center; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px; background: var(--surface-2); box-shadow: var(--sh-sm); gap: 5px;}
+    .element-info {display: flex; flex-direction: column; gap: 2px;}
+    .element-info .element-name {font-size: 15px; font-weight: 700; color: var(--txt-1);}
+    .element-info span {font-size: 13px; color: var(--txt-2);}
+    .element-avatar {width: 48px; height: 48px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); object-fit: cover; margin-right: 5px;}
+    /* ============================================================
+    NEXT SERVICES SCROLL CONTAINER
+    ============================================================ */
+    #nextServicesCard {flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 5px; scrollbar-width: none; width: 100%; max-width: 100%; margin-bottom: 40px; }
+    #nextServicesCard::-webkit-scrollbar {display: none;}
+    /* ============================================================
+    FOOTER
+    ============================================================ */
+    .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+    .footer-content {text-align: center;}
+    .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+    .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+    @keyframes spin {to { transform: rotate(360deg);}}
+    @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
+    @keyframes fadeInSoft {from {opacity: 0; transform: translateY(-6px);} to {opacity: 1; transform: translateY(0);}}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
+    @media (max-width: 480px) {
+      .header-title {font-size: 16px;}
+      .scales-subtitle {font-size: 0.95em;}
+      .scales-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
+      .scales-btn .material-icons {font-size: 19px;}
+      .main-content {padding-left: 14px; padding-right: 14px;}
+    }
+    @media (min-width: 769px) {
+      .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
+    }
+  }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+         onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">ESCALAS</span>
+      <span class="header-sub">Profissional</span>
+    </div>
+    <h2 id="corpInfo" style="display: none;"></h2>
+  </header>
+  <div class="main-content">
+    <div class="scales-header">
+      <p class="scales-subtitle" id="scalesSubtitle">Selecione o mês:</p>
+      <div id="btnBackWrapper" class="btn-back-wrapper">
+        <div class="btn-back-row">
+          <button id="btnBackToMonths" class="btn-back">
+            <span class="material-icons">arrow_back</span>
+            <span>Voltar aos Meses</span>
+          </button>
+          <div id="selectedMonthBadge" class="btn-back month-badge">
+            <span id="selectedMonthIcon" class="material-icons"></span>
+            <span id="selectedMonthName"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="months-card">
+      <div class="scales-buttons">
+        <button class="scales-btn" data-month="0"><span class="material-icons">ac_unit</span><div>Janeiro</div></button>
+        <button class="scales-btn" data-month="1"><span class="material-icons">favorite</span><div>Fevereiro</div></button>
+        <button class="scales-btn" data-month="2"><span class="material-icons">eco</span><div>Março</div></button>
+        <button class="scales-btn" data-month="3"><span class="material-icons">local_florist</span><div>Abril</div></button>
+        <button class="scales-btn" data-month="4"><span class="material-icons">wb_sunny</span><div>Maio</div></button>
+        <button class="scales-btn" data-month="5"><span class="material-icons">beach_access</span><div>Junho</div></button>
+        <button class="scales-btn" data-month="6"><span class="material-icons">local_fire_department</span><div>Julho</div></button>
+        <button class="scales-btn" data-month="7"><span class="material-icons">whatshot</span><div>Agosto</div></button>
+        <button class="scales-btn" data-month="8"><span class="material-icons">park</span><div>Setembro</div></button>
+        <button class="scales-btn" data-month="9"><span class="material-icons">cloud</span><div>Outubro</div></button>
+        <button class="scales-btn" data-month="10"><span class="material-icons">grain</span><div>Novembro</div></button>
+        <button class="scales-btn" data-month="11"><span class="material-icons">celebration</span><div>Dezembro</div></button>
+      </div>
+    </div>
+    <div id="attendanceCard" class="attendance-card" style="display:none;">
+      <div class="attendance-stat comparencias-stat">
+        <span class="attendance-label">Comparências</span>
+        <span class="attendance-value" id="attendancePresences" style="color: #2ecc71;">0</span>
+      </div>
+      <div class="attendance-stat faltas-stat">
+        <span class="attendance-label">Faltas</span>
+        <span class="attendance-value" id="attendanceAbsences">0</span>
+      </div>
+      <div class="attendance-stat dispensas-stat">
+        <span class="attendance-label">Dispensas</span>
+        <span class="attendance-value" id="attendanceDispensas" style="color: var(--dispensa);">0</span>
+      </div>
+    </div>
+    <div id="servicesCard" class="services-card" style="display:none;">
+      <div id="ServicesSection" class="services-section" style="display:none;">
+        <div class="services-section-title"><span class="material-icons">local_fire_department</span>Turnos Atribuídos</div>
+        <div id="ServicesChips" class="chips-row"></div>
+      </div>
+    </div>
+    <div id="nextserv-info-title" class="nextserv-info-title" style="display:none; margin:0 0 -5px 0;">📅 Próximos(s) Serviços(s)</div>
+    <div id="nextServicesCard" style="display:none;"></div>
+  </div>
+  <div id="serviceModal" class="service-modal" style="display:none;">
+    <div class="service-modal-content">
+      <div class="modal-header">
+        <span id="modalTitle">ELEMENTOS DE SERVIÇO</span>
+      </div>
+      <div id="modalElementsContainer" class="modal-elements-container">
+      </div>
+      <div class="modal-footer">
+        <button class="modal-footer-btn" id="modalFooterClose">FECHAR</button>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">
+        Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+      </div>
+      <div class="footer-year">
+        © 2023–2025 · Sistema CB360 Mobile
+      </div>
+    </div>
+  </footer>
+  <\script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  <\/script>
+  <\script>
+    /* ===================== SUPABASE CONFIGURATION ====================== */
+    const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+    /* ===== Fotos dos elementos: link antigo (http...) ou caminho no bucket privado "elem-photos" ===== */
+    async function mobileLoadPhoto(imgEl, photoUrl, fallback = "") {
+      if (!imgEl) return;
+      if (!photoUrl) { if (fallback) imgEl.src = fallback; return; }
+      if (/^https?:\/\//i.test(photoUrl)) { imgEl.src = photoUrl; return; }
+      try {
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/elem-photos/${photoUrl}`, {
+          headers: {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${localStorage.getItem("authToken")}`}
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const url = URL.createObjectURL(await res.blob());
+        imgEl.onload = () => URL.revokeObjectURL(url);
+        imgEl.src = url;
+      } catch (e) {
+        console.warn("Não foi possível carregar a foto:", e);
+        if (fallback) imgEl.src = fallback;
+      }
+    }
+    function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+    function getNInt() {return localStorage.getItem("currentCorpNint");}
+    function getSupabaseHeaders(options = {}) {
+      const corp  = getCorp();
+      const nint  = getNInt();
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'x-my-corpo': corp,
+        'x-my-nint': nint,
+      };
+      if (options.returnRepresentation) {
+        headers['Prefer'] = 'return=representation';
+      }
+      return headers;
+    }
+    /* ===================== UTILITY FUNCTIONS ===================== */
+    function showLoading(cardId, message) {
+      const card = document.getElementById(cardId);
+      card.style.display = "block";
+      card.innerHTML = `
+        <div style="display: flex; align-items: center;">
+          <div class="loading-spinner"></div>
+          <span>${message}</span>
+        </div>
+      `;
+    }    
+    function showError(cardId, message) {
+      const card = document.getElementById(cardId);
+      card.style.display = "block";
+      card.innerHTML = `<span class="error-message">⚠️ ${message}</span>`;
+    }    
+    function validateCorpData() {
+      const nintCorpStr = localStorage.getItem("currentCorpNint");
+      if (!nintCorpStr || isNaN(parseInt(nintCorpStr, 10))) {
+        return null;
+      }
+      return parseInt(nintCorpStr, 10);
+    }
+    /* ======================= CORPORATION LOADING ======================= */
+    async function loadCorpInfo() {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const h2 = document.getElementById("corpInfo");
+      const logoEl = document.getElementById("corpLogo");
+      if (!corpOperNr) return;
+      const cachedLogo = localStorage.getItem("cached_logo_url");
+      if (cachedLogo && logoEl) {
+        logoEl.src = cachedLogo;
+      }
+      if (h2) h2.textContent = corpOperNr;
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/corporation_data?select=corporation,corp_oper_nr,logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+            headers: getSupabaseHeaders()
+          }
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const corp = data[0];
+          if (corp.logo_url && corp.logo_url !== cachedLogo) {
+            localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+            if (logoEl) logoEl.src = corp.logo_url.trim();
+          }
+        }
+      } catch (err) {
+        console.error('Erro silencioso:', err);
+      }
+    }    
+    function getWorkYear(targetMonthIndex) {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const currentDay = now.getDate();
+      if (currentMonth === 11 && currentDay >= 27 && targetMonthIndex === 0) {
+        return currentYear + 1;
+      }
+      return currentYear;
+    }
+    /* ===================== GENERIC DATA LOADER ===================== */
+    async function loadMonthData(config, monthIndex) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nintCorp = validateCorpData();      
+      if (!nintCorp) {
+        showError(config.cardId, "Elemento e Corporação não definidos.");
+        return;
+      }      
+      const month = monthIndex + 1;
+      const yearToFetch = getWorkYear(monthIndex);
+      const card = document.getElementById(config.cardId);
+      card.style.display = "none";      
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/${config.table}?select=${config.select}&n_int=eq.${nintCorp}&month=eq.${month}&year=eq.${yearToFetch}&${config.filter}&corp_oper_nr=eq.${corpOperNr}`;
+        const response = await fetch(url, { headers: getSupabaseHeaders() });        
+        if (!response.ok) {
+          showError(config.cardId, "Erro ao carregar dados");
+          return;
+        }        
+        const data = await response.json();
+        const formattedData = config.formatData(data);
+         if (config.hideIfEmpty && (!formattedData || formattedData.length === 0)) {
+          card.style.display = "none";
+          return;
+        }
+        card.innerHTML = formattedData.length
+          ? `<span class="card-title">${config.label}</span><span class="values">${formattedData}</span>`
+          : `<span class="card-title">${config.label}</span><span class="values"> Nenhum Registado</span>`;
+        card.style.display = "block";
+      } catch (err) {
+        console.error(`Erro ao carregar ${config.label}`, err);
+        showError(config.cardId, "Erro de ligação ao servidor");
+      }
+    }
+    /* ===================== SECTION DIVIDERS ===================== */
+    function updateSectionDividers() {
+      const order = ["ServicesSection"];
+      let firstVisibleFound = false;
+      order.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const isVisible = el.style.display !== "none";
+        if (!isVisible) {
+          el.classList.remove("section-divider");
+          return;
+        }
+        if (!firstVisibleFound) {
+          el.classList.remove("section-divider");
+          firstVisibleFound = true;
+        } else {
+          el.classList.add("section-divider");
+        }
+      });
+    }
+    /* ===================== RENDER SERVICE CHIPS ===================== */
+    function renderServiceChips(sectionId, chipsId, items) {
+      const monthsCard = document.querySelector(".months-card");
+      if (monthsCard && monthsCard.style.display !== "none") return;
+      const wrapper = document.getElementById("servicesCard");
+      const section = document.getElementById(sectionId);
+      const chipsEl = document.getElementById(chipsId);      
+      if (!items || items.length === 0) {
+        section.style.display = "none";
+        const anyVisible = document.getElementById("ServicesSection").style.display !== "none";
+        wrapper.style.display = anyVisible ? "flex" : "none";
+        return;
+      }
+      chipsEl.innerHTML = items.map(it =>
+      `<span class="day-chip type-${it.type}${it.past ? ' past' : ''}">${it.day}${it.suffix || ''}</span>`
+      ).join('');
+      section.style.display = "flex";
+      wrapper.style.display = "flex";
+    }
+    async function loadServicesMonth(monthIndex) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nintCorp = validateCorpData();
+      if (!nintCorp || !corpOperNr) return;
+      const month = monthIndex + 1;
+      const year = getWorkYear(monthIndex);
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/reg_employee_shifts?select=day,shift&n_int=eq.${nintCorp}&corp_oper_nr=eq.${corpOperNr}&month=eq.${month}&year=eq.${year}&shift=in.(D,N,M)&order=day.asc`;
+        const response = await fetch(url, {
+          headers: getSupabaseHeaders()
+        });
+        if (!response.ok) {
+          console.error("Erro ao carregar turnos:", await response.text());
+          renderServiceChips("ServicesSection", "ServicesChips", []);
+          return;
+        }
+        const data = await response.json();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const items = data
+        .filter(d => d.day && ["D", "N", "M"].includes(d.shift))
+        .map(d => ({
+          day: Number(d.day),
+          type: d.shift,
+          suffix: d.shift,
+          past: new Date(year, month - 1, Number(d.day)) < today
+        }));
+        renderServiceChips("ServicesSection", "ServicesChips", items);
+      } catch (err) {
+        console.error("Erro ao carregar turnos:", err);
+        renderServiceChips("ServicesSection", "ServicesChips", []);
+      }
+    }
+    /* ===================== CREATE NEXT SERVICE CARD ==================== */
+    function createServiceCard(service, index = 0) {
+      const card = document.createElement("div");
+      card.className = "nextserv-card";
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(-10px)';      
+      const year = service.year || new Date().getFullYear();
+      const dateText = formatDateWithWeekday(service.day, service.month, year);
+      const info = getServiceInfo(service.value.toUpperCase());      
+      card.innerHTML = `
+        <div>
+          <div class="nextserv-type">
+            <span class="label">Tipo:</span>
+            <span class="nextserv-type-value">${info.tipo}</span>
+          </div>
+          <div class="nextserv-dates" style="display:flex; justify-content: space-between; align-items: center;">
+            <div class="nextserv-left">
+              <span class="label">Data:</span>
+              <span class="nextserv-dates-value">${dateText}</span>
+            </div>
+            <div class="nextserv-prevention">👨‍🚒 ${service.totalElements || '0'}</div>
+          </div>
+          <div class="nextserv-location">
+            <span class="label">Turno:</span>
+            <span class="location-value">${info.turno}</span>
+          </div>
+        </div>
+      `;      
+      card.addEventListener('click', async () => {
+        openServiceModal(`${info.tipo} - ${dateText}`, null);
+        const elements = await fetchServiceElements(service.day, service.month, service.value, year);
+        openServiceModal(`${info.tipo} - ${dateText}`, elements);
+      });      
+      setTimeout(() => {
+        card.style.transition = 'all 0.18s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 60);      
+      return card;
+    }
+    function getServiceInfo(code) {
+      const map = {D: {tipo: "TURNO DIURNO", turno: "08:00-20:00"},
+                   N: {tipo: "TURNO NOCTURNO", turno: "20:00-08:00"},
+                   M: {tipo: "TURNO MANHÃ", turno: "09:00-17:00"}
+                  };
+      return map[code] || {tipo: code, turno: "-"};
+    }
+    function formatDateWithWeekday(day, month, year) {
+      const date = new Date(year, month - 1, day);
+      const weekdays = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+      const dd = String(day).padStart(2, "0");
+      const mm = String(month).padStart(2, "0");
+      return `${dd}-${mm}-${year} (${weekdays[date.getDay()]})`;
+    }
+    async function fetchServiceElements(day, month, value, year = new Date().getFullYear()) {
+      try {
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const nintCorp = validateCorpData();
+        if (!nintCorp || !corpOperNr) return [];
+        const shiftValue = String(value || "").trim().toUpperCase();
+        if (!["D", "N", "M"].includes(shiftValue)) {
+          console.error("[CB360] TURNO INVÁLIDO:", value);
+          return [];
+        }
+        const shiftsToFetch = {D: ["D", "M"], N: ["N"], M: ["M", "D"]};
+        const allowedShifts = shiftsToFetch[shiftValue];
+        const url = `${SUPABASE_URL}/rest/v1/reg_employee_shifts?select=n_int,shift,is_optel,is_eip&corp_oper_nr=eq.${corpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}&shift=in.(${allowedShifts.join(",")})`;
+        const response = await fetch(url, {
+          headers: getSupabaseHeaders()
+        });
+        if (!response.ok) {
+          console.error(
+            "[CB360] Erro ao consultar turnos:",
+            await response.text()
+            );
+            return [];
+          }
+          const servData = await response.json();
+          if (!Array.isArray(servData) || servData.length === 0) {
+            console.warn("[CB360] Nenhum elemento encontrado.");
+            return [];
+          }
+          const normalizeNInt = n =>
+          String(n ?? "").trim().replace(/^0+(?=\d)/, "");
+          const valueByNInt = {};
+          const flagsByNInt = {};
+          servData.forEach(s => {
+            const n = normalizeNInt(s.n_int);
+            if (!n) return;
+            if (!valueByNInt[n]) {
+              valueByNInt[n] = String(s.shift).trim().toUpperCase();
+            }
+            if (!flagsByNInt[n]) flagsByNInt[n] = { optel: false, eip: false };
+            if (s.is_optel === true) flagsByNInt[n].optel = true;
+            if (s.is_eip === true) flagsByNInt[n].eip = true;
+          });
+          const nInts = [...new Set(servData .map(s => normalizeNInt(s.n_int)) .filter(Boolean))];
+          if (!nInts.length) return [];
+          const nIntsPadded = [...new Set(nInts.map(n => n.padStart(3, "0")))];
+          const elemUrl =
+            `${SUPABASE_URL}/rest/v1/reg_elems?` +
+            `select=n_int,full_name,patent,photo_url` +
+            `&n_int=in.(${nIntsPadded.join(",")})` +
+            `&corp_oper_nr=eq.${corpOperNr}`;
+          const elemResponse = await fetch(elemUrl, {
+            headers: getSupabaseHeaders()
+          });
+          if (!elemResponse.ok) {
+            console.error("[CB360] Erro ao carregar elementos:",await elemResponse.text());
+            return [];
+          }
+          const allElements = await elemResponse.json();
+          if (!Array.isArray(allElements)) return [];
+          const teamByNInt = {};
+          try {
+            const teamResp = await fetch(
+              `${SUPABASE_URL}/rest/v1/reg_employees?select=n_int,team&n_int=in.(${nInts.join(",")})&corp_oper_nr=eq.${corpOperNr}`,
+              {headers: getSupabaseHeaders()}
+            );
+            if (teamResp.ok) {
+              (await teamResp.json()).forEach(t => {
+                teamByNInt[normalizeNInt(t.n_int)] = String(t.team || "").trim().toUpperCase();
+              });
+            } else {
+              console.error("[CB360] Erro ao carregar equipas:", await teamResp.text());
+            }
+          } catch (err) {
+            console.error("[CB360] Erro ao carregar equipas:", err);
+          }
+          allElements.forEach(e => {
+            const n = normalizeNInt(e.n_int);
+            e.serviceValue = valueByNInt[n] || null;
+            e.team = teamByNInt[n] || "";
+            e.isOptel = !!(flagsByNInt[n] && flagsByNInt[n].optel);
+            e.isEip = !!(flagsByNInt[n] && flagsByNInt[n].eip);
+          });
+          const patentOrder = ["Chefe", "Subchefe", "Bombeiro(a) 1ª", "Bombeiro(a) 2ª", "Bombeiro(a) 3ª", "Estagiário(a)", "Bº Especialista"];
+          allElements.sort((a, b) => {
+            const indexA = patentOrder.indexOf(a.patent);
+            const indexB = patentOrder.indexOf(b.patent);
+            const orderA = indexA === -1 ? 999 : indexA;
+            const orderB = indexB === -1 ? 999 : indexB;
+          if (orderA !== orderB) {
+            return orderA - orderB;
+          }
+          return Number(a.n_int) - Number(b.n_int);
+        });
+        return allElements;
+      } catch (err) {
+        console.error("[CB360] Erro ao buscar elementos:", err);
+        return [];
+      }
+    }
+    const patenteLogos = {"Comandante": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Comandante.png",
+                          "2º Comandante": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/2%20Comandante.png",
+                          "Adj. de Comando": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Adj.%20Comando.png",
+                          "Oficial Bº Superior": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Of.%20Sup..png",
+                          "Oficial Bº Principal": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Of.%20Prc..png",
+                          "Oficial Bº 1ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Of.%201.png",
+                          "Oficial Bº 2ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Of.%202.png",
+                          "Chefe": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Chefe.png",
+                          "Subchefe": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Subchefe.png",
+                          "Bombeiro(a) 1ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/B1C.png",
+                          "Bombeiro(a) 2ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/B2C.png",
+                          "Bombeiro(a) 3ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/B3C.png",
+                          "Estagiário(a)": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Est..png",
+                          "Bº Especialista": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Esp.png",};
+    const serviceColors = {
+      D: {bg: 'linear-gradient(135deg, #fbc02d, #f9a825)', text: '#212121'},
+      N: {bg: 'linear-gradient(135deg, #3949ab, #2c387e, #1a237e)', text: '#fff'},
+      M: {bg: 'linear-gradient(135deg, #00897b, #00695c)', text: '#fff'}
+    };
+    const modalGroups = [
+      {title: 'INEM', prefix: 'EQ',   icon: 'medical_services', color: '#ef6c00'},
+      {title: 'GERAL', prefix: 'TDNU', icon: 'local_fire_department', color: '#c62828'},
+      {title: 'OPTEL', prefix: 'OPC',  icon: 'cell_tower', color: '#8e24aa'},
+      {title: 'EIP', prefix: 'EIP',  icon: 'security', color: '#1565c0'}
+    ];
+    const modalGroupOther = {title: 'OUTROS', icon: 'groups', color: '#757575'};
+    function groupOfTeam(team) {
+      const t = String(team || '').toUpperCase();
+      const g = modalGroups.find(g => t.startsWith(g.prefix));
+      return g ? g.title : 'OUTROS';
+    }
+    function groupsOfElement(e) {
+      const g = [];
+      if (e.isOptel) g.push('OPTEL');
+      if (e.isEip) g.push('EIP');
+      return g.length ? g : [groupOfTeam(e.team)];
+    }
+    function openServiceModal(title, elements) {
+      const modal = document.getElementById('serviceModal');
+      const container = document.getElementById('modalElementsContainer');
+      const modalTitle = document.getElementById('modalTitle');
+      modalTitle.textContent = title;
+      modal.style.display = 'flex';
+      container.innerHTML = '';
+      if (elements === null) {
+        container.innerHTML = `
+          <div style="display: flex; justify-content: center; align-items: center; padding: 40px;">
+            <div class="loading-spinner"></div>
+            <span style="margin-left: 10px;">A carregar elementos...</span>
+          </div>
+        `;
+        return;
+      }
+      if (!elements || elements.length === 0) {
+        const p = document.createElement('p');
+        p.textContent = 'Nenhum elemento encontrado';
+        p.style.color = 'var(--txt-1)';
+        p.style.textAlign = 'center';
+        p.style.padding = '40px';
+        container.appendChild(p);
+        return;
+      }
+      [...modalGroups, modalGroupOther].forEach(group => {
+        const list = elements.filter(e => groupsOfElement(e).includes(group.title));
+        if (!list.length) return;
+        const h = document.createElement('div');
+        h.className = 'modal-group-title';
+        h.style.setProperty('--gc', group.color);
+        h.innerHTML = `<span class="material-icons">${group.icon}</span><span>${group.title}</span><span class="mg-count">${list.length}</span>`;
+        container.appendChild(h);
+        list.forEach(e => {
+          const card = document.createElement('div');
+          card.className = 'element-card';
+          card.style.position = 'relative';
+          const avatar = document.createElement('img');
+          avatar.className = 'element-avatar';
+          mobileLoadPhoto(avatar, e.photo_url, 'https://www.gravatar.com/avatar/?d=mp');
+          avatar.alt = e.full_name || 'Avatar';
+          const info = document.createElement('div');
+          info.className = 'element-info';
+          info.innerHTML = `
+            <span class="element-name">${e.full_name || 'N/D'}</span>
+            <span>${e.patent || 'N/D'}</span>
+          `;
+          const patenteImg = document.createElement('img');
+          patenteImg.src = patenteLogos[e.patent] || '';
+          patenteImg.alt = e.patent || '';
+          patenteImg.style.width = '30px';
+          patenteImg.style.height = '30px';
+          patenteImg.style.objectFit = 'contain';
+          patenteImg.style.marginLeft = 'auto';
+          card.appendChild(avatar);
+          card.appendChild(info);
+          card.appendChild(patenteImg);
+          if (e.serviceValue) {
+            const badge = document.createElement('span');
+            badge.textContent = e.serviceValue;
+            const colorInfo = serviceColors[e.serviceValue] || { bg: 'var(--red)', text: '#fff' };
+            badge.style.cssText = `position: absolute; top: -6px; right: -6px; background: ${colorInfo.bg}; color: ${colorInfo.text}; font-size: 10px; font-weight: 700;
+                                   padding: 3px 7px; border-radius: 10px; box-shadow: var(--sh-sm); letter-spacing: 0.3px;`;
+            card.appendChild(badge);
+          }
+          container.appendChild(card);
+        });
+      });
+    }
+    document.getElementById('modalFooterClose').addEventListener('click', () => {
+      document.getElementById('serviceModal').style.display = 'none';
+    });
+    async function loadNextServicesUnified(selectedMonth) {
+      const corpOperNr = localStorage.getItem("currentCorpOperNr");
+      const nintCorp = validateCorpData();
+      const container = document.getElementById("nextServicesCard");
+      const title = document.getElementById("nextserv-info-title");
+      container.innerHTML = "";
+      container.style.display = "none";
+      title.style.display = "none";
+      if (!nintCorp || !corpOperNr) return;
+    
+      const now = new Date();
+      const year = getWorkYear(selectedMonth);
+      const month = selectedMonth + 1;
+      const shiftsToCount = {
+        D: ["D", "M"],
+        N: ["N"],
+        M: ["M", "D"]
+      };
+      const shiftEndHour = { D: 20, N: 8, M: 17 };
+      const normalizeNInt = n =>
+        String(n ?? "").trim().replace(/^0+(?=\d)/, "");
+    
+      // Vai buscar todas as linhas, paginando (o Supabase limita a 1000 por pedido)
+      const fetchAllRows = async (url, pageSize = 1000) => {
+        const rows = [];
+        for (let from = 0; ; from += pageSize) {
+          const res = await fetch(url, {
+            headers: {
+              ...getSupabaseHeaders(),
+              "Range-Unit": "items",
+              Range: `${from}-${from + pageSize - 1}`
+            }
+          });
+          if (!res.ok) {
+            console.error("[CB360] Erro na contagem:", await res.text());
+            return rows;
+          }
+          const page = await res.json();
+          rows.push(...page);
+          if (page.length < pageSize) break;
+        }
+        return rows;
+      };
+    
+      try {
+        const urlShifts =
+          `${SUPABASE_URL}/rest/v1/reg_employee_shifts?` +
+          `select=day,month,year,shift` +
+          `&n_int=eq.${nintCorp}` +
+          `&corp_oper_nr=eq.${corpOperNr}` +
+          `&month=eq.${month}` +
+          `&year=eq.${year}` +
+          `&shift=in.(D,N,M)` +
+          `&order=day.asc`;
+    
+        const responseShifts = await fetch(urlShifts, {
+          headers: getSupabaseHeaders()
+        });
+        if (!responseShifts.ok) {
+          console.error(
+            "Erro ao carregar próximos turnos:",
+            await responseShifts.text()
+          );
+          return;
+        }
+    
+        const dataShifts = await responseShifts.json();
+        const monthsCard = document.querySelector(".months-card");
+        if (monthsCard && monthsCard.style.display !== "none") return;
+    
+        const services = dataShifts.map(d => ({
+          day: Number(d.day),
+          month: Number(d.month),
+          year: Number(d.year),
+          value: String(d.shift).trim().toUpperCase()
+        }));
+    
+        const uniqueServices = new Map();
+        services.forEach(service => {
+          const key =
+            `${service.year}-${service.month}-${service.day}-${service.value}`;
+          if (!uniqueServices.has(key)) {
+            uniqueServices.set(key, service);
+          }
+        });
+    
+        const nextServices = [...uniqueServices.values()]
+          .filter(service => {
+            const end = new Date(
+              service.year,
+              service.month - 1,
+              service.day,
+              shiftEndHour[service.value],
+              0, 0, 0
+            );
+            if (service.value === "N") end.setDate(end.getDate() + 1);
+            return end > now;
+          })
+          .sort((a, b) => a.day - b.day);
+    
+        if (!nextServices.length) return;
+    
+        // Um único conjunto de pedidos para todos os dias a partir do próximo serviço
+        const firstDay = nextServices[0].day;
+        const countUrl =
+          `${SUPABASE_URL}/rest/v1/reg_employee_shifts?` +
+          `select=day,shift,n_int` +
+          `&corp_oper_nr=eq.${corpOperNr}` +
+          `&month=eq.${month}` +
+          `&year=eq.${year}` +
+          `&day=gte.${firstDay}` +
+          `&shift=in.(D,N,M)` +
+          `&order=day.asc,n_int.asc,shift.asc`;
+    
+        const monthRows = await fetchAllRows(countUrl);
+        if (monthsCard && monthsCard.style.display !== "none") return;
+    
+        // Agrupa: "dia|turno" -> Set de n_int
+        const grouped = new Map();
+        for (const r of monthRows) {
+          const nInt = normalizeNInt(r.n_int);
+          if (!nInt) continue;
+          const key = `${Number(r.day)}|${String(r.shift).trim().toUpperCase()}`;
+          if (!grouped.has(key)) grouped.set(key, new Set());
+          grouped.get(key).add(nInt);
+        }
+    
+        const countFor = service => {
+          const allowed = shiftsToCount[service.value] || [];
+          const union = new Set();
+          for (const s of allowed) {
+            const set = grouped.get(`${service.day}|${s}`);
+            if (set) set.forEach(n => union.add(n));
+          }
+          return union.size;
+        };
+    
+        title.style.display = "block";
+        container.style.display = "block";
+    
+        nextServices.forEach((service, index) => {
+          container.appendChild(
+            createServiceCard({
+              day: service.day,
+              month: service.month,
+              year: service.year,
+              value: service.value,
+              totalElements: countFor(service)
+            }, index)
+          );
+        });
+      } catch (err) {
+        console.error("Erro ao carregar próximos serviços:", err);
+      }
+    }
+    function toggleMobileMonthLayout(active) {
+      if (window.innerWidth > 480) return Promise.resolve();
+      const body = document.body;
+      const main = document.querySelector('.main-content');
+      if (!main) return Promise.resolve();
+      return new Promise(resolve => {
+        const topOffset = 70;
+        const currentScroll = main.scrollTop;
+        main.classList.remove('slide-in');
+        main.classList.add('slide-out');
+        setTimeout(() => {
+          if (active) {
+            body.classList.add('mobile-month-active');
+          } else {
+            body.classList.remove('mobile-month-active');
+          }
+          main.classList.remove('slide-out');
+          main.classList.add('slide-in');
+          const targetScroll = currentScroll;
+          main.scrollTo({top: targetScroll, behavior: 'smooth'});
+          setTimeout(() => {
+            main.classList.remove('slide-in');
+            resolve();
+          }, 350);
+        }, 50);
+      });
+    }
+    /* ========================== INITIALIZATION ========================== */
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCorpInfo();
+      const savedTheme = localStorage.getItem('sgo-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+      let selectedMonth = null;
+      let currentFetchRequestId = 0;
+      const monthsCard = document.querySelector(".months-card");
+      const btnBack = document.getElementById("btnBackToMonths");
+      const btnBackWrapper = document.getElementById("btnBackWrapper");
+      const scalesSubtitle = document.getElementById("scalesSubtitle");
+      const scalesHeader = document.querySelector(".scales-header");
+      const mainContent = document.querySelector(".main-content");
+      const selectedMonthIcon = document.getElementById("selectedMonthIcon");
+      const selectedMonthName = document.getElementById("selectedMonthName");
+      function applyMonthsCentering() {
+        if (window.innerWidth > 480) {
+          mainContent.style.paddingTop = "";
+          return;
+        }
+        const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 60;
+        const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footer-h")) || 50;
+        const contentHeight = (scalesHeader ? scalesHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
+        const availableHeight = window.innerHeight - headerH - footerH;
+        const extra = Math.max(18, (availableHeight - contentHeight) / 2);
+        mainContent.style.paddingTop = `calc(var(--header-h) + ${extra}px)`;
+      }
+      function hideBackButtonInstant() {
+        btnBackWrapper.classList.add("no-transition");
+        btnBackWrapper.classList.remove("show");
+        void btnBackWrapper.offsetHeight;
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            btnBackWrapper.classList.remove("no-transition");
+          });
+        });
+      }
+      function hideAllServiceCards() {
+        document.getElementById("servicesCard").style.display = "none";
+        document.getElementById("ServicesSection").style.display = "none";
+        document.getElementById("nextServicesCard").style.display = "none";
+        document.getElementById("nextserv-info-title").style.display = "none";
+        const noServicesCard = document.getElementById("noServicesCard");
+        if (noServicesCard) noServicesCard.remove();
+      }
+      function resetToMonthsView() {
+        currentFetchRequestId++;
+        selectedMonth = null;
+        document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
+        hideBackButtonInstant();
+        hideAllServiceCards();
+        monthsCard.style.display = "block";
+        if (scalesSubtitle) scalesSubtitle.style.display = "block";
+        toggleMobileMonthLayout(false);
+        requestAnimationFrame(() => applyMonthsCentering());
+      }
+      btnBack.addEventListener("click", resetToMonthsView);
+      requestAnimationFrame(() => applyMonthsCentering());
+      window.addEventListener("resize", () => {
+        if (selectedMonth === null) applyMonthsCentering();
+      });
+      document.querySelectorAll(".scales-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const month = parseInt(btn.dataset.month, 10);
+          const requestId = ++currentFetchRequestId;
+          document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          selectedMonth = month;
+          const btnIconText = btn.querySelector(".material-icons") ? btn.querySelector(".material-icons").textContent : "";
+          const btnNameText = btn.querySelector("div") ? btn.querySelector("div").textContent : "";
+          if (selectedMonthIcon) selectedMonthIcon.textContent = btnIconText;
+          if (selectedMonthName) selectedMonthName.textContent = btnNameText;
+          monthsCard.style.display = "none";
+          if (scalesSubtitle) scalesSubtitle.style.display = "none";
+          hideBackButtonInstant();
+          mainContent.style.paddingTop = "";
+          await toggleMobileMonthLayout(true);
+          hideAllServiceCards();
+          if (requestId !== currentFetchRequestId) return;
+          const today = new Date();
+          const loaders = [
+            loadServicesMonth(month)
+          ];
+          await Promise.all(loaders);
+          if (requestId !== currentFetchRequestId) return;
+          updateSectionDividers();
+          btnBackWrapper.classList.add("show");
+          if (month >= today.getMonth()) {
+            await loadNextServicesUnified(month);
+            if (requestId !== currentFetchRequestId) return;
+          }
+          const hasServices = document.getElementById("ServicesSection").style.display !== "none";
+          const hasNext = document.getElementById("nextServicesCard").style.display !== "none" && document.getElementById("nextServicesCard").children.length > 0;
+          if (!hasServices && !hasNext) {
+            document.getElementById("nextserv-info-title").style.display = "none";
+            const mainContainer = document.querySelector(".main-content");
+            const noServicesCard = document.createElement("div");
+            noServicesCard.id = "noServicesCard";
+            noServicesCard.className = "scales-card";
+            noServicesCard.style.marginTop = "0px";
+            noServicesCard.innerHTML = `
+              <span class="card-title" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span class="material-icons" style="font-size: 18px; color: var(--red-icon);">info</span> Informação</span>
+                <span class="values" style="margin-top: 4px;">Nenhum serviço registado neste mês.</span>
+              `;
+            mainContainer.appendChild(noServicesCard);
+          }
+        });
+      });
+    });
+  <\/script>  
+</body>
+</html>
+</script>
+
+
+
+
+
+
+
+
+
+
+
 <script type="text/x-cb360" data-page="SolFardam"><!DOCTYPE html>
 <html lang="pt-PT" style="background-color: #d32f2f;">
 <head>
