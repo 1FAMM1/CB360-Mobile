@@ -8,7 +8,7 @@
     to 'Response'); devolve sempre um Response válido, com
     fallback para index.html em navegações offline.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v6.1.0';
+    const CACHE_NAME = 'cb360-cache-v6.1.1';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/manifest.json'];
     let activeChats = new Map();
     self.addEventListener('install', (event) => {
