@@ -154,14 +154,17 @@
       </header>
       <div class="main-content">
         <div class="availability-buttons">
-          <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='ScalesViewProf.html', 300);">
+
+          <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => __go('ScalesViewProf.html'), 300);">
             <span class="material-icons">local_fire_department</span>
             <span>Profissionais</span>
           </button>
-          <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => window.location.href='ScalesView.html', 300);">
+        
+          <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => __go('ScalesView.html'), 300);">
             <span class="material-icons">local_fire_department</span>
             <span>Voluntariado</span>
-          </button>      
+          </button>
+        
         </div>
       </div>
       <footer class="footer">
@@ -14710,11 +14713,9 @@
 async function openScales() {
   if (openingScales) return;
   openingScales = true;
-
   const nInt = getNInt();
   const corp = getCorpPadded();
   const cacheKey = 'cb360_link_type_' + corp + '_' + nInt;
-
   let linkType = null;
 
   try {
@@ -14723,43 +14724,25 @@ async function openScales() {
         `${SUPABASE_URL}/rest/v1/reg_elems?select=link_type&n_int=eq.${nInt}&corp_oper_nr=eq.${corp}`,
         { headers: getSupabaseHeaders() }
       );
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-
       linkType = data?.[0]?.link_type || null;
-
       if (linkType) {
-        try {
-          localStorage.setItem(cacheKey, linkType);
-        } catch (e) {}
+        try { localStorage.setItem(cacheKey, linkType); } catch (e) {}
       }
     }
   } catch (err) {
     console.error('Erro ao verificar link_type:', err);
-
-    // Sem rede: utiliza o último valor conhecido
-    try {
-      linkType = localStorage.getItem(cacheKey);
-    } catch (e) {}
+    // sem rede: usa o último valor conhecido
+    try { linkType = localStorage.getItem(cacheKey); } catch (e) {}
   }
 
   const isProf = String(linkType || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .includes('profissional');
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().includes('profissional');
 
   openingScales = false;
-
-  if (isProf) {
-    __go('ScalesViewProf.html');
-  } else {
-    __go('ScalesView.html');
-  }
+  __go(isProf ? 'ScalesViewMenu.html' : 'ScalesView.html');
 }
     function clearAllSelections() {
       document.querySelectorAll('.mbtn').forEach(btn => btn.classList.remove('sel'));
