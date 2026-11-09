@@ -3487,6 +3487,11 @@
           document.querySelectorAll(".scales-btn").forEach(btn => {
             btn.addEventListener("click", async () => {
               const month = parseInt(btn.dataset.month, 10);
+  console.log("========== CLIQUE MÊS ==========");
+console.log("[CB360] Texto do botão:", btn.textContent.trim());
+console.log("[CB360] Dataset month:", btn.dataset.month);
+console.log("[CB360] Valor month:", month);
+console.log("[CB360] selectedMonth antes:", selectedMonth);
               const requestId = ++currentFetchRequestId;
               document.querySelectorAll(".scales-btn").forEach(b => {
                 b.classList.remove("selected");
@@ -3515,6 +3520,9 @@
               hideAllServiceCards();
               if (requestId !== currentFetchRequestId) return;
               const validation = await isMonthScaleValidated(month);
+  console.log("[CB360] Validação:", validation);
+console.log("[CB360] Mês selecionado:", month);
+console.log("================================");
               if (requestId !== currentFetchRequestId) return;
               btnBackWrapper.classList.add("show");
               const showInformation = (message) => {
