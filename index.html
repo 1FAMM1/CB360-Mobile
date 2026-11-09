@@ -3616,7 +3616,7 @@
            onload="this.style.display='block';">
       <div class="header-center">
         <span class="header-title">ESCALAS</span>
-        <span class="header-sub">Piquetes · Extras · Decir · SBA · OPAT</span>
+        <span class="header-sub" id="headerSub">Piquetes · Extras</span>
       </div>
       <h2 id="corpInfo" style="display: none;"></h2>
     </header>
@@ -3821,7 +3821,64 @@
         } catch (err) {
           console.error('Erro silencioso:', err);
         }
-      }    
+      }
+      /* ===== MÓDULOS ATIVOS DA CORPORAÇÃO ===== */
+      function updateHeaderSubtitle(flags = {}) {
+        const el = document.getElementById("headerSub");
+        if (!el) return;
+        const parts = ["Piquetes", "Extras"];
+        if (flags.has_decir === true) parts.push("Decir");
+        if (flags.has_sba === true) parts.push("SBA");
+        if (flags.has_opat === true) parts.push("OPAT");
+        el.textContent = parts.join(" · ");
+      }
+      function applyModules(flags = {}) {
+        updateHeaderSubtitle(flags);
+      }
+      async function loadModules() {
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        if (!corpOperNr) {
+          console.warn("[CB360] Corporação não identificada.");
+          applyModules({});
+          return;
+        }
+        const key = "cb360_mods_" + corpOperNr;
+        let cached = null;
+        try {
+          cached = JSON.parse(localStorage.getItem(key) || "null");
+        } catch (e) {
+          cached = null;
+        }
+        if (cached) {
+          applyModules(cached);
+        }
+        try {
+          const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/corporation_data?select=has_decir,has_sba,has_opat&corp_oper_nr=eq.${encodeURIComponent(corpOperNr)}`, {
+              method: "GET",
+              headers: getSupabaseHeaders()
+            }
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+          }
+          const data = await response.json();
+          if (!Array.isArray(data) || data.length === 0) {
+            console.warn("[CB360] Não foram encontrados módulos para:", corpOperNr);
+            return;
+          }
+          const row = data[0];
+          const toBoolean = value => value === true || value === 1 || String(value).toLowerCase() === "true" || String(value) === "1";
+          const flags = {has_decir: toBoolean(row.has_decir), has_sba: toBoolean(row.has_sba), has_opat: toBoolean(row.has_opat)};
+          localStorage.setItem(key, JSON.stringify(flags));
+          applyModules(flags);
+        } catch (err) {
+          console.error("[CB360] Erro ao carregar módulos:", err);
+          if (!cached) {
+            applyModules({});
+          }
+        }
+      }
       function getWorkYear(targetMonthIndex) {
         const now = new Date();
         const currentYear = now.getFullYear();
@@ -4339,6 +4396,7 @@
       /* ========================== INITIALIZATION ========================== */
       document.addEventListener('DOMContentLoaded', function() {
         loadCorpInfo();
+        loadModules();
         const savedTheme = localStorage.getItem('sgo-theme');
         if (savedTheme === 'dark') {
           document.body.classList.add('dark-mode');
@@ -5561,6 +5619,10 @@
           <span class="material-icons">local_fire_department</span>
           <span>Piquetes</span>
         </button>
+        <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => __go('ExtDisp.html'), 300);">
+          <span class="material-icons">emergency</span>
+          <span>Extras</span>
+        </button>
         <button class="availability-btn" data-flag="has_decir" onclick="toggleButton(this); setTimeout(() => __go('DecDisp.html'), 300);">
           <span class="material-icons">whatshot</span>
           <span>DECIR</span>
@@ -5572,11 +5634,7 @@
         <button class="availability-btn" data-flag="has_opat" onclick="toggleButton(this); setTimeout(() => __go('OPATDisp.html'), 300);">
           <span class="material-icons">cell_tower</span>
           <span>OPATS</span>
-        </button>
-        <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => __go('ExtDisp.html'), 300);">
-          <span class="material-icons">emergency</span>
-          <span>Extras</span>
-        </button>
+        </button>        
         <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => __go('DispView.html'), 300);">
           <span class="material-icons">visibility</span>
           <span>Visualizar Disponibilidades</span>
