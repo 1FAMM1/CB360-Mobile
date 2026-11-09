@@ -3243,8 +3243,6 @@
           const main = document.querySelector('.main-content');
           if (!main) return Promise.resolve();
           return new Promise(resolve => {
-            const topOffset = 70;
-            const currentScroll = main.scrollTop;
             main.classList.remove('slide-in');
             main.classList.add('slide-out');
             setTimeout(() => {
@@ -3253,10 +3251,17 @@
               } else {
                 body.classList.remove('mobile-month-active');
               }
+              main.scrollTop = 0;
+              const nextServices = document.getElementById('nextServicesCard');
+              if (nextServices) {
+                nextServices.scrollTop = 0;
+              }
               main.classList.remove('slide-out');
               main.classList.add('slide-in');
-              const targetScroll = currentScroll;
-              main.scrollTo({top: targetScroll, behavior: 'smooth'});
+              main.scrollTo({
+                top: 0,
+                behavior: 'auto'
+              });
               setTimeout(() => {
                 main.classList.remove('slide-in');
                 resolve();
@@ -3318,6 +3323,9 @@
             document.querySelectorAll(".scales-btn").forEach(b => b.classList.remove("selected"));
             hideBackButtonInstant();
             hideAllServiceCards();
+            mainContent.scrollTop = 0;
+            const nextServices = document.getElementById("nextServicesCard");
+            if (nextServices) nextServices.scrollTop = 0;
             monthsCard.style.display = "block";
             if (scalesSubtitle) scalesSubtitle.style.display = "block";
             toggleMobileMonthLayout(false);
