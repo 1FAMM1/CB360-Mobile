@@ -1955,7 +1955,7 @@
       <div class="main-content">
         <div class="availability-buttons">
           <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => __go('ScalesViewProf.html'), 300);">
-            <span class="material-icons">local_fire_department</span>
+            <span class="material-icons">business_center</span>
             <span>Profissionais</span>
           </button>        
           <button class="availability-btn" onclick="toggleButton(this); setTimeout(() => __go('ScalesView.html'), 300);">
@@ -3090,10 +3090,7 @@
           document.getElementById('serviceModal').style.display = 'none';
         });
         /* ===================== LOAD NEXT SERVICES UNIFIED ==================== */
-        async function loadNextServicesUnified(
-          selectedMonth,
-          scaleAlreadyValidated = false
-        ) {
+        async function loadNextServicesUnified(selectedMonth, scaleAlreadyValidated = false) {
           const corpOperNr = localStorage.getItem("currentCorpOperNr");
           const nintCorp = validateCorpData();
           const container = document.getElementById("nextServicesCard");
@@ -3102,31 +3099,29 @@
           container.style.display = "none";
           title.style.display = "none";
           if (!nintCorp || !corpOperNr) return;
-          if (!scaleAlreadyValidated) {
-            const validation = await isMonthScaleValidated(selectedMonth);
-            if (!validation.validated) {
-              console.warn("[CB360] Próximos serviços bloqueados: escala não validada.");
-              return;
-            }
-          }
           const now = new Date();
           const year = getWorkYear(selectedMonth);
           const month = selectedMonth + 1;
+          const currentYear = now.getFullYear();
+          const currentMonth = now.getMonth() + 1;
+          const isFutureMonth = year > currentYear || (year === currentYear && month > currentMonth);
+          if (isFutureMonth && !scaleAlreadyValidated) {
+            const validation = await isMonthScaleValidated(selectedMonth);
+            if (!validation.validated) {
+              console.warn("[CB360] Próximos serviços bloqueados: escala futura não validada.");
+              return;
+            }
+          }
           const shiftsToCount = {D: ["D", "M"], N: ["N"], M: ["M", "D"]};
           const shiftEndHour = {D: 20, N: 8, M: 17};
-          const normalizeNInt = n =>
-            String(n ?? "")
-              .trim()
-              .replace(/^0+(?=\d)/, "");
+          const normalizeNInt = n => String(n ?? "")
+            .trim()
+            .replace(/^0+(?=\d)/, "");
           const fetchAllRows = async (url, pageSize = 1000) => {
             const rows = [];
             for (let from = 0; ; from += pageSize) {
               const res = await fetch(url, {
-                headers: {
-                  ...getSupabaseHeaders(),
-                  "Range-Unit": "items",
-                  Range: `${from}-${from + pageSize - 1}`
-                }
+                headers: {...getSupabaseHeaders(), "Range-Unit": "items", Range: `${from}-${from + pageSize - 1}`}
               });
               if (!res.ok) {
                 console.error("[CB360] Erro na contagem:", await res.text());
@@ -3160,12 +3155,7 @@
             if (monthsCard && monthsCard.style.display !== "none") {
               return;
             }
-            const services = dataShifts.map(d => ({
-              day: Number(d.day),
-              month: Number(d.month),
-              year: Number(d.year),
-              value: String(d.shift).trim().toUpperCase()
-            }));
+            const services = dataShifts.map(d => ({day: Number(d.day), month: Number(d.month), year: Number(d.year), value: String(d.shift).trim().toUpperCase()}));
             const uniqueServices = new Map();
             services.forEach(service => {
               const key =
@@ -3176,13 +3166,15 @@
             });
             const nextServices = [...uniqueServices.values()]
               .filter(service => {
+                const currentMonth = now.getMonth() + 1;
+                const currentYear = now.getFullYear();
+                const isPreviousMonth = service.year < currentYear ||(service.year === currentYear && service.month < currentMonth);
+                if (isPreviousMonth) return true;
                 const end = new Date(service.year, service.month - 1, service.day, shiftEndHour[service.value], 0, 0, 0);
-                if (service.value === "N") {
-                  end.setDate(end.getDate() + 1);
-                }
+                if (service.value === "N") {end.setDate(end.getDate() + 1);}
                 return end > now;
               })
-              .sort((a, b) => a.day - b.day);
+            .sort((a, b) => a.day - b.day);
             if (!nextServices.length) return;
             const firstDay = nextServices[0].day;
             const countUrl =
@@ -3202,8 +3194,7 @@
             for (const r of monthRows) {
               const nInt = normalizeNInt(r.n_int);
               if (!nInt) continue;
-              const key =
-                `${Number(r.day)}|${String(r.shift).trim().toUpperCase()}`;
+              const key = `${Number(r.day)}|${String(r.shift).trim().toUpperCase()}`;
               if (!grouped.has(key)) {
                 grouped.set(key, new Set());
               }
