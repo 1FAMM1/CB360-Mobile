@@ -5664,9 +5664,7 @@
           console.error('Erro silencioso:', err);
         }
       }    
-      /* ===== Módulos ativos da corporação: corporation_data.has_decir / has_sba / has_opat =====
-       true  -> botão visível
-       outro -> botão oculto (e, se ficar nº ímpar de botões, o último ocupa a linha toda) */
+      /* ===== Módulos ativos da corporação: corporation_data.has_decir / has_sba / has_opat ===== */      
       const MODULE_FLAGS = ['has_decir', 'has_sba', 'has_opat'];
       function applyModules(flags) {
         document.querySelectorAll('.availability-btn[data-flag]').forEach(btn => {
@@ -5678,28 +5676,46 @@
       }
       async function loadModules() {
         const corpOperNr = localStorage.getItem("currentCorpOperNr");
-        const key = 'cb360_mods_' + corpOperNr;
+        if (!corpOperNr) {
+          console.warn("[CB360] Corporação não identificada.");
+          applyModules({});
+          return;
+        }
+        const key = "cb360_mods_" + corpOperNr;
         let cached = null;
-        try { cached = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) {}
-        applyModules(cached); /* usa o último valor guardado; sem ele, os 3 ficam ocultos até haver resposta */
-        if (!corpOperNr) return;
+        try {
+          cached = JSON.parse(localStorage.getItem(key) || "null");
+        } catch (e) {
+          cached = null;
+        }
+        if (cached) {
+          applyModules(cached);
+        }
         try {
           const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/corporation_data?select=${MODULE_FLAGS.join(',')}&corp_oper_nr=eq.${corpOperNr}`, {
+            `${SUPABASE_URL}/rest/v1/corporation_data?select=has_decir,has_sba,has_opat&corp_oper_nr=eq.${encodeURIComponent(corpOperNr)}`, {
+              method: "GET",
               headers: getSupabaseHeaders()
             }
           );
-          if (!response.ok) throw new Error('HTTP ' + response.status);
-          const data = await response.json();
-          if (data && data.length > 0) {
-            const flags = {};
-            MODULE_FLAGS.forEach(fl => { flags[fl] = data[0][fl] === true; });
-            try {localStorage.setItem(key, JSON.stringify(flags));} catch (e) {}
-            applyModules(flags);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${await response.text()}`);
           }
+          const data = await response.json();
+          if (!Array.isArray(data) || data.length === 0) {
+            console.warn("[CB360] Não foram encontrados módulos para:", corpOperNr);
+            return;
+          }
+          const row = data[0];
+          const toBoolean = value => value === true || value === 1 || String(value).toLowerCase() === "true" || String(value) === "1";
+          const flags = {has_decir: toBoolean(row.has_decir), has_sba: toBoolean(row.has_sba), has_opat: toBoolean(row.has_opat)};
+          localStorage.setItem(key, JSON.stringify(flags));
+          applyModules(flags);
         } catch (err) {
-          console.error('Módulos da corporação:', err);
-          if (!cached) applyModules({ has_decir: true, has_sba: true, has_opat: true });
+          console.error("[CB360] Erro ao carregar módulos:", err);
+          if (!cached) {
+            applyModules({});
+          }
         }
       }
       function toggleButton(button) {
