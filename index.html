@@ -5628,9 +5628,8 @@
       function updateHeaderSubtitle(flags = {}) {
         const el = document.getElementById("headerSub");
         if (!el) return;
-        const parts = ["Piquetes"];
+        const parts = ["Piquetes", "Extras"];
         if (flags.has_decir === true) parts.push("Decir");
-        parts.push("Extras");
         if (flags.has_sba === true) parts.push("SBA");
         if (flags.has_opat === true) parts.push("OPAT");
         el.textContent = parts.join(" · ");
@@ -5666,13 +5665,17 @@
       }    
       /* ===== Módulos ativos da corporação: corporation_data.has_decir / has_sba / has_opat ===== */      
       const MODULE_FLAGS = ['has_decir', 'has_sba', 'has_opat'];
-      function applyModules(flags) {
+      function applyModules(flags = {}) {
         document.querySelectorAll('.availability-btn[data-flag]').forEach(btn => {
-        btn.hidden = !(flags && flags[btn.dataset.flag] === true);
+          btn.hidden = !(flags && flags[btn.dataset.flag] === true);
         });
-        const visible = [...document.querySelectorAll('.availability-btn')].filter(b => !b.hidden);
+        const visible = [...document.querySelectorAll('.availability-btn')]
+        .filter(b => !b.hidden);
         visible.forEach(b => b.classList.remove('span2'));
-        if (visible.length % 2 === 1) visible[visible.length - 1].classList.add('span2');
+        if (visible.length % 2 === 1) {
+          visible[visible.length - 1].classList.add('span2');
+        }
+        updateHeaderSubtitle(flags);
       }
       async function loadModules() {
         const corpOperNr = localStorage.getItem("currentCorpOperNr");
