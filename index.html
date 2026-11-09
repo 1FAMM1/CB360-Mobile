@@ -8782,6 +8782,38 @@
         }
         return headers;
       }
+      /* ======================= MODULE AVAILABILITY ======================= */
+      let corporationModules = {has_decir: false, has_sba: false, has_opat: false};
+      async function loadCorporationModules() {
+        const corpOperNr = getCorp();
+        if (!corpOperNr) return;
+        const cacheKey = `cb360_mods_${corpOperNr}`;
+        try {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            corporationModules = {...corporationModules, ...JSON.parse(cached)};
+          }
+        } catch (e) {
+          console.warn("Erro ao ler módulos em cache:", e);
+        }
+        try {
+          const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/corporation_data?select=has_decir,has_sba,has_opat&corp_oper_nr=eq.${encodeURIComponent(corpOperNr)}`, {
+            headers: getSupabaseHeaders()
+          }
+          );
+          if (!response.ok) {
+            throw new Error(`Erro HTTP ${response.status}`);
+          }
+          const data = await response.json();
+          if (data && data.length > 0) {
+            corporationModules = {has_decir: data[0].has_decir === true, has_sba: data[0].has_sba === true, has_opat: data[0].has_opat === true};
+            localStorage.setItem(cacheKey, JSON.stringify(corporationModules));
+          }
+        } catch (error) {
+          console.error("Erro ao carregar módulos da corporação:", error);
+        }
+      }
       /* ======================= CORPORATION LOADING ======================= */
       async function loadCorpInfo() {
         const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -8986,10 +9018,17 @@
         if (!legendContainer) return;
         legendContainer.innerHTML = '';
         const month = currentMonthIndex;
-        let typeOrder = (month >= 4 && month <= 9)
-        ? ['PN', 'EX', 'ED', 'EN', 'ET', 'EP', 'SB', 'OP']
-        : ['PN', 'EX', 'SB', 'OP'];      
-        typeOrder.forEach((type) => {
+        let typeOrder = ['PN', 'EX'];
+        if (month >= 4 && month <= 9 && corporationModules.has_decir) {
+          typeOrder.push('ED', 'EN', 'ET', 'EP');
+        }
+        if (corporationModules.has_sba) {
+          typeOrder.push('SB');
+        }
+        if (corporationModules.has_opat) {
+          typeOrder.push('OP');
+        }
+        typeOrder.forEach(type => {
           const item = document.createElement('div');
           item.className = 'legend-item';
           const colorBox = document.createElement('span');
@@ -9018,8 +9057,9 @@
         }, 3000);
       }
       /* ============================== INIT =============================== */
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('DOMContentLoaded', async () => {
         loadCorpInfo();
+        await loadCorporationModules();
         const savedTheme = localStorage.getItem('sgo-theme');
         if (savedTheme === 'dark') {
           document.body.classList.add('dark-mode');
