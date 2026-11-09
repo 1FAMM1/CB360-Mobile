@@ -3090,141 +3090,309 @@
           document.getElementById('serviceModal').style.display = 'none';
         });
         /* ===================== LOAD NEXT SERVICES UNIFIED ==================== */
-        async function loadNextServicesUnified(selectedMonth, scaleAlreadyValidated = false) {
-          const corpOperNr = localStorage.getItem("currentCorpOperNr");
-          const nintCorp = validateCorpData();
-          const container = document.getElementById("nextServicesCard");
-          const title = document.getElementById("nextserv-info-title");
-          container.innerHTML = "";
-          container.style.display = "none";
-          title.style.display = "none";
-          if (!nintCorp || !corpOperNr) return;
-          const now = new Date();
-          const year = getWorkYear(selectedMonth);
-          const month = selectedMonth + 1;
-          const currentYear = now.getFullYear();
-          const currentMonth = now.getMonth() + 1;
-          const isFutureMonth = year > currentYear || (year === currentYear && month > currentMonth);
-          if (isFutureMonth && !scaleAlreadyValidated) {
-            const validation = await isMonthScaleValidated(selectedMonth);
-            if (!validation.validated) {
-              console.warn("[CB360] Próximos serviços bloqueados: escala futura não validada.");
-              return;
-            }
-          }
-          const shiftsToCount = {D: ["D", "M"], N: ["N"], M: ["M", "D"]};
-          const shiftEndHour = {D: 20, N: 8, M: 17};
-          const normalizeNInt = n => String(n ?? "")
-            .trim()
-            .replace(/^0+(?=\d)/, "");
-          const fetchAllRows = async (url, pageSize = 1000) => {
-            const rows = [];
-            for (let from = 0; ; from += pageSize) {
-              const res = await fetch(url, {
-                headers: {...getSupabaseHeaders(), "Range-Unit": "items", Range: `${from}-${from + pageSize - 1}`}
-              });
-              if (!res.ok) {
-                console.error("[CB360] Erro na contagem:", await res.text());
-                throw new Error("Erro ao consultar a contagem dos elementos.");
-              }
-              const page = await res.json();
-              rows.push(...page);
-              if (page.length < pageSize) break;
-            }
-            return rows;
-          };
-          try {
-            const urlShifts =
-              `${SUPABASE_URL}/rest/v1/reg_employee_shifts?` +
-              `select=day,month,year,shift` +
-              `&n_int=eq.${nintCorp}` +
-              `&corp_oper_nr=eq.${corpOperNr}` +
-              `&month=eq.${month}` +
-              `&year=eq.${year}` +
-              `&shift=in.(D,N,M)` +
-              `&order=day.asc`;
-            const responseShifts = await fetch(urlShifts, {
-              headers: getSupabaseHeaders()
-            });
-            if (!responseShifts.ok) {
-              console.error("[CB360] Erro ao carregar próximos turnos:", await responseShifts.text());
-              return;
-            }
-            const dataShifts = await responseShifts.json();
-            const monthsCard = document.querySelector(".months-card");
-            if (monthsCard && monthsCard.style.display !== "none") {
-              return;
-            }
-            const services = dataShifts.map(d => ({day: Number(d.day), month: Number(d.month), year: Number(d.year), value: String(d.shift).trim().toUpperCase()}));
-            const uniqueServices = new Map();
-            services.forEach(service => {
-              const key =
-                `${service.year}-${service.month}-${service.day}-${service.value}`;
-              if (!uniqueServices.has(key)) {
-                uniqueServices.set(key, service);
-              }
-            });
-            const nextServices = [...uniqueServices.values()]
-              .filter(service => {
-                const currentMonth = now.getMonth() + 1;
-                const currentYear = now.getFullYear();
-                const isPreviousMonth = service.year < currentYear ||(service.year === currentYear && service.month < currentMonth);
-                if (isPreviousMonth) return true;
-                const end = new Date(service.year, service.month - 1, service.day, shiftEndHour[service.value], 0, 0, 0);
-                if (service.value === "N") {end.setDate(end.getDate() + 1);}
-                return end > now;
-              })
-            .sort((a, b) => a.day - b.day);
-            if (!nextServices.length) return;
-            const firstDay = nextServices[0].day;
-            const countUrl =
-              `${SUPABASE_URL}/rest/v1/reg_employee_shifts?` +
-              `select=day,shift,n_int` +
-              `&corp_oper_nr=eq.${corpOperNr}` +
-              `&month=eq.${month}` +
-              `&year=eq.${year}` +
-              `&day=gte.${firstDay}` +
-              `&shift=in.(D,N,M)` +
-              `&order=day.asc,n_int.asc,shift.asc`;
-            const monthRows = await fetchAllRows(countUrl);
-            if (monthsCard && monthsCard.style.display !== "none") {
-              return;
-            }
-            const grouped = new Map();
-            for (const r of monthRows) {
-              const nInt = normalizeNInt(r.n_int);
-              if (!nInt) continue;
-              const key = `${Number(r.day)}|${String(r.shift).trim().toUpperCase()}`;
-              if (!grouped.has(key)) {
-                grouped.set(key, new Set());
-              }
-              grouped.get(key).add(nInt);
-            }
-            const countFor = service => {
-              const allowed = shiftsToCount[service.value] || [];
-              const union = new Set();
-              for (const s of allowed) {
-                const set = grouped.get(`${service.day}|${s}`);
-                if (set) {
-                  set.forEach(n => union.add(n));
-                }
-              }
-              return union.size;
-            };
-            title.style.display = "block";
-            container.style.display = "block";
-            nextServices.forEach((service, index) => {
-              container.appendChild(
-                createServiceCard({day: service.day, month: service.month, year: service.year, value: service.value, totalElements: countFor(service)}, index)
-              );
-            });
-          } catch (err) {
-            console.error("[CB360] Erro ao carregar próximos serviços:", err);
-            container.innerHTML = "";
-            container.style.display = "none";
-            title.style.display = "none";
-          }
+        async function loadNextServicesUnified(
+  selectedMonth,
+  scaleAlreadyValidated = false
+) {
+  const corpOperNr = localStorage.getItem("currentCorpOperNr");
+  const nintCorp = validateCorpData();
+
+  const container = document.getElementById("nextServicesCard");
+  const title = document.getElementById("nextserv-info-title");
+
+  console.log("========== CB360 DIAGNÓSTICO ==========");
+
+  console.log("Mês índice:", selectedMonth);
+  console.log("Corporação:", corpOperNr);
+  console.log("N.º interno:", nintCorp);
+  console.log("Container:", container);
+  console.log("Título:", title);
+
+  if (!container || !title) {
+    console.error("[CB360] Container ou título não encontrado.");
+    return;
+  }
+
+  container.innerHTML = "";
+  container.style.display = "none";
+  title.style.display = "none";
+
+  if (!nintCorp || !corpOperNr) {
+    console.error("[CB360] Dados da corporação em falta.");
+    return;
+  }
+
+  const now = new Date();
+  const year = getWorkYear(selectedMonth);
+  const month = selectedMonth + 1;
+
+  console.log("[CB360] Mês:", month);
+  console.log("[CB360] Ano:", year);
+
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
+  const isFutureMonth =
+    year > currentYear ||
+    (year === currentYear && month > currentMonth);
+
+  if (isFutureMonth && !scaleAlreadyValidated) {
+    const validation = await isMonthScaleValidated(selectedMonth);
+
+    if (!validation.validated) {
+      console.warn("[CB360] Escala futura não validada.");
+      return;
+    }
+  }
+
+  const shiftsToCount = {
+    D: ["D", "M"],
+    N: ["N"],
+    M: ["M", "D"]
+  };
+
+  const shiftEndHour = {
+    D: 20,
+    N: 8,
+    M: 17
+  };
+
+  const normalizeNInt = n =>
+    String(n ?? "")
+      .trim()
+      .replace(/^0+(?=\d)/, "");
+
+  const fetchAllRows = async (url, pageSize = 1000) => {
+    const rows = [];
+
+    for (let from = 0; ; from += pageSize) {
+      const res = await fetch(url, {
+        headers: {
+          ...getSupabaseHeaders(),
+          "Range-Unit": "items",
+          Range: `${from}-${from + pageSize - 1}`
         }
+      });
+
+      if (!res.ok) {
+        console.error("[CB360] Erro na contagem:", await res.text());
+        throw new Error("Erro ao consultar a contagem dos elementos.");
+      }
+
+      const page = await res.json();
+      rows.push(...page);
+
+      if (page.length < pageSize) break;
+    }
+
+    return rows;
+  };
+
+  try {
+    // CONSULTAR TURNOS DO ELEMENTO
+
+    const urlShifts =
+      `${SUPABASE_URL}/rest/v1/reg_employee_shifts?` +
+      `select=day,month,year,shift` +
+      `&n_int=eq.${nintCorp}` +
+      `&corp_oper_nr=eq.${corpOperNr}` +
+      `&month=eq.${month}` +
+      `&year=eq.${year}` +
+      `&shift=in.(D,N,M)` +
+      `&order=day.asc`;
+
+    console.log("[CB360] URL turnos:", urlShifts);
+
+    const responseShifts = await fetch(urlShifts, {
+      headers: getSupabaseHeaders()
+    });
+
+    if (!responseShifts.ok) {
+      console.error(
+        "[CB360] Erro ao carregar turnos:",
+        await responseShifts.text()
+      );
+      return;
+    }
+
+    const dataShifts = await responseShifts.json();
+
+    console.log("[CB360] Turnos encontrados:", dataShifts.length);
+    console.log("[CB360] Dados dos turnos:", dataShifts);
+
+    const monthsCard = document.querySelector(".months-card");
+
+    console.log(
+      "[CB360] Estado monthsCard:",
+      monthsCard?.style.display
+    );
+
+    if (monthsCard && monthsCard.style.display !== "none") {
+      console.warn("[CB360] Interrompido: monthsCard visível.");
+      return;
+    }
+
+    // PREPARAR SERVIÇOS
+
+    const services = dataShifts.map(d => ({
+      day: Number(d.day),
+      month: Number(d.month),
+      year: Number(d.year),
+      value: String(d.shift).trim().toUpperCase()
+    }));
+
+    const uniqueServices = new Map();
+
+    services.forEach(service => {
+      const key =
+        `${service.year}-${service.month}-${service.day}-${service.value}`;
+
+      if (!uniqueServices.has(key)) {
+        uniqueServices.set(key, service);
+      }
+    });
+
+    // FILTRAR SERVIÇOS
+
+    const nextServices = [...uniqueServices.values()]
+      .filter(service => {
+        const isPreviousMonth =
+          service.year < currentYear ||
+          (
+            service.year === currentYear &&
+            service.month < currentMonth
+          );
+
+        if (isPreviousMonth) return true;
+
+        const end = new Date(
+          service.year,
+          service.month - 1,
+          service.day,
+          shiftEndHour[service.value],
+          0,
+          0,
+          0
+        );
+
+        if (service.value === "N") {
+          end.setDate(end.getDate() + 1);
+        }
+
+        return end > now;
+      })
+      .sort((a, b) => a.day - b.day);
+
+    console.log("[CB360] Serviços após filtro:", nextServices.length);
+    console.log("[CB360] Serviços:", nextServices);
+
+    if (!nextServices.length) {
+      console.warn("[CB360] Nenhum serviço após o filtro.");
+      return;
+    }
+
+    // CONTAR ELEMENTOS
+
+    const firstDay = nextServices[0].day;
+
+    const countUrl =
+      `${SUPABASE_URL}/rest/v1/reg_employee_shifts?` +
+      `select=day,shift,n_int` +
+      `&corp_oper_nr=eq.${corpOperNr}` +
+      `&month=eq.${month}` +
+      `&year=eq.${year}` +
+      `&day=gte.${firstDay}` +
+      `&shift=in.(D,N,M)` +
+      `&order=day.asc,n_int.asc,shift.asc`;
+
+    console.log("[CB360] URL contagem:", countUrl);
+
+    const monthRows = await fetchAllRows(countUrl);
+
+    console.log("[CB360] Registos para contagem:", monthRows.length);
+
+    if (monthsCard && monthsCard.style.display !== "none") {
+      console.warn("[CB360] Interrompido após contagem: monthsCard visível.");
+      return;
+    }
+
+    const grouped = new Map();
+
+    for (const r of monthRows) {
+      const nInt = normalizeNInt(r.n_int);
+
+      if (!nInt) continue;
+
+      const key =
+        `${Number(r.day)}|${String(r.shift).trim().toUpperCase()}`;
+
+      if (!grouped.has(key)) {
+        grouped.set(key, new Set());
+      }
+
+      grouped.get(key).add(nInt);
+    }
+
+    const countFor = service => {
+      const allowed = shiftsToCount[service.value] || [];
+      const union = new Set();
+
+      for (const s of allowed) {
+        const set = grouped.get(`${service.day}|${s}`);
+
+        if (set) {
+          set.forEach(n => union.add(n));
+        }
+      }
+
+      return union.size;
+    };
+
+    // APRESENTAR CARTÕES
+
+    title.style.display = "block";
+    container.style.display = "block";
+
+    nextServices.forEach((service, index) => {
+      const totalElements = countFor(service);
+
+      console.log(
+        "[CB360] Criar cartão:",
+        service.day,
+        service.value,
+        "Elementos:",
+        totalElements
+      );
+
+      container.appendChild(
+        createServiceCard(
+          {
+            day: service.day,
+            month: service.month,
+            year: service.year,
+            value: service.value,
+            totalElements
+          },
+          index
+        )
+      );
+    });
+
+    console.log(
+      "[CB360] Cartões criados:",
+      container.children.length
+    );
+
+    console.log("========== FIM DIAGNÓSTICO ==========");
+
+  } catch (err) {
+    console.error("[CB360] Erro ao carregar próximos serviços:", err);
+
+    container.innerHTML = "";
+    container.style.display = "none";
+    title.style.display = "none";
+  }
+}
         function toggleMobileMonthLayout(active) {
           if (window.innerWidth > 480) return Promise.resolve();
           const body = document.body;
