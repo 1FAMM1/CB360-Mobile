@@ -3559,10 +3559,9 @@ console.log("================================");
               await loadServicesMonth(month, true);
               if (requestId !== currentFetchRequestId) return;
               updateSectionDividers();
-              if (month >= today.getMonth()) {
-                await loadNextServicesUnified(month, true);
-                if (requestId !== currentFetchRequestId) return;
-              }
+              await loadNextServicesUnified(month, true);
+
+if (requestId !== currentFetchRequestId) return;
               const hasServices = document.getElementById("ServicesSection").style.display !== "none";
               const hasNext = document.getElementById("nextServicesCard").style.display !== "none" && document.getElementById("nextServicesCard").children.length > 0;
               if (!hasServices && !hasNext) {
