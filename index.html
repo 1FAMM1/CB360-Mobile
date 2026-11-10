@@ -19505,568 +19505,612 @@
     <\script>
       (function() {
         try {
-          if (localStorage.getItem('sgo-theme') === 'dark') {
-            document.documentElement.classList.add('dark-mode');
-          }
-        } catch (e) {}
-      })();
-    <\/script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-    <title>Guia de Comando Acidentes</title>
-    <style>
-      /* ============================================================
-      VARIABLES
-      ============================================================ */
-      :root {--red:#c62828; --red-dark:#8b0000; --header-h:60px; --footer-h:50px; --color-secondary:#2c5aa0; --color-orange:#ff8c00; --color-red:#ff0000; --color-gray-medium:#c2c2c2; --color-gray-dark:#8a8a8a; --color-light-blue:#7faefa; --color-dark-blue:#062f73; --color-black:#000; --color-white:#fff; --sand:#e0d099; --navy:#003366; --shadow-default:0 4px 6px rgba(0,0,0,0.1); --border-default:1px solid #000;
-             --page-bg:#f5f5f5; --panel-bg:#f4f4f4; --panel-border:#aaa; --line:#ddd; --th-bg:#e6e6e6; --field-bg:#fff; --field-txt:#000; --label:#003366; --muted:#666; --sep:#000; --focus-bg:#f0f0f0; --focus-border:#8b0000; --focus-ring:rgba(139,0,0,0.35); --s:1; --p:20px;}
-      .dark-mode {--page-bg:#141312; --panel-bg:#1f1e1c; --panel-border:rgba(255,255,255,0.15); --line:rgba(255,255,255,0.12); --th-bg:#d9d9d9; --field-bg:#d9d9d9; --field-txt:#1c1b1a; --label:#8fb4e8; --muted:#a09890; --sep:#f0ede8; --focus-bg:#cbcbcb; --focus-border:#c62828; --focus-ring:rgba(198,40,40,0.5);}
-      
-      /* ============================================================
-      RESET & BASE
-      ============================================================ */
-      * {margin:0; padding:0; box-sizing:border-box;}
-      body {font-family:Arial, sans-serif; background-color:var(--page-bg); padding:20px;}
-      /* ============================================================
-      HEADER & FOOTER (padrão CB360)
-      ============================================================ */
-      .header, .footer {position:fixed; left:0; right:0; background:linear-gradient(to right, var(--red-dark), var(--red)); display:flex; align-items:center; justify-content:center; z-index:1000;}
-      .header {top:0; height:var(--header-h); box-shadow:0 2px 8px rgba(0,0,0,0.20);}
-      .header-logo {position:absolute; left:14px; height:50px; border-radius:6px;}
-      .header-center {display:flex; flex-direction:column; align-items:center; gap:1px;}
-      .header-title {font-size:19px; font-weight:700; letter-spacing:1.5px; color:#fff;}    
-      .header-sub {font-size:10px; font-weight:500; letter-spacing:1.5px; color:rgba(255,255,255,0.75); text-transform:uppercase;}
-      .footer {bottom:0; height:var(--footer-h); box-shadow:0 -2px 8px rgba(0,0,0,0.18);}
-      .footer-content {text-align:center;}
-      .powered-by {font-size:11px; font-weight:500; color:rgba(255,255,255,0.85);}
-      .footer-year {font-size:9px; color:rgba(255,255,255,0.45); margin-top:1px;}
-      /* ============================================================
-      CAMPOS (fundo/texto por tema + focus suave)
-      ============================================================ */
-      .input-field, .iam-field, .wide-text-input, .cargo-field, .posit-hora-input, .posit-desc-input, .vehiclesnoto-input, .vehiclesnoto-time-input, .passagecos-hora-input, .passagecos-input {background-color:var(--field-bg); color:var(--field-txt);}
-      .input-field, .iam-field, .wide-text-input, .cargo-field, .posit-hora-input, .posit-desc-input, .vehiclesnoto-input, .vehiclesnoto-time-input {transition:background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;}
-      .input-field:focus, .iam-field:focus, .wide-text-input:focus, .cargo-field:focus, .posit-hora-input:focus, .posit-desc-input:focus, .vehiclesnoto-input:focus, .vehiclesnoto-time-input:focus {outline:none; background-color:var(--focus-bg); border-color:var(--focus-border); box-shadow:0 0 0 1px var(--focus-ring);}
-      .coordinate-input:focus, .local-input:focus, .assumptions-input:focus {background-color:var(--focus-bg);}
-      /* ============================================================
-      CHECKBOXES
-      ============================================================ */
-      .checkbox-base {position:absolute; border:var(--border-default); padding:10px 15px; width:269px; height:30px; display:flex; align-items:center;}
-      .checkbox-base input[type="checkbox"] {width:30px !important; height:30px !important; position:relative !important; left:-16px !important; cursor:pointer; -webkit-appearance:none; -moz-appearance:none; appearance:none; border:var(--border-default); background-color:var(--field-bg);}
-      .checkbox-base input[type="checkbox"]:checked::after {content:"✗"; position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); font-size:18px; font-weight:bold; color:var(--color-black);}
-      .checkbox-base input[type="checkbox"]:hover {border-color:#007bff;}
-      .checkbox-base label {font-size:15px !important; font-weight:bold !important; position:relative; flex:1; text-align:center; cursor:pointer; user-select:none; color:var(--color-white) !important;}
-      .checkbox-wide {width:542px;}
-      .checkbox-wide label {flex:0 0 170px;}
-      .checkbox-short label {flex:0 0 100px;}
-      [class*="checkbox-accident"] label, [class*="checkbox-irequest"] label {color:var(--color-black) !important;}
-      .wide-text-input {flex:1; min-width:0; height:30px; border:var(--border-default); font-size:14px; text-align:center; transform:translateX(16px);}
-      /* WRAPPERS */
-      .main-wrapper {position:absolute; top:calc(var(--header-h) + 8px); max-width:750px; width:100%; margin:0 auto; transform:scale(var(--s)); transform-origin:top center;}
-      .controls-wrapper, .iam-wrapper, .isee-wrapper, .ido-wrapper, .irequest-wrapper, .assumptions-wrapper, .recognition-wrapper, .sitacseparator-wrapper, .posit-wrapper, .vehiclesnoto-wrapper, .passagecos-wrapper, .menagebuttons-wrapper {position:relative; margin-top:4px;}
-      .header-wrapper {position:relative;}
-      .iam-wrapper {min-height:132px;}
-      .isee-wrapper {min-height:472px;}
-      .ido-wrapper {min-height:64px;}
-      .irequest-wrapper {min-height:188px;}
-      .assumptions-wrapper, .recognition-wrapper, .sitacseparator-wrapper {min-height:30px;}
-      .recognition-wrapper {margin-bottom:10px;}
-      .posit-wrapper {min-height:200px;}
-      .vehiclesnoto-wrapper {min-height:350px;}
-      .menagebuttons-wrapper {min-height:150px;}
-      /* ============================================================
-      WRAPPERS
-      ============================================================ */
-      .em-container, .accident-container, .victims-container, .trapped-container, .road-container, .cargo-container, .meteo-container, .idonow-container, .irequestnow-container, .assumptions-container, .recognition-container {position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; border:var(--border-default); box-shadow:var(--shadow-default); text-align:center; font-weight:bold; font-size:14px; color:#000;}
-      .cargo-container, .meteo-container, .irequestnow-container {line-height:1.2;}
-      /* ============================================================
-      CABEÇALHOS GUIA DE COMANDO
-      ============================================================ */
-      .header-container {display:flex; flex-direction:column; justify-content:center; background-color:#ffc000; padding:20px 60px; text-align:center; box-shadow:var(--shadow-default); height:90px;}
-      .header-sgo-logo {position:absolute; margin-top:-10px; left:10px; top:45%; transform:translateY(-50%); height:80px; width:auto; border-radius:8px; transition:all 0.3s ease; z-index:1001;}
-      .header-sgo-logo:hover {transform:translateY(-50%) scale(1.1);}
-      .header-container-blue {display:flex; flex-direction:column; justify-content:center; margin-top:4px; background-color:var(--color-secondary); padding:15px 60px; text-align:center; box-shadow:0 0 6px rgba(0,0,0,0.1); height:20px;}
-      .header-container .title {color:var(--color-black) !important; margin-bottom:5px !important; font-size:22px !important; font-weight:bold !important;}
-      .header-container .title:nth-child(3) {font-size:15px !important; font-weight:normal !important;}
-      .header-container .title:last-child {font-size:20px !important; margin-bottom:0 !important;}
-      .title-blue {color:var(--color-white); font-size:18px; font-weight:normal; margin:0;}
-      /* ============================================================
-      HR POSIT, OCORRÊNCIA E CANAL
-      ============================================================ */
-      .inputs-wrapper {margin-top:4px; display:flex; gap:10px;}
-      .container-hr-posit, .container-ocorr-num, .container-channel {flex:1; display:flex; align-items:center; gap:5px;}
-      .label-hr-posit, .label-ocorr-num, .label-channel {background-color:var(--color-orange); font-weight:bold; border:var(--border-default); white-space:nowrap;}
-      .label-hr-posit {padding:8px 18px;}
-      .label-ocorr-num {margin-left:-5px; padding:8px 45px;}
-      .label-channel {margin-left:-5px; padding:8px 20px;}
-      .input-field {padding:8px; border:var(--border-default); font-size:16px; text-align:center;}
-      .input-hour {margin-left:-6px; width:70px;}
-      .input-occurrence {margin-left:-6px; width:180px;}
-      .input-channel {margin-left:-6px; width:60px;}
-      /* ============================================================
-      ETIQUETAS VERTICAIS (ESTOU / VEJO / FAÇO / PEÇO)
-      ============================================================ */
-      .iam-container, .isee-container, .ido-container, .irequest-container {position:absolute; top:0; left:0; width:50px; display:flex; align-items:center; padding-left:15px; border:var(--border-default); box-shadow:var(--shadow-default);}
-      .iam-container {height:132px; background-color:var(--color-orange);}
-      .isee-container {height:472px; background-color:var(--color-red);}
-      .ido-container {height:64px; background-color:var(--color-dark-blue);}
-      .irequest-container {height:188px; background-color:var(--sand);}
-      .iam-text, .isee-text, .ido-text, .irequest-text {font-weight:bold; font-size:16px; writing-mode:vertical-lr; text-orientation:mixed; transform:rotate(180deg);}
-      .isee-text, .ido-text, .irequest-text {letter-spacing:2px;}
-      .isee-text, .ido-text {color:var(--color-white);}
-      /* ============================================================
-      SECÇÃO ESTOU (localização, coordenadas, freguesia/município)
-      ============================================================ */
-      .em-container, .iam-label {background-color:var(--color-orange);}
-      .em-container {top:0; left:54px; width:150px; height:64px;}
-      .iam-label {position:absolute; display:flex; align-items:center; justify-content:center; height:30px; font-weight:bold; font-size:14px; border:var(--border-default); box-shadow:var(--shadow-default);}
-      .iam-field {position:absolute; height:30px; padding:5px 8px; border:var(--border-default); font-size:14px; text-align:center; box-shadow:var(--shadow-default);}
-      .via-label {top:0; left:208px; width:100px;}
-      .via-field {top:0; left:312px; width:438px;}
-      .km-label {top:34px; left:208px; width:100px;}
-      .km-field {top:34px; left:312px; width:58px;}
-      .sentido-label {top:34px; left:374px; width:146px;}
-      .sentido-field {top:34px; left:524px; width:226px;}
-      .coordinates-container, .local-container {position:absolute; top:68px; height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; background-color:var(--color-orange); border:var(--border-default); box-shadow:var(--shadow-default);}
-      .coordinates-container {left:54px; width:150px;}
-      .local-container {left:474px; width:100px;}
-      .coordinates-text, .local-text {font-weight:bold; font-size:14px; text-align:center; margin:2px 0;}
-      .coordinates-input-container, .local-input-container {position:absolute; top:68px; height:64px; display:flex; flex-direction:column; padding:5px; z-index:10; background-color:var(--field-bg); border:var(--border-default); box-shadow:var(--shadow-default);}
-      .coordinates-input-container {left:208px; width:262px;}
-      .local-input-container {left:578px; width:172px;}
-      .coordinate-line, .local-line {display:flex; align-items:center; height:50%; gap:5px;}
-      .local-input-container .local-line {height:100%;}
-      .coordinate-input, .local-input, .assumptions-input {flex:1; border:none; outline:none; font-size:14px; text-align:center; background-color:transparent;}
-      .coordinate-letter, .assumptions-separator, .assumptions-label {font-weight:bold; font-size:14px; color:#333;}
-      .assumptions-separator {font-size:16px;}
-      /* ============================================================
-      SECÇÃO VEJO (incêndio, intensidade, vegetação, propagação, declive)
-      ============================================================ */
-      .accident-container {top:0; left:54px; width:150px; height:98px; background-color:var(--color-red); color:var(--color-white);}
-      [class*="checkbox-accident"] {background-color:var(--color-gray-medium);}
-      .checkbox-accident-1 {top:0; left:208px;}
-      .checkbox-accident-2 {top:34px; left:208px;}
-      .checkbox-accident-3 {top:68px; left:208px;}
-      .victims-container {top:102px; left:54px; width:150px; height:64px; background-color:var(--color-gray-dark); color:var(--color-white);}
-      [class*="checkbox-victims"] {background-color:var(--color-gray-dark);}
-      .checkbox-victims-1 {top:102px; left:208px;}
-      .checkbox-victims-2 {top:102px; left:481px;}
-      .checkbox-victims-3 {top:136px; left:208px;}
-      .checkbox-victims-4 {top:136px; left:481px;}
-      .trapped-container {top:170px; left:54px; width:150px; height:98px; background-color:#c00000; color:var(--color-white);}
-      [class*="checkbox-trapped"] {background-color:#c00000;}
-      .checkbox-trapped-1 {top:170px; left:208px;}
-      .checkbox-trapped-2 {top:204px; left:208px;}
-      .checkbox-trapped-3 {top:238px; left:208px;}
-      [class*="checkbox-vehicle"] {background-color:#375623;}
-      .checkbox-vehicle-1 {top:170px; left:481px;}
-      .checkbox-vehicle-2 {top:204px; left:481px;}
-      .checkbox-vehicle-3 {top:238px; left:481px;}
-      .road-container {top:272px; left:54px; width:150px; height:64px; background-color:#833c0c; color:var(--color-white);}
-      [class*="checkbox-road"] {background-color:#833c0c;}
-      .checkbox-road-1 {top:272px; left:208px;}
-      .checkbox-road-2 {top:272px; left:481px;}
-      .checkbox-road-3 {top:306px; left:208px;}
-      .checkbox-road-4 {top:306px; left:481px;}
-      .cargo-container {top:340px; left:54px; width:150px; height:64px; background-color:#70ad47; color:var(--color-white);}
-      [class*="checkbox-cargo"] {background-color:#70ad47;}
-      .checkbox-cargo-1 {top:340px; left:208px;}
-      .checkbox-cargo-2 {top:374px; left:208px;}
-      .cargo-field {position:absolute; left:481px; width:269px; height:30px; border:var(--border-default); font-size:14px; text-align:center;}
-      .cargo-field-1 {top:340px;}
-      .cargo-field-2 {top:374px;}
-      .meteo-container {top:408px; left:54px; width:292px; height:64px; background-color:var(--color-light-blue);}
-      .meteo-wind-container, .meteo-temperature-container {position:absolute; left:350px;}
-      .meteo-wind-container {top:408px;}
-      .meteo-temperature-container {top:442px;}
-      .meteo-wind-textbox, .meteo-temperature-textbox {display:flex; align-items:center; background-color:var(--color-light-blue); border:var(--border-default); padding:5px 10px; height:30px; width:400px; gap:10px;}
-      .meteo-wind-text-input, .meteo-temperature-text-input {height:30px; width:105px; border:var(--border-default); background-color:var(--color-light-blue); margin-left:-11px; font-size:14px; color:#000 !important; text-align:left; cursor:default; font-weight:bold; flex-shrink:0;}
-      .meteo-wind-text-input:focus, .meteo-temperature-text-input:focus {outline:none;}
-      .meteo-wind-text-input::placeholder, .meteo-temperature-text-input::placeholder {color:#000 !important; opacity:1;}
-      .meteo-fixed-text {font-weight:bold; color:#000; white-space:nowrap; flex-shrink:0;}
-      .meteo-editable-input {border:none; outline:none; background:transparent; text-align:center; font-weight:bold; width:96px; flex-shrink:0; color:#000;}
-      .meteo-editable-input:focus {background-color:#f0f0f0;}
-      .meteo-editable-input::placeholder {color:#666;}
-      /* ============================================================
-      SECÇÃO FAÇO
-      ============================================================ */
-      .idonow-container {top:0; left:54px; width:150px; height:64px; background-color:var(--color-dark-blue); color:var(--color-white);}
-      [class*="checkbox-idonow"] {background-color:var(--color-dark-blue);}
-      .checkbox-idonow-1 {top:0; left:208px;}
-      .checkbox-idonow-2 {top:0; left:481px;}
-      .checkbox-idonow-3 {top:34px; left:208px;}
-      .checkbox-idonow-4 {top:34px; left:481px;}
-      /* ============================================================
-      SECÇÃO PEÇO + PONTO DE TRÂNSITO
-      ============================================================ */
-      .irequestnow-container {top:0; left:54px; width:150px; height:188px; background-color:var(--sand);}
-      [class*="checkbox-irequest"] {background-color:var(--sand);}
-      .checkbox-irequest-1 {top:0; left:208px;}
-      .checkbox-irequest-2 {top:0; left:481px;}
-      .checkbox-irequest-3 {top:34px; left:208px;}
-      .checkbox-irequest-4 {top:34px; left:481px;}
-      .transit-box {position:absolute; top:68px; left:208px; width:542px; background-color:var(--field-bg); border:var(--border-default); box-shadow:var(--shadow-default);}
-      .transit-title {height:30px; display:flex; align-items:center; justify-content:center; background-color:var(--sand); border-bottom:var(--border-default); font-weight:bold; font-size:14px; color:#000;}
-      .transit-body {display:flex; height:90px;}
-      .transit-icon {width:160px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-right:1px solid #aaa;}
-      .transit-icon svg {width:140px; height:46px;}
-      .transit-textarea {flex:1; border:none; outline:none; resize:none; padding:6px 8px; font-family:Arial, sans-serif; font-size:14px; color:var(--field-txt); background-color:transparent;}
-      .transit-textarea:focus {background-color:var(--focus-bg);}
-      /* ============================================================
-      ASSUMO COS / PROSSIGO RECONHECIMENTO
-      ============================================================ */
-      .assumptions-container, .recognition-container {top:2px; left:0; height:30px; background-color:yellow; font-size:15px;}
-      .assumptions-container {width:205px;}
-      .recognition-container {width:750px;}
-      .assumptions-input-container {position:absolute; display:flex; align-items:center; height:30px; padding:5px; z-index:10; background-color:var(--field-bg); border:var(--border-default); box-shadow:var(--shadow-default); top:2px; left:209px; width:541px;}
-      .assumptions-line {display:flex; align-items:center; width:100%; gap:10px;}
-      /* ============================================================
-      SECÇÃO SITAC (caixas)
-      ============================================================ */
-      .sitacseparator-container {position:absolute; height:30px; display:flex; align-items:center; justify-content:center; padding:5px; width:752px;}
-      .sitacseparator-text {font-weight:bold; font-size:15px; color:var(--sep); text-align:center;}
-      .posit-box, .vehiclesnoto-box {width:750px; border:1px solid var(--panel-border); background-color:var(--panel-bg); font-family:sans-serif;}
-      .posit-box-title, .vehiclesnoto-box-title {background-color:var(--navy); padding:8px; font-weight:bold; font-size:14px; text-align:center; color:#fff;}
-      .posit-table {width:100%; border-collapse:collapse; font-family:sans-serif; table-layout:fixed;}
-      .posit-table td {padding:3px; vertical-align:middle; border-bottom:1px solid var(--line);}
-      .posit-table tr:last-child td {border-bottom:none;}
-      .posit-label {font-weight:bold; font-size:13px; color:var(--label); width:80px; text-align:left;}
-      .posit-hora-cell {width:90px; text-align:left; display:flex; align-items:center; gap:5px; padding-right:5px;}
-      .posit-hora-label {font-size:12px; font-weight:bold; color:var(--muted); white-space:nowrap;}
-      .posit-desc-cell {width:550px; padding-left:5px;}
-      .posit-hora-input, .posit-desc-input, .vehiclesnoto-input, .vehiclesnoto-time-input {padding:3px; border:1px solid #ccc; border-radius:3px;}
-      .posit-hora-input {width:90px; font-size:12px;}
-      .posit-desc-input {width:100%;}
-      .vehiclesnoto-table {width:100%; border-collapse:collapse; font-family:sans-serif; table-layout:fixed;}
-      .vehiclesnoto-header {background-color:var(--th-bg); padding:8px 5px; font-weight:bold; font-size:12px; color:var(--navy); text-align:center; border:1px solid #ccc;}
-      .vehiclesnoto-header:nth-child(1), .vehiclesnoto-header:nth-child(3) {width:15%;}
-      .vehiclesnoto-header:nth-child(2) {width:25%;}
-      .vehiclesnoto-header:nth-child(4) {width:45%;}
-      .vehiclesnoto-cell {padding:3px; vertical-align:middle; border:1px solid var(--line);}
-      .vehiclesnoto-input, .vehiclesnoto-time-input {width:100%; font-size:12px;}
-      .vehiclesnoto-time-input {text-align:center;}
-      /* ============================================================
-      PASSAGEM COS
-      ============================================================ */
-      .passagecos-wrapper {width:750px; min-height:50px; border:1px solid #aaa; background-color:#a3a3a3; font-family:sans-serif; padding:10px;}
-      .passagecos-container {display:flex; align-items:center; width:100%;}
-      .passagecos-text {font-size:14px; font-weight:bold; white-space:nowrap; margin-right:5px;}
-      .passagecos-input-container {display:flex; align-items:center; flex:1;}
-      .passagecos-line {display:flex; align-items:center; gap:3px; width:100%;}
-      .passagecos-hora-input, .passagecos-input {padding:5px; border:1px solid #ccc; border-radius:3px; font-size:14px;}
-      .passagecos-hora-input {width:90px; text-align:center;}
-      .passagecos-input {flex:1;}
-      .passagecos-hora-input:focus, .passagecos-input:focus {outline:none; border-color:var(--navy); box-shadow:0 0 3px rgba(0,51,102,0.3);}
-      /* ============================================================
-      BOTÕES DO SISTEMA (--b/--bd = normal, --bh/--bdh = hover)
-      ============================================================ */
-      .menagebuttons-container {padding:5px; display:flex; gap:4px; align-items:center; flex-wrap:wrap; justify-content:center;}
-      .recharge-btn, .save-btn, .close-btn {height:30px !important; width:90px !important; font-size:13px !important; font-weight:bold !important; background:var(--b) !important; color:var(--t, #fff) !important; border:2px solid var(--bd) !important;}
-      .recharge-btn:hover, .save-btn:hover, .close-btn:hover {background:var(--bh) !important; border-color:var(--bdh) !important; transform:translateY(-2px) !important;}
-      .recharge-btn.active, .save-btn.active, .close-btn.active {background:#bd2130 !important; border-color:#bd2130 !important; box-shadow:inset 0 2px 4px rgba(0,0,0,0.2) !important;}
-      .recharge-btn {--b:#dc3545; --bd:#dc3545; --bh:#c82333; --bdh:#c82333;}
-      .save-btn {--b:#0066cc; --bd:#004080; --bh:#0052a3; --bdh:#004080;}
-      .close-btn {--b:#ffcc00; --bd:#cc9900; --bh:#e6b800; --bdh:#cc9900; --t:#000;}
-      /* RESPONSIVE */
-      @media (min-width:1201px) {.main-wrapper {width:750px; left:50%; margin-left:-375px;}}
-      @media (max-width:1200px) {
-        :root {--s:0.9; --p:10px;}
-        body {display:flex; justify-content:center; overflow-x:auto; padding:var(--p);}
-        .main-wrapper {width:calc(100% / var(--s));}
-        .main-wrapper * {font-size:inherit;}
-      }
-      @media (max-width:1080px) {:root {--s:0.78; --p:10px;}}
-      @media (max-width:900px) {:root {--s:0.68; --p:8px;}}
-      @media (max-width:768px) {:root {--s:0.58; --p:5px;} :root:not(.dark-mode) {--page-bg:#f0f0f0;}
-      .checkbox-base input[type="checkbox"] {min-width:30px !important; min-height:30px !important;}}
-      @media (max-width:600px) {:root {--s:0.53;}}
-      @media (max-width:480px) {:root {--s:0.48; --p:3px;} .header-title {font-size:16px;}}
-      @media (max-width:360px) {:root {--s:0.43; --p:2px;}}
-      @media (max-width:1080px) and (orientation:landscape) {:root {--s:0.68; --p:5px;}}
-      @media (max-width:768px) and (orientation:landscape) {:root {--s:0.53;}}
-      @media (max-width:480px) and (min-width:361px) {.input-occurrence {width:183px;}}
-      @media (-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {.main-wrapper {-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}}
-    </style>
-  </head>
-  <body>
-    <header class="header">
-      <img id="corpLogo" class="header-logo" alt="" style="display:none;"
-         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
-         onload="this.style.display='block';">
-      <div class="header-center">
-        <span class="header-title">APOIO À DECISÃO</span>
-        <span class="header-sub">Guias de Comando</span>
+        if (localStorage.getItem('sgo-theme') === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+        }
+      } catch (e) {}
+    })();
+  <\/script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+  <title>Guia de Comando Acidentes</title>
+  <style>
+    /* ============================================================
+    VARIABLES
+    ============================================================ */
+    :root {--red:#c62828; --red-dark:#8b0000; --header-h:60px; --footer-h:50px; --color-secondary:#2c5aa0; --color-orange:#ff8c00; --color-red:#ff0000; --color-gray-medium:#c2c2c2; --color-gray-dark:#8a8a8a; --color-light-blue:#7faefa; --color-dark-blue:#062f73; --color-black:#000; --color-white:#fff; --sand:#e0d099; --navy:#003366; --shadow-default:0 4px 6px rgba(0,0,0,0.1); --border-default:1px solid #000;
+           --page-bg:#f5f5f5; --panel-bg:#f4f4f4; --panel-border:#aaa; --line:#ddd; --th-bg:#e6e6e6; --field-bg:#fff; --field-txt:#000; --label:#003366; --muted:#666; --sep:#000; --focus-bg:#f0f0f0; --focus-border:#8b0000; --focus-ring:rgba(139,0,0,0.35); --s:1; --p:20px;}
+    /* ============================================================
+    DARK MODE
+    ============================================================ */
+    .dark-mode {--page-bg:#141312; --panel-bg:#1f1e1c; --panel-border:rgba(255,255,255,0.15); --line:rgba(255,255,255,0.12); --th-bg:#d9d9d9; --field-bg:#d9d9d9; --field-txt:#1c1b1a; --label:#8fb4e8; --muted:#a09890; --sep:#f0ede8; --focus-bg:#cbcbcb; --focus-border:#c62828; --focus-ring:rgba(198,40,40,0.5);}
+    /* ============================================================
+    RESET & BASE
+    ============================================================ */
+    * {margin:0; padding:0; box-sizing:border-box;}
+    body {font-family:Arial, sans-serif; background-color:var(--page-bg); padding:20px;}
+    /* ============================================================
+    HEADER & FOOTER (padrão CB360)
+    ============================================================ */
+    .header, .footer {position:fixed; left:0; right:0; background:linear-gradient(to right, var(--red-dark), var(--red)); display:flex; align-items:center; justify-content:center; z-index:1000;}
+    .header {top:0; height:var(--header-h); box-shadow:0 2px 8px rgba(0,0,0,0.20);}
+    .header-logo {position:absolute; left:14px; height:50px; border-radius:6px;}
+    .header-center {display:flex; flex-direction:column; align-items:center; gap:1px;}
+    .header-title {font-size:19px; font-weight:700; letter-spacing:1.5px; color:#fff;}
+    .header-sub {font-size:10px; font-weight:500; letter-spacing:1.5px; color:rgba(255,255,255,0.75); text-transform:uppercase;}
+    .footer {bottom:0; height:var(--footer-h); box-shadow:0 -2px 8px rgba(0,0,0,0.18);}
+    .footer-content {text-align:center;}
+    .powered-by {font-size:11px; font-weight:500; color:rgba(255,255,255,0.85);}
+    .footer-year {font-size:9px; color:rgba(255,255,255,0.45); margin-top:1px;}
+    /* ============================================================
+    CAMPOS (fundo/texto por tema + focus suave)
+    ============================================================ */
+  .input-field, .iam-field, .wide-text-input, .cargo-field, .posit-hora-input, .posit-desc-input, .vehiclesnoto-input, .vehiclesnoto-time-input, .passagecos-hora-input, .passagecos-input {background-color:var(--field-bg); color:var(--field-txt);}
+    .input-field, .iam-field, .wide-text-input, .cargo-field, .posit-hora-input, .posit-desc-input, .vehiclesnoto-input, .vehiclesnoto-time-input {transition:background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;}
+    .input-field:focus, .iam-field:focus, .wide-text-input:focus, .cargo-field:focus, .posit-hora-input:focus, .posit-desc-input:focus, .vehiclesnoto-input:focus, .vehiclesnoto-time-input:focus {outline:none; background-color:var(--focus-bg); border-color:var(--focus-border); box-shadow:0 0 0 1px var(--focus-ring);}
+    .coordinate-input:focus, .local-input:focus, .assumptions-input:focus {background-color:var(--focus-bg);}
+    /* ============================================================
+    CHECKBOXES
+    ============================================================ */
+    .checkbox-base {position:absolute; border:var(--border-default); padding:10px 15px; width:269px; height:30px; display:flex; align-items:center;}
+    .checkbox-base input[type="checkbox"] {width:30px !important; height:30px !important; position:relative !important; left:-16px !important; cursor:pointer; -webkit-appearance:none; -moz-appearance:none; appearance:none; border:var(--border-default); background-color:var(--field-bg);}
+    .checkbox-base input[type="checkbox"]:checked::after {content:"✗"; position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); font-size:18px; font-weight:bold; color:var(--color-black);}
+    .checkbox-base input[type="checkbox"]:hover {border-color:#007bff;}
+    .checkbox-base label {font-size:15px !important; font-weight:bold !important; position:relative; flex:1; text-align:center; cursor:pointer; user-select:none; color:var(--color-white) !important;}
+    .checkbox-wide {width:542px;}
+    .checkbox-wide label {flex:0 0 170px;}
+    .checkbox-short label {flex:0 0 100px;}
+    [class*="checkbox-accident"] label, [class*="checkbox-irequest"] label {color:var(--color-black) !important;}
+    .wide-text-input {flex:1; min-width:0; height:30px; border:var(--border-default); font-size:14px; text-align:center; transform:translateX(16px);}
+    /* ============================================================
+    WRAPPERS
+    ============================================================ */
+    .main-wrapper {position:absolute; top:calc(var(--header-h) + 8px); max-width:750px; width:100%; margin:0 auto; transform:scale(var(--s)); transform-origin:top center;}
+    .controls-wrapper, .iam-wrapper, .isee-wrapper, .ido-wrapper, .irequest-wrapper, .assumptions-wrapper, .recognition-wrapper, .sitacseparator-wrapper, .sitac-wrapper, .posit-wrapper, .vehiclesnoto-wrapper, .passagecos-wrapper, .menagebuttons-wrapper {position:relative; margin-top:4px;}
+    .header-wrapper {position:relative;}
+    .iam-wrapper {min-height:132px;}
+    .isee-wrapper {min-height:472px;}
+    .ido-wrapper {min-height:64px;}
+    .irequest-wrapper {min-height:188px;}
+    .assumptions-wrapper, .recognition-wrapper, .sitacseparator-wrapper {min-height:30px;}
+    .recognition-wrapper {margin-bottom:10px;}
+    .sitac-wrapper {display:flex; gap:10px;}
+    .posit-wrapper {min-height:200px;}
+    .vehiclesnoto-wrapper {min-height:350px;}
+    .menagebuttons-wrapper {min-height:150px;}
+    /* ============================================================
+    BLOCOS COLORIDOS
+    ============================================================ */
+    .em-container, .accident-container, .victims-container, .trapped-container, .road-container, .cargo-container, .meteo-container, .idonow-container, .irequestnow-container, .assumptions-container, .recognition-container {position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; border:var(--border-default); box-shadow:var(--shadow-default); text-align:center; font-weight:bold; font-size:14px; color:#000;}
+    .cargo-container, .meteo-container, .irequestnow-container {line-height:1.2;}
+    /* ============================================================
+    CABEÇALHOS GUIA DE COMANDO
+    ============================================================ */
+    .header-container {display:flex; flex-direction:column; justify-content:center; background-color:#ffc000; padding:20px 60px; text-align:center; box-shadow:var(--shadow-default); height:90px;}
+    .header-sgo-logo {position:absolute; margin-top:-10px; left:10px; top:45%; transform:translateY(-50%); height:80px; width:auto; border-radius:8px; transition:all 0.3s ease; z-index:1001;}
+    .header-sgo-logo:hover {transform:translateY(-50%) scale(1.1);}
+    .header-container-blue {display:flex; flex-direction:column; justify-content:center; margin-top:4px; background-color:var(--color-secondary); padding:15px 60px; text-align:center; box-shadow:0 0 6px rgba(0,0,0,0.1); height:20px;}
+    .header-container .title {color:var(--color-black) !important; margin-bottom:5px !important; font-size:22px !important; font-weight:bold !important;}
+    .header-container .title:nth-child(3) {font-size:15px !important; font-weight:normal !important;}
+    .header-container .title:last-child {font-size:20px !important; margin-bottom:0 !important;}
+    .title-blue {color:var(--color-white); font-size:18px; font-weight:normal; margin:0;}
+    /* ============================================================
+    HR POSIT, OCORRÊNCIA E CANAL
+    ============================================================ */
+    .inputs-wrapper {margin-top:4px; display:flex; gap:10px;}
+    .container-hr-posit, .container-ocorr-num, .container-channel {flex:1; display:flex; align-items:center; gap:5px;}
+    .label-hr-posit, .label-ocorr-num, .label-channel {background-color:var(--color-orange); font-weight:bold; border:var(--border-default); white-space:nowrap;}
+    .label-hr-posit {padding:8px 18px;}
+    .label-ocorr-num {margin-left:-5px; padding:8px 45px;}
+    .label-channel {margin-left:-5px; padding:8px 20px;}
+    .input-field {padding:8px; border:var(--border-default); font-size:16px; text-align:center;}
+    .input-hour {margin-left:-6px; width:70px;}
+    .input-occurrence {margin-left:-6px; width:180px;}
+    .input-channel {margin-left:-6px; width:60px;}
+    /* ============================================================
+    ETIQUETAS VERTICAIS (ESTOU / VEJO / FAÇO / PEÇO)
+    ============================================================ */
+    .iam-container, .isee-container, .ido-container, .irequest-container {position:absolute; top:0; left:0; width:50px; display:flex; align-items:center; padding-left:15px; border:var(--border-default); box-shadow:var(--shadow-default);}
+    .iam-container {height:132px; background-color:var(--color-orange);}
+    .isee-container {height:472px; background-color:var(--color-red);}
+    .ido-container {height:64px; background-color:var(--color-dark-blue);}
+    .irequest-container {height:189px; background-color:var(--sand);}
+    .iam-text, .isee-text, .ido-text, .irequest-text {font-weight:bold; font-size:16px; writing-mode:vertical-lr; text-orientation:mixed; transform:rotate(180deg);}
+    .isee-text, .ido-text, .irequest-text {letter-spacing:2px;}
+    .isee-text, .ido-text {color:var(--color-white);}
+    /* ============================================================
+    SECÇÃO ESTOU (localização, coordenadas, freguesia/município)
+    ============================================================ */
+    .em-container, .iam-label {background-color:var(--color-orange);}
+    .em-container {top:0; left:54px; width:150px; height:64px;}
+    .iam-label {position:absolute; display:flex; align-items:center; justify-content:center; height:30px; font-weight:bold; font-size:14px; border:var(--border-default); box-shadow:var(--shadow-default);}
+    .iam-field {position:absolute; height:30px; padding:5px 8px; border:var(--border-default); font-size:14px; text-align:center; box-shadow:var(--shadow-default);}
+    .via-label {top:0; left:208px; width:100px;}
+    .via-field {top:0; left:312px; width:438px;}
+    .km-label {top:34px; left:208px; width:100px;}
+    .km-field {top:34px; left:312px; width:58px;}
+    .sentido-label {top:34px; left:374px; width:146px;}
+    .sentido-field {top:34px; left:524px; width:226px;}
+    .coordinates-container, .local-container {position:absolute; top:68px; height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; background-color:var(--color-orange); border:var(--border-default); box-shadow:var(--shadow-default);}
+    .coordinates-container {left:54px; width:150px;}
+    .local-container {left:474px; width:100px;}
+    .coordinates-text, .local-text {font-weight:bold; font-size:14px; text-align:center; margin:2px 0;}
+    .coordinates-input-container, .local-input-container {position:absolute; top:68px; height:64px; display:flex; flex-direction:column; padding:5px; z-index:10; background-color:var(--field-bg); border:var(--border-default); box-shadow:var(--shadow-default);}
+    .coordinates-input-container {left:208px; width:262px;}
+    .local-input-container {left:578px; width:172px;}
+    .coordinate-line, .local-line {display:flex; align-items:center; height:50%; gap:5px;}
+    .local-input-container .local-line {height:100%;}
+    .coordinate-input, .local-input, .assumptions-input {flex:1; border:none; outline:none; font-size:14px; text-align:center; background-color:transparent;}
+    .local-input {width:150px;}
+    .coordinate-letter, .assumptions-separator, .assumptions-label {font-weight:bold; font-size:14px; color:#333;}
+    .assumptions-separator {font-size:16px;}
+    /* ============================================================
+    SECÇÃO VEJO (incêndio, intensidade, vegetação, propagação, declive)
+    ============================================================ */
+    .accident-container {top:0; left:54px; width:150px; height:98px; background-color:var(--color-red); color:var(--color-white);}
+    [class*="checkbox-accident"] {background-color:var(--color-gray-medium);}
+    .checkbox-accident-1 {top:0; left:208px;}
+    .checkbox-accident-2 {top:34px; left:208px;}
+    .checkbox-accident-3 {top:68px; left:208px;}
+    .victims-container {top:102px; left:54px; width:150px; height:64px; background-color:var(--color-gray-dark); color:var(--color-white);}
+    [class*="checkbox-victims"] {background-color:var(--color-gray-dark);}
+    .checkbox-victims-1 {top:102px; left:208px;}
+    .checkbox-victims-2 {top:102px; left:481px;}
+    .checkbox-victims-3 {top:136px; left:208px;}
+    .checkbox-victims-4 {top:136px; left:481px;}
+    .trapped-container {top:170px; left:54px; width:150px; height:98px; background-color:#c00000; color:var(--color-white);}
+    [class*="checkbox-trapped"] {background-color:#c00000;}
+    .checkbox-trapped-1 {top:170px; left:208px;}
+    .checkbox-trapped-2 {top:204px; left:208px;}
+    .checkbox-trapped-3 {top:238px; left:208px;}
+    [class*="checkbox-vehicle"] {background-color:#375623;}
+    .checkbox-vehicle-1 {top:170px; left:481px;}
+    .checkbox-vehicle-2 {top:204px; left:481px;}
+    .checkbox-vehicle-3 {top:238px; left:481px;}
+    .road-container {top:272px; left:54px; width:150px; height:64px; background-color:#833c0c; color:var(--color-white);}
+    [class*="checkbox-road"] {background-color:#833c0c;}
+    .checkbox-road-1 {top:272px; left:208px;}
+    .checkbox-road-2 {top:272px; left:481px;}
+    .checkbox-road-3 {top:306px; left:208px;}
+    .checkbox-road-4 {top:306px; left:481px;}
+    .cargo-container {top:340px; left:54px; width:150px; height:64px; background-color:#70ad47; color:var(--color-white);}
+    [class*="checkbox-cargo"] {background-color:#70ad47;}
+    .checkbox-cargo-1 {top:340px; left:208px;}
+    .checkbox-cargo-2 {top:374px; left:208px;}
+    .cargo-field {position:absolute; left:481px; width:269px; height:30px; border:var(--border-default); font-size:14px; text-align:center;}
+    .cargo-field-1 {top:340px;}
+    .cargo-field-2 {top:374px;}
+    .meteo-container {top:408px; left:54px; width:292px; height:64px; background-color:var(--color-light-blue);}
+    .meteo-wind-container, .meteo-temperature-container {position:absolute; left:350px;}
+    .meteo-wind-container {top:408px;}
+    .meteo-temperature-container {top:442px;}
+    .meteo-wind-textbox, .meteo-temperature-textbox {display:flex; align-items:center; background-color:var(--color-light-blue); border:var(--border-default); padding:5px 10px; height:30px; width:400px; gap:10px;}
+    .meteo-wind-text-input, .meteo-temperature-text-input {height:30px; width:105px; border:var(--border-default); background-color:var(--color-light-blue); margin-left:-11px; font-size:14px; color:#000 !important; text-align:left; cursor:default; font-weight:bold; flex-shrink:0;}
+    .meteo-wind-text-input:focus, .meteo-temperature-text-input:focus {outline:none;}
+    .meteo-wind-text-input::placeholder, .meteo-temperature-text-input::placeholder {color:#000 !important; opacity:1;}
+    .meteo-fixed-text {font-weight:bold; color:#000; white-space:nowrap; flex-shrink:0;}
+    .meteo-editable-input {border:none; outline:none; background:transparent; text-align:center; font-weight:bold; width:96px; flex-shrink:0; color:#000;}
+    .meteo-editable-input:focus {background-color:#f0f0f0;}
+    .meteo-editable-input::placeholder {color:#666;}
+    /* ============================================================
+    SECÇÃO FAÇO
+    ============================================================ */
+    .idonow-container {top:0; left:54px; width:150px; height:64px; background-color:var(--color-dark-blue); color:var(--color-white);}
+    [class*="checkbox-idonow"] {background-color:var(--color-dark-blue);}
+    .checkbox-idonow-1 {top:0; left:208px;}
+    .checkbox-idonow-2 {top:0; left:481px;}
+    .checkbox-idonow-3 {top:34px; left:208px;}
+    .checkbox-idonow-4 {top:34px; left:481px;}
+    /* ============================================================
+    SECÇÃO PEÇO + PONTO DE TRÂNSITO
+    ============================================================ */
+    .irequestnow-container {top:0; left:54px; width:150px; height:189px; background-color:var(--sand);}
+    [class*="checkbox-irequest"] {background-color:var(--sand);}
+    .checkbox-irequest-1 {top:0; left:208px;}
+    .checkbox-irequest-2 {top:0; left:481px;}
+    .checkbox-irequest-3 {top:34px; left:208px;}
+    .checkbox-irequest-4 {top:34px; left:481px;}
+    .transit-box {position:absolute; top:68px; left:208px; width:542px; background-color:var(--field-bg); border:var(--border-default); box-shadow:var(--shadow-default);}
+    .transit-title {height:30px; display:flex; align-items:center; justify-content:center; background-color:var(--sand); border-bottom:var(--border-default); font-weight:bold; font-size:14px; color:#000;}
+    .transit-body {display:flex; height:90px;}
+    .transit-icon {width:160px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-right:1px solid #aaa;}
+    .transit-icon svg {width:140px; height:46px;}
+    .transit-textarea {flex:1; border:none; outline:none; resize:none; padding:6px 8px; font-family:Arial, sans-serif; font-size:14px; color:var(--field-txt); background-color:transparent;}
+    .transit-textarea:focus {background-color:var(--focus-bg);}
+    /* ============================================================
+    ASSUMO COS / PROSSIGO RECONHECIMENTO
+    ============================================================ */
+    .assumptions-container, .recognition-container {top:2px; left:0; height:30px; background-color:yellow; font-size:15px;}
+    .assumptions-container {width:205px;}
+    .recognition-container {width:750px;}
+    .assumptions-input-container {position:absolute; display:flex; align-items:center; height:30px; padding:5px; z-index:10; background-color:var(--field-bg); border:var(--border-default); box-shadow:var(--shadow-default); top:2px; left:209px; width:541px;}
+    .assumptions-line {display:flex; align-items:center; width:100%; gap:10px;}
+    .sitacseparator-container {position:absolute; height:30px; display:flex; align-items:center; justify-content:center; padding:5px; width:752px;}
+    .sitacseparator-text {font-weight:bold; font-size:15px; color:var(--sep); text-align:center;}
+    /* ============================================================
+    SECÇÃO SITAC (caixas)
+    ============================================================ */
+    .sitacseparator-container {position:absolute; height:30px; display:flex; align-items:center; justify-content:center; padding:5px; width:752px;}
+    .sitacseparator-text {font-weight:bold; font-size:15px; color:var(--sep); text-align:center;}
+    .sitac-box, .posit-box, .vehiclesnoto-box {border:1px solid var(--panel-border); background-color:var(--panel-bg); font-family:sans-serif;}
+    .sitac-box {width:300px;}
+    .sitac-box-title, .sitac-drawtitle, .posit-box-title, .vehiclesnoto-box-title {background-color:var(--navy); padding:8px; font-weight:bold; font-size:14px; text-align:center; color:#fff;}
+    .sitac-inputs {padding:10px;}
+    .sitac-input {display:block; width:100%; margin-bottom:5px; padding:5px; font-family:sans-serif;}
+    .sitac-input:last-child {margin-bottom:0;}
+    textarea.sitac-input {resize:vertical; min-height:335px;}
+    .sitac-drawbox {position:relative; width:450px; border:1px solid #aaa; background-color:#fff; font-family:sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+    .sitac-drawtitle {position:relative; user-select:none; transition:all 0.3s ease;}
+    /* ============================================================
+    PONTOS DE SITUAÇÃO
+    ============================================================ */
+    .posit-box, .vehiclesnoto-box {width:750px; border:1px solid var(--panel-border); background-color:var(--panel-bg); font-family:sans-serif;}
+    .posit-box-title, .vehiclesnoto-box-title {background-color:var(--navy); padding:8px; font-weight:bold; font-size:14px; text-align:center; color:#fff;}
+    .posit-table {width:100%; border-collapse:collapse; font-family:sans-serif; table-layout:fixed;}
+    .posit-table td {padding:3px; vertical-align:middle; border-bottom:1px solid var(--line);}
+    .posit-table tr:last-child td {border-bottom:none;}
+    .posit-label {font-weight:bold; font-size:13px; color:var(--label); width:80px; text-align:left;}
+    .posit-hora-cell {width:90px; text-align:left; display:flex; align-items:center; gap:5px; padding-right:5px;}
+    .posit-hora-label {font-size:12px; font-weight:bold; color:var(--muted); white-space:nowrap;}
+    .posit-desc-cell {width:550px; padding-left:5px;}
+    .posit-hora-input, .posit-desc-input, .vehiclesnoto-input, .vehiclesnoto-time-input {padding:3px; border:1px solid #ccc; border-radius:3px;}
+    .posit-hora-input {width:90px; font-size:12px;}
+    .posit-desc-input {width:100%;}
+    /* ============================================================
+    MEIOS
+    ============================================================ */
+    .vehiclesnoto-table {width:100%; border-collapse:collapse; font-family:sans-serif; table-layout:fixed;}
+    .vehiclesnoto-header {background-color:var(--th-bg); padding:8px 5px; font-weight:bold; font-size:12px; color:var(--navy); text-align:center; border:1px solid #ccc;}
+    .vehiclesnoto-header:nth-child(1), .vehiclesnoto-header:nth-child(3) {width:15%;}
+    .vehiclesnoto-header:nth-child(2) {width:25%;}
+    .vehiclesnoto-header:nth-child(4) {width:45%;}
+    .vehiclesnoto-cell {padding:3px; vertical-align:middle; border:1px solid var(--line);}
+    .vehiclesnoto-input, .vehiclesnoto-time-input {width:100%; font-size:12px;}
+    .vehiclesnoto-time-input {text-align:center;}
+    /* ============================================================
+    PASSAGEM COS
+    ============================================================ */
+    .passagecos-wrapper {width:750px; min-height:50px; border:1px solid #aaa; background-color:#a3a3a3; font-family:sans-serif; padding:10px;}
+    .passagecos-container {display:flex; align-items:center; width:100%;}
+    .passagecos-text {font-size:14px; font-weight:bold; white-space:nowrap; margin-right:5px;}
+    .passagecos-input-container {display:flex; align-items:center; flex:1;}
+    .passagecos-line {display:flex; align-items:center; gap:3px; width:100%;}
+    .passagecos-hora-input, .passagecos-input {padding:5px; border:1px solid #ccc; border-radius:3px; font-size:14px;}
+    .passagecos-hora-input {width:90px; text-align:center;}
+    .passagecos-input {flex:1;}
+    .passagecos-hora-input:focus, .passagecos-input:focus {outline:none; border-color:var(--navy); box-shadow:0 0 3px rgba(0,51,102,0.3);}
+    /* ============================================================
+    BOTÕES DO SISTEMA (--b/--bd = normal, --bh/--bdh = hover)
+    ============================================================ */
+    .menagebuttons-container {padding:5px; display:flex; gap:4px; align-items:center; flex-wrap:wrap; justify-content:center;}
+    .recharge-btn, .save-btn, .close-btn {height:30px !important; width:90px !important; font-size:13px !important; font-weight:bold !important; background:var(--b) !important; color:var(--t, #fff) !important; border:2px solid var(--bd) !important;}
+    .recharge-btn:hover, .save-btn:hover, .close-btn:hover {background:var(--bh) !important; border-color:var(--bdh) !important; transform:translateY(-2px) !important;}
+    .recharge-btn.active, .save-btn.active, .close-btn.active {background:#bd2130 !important; border-color:#bd2130 !important; box-shadow:inset 0 2px 4px rgba(0,0,0,0.2) !important;}
+    .recharge-btn {--b:#dc3545; --bd:#dc3545; --bh:#c82333; --bdh:#c82333;}
+    .save-btn {--b:#0066cc; --bd:#004080; --bh:#0052a3; --bdh:#004080;}
+    .close-btn {--b:#ffcc00; --bd:#cc9900; --bh:#e6b800; --bdh:#cc9900; --t:#000;}
+    /* ============================================================
+    RESPONSIVE
+    ============================================================ */
+    @media (min-width:1201px) {.main-wrapper {width:750px; left:50%; margin-left:-375px;}}
+    @media (max-width:1200px) {
+      :root {--s:0.9; --p:10px;}
+      body {display:flex; justify-content:center; overflow-x:auto; padding:var(--p);}
+      .main-wrapper {width:calc(100% / var(--s));}
+      .main-wrapper * {font-size:inherit;}
+    }
+    @media (max-width:1080px) {:root {--s:0.78; --p:10px;}}
+    @media (max-width:900px) {:root {--s:0.68; --p:8px;}}
+    @media (max-width:768px) {:root {--s:0.58; --p:5px;} :root:not(.dark-mode) {--page-bg:#f0f0f0;}
+    .checkbox-base input[type="checkbox"] {min-width:30px !important; min-height:30px !important;}}
+    @media (max-width:600px) {:root {--s:0.53;}}
+    @media (max-width:480px) {:root {--s:0.48; --p:3px;} 
+      .header-title {font-size:16px;}.input-occurrence {width:183px;}
+      #sitac-map {height:355px !important;}
+      .sitac-draws {min-height:300px !important;}}
+    @media (max-width:360px) {:root {--s:0.43; --p:2px;}}
+    @media (max-width:1080px) and (orientation:landscape) {:root {--s:0.68; --p:5px;}}
+    @media (max-width:768px) and (orientation:landscape) {:root {--s:0.53;}}
+    @media (max-width:480px) and (min-width:361px) {.input-occurrence {width:183px;}}
+    @media (-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {.main-wrapper {-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img id="corpLogo" class="header-logo" alt="" style="display:none;"
+      onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
+      onload="this.style.display='block';">
+    <div class="header-center">
+      <span class="header-title">APOIO À DECISÃO</span>
+      <span class="header-sub">Guias de Comando</span>
+    </div>
+  </header>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="powered-by">Powered by Fábio Martins · Sistemas de Informação · Grupo CB360</div>
+      <div class="footer-year">© 2023–<span id="footerYear"></span> · Sistema CB360 Mobile</div>
+    </div>
+  </footer>
+  <div class="main-wrapper">
+    <div class="header-wrapper">
+      <div class="header-container">
+        <img src="https://imgur.com/JZndZab.png" alt="CB Faro Cruz Lusa" class="header-sgo-logo">
+        <h1 class="title">Sistema de Gestão de Operações</h1>
+        <h2 class="title">Guia de Comando</h2>
+        <h2 class="title">Acidentes</h2>
       </div>
-    </header>
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="powered-by">Powered by Fábio Martins · Sistemas de Informação · Grupo CB360</div>
-        <div class="footer-year">© 2023–<span id="footerYear"></span> · Sistema CB360 Mobile</div>
+      <div class="header-container-blue">
+        <h1 class="title-blue">Ponto de Situação Inicial / Reconhecimento</h1>
       </div>
-    </footer>
-    <div class="main-wrapper">
-      <div class="header-wrapper">
-        <div class="header-container">
-          <img src="https://imgur.com/JZndZab.png" alt="CB Faro Cruz Lusa" class="header-sgo-logo">
-          <h1 class="title">Sistema de Gestão de Operações</h1>
-          <h2 class="title">Guia de Comando</h2>
-          <h2 class="title">Acidentes</h2>
+    </div>
+    <div class="controls-wrapper">
+      <div class="inputs-wrapper">
+        <div class="container-hr-posit">
+          <span class="label-hr-posit">Hr Posit:</span>
+          <input type="text" class="input-field input-hour" maxlength="5" placeholder="00:00" />
         </div>
-        <div class="header-container-blue">
-          <h1 class="title-blue">Ponto de Situação Inicial / Reconhecimento</h1>
+        <div class="container-ocorr-num">
+          <span class="label-ocorr-num">Ocorr. Nº:</span>
+          <input type="text" class="input-field input-occurrence" maxlength="12" placeholder="Indique o NOC" />
         </div>
-      </div>
-      <div class="controls-wrapper">
-        <div class="inputs-wrapper">
-          <div class="container-hr-posit">
-            <span class="label-hr-posit">Hr Posit:</span>
-            <input type="text" class="input-field input-hour" maxlength="5" placeholder="00:00" />
-          </div>
-          <div class="container-ocorr-num">
-            <span class="label-ocorr-num">Ocorr. Nº:</span>
-            <input type="text" class="input-field input-occurrence" maxlength="12" placeholder="Indique o NOC" />
-          </div>
-          <div class="container-channel">
-            <span class="label-channel">Canal Manobra:</span>
-            <input type="text" class="input-field input-channel" maxlength="2" placeholder="00" />
-          </div>
-        </div>
-      </div>
-      <div class="iam-wrapper">
-        <div class="iam-container"><span class="iam-text">ESTOU</span></div>
-        <div class="em-container">em:</div>
-        <div class="iam-label via-label">Via</div>
-        <input type="text" class="iam-field via-field" placeholder="Indique a via" />
-        <div class="iam-label km-label">Km</div>
-        <input type="text" class="iam-field km-field" placeholder="Km" />
-        <div class="iam-label sentido-label">Sentido</div>
-        <input type="text" class="iam-field sentido-field" placeholder="Indique o sentido" />
-        <div class="coordinates-container">
-          <span class="coordinates-text">Coord:</span>
-          <span class="coordinates-text">WGS84</span>
-        </div>
-        <div class="coordinates-input-container">
-          <div class="coordinate-line">
-            <input type="text" class="coordinate-input" placeholder="Latitude" />
-            <span class="coordinate-letter">N</span>
-          </div>
-          <div class="coordinate-line">
-            <input type="text" class="coordinate-input" placeholder="Longitude" />
-            <span class="coordinate-letter">W</span>
-          </div>
-        </div>
-        <div class="local-container"><span class="local-text">Localidade</span></div>
-        <div class="local-input-container">
-          <div class="local-line">
-            <input type="text" class="local-input" placeholder="Indique a localidade" />
-          </div>
-        </div>
-      </div>
-      <div class="isee-wrapper">
-        <div class="isee-container"><span class="isee-text">VEJO</span></div>
-        <div class="accident-container"><span>Acidente:</span></div>
-        <div class="checkbox-base checkbox-wide checkbox-accident-1">
-          <input type="checkbox" id="acc-collision" />
-          <label for="acc-collision">Colisão entre:</label>
-          <input type="text" class="wide-text-input" placeholder="Indique..." />
-        </div>
-        <div class="checkbox-base checkbox-wide checkbox-accident-2">
-          <input type="checkbox" id="acc-runoff" />
-          <label for="acc-runoff">Despiste de:</label>
-          <input type="text" class="wide-text-input" placeholder="Indique..." />
-        </div>
-        <div class="checkbox-base checkbox-wide checkbox-accident-3">
-          <input type="checkbox" id="acc-other" />
-          <label for="acc-other">Outro:</label>
-          <input type="text" class="wide-text-input" placeholder="Indique..." />
-        </div>
-        <div class="victims-container"><span>Vítimas:</span></div>
-        <div class="checkbox-base checkbox-victims-1"><input type="checkbox" id="acc-dead" /><label for="acc-dead">Mortos</label></div>
-        <div class="checkbox-base checkbox-victims-2"><input type="checkbox" id="acc-severe" /><label for="acc-severe">Graves</label></div>
-        <div class="checkbox-base checkbox-victims-3"><input type="checkbox" id="acc-light" /><label for="acc-light">Leves</label></div>
-        <div class="checkbox-base checkbox-victims-4"><input type="checkbox" id="acc-missing" /><label for="acc-missing">Desaparecidos</label></div>
-        <div class="trapped-container"><span>Encarcerados:</span></div>
-        <div class="checkbox-base checkbox-trapped-1"><input type="checkbox" id="acc-trapped-mech" /><label for="acc-trapped-mech">Mecânico</label></div>
-        <div class="checkbox-base checkbox-trapped-2"><input type="checkbox" id="acc-trapped-phys1" /><label for="acc-trapped-phys1">Físico Tipo I</label></div>
-        <div class="checkbox-base checkbox-trapped-3"><input type="checkbox" id="acc-trapped-phys2" /><label for="acc-trapped-phys2">Físico Tipo II</label></div>
-        <div class="checkbox-base checkbox-short checkbox-vehicle-1">
-          <input type="checkbox" id="acc-vehicle-1" /><label for="acc-vehicle-1">Veículo 01</label>
-          <input type="text" class="wide-text-input" />
-        </div>
-        <div class="checkbox-base checkbox-short checkbox-vehicle-2">
-          <input type="checkbox" id="acc-vehicle-2" /><label for="acc-vehicle-2">Veículo 02</label>
-          <input type="text" class="wide-text-input" />
-        </div>
-        <div class="checkbox-base checkbox-short checkbox-vehicle-3">
-          <input type="checkbox" id="acc-vehicle-3" /><label for="acc-vehicle-3">Veículo 03</label>
-          <input type="text" class="wide-text-input" />
-        </div>
-        <div class="road-container"><span>Via:</span></div>
-        <div class="checkbox-base checkbox-road-1"><input type="checkbox" id="acc-road-closed" /><label for="acc-road-closed">Interdita</label></div>
-        <div class="checkbox-base checkbox-road-2"><input type="checkbox" id="acc-road-limited" /><label for="acc-road-limited">Condicionada</label></div>
-        <div class="checkbox-base checkbox-short checkbox-road-3">
-          <input type="checkbox" id="acc-road-closed-dir" /><label for="acc-road-closed-dir">Sentido</label>
-          <input type="text" class="wide-text-input" />
-        </div>
-        <div class="checkbox-base checkbox-short checkbox-road-4">
-          <input type="checkbox" id="acc-road-limited-dir" /><label for="acc-road-limited-dir">Sentido</label>
-          <input type="text" class="wide-text-input" />
-        </div>
-        <div class="cargo-container"><span>Carga do</span><span>Veículo:</span></div>
-        <div class="checkbox-base checkbox-cargo-1"><input type="checkbox" id="acc-cargo-type" /><label for="acc-cargo-type">Tipo de Carga</label></div>
-        <input type="text" class="cargo-field cargo-field-1" />
-        <div class="checkbox-base checkbox-cargo-2"><input type="checkbox" id="acc-cargo-damage" /><label for="acc-cargo-damage">Afetação da Carga</label></div>
-        <input type="text" class="cargo-field cargo-field-2" />
-        <div class="meteo-container">
-          <span class="meteo-text">Condições</span>
-          <span class="meteo-text">Meteorológicas:</span>
-        </div>
-        <div class="meteo-wind-container">
-          <div class="meteo-wind-textbox">
-            <input type="text" class="meteo-wind-text-input" placeholder=" Vento:" readonly />
-            <input type="text" class="meteo-editable-input" placeholder="NORTE" />
-            <span class="meteo-fixed-text">a</span>
-            <input type="text" class="meteo-editable-input" placeholder="20" />
-            <span class="meteo-fixed-text">KM/H</span>
-          </div>
-        </div>
-        <div class="meteo-temperature-container">
-          <div class="meteo-temperature-textbox">
-            <input type="text" class="meteo-temperature-text-input" placeholder=" Ar:" readonly />
-            <input type="text" class="meteo-editable-input" placeholder="38" />
-            <span class="meteo-fixed-text">ºC</span>
-            <input type="text" class="meteo-editable-input" placeholder="58" />
-            <span class="meteo-fixed-text">%HR</span>
-          </div>
-        </div>
-      </div>
-      <div class="ido-wrapper">
-        <div class="ido-container"><span class="ido-text">FAÇO</span></div>
-        <div class="idonow-container"><span class="idonow-text">Faço:</span></div>
-        <div class="checkbox-base checkbox-idonow-1"><input type="checkbox" id="ido-workzones" /><label for="ido-workzones">Zonas de Trabalho</label></div>
-        <div class="checkbox-base checkbox-idonow-2"><input type="checkbox" id="ido-victim-approach" /><label for="ido-victim-approach">Abordagem à(s) Vítima(s)</label></div>
-        <div class="checkbox-base checkbox-idonow-3"><input type="checkbox" id="ido-stabilization" /><label for="ido-stabilization">Estabilização</label></div>
-        <div class="checkbox-base checkbox-idonow-4"><input type="checkbox" id="ido-space-creation" /><label for="ido-space-creation">Criação de Espaços</label></div>
-      </div>
-      <div class="irequest-wrapper">
-        <div class="irequest-container"><span class="irequest-text">SOLICITO</span></div>
-        <div class="irequestnow-container">
-          <span class="irequestnow-text">Solicito:</span>
-          <span class="irequestnow-text">(Quantificar)</span>
-        </div>
-        <div class="checkbox-base checkbox-irequest-1"><input type="checkbox" id="irequest-vmer" /><label for="irequest-vmer">VMER</label></div>
-        <div class="checkbox-base checkbox-irequest-2"><input type="checkbox" id="irequest-vsat" /><label for="irequest-vsat">VSAT/VSAE</label></div>
-        <div class="checkbox-base checkbox-irequest-3"><input type="checkbox" id="irequest-absc" /><label for="irequest-absc">ABSC</label></div>
-        <div class="checkbox-base checkbox-short checkbox-irequest-4">
-          <input type="checkbox" id="irequest-other" /><label for="irequest-other">Outros</label>
-          <input type="text" class="wide-text-input" />
-        </div>
-        <div class="transit-box">
-          <div class="transit-title">PONTO DE TRÂNSITO</div>
-          <div class="transit-body">
-            <div class="transit-icon">
-              <svg width="140" height="46" viewBox="0 0 140 46" xmlns="http://www.w3.org/2000/svg">
-                <line x1="0" y1="23" x2="50" y2="23" stroke="#c08e00" stroke-width="5"/>
-                <circle cx="70" cy="23" r="19" fill="#fff" stroke="#c08e00" stroke-width="4"/>
-                <line x1="89" y1="23" x2="118" y2="23" stroke="#c08e00" stroke-width="5"/>
-                <polygon points="116,10 140,23 116,36" fill="#c08e00"/>
-              </svg>
-            </div>
-            <textarea id="transit-text" class="transit-textarea" placeholder="Indique o ponto de trânsito..."></textarea>
-          </div>
-        </div>
-      </div>
-      <div class="assumptions-wrapper">
-        <div class="assumptions-container"><span class="assumptions-text">Assumo COS</span></div>
-        <div class="assumptions-input-container">
-          <div class="assumptions-line">
-            <input type="text" class="assumptions-input" placeholder="Indique a denominação do COS" />
-            <span class="assumptions-separator">|</span>
-            <span class="assumptions-label">Categoria e Nome</span>
-          </div>
-        </div>
-      </div>
-      <div class="recognition-wrapper">
-        <div class="recognition-container"><span class="recognition-text">Prossigo com Reconhecimento</span></div>
-      </div>
-      <div class="sitacseparator-wrapper">
-        <div class="sitacseparator-container"><span class="sitacseparator-text">*******************</span></div>
-      </div>
-      <div class="posit-wrapper">
-        <div class="posit-box">
-          <div class="posit-box-title">PONTOS DE SITUAÇÃO</div>
-          <div class="posit-inputs">
-            <table class="posit-table">
-              <tr><td class="posit-label">2º POSIT</td><td class="posit-hora-cell"><span class="posit-hora-label">Hrs.</span><input type="time" class="posit-hora-input"></td><td class="posit-desc-cell"><input type="text" class="posit-desc-input" placeholder="Descrição..."></td></tr>
-              <tr><td class="posit-label">3º POSIT</td><td class="posit-hora-cell"><span class="posit-hora-label">Hrs.</span><input type="time" class="posit-hora-input"></td><td class="posit-desc-cell"><input type="text" class="posit-desc-input" placeholder="Descrição..."></td></tr>
-              <tr><td class="posit-label">4º POSIT</td><td class="posit-hora-cell"><span class="posit-hora-label">Hrs.</span><input type="time" class="posit-hora-input"></td><td class="posit-desc-cell"><input type="text" class="posit-desc-input" placeholder="Descrição..."></td></tr>
-            </table>
-          </div>
-        </div>
-        <div class="vehiclesnoto-wrapper">
-          <div class="vehiclesnoto-box">
-            <div class="vehiclesnoto-box-title">MEIOS</div>
-            <div class="vehiclesnoto-inputs">
-              <table class="vehiclesnoto-table">
-                <thead>
-                  <tr>
-                    <th class="vehiclesnoto-header">MEIO</th>
-                    <th class="vehiclesnoto-header">ENTIDADE</th>
-                    <th class="vehiclesnoto-header">Hr. no TO</th>
-                    <th class="vehiclesnoto-header">MISSÃO</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                  <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div class="passagecos-wrapper">
-          <div class="passagecos-container">
-            <span class="passagecos-text">Passagem COS às </span>
-            <div class="passagecos-input-container">
-              <div class="passagecos-line">
-                <input type="time" class="passagecos-hora-input">
-                <span class="passagecos-text">, para </span>
-                <input type="text" class="passagecos-input" placeholder="Indique o nome e categoria do novo COS" />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="menagebuttons-wrapper">
-          <div class="menagebuttons-container">
-            <button class="menagebuttons--btn close-btn" onclick="encerrarSessao()">Encerrar</button>
-            <button class="menagebuttons--btn recharge-btn" onclick="carregarDados()">Carregar</button>
-            <button class="menagebuttons--btn save-btn" onclick="exportToPDF()">Exportar PDF</button>
-            <button class="menagebuttons--btn export-btn" onclick="exportToJSON()">Gravar JSON</button>
-          </div>
+        <div class="container-channel">
+          <span class="label-channel">Canal Manobra:</span>
+          <input type="text" class="input-field input-channel" maxlength="2" placeholder="00" />
         </div>
       </div>
     </div>
-    <\script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('App pronta: ', reg.scope))
-            .catch(err => console.log('Erro no motor da App: ', err));
-        });
-      }
-    <\/script>
-  </body>
-  </html>
+    <div class="iam-wrapper">
+      <div class="iam-container"><span class="iam-text">ESTOU</span></div>
+      <div class="em-container">em:</div>
+      <div class="iam-label via-label">Via</div>
+      <input type="text" class="iam-field via-field" placeholder="Indique a via" />
+      <div class="iam-label km-label">Km</div>
+      <input type="text" class="iam-field km-field" placeholder="Km" />
+      <div class="iam-label sentido-label">Sentido</div>
+      <input type="text" class="iam-field sentido-field" placeholder="Indique o sentido" />
+      <div class="coordinates-container">
+        <span class="coordinates-text">Coord:</span>
+        <span class="coordinates-text">WGS84</span>
+      </div>
+      <div class="coordinates-input-container">
+        <div class="coordinate-line">
+          <input type="text" class="coordinate-input" placeholder="Latitude" />
+          <span class="coordinate-letter">N</span>
+        </div>
+        <div class="coordinate-line">
+          <input type="text" class="coordinate-input" placeholder="Longitude" />
+          <span class="coordinate-letter">W</span>
+        </div>
+      </div>
+      <div class="local-container"><span class="local-text">Localidade</span></div>
+      <div class="local-input-container">
+        <div class="local-line">
+          <input type="text" class="local-input" placeholder="Indique a localidade" />
+        </div>
+      </div>
+    </div>
+    <div class="isee-wrapper">
+      <div class="isee-container"><span class="isee-text">VEJO</span></div>
+      <div class="accident-container"><span>Acidente:</span></div>
+      <div class="checkbox-base checkbox-wide checkbox-accident-1">
+        <input type="checkbox" id="acc-collision" />
+        <label for="acc-collision">Colisão entre:</label>
+        <input type="text" class="wide-text-input" placeholder="Indique..." />
+      </div>
+      <div class="checkbox-base checkbox-wide checkbox-accident-2">
+        <input type="checkbox" id="acc-runoff" />
+        <label for="acc-runoff">Despiste de:</label>
+        <input type="text" class="wide-text-input" placeholder="Indique..." />
+      </div>
+      <div class="checkbox-base checkbox-wide checkbox-accident-3">
+        <input type="checkbox" id="acc-other" />
+        <label for="acc-other">Outro:</label>
+        <input type="text" class="wide-text-input" placeholder="Indique..." />
+      </div>
+      <div class="victims-container"><span>Vítimas:</span></div>
+      <div class="checkbox-base checkbox-victims-1"><input type="checkbox" id="acc-dead" /><label for="acc-dead">Mortos</label></div>
+      <div class="checkbox-base checkbox-victims-2"><input type="checkbox" id="acc-severe" /><label for="acc-severe">Graves</label></div>
+      <div class="checkbox-base checkbox-victims-3"><input type="checkbox" id="acc-light" /><label for="acc-light">Leves</label></div>
+      <div class="checkbox-base checkbox-victims-4"><input type="checkbox" id="acc-missing" /><label for="acc-missing">Desaparecidos</label></div>
+      <div class="trapped-container"><span>Encarcerados:</span></div>
+      <div class="checkbox-base checkbox-trapped-1"><input type="checkbox" id="acc-trapped-mech" /><label for="acc-trapped-mech">Mecânico</label></div>
+      <div class="checkbox-base checkbox-trapped-2"><input type="checkbox" id="acc-trapped-phys1" /><label for="acc-trapped-phys1">Físico Tipo I</label></div>
+      <div class="checkbox-base checkbox-trapped-3"><input type="checkbox" id="acc-trapped-phys2" /><label for="acc-trapped-phys2">Físico Tipo II</label></div>
+      <div class="checkbox-base checkbox-short checkbox-vehicle-1">
+        <input type="checkbox" id="acc-vehicle-1" /><label for="acc-vehicle-1">Veículo 01</label>
+        <input type="text" class="wide-text-input" />
+      </div>
+      <div class="checkbox-base checkbox-short checkbox-vehicle-2">
+        <input type="checkbox" id="acc-vehicle-2" /><label for="acc-vehicle-2">Veículo 02</label>
+        <input type="text" class="wide-text-input" />
+      </div>
+      <div class="checkbox-base checkbox-short checkbox-vehicle-3">
+        <input type="checkbox" id="acc-vehicle-3" /><label for="acc-vehicle-3">Veículo 03</label>
+        <input type="text" class="wide-text-input" />
+      </div>
+      <div class="road-container"><span>Via:</span></div>
+      <div class="checkbox-base checkbox-road-1"><input type="checkbox" id="acc-road-closed" /><label for="acc-road-closed">Interdita</label></div>
+      <div class="checkbox-base checkbox-road-2"><input type="checkbox" id="acc-road-limited" /><label for="acc-road-limited">Condicionada</label></div>
+      <div class="checkbox-base checkbox-short checkbox-road-3">
+        <input type="checkbox" id="acc-road-closed-dir" /><label for="acc-road-closed-dir">Sentido</label>
+        <input type="text" class="wide-text-input" />
+      </div>
+      <div class="checkbox-base checkbox-short checkbox-road-4">
+        <input type="checkbox" id="acc-road-limited-dir" /><label for="acc-road-limited-dir">Sentido</label>
+        <input type="text" class="wide-text-input" />
+      </div>
+      <div class="cargo-container"><span>Carga do</span><span>Veículo:</span></div>
+      <div class="checkbox-base checkbox-cargo-1"><input type="checkbox" id="acc-cargo-type" /><label for="acc-cargo-type">Tipo de Carga</label></div>
+      <input type="text" class="cargo-field cargo-field-1" />
+      <div class="checkbox-base checkbox-cargo-2"><input type="checkbox" id="acc-cargo-damage" /><label for="acc-cargo-damage">Afetação da Carga</label></div>
+      <input type="text" class="cargo-field cargo-field-2" />
+      <div class="meteo-container">
+        <span class="meteo-text">Condições</span>
+        <span class="meteo-text">Meteorológicas:</span>
+      </div>
+      <div class="meteo-wind-container">
+        <div class="meteo-wind-textbox">
+          <input type="text" class="meteo-wind-text-input" placeholder=" Vento:" readonly />
+          <input type="text" class="meteo-editable-input" placeholder="NORTE" />
+          <span class="meteo-fixed-text">a</span>
+          <input type="text" class="meteo-editable-input" placeholder="20" />
+          <span class="meteo-fixed-text">KM/H</span>
+        </div>
+      </div>
+      <div class="meteo-temperature-container">
+        <div class="meteo-temperature-textbox">
+          <input type="text" class="meteo-temperature-text-input" placeholder=" Ar:" readonly />
+          <input type="text" class="meteo-editable-input" placeholder="38" />
+          <span class="meteo-fixed-text">ºC</span>
+          <input type="text" class="meteo-editable-input" placeholder="58" />
+          <span class="meteo-fixed-text">%HR</span>
+        </div>
+      </div>
+    </div>
+    <div class="ido-wrapper">
+      <div class="ido-container"><span class="ido-text">FAÇO</span></div>
+      <div class="idonow-container"><span class="idonow-text">Faço:</span></div>
+      <div class="checkbox-base checkbox-idonow-1"><input type="checkbox" id="ido-workzones" /><label for="ido-workzones">Zonas de Trabalho</label></div>
+      <div class="checkbox-base checkbox-idonow-2"><input type="checkbox" id="ido-victim-approach" /><label for="ido-victim-approach">Abordagem à(s) Vítima(s)</label></div>
+      <div class="checkbox-base checkbox-idonow-3"><input type="checkbox" id="ido-stabilization" /><label for="ido-stabilization">Estabilização</label></div>
+      <div class="checkbox-base checkbox-idonow-4"><input type="checkbox" id="ido-space-creation" /><label for="ido-space-creation">Criação de Espaços</label></div>
+    </div>
+    <div class="irequest-wrapper">
+      <div class="irequest-container"><span class="irequest-text">SOLICITO</span></div>
+      <div class="irequestnow-container">
+        <span class="irequestnow-text">Solicito:</span>
+        <span class="irequestnow-text">(Quantificar)</span>
+      </div>
+      <div class="checkbox-base checkbox-irequest-1"><input type="checkbox" id="irequest-vmer" /><label for="irequest-vmer">VMER</label></div>
+      <div class="checkbox-base checkbox-irequest-2"><input type="checkbox" id="irequest-vsat" /><label for="irequest-vsat">VSAT/VSAE</label></div>
+      <div class="checkbox-base checkbox-irequest-3"><input type="checkbox" id="irequest-absc" /><label for="irequest-absc">ABSC</label></div>
+      <div class="checkbox-base checkbox-short checkbox-irequest-4">
+        <input type="checkbox" id="irequest-other" /><label for="irequest-other">Outros</label>
+        <input type="text" class="wide-text-input" />
+      </div>
+      <div class="transit-box">
+        <div class="transit-title">PONTO DE TRÂNSITO</div>
+        <div class="transit-body">
+          <div class="transit-icon">
+            <svg width="140" height="46" viewBox="0 0 140 46" xmlns="http://www.w3.org/2000/svg">
+              <line x1="0" y1="23" x2="50" y2="23" stroke="#c08e00" stroke-width="5"/>
+              <circle cx="70" cy="23" r="19" fill="#fff" stroke="#c08e00" stroke-width="4"/>
+              <line x1="89" y1="23" x2="118" y2="23" stroke="#c08e00" stroke-width="5"/>
+              <polygon points="116,10 140,23 116,36" fill="#c08e00"/>
+            </svg>
+          </div>
+          <textarea id="transit-text" class="transit-textarea" placeholder="Indique o ponto de trânsito..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="assumptions-wrapper">
+      <div class="assumptions-container"><span class="assumptions-text">Assumo COS</span></div>
+      <div class="assumptions-input-container">
+        <div class="assumptions-line">
+          <input type="text" class="assumptions-input" placeholder="Indique a denominação do COS" />
+          <span class="assumptions-separator">|</span>
+          <span class="assumptions-label">Categoria e Nome</span>
+        </div>
+      </div>
+    </div>
+    <div class="recognition-wrapper">
+      <div class="recognition-container"><span class="recognition-text">Prossigo com Reconhecimento</span></div>
+    </div>
+    <div class="sitacseparator-wrapper">
+      <div class="sitacseparator-container"><span class="sitacseparator-text">*******************</span></div>
+    </div>
+    <div class="sitac-wrapper">
+      <div class="sitac-box">
+        <div class="sitac-box-title">Informações</div>
+        <div class="sitac-inputs">
+          <textarea class="sitac-input sitac-textarea" rows="10" placeholder="Digite suas informações aqui..."></textarea>
+        </div>
+      </div>
+      <div class="sitac-drawbox">
+        <div class="sitac-drawtitle" id="sitac-header" onclick="toggleSitacSize()" style="cursor: pointer;">
+          SITAC
+          <span id="sitac-size-indicator" style="font-size: 14px; opacity: 0.7; float: right;">🔍</span>
+        </div>
+        <div class="sitac-draws">
+        </div>
+      </div>
+    </div>
+    <div class="posit-wrapper">
+      <div class="posit-box">
+        <div class="posit-box-title">PONTOS DE SITUAÇÃO</div>
+        <div class="posit-inputs">
+          <table class="posit-table">
+            <tr><td class="posit-label">2º POSIT</td><td class="posit-hora-cell"><span class="posit-hora-label">Hrs.</span><input type="time" class="posit-hora-input"></td><td class="posit-desc-cell"><input type="text" class="posit-desc-input" placeholder="Descrição..."></td></tr>
+            <tr><td class="posit-label">3º POSIT</td><td class="posit-hora-cell"><span class="posit-hora-label">Hrs.</span><input type="time" class="posit-hora-input"></td><td class="posit-desc-cell"><input type="text" class="posit-desc-input" placeholder="Descrição..."></td></tr>
+            <tr><td class="posit-label">4º POSIT</td><td class="posit-hora-cell"><span class="posit-hora-label">Hrs.</span><input type="time" class="posit-hora-input"></td><td class="posit-desc-cell"><input type="text" class="posit-desc-input" placeholder="Descrição..."></td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="vehiclesnoto-wrapper">
+        <div class="vehiclesnoto-box">
+          <div class="vehiclesnoto-box-title">MEIOS</div>
+          <div class="vehiclesnoto-inputs">
+            <table class="vehiclesnoto-table">
+              <thead>
+                <tr>
+                  <th class="vehiclesnoto-header">MEIO</th>
+                  <th class="vehiclesnoto-header">ENTIDADE</th>
+                  <th class="vehiclesnoto-header">Hr. no TO</th>
+                  <th class="vehiclesnoto-header">MISSÃO</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
+                <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
+                <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
+                <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
+                <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
+                <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
+                <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
+                <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
+                <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."><  /td></tr>
+              <tr><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Meio..."></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Entidade..."></td><td class="vehiclesnoto-cell"><input type="time" class="vehiclesnoto-time-input"></td><td class="vehiclesnoto-cell"><input type="text" class="vehiclesnoto-input" placeholder="Missão..."></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="passagecos-wrapper">
+        <div class="passagecos-container">
+          <span class="passagecos-text">Passagem COS às </span>
+          <div class="passagecos-input-container">
+            <div class="passagecos-line">
+              <input type="time" class="passagecos-hora-input">
+              <span class="passagecos-text">, para </span>
+              <input type="text" class="passagecos-input" placeholder="Indique o nome e categoria do novo COS" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="menagebuttons-wrapper">
+        <div class="menagebuttons-container">
+          <button class="menagebuttons--btn close-btn" onclick="encerrarSessao()">Encerrar</button>
+          <button class="menagebuttons--btn recharge-btn" onclick="carregarDados()">Carregar</button>
+          <button class="menagebuttons--btn save-btn" onclick="exportToPDF()">Exportar PDF</button>
+          <button class="menagebuttons--btn export-btn" onclick="exportToJSON()">Gravar JSON</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <\script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App pronta: ', reg.scope))
+          .catch(err => console.log('Erro no motor da App: ', err));
+      });
+    }
+  <\/script>
+</body>
+</html>
 </script>
 <script type="text/x-cb360" data-page="GCIncUrb"><!DOCTYPE html>
   <html lang="pt-PT">
@@ -20325,61 +20369,8 @@
       .sitac-input {display:block; width:100%; margin-bottom:5px; padding:5px; font-family:sans-serif;}
       .sitac-input:last-child {margin-bottom:0;}
       textarea.sitac-input {resize:vertical; min-height:335px;}
-      .sitac-drawbox {position:relative; width:450px; border:1px solid #aaa; background-color:#d62b2b; font-family:sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
-      .sitac-drawtitle {position:relative; user-select:none; transition:all 0.3s ease;}
-      .sitac-drawtitle:hover {background-color:rgba(0, 123, 255, 0.1);}
-      .sitac-drawtitle:active {transform:scale(0.98);}
-      .sitac-draws {position:relative; min-height:350px; background-color:#000; border:1px solid #ccc;}
-      #sitac-map {width:100%; height:353px; background-color:#f0f0f0; transition:all 0.3s ease;}
-      /* ============================================================
-      SITAC: ESTADO EXPANDIDO
-      ============================================================ */
-      .sitac-drawbox.expanded {position:fixed !important; top:0 !important; left:0 !important; width:750px !important; height:1027px !important; z-index:9999 !important; background:#fff !important; margin:0 !important; padding:0 !important;}
-      .sitac-drawbox.expanded .sitac-drawtitle {padding:20px; font-size:18px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);}
-      .sitac-drawbox.expanded #sitac-map {width:100% !important; height:calc(1027px - 120px) !important;}
-      #sitac-size-indicator {transition:transform 0.3s ease;}
-      .sitac-drawbox.expanded #sitac-size-indicator {transform:rotate(180deg);}
-      .map-fireareas-vehicles-overlay, .map-controls {display:none !important;}
-      .sitac-drawbox.expanded .map-fireareas-vehicles-overlay, .sitac-drawbox.expanded .map-controls {display:flex !important;}
-      /* ============================================================
-      SITAC: OVERLAY DE MEIOS E CONTROLOS DO MAPA
-      ============================================================ */
-      .map-fireareas-vehicles-overlay {position:absolute; top:80px; left:10px; bottom:10px; width:90px; z-index:1000; background:transparent; backdrop-filter:blur(10px); border-radius:8px; padding:12px 6px; box-shadow:0 2px 5px rgba(0,0,0,0.3); flex-direction:column; align-items:center; gap:8px;}
-      .vehicles-overlay-title, .markers-overlay-title {color:#fff; font-size:10px; font-weight:bold; margin-bottom:4px; text-align:center;}
-      .vehicles-buttons-row {display:flex; flex-direction:column; gap:5px; width:100%;}
-      .map-controls {position:absolute; bottom:-50px; left:1.3%; border-radius:8px; padding:10px 6px; background:transparent; backdrop-filter:blur(10px); border-top:1px solid rgba(255,255,255,0.3); gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; z-index:1001;}
-      /* ============================================================
-      SITAC: BOTÕES
-      ============================================================ */
-      .map-fireareas-vehicle-btn, .map-fireareas-markers-btn, .map-btn {height:25px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); color:#fff; font-size:9px; border-radius:6px; cursor:pointer; transition:all 0.3s ease; display:flex; align-items:center; justify-content:center; gap:2px; font-weight:bold; padding:10px;}
-      .map-fireareas-vehicle-btn, .map-fireareas-markers-btn {width:100%; flex-direction:column;}
-      .map-btn {min-width:70px;}
-      .map-fireareas-vehicle-btn:hover, .map-fireareas-markers-btn:hover, .map-btn:hover {background:rgba(0,0,0,0.4); border-color:rgba(255,255,255,0.6); transform:scale(1.05); box-shadow:0 2px 8px rgba(0,0,0,0.3);}
-      .map-fireareas-vehicle-btn:active, .map-fireareas-markers-btn:active, .map-btn:active {transform:scale(0.95);}
-      .team-btn:hover, .brigade-btn:hover, .group-btn:hover, .company-btn:hover, .aircrafter-btn:hover {border-color:#bd3737; background:rgba(189,55,55,0.5); box-shadow:0 2px 8px rgba(255,68,68,0.4);}
-      .aircrafterwater-btn:hover, .aircraftdrop-btn:hover, .onshoresupply-btn:hover {border-color:#312abd; background:rgba(49,42,189,0.5); box-shadow:0 2px 8px rgba(49,42,189,0.4);}
-      .perimetre-btn, .setor-btn, .tool-btn, .delete-btn {background:rgba(var(--c),0.8) !important; border-color:rgb(var(--c)) !important;}
-      .perimetre-btn:hover, .setor-btn:hover, .tool-btn:hover, .delete-btn:hover {background:rgba(var(--h),0.9) !important; border-color:rgb(var(--h)) !important; box-shadow:0 2px 8px rgba(var(--c),0.4) !important;}
-      .perimetre-btn {--c:220,53,69; --h:200,35,51; min-width:90px !important; font-size:10px !important;}
-      .setor-a {--c:0,102,204; --h:0,82,163;}
-      .setor-b {--c:0,204,102; --h:0,163,82;}
-      .setor-c {--c:255,204,0; --h:230,184,0; color:#333 !important;}
-      .setor-d {--c:255,102,0; --h:229,90,0;}
-      .setor-e {--c:204,0,204; --h:163,0,163;}
-      .setor-f {--c:153,102,51; --h:128,85,41;}
-      .tool-btn {--c:108,117,125; --h:90,98,104;}
-      .delete-btn {--c:220,53,69; --h:200,35,51;}
-      /* ============================================================
-      SITAC: POPUPS LEAFLET
-      ============================================================ */
-      .leaflet-popup-content {font-size:14px; line-height:1.4; margin:12px; min-width:200px;}
-      .leaflet-popup-content strong {display:block; margin-bottom:1px; font-size:15px;}
-      .leaflet-popup-content small {display:block; color:#666; line-height:1.8;}
-      .leaflet-popup-content div {text-align:center;}
-      .popup-input {width:200px; padding:6px 10px; border:2px solid #ddd; border-radius:6px; font-size:13px; margin:2px 0 8px;}
-      .popup-input:focus {outline:none; border-color:#007bff; box-shadow:0 0 0 3px rgba(0,123,255,0.1);}
-      .popup-btn {padding:6px 14px; font-size:12px; border:1px solid var(--color-primary); background-color:var(--color-primary); color:#fff; border-radius:6px; cursor:pointer; margin:4px; font-weight:500; transition:all 0.2s ease;}
-      .popup-btn:hover {background-color:#218838; transform:translateY(-1px);}
+      .sitac-drawbox {position:relative; width:450px; border:1px solid #aaa; background-color:#fff; font-family:sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+      .sitac-drawtitle {position:relative; user-select:none; transition:all 0.3s ease;}      
       /* ============================================================
       PONTOS DE SITUAÇÃO
       ============================================================ */
@@ -20449,12 +20440,6 @@
       @media (max-width:768px) and (orientation:landscape) {:root {--s:0.53;}}
       @media (max-width:480px) and (min-width:361px) {
         .input-occurrence {width:183px;}
-        .map-fireareas-vehicles-overlay {width:60px !important; padding:8px 4px !important; gap:6px !important; top:80px !important; left:8px !important;}
-        .map-fireareas-vehicle-btn, .map-fireareas-markers-btn {height:22px !important; font-size:8px !important; padding:2px !important;}
-        .vehicles-overlay-title, .markers-overlay-title {font-size:8px !important; margin-bottom:2px !important;}
-        .map-controls {padding:6px 4px !important; gap:4px !important; left:17% !important; flex-wrap:wrap !important;}
-        .map-btn {height:22px !important; font-size:8px !important; padding:3px 6px !important; min-width:50px !important;}
-        .perimetre-btn {min-width:65px !important; font-size:8px !important;}
         #sitac-map {height:355px !important;}
         .sitac-draws {min-height:300px !important;}
       }
@@ -20594,7 +20579,7 @@
           <label for="industry">Indústria</label>
         </div>
         <div class="checkbox-base checkbox-buildingtype-4"> 
-          <input type="checkbox" id="buildingtype-4 checkbox" />
+          <input type="checkbox" id="buildingtype-4" />
           <label for="buildingtype-4">Outro </label>
           <input type="text" class="buildingtype-text-input" placeholder="Indique qual..." />
         </div>        
@@ -20623,7 +20608,7 @@
           <label for="public-utility">Utilidade Púplica</label>
         </div>
         <div class="checkbox-base checkbox-btypo-6"> 
-          <input type="checkbox" id="building-other checkbox" />
+          <input type="checkbox" id="building-other" />
           <label for="building-other">Outro </label>
           <input type="text" class="buildingtype-text-input" placeholder="Indique qual..." />
         </div>   
@@ -20646,7 +20631,7 @@
           <label for="horizontal">Marcos de Água</label>
         </div>
         <div class="checkbox-base checkbox-firehydrants-2"> 
-          <input type="checkbox" id="firehydrants-other checkbox" />
+          <input type="checkbox" id="firehydrants-other" />
           <label for="firehydrants-other">Outro </label>
           <input type="text" class="firehydrants-text-input" placeholder="Indique qual..." />
         </div>  
@@ -20667,8 +20652,8 @@
           <label for="comercio">Comércio</label>
         </div>
         <div class="checkbox-base checkbox-sensitivepoints-4">
-          <input type="checkbox" id="sensitivepoints-4 checkbox" />
-          <label for="sensitivepoints-checkbox">Outro </label>
+          <input type="checkbox" id="sensitivepoints-checkbox-4" />
+          <label for="sensitivepoints-checkbox-4">Outro </label>
           <input type="text" class="sensitivepoints-text-input" placeholder="Indique qual..." />
         </div>
         <div class="meteo-container">
@@ -20812,7 +20797,23 @@
         <div class="sitacseparator-container">
           <span class="sitacseparator-text">*******************</span>
         </div>
-      </div>        
+      </div>
+      <div class="sitac-wrapper">
+        <div class="sitac-box">
+          <div class="sitac-box-title">Informações</div>
+          <div class="sitac-inputs">
+            <textarea class="sitac-input sitac-textarea" rows="10" placeholder="Digite suas informações aqui..."></textarea>
+          </div>
+        </div>
+        <div class="sitac-drawbox">
+          <div class="sitac-drawtitle" id="sitac-header" onclick="toggleSitacSize()" style="cursor: pointer;">
+            SITAC
+            <span id="sitac-size-indicator" style="font-size: 14px; opacity: 0.7; float: right;">🔍</span>
+          </div>
+          <div class="sitac-draws">
+          </div>
+        </div>
+      </div>
       <div class="posit-wrapper">
         <div class="posit-box">
           <div class="posit-box-title">PONTOS DE SITUAÇÃO</div>
@@ -21713,7 +21714,7 @@
           <span class="sitacseparator-text">*******************</span>
         </div>
       </div>
-        <div class="sitac-wrapper">
+      <div class="sitac-wrapper">
         <div class="sitac-box">
           <div class="sitac-box-title">Informações</div>
           <div class="sitac-inputs">
