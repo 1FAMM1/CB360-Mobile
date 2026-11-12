@@ -648,7 +648,7 @@
             <div>Chat Interno</div>
             <span class="bdg">0</span>
           </button>
-          <button id="pointJustif" class="mbtn" data-module="point_justif" style="background: var(--red-dark); color: #fff;" onclick="selBtn(this); setTimeout(()=> __go('PointJustif.html'), 100)">
+          <button id="pointJustif" class="mbtn" data-module="point_justif" style="display: none; background: var(--red-dark); color: #fff;" onclick="selBtn(this); setTimeout(()=> __go('PointJustif.html'), 100)">
             <span class="material-icons" style="color: #fff;">how_to_reg</span>
             <div>Justificação de Picagens</div>
           </button>
@@ -1812,7 +1812,11 @@
         loadCorpInfo();
         loadUserName();
         loadNextService();
-        loadAccessRestrictions();        
+        loadAccessRestrictions();   
+        resolveIsProfessional().then(isProf => {
+          const pj = document.getElementById('pointJustif');
+          if (pj) pj.style.display = isProf ? '' : 'none';
+        });
         updateSwapsBadge();
         updateOccurrencesBadge();
         updateEventsBadge();
@@ -26926,7 +26930,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v13 - 2026-11-07 - ScalesView: folga ao rodape 5px (DispView reposto) (+ v11)';
+  window.CB360_BUILD='v14 - 2026-11-12 - Voltar do chat: historico no shell (+ v13)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
@@ -26979,7 +26983,7 @@
       if(my!==token){f.remove();return;}
       var old=curFrame;
       f.style.visibility='';
-      curFrame=f; curName=name;
+      curFrame=f; curName=name; subOpen=false;
       if(old&&old!==f)old.remove();
       try{
         var d=f.contentDocument, t=d.title;
@@ -27009,10 +27013,33 @@
     else history.pushState({p:n},'',url);
     show(n);
   };
+  /* "sub-ecrã" de uma página (ex.: conversa aberta no chat): entrada de histórico no shell,
+     não no iframe. Entradas do iframe ficam "mortas" quando o iframe é trocado e obrigam a
+     carregar várias vezes em Voltar. */
+  var subOpen=false;
+  window.__cbSubPush=function(){
+    if(subOpen) return;
+    history.pushState({p:curName,sub:1},'',location.href);
+    subOpen=true;
+  };
+  window.__cbSubBack=function(){ if(!subOpen) return false; history.back(); return true; };
   /* botão "Voltar" */
   window.addEventListener('popstate',function(e){
-    var n=(e.state&&e.state.p)||fromHash()||DEFAULT;
-    if(n!==curName)show(n);
+    var st=e.state||{};
+    var n=st.p||fromHash()||DEFAULT;
+    if(st.sub){
+      /* sub-ecrã que já não existe (a página foi trocada) ou avanço: salta por cima */
+      if(!(n===curName && subOpen)) history.back();
+      return;
+    }
+    if(n===curName){
+      if(subOpen){
+        subOpen=false;
+        try{ var w=curFrame&&curFrame.contentWindow; if(w&&w.__cbSubPop) w.__cbSubPop(); }catch(_){}
+      }
+      return;
+    }
+    show(n);
   });
   /* token expirou com a app aberta (ex.: voltou ao telemóvel dias depois) */
   function checkSession(){
