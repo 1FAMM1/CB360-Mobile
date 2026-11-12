@@ -1,6 +1,7 @@
 import webpush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 import ws from 'ws';
+import { randomUUID } from 'crypto';
 
 /* Valida o token do utilizador no próprio Supabase (assinatura, validade e
    token revogado) e devolve os claims: { corp_oper_nr, n_int, ... } */
@@ -83,9 +84,11 @@ export default async function handler(req, res) {
     /* página a abrir ao tocar (só nomes simples, ex.: 'Swaps', 'SolVacat', 'Events') */
     const pagina = /^[A-Za-z0-9_]{1,40}$/.test(String(body.pagina || '')) ? String(body.pagina) : '';
     const chatNint = aviso ? '' : (recipient === 'geral' ? 'geral' : senderNint);
+    /* id deste envio: o telemóvel junta as 2 cópias numa só notificação */
+    const nid = randomUUID().replace(/-/g, '');
     const payload = JSON.stringify(aviso
-      ? { title: senderName || 'CB360 Mobile', message: messageText, pagina, url: pagina ? `/?abrir=${pagina}` : '/' }
-      : {
+      ? { nid, title: senderName || 'CB360 Mobile', message: messageText, pagina, url: pagina ? `/?abrir=${pagina}` : '/' }
+      : { nid,
           title: recipient === 'geral' ? `Geral: ${senderName}` : senderName,
           message: messageText,
           chatId: chatNint,
@@ -94,22 +97,29 @@ export default async function handler(req, res) {
         });
 
     let enviados = 0;
-    await Promise.all(subs.map(d =>
+    const gone = new Set();
+    const sendAll = (count) => Promise.all(subs.filter(d => !gone.has(d.endpoint)).map(d =>
       webpush.sendNotification(
         { endpoint: d.endpoint, keys: { auth: d.auth, p256dh: d.p256dh } },
         payload,
         { TTL: 60 * 60 * 24, urgency: 'high' }   /* guarda até 24 h; entrega mesmo com o telemóvel em repouso */
       )
-        .then(() => { enviados++; })
+        .then(() => { if (count) enviados++; })
         .catch(async err => {
           /* subscrição que já não existe (app desinstalada / permissão retirada): apagar */
           if (err && (err.statusCode === 404 || err.statusCode === 410)) {
+            gone.add(d.endpoint);
             await supabase.from('user_push_subscriptions').delete().eq('endpoint', d.endpoint);
           } else {
             console.error('Falha ao enviar para um dispositivo:', err && err.statusCode);
           }
         })
     ));
+    /* 1.ª cópia; 2.ª cópia 4 s depois: em telemóveis que adormecem o Chrome (ex.: Xiaomi)
+       a 1.ª acorda-o e pode perder-se; a 2.ª chega e substitui a 1.ª em silêncio se esta tiver chegado */
+    await sendAll(true);
+    await new Promise(r => setTimeout(r, 4000));
+    await sendAll(false);
 
     return res.status(200).json({ success: true, total_enviados: enviados });
   } catch (err) {
