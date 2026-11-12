@@ -31,6 +31,10 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   res.setHeader('Content-Type', 'application/json');
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
+  if (!process.env.SUPABASE_SERVICE_KEY) {
+    console.error('Falta a variável SUPABASE_SERVICE_KEY no Vercel');
+    return res.status(500).json({ error: 'Configuração em falta' });
+  }
 
   /* 1) Quem envia: vem do token, não do corpo do pedido */
   const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
@@ -52,7 +56,8 @@ export default async function handler(req, res) {
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {
+  /* chave de serviço só para esta API (variável própria no Vercel; nunca vai para o browser) */
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
     realtime: { transport: ws }
   });
 
@@ -72,15 +77,19 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, info: 'Nenhum dispositivo encontrado.' });
     }
 
-    /* conversa a abrir ao tocar: geral -> chat geral; privada -> conversa com quem enviou */
-    const chatNint = recipient === 'geral' ? 'geral' : senderNint;
-    const payload = JSON.stringify({
-      title: recipient === 'geral' ? `Geral: ${senderName}` : senderName,
-      message: messageText,
-      chatId: chatNint,
-      chatNint: chatNint,
-      url: `/?openChat=${encodeURIComponent(chatNint)}`
-    });
+    /* tipo "aviso" (escalas, eventos, trocas…): não é do chat -> ao tocar abre só a app.
+       Sem tipo (chat): geral -> chat geral; privada -> conversa com quem enviou */
+    const aviso = String(body.tipo || '') === 'aviso';
+    const chatNint = aviso ? '' : (recipient === 'geral' ? 'geral' : senderNint);
+    const payload = JSON.stringify(aviso
+      ? { title: senderName || 'CB360 Mobile', message: messageText, url: '/' }
+      : {
+          title: recipient === 'geral' ? `Geral: ${senderName}` : senderName,
+          message: messageText,
+          chatId: chatNint,
+          chatNint: chatNint,
+          url: `/?openChat=${encodeURIComponent(chatNint)}`
+        });
 
     let enviados = 0;
     await Promise.all(subs.map(d =>
