@@ -22871,15 +22871,15 @@
         return headers;
       }
       const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        /* o tempo real (e os pedidos) usam SEMPRE o token da sessão, também ao reconectar */
+        accessToken: async () => getAuthToken(),
         global: {
           headers: {
-            'Authorization': `Bearer ${getAuthToken()}`,
             'x-my-corpo': getCorp(),
             'x-my-nint': getNInt()
           }
         }
       });
-      supabaseClient.realtime.setAuth(getAuthToken());
       /* ======================== GLOBAL VARIABLES ========================= */
       let currentChat = 'null';
       let currentChatName = '';
