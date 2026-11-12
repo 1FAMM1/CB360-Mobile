@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
 <meta name="theme-color" content="#0f1117">
@@ -1660,14 +1659,21 @@
         }
       }
       /* ======================= OCCURRENCE LOADING ======================== */
+      /* pedido à API que devolve sempre uma lista; qualquer erro (401, 403, 500…) passa a exceção -> badge '!' */
+      async function sbList(url) {
+        const r = await fetch(url, { headers: getSupabaseHeaders() });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const d = await r.json();
+        if (!Array.isArray(d)) throw new Error('Resposta inesperada');
+        return d;
+      }
       async function updateOccurrencesBadge() {
         const corpOperNr = getCorp();
         const badge = document.querySelector('#ongoingBtn .bdg');
         if (!badge) return;
         if (!corpOperNr) { badge.textContent = '0'; return; }
         try {
-          const response = await fetch(`${SUPABASE_URL}/rest/v1/occurrences_control?select=*&corp_oper_nr=eq.${corpOperNr}`, { headers: getSupabaseHeaders() });
-          const data = await response.json();
+          const data = await sbList(`${SUPABASE_URL}/rest/v1/occurrences_control?select=id&corp_oper_nr=eq.${corpOperNr}`);
           badge.textContent = `${data.length}`;
         } catch (err) {
           console.error('Erro ao buscar ocorrências:', err);
@@ -1681,8 +1687,7 @@
         if (!badge) return;
         if (!corpOperNr) { badge.textContent = '0'; return; }
         try {
-          const response = await fetch(`${SUPABASE_URL}/rest/v1/event_list?select=*&corp_oper_nr=eq.${corpOperNr}&is_ended=eq.false`, { headers: getSupabaseHeaders() });
-          const data = await response.json();
+          const data = await sbList(`${SUPABASE_URL}/rest/v1/event_list?select=id&corp_oper_nr=eq.${corpOperNr}&is_ended=eq.false`);
           badge.textContent = `${data.length}`;
         } catch (err) {
           console.error('Erro ao buscar eventos:', err);
@@ -1716,15 +1721,15 @@
         if (!corpOperNr) { badge.textContent = '0'; return; }
         try {
           const url = `${SUPABASE_URL}/rest/v1/serv_comun?select=comun_url&corp_oper_nr=eq.${corpOperNr}`;
-          const response = await fetch(url, { headers: getSupabaseHeaders() });
-          const comunicados = await response.json();
-          const viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]");
+          const comunicados = await sbList(url);
+          let viewedDocs = [];
+          try { viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]"); } catch (_) {}
           let unreadCount = 0;
           comunicados.forEach(comun => {
             if (comun.comun_url) {
               const publicUrl = comun.comun_url.startsWith('http') ?
                 comun.comun_url :
-                `${SUPABASE_URL}/storage/v1/object/public/comunicados/${comun.comun_url}`;
+                `${SUPABASE_URL}/storage/v1/object/public/cb_pdf/${comun.comun_url}`;   /* igual à página Comunicados */
               if (!viewedDocs.includes(publicUrl)) unreadCount++;
             }
           });
@@ -1767,12 +1772,9 @@
         if (!badge) return;
         if (!corpOperNr) { badge.textContent = '0'; return; }
         try {
-          const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/hospital_restrictions?select=service,hospital&corp_oper_nr=eq.${corpOperNr}&service=not.is.null&hospital=neq.EMPTY`, { 
-              headers: getSupabaseHeaders() 
-            }
+          const rawData = await sbList(
+            `${SUPABASE_URL}/rest/v1/hospital_restrictions?select=service,hospital&corp_oper_nr=eq.${corpOperNr}&service=not.is.null&hospital=neq.EMPTY`
           );
-          const rawData = await response.json();
           const data = (rawData || []).filter(item => item.service && item.service.trim() !== "" && item.hospital && item.hospital.trim().toUpperCase() !== "EMPTY");
           badge.textContent = `${data.length}`;
         } catch (err) {
@@ -1789,14 +1791,11 @@
         if (!corpOperNr || !myNInt) { badge.textContent = '0'; return; }
         try {
           const privUrl = `${SUPABASE_URL}/rest/v1/chat_messages?select=id&corp_oper_nr=eq.${corpOperNr}&recipient_nint=eq.${myNInt}&read_at=is.null`;
-          const privRes = await fetch(privUrl, { headers: getSupabaseHeaders() });
-          const privData = await privRes.json();
+          const privData = await sbList(privUrl);
           const geralUrl = `${SUPABASE_URL}/rest/v1/chat_messages?select=id&corp_oper_nr=eq.${corpOperNr}&recipient_nint=eq.geral`;
-          const geralRes = await fetch(geralUrl, { headers: getSupabaseHeaders() });
-          const geralMsgs = await geralRes.json();
+          const geralMsgs = await sbList(geralUrl);
           const readsUrl = `${SUPABASE_URL}/rest/v1/chat_message_reads?select=message_id&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${myNInt}`;
-          const readsRes = await fetch(readsUrl, { headers: getSupabaseHeaders() });
-          const readsData = await readsRes.json();
+          const readsData = await sbList(readsUrl);
           const readSet = new Set(readsData.map(r => r.message_id));
           const total = privData.length + geralMsgs.filter(m => !readSet.has(m.id)).length;
           badge.textContent = `${total}`;
@@ -2416,7 +2415,7 @@
           Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
         </div>
         <div class="footer-year">
-          © 2023–2025 · Sistema CB360 Mobile
+          © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
         </div>
       </div>
     </footer>
@@ -3309,6 +3308,17 @@
       }
       /* ========================== INITIALIZATION ========================== */
       document.addEventListener('DOMContentLoaded', function() {
+        const fy = document.getElementById('footerYear');
+        if (fy) fy.textContent = new Date().getFullYear();
+        document.querySelectorAll('.availability-btn').forEach((btn, i) => {
+          btn.style.opacity = '0';
+          btn.style.transform = 'translateY(15px)';
+          btn.style.transition = 'all 0.4s ease';
+          setTimeout(() => {
+            btn.style.opacity = '1';
+            btn.style.transform = 'translateY(0)';
+          }, i * 80);
+        });
         loadCorpInfo();
         const savedTheme = localStorage.getItem('sgo-theme');
         if (savedTheme === 'dark') {
@@ -3843,7 +3853,7 @@
           Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
         </div>
         <div class="footer-year">
-          © 2023–2025 · Sistema CB360 Mobile
+          © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
         </div>
       </div>
     </footer>
@@ -4550,6 +4560,17 @@
       }
       /* ========================== INITIALIZATION ========================== */
       document.addEventListener('DOMContentLoaded', function() {
+        const fy = document.getElementById('footerYear');
+        if (fy) fy.textContent = new Date().getFullYear();
+        document.querySelectorAll('.availability-btn').forEach((btn, i) => {
+          btn.style.opacity = '0';
+          btn.style.transform = 'translateY(15px)';
+          btn.style.transition = 'all 0.4s ease';
+          setTimeout(() => {
+            btn.style.opacity = '1';
+            btn.style.transform = 'translateY(0)';
+          }, i * 80);
+        });
         loadCorpInfo();
         loadModules();
         const savedTheme = localStorage.getItem('sgo-theme');
@@ -8943,7 +8964,7 @@
           Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
         </div>
         <div class="footer-year">
-          © 2023–2025 · Sistema CB360 Mobile
+          © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
         </div>
       </div>
     </footer>
@@ -9254,6 +9275,17 @@
       }
       /* ============================== INIT =============================== */
       document.addEventListener('DOMContentLoaded', async () => {
+        const fy = document.getElementById('footerYear');
+        if (fy) fy.textContent = new Date().getFullYear();
+        document.querySelectorAll('.availability-btn').forEach((btn, i) => {
+          btn.style.opacity = '0';
+          btn.style.transform = 'translateY(15px)';
+          btn.style.transition = 'all 0.4s ease';
+          setTimeout(() => {
+            btn.style.opacity = '1';
+            btn.style.transform = 'translateY(0)';
+          }, i * 80);
+        });
         loadCorpInfo();
         await loadCorporationModules();
         const savedTheme = localStorage.getItem('sgo-theme');
@@ -22224,7 +22256,7 @@
           }
         } catch (e) {}
       })();
-    <\/script>
+    <\/script>    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22554,6 +22586,62 @@
     </style>
   </head>
   <body>
+    <\script>
+    (function () {
+      const PUB = '/storage/v1/object/public/cb_files/';
+      const cache = new Map();
+      function pathOf(u) {
+        if (!u || typeof u !== 'string') return null;
+        const i = u.indexOf(PUB);
+        return i < 0 ? null : u.slice(i + PUB.length).split('?')[0];
+      }
+      function blobUrl(path) {
+        if (cache.has(path)) return cache.get(path);
+        const p = (async () => {
+          const tk = sessionStorage.getItem('authToken') || localStorage.getItem('authToken');
+          const r = await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/cb_files/${path}`, {
+            headers: {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${tk}`}
+          });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return URL.createObjectURL(await r.blob());
+        })();
+        cache.set(path, p);
+        p.catch(() => cache.delete(path));
+        return p;
+      }
+      function fix(el) {
+        if (!el || el.nodeType !== 1) return;
+        const attr = el.tagName === 'A' ? 'href' : ((el.tagName === 'IMG' || el.tagName === 'AUDIO' || el.tagName === 'VIDEO' || el.tagName === 'SOURCE') ? 'src' : null);
+        if (!attr) return;
+        const path = pathOf(el.getAttribute(attr));
+        if (!path) return;
+        el.setAttribute(attr, el.tagName === 'A' ? '#' : '');
+        blobUrl(path).then(b => {
+          el.setAttribute(attr, b);
+          if (el.tagName === 'AUDIO' || el.tagName === 'VIDEO') { try { el.load(); } catch (_) {} }
+        }).catch(err => console.warn('Anexo do chat não carregou:', path, err));
+      }
+      function scan(root) {
+        if (!root || root.nodeType !== 1) return;
+        fix(root);
+        root.querySelectorAll && root.querySelectorAll('img[src*="/cb_files/"],audio[src*="/cb_files/"],video[src*="/cb_files/"],source[src*="/cb_files/"],a[href*="/cb_files/"]').forEach(fix);
+      }
+      new MutationObserver(list => {
+        for (const m of list) {
+          if (m.type === 'attributes') fix(m.target);
+          else m.addedNodes.forEach(scan);
+        }
+      }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['src', 'href']});
+      const _open = window.open;
+      window.open = function (u, ...rest) {
+        const path = pathOf(String(u || ''));
+        if (!path) return _open.call(window, u, ...rest);
+        const w = _open.call(window, 'about:blank', ...rest);
+        blobUrl(path).then(b => { if (w) w.location.href = b; }).catch(() => { if (w) w.close(); });
+        return w;
+      };
+    })();
+    <\/script>
     <header class="header">
       <img id="corpLogo" class="header-logo" alt="" src="">
       <div class="header-center">
@@ -26855,7 +26943,6 @@
     return pages[h]?h:null;
   }
   function baseUrl(){return location.pathname+location.search;}
-  /* medição da safe-area para as páginas */
   window.__cbSafe=function(){
     var cs=getComputedStyle(document.getElementById('sa'));
     return {top:parseFloat(cs.paddingTop)||0,right:parseFloat(cs.paddingRight)||0, bottom:parseFloat(cs.paddingBottom)||0,left:parseFloat(cs.paddingLeft)||0};
@@ -26863,7 +26950,7 @@
   function hasSession(){
     var tk=sessionStorage.getItem('authToken')||localStorage.getItem('authToken');
     if(!tk) return false;
-    var ex=jwtExp(tk);               /* null = não é um JWT válido (ex.: "null", "undefined") */
+    var ex=jwtExp(tk);
     return !!ex && ex>Date.now();
   }
   function clearSession(){
@@ -26871,7 +26958,6 @@
       .forEach(function(k){localStorage.removeItem(k);sessionStorage.removeItem(k);});
   }
   function show(name){
-    /* guarda de sessão: sem token ou token expirado -> login */
     if(name!==DEFAULT && !hasSession()){
       clearSession();
       name=DEFAULT;
@@ -26896,9 +26982,7 @@
         if(t)document.title=t;
         var tc=d.querySelector('meta[name="theme-color"]');
         var m=document.querySelector('meta[name="theme-color"]');
-        /* barra de estado e de navegação: sempre escuras */
         if(m)m.setAttribute('content','#0f1117');
-        /* fundo do shell fica escuro (era copiado da página = vermelho por baixo da barra de navegação) */
         document.documentElement.style.background='#0f1117';
       }catch(_){}
       document.getElementById('boot').classList.add('off');
@@ -26906,34 +26990,27 @@
       if(name===DEFAULT) pendingChat=null;
     }
     f.addEventListener('load',reveal);
-    setTimeout(reveal,6000); /* rede lenta/CDN em baixo: não deixa o ecrã preso */
+    setTimeout(reveal,6000);/
     document.body.appendChild(f);
   }
-  /* chamado pelas páginas (window.__go) */
   window.__cbGo=function(u){
     var n=norm(u);
-    if(!n){ top.location.href=u; return; }          /* ex.: system_admin.html (fora desta app) */
+    if(!n){ top.location.href=u; return; }
     var url=n===DEFAULT?baseUrl():baseUrl()+'#'+n;
     /* sair do login ou voltar ao login: substitui, não empilha */
     if(curName===DEFAULT||n===DEFAULT) history.replaceState({p:n},'',url);
     else history.pushState({p:n},'',url);
     show(n);
   };
-  /* botão "Voltar" */
   window.addEventListener('popstate',function(e){
     var n=(e.state&&e.state.p)||fromHash()||DEFAULT;
     if(n!==curName)show(n);
   });
-  /* token expirou com a app aberta (ex.: voltou ao telemóvel dias depois) */
   function checkSession(){
     if(curName && curName!==DEFAULT && !hasSession()) window.__cbGo('index.html');
   }
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) checkSession(); });
   setInterval(checkSession,60000);
-  /* ===== SESSÃO FICTÍCIA DE TESTE =====
-     Só corre em localhost, rede local (telemóvel a testar o PC) e StackBlitz.
-     Lê o ficheiro test-session.js (que NÃO vai para produção) e substitui a sessão guardada.
-     Em produção nem sequer pede o ficheiro. Para ver o login em teste: abrir com #index */
   var TEST_HOST=/^(localhost|127\.0\.0\.1|\[::1\]|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$|(^|\.)(localhost|stackblitz\.(io|com)|webcontainer(-api)?\.io)$/i;
   function testBanner(msg,bad){
     var d=document.createElement('div');
@@ -26956,7 +27033,6 @@
       try{
         var o=window.CB360_TEST_SESSION||{}, keys=Object.keys(o);
         if(!keys.length){testBanner('TESTE · test-session.js vazio ou inválido',true);return done(false);}
-        /* em teste a sessão fictícia manda: substitui qualquer sessão antiga/expirada */
         keys.forEach(function(k){localStorage.setItem(k,o[k]);});
         console.warn('CB360 TESTE: sessão fictícia ativa (test-session.js). Nunca publicar esse ficheiro.');
         var exp=jwtExp(o.authToken);
@@ -26971,8 +27047,6 @@
     };
     document.head.appendChild(s);
   }
-  /* arranque */
-  /* aberto a partir de uma notificação com a app fechada: /?openChat=NINT */
   (function(){
     try{
       var q=new URLSearchParams(location.search), oc=q.get('openChat'), ab=q.get('abrir');
@@ -26985,7 +27059,6 @@
     }catch(_){}
   })();
   loadTestSession(function(testSession){
-    /* com sessão válida abre logo a MainPage (o utilizador mestre passa pelo login) */
     var master=(sessionStorage.getItem('isMasterUser')||localStorage.getItem('isMasterUser'))==='true';
     var first=pendingChat?'InterChat':(pendingPage||fromHash()||((testSession||(hasSession()&&!master))?'MainPage':DEFAULT));
     pendingPage=null;
@@ -26998,7 +27071,6 @@
       w.navigator.serviceWorker.dispatchEvent(new w.MessageEvent('message',{data:data}));
     }catch(_){}
   }
-  /* espera que o chat tenha a lista de contactos carregada (máx. ~8 s) e abre a conversa */
   function deliverChat(nint){
     var tries=0, f0=curFrame;
     (function tick(){
@@ -27009,20 +27081,17 @@
       if(++tries<55) setTimeout(tick,150);
     })();
   }
-  /* Service Worker: regista e reencaminha mensagens (ex.: OPEN_CHAT) para a página ativa */
   if('serviceWorker' in navigator){
     window.addEventListener('load',function(){
       navigator.serviceWorker.register('sw.js').catch(function(err){console.warn('SW:',err);});
     });
     navigator.serviceWorker.addEventListener('message',function(e){
       var d=e.data||{};
-      /* notificação do chat: se não estiver no chat, abre-o e entrega a conversa quando estiver pronto */
       if(d.type==='OPEN_CHAT' && d.chatNint){
         if(curName==='InterChat') deliverChat(d.chatNint);
         else { pendingChat=String(d.chatNint); window.__cbGo('InterChat.html'); }
         return;
       }
-      /* aviso com página (trocas, férias, eventos, escalas): abre essa página */
       if(d.type==='OPEN_PAGE' && d.pagina && pages[d.pagina]){
         if(curName!==d.pagina) window.__cbGo(d.pagina+'.html');
         return;
