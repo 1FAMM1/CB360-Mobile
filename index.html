@@ -539,6 +539,7 @@
       <div class="menu-item" onclick="showTerms()"><span class="material-icons">description</span> Termos de Uso</div>
       <div class="menu-item" onclick="showAbout()"><span class="material-icons">info</span> Sobre o Sistema</div>
       <div class="menu-item" onclick="showContact()"><span class="material-icons">call</span> Contacto</div>
+      <div id="menuVersion" style="border-top:1px solid var(--border); margin-top:4px; padding:8px 12px 4px; font-size:11px; color:var(--txt-2); opacity:.7; text-align:center;"></div>
     </div>
     <header class="header">
       <img id="corpLogo" class="header-logo" alt="" style="display:none;"
@@ -639,7 +640,7 @@
             <span class="material-icons">fire_truck</span>
             <div>Veículos</div>
           </button>
-          <button class="mbtn" data-module="tools" onclick="selBtn(this); setTimeout(()=> __go('Tools.html'), 100)">
+          <button class="mbtn" data-module="tools" style="border-bottom: none;" onclick="selBtn(this); setTimeout(()=> __go('Tools.html'), 100)">
             <span class="material-icons">construction</span>
             <div>Ferramentas Úteis</div>
           </button>
@@ -1817,6 +1818,12 @@
           const pj = document.getElementById('pointJustif');
           if (pj) pj.style.display = isProf ? '' : 'none';
         });
+        try {
+          const v = (parent.CB360_BUILD || '').split(' - ');
+          const mv = document.getElementById('menuVersion');
+          const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v[1] || '');
+          if (mv && v[0]) mv.textContent = `Versão ${v[0]}${d ? ` · ${d[3]}-${d[2]}-${d[1]}` : ''}`;
+        } catch (e) {}
         updateSwapsBadge();
         updateOccurrencesBadge();
         updateEventsBadge();
@@ -26318,20 +26325,11 @@
         if (!currentContactMenuTarget) return;
         const targetNint = currentContactMenuTarget.nint;
         const targetName = currentContactMenuTarget.name;
-        const currentCorp = localStorage.getItem("currentCorpOperNr");
-        const myNint = localStorage.getItem("currentUserNint") || currentUserNint;
         const confirmed = await confirmCriticalAction(targetName);
         if (!confirmed) return;
         try {
-          const {
-            error
-          } = await supabaseClient
-            .from('chat_messages')
-            .update({
-              hidden_for: [myNint]
-            })
-            .eq('corp_oper_nr', currentCorp)
-            .or(`and(n_int.eq.${myNint},recipient_nint.eq.${targetNint}),and(n_int.eq.${targetNint},recipient_nint.eq.${myNint})`);
+          const { error } = await supabaseClient
+            .rpc('chat_hide_conversation', { p_other: String(targetNint) });
           if (error) throw error;
           closeContactMenu();
           showSystemWarning('sucesso_limpeza', 'Conversa Eliminada.', `A conversa foi eliminada do teu histórico.`);
@@ -26615,7 +26613,7 @@
       </div>
       <h2 id="corpInfo" style="display: none;"></h2>
     </header>
-    <div class="main-content">
+    <div class="main-content" id="pjContent" style="visibility:hidden;">
       <p class="section-label">Selecione o Tipo de Picagem:</p>
       <div class="segmented-control" id="tipoRegistoControl">
         <button type="button" class="segmented-btn" data-tipo="branco" onclick="selectTipoRegisto('branco', this)">
@@ -26912,6 +26910,24 @@
       }
       document.addEventListener('DOMContentLoaded', function() {
         loadCorpInfo();
+        /* só profissionais: quem não é, volta à página inicial (mesma regra da MainPage) */
+        (async () => {
+          const corp = (getCorp() || '').padStart(4, '0');
+          const nInt = getNInt();
+          const cacheKey = 'cb360_link_type_' + corp + '_' + nInt;
+          let linkType = null;
+          try {
+            const nPad = String(nInt).padStart(3, '0');
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/reg_elems?select=link_type&n_int=in.(${nInt},${nPad})&corp_oper_nr=eq.${corp}`, { headers: getSupabaseHeaders() });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            linkType = (await r.json())?.[0]?.link_type || '';
+          } catch (e) {
+            try { linkType = localStorage.getItem(cacheKey); } catch (_) {}
+          }
+          const isProf = String(linkType || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes('profissional');
+          if (!isProf) { showToast('Disponível apenas para profissionais.'); setTimeout(() => __go('MainPage.html'), 1200); return; }
+          document.getElementById('pjContent').style.visibility = '';
+        })();
         const savedTheme = localStorage.getItem('sgo-theme');
         if (savedTheme === 'dark') {
           document.body.classList.add('dark-mode');
