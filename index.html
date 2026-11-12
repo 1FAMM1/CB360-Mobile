@@ -18116,6 +18116,25 @@
       @media (max-width:1080px) and (orientation:landscape) {:root {--s:0.68; --p:5px;}}
       @media (max-width:768px) and (orientation:landscape) {:root {--s:0.53;}}
       @media (-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {.main-wrapper {-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}}
+      /* ============================================================
+      IMPRESSÃO / PDF: só a folha (main-wrapper), sem cortes
+      ============================================================ */
+      @media print {
+        @page {size: A4 portrait; margin: 6mm;}
+        html, body {height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important;}
+        * {-webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;}
+        header.header, footer.footer, .menagebuttons-wrapper,
+        .leaflet-control-container, .map-fireareas-vehicles-overlay, .map-controls, .leaflet-popup {display: none !important;}
+        .main-wrapper {position: static !important; transform: none !important; top: auto !important; left: auto !important;
+                       margin: 0 auto !important; width: 750px !important; max-width: none !important; zoom: 0.96;}
+        .sec, table, .sitac-wrapper, .posit-wrapper, .assumptions-wrapper, .recognition-wrapper {break-inside: avoid; page-break-inside: avoid;}
+        .sitac-drawbox.expanded {position: static !important; width: auto !important; height: auto !important;}
+        textarea {overflow: visible !important; resize: none !important;}
+      }
+      /* telemóvel: a folha está reduzida (scale), por isso o espaço por baixo dos botões
+         tem de ser dividido pela mesma escala para os botões não ficarem por baixo do rodapé */
+      .menagebuttons-wrapper {margin-bottom: calc((var(--footer-h) + 30px) / var(--s, 1)) !important;}
+      @media print {.menagebuttons-wrapper {margin-bottom: 0 !important;}}
     </style>
   </head>
   <body>
@@ -18629,6 +18648,140 @@
           });
         });
       })();
+      /* =====================================================================
+         GRAVAR JSON / CARREGAR / EXPORTAR PDF / ENCERRAR
+         Grava todo o cenário (campos da folha + SITAC: meios, marcadores e setores)
+         num ficheiro .json, e volta a carregá-lo.
+         ===================================================================== */
+      const GC_PAGE = 'GCMatPerig';
+      const GC_LABEL = 'MatPerig';
+      const gcHasSitac = () => typeof sitacMap !== 'undefined' && !!sitacMap && typeof drawingLayer !== 'undefined';
+      function gcFields() {
+        return Array.from(document.querySelectorAll('input, textarea, select'))
+          .filter(el => el.type !== 'file' && el.type !== 'button' && el.type !== 'submit' &&
+                        !el.closest('#sitac-map') && !el.closest('.leaflet-popup'));
+      }
+      function gcCollectSitac() {
+        if (!gcHasSitac()) return null;
+        const out = {vehicles: [], markers: [], sectors: []};
+        const desc = (id) => savedDescriptions[id] || '';
+        vehicleLayer.eachLayer(m => { if (m.options.uniqueId) out.vehicles.push({name: m.options.elementName, position: m.getLatLng(), description: desc(m.options.uniqueId)}); });
+        markerLayer.eachLayer(m => { if (m.options.uniqueId) out.markers.push({name: m.options.elementName, position: m.getLatLng(), description: desc(m.options.uniqueId)}); });
+        drawingLayer.eachLayer(l => { if (l.uniqueId) out.sectors.push({type: l.sectorType, coordinates: l.getLatLngs(), description: desc(l.uniqueId)}); });
+        out.view = {center: sitacMap.getCenter(), zoom: sitacMap.getZoom()};
+        return out;
+      }
+      function gcClearSitac() {
+        if (!gcHasSitac()) return;
+        vehicleLayer.clearLayers();
+        markerLayer.clearLayers();
+        drawingLayer.clearLayers();
+        savedDescriptions = {};
+        vehicleCounter = 0;
+        markerCounter = 0;
+        if (typeof resetAllButtons === 'function') resetAllButtons();
+      }
+      const gcNum = (v, lim) => { const n = Number(v); return Number.isFinite(n) && Math.abs(n) <= lim ? n : null; };
+      async function gcRestoreSitac(s) {
+        if (!gcHasSitac()) return;
+        gcClearSitac();
+        if (!s || typeof s !== 'object') return;
+        for (const item of [...(s.vehicles || []), ...(s.markers || [])]) {
+          if (!item || !ELEMENT_CONFIG[item.name]) continue;               /* só elementos conhecidos */
+          const lat = gcNum(item.position && item.position.lat, 90), lng = gcNum(item.position && item.position.lng, 180);
+          if (lat === null || lng === null) continue;
+          const id = await addElement(item.name, L.latLng(lat, lng));
+          if (id && item.description) savedDescriptions[id] = String(item.description).slice(0, 500);
+        }
+        sitacMap.closePopup();
+        (s.sectors || []).forEach((sec, i) => {
+          const cfg = SECTOR_CONFIG[sec && sec.type];
+          if (!cfg || !Array.isArray(sec.coordinates)) return;
+          const ring = Array.isArray(sec.coordinates[0]) ? sec.coordinates[0] : sec.coordinates;
+          const pts = ring.map(p => [gcNum(p && p.lat, 90), gcNum(p && p.lng, 180)]).filter(([a, b]) => a !== null && b !== null);
+          if (pts.length < 3) return;
+          const layer = L.polygon(pts, {color: cfg.color, fillColor: cfg.color, fillOpacity: 0.3, weight: 3, opacity: 0.8});
+          const id = 'drawing-' + Date.now() + '-' + i;
+          layer.uniqueId = id;
+          layer.sectorType = sec.type;
+          drawingLayer.addLayer(layer);
+          if (sec.description) savedDescriptions[id] = String(sec.description).slice(0, 500);
+          layer.bindPopup(createSectorPopup(id, sec.type, layer));
+        });
+        const c = s.view && s.view.center;
+        const lat = gcNum(c && c.lat, 90), lng = gcNum(c && c.lng, 180), z = gcNum(s.view && s.view.zoom, 22);
+        if (lat !== null && lng !== null && z !== null) sitacMap.setView([lat, lng], z);
+      }
+      function exportToJSON() {
+        try {
+          const data = {
+            app: 'CB360-GC', page: GC_PAGE, version: 1, savedAt: new Date().toISOString(),
+            fields: gcFields().map((el, i) => ({i, id: el.id || null, value: (el.type === 'checkbox' || el.type === 'radio') ? el.checked : el.value})),
+            sitac: gcCollectSitac()
+          };
+          const d = new Date(), p = (n) => String(n).padStart(2, '0');
+          const name = `GC_${GC_LABEL}_${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.json`;
+          const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}));
+          const a = document.createElement('a');
+          a.href = url; a.download = name;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (e) {
+          console.error('Erro ao gravar JSON:', e);
+          alert('❌ Não foi possível gravar o ficheiro.');
+        }
+      }
+      function carregarDados() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+        input.onchange = () => {
+          const file = input.files && input.files[0];
+          if (!file) return;
+          if (file.size > 5 * 1024 * 1024) { alert('❌ Ficheiro demasiado grande.'); return; }
+          const reader = new FileReader();
+          reader.onload = async () => {
+            try {
+              const data = JSON.parse(reader.result);
+              if (!data || data.app !== 'CB360-GC' || !Array.isArray(data.fields)) throw new Error('formato');
+              if (data.page && data.page !== GC_PAGE && !confirm('Este ficheiro foi gravado noutro tipo de cenário. Carregar mesmo assim?')) return;
+              const fields = gcFields();
+              const byId = {};
+              fields.forEach(el => { if (el.id) byId[el.id] = el; });
+              data.fields.forEach(f => {
+                if (!f) return;
+                const el = (f.id && byId[f.id]) || (!f.id && Number.isInteger(f.i) ? fields[f.i] : null);
+                if (!el) return;
+                if (el.type === 'checkbox' || el.type === 'radio') el.checked = f.value === true;
+                else el.value = String(f.value ?? '').slice(0, 5000);   /* texto, nunca HTML */
+                el.dispatchEvent(new Event('input', {bubbles: true}));
+                el.dispatchEvent(new Event('change', {bubbles: true}));
+              });
+              await gcRestoreSitac(data.sitac);
+              alert('✅ Cenário carregado.');
+            } catch (e) {
+              console.error('Erro ao carregar:', e);
+              alert('❌ Ficheiro inválido. Escolha um ficheiro gravado com "Gravar JSON".');
+            }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      }
+      function exportToPDF() {
+        if (gcHasSitac()) sitacMap.closePopup();
+        setTimeout(() => window.print(), 150);   /* na janela de impressão escolha "Guardar como PDF" */
+      }
+      function encerrarSessao() {
+        if (!confirm('Encerrar o cenário?\nO que não foi gravado com "Gravar JSON" perde-se.')) return;
+        gcFields().forEach(el => {
+          if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+          else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+          else el.value = '';
+        });
+        gcClearSitac();
+        if (typeof __go === 'function') __go('Tools.html');   /* volta às Ferramentas Úteis */
+      }
     <\/script>
   </body>
   </html>
@@ -18877,6 +19030,25 @@
       @media (max-width:1080px) and (orientation:landscape) {:root {--s:0.68; --p:5px;}}
       @media (max-width:768px) and (orientation:landscape) {:root {--s:0.53;}}
       @media (-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {.main-wrapper {-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}}
+      /* ============================================================
+      IMPRESSÃO / PDF: só a folha (main-wrapper), sem cortes
+      ============================================================ */
+      @media print {
+        @page {size: A4 portrait; margin: 6mm;}
+        html, body {height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important;}
+        * {-webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;}
+        header.header, footer.footer, .menagebuttons-wrapper,
+        .leaflet-control-container, .map-fireareas-vehicles-overlay, .map-controls, .leaflet-popup {display: none !important;}
+        .main-wrapper {position: static !important; transform: none !important; top: auto !important; left: auto !important;
+                       margin: 0 auto !important; width: 750px !important; max-width: none !important; zoom: 0.96;}
+        .sec, table, .sitac-wrapper, .posit-wrapper, .assumptions-wrapper, .recognition-wrapper {break-inside: avoid; page-break-inside: avoid;}
+        .sitac-drawbox.expanded {position: static !important; width: auto !important; height: auto !important;}
+        textarea {overflow: visible !important; resize: none !important;}
+      }
+      /* telemóvel: a folha está reduzida (scale), por isso o espaço por baixo dos botões
+         tem de ser dividido pela mesma escala para os botões não ficarem por baixo do rodapé */
+      .menagebuttons-wrapper {margin-bottom: calc((var(--footer-h) + 30px) / var(--s, 1)) !important;}
+      @media print {.menagebuttons-wrapper {margin-bottom: 0 !important;}}
     </style>
   </head>
   <body>
@@ -19351,6 +19523,140 @@
           }).catch(err => console.error('Erro silencioso:', err));
         }
       })();
+      /* =====================================================================
+         GRAVAR JSON / CARREGAR / EXPORTAR PDF / ENCERRAR
+         Grava todo o cenário (campos da folha + SITAC: meios, marcadores e setores)
+         num ficheiro .json, e volta a carregá-lo.
+         ===================================================================== */
+      const GC_PAGE = 'GCAcidentes';
+      const GC_LABEL = 'Acidentes';
+      const gcHasSitac = () => typeof sitacMap !== 'undefined' && !!sitacMap && typeof drawingLayer !== 'undefined';
+      function gcFields() {
+        return Array.from(document.querySelectorAll('input, textarea, select'))
+          .filter(el => el.type !== 'file' && el.type !== 'button' && el.type !== 'submit' &&
+                        !el.closest('#sitac-map') && !el.closest('.leaflet-popup'));
+      }
+      function gcCollectSitac() {
+        if (!gcHasSitac()) return null;
+        const out = {vehicles: [], markers: [], sectors: []};
+        const desc = (id) => savedDescriptions[id] || '';
+        vehicleLayer.eachLayer(m => { if (m.options.uniqueId) out.vehicles.push({name: m.options.elementName, position: m.getLatLng(), description: desc(m.options.uniqueId)}); });
+        markerLayer.eachLayer(m => { if (m.options.uniqueId) out.markers.push({name: m.options.elementName, position: m.getLatLng(), description: desc(m.options.uniqueId)}); });
+        drawingLayer.eachLayer(l => { if (l.uniqueId) out.sectors.push({type: l.sectorType, coordinates: l.getLatLngs(), description: desc(l.uniqueId)}); });
+        out.view = {center: sitacMap.getCenter(), zoom: sitacMap.getZoom()};
+        return out;
+      }
+      function gcClearSitac() {
+        if (!gcHasSitac()) return;
+        vehicleLayer.clearLayers();
+        markerLayer.clearLayers();
+        drawingLayer.clearLayers();
+        savedDescriptions = {};
+        vehicleCounter = 0;
+        markerCounter = 0;
+        if (typeof resetAllButtons === 'function') resetAllButtons();
+      }
+      const gcNum = (v, lim) => { const n = Number(v); return Number.isFinite(n) && Math.abs(n) <= lim ? n : null; };
+      async function gcRestoreSitac(s) {
+        if (!gcHasSitac()) return;
+        gcClearSitac();
+        if (!s || typeof s !== 'object') return;
+        for (const item of [...(s.vehicles || []), ...(s.markers || [])]) {
+          if (!item || !ELEMENT_CONFIG[item.name]) continue;               /* só elementos conhecidos */
+          const lat = gcNum(item.position && item.position.lat, 90), lng = gcNum(item.position && item.position.lng, 180);
+          if (lat === null || lng === null) continue;
+          const id = await addElement(item.name, L.latLng(lat, lng));
+          if (id && item.description) savedDescriptions[id] = String(item.description).slice(0, 500);
+        }
+        sitacMap.closePopup();
+        (s.sectors || []).forEach((sec, i) => {
+          const cfg = SECTOR_CONFIG[sec && sec.type];
+          if (!cfg || !Array.isArray(sec.coordinates)) return;
+          const ring = Array.isArray(sec.coordinates[0]) ? sec.coordinates[0] : sec.coordinates;
+          const pts = ring.map(p => [gcNum(p && p.lat, 90), gcNum(p && p.lng, 180)]).filter(([a, b]) => a !== null && b !== null);
+          if (pts.length < 3) return;
+          const layer = L.polygon(pts, {color: cfg.color, fillColor: cfg.color, fillOpacity: 0.3, weight: 3, opacity: 0.8});
+          const id = 'drawing-' + Date.now() + '-' + i;
+          layer.uniqueId = id;
+          layer.sectorType = sec.type;
+          drawingLayer.addLayer(layer);
+          if (sec.description) savedDescriptions[id] = String(sec.description).slice(0, 500);
+          layer.bindPopup(createSectorPopup(id, sec.type, layer));
+        });
+        const c = s.view && s.view.center;
+        const lat = gcNum(c && c.lat, 90), lng = gcNum(c && c.lng, 180), z = gcNum(s.view && s.view.zoom, 22);
+        if (lat !== null && lng !== null && z !== null) sitacMap.setView([lat, lng], z);
+      }
+      function exportToJSON() {
+        try {
+          const data = {
+            app: 'CB360-GC', page: GC_PAGE, version: 1, savedAt: new Date().toISOString(),
+            fields: gcFields().map((el, i) => ({i, id: el.id || null, value: (el.type === 'checkbox' || el.type === 'radio') ? el.checked : el.value})),
+            sitac: gcCollectSitac()
+          };
+          const d = new Date(), p = (n) => String(n).padStart(2, '0');
+          const name = `GC_${GC_LABEL}_${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.json`;
+          const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}));
+          const a = document.createElement('a');
+          a.href = url; a.download = name;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (e) {
+          console.error('Erro ao gravar JSON:', e);
+          alert('❌ Não foi possível gravar o ficheiro.');
+        }
+      }
+      function carregarDados() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+        input.onchange = () => {
+          const file = input.files && input.files[0];
+          if (!file) return;
+          if (file.size > 5 * 1024 * 1024) { alert('❌ Ficheiro demasiado grande.'); return; }
+          const reader = new FileReader();
+          reader.onload = async () => {
+            try {
+              const data = JSON.parse(reader.result);
+              if (!data || data.app !== 'CB360-GC' || !Array.isArray(data.fields)) throw new Error('formato');
+              if (data.page && data.page !== GC_PAGE && !confirm('Este ficheiro foi gravado noutro tipo de cenário. Carregar mesmo assim?')) return;
+              const fields = gcFields();
+              const byId = {};
+              fields.forEach(el => { if (el.id) byId[el.id] = el; });
+              data.fields.forEach(f => {
+                if (!f) return;
+                const el = (f.id && byId[f.id]) || (!f.id && Number.isInteger(f.i) ? fields[f.i] : null);
+                if (!el) return;
+                if (el.type === 'checkbox' || el.type === 'radio') el.checked = f.value === true;
+                else el.value = String(f.value ?? '').slice(0, 5000);   /* texto, nunca HTML */
+                el.dispatchEvent(new Event('input', {bubbles: true}));
+                el.dispatchEvent(new Event('change', {bubbles: true}));
+              });
+              await gcRestoreSitac(data.sitac);
+              alert('✅ Cenário carregado.');
+            } catch (e) {
+              console.error('Erro ao carregar:', e);
+              alert('❌ Ficheiro inválido. Escolha um ficheiro gravado com "Gravar JSON".');
+            }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      }
+      function exportToPDF() {
+        if (gcHasSitac()) sitacMap.closePopup();
+        setTimeout(() => window.print(), 150);   /* na janela de impressão escolha "Guardar como PDF" */
+      }
+      function encerrarSessao() {
+        if (!confirm('Encerrar o cenário?\nO que não foi gravado com "Gravar JSON" perde-se.')) return;
+        gcFields().forEach(el => {
+          if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+          else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+          else el.value = '';
+        });
+        gcClearSitac();
+        if (typeof __go === 'function') __go('Tools.html');   /* volta às Ferramentas Úteis */
+      }
     <\/script>
   </body>
   </html>
@@ -19607,6 +19913,25 @@
       @media (max-width:768px) and (orientation:landscape) {:root {--s:0.53;}}
       @media (-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {.main-wrapper {-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}}
 
+      /* ============================================================
+      IMPRESSÃO / PDF: só a folha (main-wrapper), sem cortes
+      ============================================================ */
+      @media print {
+        @page {size: A4 portrait; margin: 6mm;}
+        html, body {height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important;}
+        * {-webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;}
+        header.header, footer.footer, .menagebuttons-wrapper,
+        .leaflet-control-container, .map-fireareas-vehicles-overlay, .map-controls, .leaflet-popup {display: none !important;}
+        .main-wrapper {position: static !important; transform: none !important; top: auto !important; left: auto !important;
+                       margin: 0 auto !important; width: 750px !important; max-width: none !important; zoom: 0.96;}
+        .sec, table, .sitac-wrapper, .posit-wrapper, .assumptions-wrapper, .recognition-wrapper {break-inside: avoid; page-break-inside: avoid;}
+        .sitac-drawbox.expanded {position: static !important; width: auto !important; height: auto !important;}
+        textarea {overflow: visible !important; resize: none !important;}
+      }
+      /* telemóvel: a folha está reduzida (scale), por isso o espaço por baixo dos botões
+         tem de ser dividido pela mesma escala para os botões não ficarem por baixo do rodapé */
+      .menagebuttons-wrapper {margin-bottom: calc((var(--footer-h) + 30px) / var(--s, 1)) !important;}
+      @media print {.menagebuttons-wrapper {margin-bottom: 0 !important;}}
     </style>
   </head>
   <body>
@@ -20130,6 +20455,140 @@
           }).catch(err => console.error('Erro silencioso:', err));
         }
       })();
+      /* =====================================================================
+         GRAVAR JSON / CARREGAR / EXPORTAR PDF / ENCERRAR
+         Grava todo o cenário (campos da folha + SITAC: meios, marcadores e setores)
+         num ficheiro .json, e volta a carregá-lo.
+         ===================================================================== */
+      const GC_PAGE = 'GCIncUrb';
+      const GC_LABEL = 'IncUrbano';
+      const gcHasSitac = () => typeof sitacMap !== 'undefined' && !!sitacMap && typeof drawingLayer !== 'undefined';
+      function gcFields() {
+        return Array.from(document.querySelectorAll('input, textarea, select'))
+          .filter(el => el.type !== 'file' && el.type !== 'button' && el.type !== 'submit' &&
+                        !el.closest('#sitac-map') && !el.closest('.leaflet-popup'));
+      }
+      function gcCollectSitac() {
+        if (!gcHasSitac()) return null;
+        const out = {vehicles: [], markers: [], sectors: []};
+        const desc = (id) => savedDescriptions[id] || '';
+        vehicleLayer.eachLayer(m => { if (m.options.uniqueId) out.vehicles.push({name: m.options.elementName, position: m.getLatLng(), description: desc(m.options.uniqueId)}); });
+        markerLayer.eachLayer(m => { if (m.options.uniqueId) out.markers.push({name: m.options.elementName, position: m.getLatLng(), description: desc(m.options.uniqueId)}); });
+        drawingLayer.eachLayer(l => { if (l.uniqueId) out.sectors.push({type: l.sectorType, coordinates: l.getLatLngs(), description: desc(l.uniqueId)}); });
+        out.view = {center: sitacMap.getCenter(), zoom: sitacMap.getZoom()};
+        return out;
+      }
+      function gcClearSitac() {
+        if (!gcHasSitac()) return;
+        vehicleLayer.clearLayers();
+        markerLayer.clearLayers();
+        drawingLayer.clearLayers();
+        savedDescriptions = {};
+        vehicleCounter = 0;
+        markerCounter = 0;
+        if (typeof resetAllButtons === 'function') resetAllButtons();
+      }
+      const gcNum = (v, lim) => { const n = Number(v); return Number.isFinite(n) && Math.abs(n) <= lim ? n : null; };
+      async function gcRestoreSitac(s) {
+        if (!gcHasSitac()) return;
+        gcClearSitac();
+        if (!s || typeof s !== 'object') return;
+        for (const item of [...(s.vehicles || []), ...(s.markers || [])]) {
+          if (!item || !ELEMENT_CONFIG[item.name]) continue;               /* só elementos conhecidos */
+          const lat = gcNum(item.position && item.position.lat, 90), lng = gcNum(item.position && item.position.lng, 180);
+          if (lat === null || lng === null) continue;
+          const id = await addElement(item.name, L.latLng(lat, lng));
+          if (id && item.description) savedDescriptions[id] = String(item.description).slice(0, 500);
+        }
+        sitacMap.closePopup();
+        (s.sectors || []).forEach((sec, i) => {
+          const cfg = SECTOR_CONFIG[sec && sec.type];
+          if (!cfg || !Array.isArray(sec.coordinates)) return;
+          const ring = Array.isArray(sec.coordinates[0]) ? sec.coordinates[0] : sec.coordinates;
+          const pts = ring.map(p => [gcNum(p && p.lat, 90), gcNum(p && p.lng, 180)]).filter(([a, b]) => a !== null && b !== null);
+          if (pts.length < 3) return;
+          const layer = L.polygon(pts, {color: cfg.color, fillColor: cfg.color, fillOpacity: 0.3, weight: 3, opacity: 0.8});
+          const id = 'drawing-' + Date.now() + '-' + i;
+          layer.uniqueId = id;
+          layer.sectorType = sec.type;
+          drawingLayer.addLayer(layer);
+          if (sec.description) savedDescriptions[id] = String(sec.description).slice(0, 500);
+          layer.bindPopup(createSectorPopup(id, sec.type, layer));
+        });
+        const c = s.view && s.view.center;
+        const lat = gcNum(c && c.lat, 90), lng = gcNum(c && c.lng, 180), z = gcNum(s.view && s.view.zoom, 22);
+        if (lat !== null && lng !== null && z !== null) sitacMap.setView([lat, lng], z);
+      }
+      function exportToJSON() {
+        try {
+          const data = {
+            app: 'CB360-GC', page: GC_PAGE, version: 1, savedAt: new Date().toISOString(),
+            fields: gcFields().map((el, i) => ({i, id: el.id || null, value: (el.type === 'checkbox' || el.type === 'radio') ? el.checked : el.value})),
+            sitac: gcCollectSitac()
+          };
+          const d = new Date(), p = (n) => String(n).padStart(2, '0');
+          const name = `GC_${GC_LABEL}_${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.json`;
+          const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}));
+          const a = document.createElement('a');
+          a.href = url; a.download = name;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (e) {
+          console.error('Erro ao gravar JSON:', e);
+          alert('❌ Não foi possível gravar o ficheiro.');
+        }
+      }
+      function carregarDados() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+        input.onchange = () => {
+          const file = input.files && input.files[0];
+          if (!file) return;
+          if (file.size > 5 * 1024 * 1024) { alert('❌ Ficheiro demasiado grande.'); return; }
+          const reader = new FileReader();
+          reader.onload = async () => {
+            try {
+              const data = JSON.parse(reader.result);
+              if (!data || data.app !== 'CB360-GC' || !Array.isArray(data.fields)) throw new Error('formato');
+              if (data.page && data.page !== GC_PAGE && !confirm('Este ficheiro foi gravado noutro tipo de cenário. Carregar mesmo assim?')) return;
+              const fields = gcFields();
+              const byId = {};
+              fields.forEach(el => { if (el.id) byId[el.id] = el; });
+              data.fields.forEach(f => {
+                if (!f) return;
+                const el = (f.id && byId[f.id]) || (!f.id && Number.isInteger(f.i) ? fields[f.i] : null);
+                if (!el) return;
+                if (el.type === 'checkbox' || el.type === 'radio') el.checked = f.value === true;
+                else el.value = String(f.value ?? '').slice(0, 5000);   /* texto, nunca HTML */
+                el.dispatchEvent(new Event('input', {bubbles: true}));
+                el.dispatchEvent(new Event('change', {bubbles: true}));
+              });
+              await gcRestoreSitac(data.sitac);
+              alert('✅ Cenário carregado.');
+            } catch (e) {
+              console.error('Erro ao carregar:', e);
+              alert('❌ Ficheiro inválido. Escolha um ficheiro gravado com "Gravar JSON".');
+            }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      }
+      function exportToPDF() {
+        if (gcHasSitac()) sitacMap.closePopup();
+        setTimeout(() => window.print(), 150);   /* na janela de impressão escolha "Guardar como PDF" */
+      }
+      function encerrarSessao() {
+        if (!confirm('Encerrar o cenário?\nO que não foi gravado com "Gravar JSON" perde-se.')) return;
+        gcFields().forEach(el => {
+          if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+          else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+          else el.value = '';
+        });
+        gcClearSitac();
+        if (typeof __go === 'function') __go('Tools.html');   /* volta às Ferramentas Úteis */
+      }
     <\/script>
   </body>
   </html>
@@ -20453,7 +20912,24 @@
         .perimetre-btn {min-width:65px !important; font-size:8px !important;}
       }
       @media (-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {.main-wrapper {-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}}
-
+      /* ============================================================
+      IMPRESSÃO / PDF: só a folha (main-wrapper), sem cortes
+      ============================================================ */
+      @media print {
+        @page {size: A4 portrait; margin: 6mm;}
+        html, body {height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important;}
+        * {-webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;}
+        header.header, footer.footer, .menagebuttons-wrapper,
+        .leaflet-control-container, .map-fireareas-vehicles-overlay, .map-controls, .leaflet-popup {display: none !important;}
+        .main-wrapper {position: static !important; transform: none !important; top: auto !important; left: auto !important; margin: 0 auto !important; width: 750px !important; max-width: none !important; zoom: 0.96;}
+        .sec, table, .sitac-wrapper, .posit-wrapper, .assumptions-wrapper, .recognition-wrapper {break-inside: avoid; page-break-inside: avoid;}
+        .sitac-drawbox.expanded {position: static !important; width: auto !important; height: auto !important;}
+        textarea {overflow: visible !important; resize: none !important;}
+      }
+      /* telemóvel: a folha está reduzida (scale), por isso o espaço por baixo dos botões
+         tem de ser dividido pela mesma escala para os botões não ficarem por baixo do rodapé */
+      .menagebuttons-wrapper {margin-bottom: calc((var(--footer-h) + 30px) / var(--s, 1)) !important;}
+      @media print {.menagebuttons-wrapper {margin-bottom: 0 !important;}}
     </style>
   </head>
   <body>
@@ -20967,7 +21443,6 @@
       }
     <\/script>
     <\script>
-      /* Ano do rodapé e logo da corporação (cabeçalho e guia), igual às outras páginas */
       (function () {
         const fy = document.getElementById('footerYear');
         if (fy) fy.textContent = new Date().getFullYear();
@@ -21706,6 +22181,24 @@
             };
             (data.vehicles || []).forEach(restore);
             (data.markers || []).forEach(restore);
+            /* setores / perímetro desenhados */
+            (data.sectors || []).forEach((s, i) => {
+              const cfg = SECTOR_CONFIG[s && s.type];
+              if (!cfg || !Array.isArray(s.coordinates)) return;
+              /* aceita [[{lat,lng},…]] (o que o export grava) ou [{lat,lng},…] */
+              const ring = Array.isArray(s.coordinates[0]) ? s.coordinates[0] : s.coordinates;
+              const pts = ring
+                .map(p => [Number(p && p.lat), Number(p && p.lng)])
+                .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180);
+              if (pts.length < 3) return;
+              const layer = L.polygon(pts, {color: cfg.color, fillColor: cfg.color, fillOpacity: 0.3, weight: 3, opacity: 0.8});
+              const id = 'drawing-' + Date.now() + '-' + i;
+              layer.uniqueId = id;
+              layer.sectorType = s.type;
+              drawingLayer.addLayer(layer);
+              if (s.description) savedDescriptions[id] = String(s.description).slice(0, 500);
+              layer.bindPopup(createSectorPopup(id, s.type, layer));
+            });
             alert('✅ Dados importados com sucesso!');
           } catch (error) {
             console.error('Erro ao importar dados:', error);
@@ -21713,6 +22206,140 @@
           }
         };
         reader.readAsText(file);
+      }
+      /* =====================================================================
+         GRAVAR JSON / CARREGAR / EXPORTAR PDF / ENCERRAR
+         Grava todo o cenário (campos da folha + SITAC: meios, marcadores e setores)
+         num ficheiro .json, e volta a carregá-lo.
+         ===================================================================== */
+      const GC_PAGE = 'GCIncRural';
+      const GC_LABEL = 'IncRural';
+      const gcHasSitac = () => typeof sitacMap !== 'undefined' && !!sitacMap && typeof drawingLayer !== 'undefined';
+      function gcFields() {
+        return Array.from(document.querySelectorAll('input, textarea, select'))
+          .filter(el => el.type !== 'file' && el.type !== 'button' && el.type !== 'submit' &&
+                        !el.closest('#sitac-map') && !el.closest('.leaflet-popup'));
+      }
+      function gcCollectSitac() {
+        if (!gcHasSitac()) return null;
+        const out = {vehicles: [], markers: [], sectors: []};
+        const desc = (id) => savedDescriptions[id] || '';
+        vehicleLayer.eachLayer(m => { if (m.options.uniqueId) out.vehicles.push({name: m.options.elementName, position: m.getLatLng(), description: desc(m.options.uniqueId)}); });
+        markerLayer.eachLayer(m => { if (m.options.uniqueId) out.markers.push({name: m.options.elementName, position: m.getLatLng(), description: desc(m.options.uniqueId)}); });
+        drawingLayer.eachLayer(l => { if (l.uniqueId) out.sectors.push({type: l.sectorType, coordinates: l.getLatLngs(), description: desc(l.uniqueId)}); });
+        out.view = {center: sitacMap.getCenter(), zoom: sitacMap.getZoom()};
+        return out;
+      }
+      function gcClearSitac() {
+        if (!gcHasSitac()) return;
+        vehicleLayer.clearLayers();
+        markerLayer.clearLayers();
+        drawingLayer.clearLayers();
+        savedDescriptions = {};
+        vehicleCounter = 0;
+        markerCounter = 0;
+        if (typeof resetAllButtons === 'function') resetAllButtons();
+      }
+      const gcNum = (v, lim) => { const n = Number(v); return Number.isFinite(n) && Math.abs(n) <= lim ? n : null; };
+      async function gcRestoreSitac(s) {
+        if (!gcHasSitac()) return;
+        gcClearSitac();
+        if (!s || typeof s !== 'object') return;
+        for (const item of [...(s.vehicles || []), ...(s.markers || [])]) {
+          if (!item || !ELEMENT_CONFIG[item.name]) continue;               /* só elementos conhecidos */
+          const lat = gcNum(item.position && item.position.lat, 90), lng = gcNum(item.position && item.position.lng, 180);
+          if (lat === null || lng === null) continue;
+          const id = await addElement(item.name, L.latLng(lat, lng));
+          if (id && item.description) savedDescriptions[id] = String(item.description).slice(0, 500);
+        }
+        sitacMap.closePopup();
+        (s.sectors || []).forEach((sec, i) => {
+          const cfg = SECTOR_CONFIG[sec && sec.type];
+          if (!cfg || !Array.isArray(sec.coordinates)) return;
+          const ring = Array.isArray(sec.coordinates[0]) ? sec.coordinates[0] : sec.coordinates;
+          const pts = ring.map(p => [gcNum(p && p.lat, 90), gcNum(p && p.lng, 180)]).filter(([a, b]) => a !== null && b !== null);
+          if (pts.length < 3) return;
+          const layer = L.polygon(pts, {color: cfg.color, fillColor: cfg.color, fillOpacity: 0.3, weight: 3, opacity: 0.8});
+          const id = 'drawing-' + Date.now() + '-' + i;
+          layer.uniqueId = id;
+          layer.sectorType = sec.type;
+          drawingLayer.addLayer(layer);
+          if (sec.description) savedDescriptions[id] = String(sec.description).slice(0, 500);
+          layer.bindPopup(createSectorPopup(id, sec.type, layer));
+        });
+        const c = s.view && s.view.center;
+        const lat = gcNum(c && c.lat, 90), lng = gcNum(c && c.lng, 180), z = gcNum(s.view && s.view.zoom, 22);
+        if (lat !== null && lng !== null && z !== null) sitacMap.setView([lat, lng], z);
+      }
+      function exportToJSON() {
+        try {
+          const data = {
+            app: 'CB360-GC', page: GC_PAGE, version: 1, savedAt: new Date().toISOString(),
+            fields: gcFields().map((el, i) => ({i, id: el.id || null, value: (el.type === 'checkbox' || el.type === 'radio') ? el.checked : el.value})),
+            sitac: gcCollectSitac()
+          };
+          const d = new Date(), p = (n) => String(n).padStart(2, '0');
+          const name = `GC_${GC_LABEL}_${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.json`;
+          const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}));
+          const a = document.createElement('a');
+          a.href = url; a.download = name;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (e) {
+          console.error('Erro ao gravar JSON:', e);
+          alert('❌ Não foi possível gravar o ficheiro.');
+        }
+      }
+      function carregarDados() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+        input.onchange = () => {
+          const file = input.files && input.files[0];
+          if (!file) return;
+          if (file.size > 5 * 1024 * 1024) { alert('❌ Ficheiro demasiado grande.'); return; }
+          const reader = new FileReader();
+          reader.onload = async () => {
+            try {
+              const data = JSON.parse(reader.result);
+              if (!data || data.app !== 'CB360-GC' || !Array.isArray(data.fields)) throw new Error('formato');
+              if (data.page && data.page !== GC_PAGE && !confirm('Este ficheiro foi gravado noutro tipo de cenário. Carregar mesmo assim?')) return;
+              const fields = gcFields();
+              const byId = {};
+              fields.forEach(el => { if (el.id) byId[el.id] = el; });
+              data.fields.forEach(f => {
+                if (!f) return;
+                const el = (f.id && byId[f.id]) || (!f.id && Number.isInteger(f.i) ? fields[f.i] : null);
+                if (!el) return;
+                if (el.type === 'checkbox' || el.type === 'radio') el.checked = f.value === true;
+                else el.value = String(f.value ?? '').slice(0, 5000);   /* texto, nunca HTML */
+                el.dispatchEvent(new Event('input', {bubbles: true}));
+                el.dispatchEvent(new Event('change', {bubbles: true}));
+              });
+              await gcRestoreSitac(data.sitac);
+              alert('✅ Cenário carregado.');
+            } catch (e) {
+              console.error('Erro ao carregar:', e);
+              alert('❌ Ficheiro inválido. Escolha um ficheiro gravado com "Gravar JSON".');
+            }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      }
+      function exportToPDF() {
+        if (gcHasSitac()) sitacMap.closePopup();
+        setTimeout(() => window.print(), 150);   /* na janela de impressão escolha "Guardar como PDF" */
+      }
+      function encerrarSessao() {
+        if (!confirm('Encerrar o cenário?\nO que não foi gravado com "Gravar JSON" perde-se.')) return;
+        gcFields().forEach(el => {
+          if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+          else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+          else el.value = '';
+        });
+        gcClearSitac();
+        if (typeof __go === 'function') __go('Tools.html');   /* volta às Ferramentas Úteis */
       }
     <\/script>
   </body>
@@ -27024,7 +27651,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v16 - 2026-11-12 - Voltar do chat: historico no shell (+ v13)';
+  window.CB360_BUILD='v17 - 2026-11-12 - Voltar do chat: historico no shell (+ v13)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
