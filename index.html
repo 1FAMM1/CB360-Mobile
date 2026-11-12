@@ -22603,7 +22603,9 @@
             headers: {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${tk}`}
           });
           if (!r.ok) throw new Error('HTTP ' + r.status);
-          return URL.createObjectURL(await r.blob());
+          const b = await r.blob();
+          const seguro = /^(image\/(png|jpe?g|gif|webp|heic|heif|bmp)|audio\/|video\/|application\/pdf)/i.test(b.type);
+          return URL.createObjectURL(seguro ? b : new Blob([b], {type: 'application/octet-stream'}));
         })();
         cache.set(path, p);
         p.catch(() => cache.delete(path));
@@ -26943,6 +26945,7 @@
     return pages[h]?h:null;
   }
   function baseUrl(){return location.pathname+location.search;}
+  /* medição da safe-area para as páginas */
   window.__cbSafe=function(){
     var cs=getComputedStyle(document.getElementById('sa'));
     return {top:parseFloat(cs.paddingTop)||0,right:parseFloat(cs.paddingRight)||0, bottom:parseFloat(cs.paddingBottom)||0,left:parseFloat(cs.paddingLeft)||0};
@@ -26950,7 +26953,7 @@
   function hasSession(){
     var tk=sessionStorage.getItem('authToken')||localStorage.getItem('authToken');
     if(!tk) return false;
-    var ex=jwtExp(tk);
+    var ex=jwtExp(tk);               /* null = não é um JWT válido (ex.: "null", "undefined") */
     return !!ex && ex>Date.now();
   }
   function clearSession(){
@@ -26958,6 +26961,7 @@
       .forEach(function(k){localStorage.removeItem(k);sessionStorage.removeItem(k);});
   }
   function show(name){
+    /* guarda de sessão: sem token ou token expirado -> login */
     if(name!==DEFAULT && !hasSession()){
       clearSession();
       name=DEFAULT;
@@ -26982,7 +26986,9 @@
         if(t)document.title=t;
         var tc=d.querySelector('meta[name="theme-color"]');
         var m=document.querySelector('meta[name="theme-color"]');
+        /* barra de estado e de navegação: sempre escuras */
         if(m)m.setAttribute('content','#0f1117');
+        /* fundo do shell fica escuro (era copiado da página = vermelho por baixo da barra de navegação) */
         document.documentElement.style.background='#0f1117';
       }catch(_){}
       document.getElementById('boot').classList.add('off');
@@ -26990,27 +26996,34 @@
       if(name===DEFAULT) pendingChat=null;
     }
     f.addEventListener('load',reveal);
-    setTimeout(reveal,6000);
+    setTimeout(reveal,6000); /* rede lenta/CDN em baixo: não deixa o ecrã preso */
     document.body.appendChild(f);
   }
+  /* chamado pelas páginas (window.__go) */
   window.__cbGo=function(u){
     var n=norm(u);
-    if(!n){ top.location.href=u; return; }
+    if(!n){ top.location.href=u; return; }          /* ex.: system_admin.html (fora desta app) */
     var url=n===DEFAULT?baseUrl():baseUrl()+'#'+n;
     /* sair do login ou voltar ao login: substitui, não empilha */
     if(curName===DEFAULT||n===DEFAULT) history.replaceState({p:n},'',url);
     else history.pushState({p:n},'',url);
     show(n);
   };
+  /* botão "Voltar" */
   window.addEventListener('popstate',function(e){
     var n=(e.state&&e.state.p)||fromHash()||DEFAULT;
     if(n!==curName)show(n);
   });
+  /* token expirou com a app aberta (ex.: voltou ao telemóvel dias depois) */
   function checkSession(){
     if(curName && curName!==DEFAULT && !hasSession()) window.__cbGo('index.html');
   }
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) checkSession(); });
   setInterval(checkSession,60000);
+  /* ===== SESSÃO FICTÍCIA DE TESTE =====
+     Só corre em localhost, rede local (telemóvel a testar o PC) e StackBlitz.
+     Lê o ficheiro test-session.js (que NÃO vai para produção) e substitui a sessão guardada.
+     Em produção nem sequer pede o ficheiro. Para ver o login em teste: abrir com #index */
   var TEST_HOST=/^(localhost|127\.0\.0\.1|\[::1\]|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$|(^|\.)(localhost|stackblitz\.(io|com)|webcontainer(-api)?\.io)$/i;
   function testBanner(msg,bad){
     var d=document.createElement('div');
@@ -27033,6 +27046,7 @@
       try{
         var o=window.CB360_TEST_SESSION||{}, keys=Object.keys(o);
         if(!keys.length){testBanner('TESTE · test-session.js vazio ou inválido',true);return done(false);}
+        /* em teste a sessão fictícia manda: substitui qualquer sessão antiga/expirada */
         keys.forEach(function(k){localStorage.setItem(k,o[k]);});
         console.warn('CB360 TESTE: sessão fictícia ativa (test-session.js). Nunca publicar esse ficheiro.');
         var exp=jwtExp(o.authToken);
@@ -27047,6 +27061,8 @@
     };
     document.head.appendChild(s);
   }
+  /* arranque */
+  /* aberto a partir de uma notificação com a app fechada: /?openChat=NINT */
   (function(){
     try{
       var q=new URLSearchParams(location.search), oc=q.get('openChat'), ab=q.get('abrir');
@@ -27059,6 +27075,7 @@
     }catch(_){}
   })();
   loadTestSession(function(testSession){
+    /* com sessão válida abre logo a MainPage (o utilizador mestre passa pelo login) */
     var master=(sessionStorage.getItem('isMasterUser')||localStorage.getItem('isMasterUser'))==='true';
     var first=pendingChat?'InterChat':(pendingPage||fromHash()||((testSession||(hasSession()&&!master))?'MainPage':DEFAULT));
     pendingPage=null;
@@ -27071,6 +27088,7 @@
       w.navigator.serviceWorker.dispatchEvent(new w.MessageEvent('message',{data:data}));
     }catch(_){}
   }
+  /* espera que o chat tenha a lista de contactos carregada (máx. ~8 s) e abre a conversa */
   function deliverChat(nint){
     var tries=0, f0=curFrame;
     (function tick(){
@@ -27081,17 +27099,20 @@
       if(++tries<55) setTimeout(tick,150);
     })();
   }
+  /* Service Worker: regista e reencaminha mensagens (ex.: OPEN_CHAT) para a página ativa */
   if('serviceWorker' in navigator){
     window.addEventListener('load',function(){
       navigator.serviceWorker.register('sw.js').catch(function(err){console.warn('SW:',err);});
     });
     navigator.serviceWorker.addEventListener('message',function(e){
       var d=e.data||{};
+      /* notificação do chat: se não estiver no chat, abre-o e entrega a conversa quando estiver pronto */
       if(d.type==='OPEN_CHAT' && d.chatNint){
         if(curName==='InterChat') deliverChat(d.chatNint);
         else { pendingChat=String(d.chatNint); window.__cbGo('InterChat.html'); }
         return;
       }
+      /* aviso com página (trocas, férias, eventos, escalas): abre essa página */
       if(d.type==='OPEN_PAGE' && d.pagina && pages[d.pagina]){
         if(curName!==d.pagina) window.__cbGo(d.pagina+'.html');
         return;
