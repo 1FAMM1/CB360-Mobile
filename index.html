@@ -18135,6 +18135,14 @@
          tem de ser dividido pela mesma escala para os botões não ficarem por baixo do rodapé */
       .menagebuttons-wrapper {margin-bottom: calc((var(--footer-h) + 30px) / var(--s, 1)) !important;}
       @media print {.menagebuttons-wrapper {margin-bottom: 0 !important;}}
+      /* ============================================================
+      ZOOM COM OS DEDOS: só a folha (main-wrapper); cabeçalho e rodapé ficam fixos
+      ============================================================ */
+      html.gc-zoomed .main-wrapper {transform: scale(calc(var(--s) * var(--gcz, 1))) !important; transform-origin: top left !important; left: var(--gcl, 0px) !important; margin-left: 0 !important;}
+      #gcZoomReset {display: none; position: fixed; right: 12px; bottom: calc(var(--footer-h) + 12px); z-index: 1000; padding: 8px 14px; border: 0; border-radius: 20px;
+                    background: rgba(15, 17, 23, 0.85); color: #fff; font: 600 13px/1 sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,.3);}
+      html.gc-zoomed #gcZoomReset {display: block;}
+      @media print {html.gc-zoomed .main-wrapper {transform: none !important;} #gcZoomReset {display: none !important;}}
     </style>
   </head>
   <body>
@@ -18782,6 +18790,66 @@
         gcClearSitac();
         if (typeof __go === 'function') __go('Tools.html');   /* volta às Ferramentas Úteis */
       }
+      /* =====================================================================
+         ZOOM COM OS DEDOS (só a folha). No mapa do SITAC o "pinch" continua a ser do mapa.
+         ===================================================================== */
+      (function () {
+        const root = document.documentElement;
+        const MAX = 4;
+        let z = 1, pinch = null;
+        const btn = document.createElement('button');
+        btn.id = 'gcZoomReset';
+        btn.type = 'button';
+        btn.textContent = '↺ Tamanho normal';
+        btn.addEventListener('click', () => setZoom(1, 0, 0));
+        document.body.appendChild(btn);
+        function scrollPos() {
+          const se = document.scrollingElement || root, b = document.body;
+          return {x: Math.max(se.scrollLeft, b.scrollLeft), y: Math.max(se.scrollTop, b.scrollTop)};
+        }
+        function scrollTo(x, y) {
+          const se = document.scrollingElement || root, b = document.body;
+          se.scrollLeft = x; b.scrollLeft = x; se.scrollTop = y; b.scrollTop = y;
+        }
+        function setZoom(newZ, cx, cy) {
+          newZ = Math.min(MAX, Math.max(1, newZ));
+          if (newZ < 1.02) newZ = 1;
+          const p = scrollPos(), ratio = newZ / z;
+          z = newZ;
+          if (z === 1) {
+            root.classList.remove('gc-zoomed');
+            root.style.removeProperty('--gcz');
+            scrollTo(0, p.y * ratio);
+            return;
+          }
+          if (!root.classList.contains('gc-zoomed')) {
+            /* a folha começa onde estava (centrada), para não "saltar" ao começar o zoom */
+            const mw = document.querySelector('.main-wrapper');
+            const left = mw ? mw.getBoundingClientRect().left + p.x : 0;
+            root.style.setProperty('--gcl', Math.max(0, Math.round(left)) + 'px');
+          }
+          root.style.setProperty('--gcz', String(z));
+          root.classList.add('gc-zoomed');
+          /* mantém o ponto entre os dedos no mesmo sítio do ecrã */
+          scrollTo((p.x + cx) * ratio - cx, (p.y + cy) * ratio - cy);
+        }
+        const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        document.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 2 && !(e.target.closest && e.target.closest('#sitac-map'))) {
+            pinch = {d: dist(e.touches) || 1, z};
+          }
+        }, {passive: true});
+        document.addEventListener('touchmove', (e) => {
+          if (!pinch || e.touches.length !== 2) return;
+          e.preventDefault();
+          const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          setZoom(pinch.z * dist(e.touches) / pinch.d, cx, cy);
+        }, {passive: false});
+        document.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = null; }, {passive: true});
+        document.addEventListener('touchcancel', () => { pinch = null; }, {passive: true});
+        window.gcSetZoom = setZoom;   /* usado pelo Encerrar */
+      })();
     <\/script>
   </body>
   </html>
@@ -19049,6 +19117,14 @@
          tem de ser dividido pela mesma escala para os botões não ficarem por baixo do rodapé */
       .menagebuttons-wrapper {margin-bottom: calc((var(--footer-h) + 30px) / var(--s, 1)) !important;}
       @media print {.menagebuttons-wrapper {margin-bottom: 0 !important;}}
+      /* ============================================================
+      ZOOM COM OS DEDOS: só a folha (main-wrapper); cabeçalho e rodapé ficam fixos
+      ============================================================ */
+      html.gc-zoomed .main-wrapper {transform: scale(calc(var(--s) * var(--gcz, 1))) !important; transform-origin: top left !important; left: var(--gcl, 0px) !important; margin-left: 0 !important;}
+      #gcZoomReset {display: none; position: fixed; right: 12px; bottom: calc(var(--footer-h) + 12px); z-index: 1000; padding: 8px 14px; border: 0; border-radius: 20px;
+                    background: rgba(15, 17, 23, 0.85); color: #fff; font: 600 13px/1 sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,.3);}
+      html.gc-zoomed #gcZoomReset {display: block;}
+      @media print {html.gc-zoomed .main-wrapper {transform: none !important;} #gcZoomReset {display: none !important;}}
     </style>
   </head>
   <body>
@@ -19657,6 +19733,66 @@
         gcClearSitac();
         if (typeof __go === 'function') __go('Tools.html');   /* volta às Ferramentas Úteis */
       }
+      /* =====================================================================
+         ZOOM COM OS DEDOS (só a folha). No mapa do SITAC o "pinch" continua a ser do mapa.
+         ===================================================================== */
+      (function () {
+        const root = document.documentElement;
+        const MAX = 4;
+        let z = 1, pinch = null;
+        const btn = document.createElement('button');
+        btn.id = 'gcZoomReset';
+        btn.type = 'button';
+        btn.textContent = '↺ Tamanho normal';
+        btn.addEventListener('click', () => setZoom(1, 0, 0));
+        document.body.appendChild(btn);
+        function scrollPos() {
+          const se = document.scrollingElement || root, b = document.body;
+          return {x: Math.max(se.scrollLeft, b.scrollLeft), y: Math.max(se.scrollTop, b.scrollTop)};
+        }
+        function scrollTo(x, y) {
+          const se = document.scrollingElement || root, b = document.body;
+          se.scrollLeft = x; b.scrollLeft = x; se.scrollTop = y; b.scrollTop = y;
+        }
+        function setZoom(newZ, cx, cy) {
+          newZ = Math.min(MAX, Math.max(1, newZ));
+          if (newZ < 1.02) newZ = 1;
+          const p = scrollPos(), ratio = newZ / z;
+          z = newZ;
+          if (z === 1) {
+            root.classList.remove('gc-zoomed');
+            root.style.removeProperty('--gcz');
+            scrollTo(0, p.y * ratio);
+            return;
+          }
+          if (!root.classList.contains('gc-zoomed')) {
+            /* a folha começa onde estava (centrada), para não "saltar" ao começar o zoom */
+            const mw = document.querySelector('.main-wrapper');
+            const left = mw ? mw.getBoundingClientRect().left + p.x : 0;
+            root.style.setProperty('--gcl', Math.max(0, Math.round(left)) + 'px');
+          }
+          root.style.setProperty('--gcz', String(z));
+          root.classList.add('gc-zoomed');
+          /* mantém o ponto entre os dedos no mesmo sítio do ecrã */
+          scrollTo((p.x + cx) * ratio - cx, (p.y + cy) * ratio - cy);
+        }
+        const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        document.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 2 && !(e.target.closest && e.target.closest('#sitac-map'))) {
+            pinch = {d: dist(e.touches) || 1, z};
+          }
+        }, {passive: true});
+        document.addEventListener('touchmove', (e) => {
+          if (!pinch || e.touches.length !== 2) return;
+          e.preventDefault();
+          const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          setZoom(pinch.z * dist(e.touches) / pinch.d, cx, cy);
+        }, {passive: false});
+        document.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = null; }, {passive: true});
+        document.addEventListener('touchcancel', () => { pinch = null; }, {passive: true});
+        window.gcSetZoom = setZoom;   /* usado pelo Encerrar */
+      })();
     <\/script>
   </body>
   </html>
@@ -19932,6 +20068,14 @@
          tem de ser dividido pela mesma escala para os botões não ficarem por baixo do rodapé */
       .menagebuttons-wrapper {margin-bottom: calc((var(--footer-h) + 30px) / var(--s, 1)) !important;}
       @media print {.menagebuttons-wrapper {margin-bottom: 0 !important;}}
+      /* ============================================================
+      ZOOM COM OS DEDOS: só a folha (main-wrapper); cabeçalho e rodapé ficam fixos
+      ============================================================ */
+      html.gc-zoomed .main-wrapper {transform: scale(calc(var(--s) * var(--gcz, 1))) !important; transform-origin: top left !important; left: var(--gcl, 0px) !important; margin-left: 0 !important;}
+      #gcZoomReset {display: none; position: fixed; right: 12px; bottom: calc(var(--footer-h) + 12px); z-index: 1000; padding: 8px 14px; border: 0; border-radius: 20px;
+                    background: rgba(15, 17, 23, 0.85); color: #fff; font: 600 13px/1 sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,.3);}
+      html.gc-zoomed #gcZoomReset {display: block;}
+      @media print {html.gc-zoomed .main-wrapper {transform: none !important;} #gcZoomReset {display: none !important;}}
     </style>
   </head>
   <body>
@@ -20589,6 +20733,66 @@
         gcClearSitac();
         if (typeof __go === 'function') __go('Tools.html');   /* volta às Ferramentas Úteis */
       }
+      /* =====================================================================
+         ZOOM COM OS DEDOS (só a folha). No mapa do SITAC o "pinch" continua a ser do mapa.
+         ===================================================================== */
+      (function () {
+        const root = document.documentElement;
+        const MAX = 4;
+        let z = 1, pinch = null;
+        const btn = document.createElement('button');
+        btn.id = 'gcZoomReset';
+        btn.type = 'button';
+        btn.textContent = '↺ Tamanho normal';
+        btn.addEventListener('click', () => setZoom(1, 0, 0));
+        document.body.appendChild(btn);
+        function scrollPos() {
+          const se = document.scrollingElement || root, b = document.body;
+          return {x: Math.max(se.scrollLeft, b.scrollLeft), y: Math.max(se.scrollTop, b.scrollTop)};
+        }
+        function scrollTo(x, y) {
+          const se = document.scrollingElement || root, b = document.body;
+          se.scrollLeft = x; b.scrollLeft = x; se.scrollTop = y; b.scrollTop = y;
+        }
+        function setZoom(newZ, cx, cy) {
+          newZ = Math.min(MAX, Math.max(1, newZ));
+          if (newZ < 1.02) newZ = 1;
+          const p = scrollPos(), ratio = newZ / z;
+          z = newZ;
+          if (z === 1) {
+            root.classList.remove('gc-zoomed');
+            root.style.removeProperty('--gcz');
+            scrollTo(0, p.y * ratio);
+            return;
+          }
+          if (!root.classList.contains('gc-zoomed')) {
+            /* a folha começa onde estava (centrada), para não "saltar" ao começar o zoom */
+            const mw = document.querySelector('.main-wrapper');
+            const left = mw ? mw.getBoundingClientRect().left + p.x : 0;
+            root.style.setProperty('--gcl', Math.max(0, Math.round(left)) + 'px');
+          }
+          root.style.setProperty('--gcz', String(z));
+          root.classList.add('gc-zoomed');
+          /* mantém o ponto entre os dedos no mesmo sítio do ecrã */
+          scrollTo((p.x + cx) * ratio - cx, (p.y + cy) * ratio - cy);
+        }
+        const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        document.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 2 && !(e.target.closest && e.target.closest('#sitac-map'))) {
+            pinch = {d: dist(e.touches) || 1, z};
+          }
+        }, {passive: true});
+        document.addEventListener('touchmove', (e) => {
+          if (!pinch || e.touches.length !== 2) return;
+          e.preventDefault();
+          const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          setZoom(pinch.z * dist(e.touches) / pinch.d, cx, cy);
+        }, {passive: false});
+        document.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = null; }, {passive: true});
+        document.addEventListener('touchcancel', () => { pinch = null; }, {passive: true});
+        window.gcSetZoom = setZoom;   /* usado pelo Encerrar */
+      })();
     <\/script>
   </body>
   </html>
@@ -20930,6 +21134,14 @@
          tem de ser dividido pela mesma escala para os botões não ficarem por baixo do rodapé */
       .menagebuttons-wrapper {margin-bottom: calc((var(--footer-h) + 30px) / var(--s, 1)) !important;}
       @media print {.menagebuttons-wrapper {margin-bottom: 0 !important;}}
+      /* ============================================================
+      ZOOM COM OS DEDOS: só a folha (main-wrapper); cabeçalho e rodapé ficam fixos
+      ============================================================ */
+      html.gc-zoomed .main-wrapper {transform: scale(calc(var(--s) * var(--gcz, 1))) !important; transform-origin: top left !important; left: var(--gcl, 0px) !important; margin-left: 0 !important;}
+      #gcZoomReset {display: none; position: fixed; right: 12px; bottom: calc(var(--footer-h) + 12px); z-index: 1000; padding: 8px 14px; border: 0; border-radius: 20px;
+                    background: rgba(15, 17, 23, 0.85); color: #fff; font: 600 13px/1 sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,.3);}
+      html.gc-zoomed #gcZoomReset {display: block;}
+      @media print {html.gc-zoomed .main-wrapper {transform: none !important;} #gcZoomReset {display: none !important;}}
     </style>
   </head>
   <body>
@@ -22341,6 +22553,66 @@
         gcClearSitac();
         if (typeof __go === 'function') __go('Tools.html');   /* volta às Ferramentas Úteis */
       }
+      /* =====================================================================
+         ZOOM COM OS DEDOS (só a folha). No mapa do SITAC o "pinch" continua a ser do mapa.
+         ===================================================================== */
+      (function () {
+        const root = document.documentElement;
+        const MAX = 4;
+        let z = 1, pinch = null;
+        const btn = document.createElement('button');
+        btn.id = 'gcZoomReset';
+        btn.type = 'button';
+        btn.textContent = '↺ Tamanho normal';
+        btn.addEventListener('click', () => setZoom(1, 0, 0));
+        document.body.appendChild(btn);
+        function scrollPos() {
+          const se = document.scrollingElement || root, b = document.body;
+          return {x: Math.max(se.scrollLeft, b.scrollLeft), y: Math.max(se.scrollTop, b.scrollTop)};
+        }
+        function scrollTo(x, y) {
+          const se = document.scrollingElement || root, b = document.body;
+          se.scrollLeft = x; b.scrollLeft = x; se.scrollTop = y; b.scrollTop = y;
+        }
+        function setZoom(newZ, cx, cy) {
+          newZ = Math.min(MAX, Math.max(1, newZ));
+          if (newZ < 1.02) newZ = 1;
+          const p = scrollPos(), ratio = newZ / z;
+          z = newZ;
+          if (z === 1) {
+            root.classList.remove('gc-zoomed');
+            root.style.removeProperty('--gcz');
+            scrollTo(0, p.y * ratio);
+            return;
+          }
+          if (!root.classList.contains('gc-zoomed')) {
+            /* a folha começa onde estava (centrada), para não "saltar" ao começar o zoom */
+            const mw = document.querySelector('.main-wrapper');
+            const left = mw ? mw.getBoundingClientRect().left + p.x : 0;
+            root.style.setProperty('--gcl', Math.max(0, Math.round(left)) + 'px');
+          }
+          root.style.setProperty('--gcz', String(z));
+          root.classList.add('gc-zoomed');
+          /* mantém o ponto entre os dedos no mesmo sítio do ecrã */
+          scrollTo((p.x + cx) * ratio - cx, (p.y + cy) * ratio - cy);
+        }
+        const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        document.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 2 && !(e.target.closest && e.target.closest('#sitac-map'))) {
+            pinch = {d: dist(e.touches) || 1, z};
+          }
+        }, {passive: true});
+        document.addEventListener('touchmove', (e) => {
+          if (!pinch || e.touches.length !== 2) return;
+          e.preventDefault();
+          const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          setZoom(pinch.z * dist(e.touches) / pinch.d, cx, cy);
+        }, {passive: false});
+        document.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = null; }, {passive: true});
+        document.addEventListener('touchcancel', () => { pinch = null; }, {passive: true});
+        window.gcSetZoom = setZoom;   /* usado pelo Encerrar */
+      })();
     <\/script>
   </body>
   </html>
@@ -27651,7 +27923,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v17 - 2026-11-12 - Voltar do chat: historico no shell (+ v13)';
+  window.CB360_BUILD='v17 - 2026-11-12 - Voltar do chat: historico no shell (+ v16)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
