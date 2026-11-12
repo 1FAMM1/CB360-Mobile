@@ -2,77 +2,103 @@ import webpush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 import ws from 'ws';
 
+/* Valida o token do utilizador no próprio Supabase (assinatura, validade e
+   token revogado) e devolve os claims: { corp_oper_nr, n_int, ... } */
+async function whoami(token) {
+  if (!token) return null;
+  try {
+    const r = await fetch(`${process.env.SUPABASE_URL}/rest/v1/rpc/cb360_whoami`, {
+      method: 'POST',
+      headers: {
+        apikey: process.env.SUPABASE_KEY,
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: '{}'
+    });
+    if (!r.ok) return null;
+    const c = await r.json();
+    return c && c.role === 'authenticated' && c.corp_oper_nr && c.n_int ? c : null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }  
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
   res.setHeader('Content-Type', 'application/json');
-  
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
+
+  /* 1) Quem envia: vem do token, não do corpo do pedido */
+  const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  const claims = await whoami(token);
+  if (!claims) return res.status(401).json({ error: 'Sessão inválida' });
+  const corp = String(claims.corp_oper_nr);
+  const senderNint = String(claims.n_int);
+
+  /* 2) Validar o pedido */
+  const body = req.body || {};
+  const recipient = String(body.recipient_nint ?? '').trim();
+  const senderName = String(body.sender_name ?? '').slice(0, 80);
+  const messageText = String(body.message_text ?? '').slice(0, 500);
+  if (!recipient || !messageText) return res.status(400).json({ error: 'Pedido inválido' });
+  if (recipient !== 'geral' && !/^\d{1,6}$/.test(recipient)) return res.status(400).json({ error: 'Destinatário inválido' });
+
   webpush.setVapidDetails(
     'mailto:fmartins.ahbfaro@gmail.com',
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );
-  // Adicionado o transporte ws para compatibilidade com Node.js 20 na Vercel
-  const supabase = createClient(
-    process.env.SUPABASE_URL, 
-    process.env.SUPABASE_KEY, 
-    {
-      realtime: {
-        transport: ws
-      }
-    }
-  );
-  
-  const { recipient_nint, corp_nr, sender_name, message_text, sender_nint } = req.body;  
-  
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {
+    realtime: { transport: ws }
+  });
+
   try {
-    let query = supabase.from('user_push_subscriptions').select('*');    
-    if (recipient_nint === 'geral') {
-      query = query
-        .eq('corp_oper_nr', corp_nr) 
-        .neq('n_int', sender_nint);
-    } else {
-      query = query.eq('n_int', parseInt(recipient_nint));
-    }    
-    
+    /* 3) Destinatários: SEMPRE só da corporação de quem envia */
+    let query = supabase
+      .from('user_push_subscriptions')
+      .select('endpoint, auth, p256dh')
+      .eq('corp_oper_nr', corp);
+    query = recipient === 'geral'
+      ? query.neq('n_int', parseInt(senderNint, 10))
+      : query.eq('n_int', parseInt(recipient, 10));
+
     const { data: subs, error } = await query;
-    if (error || !subs || subs.length === 0) {
-      return res.status(200).json({ success: true, info: "Nenhum dispositivo encontrado." });
+    if (error) throw error;
+    if (!subs || subs.length === 0) {
+      return res.status(200).json({ success: true, info: 'Nenhum dispositivo encontrado.' });
     }
-    
+
+    /* conversa a abrir ao tocar: geral -> chat geral; privada -> conversa com quem enviou */
+    const chatNint = recipient === 'geral' ? 'geral' : senderNint;
     const payload = JSON.stringify({
-      title: recipient_nint === 'geral' ? `Geral: ${sender_name}` : sender_name,
-      message: message_text,
-      chatId: String(sender_nint),
-      url: `/index.html?chatId=${sender_nint}`
+      title: recipient === 'geral' ? `Geral: ${senderName}` : senderName,
+      message: messageText,
+      chatId: chatNint,
+      chatNint: chatNint,
+      url: `/?openChat=${encodeURIComponent(chatNint)}`
     });
-    
-    const envios = subs.map(dispositivo => {
-      const config = {
-        endpoint: dispositivo.endpoint,
-        keys: { 
-          auth: dispositivo.auth, 
-          p256dh: dispositivo.p256dh 
-        }
-      };
-      return webpush.sendNotification(config, payload)
-        .catch(err => {
-          console.error("Falha ao enviar para um dispositivo:", dispositivo.endpoint);
-        });
-    });    
-    
-    await Promise.all(envios);    
-    
-    return res.status(200).json({ 
-      success: true, 
-      total_enviados: subs.length 
-    });
+
+    let enviados = 0;
+    await Promise.all(subs.map(d =>
+      webpush.sendNotification({ endpoint: d.endpoint, keys: { auth: d.auth, p256dh: d.p256dh } }, payload)
+        .then(() => { enviados++; })
+        .catch(async err => {
+          /* subscrição que já não existe (app desinstalada / permissão retirada): apagar */
+          if (err && (err.statusCode === 404 || err.statusCode === 410)) {
+            await supabase.from('user_push_subscriptions').delete().eq('endpoint', d.endpoint);
+          } else {
+            console.error('Falha ao enviar para um dispositivo:', err && err.statusCode);
+          }
+        })
+    ));
+
+    return res.status(200).json({ success: true, total_enviados: enviados });
   } catch (err) {
-    console.error("Erro na API de Push:", err);
-    return res.status(500).json({ error: err.message });
+    console.error('Erro na API de Push:', err);
+    return res.status(500).json({ error: 'Erro ao enviar notificação' });
   }
 }
