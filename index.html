@@ -26671,7 +26671,7 @@
         return { cb_name, logoUrl, corpAddress, corpCp, corpLocalitie, corpPhoneMobile, corpPhoneLandline, corpEmail };
       }
       async function fetchJustifRecipientsFromSupabase(corpOperNr) {
-        const categories = ['point_reg_justif_to', 'point_reg_justif_cc', 'point_reg_justif_bcc'];
+        const categories = ['pointjustif_mail_to', 'pointjustif_mail_cc', 'pointjustif_mail_bcc'];
         const url = `${SUPABASE_URL}/rest/v1/mails_config?category=in.(${categories.join(',')})&corp_oper_nr=eq.${corpOperNr}&select=category,value`;
         try {
           const response = await fetch(url, { headers: getSupabaseHeaders() });
