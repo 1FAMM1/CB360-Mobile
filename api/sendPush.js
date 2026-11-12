@@ -80,9 +80,11 @@ export default async function handler(req, res) {
     /* tipo "aviso" (escalas, eventos, trocas…): não é do chat -> ao tocar abre só a app.
        Sem tipo (chat): geral -> chat geral; privada -> conversa com quem enviou */
     const aviso = String(body.tipo || '') === 'aviso';
+    /* página a abrir ao tocar (só nomes simples, ex.: 'Swaps', 'SolVacat', 'Events') */
+    const pagina = /^[A-Za-z0-9_]{1,40}$/.test(String(body.pagina || '')) ? String(body.pagina) : '';
     const chatNint = aviso ? '' : (recipient === 'geral' ? 'geral' : senderNint);
     const payload = JSON.stringify(aviso
-      ? { title: senderName || 'CB360 Mobile', message: messageText, url: '/' }
+      ? { title: senderName || 'CB360 Mobile', message: messageText, pagina, url: pagina ? `/?abrir=${pagina}` : '/' }
       : {
           title: recipient === 'geral' ? `Geral: ${senderName}` : senderName,
           message: messageText,
