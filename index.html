@@ -5224,7 +5224,7 @@
                 await fetch('https://cb-360-app.vercel.app/api/sendPush', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({recipient_nint: swap.n_int, corp_nr: corpOperNr, sender_name: title, message_text: msg, sender_nint: nint})
+                  body: JSON.stringify({recipient_nint: swap.n_int, tipo: 'aviso', sender_name: title, message_text: msg})
                 });
               } catch (e) {
                 console.error("Erro ao enviar push de resposta:", e);
@@ -5538,7 +5538,7 @@
             await fetch('https://cb-360-app.vercel.app/api/sendPush', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({recipient_nint: targetNInt, corp_nr: corpOperNr, sender_name: 'Pedido de Troca', message_text: `O elemento ${myName} solicitou uma troca: Dia ${fmtDM(targetShiftDay, monthNumber)} por Dia ${fmtDM(myShiftDay, monthNumber)}.`, sender_nint: myNInt})
+              body: JSON.stringify({recipient_nint: targetNInt, tipo: 'aviso', sender_name: 'Pedido de Troca', message_text: `O elemento ${myName} solicitou uma troca: Dia ${fmtDM(targetShiftDay, monthNumber)} por Dia ${fmtDM(myShiftDay, monthNumber)}.`})
             });
           } catch (e) { console.error("Erro ao enviar push:", e); }
           showToast("Pedido de troca enviado com sucesso!", true);
@@ -20863,6 +20863,10 @@
       // 📋 CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
       // ============================================================================
       var sitacMap;
+      /* texto escrito pelo utilizador ou vindo de um ficheiro importado: nunca como HTML */
+      function sitacEsc(v) {
+        return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
       var vehicleLayer, markerLayer, drawingLayer;
       var vehicleCounter = 0;
       var markerCounter = 0;
@@ -20934,7 +20938,7 @@
         const position = latlng || sitacMap.getCenter();
         const targetLayer = (config.type === 'vehicle') ? vehicleLayer : markerLayer;
         const counter = (config.type === 'vehicle') ? ++vehicleCounter : ++markerCounter;
-        const uniqueId = `${config.type}-${elementName}-${Date.now()}`;
+        const uniqueId = `${config.type}-${elementName}-${counter}-${Date.now()}`;
         const icon = await createElementIcon(config);
         const marker = L.marker(position, {
           icon: icon,
@@ -20948,6 +20952,7 @@
         marker.openPopup();
         marker.on('dragend', () => updateElementPopup(marker, config, uniqueId));
         marker.on('popupopen', () => updateElementPopup(marker, config, uniqueId));
+        return uniqueId;
       }  
       async function createElementIcon(config) {
         return new Promise((resolve) => {
@@ -20992,7 +20997,7 @@
         if (savedDesc) {
           popupContent = `
             <div>
-              <strong style="color: ${config.color}">${config.fallback} ${savedDesc}</strong><br>
+              <strong style="color: ${config.color}">${config.fallback} ${sitacEsc(savedDesc)}</strong><br>
               <small>📌 ${currentPos.lat.toFixed(6)}, ${currentPos.lng.toFixed(6)}</small><br>
               <button class="popup-btn" onclick="editElementDescription('${uniqueId}', '${config.name || marker.options.elementName}')">
                 ✏️ Editar
@@ -21214,7 +21219,7 @@
           <div>
             <strong>${title}</strong><br>
             <small><strong>📐 Área:</strong> ${area}</small><br>
-            <textarea class="popup-input" placeholder="Descrição do setor..." maxlength="500" id="${uniqueId}" rows="3">${savedDesc}</textarea>
+            <textarea class="popup-input" placeholder="Descrição do setor..." maxlength="500" id="${uniqueId}" rows="3">${sitacEsc(savedDesc)}</textarea>
             <br>
             <button class="popup-btn" onclick="saveSectorDescription('${uniqueId}', '${title}', '${sectorType}')">
               💾 Guardar
@@ -21551,17 +21556,14 @@
           try {
             const data = JSON.parse(e.target.result);
             clearMap();
-            savedDescriptions = data.descriptions || {};
-            if (data.vehicles) {
-              data.vehicles.forEach(async (vehicle) => {
-                await addElement(vehicle.name, vehicle.position);
-              });
-            }
-            if (data.markers) {
-              data.markers.forEach(async (marker) => {
-                await addElement(marker.name, marker.position);
-              });
-            }
+            savedDescriptions = {};
+            /* cada elemento novo tem um id novo: a descrição vem com o próprio elemento */
+            const restore = async (item) => {
+              const id = await addElement(item.name, item.position);
+              if (id && item.description) savedDescriptions[id] = String(item.description).slice(0, 500);
+            };
+            (data.vehicles || []).forEach(restore);
+            (data.markers || []).forEach(restore);
             alert('✅ Dados importados com sucesso!');
           } catch (error) {
             console.error('Erro ao importar dados:', error);
