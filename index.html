@@ -1640,6 +1640,24 @@
           btn.appendChild(lock);
         }
       }
+      /* ========================== SWAPS LOADING ========================== */
+      async function updateSwapsBadge() {
+        const corpOperNr = getCorp();
+        const myNInt = getNInt();
+        const badge = document.querySelector('#changes .bdg');
+        if (!badge) return;
+        if (!corpOperNr || !myNInt) { badge.textContent = '0'; return; }
+        try {
+          const url = `${SUPABASE_URL}/rest/v1/reg_swaps?select=id&corp_oper_nr=eq.${corpOperNr}&n_int_end=eq.${myNInt}&element_approval=is.null`;
+          const res = await fetch(url, { headers: getSupabaseHeaders() });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          badge.textContent = `${data.length}`;
+        } catch (err) {
+          console.error('Erro ao atualizar badge de trocas:', err);
+          badge.textContent = '!';
+        }
+      }
       /* ======================= OCCURRENCE LOADING ======================== */
       async function updateOccurrencesBadge() {
         const corpOperNr = getCorp();
@@ -1794,7 +1812,8 @@
         loadCorpInfo();
         loadUserName();
         loadNextService();
-        loadAccessRestrictions();
+        loadAccessRestrictions();        
+        updateSwapsBadge();
         updateOccurrencesBadge();
         updateEventsBadge();
         updateOccurrenceReportsBadge();
@@ -1804,6 +1823,7 @@
         updateChatBadge();
         checkRealNotifications();
         const whenVisible = (fn) => () => { if (!document.hidden) fn(); };
+        setInterval(whenVisible(updateSwapsBadge), 30000);
         setInterval(whenVisible(updateOccurrencesBadge), 30000);
         setInterval(whenVisible(updateEventsBadge), 30000);
         setInterval(whenVisible(updateOccurrenceReportsBadge), 30000);
@@ -1814,8 +1834,8 @@
         setInterval(whenVisible(checkRealNotifications), 30000);
         document.addEventListener('visibilitychange', () => {
           if (document.hidden) return;
-          updateOccurrencesBadge(); updateEventsBadge(); updateOccurrenceReportsBadge(); updateComunicatesBadge();
-          updateNohospitalBadge(); updateChatBadge(); checkRealNotifications();
+          updateSwapsBadge(); updateOccurrencesBadge(); updateEventsBadge(); updateOccurrenceReportsBadge(); 
+          updateComunicatesBadge(); updateNohospitalBadge(); updateChatBadge(); checkRealNotifications();
         });
         const buttons = document.querySelectorAll('.mbtn');
         buttons.forEach((button, index) => {
@@ -5224,7 +5244,7 @@
                 await fetch('https://cb-360-app.vercel.app/api/sendPush', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({recipient_nint: swap.n_int, tipo: 'aviso', sender_name: title, message_text: msg})
+                  body: JSON.stringify({recipient_nint: swap.n_int, tipo: 'aviso', pagina: 'Swaps', sender_name: title, message_text: msg})
                 });
               } catch (e) {
                 console.error("Erro ao enviar push de resposta:", e);
@@ -5538,7 +5558,7 @@
             await fetch('https://cb-360-app.vercel.app/api/sendPush', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({recipient_nint: targetNInt, tipo: 'aviso', sender_name: 'Pedido de Troca', message_text: `O elemento ${myName} solicitou uma troca: Dia ${fmtDM(targetShiftDay, monthNumber)} por Dia ${fmtDM(myShiftDay, monthNumber)}.`})
+              body: JSON.stringify({recipient_nint: targetNInt, tipo: 'aviso', pagina: 'Swaps', sender_name: 'Pedido de Troca', message_text: `O elemento ${myName} solicitou uma troca: Dia ${fmtDM(targetShiftDay, monthNumber)} por Dia ${fmtDM(myShiftDay, monthNumber)}.`})
             });
           } catch (e) { console.error("Erro ao enviar push:", e); }
           showToast("Pedido de troca enviado com sucesso!", true);
@@ -26820,7 +26840,7 @@
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/cb-360-app\\.vercel\\.app\\/api\\/sendPush/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
   var ALLOW='camera; microphone; geolocation; clipboard-read; clipboard-write; fullscreen; autoplay';
-  var pages={}, curName=null, curFrame=null, token=0, pendingChat=null;
+  var pages={}, curName=null, curFrame=null, token=0, pendingChat=null, pendingPage=null;
   [].forEach.call(document.querySelectorAll('script[type="text/x-cb360"]'),function(s){pages[s.getAttribute('data-page')]=s;});
   function source(name){
     return pages[name].textContent.replace(/<\\(?=!--|\/?script)/gi,'<');
@@ -26954,16 +26974,20 @@
   /* aberto a partir de uma notificação com a app fechada: /?openChat=NINT */
   (function(){
     try{
-      var q=new URLSearchParams(location.search), oc=q.get('openChat');
-      if(!oc) return;
-      q.delete('openChat');
+      var q=new URLSearchParams(location.search), oc=q.get('openChat'), ab=q.get('abrir');
+      if(!oc&&!ab) return;
+      q.delete('openChat'); q.delete('abrir');
       var rest=q.toString();
       history.replaceState(null,'',location.pathname+(rest?'?'+rest:''));
-      pendingChat=oc;
+      if(oc) pendingChat=oc;
+      else if(ab&&pages[ab]&&ab!==DEFAULT) pendingPage=ab;
     }catch(_){}
   })();
   loadTestSession(function(testSession){
-    var first=pendingChat?'InterChat':(fromHash()||(testSession?'MainPage':DEFAULT));
+    /* com sessão válida abre logo a MainPage (o utilizador mestre passa pelo login) */
+    var master=(sessionStorage.getItem('isMasterUser')||localStorage.getItem('isMasterUser'))==='true';
+    var first=pendingChat?'InterChat':(pendingPage||fromHash()||((testSession||(hasSession()&&!master))?'MainPage':DEFAULT));
+    pendingPage=null;
     history.replaceState({p:first},'',first===DEFAULT?baseUrl():baseUrl()+'#'+first);
     show(first);
   });
@@ -26995,6 +27019,11 @@
       if(d.type==='OPEN_CHAT' && d.chatNint){
         if(curName==='InterChat') deliverChat(d.chatNint);
         else { pendingChat=String(d.chatNint); window.__cbGo('InterChat.html'); }
+        return;
+      }
+      /* aviso com página (trocas, férias, eventos, escalas): abre essa página */
+      if(d.type==='OPEN_PAGE' && d.pagina && pages[d.pagina]){
+        if(curName!==d.pagina) window.__cbGo(d.pagina+'.html');
         return;
       }
       forwardSw(d);
