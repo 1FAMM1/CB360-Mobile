@@ -1,5 +1,7 @@
     /* =========================================================
     CB360 Mobile - Complete Service Worker
+    v6.3.0 - Notificações do chat: abre a conversa certa no shell (app aberta ou fechada);
+    ignora chats "ativos" de páginas que já não existem.
     v6.1.0 - App num único index.html (todas as páginas embebidas).
     Navegações (index.html) vão primeiro à rede e só usam a cache offline,
     para que uma nova versão chegue sempre sem ser preciso limpar dados.
@@ -8,7 +10,7 @@
     to 'Response'); devolve sempre um Response válido, com
     fallback para index.html em navegações offline.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v6.2.1';
+    const CACHE_NAME = 'cb360-cache-v6.3.0';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/manifest.json'];
     let activeChats = new Map();
     self.addEventListener('install', (event) => {
@@ -117,14 +119,6 @@
         data.message = event.data.text();
       }
       const chatNint = String(data.chatNint || data.chatId || '');
-      if (chatNint) {
-        const isActiveInAnyTab = Array.from(activeChats.values())
-        .map(id => String(id))
-        .includes(chatNint);
-        if (isActiveInAnyTab) {
-          return;
-        }
-      }
       const options = {
         body: data.message || data.body || 'Tens uma nova mensagem.',
         icon: '/icon-192.png',
@@ -136,9 +130,17 @@
         tag: 'cb360-notification',
         renotify: true
       };
-      event.waitUntil(
-        self.registration.showNotification(data.title || 'CB360 Mobile', options)
-      );
+      event.waitUntil((async () => {
+        if (chatNint) {
+          // esquece chats "ativos" de páginas que já não existem (ex.: iframe do chat removida pelo shell)
+          const live = new Set((await clients.matchAll({ type: 'window', includeUncontrolled: true })).map(c => c.id));
+          for (const id of Array.from(activeChats.keys())) {
+            if (!live.has(id)) activeChats.delete(id);
+          }
+          if (Array.from(activeChats.values()).map(String).includes(chatNint)) return;
+        }
+        await self.registration.showNotification(data.title || 'CB360 Mobile', options);
+      })());
     });
     self.addEventListener('notificationclick', function(event) {
       event.notification.close();
@@ -156,7 +158,9 @@
             }
           }
           if (clients.openWindow) {
-            return clients.openWindow(event.notification.data.url || '/');
+            // app fechada: abre o shell e diz-lhe qual a conversa a abrir
+            const nint = event.notification.data.chatNint;
+            return clients.openWindow(nint ? '/?openChat=' + encodeURIComponent(nint) : (event.notification.data.url || '/'));
           }
         })
       );
