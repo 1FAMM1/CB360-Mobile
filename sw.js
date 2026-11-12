@@ -1,5 +1,6 @@
     /* =========================================================
     CB360 Mobile - Complete Service Worker
+    v6.4.0 - Avisos com página: abre a página indicada (trocas, férias, eventos, escalas).
     v6.3.0 - Notificações do chat: abre a conversa certa no shell (app aberta ou fechada);
     ignora chats "ativos" de páginas que já não existem.
     v6.1.0 - App num único index.html (todas as páginas embebidas).
@@ -10,7 +11,7 @@
     to 'Response'); devolve sempre um Response válido, com
     fallback para index.html em navegações offline.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v6.3.0';
+    const CACHE_NAME = 'cb360-cache-v6.4.0';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/manifest.json'];
     let activeChats = new Map();
     self.addEventListener('install', (event) => {
@@ -125,7 +126,8 @@
         vibrate: [200, 100, 200, 100, 200],
         data: {
           url: data.url || '/',
-          chatNint: chatNint
+          chatNint: chatNint,
+          pagina: /^[A-Za-z0-9_]{1,40}$/.test(String(data.pagina || '')) ? String(data.pagina) : ''
         },
         tag: 'cb360-notification',
         renotify: true
@@ -153,6 +155,8 @@
                   type: 'OPEN_CHAT',
                   chatNint: event.notification.data.chatNint
                 });
+              } else if (event.notification.data.pagina) {
+                client.postMessage({ type: 'OPEN_PAGE', pagina: event.notification.data.pagina });
               }
               return client.focus();
             }
@@ -160,7 +164,11 @@
           if (clients.openWindow) {
             // app fechada: abre o shell e diz-lhe qual a conversa a abrir
             const nint = event.notification.data.chatNint;
-            return clients.openWindow(nint ? '/?openChat=' + encodeURIComponent(nint) : (event.notification.data.url || '/'));
+            const pagina = event.notification.data.pagina;
+            return clients.openWindow(
+              nint ? '/?openChat=' + encodeURIComponent(nint)
+                   : (pagina ? '/?abrir=' + encodeURIComponent(pagina) : (event.notification.data.url || '/'))
+            );
           }
         })
       );
