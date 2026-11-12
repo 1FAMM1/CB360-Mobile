@@ -1,5 +1,8 @@
     /* =========================================================
     CB360 Mobile - Complete Service Worker
+    v6.6.0 - Cada envio traz um id (nid); o servidor envia 2 cópias e a 2.ª substitui a 1.ª em silêncio
+    (no Xiaomi a 1.ª perdia-se quando o Chrome estava a dormir).
+    v6.5.0 - Etiqueta por conversa/aviso: avisos seguidos já não se substituem.
     v6.4.0 - Avisos com página: abre a página indicada (trocas, férias, eventos, escalas).
     v6.3.0 - Notificações do chat: abre a conversa certa no shell (app aberta ou fechada);
     ignora chats "ativos" de páginas que já não existem.
@@ -11,9 +14,11 @@
     to 'Response'); devolve sempre um Response válido, com
     fallback para index.html em navegações offline.
     ========================================================= */
-    const CACHE_NAME = 'cb360-cache-v6.4.0';
+    const CACHE_NAME = 'cb360-cache-v6.6.0';
     const ASSETS_TO_CACHE = ['/', '/index.html', '/manifest.json'];
     let activeChats = new Map();
+    /* ids de notificações já mostradas (o servidor envia cada aviso 2x por causa de telemóveis que adormecem o Chrome) */
+    const seenNids = new Map();
     self.addEventListener('install', (event) => {
       self.skipWaiting();
       event.waitUntil(
@@ -129,9 +134,17 @@
           chatNint: chatNint,
           pagina: /^[A-Za-z0-9_]{1,40}$/.test(String(data.pagina || '')) ? String(data.pagina) : ''
         },
-        tag: 'cb360-notification',
-        renotify: true
+        /* cada envio tem um id (nid): a 2.ª cópia substitui a 1.ª em silêncio; envios diferentes nunca se substituem */
+        tag: 'cb360-' + (/^[A-Za-z0-9_-]{6,64}$/.test(String(data.nid || '')) ? String(data.nid) : (Date.now() + '-' + Math.random().toString(36).slice(2, 8))),
+        renotify: false
       };
+      const nid = String(data.nid || '');
+      if (nid) {
+        const now = Date.now();
+        for (const [k, t] of seenNids) if (now - t > 5 * 60 * 1000) seenNids.delete(k);
+        if (seenNids.has(nid)) options.silent = true;   // cópia repetida: não volta a tocar
+        seenNids.set(nid, now);
+      }
       event.waitUntil((async () => {
         if (chatNint) {
           // esquece chats "ativos" de páginas que já não existem (ex.: iframe do chat removida pelo shell)
