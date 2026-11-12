@@ -95,7 +95,11 @@ export default async function handler(req, res) {
 
     let enviados = 0;
     await Promise.all(subs.map(d =>
-      webpush.sendNotification({ endpoint: d.endpoint, keys: { auth: d.auth, p256dh: d.p256dh } }, payload)
+      webpush.sendNotification(
+        { endpoint: d.endpoint, keys: { auth: d.auth, p256dh: d.p256dh } },
+        payload,
+        { TTL: 60 * 60 * 24, urgency: 'high' }   /* guarda até 24 h; entrega mesmo com o telemóvel em repouso */
+      )
         .then(() => { enviados++; })
         .catch(async err => {
           /* subscrição que já não existe (app desinstalada / permissão retirada): apagar */
