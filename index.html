@@ -587,7 +587,7 @@
             <span class="material-icons">free_cancellation</span>
             <div>Disponibilidades</div>
           </button>
-          <button class="mbtn" data-module="vacation_request" onclick="selBtn(this); setTimeout(()=> __go('SolVacat.html'), 100)">
+          <button class="mbtn" data-module="vacation_request" onclick="selBtn(this); openVacationRequest()">
             <span class="material-icons">beach_access</span>
             <div>Pedido de Férias</div>
           </button>
@@ -1681,6 +1681,15 @@
         openingAttendance = false;
         try {sessionStorage.setItem('cb360_attendance_prof', isProf ? '1' : '0');} catch (e) {}
         __go('Attendance.html');
+      }
+      let openingVacation = false;
+      async function openVacationRequest() {
+        if (openingVacation) return;
+        openingVacation = true;
+        const isProf = await resolveIsProfessional();
+        openingVacation = false;
+        try {sessionStorage.setItem('cb360_attendance_prof', isProf ? '1' : '0');} catch (e) {}
+        __go('SolVacat.html');
       }
       function clearAllSelections() {
         document.querySelectorAll('.mbtn').forEach(btn => btn.classList.remove('sel'));
@@ -5065,7 +5074,9 @@
     </div>
     <div id="emDesenvolvimentoModal" class="modal">
       <div class="modal-content">
-        <div class="modal-header">🚧 Em Desenvolvimento</div>
+        <div class="modal-header">
+          <span class="material-icons">construction</span>&nbsp;Em Desenvolvimento
+        </div>
         <div class="modal-body" style="text-align:center; font-size:16px;">
           Esta funcionalidade ainda está em desenvolvimento.<br>
           Por favor, verifique mais tarde.
@@ -9577,6 +9588,23 @@
       .footer-content {text-align: center;}
       .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
       .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+      /* ============================================================
+      ESCOLHA PROFISSIONAIS / VOLUNTARIADO (igual à Assiduidade)
+      ============================================================ */
+      .main-btn {width:100%; max-width:400px; margin-top:auto; margin-bottom:auto; display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); border:1px solid var(--border);
+                 border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-md);}
+      .btn-choose {position:relative; width:100%; min-height:120px; padding:14px 8px; border:0; border-radius:0; background:var(--surface); color:var(--txt-2); font-family:'Inter',sans-serif;
+                   font-size:14px; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; line-height:1.2;
+                   box-shadow:none; transition:background var(--ease),color var(--ease),transform var(--ease);}
+      .btn-choose:hover {background:var(--surface-2); color:var(--txt-1);}
+      .btn-choose:active {background:var(--surface-2); transform:scale(.98);}
+      .btn-choose:hover .btn-icon {transform:scale(1.08);}
+      .btn-icon {font-size:36px; color:var(--red-icon); transition:transform var(--ease), color var(--ease);}
+      .btn-text {font-size:14px; font-weight:600;}
+      .voluntary-view {display:none; width:100%; flex-direction:column; align-items:center; gap:5px;}
+      .voluntary-back-header {display:flex; align-items:center; gap:8px; font-size:15px; font-weight:600; color:var(--txt-2); cursor:pointer; margin-bottom:6px; align-self:flex-start; transition:color var(--ease);}
+      .voluntary-back-header:hover {color:var(--txt-1);}
+      .voluntary-back-header .material-icons {font-size:20px; line-height:1;}
       @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
       /* ============================================================
       RESPONSIVE
@@ -9587,6 +9615,8 @@
         .vacations-req-btn {min-height: 56px; font-size: 10.5px; padding: 10px 6px;}
         .vacations-req-btn .material-icons {font-size: 19px;}
         .main-content {padding-left: 14px; padding-right: 14px;}
+        .btn-choose {height: 120px; font-size: 13px;}
+        .btn-icon {font-size: 30px;}
       }
       @media (min-width: 769px) {
         .main-content {max-width: 700px; margin: 0 auto; width: 100%;}
@@ -9603,6 +9633,21 @@
       <h2 id="corpInfo" style="display: none;"></h2>
     </header>  
     <div class="main-content">
+      <div class="main-btn" id="vacChoose" style="display:none;">
+        <button class="btn-choose" id="btn-professionals">
+          <span class="material-icons btn-icon">badge</span>
+          <span class="btn-text">Profissionais</span>
+        </button>
+        <button class="btn-choose" id="btn-voluntaries">
+          <span class="material-icons btn-icon">group</span>
+          <span class="btn-text">Voluntariado</span>
+        </button>
+      </div>
+      <div class="voluntary-view" id="voluntaryView">
+      <div class="voluntary-back-header" id="voluntaryBack">
+        <span class="material-icons">arrow_back</span>
+        <span id="vacBackText">VOLUNTARIADO</span>
+      </div>
       <div class="vacations-req-header">
         <p class="vacations-req-subtitle">Selecione o mês:</p>
       </div>    
@@ -9637,6 +9682,8 @@
         </div>
         <span class="material-icons vacations-summary-chevron">chevron_right</span>
       </div>
+      </div>
+    </div>
     </div>
     <div id="vacationsModalOverlay" class="modal-overlay" onclick="if(event.target===this) closeVacationsModal()">
       <div class="modal-panel">
@@ -9759,7 +9806,7 @@
         const yearLabel = document.getElementById('vacationsSummaryYear');
         if (yearLabel) yearLabel.textContent = currentYear;
         try {
-          const data = await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?select=id,year,month,day,state&n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr.padStart(4, "0")}&year=in.(${currentYear},${currentYear + 1})&order=year,month`);
+          const data = await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?select=id,year,month,day,state&n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr.padStart(4, "0")}&year=in.(${currentYear},${currentYear + 1})&vacation_type=eq.${encodeURIComponent(vacType)}&order=year,month`);
           vacationsData = data || [];
           renderVacationsSummary(currentYear);
           renderVacationsModalList(currentYear);
@@ -9785,7 +9832,7 @@
           emptyMsg.innerHTML = `
             <div class="vacation-card-empty-content">
               <span class="material-icons">event_busy</span>
-              <span>Ainda não efetuou pedidos de férias de voluntariado.</span>
+              <span>Ainda não efetuou pedidos de férias ${vacType === 'Profissional' ? 'profissionais' : 'de voluntariado'}.</span>
             </div>
           `;
           container.appendChild(emptyMsg);
@@ -9878,7 +9925,7 @@
           if (dateObj < todayRef) {
             dayEl.classList.add('disabled');
           }        
-          const isDayDecir = (month === 5 && day >= 15) || (month > 5 && month < 10) || (month === 10 && day <= 15);
+          const isDayDecir = vacType === 'Voluntariado' && ((month === 5 && day >= 15) || (month > 5 && month < 10) || (month === 10 && day <= 15));
           if (isDayDecir) dayEl.classList.add('decir-period');        
           monthRecords.forEach(r => {
             if (parseDays(r.day).includes(day)) {
@@ -9927,7 +9974,7 @@
         isSavingVacation = true;
         if (btn) btn.disabled = true;
         try {
-          const existing = await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?select=id,day,state&n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr}&year=eq.${year}&month=eq.${month}`) || [];
+          const existing = await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?select=id,day,state&n_int=eq.${n_int}&corp_oper_nr=eq.${corp_oper_nr}&year=eq.${year}&month=eq.${month}&vacation_type=eq.${encodeURIComponent(vacType)}`) || [];
           const approvedDays = new Set(existing.filter(r => r.state === "Aprovadas").flatMap(r => parseDays(r.day)));
           const editable = existing.find(r => r.state !== "Aprovadas");
           const newDays = [...new Set(selectedDays)].filter(d => !approvedDays.has(d)).sort((a, b) => a - b);
@@ -9944,7 +9991,7 @@
           } else {
             await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat`, {
               method: 'POST',
-              body: JSON.stringify({n_int, corp_oper_nr, year, month, day: newDays.join(','), state: "Em Aprovação"})
+              body: JSON.stringify({n_int, corp_oper_nr, year, month, day: newDays.join(','), state: "Em Aprovação", vacation_type: vacType})
             });
             showToast("Pedido de Férias Enviado!");
           }
@@ -10005,6 +10052,45 @@
           setTimeout(() => toast.remove(), 300);
         }, 3000);
       }
+      /* ============== PROFISSIONAIS / VOLUNTARIADO (vínculo definido na MainPage) ============== */
+      let vacVoluntaryOpen = false;
+      let vacType = 'Voluntariado';          /* 'Voluntariado' | 'Profissional' -> coluna vacation_type */
+      function openVoluntaryView(hideBack, type = 'Voluntariado') {
+        vacType = type;
+        document.getElementById('vacBackText').textContent = type === 'Profissional' ? 'PROFISSIONAIS' : 'VOLUNTARIADO';
+        vacationsData = [];
+        loadVacations();
+        document.getElementById('vacChoose').style.display = 'none';
+        document.getElementById('voluntaryView').style.display = 'flex';
+        document.getElementById('voluntaryBack').style.display = hideBack ? 'none' : '';
+        vacVoluntaryOpen = true;
+        const sub = document.querySelector('.header-sub'); if (sub) sub.textContent = type === 'Profissional' ? 'Profissionais' : 'Voluntariado';
+        requestAnimationFrame(() => window.applyMonthsCentering && window.applyMonthsCentering());
+      }
+      function backToChoose() {
+        if (currentMonthIndex !== null) {
+          const selBtn = document.querySelector('.vacations-req-btn.selected');
+          if (selBtn) showCalendar(currentMonthIndex, selBtn);
+        }
+        vacVoluntaryOpen = false;
+        document.getElementById('voluntaryView').style.display = 'none';
+        document.getElementById('vacChoose').style.display = 'grid';
+        document.querySelector('.main-content').style.paddingTop = '';
+        const sub = document.querySelector('.header-sub'); if (sub) sub.textContent = 'Profissionais · Voluntariado';
+      }
+      function setupViewByLinkType() {
+        let isProf = false;
+        try {isProf = sessionStorage.getItem('cb360_attendance_prof') === '1';} catch (e) {}
+        document.getElementById('btn-professionals').addEventListener('click', () => openVoluntaryView(false, 'Profissional'));
+        document.getElementById('btn-voluntaries').addEventListener('click', () => openVoluntaryView(false, 'Voluntariado'));
+        document.getElementById('voluntaryBack').addEventListener('click', backToChoose);
+        if (isProf) {
+          document.getElementById('vacChoose').style.display = 'grid';
+          const sub = document.querySelector('.header-sub'); if (sub) sub.textContent = 'Profissionais · Voluntariado';
+        } else {
+          openVoluntaryView(true);
+        }
+      }
       /* ============================== INIT =============================== */
       document.addEventListener('DOMContentLoaded', () => {
         loadCorpInfo();
@@ -10014,24 +10100,25 @@
         if (savedTheme === 'dark') {
           document.body.classList.add('dark-mode');
         }
-        loadVacations();
         const monthsCard = document.querySelector('.months-card');
         const reqHeader = document.querySelector('.vacations-req-header');
         const mainContent = document.querySelector('.main-content');
         window.applyMonthsCentering = function applyMonthsCentering() {
-          if (window.innerWidth > 480) {
+          if (window.innerWidth > 480 || !vacVoluntaryOpen) {
             mainContent.style.paddingTop = "";
             return;
           }
           if (currentMonthIndex !== null) return;
           const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 60;
           const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footer-h")) || 50;
-          const contentHeight = (reqHeader ? reqHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
+          const backEl = document.getElementById('voluntaryBack');
+          const backH = backEl && backEl.style.display !== 'none' ? backEl.offsetHeight + 6 : 0;
+          const contentHeight = backH + (reqHeader ? reqHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
           const availableHeight = window.innerHeight - headerH - footerH;
           const extra = Math.max(18, (availableHeight - contentHeight) / 2);
           mainContent.style.paddingTop = `calc(var(--header-h) + ${extra}px)`;
         };
-        requestAnimationFrame(() => window.applyMonthsCentering());
+        setupViewByLinkType();
         window.addEventListener('resize', () => {
           if (currentMonthIndex === null) window.applyMonthsCentering();
         });
@@ -10168,6 +10255,7 @@
       .btn-add-item {display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--r-sm); padding: 12px 16px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--red); letter-spacing: 0.3px; cursor: pointer; transition: background var(--ease), border-color var(--ease); margin-top: 4px;}
       .btn-add-item:hover {background: var(--red-light); border-color: var(--red);}
       .btn-add-item .material-icons {font-size: 18px;}
+      .btn-add-item:disabled {opacity: 0.5; cursor: not-allowed;}
       /* ============================================================
       JUSTIFICATION
       ============================================================ */
@@ -10365,11 +10453,33 @@
         }
       }
       /* ====================== AVAILABLE ITEMS ====================== */
-      const UNIFORM_ITEMS = [{value: "capacte_florestal", label: "Capacete Florestal"}, {value: "cogula_florestal", label: "Cógula EPI Florestal"}, {value: "dolman_florestal", label: "Dolman EPI Florestal", sizeType: "letter"}, {value: "sweatshirt_florestal", label: "Sweatshirt EPI Florestal", sizeType: "letter"},
-                                  {value: "calca_florestal", label: "Calças EPI Florestal", sizeType: "numeric"}, {value: "luva_florestal", label: "Luvas EPI Florestal", sizeType: "numeric"}, {value: "bota_florestal", label: "Botas EPI Florestal", sizeType: "numeric"}, {value: "capacte_urbano", label: "Capacete Urbano"},
-                                  {value: "cogula_urbano", label: "Cógula EPI Urbano"}, {value: "casaco_urbano", label: "Casaco EPI Urbano", sizeType: "letter"}, {value: "calca_urbano", label: "Calças EPI Urbano", sizeType: "numeric"}, {value: "luva_urbano", label: "Luvas EPI Urbano", sizeType: "numeric"},
-                                  {value: "bota_urbano", label: "Botas EPI Urbano", sizeType: "numeric"}, {value: "polo_vermelho_mct", label: "Polo Vermelho Manga Curta", sizeType: "letter"}, {value: "polo_vermelho_mcp", label: "Polo Vermelho Manga Comprida", sizeType: "letter"}, {value: "tshir_azul", label: "T-Shirt Azul Bombeiros", sizeType: "letter"},
-                                  {value: "calca_3", label: "Calças Trabalho", sizeType: "numeric"}, {value: "cinturao", label: "Cinturão Vermelho"}, {value: "cinto", label: "Cinto Vermelho"}, {value: "bone", label: "Boné Vermelho Bombeiros", sizeType: "letter"}, {value: "boina_vermelha", label: "Boina Lista Vermelha", sizeType: "numeric"}, {value: "boina_dourada", label: "Boina Lista Dourada", sizeType: "numeric"},];
+      /* Artigos vêm da tabela uniform_items (cada corporação tem a sua lista, gerida no Online) */
+      let UNIFORM_ITEMS = [];
+      async function loadUniformItems() {
+        const corp = getCorpPadded();
+        if (!corp) return false;
+        try {
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/uniform_items?select=code,label,size_type,brand&corp_oper_nr=eq.${corp}&active=is.true&order=sort_order.asc,label.asc`, {headers: getSupabaseHeaders()});
+          if (!r.ok) throw new Error(await r.text());
+          const rows = await r.json();
+          UNIFORM_ITEMS = (rows || []).map(x => ({value: x.code, label: x.label, sizeType: x.size_type || undefined, brand: x.brand || ""}));
+          return true;
+        } catch (err) {
+          console.error("Erro ao carregar artigos:", err);
+          return false;
+        }
+      }
+      function showItemsMessage(text) {
+        const list = document.getElementById('itemsList');
+        list.innerHTML = `<p class="empty-state" id="itemsEmptyState">${escapeHtml(text)}</p>`;
+        document.querySelector('.btn-add-item')?.setAttribute('disabled', '');
+        const sb = document.getElementById('submitOrderBtn');
+        if (sb) sb.disabled = true;
+      }
+      function getBrandForItem(value) {
+        const found = UNIFORM_ITEMS.find(i => i.value === value);
+        return (found && found.brand) ? found.brand : "Não Aplicável";
+      }
       const LETTER_SIZES = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"];
       let itemRowCounter = 0;
       /* ======================= BUILD OPTIONS ======================= */
@@ -10392,9 +10502,10 @@
       }
       function getSizeTypeForItem(value) {
         const found = UNIFORM_ITEMS.find(i => i.value === value);
-        return found ? found.sizeType : "letter";
+        return found ? found.sizeType : undefined;
       }
       function addItemRow() {
+        if (!UNIFORM_ITEMS.length) return;
         const list = document.getElementById('itemsList');
         const emptyState = document.getElementById('itemsEmptyState');
         if (emptyState) emptyState.remove();
@@ -10422,7 +10533,7 @@
           <div class="item-row">
             <div class="item-field" style="flex: 2;">
               <label for="itemBrand_${rowId}">Marca</label>
-              <input type="text" id="itemBrand_${rowId}" value="Não Aplicável" disabled style="opacity:0.5;">
+              <input type="text" id="itemBrand_${rowId}" value="${escapeHtml(getBrandForItem(defaultItem.value))}" disabled style="opacity:0.5;">
             </div>
             <div class="item-field" id="itemSizeField_${rowId}">
               <label for="itemSize_${rowId}">Tamanho</label>
@@ -10445,6 +10556,8 @@
           <label for="itemSize_${rowId}">Tamanho</label>
           ${buildSizeFieldHTML(rowId, sizeType, "M")}
         `;
+        const brandEl = document.getElementById(`itemBrand_${rowId}`);
+        if (brandEl) brandEl.value = getBrandForItem(select.value);
       }
       function removeItemRow(rowId) {
         const card = document.getElementById(`itemCard_${rowId}`);
@@ -10478,7 +10591,7 @@
           const sizeEl = document.getElementById(`itemSize_${rowId}`);
           const qtyEl = document.getElementById(`itemQty_${rowId}`);
           const articleLabel = UNIFORM_ITEMS.find(i => i.value === articleSelect.value)?.label || articleSelect.value;
-          items.push({article: articleSelect.value, articleLabel, brand: "Não Aplicável", size: sizeEl ? sizeEl.value.trim() : "N/A", sizeType: getSizeTypeForItem(articleSelect.value), quantity: qtyEl ? parseInt(qtyEl.value, 10) : 1});
+          items.push({article: articleSelect.value, articleLabel, brand: getBrandForItem(articleSelect.value), size: sizeEl ? sizeEl.value.trim() : "N/A", sizeType: getSizeTypeForItem(articleSelect.value), quantity: qtyEl ? parseInt(qtyEl.value, 10) : 1});
         });
         return items;
       }
@@ -10608,15 +10721,19 @@
         document.querySelector('.footer')?.classList.remove('content-blur');
       }
       /* ====================== INITIALIZATION ======================= */
-      document.addEventListener('DOMContentLoaded', function() {      
+      document.addEventListener('DOMContentLoaded', async function() {
         const savedTheme = localStorage.getItem('sgo-theme');
         if (savedTheme === 'dark') {
           document.body.classList.add('dark-mode');
         }
-        addItemRow();
         loadCorpInfo();
         const fy = document.getElementById('footerYear');
         if (fy) fy.textContent = new Date().getFullYear();
+        document.getElementById('itemsEmptyState').textContent = 'A carregar artigos...';
+        const ok = await loadUniformItems();
+        if (!ok) return showItemsMessage('Erro ao carregar os artigos. Verifique a ligação e volte a abrir a página.');
+        if (!UNIFORM_ITEMS.length) return showItemsMessage('Ainda não há artigos de fardamento configurados para a sua corporação.');
+        addItemRow();
       });
     <\/script>
     <div class="modal-overlay" id="ordersModalOverlay" onclick="if(event.target===this) closeOrdersModal()">
@@ -10634,7 +10751,7 @@
     </div>
   </body>
   </html>
-</script> 
+</script>
 <script type="text/x-cb360" data-page="Attendance"><!DOCTYPE html>
   <html lang="pt-PT" style="background-color: #0f1117;">
   <head>
@@ -10900,7 +11017,9 @@
     </div>
     <div id="emDesenvolvimentoModal" class="modal">
       <div class="modal-content">
-        <div class="modal-header">🚧 Em Desenvolvimento</div>
+        <div class="modal-header">
+          <span class="material-icons">construction</span>&nbsp;Em Desenvolvimento
+        </div>
         <div class="modal-body">
           Esta funcionalidade ainda está em desenvolvimento.<br>Por favor, verifique mais tarde.
         </div>
@@ -14278,6 +14397,10 @@
       .ipma-yellow .ipma-level-badge {background: rgba(240,192,0,0.30); color: var(--level-yellow);}
       .ipma-orange .ipma-level-badge {background: rgba(255,136,0,0.30); color: var(--level-orange);}
       .ipma-red .ipma-level-badge {background: rgba(224,32,32,0.30); color: var(--level-red);}
+      /* modo claro: texto dos níveis mais vivo (o modo escuro fica como está) */
+      :root:not(.dark-mode) .ipma-yellow .ipma-level-badge {color: #c98a00; font-weight: 800;}
+      :root:not(.dark-mode) .ipma-orange .ipma-level-badge {color: #e65c00; font-weight: 800;}
+      :root:not(.dark-mode) .ipma-red .ipma-level-badge {color: #d10000; font-weight: 800;}
       .ipma-time-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px;}
       .ipma-time-box {display: flex; align-items: center; gap: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px 10px;}
       .ipma-time-box .material-icons {font-size: 16px; color: var(--red-icon); flex-shrink: 0;}
@@ -17734,12 +17857,18 @@
             <span class="material-icons">group</span>
             <div class="label">Equipa(s) DECIR</div>
           </button>
+          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+            <span class="material-icons">checklist</span>
+            <div class="label">Check Lists</div>
+          </button>
         </div>
       </div>
     </div>
     <div id="emDesenvolvimentoModal" class="modal">
       <div class="modal-content">
-        <div class="modal-header">🚧 Em Desenvolvimento</div>
+        <div class="modal-header">
+          <span class="material-icons">construction</span>&nbsp;Em Desenvolvimento
+        </div>
         <div class="modal-body">
           Esta funcionalidade ainda está em desenvolvimento.<br>
           Por favor, verifique mais tarde.
@@ -27923,7 +28052,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v17 - 2026-11-12 - Voltar do chat: historico no shell (+ v16)';
+  window.CB360_BUILD='v20 - 2026-11-12 - Voltar do chat: historico no shell (+ v16)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
