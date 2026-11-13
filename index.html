@@ -14566,6 +14566,9 @@
       .comun-icon-wrap.read {background: rgba(46, 125, 50, 0.12);}
       .comun-icon-wrap.read .material-icons {color: var(--green-state);}
       .comun-title {font-size: 13.5px; font-weight: 600; color: var(--txt-1); flex: 1; min-width: 0;}
+      .comun-info {flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;}
+      .comun-date {font-size: 11px; color: var(--txt-3); font-weight: 500;}
+      .comun-new {flex-shrink: 0; font-size: 9.5px; font-weight: 800; letter-spacing: .5px; color: #fff; background: var(--red); border-radius: 999px; padding: 2px 7px;}
       .empty-card {text-align: center; font-weight: 700; padding: 20px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--txt-2); box-shadow: var(--sh-sm);}
       /* ============================================================
       PDF VIEWER
@@ -14745,7 +14748,7 @@
         let viewedDocs = [];
         try { viewedDocs = JSON.parse(localStorage.getItem("viewed_communications") || "[]"); } catch (_) {}
         try {
-          const resp = await fetch(`${SUPABASE_URL}/rest/v1/serv_comun?select=comun_title,comun_url&corp_oper_nr=eq.${corpOperNr}&order=created_at.desc`, {
+          const resp = await fetch(`${SUPABASE_URL}/rest/v1/serv_comun?select=comun_title,comun_url,created_at&corp_oper_nr=eq.${corpOperNr}&order=created_at.desc`, {
             headers: getSupabaseHeaders()
           });
           if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -14767,14 +14770,21 @@
               <div class="comun-icon-wrap ${isRead ? 'read' : ''}">
                 <span class="material-icons">${isRead ? 'check_circle' : 'picture_as_pdf'}</span>
               </div>
-              <div class="comun-title"></div>
+              <div class="comun-info"><div class="comun-title"></div><div class="comun-date"></div></div>
+              ${isRead ? '' : '<span class="comun-new">NOVO</span>'}
             `;
             card.querySelector('.comun-title').textContent = comun.comun_title || 'Comunicado';
+            if (comun.created_at) {
+              const d = new Date(comun.created_at);
+              card.querySelector('.comun-date').textContent = isNaN(d) ? '' : d.toLocaleDateString('pt-PT', {day: '2-digit', month: 'short', year: 'numeric'});
+            }
             card.onclick = () => {
               markAsRead(publicUrl);
               const iconWrap = card.querySelector('.comun-icon-wrap');
               iconWrap.classList.add('read');
               iconWrap.querySelector('.material-icons').innerText = 'check_circle';
+              const nw = card.querySelector('.comun-new');
+              if (nw) nw.remove();
               openPdfViewer(sourceUrl, comun.comun_title);
             };
             list.appendChild(card);
@@ -15287,6 +15297,14 @@
         }
         const areaName = ipmaAreaName(area);
         container.innerHTML = "";
+        /* ===== TESTE: 3 avisos fictícios para ver as cores — APAGAR ESTE BLOCO DEPOIS ===== */
+        { const t0 = Date.now(), h = 3600000;
+          warnings = warnings.concat([
+            {awarenessLevelID: 'yellow', awarenessTypeName: 'Tempo Quente', text: 'TESTE — Persistência de valores elevados da temperatura máxima.', startTime: new Date(t0).toISOString(), endTime: new Date(t0 + 24*h).toISOString(), idAreaAviso: area},
+            {awarenessLevelID: 'orange', awarenessTypeName: 'Agitação Marítima', text: 'TESTE — Ondas de noroeste com 5 a 6 metros.', startTime: new Date(t0 + h).toISOString(), endTime: new Date(t0 + 30*h).toISOString(), idAreaAviso: area},
+            {awarenessLevelID: 'red', awarenessTypeName: 'Vento', text: 'TESTE — Rajadas até 130 km/h.', startTime: new Date(t0 + 2*h).toISOString(), endTime: new Date(t0 + 12*h).toISOString(), idAreaAviso: area}
+          ]); }
+        /* ===== FIM DO TESTE ===== */
         if (warnings.length === 0) {
           const card = document.createElement("div");
           card.className = "ipma-card ipma-green ipma-center";
