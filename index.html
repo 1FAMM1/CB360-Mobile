@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-PT">
 <head>
 <meta charset="UTF-8">
@@ -9474,9 +9474,9 @@
       /* ============================================================
       MAIN CONTENT
       ============================================================ */
-      .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + var(--back-space, 0px) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
+      .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
       .main-content::-webkit-scrollbar {display: none;}
-      body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + var(--back-space, 0px) + 8px);}
+      body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
       .main-content.content-blur {filter: blur(2px); pointer-events: none;}    
       .vacations-req-header {flex-shrink: 0; text-align: center; width: 100%; display: flex; flex-direction: column; align-items: flex-start;}
       .vacations-req-card {flex-shrink: 0;}
@@ -9602,14 +9602,6 @@
       .btn-icon {font-size:36px; color:var(--red-icon); transition:transform var(--ease), color var(--ease);}
       .btn-text {font-size:14px; font-weight:600;}
       .voluntary-view {display:none; width:100%; flex-direction:column; align-items:center; gap:5px;}
-      /* botão Voltar fixo no topo (estilo "Voltar aos Meses" das Escalas) */
-      .voluntary-back-header {position:fixed; top:calc(var(--header-h) + 12px); left:16px; z-index:90; display:inline-flex; align-items:center; gap:8px; padding:10px 18px;
-                              background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); box-shadow:var(--sh-sm); font-family:'Inter',sans-serif;
-                              font-size:14px; font-weight:600; color:var(--txt-1); cursor:pointer; transition:background var(--ease), transform 0.15s ease;}
-      .voluntary-back-header:hover {background:var(--surface-2);}
-      .voluntary-back-header:active {transform:scale(0.97);}
-      .voluntary-back-header .material-icons {font-size:20px; line-height:1; color:var(--red);}
-      body.has-back {--back-space: 60px;}
       @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
       /* ============================================================
       RESPONSIVE
@@ -9649,10 +9641,6 @@
         </button>
       </div>
       <div class="voluntary-view" id="voluntaryView">
-      <div class="voluntary-back-header" id="voluntaryBack">
-        <span class="material-icons">arrow_back</span>
-        <span id="vacBackText">Voltar</span>
-      </div>
       <div class="vacations-req-header">
         <p class="vacations-req-subtitle">Selecione o mês:</p>
       </div>    
@@ -9773,7 +9761,6 @@
       }
       /* ==================== MOBILE MONTH TRANSITION ==================== */
       function toggleMobileMonthLayout(active) {
-        if (window.innerWidth > 480) return Promise.resolve();
         return new Promise(resolve => {
           if (active) {
             document.body.classList.add('mobile-month-active');
@@ -10066,30 +10053,15 @@
         loadVacations();
         document.getElementById('vacChoose').style.display = 'none';
         document.getElementById('voluntaryView').style.display = 'flex';
-        document.getElementById('voluntaryBack').style.display = hideBack ? 'none' : '';
-        document.body.classList.toggle('has-back', !hideBack);
         vacVoluntaryOpen = true;
         const sub = document.querySelector('.header-sub'); if (sub) sub.textContent = type === 'Profissional' ? 'Profissionais' : 'Voluntariado';
         requestAnimationFrame(() => window.applyMonthsCentering && window.applyMonthsCentering());
-      }
-      function backToChoose() {
-        if (currentMonthIndex !== null) {
-          const selBtn = document.querySelector('.vacations-req-btn.selected');
-          if (selBtn) showCalendar(currentMonthIndex, selBtn);
-        }
-        vacVoluntaryOpen = false;
-        document.body.classList.remove('has-back');
-        document.getElementById('voluntaryView').style.display = 'none';
-        document.getElementById('vacChoose').style.display = 'grid';
-        document.querySelector('.main-content').style.paddingTop = '';
-        const sub = document.querySelector('.header-sub'); if (sub) sub.textContent = 'Profissionais · Voluntariado';
       }
       function setupViewByLinkType() {
         let isProf = false;
         try {isProf = sessionStorage.getItem('cb360_attendance_prof') === '1';} catch (e) {}
         document.getElementById('btn-professionals').addEventListener('click', () => openVoluntaryView(false, 'Profissional'));
         document.getElementById('btn-voluntaries').addEventListener('click', () => openVoluntaryView(false, 'Voluntariado'));
-        document.getElementById('voluntaryBack').addEventListener('click', backToChoose);
         if (isProf) {
           document.getElementById('vacChoose').style.display = 'grid';
           const sub = document.querySelector('.header-sub'); if (sub) sub.textContent = 'Profissionais · Voluntariado';
@@ -10110,18 +10082,17 @@
         const reqHeader = document.querySelector('.vacations-req-header');
         const mainContent = document.querySelector('.main-content');
         window.applyMonthsCentering = function applyMonthsCentering() {
-          if (window.innerWidth > 480 || !vacVoluntaryOpen) {
+          if (!vacVoluntaryOpen) {
             mainContent.style.paddingTop = "";
             return;
           }
           if (currentMonthIndex !== null) return;
           const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 60;
           const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footer-h")) || 50;
-          const backH = document.body.classList.contains('has-back') ? 60 : 0;
           const contentHeight = (reqHeader ? reqHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
-          const availableHeight = window.innerHeight - headerH - footerH - backH;
+          const availableHeight = window.innerHeight - headerH - footerH;
           const extra = Math.max(18, (availableHeight - contentHeight) / 2);
-          mainContent.style.paddingTop = `calc(var(--header-h) + ${backH}px + ${extra}px)`;
+          mainContent.style.paddingTop = `calc(var(--header-h) + ${extra}px)`;
         };
         setupViewByLinkType();
         window.addEventListener('resize', () => {
