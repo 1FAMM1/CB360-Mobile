@@ -15297,14 +15297,6 @@
         }
         const areaName = ipmaAreaName(area);
         container.innerHTML = "";
-        /* ===== TESTE: 3 avisos fictícios para ver as cores — APAGAR ESTE BLOCO DEPOIS ===== */
-        { const t0 = Date.now(), h = 3600000;
-          warnings = warnings.concat([
-            {awarenessLevelID: 'yellow', awarenessTypeName: 'Tempo Quente', text: 'TESTE — Persistência de valores elevados da temperatura máxima.', startTime: new Date(t0).toISOString(), endTime: new Date(t0 + 24*h).toISOString(), idAreaAviso: area},
-            {awarenessLevelID: 'orange', awarenessTypeName: 'Agitação Marítima', text: 'TESTE — Ondas de noroeste com 5 a 6 metros.', startTime: new Date(t0 + h).toISOString(), endTime: new Date(t0 + 30*h).toISOString(), idAreaAviso: area},
-            {awarenessLevelID: 'red', awarenessTypeName: 'Vento', text: 'TESTE — Rajadas até 130 km/h.', startTime: new Date(t0 + 2*h).toISOString(), endTime: new Date(t0 + 12*h).toISOString(), idAreaAviso: area}
-          ]); }
-        /* ===== FIM DO TESTE ===== */
         if (warnings.length === 0) {
           const card = document.createElement("div");
           card.className = "ipma-card ipma-green ipma-center";
@@ -18491,15 +18483,15 @@
       <div>
         <div class="section-title">Formulários NRBQ</div>
         <div class="forms-buttons">
-          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+          <button class="forms-btn" onclick="toggleButton(this); setTimeout(() => __go('NRBQ_FNI.html'), 300);">
             <span class="material-icons">notification_important</span>
             <div class="label">Notificação Inicial</div>
           </button>
-          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+          <button class="forms-btn" onclick="toggleButton(this); setTimeout(() => __go('NRBQ_FR.html'), 300);">
             <span class="material-icons">visibility</span>
             <div class="label">Reconhecimento</div>
           </button>
-          <button class="forms-btn" onclick="showEmDesenvolvimento()">
+          <button class="forms-btn" onclick="toggleButton(this); setTimeout(() => __go('NRBQ_FI.html'), 300);">
             <span class="material-icons">medical_services</span>
             <div class="label">Intervenção</div>
           </button>
@@ -23403,8 +23395,1585 @@
 </script>
 
 /* ----- RESERVADO PARA SICAC ----- */
-/* ----- RESERVADO PARA FOMULÁRIOS NRBQ ----- */
 
+<script type="text/x-cb360" data-page="NRBQ_FNI"><!DOCTYPE html>
+  <html lang="pt-PT" style="background-color: #0f1117;">
+  <head>
+    <\script>
+      (function() {
+        try {
+          if (localStorage.getItem('sgo-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {}
+      })();
+    <\/script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+    <meta name="theme-color" content="#0f1117">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    </noscript>
+    <title>CB360 Mobile - Ficha De Notificação Inicial (Fni)</title>
+    <style>
+      @view-transition {navigation: auto;}
+      /* ============================================================
+      VARIABLES
+      ============================================================ */
+      :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea; --field: #ffffff;
+             --border: rgba(0, 0, 0, 0.07); --line: rgba(0, 0, 0, 0.13); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+             --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --header-h: 60px; --footer-h: 50px; --bar-h: 64px; --r-sm: 10px; --r-md: 15px; --r-lg: 20px;
+             --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa; --green: #2e7d32; --amber: #b26a00;}
+      ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
+      .header, .footer {view-transition-name: none;}
+      /* ============================================================
+      DARK MODE
+      ============================================================ */
+      .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --field: #2a2826; --border: rgba(255, 255, 255, 0.07); --line: rgba(255, 255, 255, 0.12); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #6d6660;
+                  --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --red-light: rgba(198, 40, 40, 0.18); --red-icon: #ff6b6b; --blue: #6cb8ff; --green: #66bb6a; --amber: #ffb74d;}
+      /* ============================================================
+      RESET & BASE
+      ============================================================ */
+      html {scrollbar-width: none; background: var(--red-dark);}
+      html, body {overscroll-behavior: none;}
+      * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent;}
+      body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
+            flex-direction: column; transition: background var(--ease), color var(--ease); padding-top: var(--sai-top, env(safe-area-inset-top)); padding-bottom: var(--sai-bottom, env(safe-area-inset-bottom));}
+      /* ============================================================
+      HEADER
+      ============================================================ */
+      .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+               justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+      .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+      .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+      .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+      .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+      /* ============================================================
+      MAIN CONTENT
+      ============================================================ */
+      .main-content {flex: 1; min-height: 0; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; overflow: hidden; padding: calc(var(--header-h) + 12px) 14px calc(var(--footer-h) + 10px); background: var(--bg);}
+      .fields-box {flex: 1; min-height: 0; border-radius: var(--r-md); overflow: hidden; display: flex;}
+      .scroll {position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 0; scrollbar-width: none;}
+      .scroll .sec:last-child {margin-bottom: 0;}
+      .scroll::-webkit-scrollbar {display: none;}
+      /* progresso */
+      .progress-card {flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 11px 14px; box-shadow: var(--sh-sm); display: flex; align-items: center; gap: 12px;}
+      .progress-card .material-icons {color: var(--red-icon); font-size: 22px;}
+      .progress-info {flex: 1; min-width: 0;}
+      .progress-top {display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; color: var(--txt-2);}
+      .progress-top b {font-size: 13px; color: var(--txt-1);}
+      .progress-bar {height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin-top: 6px;}
+      .progress-bar span {display: block; height: 100%; width: 0; background: linear-gradient(to right, var(--red-dark), var(--red)); border-radius: 3px; transition: width .3s;}
+      .draft {font-size: 10.5px; color: var(--txt-3); margin-top: 5px; display: flex; align-items: center; gap: 4px;}
+      .draft .material-icons {font-size: 13px; color: var(--green);}
+      /* secções */
+      .sec {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); margin-bottom: 12px; overflow: hidden;}
+      .sec-head {display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none;}
+      .sec-icon {width: 32px; height: 32px; border-radius: 9px; background: var(--red-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+      .sec-icon .material-icons {font-size: 18px; color: var(--red-icon);}
+      .sec-title {flex: 1; font-size: 13px; font-weight: 700; color: var(--txt-1); line-height: 1.25;}
+      .sec-count {font-size: 11px; font-weight: 700; color: var(--txt-2); background: var(--surface-2); border-radius: 999px; padding: 3px 8px; flex-shrink: 0;}
+      .sec-count.done {background: rgba(46,125,50,.14); color: var(--green);}
+      .sec-chev {color: var(--txt-3); transition: transform var(--ease);}
+      .sec.closed .sec-chev {transform: rotate(-90deg);}
+      .sec.closed .sec-body {display: none;}
+      .sec.sec-hidden {display: none;}
+      .sec-body {padding: 2px 14px 14px; display: flex; flex-wrap: wrap; gap: 12px 10px; border-top: 1px solid var(--border); padding-top: 12px;}
+      /* campos */
+      .fld {width: 100%; display: flex; flex-direction: column; gap: 5px;}
+      .fld.half {width: calc(50% - 5px);}
+      .fld.third {width: calc(33.333% - 7px);}
+      .fld.hidden {display: none;}
+      .lbl {font-size: 11.5px; font-weight: 600; color: var(--txt-2); line-height: 1.3;}
+      .lbl .req {color: var(--red-icon); margin-left: 2px;}
+      .lbl .hint {font-weight: 500; color: var(--txt-3); margin-left: 4px;}
+      .in {width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--field); color: var(--txt-1); font: inherit; font-size: 15px; padding: 9px 11px;
+           -webkit-appearance: none; appearance: none; transition: border-color var(--ease), box-shadow var(--ease);}
+      .in:focus {outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
+      textarea.in {min-height: 74px; resize: none; line-height: 1.4; overflow: hidden;}
+      input[type="time"].in, input[type="datetime-local"].in {min-height: 42px;}
+      .fld.missing .in, .fld.missing .chips {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light); border-radius: var(--r-sm);}
+      .row-gps {display: flex; gap: 8px;}
+      .gps-btn {flex-shrink: 0; width: 44px; border: 0; border-radius: var(--r-sm); background: var(--red-light); color: var(--red-icon); display: flex; align-items: center; justify-content: center; cursor: pointer;}
+      .gps-btn.busy .material-icons {animation: spin 1s linear infinite;}
+      @keyframes spin {to {transform: rotate(360deg);}}
+      .chips {display: flex; flex-wrap: wrap; gap: 7px;}
+      .chips.vertical {flex-direction: column;}
+      .chip {border: 1px solid var(--line); background: var(--field); color: var(--txt-1); border-radius: 999px; padding: 9px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+             transition: all var(--ease); text-align: left;}
+      .chips.vertical .chip {border-radius: var(--r-sm);}
+      .chip.on {background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 2px 6px rgba(198,40,40,.30);}
+      .rows {display: flex; flex-direction: column; gap: 10px;}
+      .row-card {border: 1px dashed var(--line); border-radius: var(--r-sm); padding: 10px; background: var(--surface-2);}
+      .row-head {display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--txt-1); margin-bottom: 8px;}
+      .row-del {border: 0; background: transparent; color: var(--txt-3); width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;}
+      .row-del .material-icons {font-size: 18px;}
+      .row-body {display: flex; flex-wrap: wrap; gap: 10px;}
+      .row-add {align-self: flex-start; border: 1px dashed var(--red); background: var(--red-light); color: var(--red-icon); border-radius: 999px; padding: 8px 14px 8px 10px; font: inherit; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; cursor: pointer;}
+      .row-add .material-icons {font-size: 18px;}
+      .zone {border-left: 4px solid; padding-left: 8px;}
+      .zone.hot {border-color: #d32f2f;} .zone.warm {border-color: #f9a825;} .zone.cold {border-color: #2e7d32;}
+      /* barra de ações */
+      .actions {flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 10px;}
+      .actions-in {display: flex; gap: 10px;}
+      .btn {height: 46px; border: 0; border-radius: 12px; font: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer;}
+      .btn .material-icons {font-size: 20px;}
+      .btn-ghost {flex: 0 0 auto; padding: 0 16px; background: var(--surface); color: var(--txt-2); border: 1px solid var(--line);}
+      .btn-ghost.sure {background: var(--red); color: #fff; border-color: var(--red);}
+      .btn-main {flex: 1; background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; box-shadow: 0 3px 10px rgba(198,40,40,.30);}
+      .btn-main.warn {background: linear-gradient(to right, #8a5a00, var(--amber));}
+      .btn:disabled {opacity: .6;}
+      .toast {position: fixed; left: 50%; bottom: calc(var(--footer-h) + 90px); transform: translateX(-50%) translateY(10px); opacity: 0; background: #2b2a28; color: #fff; font-size: 13px; font-weight: 500;
+              padding: 10px 16px; border-radius: 12px; box-shadow: var(--sh-md); z-index: 1100; transition: all .25s; pointer-events: none; max-width: calc(100% - 40px); text-align: center;}
+      .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+      /* ============================================================
+      FOOTER
+      ============================================================ */
+      .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+               justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000;}
+      .footer-content {text-align: center;}
+      .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+      .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+      @media (max-width: 480px) {
+        .header-title {font-size: 16px;}
+        .main-content {padding-left: 10px; padding-right: 10px;}
+        .fld.third {width: 100%;}
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
+      <div class="header-center">
+        <span class="header-title">NOTIFICAÇÃO INICIAL</span>
+        <span class="header-sub">NRBQ · DON N.º 3</span>
+      </div>
+    </header>
+    <div class="main-content">
+      <div class="progress-card">
+          <span class="material-icons">campaign</span>
+          <div class="progress-info">
+            <div class="progress-top"><span>Preenchimento</span><b id="progTxt">0 / 0</b></div>
+            <div class="progress-bar"><span id="progBar"></span></div>
+            <div class="draft" id="draftInfo"><span class="material-icons">cloud_done</span>O rascunho fica guardado neste telemóvel</div>
+          </div>
+      </div>
+      <div class="fields-box">
+        <div class="scroll" id="scroll">
+          <div id="form"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="actions-in">
+          <button type="button" class="btn btn-ghost" id="btnClear"><span class="material-icons">restart_alt</span><span>Nova</span></button>
+          <button type="button" class="btn btn-main" id="btnPdf"><span class="material-icons">picture_as_pdf</span><span>Gerar PDF e partilhar</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="powered-by">Powered by Fábio Martins · Sistemas de Informação · Grupo CB360</div>
+        <div class="footer-year">© 2023–<span id="footerYear"></span> · Sistema CB360 Mobile</div>
+      </div>
+    </footer>
+    <\script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(err => console.log('Erro no motor da App: ', err));
+        });
+      }
+    <\/script>
+    <\script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+    <\script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"><\/script>
+    <\script>
+      /* ======================= FICHA (gerada a partir do Excel DON N.º 3) ======================= */
+      function lsGet(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }
+      function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
+      function lsDel(k) { try { localStorage.removeItem(k); } catch (_) {} }
+      let SPEC = {"page": "NRBQ_FNI", "short": "FNI", "title": "NOTIFICAÇÃO INICIAL", "sub": "NRBQ · DON N.º 3", "pdfTitle": "FICHA DE NOTIFICAÇÃO INICIAL (FNI) — INCIDENTES COM SUSPEITA OU ENVOLVIMENTO DE AGENTES NRBQ", "file": "FNI_NRBQ", "icon": "campaign", "sections": [{"t": "Informação Geral", "i": "assignment", "f": [{"k": "ocorrencia", "l": "N.º Ocorrência ANEPC", "type": "text", "req": 1}, {"k": "data_notif", "l": "Data da Notificação", "type": "date", "req": 1, "now": 1, "half": 1}, {"k": "hora_notif", "l": "Hora da Notificação", "type": "time", "req": 1, "now": 1, "half": 1}, {"k": "operador", "l": "Nome do Operador (recetor)", "type": "text", "req": 1}, {"k": "emissor_id", "l": "Emissor da Notificação — Identificação", "type": "text", "req": 1}, {"k": "emissor_contactos", "l": "Emissor da Notificação — Contactos", "type": "text", "ph": "Telefone / email"}]}, {"t": "Informação Relativa ao Incidente", "i": "place", "f": [{"k": "data_inc", "l": "Data do Incidente", "type": "date", "half": 1}, {"k": "hora_inc", "l": "Hora do Incidente", "type": "time", "half": 1}, {"k": "data_obs", "l": "Data de Observação", "type": "date", "half": 1}, {"k": "hora_obs", "l": "Hora de Observação", "type": "time", "half": 1}, {"k": "local", "l": "Local / Concelho / Distrito", "type": "text", "req": 1}, {"k": "referencia", "l": "Ponto de Referência", "type": "text"}, {"k": "coordenadas", "l": "Coordenadas (Datum / Lat-Long)", "type": "gps"}, {"k": "onde", "l": "Onde ocorreu o incidente?", "type": "select", "opts": ["Via Pública", "Edifício"], "req": 1}]}, {"t": "1. Via Pública", "i": "add_road", "showIf": ["onde", "Via Pública"], "f": [{"k": "estrada", "l": "Estrada (km / sentido)", "type": "text"}, {"k": "arruamento", "l": "Arruamento (n.º Polícia / Porta e Sentido)", "type": "text"}, {"k": "ferrovia", "l": "Linha Ferroviária (km / pk / sentido)", "type": "text"}, {"k": "outra_ref", "l": "Outra referência do Local", "type": "text"}, {"k": "localidade", "l": "Localidade (exata ou a mais próxima)", "type": "text"}]}, {"t": "2. Edifício", "i": "apartment", "showIf": ["onde", "Edifício"], "f": [{"k": "estab_id", "l": "Identificação do Estabelecimento", "type": "text"}, {"k": "estab_morada", "l": "Morada", "type": "text"}, {"k": "estab_tipo", "l": "Tipo de Estabelecimento", "type": "select", "opts": ["Comércio", "Indústria", "Armazém", "Interface marítimo", "Interface rodoviário", "Interface ferroviário", "Aeroporto", "Habitação", "Escritórios", "Saúde", "Escola", "Lar", "Outro"]}, {"k": "estab_outro", "l": "Outro — especifique", "type": "text", "showIf": ["estab_tipo", "Outro"]}]}, {"t": "3. Eventuais Vítimas", "i": "personal_injury", "f": [{"k": "vitimas", "l": "Existem vítimas no local do incidente?", "type": "select", "opts": ["Sim", "Não"], "req": 1}, {"k": "n_vitimas", "l": "Quantas (aproximadamente)", "type": "number", "half": 1, "showIf": ["vitimas", "Sim"]}, {"k": "n_mortos", "l": "N.º de Mortos", "type": "number", "half": 1, "showIf": ["vitimas", "Sim"]}, {"k": "sintomas", "l": "Principais sintomas (descreva)", "type": "area", "showIf": ["vitimas", "Sim"]}]}, {"t": "4. Mercadorias e Substâncias Perigosas", "i": "science", "f": [{"k": "nome_comum", "l": "Nome Comum", "type": "text"}, {"k": "onu", "l": "N.º ONU", "type": "text", "half": 1, "ph": "Ex.: 1203"}, {"k": "perigo", "l": "N.º Perigo", "type": "text", "half": 1, "ph": "Ex.: 33"}, {"k": "etiquetas", "l": "Etiquetas ou Rótulos de perigo", "type": "text"}, {"k": "quantidade", "l": "Quantidade (estimada)", "type": "text"}, {"k": "descricao_visual", "l": "Descrição Visual", "type": "area"}, {"k": "contentor", "l": "Tipo de Contentor", "type": "select", "opts": ["Cisterna", "Garrafas de gás comprimido", "Tambores", "Outro"]}, {"k": "cisterna_m3", "l": "Cisterna — capacidade (m³)", "type": "number", "showIf": ["contentor", "Cisterna"]}, {"k": "garrafas_l", "l": "Garrafas — capacidade (litros)", "type": "number", "showIf": ["contentor", "Garrafas de gás comprimido"]}, {"k": "tambores_l", "l": "Tambores — capacidade (litros)", "type": "number", "showIf": ["contentor", "Tambores"]}, {"k": "contentor_outro", "l": "Outro contentor — especifique", "type": "text", "showIf": ["contentor", "Outro"]}, {"k": "transporte", "l": "Tipo de Transporte", "type": "select", "opts": ["Rodoviário", "Ferroviário", "Marítimo", "Fluvial", "Conduta (pipeline)", "Aéreo"]}, {"k": "fase", "l": "Fase do Transporte", "type": "select", "opts": ["Carga", "Descarga", "Em Transporte"]}]}, {"t": "5. Natureza do Incidente", "i": "local_fire_department", "f": [{"k": "derrame", "l": "Derrame (líquido) — Quantidade estimada", "type": "text"}, {"k": "fuga", "l": "Fuga (vapor / gás) — Quantidade estimada", "type": "text"}, {"k": "espalhamento", "l": "Espalhamento (sólido) — Quantidade estimada", "type": "text"}, {"k": "incendio", "l": "Incêndio", "type": "select", "opts": ["Sim", "Não"], "half": 1}, {"k": "explosao", "l": "Explosão", "type": "select", "opts": ["Sim", "Não"], "half": 1}, {"k": "outra_info", "l": "Outra informação relevante", "type": "area"}]}, {"t": "6. Matéria Não-identificada — Suspeita de risco NRBQ", "i": "help_center", "f": [{"k": "cheiro", "l": "Indícios de perigosidade — Cheiro", "type": "select", "opts": ["Sim", "Não"]}, {"k": "cheiro_tipo", "l": "Que tipo de cheiro", "type": "text", "ph": "Ex.: alho, piscina, ovos podres…", "showIf": ["cheiro", "Sim"]}, {"k": "cor_derrame", "l": "Cor do derrame", "type": "text"}, {"k": "origem_fuga", "l": "Origem da fuga", "type": "text"}, {"k": "vitimas_mat", "l": "Existem vítimas no local?", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "7. Origem do Incidente", "i": "travel_explore", "f": [{"k": "origem_conhecida", "l": "É conhecida a origem do incidente?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "origem_qual", "l": "Qual", "type": "text", "showIf": ["origem_conhecida", "Sim"]}, {"k": "reg_explosao", "l": "Há registo de explosão?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "reg_ataque", "l": "Há registo de outro tipo de incidente e/ou ataque?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "ameaca_bomba", "l": "Existe ameaça de bomba no local?", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "8. Características da Chamada de Alerta", "i": "call", "closed": 1, "f": [{"k": "tipo_chamada", "l": "Tipo de Chamada", "type": "select", "opts": ["Local", "Regional", "Nacional", "Móvel", "Internacional"]}, {"k": "sexo", "l": "Sexo", "type": "select", "opts": ["Feminino", "Masculino"], "half": 1}, {"k": "idade", "l": "Idade aproximada", "type": "number", "half": 1}, {"k": "voz", "l": "Características da Voz", "type": "multi", "opts": ["Forte", "Suave", "Aguda", "Rouca", "Agradável", "Denotada Embriaguez"]}, {"k": "sotaque", "l": "Sotaque", "type": "select", "opts": ["Local", "Regional", "Estrangeiro", "Étnico", "Outros"]}, {"k": "modo", "l": "Modo", "type": "multi", "opts": ["Calmo", "Racional", "Coerente", "Deliberado", "Direto", "Correto", "Irritante", "Irracional", "Incoerente", "Emocional"]}, {"k": "sons", "l": "Sons de Fundo", "type": "multi", "opts": ["Barulho", "Silêncio", "Misturado", "Comboio", "Música", "Vozes", "Cozinha", "Aeronaves", "Animais", "Máquinas", "Tráfego de rua", "Reunião de rua", "Outros"]}]}, {"t": "9. Outras Informações", "i": "notes", "f": [{"k": "outras", "l": "Outras informações", "type": "area"}, {"k": "optel", "l": "OPTEL", "type": "text", "req": 1}]}]};
+      const corp = (lsGet('currentCorpOperNr') || '').padStart(4, '0');
+      let KEY, FIELDS, DATA;
+      function useSpec(s) {
+        SPEC = s;
+        KEY = `cb360_nrbq_${SPEC.page}_${corp}`;
+        FIELDS = SPEC.sections.flatMap(x => x.f);
+        try { DATA = JSON.parse(lsGet(KEY) || '{}') || {}; } catch (_) { DATA = {}; }
+      }
+      useSpec(SPEC);
+      const $ = id => document.getElementById(id);
+      const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+      const pad = n => String(n).padStart(2, '0');
+      const nowLocal = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+      const nowFor = type => { const v = nowLocal(); return type === 'date' ? v.slice(0, 10) : type === 'time' ? v.slice(11) : v; };
+      let toastT;
+      function toast(msg, ms = 2600) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+      function cond(c) { if (!c) return true; const [k, ...vals] = c; return vals.includes(DATA[k]); }
+      function secOf(f) { return SPEC.sections.find(s => s.f.includes(f)); }
+      function visible(f) { return cond(f.showIf) && cond((secOf(f) || {}).showIf); }
+      function rowEmpty(r) { return !r || Object.values(r).every(x => x == null || String(x).trim() === ''); }
+      function filled(f) {
+        const v = DATA[f.k];
+        if (f.type === 'rows') return Array.isArray(v) && v.some(r => !rowEmpty(r));
+        return Array.isArray(v) ? v.length > 0 : v != null && String(v).trim() !== '';
+      }
+      function rowsHtml(f) {
+        if (!Array.isArray(DATA[f.k]) || !DATA[f.k].length) DATA[f.k] = [{}];
+        const rows = DATA[f.k];
+        const cell = (c, r, i) => {
+          const v = r[c.k] == null ? '' : r[c.k];
+          const at = `data-rk="${f.k}" data-ri="${i}" data-rc="${c.k}"`;
+          let ctl;
+          if (c.type === 'select') ctl = `<div class="chips" ${at}>${c.opts.map(o => `<button type="button" class="chip ${v === o ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+          else {
+            const ty = {number: 'number', datetime: 'datetime-local', time: 'time', date: 'date'}[c.type] || 'text';
+            ctl = `<input class="in" type="${ty}" ${at} value="${esc(v)}" placeholder="${esc(c.ph || '')}"${c.type === 'number' ? ' inputmode="decimal"' : ''} autocomplete="off">`;
+          }
+          return `<div class="fld ${c.half ? 'half' : ''}"><span class="lbl">${esc(c.l)}</span>${ctl}</div>`;
+        };
+        return `<div class="rows">${rows.map((r, i) => `
+          <div class="row-card">
+            <div class="row-head"><span>${esc(f.item)} ${i + 1}</span>${rows.length > 1 ? `<button type="button" class="row-del" data-rowdel="${f.k}" data-ri="${i}" title="Remover"><span class="material-icons">close</span></button>` : ''}</div>
+            <div class="row-body">${f.cols.map(c => cell(c, r, i)).join('')}</div>
+          </div>`).join('')}
+          ${rows.length < f.max ? `<button type="button" class="row-add" data-rowadd="${f.k}"><span class="material-icons">add</span>Adicionar ${esc(f.item.toLowerCase())}</button>` : ''}</div>`;
+      }
+      function redrawRows(k) { const f = FIELDS.find(x => x.k === k); const w = $('w_' + k); if (f && w) { w.outerHTML = fieldHtml(f); refresh(); save(); } }
+      let saveT;
+      function save() {
+        clearTimeout(saveT);
+        saveT = setTimeout(() => {
+          lsSet(KEY, JSON.stringify(DATA));
+          const d = new Date();
+          $('draftInfo').innerHTML = `<span class="material-icons">cloud_done</span>Rascunho guardado às ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }, 400);
+      }
+      /* ----------------------------- desenhar ----------------------------- */
+      function fieldHtml(f) {
+        const v = DATA[f.k] == null ? '' : DATA[f.k];
+        const cls = ['fld', f.half ? 'half' : '', f.third ? 'third' : '', f.zone ? 'zone ' + f.zone : '', visible(f) ? '' : 'hidden'].join(' ');
+        const lbl = `<label class="lbl" for="f_${f.k}">${esc(f.l)}${f.req ? '<span class="req">*</span>' : ''}${f.hint ? `<span class="hint">(${esc(f.hint)})</span>` : ''}</label>`;
+        let ctl = '';
+        if (f.type === 'rows') {
+          ctl = rowsHtml(f);
+        } else if (f.type === 'select' || f.type === 'multi') {
+          const on = o => f.type === 'multi' ? (Array.isArray(v) && v.includes(o)) : v === o;
+          ctl = `<div class="chips ${f.opts.some(o => o.length > 22) ? 'vertical' : ''}" data-k="${f.k}"${f.type === 'multi' ? ' data-multi="1"' : ''}>${f.opts.map(o => `<button type="button" class="chip ${on(o) ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+        } else if (f.type === 'area') {
+          ctl = `<textarea class="in" id="f_${f.k}" data-k="${f.k}" rows="2" placeholder="${esc(f.ph || '')}">${esc(v)}</textarea>`;
+        } else if (f.type === 'gps') {
+          ctl = `<div class="row-gps"><input class="in" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="37.01928, -7.93044" inputmode="decimal">
+                 <button type="button" class="gps-btn" data-gps="${f.k}" title="Usar a minha localização"><span class="material-icons">my_location</span></button></div>`;
+        } else {
+          const t = {text: 'text', number: 'number', time: 'time', date: 'date', datetime: 'datetime-local'}[f.type] || 'text';
+          const extra = f.type === 'number' ? ' inputmode="numeric" min="0"' : '';
+          const list = f.list ? ` list="dl_${f.k}"` : '';
+          ctl = `<input class="in" type="${t}" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="${esc(f.ph || '')}"${extra}${list} autocomplete="off">` +
+                (f.list ? `<datalist id="dl_${f.k}">${f.list.map(o => `<option value="${esc(o)}">`).join('')}</datalist>` : '');
+        }
+        return `<div class="${cls}" id="w_${f.k}">${lbl}${ctl}</div>`;
+      }
+      function render() {
+        FIELDS.forEach(f => { if (f.now && !DATA[f.k]) DATA[f.k] = nowFor(f.type); });
+        $('form').innerHTML = SPEC.sections.map((s, i) => `
+          <div class="sec closed${cond(s.showIf) ? '' : ' sec-hidden'}" id="sec_${i}">
+            <div class="sec-head" data-sec="${i}">
+              <div class="sec-icon"><span class="material-icons">${s.i}</span></div>
+              <div class="sec-title">${esc(s.t)}</div>
+              <span class="sec-count" id="cnt_${i}"></span>
+              <span class="material-icons sec-chev">expand_more</span>
+            </div>
+            <div class="sec-body">${s.f.map(fieldHtml).join('')}</div>
+          </div>`).join('');
+        document.querySelectorAll('textarea.in').forEach(grow);
+        refresh();
+        save();
+      }
+      /* acordeão: só uma secção aberta de cada vez */
+      function openSec(sec, toggle, keepScroll) {
+        if (!sec) return;
+        const wasOpen = !sec.classList.contains('closed');
+        document.querySelectorAll('.sec').forEach(s => s.classList.add('closed'));
+        if (toggle && wasOpen) return;
+        sec.classList.remove('closed');
+        sec.querySelectorAll('textarea.in').forEach(grow);
+        if (!keepScroll) {
+          const sc = $('scroll');
+          requestAnimationFrame(() => sc.scrollTo({top: Math.max(0, sec.offsetTop), behavior: 'smooth'}));
+        }
+      }
+      function grow(t) { t.style.height = 'auto'; t.style.height = Math.max(74, t.scrollHeight + 2) + 'px'; }
+      function refresh() {
+        let tot = 0, ok = 0;
+        SPEC.sections.forEach((s, i) => {
+          let st = 0, so = 0;
+          $('sec_' + i).classList.toggle('sec-hidden', !cond(s.showIf));
+          s.f.forEach(f => {
+            const w = $('w_' + f.k);
+            const vis = visible(f);
+            if (w) w.classList.toggle('hidden', !vis);
+            if (!vis) return;
+            st++; if (filled(f)) so++;
+            if (w && filled(f)) w.classList.remove('missing');
+          });
+          tot += st; ok += so;
+          const c = $('cnt_' + i);
+          c.textContent = `${so}/${st}`;
+          c.classList.toggle('done', so === st);
+        });
+        $('progTxt').textContent = `${ok} / ${tot}`;
+        $('progBar').style.width = (tot ? Math.round(ok / tot * 100) : 0) + '%';
+      }
+      /* ----------------------------- eventos ----------------------------- */
+      document.addEventListener('input', e => {
+        const ds = e.target.dataset || {};
+        if (ds.rk) { DATA[ds.rk][+ds.ri][ds.rc] = e.target.value; refresh(); save(); return; }
+        const k = ds.k;
+        if (!k) return;
+        DATA[k] = e.target.value;
+        if (e.target.tagName === 'TEXTAREA') grow(e.target);
+        refresh(); save();
+      });
+      document.addEventListener('click', e => {
+        const add = e.target.closest('[data-rowadd]');
+        if (add) { DATA[add.dataset.rowadd].push({}); redrawRows(add.dataset.rowadd); return; }
+        const del = e.target.closest('[data-rowdel]');
+        if (del) { DATA[del.dataset.rowdel].splice(+del.dataset.ri, 1); redrawRows(del.dataset.rowdel); return; }
+        const chip = e.target.closest('.chip');
+        if (chip && chip.parentElement.dataset.rk) {
+          const b = chip.parentElement, r = DATA[b.dataset.rk][+b.dataset.ri];
+          r[b.dataset.rc] = r[b.dataset.rc] === chip.dataset.v ? '' : chip.dataset.v;
+          b.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === r[b.dataset.rc]));
+          refresh(); save(); return;
+        }
+        if (chip) {
+          const box = chip.parentElement, k = box.dataset.k, v = chip.dataset.v;
+          if (box.dataset.multi) {
+            const arr = Array.isArray(DATA[k]) ? DATA[k].slice() : [];
+            const ix = arr.indexOf(v); if (ix >= 0) arr.splice(ix, 1); else arr.push(v);
+            DATA[k] = arr;
+            chip.classList.toggle('on', ix < 0);
+          } else {
+            DATA[k] = DATA[k] === v ? '' : v;
+            box.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === DATA[k]));
+          }
+          refresh(); save();
+          return;
+        }
+        const head = e.target.closest('.sec-head');
+        if (head) { openSec($('sec_' + head.dataset.sec), true); return; }
+        const g = e.target.closest('[data-gps]');
+        if (g) getGps(g);
+      });
+      function getGps(btn) {
+        if (!navigator.geolocation) return toast('Este telemóvel não permite obter a localização.');
+        btn.classList.add('busy');
+        navigator.geolocation.getCurrentPosition(p => {
+          btn.classList.remove('busy');
+          const k = btn.dataset.gps;
+          DATA[k] = `${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}`;
+          $('f_' + k).value = DATA[k];
+          refresh(); save();
+          toast(`Localização obtida (±${Math.round(p.coords.accuracy)} m)`);
+        }, err => {
+          btn.classList.remove('busy');
+          toast(err.code === 1 ? 'Sem permissão de localização. Ative-a nas definições.' : 'Não foi possível obter a localização.');
+        }, {enableHighAccuracy: true, timeout: 15000, maximumAge: 30000});
+      }
+      /* ----------------------------- nova ficha ----------------------------- */
+      let clearArm = null;
+      $('btnClear').onclick = () => {
+        const b = $('btnClear');
+        if (!clearArm) {
+          b.classList.add('sure'); b.lastElementChild.textContent = 'Apagar tudo?';
+          clearArm = setTimeout(() => { clearArm = null; b.classList.remove('sure'); b.lastElementChild.textContent = 'Nova'; }, 3500);
+          return;
+        }
+        clearTimeout(clearArm); clearArm = null;
+        b.classList.remove('sure'); b.lastElementChild.textContent = 'Nova';
+        DATA = {};
+        lsDel(KEY);
+        render();
+        $('scroll').scrollTo({top: 0, behavior: 'smooth'});
+        toast('Ficha limpa. Pode começar uma nova.');
+      };
+      /* ----------------------------- PDF ----------------------------- */
+      let forceArm = null;
+      function fmtValue(f) {
+        const v = DATA[f.k];
+        if (f.type === 'rows') {
+          const fmtC = (c, x) => c.type === 'datetime' && x ? x.replace(/^(\d{4})-(\d{2})-(\d{2})T/, '$3/$2/$1 ') : x;
+          const out = (v || []).filter(r => !rowEmpty(r)).map((r, i) => `${i + 1}) ` + f.cols.filter(c => r[c.k] && String(r[c.k]).trim()).map(c => `${c.l}: ${fmtC(c, String(r[c.k]).trim())}`).join('  |  '));
+          return out.length ? out.join('\n') : '—';
+        }
+        if (Array.isArray(v)) return v.length ? v.join(', ') : '—';
+        if (v == null || String(v).trim() === '') return '—';
+        if (f.type === 'date') { const [y, m, dd] = String(v).split('-'); return `${dd}/${m}/${y}`; }
+        if (f.type === 'datetime') { const [d, t] = String(v).split('T'); const [y, m, dd] = d.split('-'); return `${dd}/${m}/${y}${t ? ' ' + t : ''}`; }
+        if (f.type === 'number' && /\(m\)$/.test(f.l)) return `${v} m`;
+        return String(v).trim();
+      }
+      async function logoData() {
+        const url = lsGet('cached_logo_url');
+        if (!url) return null;
+        try {
+          const r = await fetch(url); if (!r.ok) return null;
+          const b = await r.blob();
+          return await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(b); });
+        } catch (_) { return null; }
+      }
+      $('btnPdf').onclick = async () => {
+        const btn = $('btnPdf');
+        const missing = FIELDS.filter(f => f.req && visible(f) && !filled(f));
+        if (missing.length && !forceArm) {
+          missing.forEach(f => $('w_' + f.k).classList.add('missing'));
+          const first = $('w_' + missing[0].k);
+          openSec(first.closest('.sec'), false, true);
+          setTimeout(() => first.scrollIntoView({behavior: 'smooth', block: 'center'}), 60);
+          toast(`Faltam ${missing.length} campo(s) obrigatório(s). Toque outra vez para gerar mesmo assim.`, 3800);
+          btn.classList.add('warn'); btn.lastElementChild.textContent = 'Gerar mesmo assim';
+          forceArm = setTimeout(() => { forceArm = null; btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar'; }, 5000);
+          return;
+        }
+        clearTimeout(forceArm); forceArm = null;
+        btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar';
+        if (!window.jspdf || !window.jspdf.jsPDF) return toast('Sem ligação para gerar o PDF. Tente novamente com rede.');
+        btn.disabled = true;
+        try {
+          const file = await buildPdf();
+          if (navigator.canShare && navigator.canShare({files: [file]})) {
+            try { await navigator.share({files: [file], title: SPEC.pdfTitle}); }
+            catch (e) { if (e && e.name !== 'AbortError') download(file); }
+          } else {
+            download(file);
+          }
+        } catch (e) {
+          console.error('Erro ao gerar PDF:', e);
+          toast('Não foi possível gerar o PDF.');
+        } finally {
+          btn.disabled = false;
+        }
+      };
+      function download(file) {
+        const u = URL.createObjectURL(file);
+        const a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(u), 60000);
+        toast('PDF guardado nas transferências.');
+      }
+      async function buildPdf() {
+        const {jsPDF} = window.jspdf;
+        const doc = new jsPDF({unit: 'mm', format: 'a4'});
+        const W = doc.internal.pageSize.getWidth();
+        const logo = await logoData();
+        doc.setFillColor(139, 0, 0); doc.rect(0, 0, W, 24, 'F');
+        doc.setFillColor(198, 40, 40); doc.rect(0, 22, W, 2, 'F');
+        let tx = 12;
+        if (logo) { try { doc.addImage(logo, 8, 3, 18, 18); tx = 30; } catch (_) {} }
+        doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5);
+        doc.text(doc.splitTextToSize(SPEC.pdfTitle, W - tx - 10), tx, 10);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+        const d = new Date();
+        doc.text(`Corporação ${corp}  |  Gerado no CB360 Mobile em ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`, tx, 19.5);
+        let y = 30;
+        SPEC.sections.filter(s => cond(s.showIf)).forEach(s => {
+          if (y > 250) { doc.addPage(); y = 16; }
+          const rows = s.f.filter(visible).map(f => [f.l.replace(/\s*\(m\)$/, '').replace(/\s*\(até \d+\)$/, ''), fmtValue(f)]);
+          doc.autoTable({
+            startY: y, margin: {left: 12, right: 12},
+            head: [[{content: s.t.toUpperCase(), colSpan: 2}]],
+            body: rows, theme: 'grid',
+            headStyles: {fillColor: [217, 225, 242], textColor: [31, 78, 120], fontStyle: 'bold', fontSize: 9.5, cellPadding: 2.4},
+            styles: {fontSize: 9, cellPadding: 2.2, lineColor: [210, 214, 220], lineWidth: 0.2, textColor: [30, 30, 30], valign: 'top'},
+            columnStyles: {0: {cellWidth: 68, fontStyle: 'bold', textColor: [60, 60, 60], fillColor: [249, 250, 252]}, 1: {cellWidth: 'auto'}}
+          });
+          y = doc.lastAutoTable.finalY + 5;
+        });
+        if (y > 262) { doc.addPage(); y = 20; }
+        y += 6;
+        doc.setDrawColor(150); doc.setLineWidth(0.3); doc.setTextColor(80); doc.setFontSize(8.5);
+        doc.line(12, y + 10, 92, y + 10); doc.line(W - 92, y + 10, W - 12, y + 10);
+        doc.text('Responsável pelo preenchimento (nome / posto)', 12, y + 14);
+        doc.text('Assinatura', W - 92, y + 14);
+        const n = doc.getNumberOfPages();
+        for (let i = 1; i <= n; i++) {
+          doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(140);
+          doc.text(`${SPEC.short}  |  NRBQ  |  DON N.º 3`, 12, 290);
+          doc.text(`Página ${i} de ${n}`, W - 12, 290, {align: 'right'});
+        }
+        const occ = String(DATA.ocorrencia || '').replace(/[^A-Za-z0-9-]+/g, '_').replace(/^_+|_+$/g, '');
+        const name = `${SPEC.file}${occ ? '_' + occ : ''}_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.pdf`;
+        return new File([doc.output('blob')], name, {type: 'application/pdf'});
+      }
+      /* ----------------------------- arranque ----------------------------- */
+      document.addEventListener('DOMContentLoaded', () => {
+        if (lsGet('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+        const logo = lsGet('cached_logo_url');
+        if (logo) $('corpLogo').src = logo;
+        $('footerYear').textContent = new Date().getFullYear();
+        render();
+      });
+    <\/script>
+  </body>
+  </html>
+</script>
+<script type="text/x-cb360" data-page="NRBQ_FR"><!DOCTYPE html>
+  <html lang="pt-PT" style="background-color: #0f1117;">
+  <head>
+    <\script>
+      (function() {
+        try {
+          if (localStorage.getItem('sgo-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {}
+      })();
+    <\/script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+    <meta name="theme-color" content="#0f1117">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    </noscript>
+    <title>CB360 Mobile - Ficha De Reconhecimento (Fr)</title>
+    <style>
+      @view-transition {navigation: auto;}
+      /* ============================================================
+      VARIABLES
+      ============================================================ */
+      :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea; --field: #ffffff;
+             --border: rgba(0, 0, 0, 0.07); --line: rgba(0, 0, 0, 0.13); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+             --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --header-h: 60px; --footer-h: 50px; --bar-h: 64px; --r-sm: 10px; --r-md: 15px; --r-lg: 20px;
+             --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa; --green: #2e7d32; --amber: #b26a00;}
+      ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
+      .header, .footer {view-transition-name: none;}
+      /* ============================================================
+      DARK MODE
+      ============================================================ */
+      .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --field: #2a2826; --border: rgba(255, 255, 255, 0.07); --line: rgba(255, 255, 255, 0.12); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #6d6660;
+                  --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --red-light: rgba(198, 40, 40, 0.18); --red-icon: #ff6b6b; --blue: #6cb8ff; --green: #66bb6a; --amber: #ffb74d;}
+      /* ============================================================
+      RESET & BASE
+      ============================================================ */
+      html {scrollbar-width: none; background: var(--red-dark);}
+      html, body {overscroll-behavior: none;}
+      * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent;}
+      body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
+            flex-direction: column; transition: background var(--ease), color var(--ease); padding-top: var(--sai-top, env(safe-area-inset-top)); padding-bottom: var(--sai-bottom, env(safe-area-inset-bottom));}
+      /* ============================================================
+      HEADER
+      ============================================================ */
+      .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+               justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+      .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+      .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+      .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+      .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+      /* ============================================================
+      MAIN CONTENT
+      ============================================================ */
+      .main-content {flex: 1; min-height: 0; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; overflow: hidden; padding: calc(var(--header-h) + 12px) 14px calc(var(--footer-h) + 10px); background: var(--bg);}
+      .fields-box {flex: 1; min-height: 0; border-radius: var(--r-md); overflow: hidden; display: flex;}
+      .scroll {position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 0; scrollbar-width: none;}
+      .scroll .sec:last-child {margin-bottom: 0;}
+      .scroll::-webkit-scrollbar {display: none;}
+      /* progresso */
+      .progress-card {flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 11px 14px; box-shadow: var(--sh-sm); display: flex; align-items: center; gap: 12px;}
+      .progress-card .material-icons {color: var(--red-icon); font-size: 22px;}
+      .progress-info {flex: 1; min-width: 0;}
+      .progress-top {display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; color: var(--txt-2);}
+      .progress-top b {font-size: 13px; color: var(--txt-1);}
+      .progress-bar {height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin-top: 6px;}
+      .progress-bar span {display: block; height: 100%; width: 0; background: linear-gradient(to right, var(--red-dark), var(--red)); border-radius: 3px; transition: width .3s;}
+      .draft {font-size: 10.5px; color: var(--txt-3); margin-top: 5px; display: flex; align-items: center; gap: 4px;}
+      .draft .material-icons {font-size: 13px; color: var(--green);}
+      /* secções */
+      .sec {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); margin-bottom: 12px; overflow: hidden;}
+      .sec-head {display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none;}
+      .sec-icon {width: 32px; height: 32px; border-radius: 9px; background: var(--red-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+      .sec-icon .material-icons {font-size: 18px; color: var(--red-icon);}
+      .sec-title {flex: 1; font-size: 13px; font-weight: 700; color: var(--txt-1); line-height: 1.25;}
+      .sec-count {font-size: 11px; font-weight: 700; color: var(--txt-2); background: var(--surface-2); border-radius: 999px; padding: 3px 8px; flex-shrink: 0;}
+      .sec-count.done {background: rgba(46,125,50,.14); color: var(--green);}
+      .sec-chev {color: var(--txt-3); transition: transform var(--ease);}
+      .sec.closed .sec-chev {transform: rotate(-90deg);}
+      .sec.closed .sec-body {display: none;}
+      .sec.sec-hidden {display: none;}
+      .sec-body {padding: 2px 14px 14px; display: flex; flex-wrap: wrap; gap: 12px 10px; border-top: 1px solid var(--border); padding-top: 12px;}
+      /* campos */
+      .fld {width: 100%; display: flex; flex-direction: column; gap: 5px;}
+      .fld.half {width: calc(50% - 5px);}
+      .fld.third {width: calc(33.333% - 7px);}
+      .fld.hidden {display: none;}
+      .lbl {font-size: 11.5px; font-weight: 600; color: var(--txt-2); line-height: 1.3;}
+      .lbl .req {color: var(--red-icon); margin-left: 2px;}
+      .lbl .hint {font-weight: 500; color: var(--txt-3); margin-left: 4px;}
+      .in {width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--field); color: var(--txt-1); font: inherit; font-size: 15px; padding: 9px 11px;
+           -webkit-appearance: none; appearance: none; transition: border-color var(--ease), box-shadow var(--ease);}
+      .in:focus {outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
+      textarea.in {min-height: 74px; resize: none; line-height: 1.4; overflow: hidden;}
+      input[type="time"].in, input[type="datetime-local"].in {min-height: 42px;}
+      .fld.missing .in, .fld.missing .chips {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light); border-radius: var(--r-sm);}
+      .row-gps {display: flex; gap: 8px;}
+      .gps-btn {flex-shrink: 0; width: 44px; border: 0; border-radius: var(--r-sm); background: var(--red-light); color: var(--red-icon); display: flex; align-items: center; justify-content: center; cursor: pointer;}
+      .gps-btn.busy .material-icons {animation: spin 1s linear infinite;}
+      @keyframes spin {to {transform: rotate(360deg);}}
+      .chips {display: flex; flex-wrap: wrap; gap: 7px;}
+      .chips.vertical {flex-direction: column;}
+      .chip {border: 1px solid var(--line); background: var(--field); color: var(--txt-1); border-radius: 999px; padding: 9px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+             transition: all var(--ease); text-align: left;}
+      .chips.vertical .chip {border-radius: var(--r-sm);}
+      .chip.on {background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 2px 6px rgba(198,40,40,.30);}
+      .rows {display: flex; flex-direction: column; gap: 10px;}
+      .row-card {border: 1px dashed var(--line); border-radius: var(--r-sm); padding: 10px; background: var(--surface-2);}
+      .row-head {display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--txt-1); margin-bottom: 8px;}
+      .row-del {border: 0; background: transparent; color: var(--txt-3); width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;}
+      .row-del .material-icons {font-size: 18px;}
+      .row-body {display: flex; flex-wrap: wrap; gap: 10px;}
+      .row-add {align-self: flex-start; border: 1px dashed var(--red); background: var(--red-light); color: var(--red-icon); border-radius: 999px; padding: 8px 14px 8px 10px; font: inherit; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; cursor: pointer;}
+      .row-add .material-icons {font-size: 18px;}
+      .zone {border-left: 4px solid; padding-left: 8px;}
+      .zone.hot {border-color: #d32f2f;} .zone.warm {border-color: #f9a825;} .zone.cold {border-color: #2e7d32;}
+      /* barra de ações */
+      .actions {flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 10px;}
+      .actions-in {display: flex; gap: 10px;}
+      .btn {height: 46px; border: 0; border-radius: 12px; font: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer;}
+      .btn .material-icons {font-size: 20px;}
+      .btn-ghost {flex: 0 0 auto; padding: 0 16px; background: var(--surface); color: var(--txt-2); border: 1px solid var(--line);}
+      .btn-ghost.sure {background: var(--red); color: #fff; border-color: var(--red);}
+      .btn-main {flex: 1; background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; box-shadow: 0 3px 10px rgba(198,40,40,.30);}
+      .btn-main.warn {background: linear-gradient(to right, #8a5a00, var(--amber));}
+      .btn:disabled {opacity: .6;}
+      .toast {position: fixed; left: 50%; bottom: calc(var(--footer-h) + 90px); transform: translateX(-50%) translateY(10px); opacity: 0; background: #2b2a28; color: #fff; font-size: 13px; font-weight: 500;
+              padding: 10px 16px; border-radius: 12px; box-shadow: var(--sh-md); z-index: 1100; transition: all .25s; pointer-events: none; max-width: calc(100% - 40px); text-align: center;}
+      .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+      /* ============================================================
+      FOOTER
+      ============================================================ */
+      .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+               justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000;}
+      .footer-content {text-align: center;}
+      .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+      .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+      @media (max-width: 480px) {
+        .header-title {font-size: 16px;}
+        .main-content {padding-left: 10px; padding-right: 10px;}
+        .fld.third {width: 100%;}
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
+      <div class="header-center">
+        <span class="header-title">RECONHECIMENTO</span>
+        <span class="header-sub">ERAS NRBQ · DON N.º 3</span>
+      </div>
+    </header>
+    <div class="main-content">
+      <div class="progress-card">
+          <span class="material-icons">travel_explore</span>
+          <div class="progress-info">
+            <div class="progress-top"><span>Preenchimento</span><b id="progTxt">0 / 0</b></div>
+            <div class="progress-bar"><span id="progBar"></span></div>
+            <div class="draft" id="draftInfo"><span class="material-icons">cloud_done</span>O rascunho fica guardado neste telemóvel</div>
+          </div>
+      </div>
+      <div class="fields-box">
+        <div class="scroll" id="scroll">
+          <div id="form"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="actions-in">
+          <button type="button" class="btn btn-ghost" id="btnClear"><span class="material-icons">restart_alt</span><span>Nova</span></button>
+          <button type="button" class="btn btn-main" id="btnPdf"><span class="material-icons">picture_as_pdf</span><span>Gerar PDF e partilhar</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="powered-by">Powered by Fábio Martins · Sistemas de Informação · Grupo CB360</div>
+        <div class="footer-year">© 2023–<span id="footerYear"></span> · Sistema CB360 Mobile</div>
+      </div>
+    </footer>
+    <\script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(err => console.log('Erro no motor da App: ', err));
+        });
+      }
+    <\/script>
+    <\script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+    <\script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"><\/script>
+    <\script>
+      /* ======================= FICHA (gerada a partir do Excel DON N.º 3) ======================= */
+      function lsGet(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }
+      function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
+      function lsDel(k) { try { localStorage.removeItem(k); } catch (_) {} }
+      let SPEC = {"page": "NRBQ_FR", "short": "FR", "title": "RECONHECIMENTO", "sub": "ERAS NRBQ · DON N.º 3", "pdfTitle": "FICHA DE RECONHECIMENTO (FR) — INCIDENTES COM SUSPEITA OU ENVOLVIMENTO DE AGENTES NRBQ", "file": "FR_NRBQ", "icon": "travel_explore", "sections": [{"t": "Informação Geral", "i": "assignment", "f": [{"k": "ocorrencia", "l": "N.º Ocorrência ANEPC", "type": "text", "req": 1}, {"k": "data_hora", "l": "Data / Hora", "type": "datetime", "req": 1, "now": 1}]}, {"t": "Elementos ERAS", "i": "groups", "f": [{"k": "eras", "l": "Elementos da equipa (até 6)", "type": "rows", "item": "Elemento", "max": 6, "req": 1, "cols": [{"k": "org", "l": "Organização"}, {"k": "nome", "l": "Nome"}, {"k": "idade", "l": "Idade", "type": "number", "half": 1}, {"k": "id", "l": "ID", "half": 1}]}]}, {"t": "Informação Relativa ao Incidente", "i": "place", "f": [{"k": "data_inc", "l": "Data do Incidente", "type": "date", "half": 1}, {"k": "hora_inc", "l": "Hora do Incidente", "type": "time", "half": 1}, {"k": "data_obs", "l": "Data de Observação", "type": "date", "half": 1}, {"k": "hora_obs", "l": "Hora de Observação", "type": "time", "half": 1}, {"k": "local", "l": "Local / Concelho / Distrito", "type": "text", "req": 1}, {"k": "referencia", "l": "Ponto de Referência", "type": "text"}, {"k": "coordenadas", "l": "Coordenadas (Datum / Lat-Long)", "type": "gps"}, {"k": "onde", "l": "Onde ocorreu o incidente?", "type": "select", "opts": ["Via Pública", "Edifício"], "req": 1}]}, {"t": "1. Via Pública", "i": "add_road", "showIf": ["onde", "Via Pública"], "f": [{"k": "estrada", "l": "Estrada (km / sentido)", "type": "text"}, {"k": "arruamento", "l": "Arruamento (n.º Polícia / Porta e Sentido)", "type": "text"}, {"k": "ferrovia", "l": "Linha Ferroviária (km / pk / sentido)", "type": "text"}, {"k": "outra_ref", "l": "Outra referência do Local", "type": "text"}, {"k": "localidade", "l": "Localidade (exata ou a mais próxima)", "type": "text"}]}, {"t": "2. Edifício", "i": "apartment", "showIf": ["onde", "Edifício"], "f": [{"k": "estab_id", "l": "Identificação do Estabelecimento", "type": "text"}, {"k": "estab_morada", "l": "Morada", "type": "text"}, {"k": "estab_tipo", "l": "Tipo de Estabelecimento", "type": "select", "opts": ["Comércio", "Indústria", "Armazém", "Interface marítimo", "Interface rodoviário", "Interface ferroviário", "Aeroporto", "Habitação", "Escritórios", "Saúde", "Escola", "Lar", "Outro"]}, {"k": "estab_outro", "l": "Outro — especifique", "type": "text", "showIf": ["estab_tipo", "Outro"]}]}, {"t": "3. Mercadorias e Substâncias Perigosas", "i": "science", "f": [{"k": "nome_comum", "l": "Nome Comum", "type": "text"}, {"k": "onu", "l": "N.º ONU", "type": "text", "half": 1, "ph": "Ex.: 1203"}, {"k": "perigo", "l": "N.º Perigo", "type": "text", "half": 1, "ph": "Ex.: 33"}, {"k": "etiquetas", "l": "Etiquetas ou Rótulos de perigo", "type": "text"}, {"k": "quantidade", "l": "Quantidade (estimada)", "type": "text"}, {"k": "descricao_visual", "l": "Descrição Visual", "type": "area"}, {"k": "contentor", "l": "Tipo de Contentor", "type": "select", "opts": ["Cisterna", "Garrafas de gás comprimido", "Tambores", "Outro"]}, {"k": "cisterna_m3", "l": "Cisterna — capacidade (m³)", "type": "number", "showIf": ["contentor", "Cisterna"]}, {"k": "garrafas_l", "l": "Garrafas — capacidade (litros)", "type": "number", "showIf": ["contentor", "Garrafas de gás comprimido"]}, {"k": "tambores_l", "l": "Tambores — capacidade (litros)", "type": "number", "showIf": ["contentor", "Tambores"]}, {"k": "contentor_outro", "l": "Outro contentor — especifique", "type": "text", "showIf": ["contentor", "Outro"]}, {"k": "transporte", "l": "Tipo de Transporte", "type": "select", "opts": ["Rodoviário", "Ferroviário", "Marítimo", "Fluvial", "Conduta (pipeline)", "Aéreo"]}, {"k": "fase", "l": "Fase do Transporte", "type": "select", "opts": ["Carga", "Descarga", "Em Transporte"]}]}, {"t": "4. Natureza do Incidente", "i": "local_fire_department", "f": [{"k": "derrame", "l": "Derrame (líquido) — Quantidade estimada", "type": "text"}, {"k": "fuga", "l": "Fuga (vapor / gás) — Quantidade estimada", "type": "text"}, {"k": "espalhamento", "l": "Espalhamento (sólido) — Quantidade estimada", "type": "text"}, {"k": "incendio", "l": "Incêndio", "type": "select", "opts": ["Sim", "Não"], "half": 1}, {"k": "explosao", "l": "Explosão", "type": "select", "opts": ["Sim", "Não"], "half": 1}, {"k": "outra_info", "l": "Outra informação relevante", "type": "area"}]}, {"t": "5. Matéria Não-identificada — Suspeita de risco NRBQ", "i": "help_center", "f": [{"k": "cheiro", "l": "Indícios de perigosidade — Cheiro", "type": "select", "opts": ["Sim", "Não"]}, {"k": "cheiro_tipo", "l": "Que tipo de cheiro", "type": "text", "ph": "Ex.: alho, piscina, ovos podres…", "showIf": ["cheiro", "Sim"]}, {"k": "cor_derrame", "l": "Cor do derrame", "type": "text"}, {"k": "origem_fuga", "l": "Origem da fuga", "type": "text"}, {"k": "vitimas_mat", "l": "Existem vítimas no local?", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "6. Origem do Incidente", "i": "travel_explore", "f": [{"k": "origem_conhecida", "l": "É conhecida a origem do incidente?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "origem_qual", "l": "Qual", "type": "text", "showIf": ["origem_conhecida", "Sim"]}, {"k": "reg_explosao", "l": "Há registo de explosão?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "reg_ataque", "l": "Há registo de outro tipo de incidente e/ou ataque?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "ameaca_bomba", "l": "Existe ameaça de bomba no local?", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "7. Eventuais Vítimas", "i": "personal_injury", "f": [{"k": "vitimas", "l": "Existem vítimas no local do incidente?", "type": "select", "opts": ["Sim", "Não"], "req": 1}, {"k": "n_vitimas", "l": "Quantas (aproximadamente)", "type": "number", "half": 1, "showIf": ["vitimas", "Sim"]}, {"k": "n_mortos", "l": "N.º de Mortos", "type": "number", "half": 1, "showIf": ["vitimas", "Sim"]}, {"k": "sintomas", "l": "Principais sintomas (descreva)", "type": "area", "showIf": ["vitimas", "Sim"]}]}, {"t": "8. Deteção", "i": "sensors", "f": [{"k": "equip_detecao", "l": "A equipa ERAS transportou equipamento de deteção?", "type": "select", "opts": ["Sim", "Não"], "req": 1}, {"k": "agentes_equip", "l": "Para que agentes", "type": "multi", "opts": ["NR", "B", "Q"], "showIf": ["equip_detecao", "Sim"]}, {"k": "det_nr", "l": "Deteção positiva — Agentes NR", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_nr_info", "l": "Agentes NR — Info", "type": "text", "showIf": ["det_nr", "Sim"]}, {"k": "det_b", "l": "Deteção positiva — Agentes B", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_b_info", "l": "Agentes B — Info", "type": "text", "showIf": ["det_b", "Sim"]}, {"k": "det_q", "l": "Deteção positiva — Agentes Q", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_q_info", "l": "Agentes Q — Info", "type": "text", "showIf": ["det_q", "Sim"]}, {"k": "medicoes", "l": "Medições efetuadas na área do incidente (até 5)", "type": "rows", "item": "Medição", "max": 5, "cols": [{"k": "dh", "l": "Data / Hora", "type": "datetime", "half": 1}, {"k": "tipo", "l": "Tipo de agente", "type": "select", "opts": ["NR", "B", "Q"], "half": 1}, {"k": "coord", "l": "Coordenadas (Lat / Long)", "ph": "37.01928, -7.93044"}, {"k": "equip", "l": "Equipamento usado"}, {"k": "res", "l": "Resultado", "half": 1}, {"k": "un", "l": "Unidade", "half": 1, "ph": "Ex.: µSv/h, ppm"}]}]}, {"t": "9. Condições Meteorológicas", "i": "air", "f": [{"k": "vento_dir", "l": "Direção do Vento (de onde sopra)", "type": "select", "opts": ["Norte", "Sul", "Este", "Oeste"]}, {"k": "vento_int", "l": "Intensidade", "type": "select", "opts": ["Fraco", "Moderado", "Forte"]}, {"k": "vento_kmh", "l": "Velocidade (km/h)", "type": "number", "half": 1}, {"k": "temperatura", "l": "Temperatura (ºC)", "type": "number", "half": 1}, {"k": "ceu", "l": "Estado do Céu", "type": "text", "list": ["Limpo", "Pouco nublado", "Nublado", "Muito nublado", "Encoberto", "Nevoeiro"]}, {"k": "precipitacao", "l": "Precipitação", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "10. Outras Informações", "i": "notes", "f": [{"k": "outras", "l": "Outras informações", "type": "area"}, {"k": "optel", "l": "OPTEL", "type": "text", "req": 1}]}]};
+      const corp = (lsGet('currentCorpOperNr') || '').padStart(4, '0');
+      let KEY, FIELDS, DATA;
+      function useSpec(s) {
+        SPEC = s;
+        KEY = `cb360_nrbq_${SPEC.page}_${corp}`;
+        FIELDS = SPEC.sections.flatMap(x => x.f);
+        try { DATA = JSON.parse(lsGet(KEY) || '{}') || {}; } catch (_) { DATA = {}; }
+      }
+      useSpec(SPEC);
+      const $ = id => document.getElementById(id);
+      const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+      const pad = n => String(n).padStart(2, '0');
+      const nowLocal = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+      const nowFor = type => { const v = nowLocal(); return type === 'date' ? v.slice(0, 10) : type === 'time' ? v.slice(11) : v; };
+      let toastT;
+      function toast(msg, ms = 2600) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+      function cond(c) { if (!c) return true; const [k, ...vals] = c; return vals.includes(DATA[k]); }
+      function secOf(f) { return SPEC.sections.find(s => s.f.includes(f)); }
+      function visible(f) { return cond(f.showIf) && cond((secOf(f) || {}).showIf); }
+      function rowEmpty(r) { return !r || Object.values(r).every(x => x == null || String(x).trim() === ''); }
+      function filled(f) {
+        const v = DATA[f.k];
+        if (f.type === 'rows') return Array.isArray(v) && v.some(r => !rowEmpty(r));
+        return Array.isArray(v) ? v.length > 0 : v != null && String(v).trim() !== '';
+      }
+      function rowsHtml(f) {
+        if (!Array.isArray(DATA[f.k]) || !DATA[f.k].length) DATA[f.k] = [{}];
+        const rows = DATA[f.k];
+        const cell = (c, r, i) => {
+          const v = r[c.k] == null ? '' : r[c.k];
+          const at = `data-rk="${f.k}" data-ri="${i}" data-rc="${c.k}"`;
+          let ctl;
+          if (c.type === 'select') ctl = `<div class="chips" ${at}>${c.opts.map(o => `<button type="button" class="chip ${v === o ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+          else {
+            const ty = {number: 'number', datetime: 'datetime-local', time: 'time', date: 'date'}[c.type] || 'text';
+            ctl = `<input class="in" type="${ty}" ${at} value="${esc(v)}" placeholder="${esc(c.ph || '')}"${c.type === 'number' ? ' inputmode="decimal"' : ''} autocomplete="off">`;
+          }
+          return `<div class="fld ${c.half ? 'half' : ''}"><span class="lbl">${esc(c.l)}</span>${ctl}</div>`;
+        };
+        return `<div class="rows">${rows.map((r, i) => `
+          <div class="row-card">
+            <div class="row-head"><span>${esc(f.item)} ${i + 1}</span>${rows.length > 1 ? `<button type="button" class="row-del" data-rowdel="${f.k}" data-ri="${i}" title="Remover"><span class="material-icons">close</span></button>` : ''}</div>
+            <div class="row-body">${f.cols.map(c => cell(c, r, i)).join('')}</div>
+          </div>`).join('')}
+          ${rows.length < f.max ? `<button type="button" class="row-add" data-rowadd="${f.k}"><span class="material-icons">add</span>Adicionar ${esc(f.item.toLowerCase())}</button>` : ''}</div>`;
+      }
+      function redrawRows(k) { const f = FIELDS.find(x => x.k === k); const w = $('w_' + k); if (f && w) { w.outerHTML = fieldHtml(f); refresh(); save(); } }
+      let saveT;
+      function save() {
+        clearTimeout(saveT);
+        saveT = setTimeout(() => {
+          lsSet(KEY, JSON.stringify(DATA));
+          const d = new Date();
+          $('draftInfo').innerHTML = `<span class="material-icons">cloud_done</span>Rascunho guardado às ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }, 400);
+      }
+      /* ----------------------------- desenhar ----------------------------- */
+      function fieldHtml(f) {
+        const v = DATA[f.k] == null ? '' : DATA[f.k];
+        const cls = ['fld', f.half ? 'half' : '', f.third ? 'third' : '', f.zone ? 'zone ' + f.zone : '', visible(f) ? '' : 'hidden'].join(' ');
+        const lbl = `<label class="lbl" for="f_${f.k}">${esc(f.l)}${f.req ? '<span class="req">*</span>' : ''}${f.hint ? `<span class="hint">(${esc(f.hint)})</span>` : ''}</label>`;
+        let ctl = '';
+        if (f.type === 'rows') {
+          ctl = rowsHtml(f);
+        } else if (f.type === 'select' || f.type === 'multi') {
+          const on = o => f.type === 'multi' ? (Array.isArray(v) && v.includes(o)) : v === o;
+          ctl = `<div class="chips ${f.opts.some(o => o.length > 22) ? 'vertical' : ''}" data-k="${f.k}"${f.type === 'multi' ? ' data-multi="1"' : ''}>${f.opts.map(o => `<button type="button" class="chip ${on(o) ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+        } else if (f.type === 'area') {
+          ctl = `<textarea class="in" id="f_${f.k}" data-k="${f.k}" rows="2" placeholder="${esc(f.ph || '')}">${esc(v)}</textarea>`;
+        } else if (f.type === 'gps') {
+          ctl = `<div class="row-gps"><input class="in" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="37.01928, -7.93044" inputmode="decimal">
+                 <button type="button" class="gps-btn" data-gps="${f.k}" title="Usar a minha localização"><span class="material-icons">my_location</span></button></div>`;
+        } else {
+          const t = {text: 'text', number: 'number', time: 'time', date: 'date', datetime: 'datetime-local'}[f.type] || 'text';
+          const extra = f.type === 'number' ? ' inputmode="numeric" min="0"' : '';
+          const list = f.list ? ` list="dl_${f.k}"` : '';
+          ctl = `<input class="in" type="${t}" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="${esc(f.ph || '')}"${extra}${list} autocomplete="off">` +
+                (f.list ? `<datalist id="dl_${f.k}">${f.list.map(o => `<option value="${esc(o)}">`).join('')}</datalist>` : '');
+        }
+        return `<div class="${cls}" id="w_${f.k}">${lbl}${ctl}</div>`;
+      }
+      function render() {
+        FIELDS.forEach(f => { if (f.now && !DATA[f.k]) DATA[f.k] = nowFor(f.type); });
+        $('form').innerHTML = SPEC.sections.map((s, i) => `
+          <div class="sec closed${cond(s.showIf) ? '' : ' sec-hidden'}" id="sec_${i}">
+            <div class="sec-head" data-sec="${i}">
+              <div class="sec-icon"><span class="material-icons">${s.i}</span></div>
+              <div class="sec-title">${esc(s.t)}</div>
+              <span class="sec-count" id="cnt_${i}"></span>
+              <span class="material-icons sec-chev">expand_more</span>
+            </div>
+            <div class="sec-body">${s.f.map(fieldHtml).join('')}</div>
+          </div>`).join('');
+        document.querySelectorAll('textarea.in').forEach(grow);
+        refresh();
+        save();
+      }
+      /* acordeão: só uma secção aberta de cada vez */
+      function openSec(sec, toggle, keepScroll) {
+        if (!sec) return;
+        const wasOpen = !sec.classList.contains('closed');
+        document.querySelectorAll('.sec').forEach(s => s.classList.add('closed'));
+        if (toggle && wasOpen) return;
+        sec.classList.remove('closed');
+        sec.querySelectorAll('textarea.in').forEach(grow);
+        if (!keepScroll) {
+          const sc = $('scroll');
+          requestAnimationFrame(() => sc.scrollTo({top: Math.max(0, sec.offsetTop), behavior: 'smooth'}));
+        }
+      }
+      function grow(t) { t.style.height = 'auto'; t.style.height = Math.max(74, t.scrollHeight + 2) + 'px'; }
+      function refresh() {
+        let tot = 0, ok = 0;
+        SPEC.sections.forEach((s, i) => {
+          let st = 0, so = 0;
+          $('sec_' + i).classList.toggle('sec-hidden', !cond(s.showIf));
+          s.f.forEach(f => {
+            const w = $('w_' + f.k);
+            const vis = visible(f);
+            if (w) w.classList.toggle('hidden', !vis);
+            if (!vis) return;
+            st++; if (filled(f)) so++;
+            if (w && filled(f)) w.classList.remove('missing');
+          });
+          tot += st; ok += so;
+          const c = $('cnt_' + i);
+          c.textContent = `${so}/${st}`;
+          c.classList.toggle('done', so === st);
+        });
+        $('progTxt').textContent = `${ok} / ${tot}`;
+        $('progBar').style.width = (tot ? Math.round(ok / tot * 100) : 0) + '%';
+      }
+      /* ----------------------------- eventos ----------------------------- */
+      document.addEventListener('input', e => {
+        const ds = e.target.dataset || {};
+        if (ds.rk) { DATA[ds.rk][+ds.ri][ds.rc] = e.target.value; refresh(); save(); return; }
+        const k = ds.k;
+        if (!k) return;
+        DATA[k] = e.target.value;
+        if (e.target.tagName === 'TEXTAREA') grow(e.target);
+        refresh(); save();
+      });
+      document.addEventListener('click', e => {
+        const add = e.target.closest('[data-rowadd]');
+        if (add) { DATA[add.dataset.rowadd].push({}); redrawRows(add.dataset.rowadd); return; }
+        const del = e.target.closest('[data-rowdel]');
+        if (del) { DATA[del.dataset.rowdel].splice(+del.dataset.ri, 1); redrawRows(del.dataset.rowdel); return; }
+        const chip = e.target.closest('.chip');
+        if (chip && chip.parentElement.dataset.rk) {
+          const b = chip.parentElement, r = DATA[b.dataset.rk][+b.dataset.ri];
+          r[b.dataset.rc] = r[b.dataset.rc] === chip.dataset.v ? '' : chip.dataset.v;
+          b.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === r[b.dataset.rc]));
+          refresh(); save(); return;
+        }
+        if (chip) {
+          const box = chip.parentElement, k = box.dataset.k, v = chip.dataset.v;
+          if (box.dataset.multi) {
+            const arr = Array.isArray(DATA[k]) ? DATA[k].slice() : [];
+            const ix = arr.indexOf(v); if (ix >= 0) arr.splice(ix, 1); else arr.push(v);
+            DATA[k] = arr;
+            chip.classList.toggle('on', ix < 0);
+          } else {
+            DATA[k] = DATA[k] === v ? '' : v;
+            box.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === DATA[k]));
+          }
+          refresh(); save();
+          return;
+        }
+        const head = e.target.closest('.sec-head');
+        if (head) { openSec($('sec_' + head.dataset.sec), true); return; }
+        const g = e.target.closest('[data-gps]');
+        if (g) getGps(g);
+      });
+      function getGps(btn) {
+        if (!navigator.geolocation) return toast('Este telemóvel não permite obter a localização.');
+        btn.classList.add('busy');
+        navigator.geolocation.getCurrentPosition(p => {
+          btn.classList.remove('busy');
+          const k = btn.dataset.gps;
+          DATA[k] = `${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}`;
+          $('f_' + k).value = DATA[k];
+          refresh(); save();
+          toast(`Localização obtida (±${Math.round(p.coords.accuracy)} m)`);
+        }, err => {
+          btn.classList.remove('busy');
+          toast(err.code === 1 ? 'Sem permissão de localização. Ative-a nas definições.' : 'Não foi possível obter a localização.');
+        }, {enableHighAccuracy: true, timeout: 15000, maximumAge: 30000});
+      }
+      /* ----------------------------- nova ficha ----------------------------- */
+      let clearArm = null;
+      $('btnClear').onclick = () => {
+        const b = $('btnClear');
+        if (!clearArm) {
+          b.classList.add('sure'); b.lastElementChild.textContent = 'Apagar tudo?';
+          clearArm = setTimeout(() => { clearArm = null; b.classList.remove('sure'); b.lastElementChild.textContent = 'Nova'; }, 3500);
+          return;
+        }
+        clearTimeout(clearArm); clearArm = null;
+        b.classList.remove('sure'); b.lastElementChild.textContent = 'Nova';
+        DATA = {};
+        lsDel(KEY);
+        render();
+        $('scroll').scrollTo({top: 0, behavior: 'smooth'});
+        toast('Ficha limpa. Pode começar uma nova.');
+      };
+      /* ----------------------------- PDF ----------------------------- */
+      let forceArm = null;
+      function fmtValue(f) {
+        const v = DATA[f.k];
+        if (f.type === 'rows') {
+          const fmtC = (c, x) => c.type === 'datetime' && x ? x.replace(/^(\d{4})-(\d{2})-(\d{2})T/, '$3/$2/$1 ') : x;
+          const out = (v || []).filter(r => !rowEmpty(r)).map((r, i) => `${i + 1}) ` + f.cols.filter(c => r[c.k] && String(r[c.k]).trim()).map(c => `${c.l}: ${fmtC(c, String(r[c.k]).trim())}`).join('  |  '));
+          return out.length ? out.join('\n') : '—';
+        }
+        if (Array.isArray(v)) return v.length ? v.join(', ') : '—';
+        if (v == null || String(v).trim() === '') return '—';
+        if (f.type === 'date') { const [y, m, dd] = String(v).split('-'); return `${dd}/${m}/${y}`; }
+        if (f.type === 'datetime') { const [d, t] = String(v).split('T'); const [y, m, dd] = d.split('-'); return `${dd}/${m}/${y}${t ? ' ' + t : ''}`; }
+        if (f.type === 'number' && /\(m\)$/.test(f.l)) return `${v} m`;
+        return String(v).trim();
+      }
+      async function logoData() {
+        const url = lsGet('cached_logo_url');
+        if (!url) return null;
+        try {
+          const r = await fetch(url); if (!r.ok) return null;
+          const b = await r.blob();
+          return await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(b); });
+        } catch (_) { return null; }
+      }
+      $('btnPdf').onclick = async () => {
+        const btn = $('btnPdf');
+        const missing = FIELDS.filter(f => f.req && visible(f) && !filled(f));
+        if (missing.length && !forceArm) {
+          missing.forEach(f => $('w_' + f.k).classList.add('missing'));
+          const first = $('w_' + missing[0].k);
+          openSec(first.closest('.sec'), false, true);
+          setTimeout(() => first.scrollIntoView({behavior: 'smooth', block: 'center'}), 60);
+          toast(`Faltam ${missing.length} campo(s) obrigatório(s). Toque outra vez para gerar mesmo assim.`, 3800);
+          btn.classList.add('warn'); btn.lastElementChild.textContent = 'Gerar mesmo assim';
+          forceArm = setTimeout(() => { forceArm = null; btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar'; }, 5000);
+          return;
+        }
+        clearTimeout(forceArm); forceArm = null;
+        btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar';
+        if (!window.jspdf || !window.jspdf.jsPDF) return toast('Sem ligação para gerar o PDF. Tente novamente com rede.');
+        btn.disabled = true;
+        try {
+          const file = await buildPdf();
+          if (navigator.canShare && navigator.canShare({files: [file]})) {
+            try { await navigator.share({files: [file], title: SPEC.pdfTitle}); }
+            catch (e) { if (e && e.name !== 'AbortError') download(file); }
+          } else {
+            download(file);
+          }
+        } catch (e) {
+          console.error('Erro ao gerar PDF:', e);
+          toast('Não foi possível gerar o PDF.');
+        } finally {
+          btn.disabled = false;
+        }
+      };
+      function download(file) {
+        const u = URL.createObjectURL(file);
+        const a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(u), 60000);
+        toast('PDF guardado nas transferências.');
+      }
+      async function buildPdf() {
+        const {jsPDF} = window.jspdf;
+        const doc = new jsPDF({unit: 'mm', format: 'a4'});
+        const W = doc.internal.pageSize.getWidth();
+        const logo = await logoData();
+        doc.setFillColor(139, 0, 0); doc.rect(0, 0, W, 24, 'F');
+        doc.setFillColor(198, 40, 40); doc.rect(0, 22, W, 2, 'F');
+        let tx = 12;
+        if (logo) { try { doc.addImage(logo, 8, 3, 18, 18); tx = 30; } catch (_) {} }
+        doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5);
+        doc.text(doc.splitTextToSize(SPEC.pdfTitle, W - tx - 10), tx, 10);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+        const d = new Date();
+        doc.text(`Corporação ${corp}  |  Gerado no CB360 Mobile em ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`, tx, 19.5);
+        let y = 30;
+        SPEC.sections.filter(s => cond(s.showIf)).forEach(s => {
+          if (y > 250) { doc.addPage(); y = 16; }
+          const rows = s.f.filter(visible).map(f => [f.l.replace(/\s*\(m\)$/, '').replace(/\s*\(até \d+\)$/, ''), fmtValue(f)]);
+          doc.autoTable({
+            startY: y, margin: {left: 12, right: 12},
+            head: [[{content: s.t.toUpperCase(), colSpan: 2}]],
+            body: rows, theme: 'grid',
+            headStyles: {fillColor: [217, 225, 242], textColor: [31, 78, 120], fontStyle: 'bold', fontSize: 9.5, cellPadding: 2.4},
+            styles: {fontSize: 9, cellPadding: 2.2, lineColor: [210, 214, 220], lineWidth: 0.2, textColor: [30, 30, 30], valign: 'top'},
+            columnStyles: {0: {cellWidth: 68, fontStyle: 'bold', textColor: [60, 60, 60], fillColor: [249, 250, 252]}, 1: {cellWidth: 'auto'}}
+          });
+          y = doc.lastAutoTable.finalY + 5;
+        });
+        if (y > 262) { doc.addPage(); y = 20; }
+        y += 6;
+        doc.setDrawColor(150); doc.setLineWidth(0.3); doc.setTextColor(80); doc.setFontSize(8.5);
+        doc.line(12, y + 10, 92, y + 10); doc.line(W - 92, y + 10, W - 12, y + 10);
+        doc.text('Responsável pelo preenchimento (nome / posto)', 12, y + 14);
+        doc.text('Assinatura', W - 92, y + 14);
+        const n = doc.getNumberOfPages();
+        for (let i = 1; i <= n; i++) {
+          doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(140);
+          doc.text(`${SPEC.short}  |  NRBQ  |  DON N.º 3`, 12, 290);
+          doc.text(`Página ${i} de ${n}`, W - 12, 290, {align: 'right'});
+        }
+        const occ = String(DATA.ocorrencia || '').replace(/[^A-Za-z0-9-]+/g, '_').replace(/^_+|_+$/g, '');
+        const name = `${SPEC.file}${occ ? '_' + occ : ''}_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.pdf`;
+        return new File([doc.output('blob')], name, {type: 'application/pdf'});
+      }
+      /* ----------------------------- arranque ----------------------------- */
+      document.addEventListener('DOMContentLoaded', () => {
+        if (lsGet('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+        const logo = lsGet('cached_logo_url');
+        if (logo) $('corpLogo').src = logo;
+        $('footerYear').textContent = new Date().getFullYear();
+        render();
+      });
+    <\/script>
+  </body>
+  </html>
+</script>
+<script type="text/x-cb360" data-page="NRBQ_FI"><!DOCTYPE html>
+  <html lang="pt-PT" style="background-color: #0f1117;">
+  <head>
+    <\script>
+      (function() {
+        try {
+          if (localStorage.getItem('sgo-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {}
+      })();
+    <\/script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+    <meta name="theme-color" content="#0f1117">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    </noscript>
+    <title>CB360 Mobile - Ficha De Intervenção (Fi)</title>
+    <style>
+      @view-transition {navigation: auto;}
+      /* ============================================================
+      VARIABLES
+      ============================================================ */
+      :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea; --field: #ffffff;
+             --border: rgba(0, 0, 0, 0.07); --line: rgba(0, 0, 0, 0.13); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+             --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --header-h: 60px; --footer-h: 50px; --bar-h: 64px; --r-sm: 10px; --r-md: 15px; --r-lg: 20px;
+             --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa; --green: #2e7d32; --amber: #b26a00;}
+      ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
+      .header, .footer {view-transition-name: none;}
+      /* ============================================================
+      DARK MODE
+      ============================================================ */
+      .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --field: #2a2826; --border: rgba(255, 255, 255, 0.07); --line: rgba(255, 255, 255, 0.12); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #6d6660;
+                  --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --red-light: rgba(198, 40, 40, 0.18); --red-icon: #ff6b6b; --blue: #6cb8ff; --green: #66bb6a; --amber: #ffb74d;}
+      /* ============================================================
+      RESET & BASE
+      ============================================================ */
+      html {scrollbar-width: none; background: var(--red-dark);}
+      html, body {overscroll-behavior: none;}
+      * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent;}
+      body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
+            flex-direction: column; transition: background var(--ease), color var(--ease); padding-top: var(--sai-top, env(safe-area-inset-top)); padding-bottom: var(--sai-bottom, env(safe-area-inset-bottom));}
+      /* ============================================================
+      HEADER
+      ============================================================ */
+      .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+               justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+      .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+      .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+      .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+      .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+      /* ============================================================
+      MAIN CONTENT
+      ============================================================ */
+      .main-content {flex: 1; min-height: 0; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; overflow: hidden; padding: calc(var(--header-h) + 12px) 14px calc(var(--footer-h) + 10px); background: var(--bg);}
+      .fields-box {flex: 1; min-height: 0; border-radius: var(--r-md); overflow: hidden; display: flex;}
+      .scroll {position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 0; scrollbar-width: none;}
+      .scroll .sec:last-child {margin-bottom: 0;}
+      .scroll::-webkit-scrollbar {display: none;}
+      /* progresso */
+      .progress-card {flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 11px 14px; box-shadow: var(--sh-sm); display: flex; align-items: center; gap: 12px;}
+      .progress-card .material-icons {color: var(--red-icon); font-size: 22px;}
+      .progress-info {flex: 1; min-width: 0;}
+      .progress-top {display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; color: var(--txt-2);}
+      .progress-top b {font-size: 13px; color: var(--txt-1);}
+      .progress-bar {height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin-top: 6px;}
+      .progress-bar span {display: block; height: 100%; width: 0; background: linear-gradient(to right, var(--red-dark), var(--red)); border-radius: 3px; transition: width .3s;}
+      .draft {font-size: 10.5px; color: var(--txt-3); margin-top: 5px; display: flex; align-items: center; gap: 4px;}
+      .draft .material-icons {font-size: 13px; color: var(--green);}
+      /* secções */
+      .sec {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); margin-bottom: 12px; overflow: hidden;}
+      .sec-head {display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none;}
+      .sec-icon {width: 32px; height: 32px; border-radius: 9px; background: var(--red-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+      .sec-icon .material-icons {font-size: 18px; color: var(--red-icon);}
+      .sec-title {flex: 1; font-size: 13px; font-weight: 700; color: var(--txt-1); line-height: 1.25;}
+      .sec-count {font-size: 11px; font-weight: 700; color: var(--txt-2); background: var(--surface-2); border-radius: 999px; padding: 3px 8px; flex-shrink: 0;}
+      .sec-count.done {background: rgba(46,125,50,.14); color: var(--green);}
+      .sec-chev {color: var(--txt-3); transition: transform var(--ease);}
+      .sec.closed .sec-chev {transform: rotate(-90deg);}
+      .sec.closed .sec-body {display: none;}
+      .sec.sec-hidden {display: none;}
+      .sec-body {padding: 2px 14px 14px; display: flex; flex-wrap: wrap; gap: 12px 10px; border-top: 1px solid var(--border); padding-top: 12px;}
+      /* campos */
+      .fld {width: 100%; display: flex; flex-direction: column; gap: 5px;}
+      .fld.half {width: calc(50% - 5px);}
+      .fld.third {width: calc(33.333% - 7px);}
+      .fld.hidden {display: none;}
+      .lbl {font-size: 11.5px; font-weight: 600; color: var(--txt-2); line-height: 1.3;}
+      .lbl .req {color: var(--red-icon); margin-left: 2px;}
+      .lbl .hint {font-weight: 500; color: var(--txt-3); margin-left: 4px;}
+      .in {width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--field); color: var(--txt-1); font: inherit; font-size: 15px; padding: 9px 11px;
+           -webkit-appearance: none; appearance: none; transition: border-color var(--ease), box-shadow var(--ease);}
+      .in:focus {outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light);}
+      textarea.in {min-height: 74px; resize: none; line-height: 1.4; overflow: hidden;}
+      input[type="time"].in, input[type="datetime-local"].in {min-height: 42px;}
+      .fld.missing .in, .fld.missing .chips {border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light); border-radius: var(--r-sm);}
+      .row-gps {display: flex; gap: 8px;}
+      .gps-btn {flex-shrink: 0; width: 44px; border: 0; border-radius: var(--r-sm); background: var(--red-light); color: var(--red-icon); display: flex; align-items: center; justify-content: center; cursor: pointer;}
+      .gps-btn.busy .material-icons {animation: spin 1s linear infinite;}
+      @keyframes spin {to {transform: rotate(360deg);}}
+      .chips {display: flex; flex-wrap: wrap; gap: 7px;}
+      .chips.vertical {flex-direction: column;}
+      .chip {border: 1px solid var(--line); background: var(--field); color: var(--txt-1); border-radius: 999px; padding: 9px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+             transition: all var(--ease); text-align: left;}
+      .chips.vertical .chip {border-radius: var(--r-sm);}
+      .chip.on {background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 2px 6px rgba(198,40,40,.30);}
+      .rows {display: flex; flex-direction: column; gap: 10px;}
+      .row-card {border: 1px dashed var(--line); border-radius: var(--r-sm); padding: 10px; background: var(--surface-2);}
+      .row-head {display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--txt-1); margin-bottom: 8px;}
+      .row-del {border: 0; background: transparent; color: var(--txt-3); width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;}
+      .row-del .material-icons {font-size: 18px;}
+      .row-body {display: flex; flex-wrap: wrap; gap: 10px;}
+      .row-add {align-self: flex-start; border: 1px dashed var(--red); background: var(--red-light); color: var(--red-icon); border-radius: 999px; padding: 8px 14px 8px 10px; font: inherit; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; cursor: pointer;}
+      .row-add .material-icons {font-size: 18px;}
+      .zone {border-left: 4px solid; padding-left: 8px;}
+      .zone.hot {border-color: #d32f2f;} .zone.warm {border-color: #f9a825;} .zone.cold {border-color: #2e7d32;}
+      /* barra de ações */
+      .actions {flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 10px;}
+      .actions-in {display: flex; gap: 10px;}
+      .btn {height: 46px; border: 0; border-radius: 12px; font: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer;}
+      .btn .material-icons {font-size: 20px;}
+      .btn-ghost {flex: 0 0 auto; padding: 0 16px; background: var(--surface); color: var(--txt-2); border: 1px solid var(--line);}
+      .btn-ghost.sure {background: var(--red); color: #fff; border-color: var(--red);}
+      .btn-main {flex: 1; background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; box-shadow: 0 3px 10px rgba(198,40,40,.30);}
+      .btn-main.warn {background: linear-gradient(to right, #8a5a00, var(--amber));}
+      .btn:disabled {opacity: .6;}
+      .toast {position: fixed; left: 50%; bottom: calc(var(--footer-h) + 90px); transform: translateX(-50%) translateY(10px); opacity: 0; background: #2b2a28; color: #fff; font-size: 13px; font-weight: 500;
+              padding: 10px 16px; border-radius: 12px; box-shadow: var(--sh-md); z-index: 1100; transition: all .25s; pointer-events: none; max-width: calc(100% - 40px); text-align: center;}
+      .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+      /* ============================================================
+      FOOTER
+      ============================================================ */
+      .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+               justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000;}
+      .footer-content {text-align: center;}
+      .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+      .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+      @media (max-width: 480px) {
+        .header-title {font-size: 16px;}
+        .main-content {padding-left: 10px; padding-right: 10px;}
+        .fld.third {width: 100%;}
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
+      <div class="header-center">
+        <span class="header-title">INTERVENÇÃO</span>
+        <span class="header-sub">NRBQ · DON N.º 3</span>
+      </div>
+    </header>
+    <div class="main-content">
+      <div class="progress-card">
+          <span class="material-icons">engineering</span>
+          <div class="progress-info">
+            <div class="progress-top"><span>Preenchimento</span><b id="progTxt">0 / 0</b></div>
+            <div class="progress-bar"><span id="progBar"></span></div>
+            <div class="draft" id="draftInfo"><span class="material-icons">cloud_done</span>O rascunho fica guardado neste telemóvel</div>
+          </div>
+      </div>
+      <div class="fields-box">
+        <div class="scroll" id="scroll">
+          <div id="form"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="actions-in">
+          <button type="button" class="btn btn-ghost" id="btnClear"><span class="material-icons">restart_alt</span><span>Nova</span></button>
+          <button type="button" class="btn btn-main" id="btnPdf"><span class="material-icons">picture_as_pdf</span><span>Gerar PDF e partilhar</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="powered-by">Powered by Fábio Martins · Sistemas de Informação · Grupo CB360</div>
+        <div class="footer-year">© 2023–<span id="footerYear"></span> · Sistema CB360 Mobile</div>
+      </div>
+    </footer>
+    <\script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(err => console.log('Erro no motor da App: ', err));
+        });
+      }
+    <\/script>
+    <\script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+    <\script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"><\/script>
+    <\script>
+      /* ======================= FICHA (gerada a partir do Excel DON N.º 3) ======================= */
+      function lsGet(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }
+      function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
+      function lsDel(k) { try { localStorage.removeItem(k); } catch (_) {} }
+      let SPEC = {"page": "NRBQ_FI", "short": "FI", "title": "INTERVENÇÃO", "sub": "NRBQ · DON N.º 3", "pdfTitle": "FICHA DE INTERVENÇÃO (FI) — INCIDENTES COM SUSPEITA OU ENVOLVIMENTO DE AGENTES NRBQ", "file": "FI_NRBQ", "icon": "engineering", "sections": [{"t": "Informação Geral", "i": "assignment", "f": [{"k": "ocorrencia", "l": "N.º Ocorrência ANEPC", "type": "text", "req": 1}, {"k": "fi_n", "l": "FI N.º", "type": "text", "half": 1, "req": 1}, {"k": "data_hora", "l": "Data / Hora", "type": "datetime", "half": 1, "req": 1, "now": 1}]}, {"t": "Elementos da Equipa de Intervenção", "i": "groups", "f": [{"k": "equipa", "l": "Designação da Equipa", "type": "text", "req": 1}, {"k": "elementos", "l": "Elementos da equipa (até 10)", "type": "rows", "item": "Elemento", "max": 10, "req": 1, "cols": [{"k": "org", "l": "Organização"}, {"k": "nome", "l": "Nome"}, {"k": "idade", "l": "Idade", "type": "number", "half": 1}, {"k": "id", "l": "ID", "half": 1}]}]}, {"t": "1. Deteção", "i": "sensors", "f": [{"k": "det_nr", "l": "Deteção positiva — Agentes NR", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_b", "l": "Deteção positiva — Agentes B", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_q", "l": "Deteção positiva — Agentes Q", "type": "select", "opts": ["Sim", "Não"]}, {"k": "medicoes", "l": "Medições efetuadas na área do incidente (até 7)", "type": "rows", "item": "Medição", "max": 7, "cols": [{"k": "dh", "l": "Data / Hora", "type": "datetime", "half": 1}, {"k": "tipo", "l": "Tipo de agente", "type": "select", "opts": ["NR", "B", "Q"], "half": 1}, {"k": "coord", "l": "Coordenadas (Lat / Long)", "ph": "37.01928, -7.93044"}, {"k": "equip", "l": "Equipamento usado"}, {"k": "res", "l": "Resultado", "half": 1}, {"k": "un", "l": "Unidade", "half": 1, "ph": "Ex.: µSv/h, ppm"}]}]}, {"t": "2. Condições Meteorológicas", "i": "air", "f": [{"k": "vento_dir", "l": "Direção do Vento (de onde sopra)", "type": "select", "opts": ["Norte", "Sul", "Este", "Oeste"]}, {"k": "vento_int", "l": "Intensidade", "type": "select", "opts": ["Fraco", "Moderado", "Forte"]}, {"k": "vento_kmh", "l": "Velocidade (km/h)", "type": "number", "half": 1}, {"k": "temperatura", "l": "Temperatura (ºC)", "type": "number", "half": 1}, {"k": "ceu", "l": "Estado do Céu", "type": "text", "list": ["Limpo", "Pouco nublado", "Nublado", "Muito nublado", "Encoberto", "Nevoeiro"]}, {"k": "precipitacao", "l": "Precipitação", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "3. Informação Pertinente", "i": "notes", "f": [{"k": "info", "l": "Toda e qualquer informação considerada pertinente", "type": "area"}, {"k": "optel", "l": "OPTEL", "type": "text", "req": 1}]}]};
+      const corp = (lsGet('currentCorpOperNr') || '').padStart(4, '0');
+      let KEY, FIELDS, DATA;
+      function useSpec(s) {
+        SPEC = s;
+        KEY = `cb360_nrbq_${SPEC.page}_${corp}`;
+        FIELDS = SPEC.sections.flatMap(x => x.f);
+        try { DATA = JSON.parse(lsGet(KEY) || '{}') || {}; } catch (_) { DATA = {}; }
+      }
+      useSpec(SPEC);
+      const $ = id => document.getElementById(id);
+      const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+      const pad = n => String(n).padStart(2, '0');
+      const nowLocal = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+      const nowFor = type => { const v = nowLocal(); return type === 'date' ? v.slice(0, 10) : type === 'time' ? v.slice(11) : v; };
+      let toastT;
+      function toast(msg, ms = 2600) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+      function cond(c) { if (!c) return true; const [k, ...vals] = c; return vals.includes(DATA[k]); }
+      function secOf(f) { return SPEC.sections.find(s => s.f.includes(f)); }
+      function visible(f) { return cond(f.showIf) && cond((secOf(f) || {}).showIf); }
+      function rowEmpty(r) { return !r || Object.values(r).every(x => x == null || String(x).trim() === ''); }
+      function filled(f) {
+        const v = DATA[f.k];
+        if (f.type === 'rows') return Array.isArray(v) && v.some(r => !rowEmpty(r));
+        return Array.isArray(v) ? v.length > 0 : v != null && String(v).trim() !== '';
+      }
+      function rowsHtml(f) {
+        if (!Array.isArray(DATA[f.k]) || !DATA[f.k].length) DATA[f.k] = [{}];
+        const rows = DATA[f.k];
+        const cell = (c, r, i) => {
+          const v = r[c.k] == null ? '' : r[c.k];
+          const at = `data-rk="${f.k}" data-ri="${i}" data-rc="${c.k}"`;
+          let ctl;
+          if (c.type === 'select') ctl = `<div class="chips" ${at}>${c.opts.map(o => `<button type="button" class="chip ${v === o ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+          else {
+            const ty = {number: 'number', datetime: 'datetime-local', time: 'time', date: 'date'}[c.type] || 'text';
+            ctl = `<input class="in" type="${ty}" ${at} value="${esc(v)}" placeholder="${esc(c.ph || '')}"${c.type === 'number' ? ' inputmode="decimal"' : ''} autocomplete="off">`;
+          }
+          return `<div class="fld ${c.half ? 'half' : ''}"><span class="lbl">${esc(c.l)}</span>${ctl}</div>`;
+        };
+        return `<div class="rows">${rows.map((r, i) => `
+          <div class="row-card">
+            <div class="row-head"><span>${esc(f.item)} ${i + 1}</span>${rows.length > 1 ? `<button type="button" class="row-del" data-rowdel="${f.k}" data-ri="${i}" title="Remover"><span class="material-icons">close</span></button>` : ''}</div>
+            <div class="row-body">${f.cols.map(c => cell(c, r, i)).join('')}</div>
+          </div>`).join('')}
+          ${rows.length < f.max ? `<button type="button" class="row-add" data-rowadd="${f.k}"><span class="material-icons">add</span>Adicionar ${esc(f.item.toLowerCase())}</button>` : ''}</div>`;
+      }
+      function redrawRows(k) { const f = FIELDS.find(x => x.k === k); const w = $('w_' + k); if (f && w) { w.outerHTML = fieldHtml(f); refresh(); save(); } }
+      let saveT;
+      function save() {
+        clearTimeout(saveT);
+        saveT = setTimeout(() => {
+          lsSet(KEY, JSON.stringify(DATA));
+          const d = new Date();
+          $('draftInfo').innerHTML = `<span class="material-icons">cloud_done</span>Rascunho guardado às ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }, 400);
+      }
+      /* ----------------------------- desenhar ----------------------------- */
+      function fieldHtml(f) {
+        const v = DATA[f.k] == null ? '' : DATA[f.k];
+        const cls = ['fld', f.half ? 'half' : '', f.third ? 'third' : '', f.zone ? 'zone ' + f.zone : '', visible(f) ? '' : 'hidden'].join(' ');
+        const lbl = `<label class="lbl" for="f_${f.k}">${esc(f.l)}${f.req ? '<span class="req">*</span>' : ''}${f.hint ? `<span class="hint">(${esc(f.hint)})</span>` : ''}</label>`;
+        let ctl = '';
+        if (f.type === 'rows') {
+          ctl = rowsHtml(f);
+        } else if (f.type === 'select' || f.type === 'multi') {
+          const on = o => f.type === 'multi' ? (Array.isArray(v) && v.includes(o)) : v === o;
+          ctl = `<div class="chips ${f.opts.some(o => o.length > 22) ? 'vertical' : ''}" data-k="${f.k}"${f.type === 'multi' ? ' data-multi="1"' : ''}>${f.opts.map(o => `<button type="button" class="chip ${on(o) ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+        } else if (f.type === 'area') {
+          ctl = `<textarea class="in" id="f_${f.k}" data-k="${f.k}" rows="2" placeholder="${esc(f.ph || '')}">${esc(v)}</textarea>`;
+        } else if (f.type === 'gps') {
+          ctl = `<div class="row-gps"><input class="in" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="37.01928, -7.93044" inputmode="decimal">
+                 <button type="button" class="gps-btn" data-gps="${f.k}" title="Usar a minha localização"><span class="material-icons">my_location</span></button></div>`;
+        } else {
+          const t = {text: 'text', number: 'number', time: 'time', date: 'date', datetime: 'datetime-local'}[f.type] || 'text';
+          const extra = f.type === 'number' ? ' inputmode="numeric" min="0"' : '';
+          const list = f.list ? ` list="dl_${f.k}"` : '';
+          ctl = `<input class="in" type="${t}" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="${esc(f.ph || '')}"${extra}${list} autocomplete="off">` +
+                (f.list ? `<datalist id="dl_${f.k}">${f.list.map(o => `<option value="${esc(o)}">`).join('')}</datalist>` : '');
+        }
+        return `<div class="${cls}" id="w_${f.k}">${lbl}${ctl}</div>`;
+      }
+      function render() {
+        FIELDS.forEach(f => { if (f.now && !DATA[f.k]) DATA[f.k] = nowFor(f.type); });
+        $('form').innerHTML = SPEC.sections.map((s, i) => `
+          <div class="sec closed${cond(s.showIf) ? '' : ' sec-hidden'}" id="sec_${i}">
+            <div class="sec-head" data-sec="${i}">
+              <div class="sec-icon"><span class="material-icons">${s.i}</span></div>
+              <div class="sec-title">${esc(s.t)}</div>
+              <span class="sec-count" id="cnt_${i}"></span>
+              <span class="material-icons sec-chev">expand_more</span>
+            </div>
+            <div class="sec-body">${s.f.map(fieldHtml).join('')}</div>
+          </div>`).join('');
+        document.querySelectorAll('textarea.in').forEach(grow);
+        refresh();
+        save();
+      }
+      /* acordeão: só uma secção aberta de cada vez */
+      function openSec(sec, toggle, keepScroll) {
+        if (!sec) return;
+        const wasOpen = !sec.classList.contains('closed');
+        document.querySelectorAll('.sec').forEach(s => s.classList.add('closed'));
+        if (toggle && wasOpen) return;
+        sec.classList.remove('closed');
+        sec.querySelectorAll('textarea.in').forEach(grow);
+        if (!keepScroll) {
+          const sc = $('scroll');
+          requestAnimationFrame(() => sc.scrollTo({top: Math.max(0, sec.offsetTop), behavior: 'smooth'}));
+        }
+      }
+      function grow(t) { t.style.height = 'auto'; t.style.height = Math.max(74, t.scrollHeight + 2) + 'px'; }
+      function refresh() {
+        let tot = 0, ok = 0;
+        SPEC.sections.forEach((s, i) => {
+          let st = 0, so = 0;
+          $('sec_' + i).classList.toggle('sec-hidden', !cond(s.showIf));
+          s.f.forEach(f => {
+            const w = $('w_' + f.k);
+            const vis = visible(f);
+            if (w) w.classList.toggle('hidden', !vis);
+            if (!vis) return;
+            st++; if (filled(f)) so++;
+            if (w && filled(f)) w.classList.remove('missing');
+          });
+          tot += st; ok += so;
+          const c = $('cnt_' + i);
+          c.textContent = `${so}/${st}`;
+          c.classList.toggle('done', so === st);
+        });
+        $('progTxt').textContent = `${ok} / ${tot}`;
+        $('progBar').style.width = (tot ? Math.round(ok / tot * 100) : 0) + '%';
+      }
+      /* ----------------------------- eventos ----------------------------- */
+      document.addEventListener('input', e => {
+        const ds = e.target.dataset || {};
+        if (ds.rk) { DATA[ds.rk][+ds.ri][ds.rc] = e.target.value; refresh(); save(); return; }
+        const k = ds.k;
+        if (!k) return;
+        DATA[k] = e.target.value;
+        if (e.target.tagName === 'TEXTAREA') grow(e.target);
+        refresh(); save();
+      });
+      document.addEventListener('click', e => {
+        const add = e.target.closest('[data-rowadd]');
+        if (add) { DATA[add.dataset.rowadd].push({}); redrawRows(add.dataset.rowadd); return; }
+        const del = e.target.closest('[data-rowdel]');
+        if (del) { DATA[del.dataset.rowdel].splice(+del.dataset.ri, 1); redrawRows(del.dataset.rowdel); return; }
+        const chip = e.target.closest('.chip');
+        if (chip && chip.parentElement.dataset.rk) {
+          const b = chip.parentElement, r = DATA[b.dataset.rk][+b.dataset.ri];
+          r[b.dataset.rc] = r[b.dataset.rc] === chip.dataset.v ? '' : chip.dataset.v;
+          b.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === r[b.dataset.rc]));
+          refresh(); save(); return;
+        }
+        if (chip) {
+          const box = chip.parentElement, k = box.dataset.k, v = chip.dataset.v;
+          if (box.dataset.multi) {
+            const arr = Array.isArray(DATA[k]) ? DATA[k].slice() : [];
+            const ix = arr.indexOf(v); if (ix >= 0) arr.splice(ix, 1); else arr.push(v);
+            DATA[k] = arr;
+            chip.classList.toggle('on', ix < 0);
+          } else {
+            DATA[k] = DATA[k] === v ? '' : v;
+            box.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === DATA[k]));
+          }
+          refresh(); save();
+          return;
+        }
+        const head = e.target.closest('.sec-head');
+        if (head) { openSec($('sec_' + head.dataset.sec), true); return; }
+        const g = e.target.closest('[data-gps]');
+        if (g) getGps(g);
+      });
+      function getGps(btn) {
+        if (!navigator.geolocation) return toast('Este telemóvel não permite obter a localização.');
+        btn.classList.add('busy');
+        navigator.geolocation.getCurrentPosition(p => {
+          btn.classList.remove('busy');
+          const k = btn.dataset.gps;
+          DATA[k] = `${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}`;
+          $('f_' + k).value = DATA[k];
+          refresh(); save();
+          toast(`Localização obtida (±${Math.round(p.coords.accuracy)} m)`);
+        }, err => {
+          btn.classList.remove('busy');
+          toast(err.code === 1 ? 'Sem permissão de localização. Ative-a nas definições.' : 'Não foi possível obter a localização.');
+        }, {enableHighAccuracy: true, timeout: 15000, maximumAge: 30000});
+      }
+      /* ----------------------------- nova ficha ----------------------------- */
+      let clearArm = null;
+      $('btnClear').onclick = () => {
+        const b = $('btnClear');
+        if (!clearArm) {
+          b.classList.add('sure'); b.lastElementChild.textContent = 'Apagar tudo?';
+          clearArm = setTimeout(() => { clearArm = null; b.classList.remove('sure'); b.lastElementChild.textContent = 'Nova'; }, 3500);
+          return;
+        }
+        clearTimeout(clearArm); clearArm = null;
+        b.classList.remove('sure'); b.lastElementChild.textContent = 'Nova';
+        DATA = {};
+        lsDel(KEY);
+        render();
+        $('scroll').scrollTo({top: 0, behavior: 'smooth'});
+        toast('Ficha limpa. Pode começar uma nova.');
+      };
+      /* ----------------------------- PDF ----------------------------- */
+      let forceArm = null;
+      function fmtValue(f) {
+        const v = DATA[f.k];
+        if (f.type === 'rows') {
+          const fmtC = (c, x) => c.type === 'datetime' && x ? x.replace(/^(\d{4})-(\d{2})-(\d{2})T/, '$3/$2/$1 ') : x;
+          const out = (v || []).filter(r => !rowEmpty(r)).map((r, i) => `${i + 1}) ` + f.cols.filter(c => r[c.k] && String(r[c.k]).trim()).map(c => `${c.l}: ${fmtC(c, String(r[c.k]).trim())}`).join('  |  '));
+          return out.length ? out.join('\n') : '—';
+        }
+        if (Array.isArray(v)) return v.length ? v.join(', ') : '—';
+        if (v == null || String(v).trim() === '') return '—';
+        if (f.type === 'date') { const [y, m, dd] = String(v).split('-'); return `${dd}/${m}/${y}`; }
+        if (f.type === 'datetime') { const [d, t] = String(v).split('T'); const [y, m, dd] = d.split('-'); return `${dd}/${m}/${y}${t ? ' ' + t : ''}`; }
+        if (f.type === 'number' && /\(m\)$/.test(f.l)) return `${v} m`;
+        return String(v).trim();
+      }
+      async function logoData() {
+        const url = lsGet('cached_logo_url');
+        if (!url) return null;
+        try {
+          const r = await fetch(url); if (!r.ok) return null;
+          const b = await r.blob();
+          return await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(b); });
+        } catch (_) { return null; }
+      }
+      $('btnPdf').onclick = async () => {
+        const btn = $('btnPdf');
+        const missing = FIELDS.filter(f => f.req && visible(f) && !filled(f));
+        if (missing.length && !forceArm) {
+          missing.forEach(f => $('w_' + f.k).classList.add('missing'));
+          const first = $('w_' + missing[0].k);
+          openSec(first.closest('.sec'), false, true);
+          setTimeout(() => first.scrollIntoView({behavior: 'smooth', block: 'center'}), 60);
+          toast(`Faltam ${missing.length} campo(s) obrigatório(s). Toque outra vez para gerar mesmo assim.`, 3800);
+          btn.classList.add('warn'); btn.lastElementChild.textContent = 'Gerar mesmo assim';
+          forceArm = setTimeout(() => { forceArm = null; btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar'; }, 5000);
+          return;
+        }
+        clearTimeout(forceArm); forceArm = null;
+        btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar';
+        if (!window.jspdf || !window.jspdf.jsPDF) return toast('Sem ligação para gerar o PDF. Tente novamente com rede.');
+        btn.disabled = true;
+        try {
+          const file = await buildPdf();
+          if (navigator.canShare && navigator.canShare({files: [file]})) {
+            try { await navigator.share({files: [file], title: SPEC.pdfTitle}); }
+            catch (e) { if (e && e.name !== 'AbortError') download(file); }
+          } else {
+            download(file);
+          }
+        } catch (e) {
+          console.error('Erro ao gerar PDF:', e);
+          toast('Não foi possível gerar o PDF.');
+        } finally {
+          btn.disabled = false;
+        }
+      };
+      function download(file) {
+        const u = URL.createObjectURL(file);
+        const a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(u), 60000);
+        toast('PDF guardado nas transferências.');
+      }
+      async function buildPdf() {
+        const {jsPDF} = window.jspdf;
+        const doc = new jsPDF({unit: 'mm', format: 'a4'});
+        const W = doc.internal.pageSize.getWidth();
+        const logo = await logoData();
+        doc.setFillColor(139, 0, 0); doc.rect(0, 0, W, 24, 'F');
+        doc.setFillColor(198, 40, 40); doc.rect(0, 22, W, 2, 'F');
+        let tx = 12;
+        if (logo) { try { doc.addImage(logo, 8, 3, 18, 18); tx = 30; } catch (_) {} }
+        doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5);
+        doc.text(doc.splitTextToSize(SPEC.pdfTitle, W - tx - 10), tx, 10);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+        const d = new Date();
+        doc.text(`Corporação ${corp}  |  Gerado no CB360 Mobile em ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`, tx, 19.5);
+        let y = 30;
+        SPEC.sections.filter(s => cond(s.showIf)).forEach(s => {
+          if (y > 250) { doc.addPage(); y = 16; }
+          const rows = s.f.filter(visible).map(f => [f.l.replace(/\s*\(m\)$/, '').replace(/\s*\(até \d+\)$/, ''), fmtValue(f)]);
+          doc.autoTable({
+            startY: y, margin: {left: 12, right: 12},
+            head: [[{content: s.t.toUpperCase(), colSpan: 2}]],
+            body: rows, theme: 'grid',
+            headStyles: {fillColor: [217, 225, 242], textColor: [31, 78, 120], fontStyle: 'bold', fontSize: 9.5, cellPadding: 2.4},
+            styles: {fontSize: 9, cellPadding: 2.2, lineColor: [210, 214, 220], lineWidth: 0.2, textColor: [30, 30, 30], valign: 'top'},
+            columnStyles: {0: {cellWidth: 68, fontStyle: 'bold', textColor: [60, 60, 60], fillColor: [249, 250, 252]}, 1: {cellWidth: 'auto'}}
+          });
+          y = doc.lastAutoTable.finalY + 5;
+        });
+        if (y > 262) { doc.addPage(); y = 20; }
+        y += 6;
+        doc.setDrawColor(150); doc.setLineWidth(0.3); doc.setTextColor(80); doc.setFontSize(8.5);
+        doc.line(12, y + 10, 92, y + 10); doc.line(W - 92, y + 10, W - 12, y + 10);
+        doc.text('Responsável pelo preenchimento (nome / posto)', 12, y + 14);
+        doc.text('Assinatura', W - 92, y + 14);
+        const n = doc.getNumberOfPages();
+        for (let i = 1; i <= n; i++) {
+          doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(140);
+          doc.text(`${SPEC.short}  |  NRBQ  |  DON N.º 3`, 12, 290);
+          doc.text(`Página ${i} de ${n}`, W - 12, 290, {align: 'right'});
+        }
+        const occ = String(DATA.ocorrencia || '').replace(/[^A-Za-z0-9-]+/g, '_').replace(/^_+|_+$/g, '');
+        const name = `${SPEC.file}${occ ? '_' + occ : ''}_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.pdf`;
+        return new File([doc.output('blob')], name, {type: 'application/pdf'});
+      }
+      /* ----------------------------- arranque ----------------------------- */
+      document.addEventListener('DOMContentLoaded', () => {
+        if (lsGet('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+        const logo = lsGet('cached_logo_url');
+        if (logo) $('corpLogo').src = logo;
+        $('footerYear').textContent = new Date().getFullYear();
+        render();
+      });
+    <\/script>
+  </body>
+  </html>
+</script>
 <script type="text/x-cb360" data-page="DecirTeam"><!DOCTYPE html>
   <html lang="pt-PT" style="background-color: #0f1117;">
   <head>
@@ -24017,6 +25586,9 @@
   </body>
   </html>
 </script>
+
+/* ----- RESERVADO PARA FOMULÁRIOS CHECK LISTS ----- */
+
 <script type="text/x-cb360" data-page="InterChat"><!DOCTYPE html>
   <html lang="pt-PT" style="background-color: #8b0000;">
   <head>
@@ -28707,7 +30279,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v19 - 2026-11-12 - Voltar do chat: historico no shell (+ v16)';
+  window.CB360_BUILD='v21.17 - 2026-11-13 - Voltar do chat: historico no shell (+ v16)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
