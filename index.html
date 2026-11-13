@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="pt-PT">
 <head>
 <meta charset="UTF-8">
@@ -9474,9 +9474,9 @@
       /* ============================================================
       MAIN CONTENT
       ============================================================ */
-      .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
+      .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: calc(var(--header-h) + var(--back-space, 0px) + 18px); padding-bottom: calc(var(--footer-h) + 18px); padding-left: 16px; padding-right: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; transition: padding-top 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
       .main-content::-webkit-scrollbar {display: none;}
-      body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + 8px);}
+      body.mobile-month-active .main-content {padding-top: calc(var(--header-h) + var(--back-space, 0px) + 8px);}
       .main-content.content-blur {filter: blur(2px); pointer-events: none;}    
       .vacations-req-header {flex-shrink: 0; text-align: center; width: 100%; display: flex; flex-direction: column; align-items: flex-start;}
       .vacations-req-card {flex-shrink: 0;}
@@ -9602,9 +9602,14 @@
       .btn-icon {font-size:36px; color:var(--red-icon); transition:transform var(--ease), color var(--ease);}
       .btn-text {font-size:14px; font-weight:600;}
       .voluntary-view {display:none; width:100%; flex-direction:column; align-items:center; gap:5px;}
-      .voluntary-back-header {display:flex; align-items:center; gap:8px; font-size:15px; font-weight:600; color:var(--txt-2); cursor:pointer; margin-bottom:6px; align-self:flex-start; transition:color var(--ease);}
-      .voluntary-back-header:hover {color:var(--txt-1);}
-      .voluntary-back-header .material-icons {font-size:20px; line-height:1;}
+      /* botão Voltar fixo no topo (estilo "Voltar aos Meses" das Escalas) */
+      .voluntary-back-header {position:fixed; top:calc(var(--header-h) + 12px); left:16px; z-index:90; display:inline-flex; align-items:center; gap:8px; padding:10px 18px;
+                              background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); box-shadow:var(--sh-sm); font-family:'Inter',sans-serif;
+                              font-size:14px; font-weight:600; color:var(--txt-1); cursor:pointer; transition:background var(--ease), transform 0.15s ease;}
+      .voluntary-back-header:hover {background:var(--surface-2);}
+      .voluntary-back-header:active {transform:scale(0.97);}
+      .voluntary-back-header .material-icons {font-size:20px; line-height:1; color:var(--red);}
+      body.has-back {--back-space: 60px;}
       @keyframes slideDown {from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);}}
       /* ============================================================
       RESPONSIVE
@@ -9646,7 +9651,7 @@
       <div class="voluntary-view" id="voluntaryView">
       <div class="voluntary-back-header" id="voluntaryBack">
         <span class="material-icons">arrow_back</span>
-        <span id="vacBackText">VOLUNTARIADO</span>
+        <span id="vacBackText">Voltar</span>
       </div>
       <div class="vacations-req-header">
         <p class="vacations-req-subtitle">Selecione o mês:</p>
@@ -10057,12 +10062,12 @@
       let vacType = 'Voluntariado';          /* 'Voluntariado' | 'Profissional' -> coluna vacation_type */
       function openVoluntaryView(hideBack, type = 'Voluntariado') {
         vacType = type;
-        document.getElementById('vacBackText').textContent = type === 'Profissional' ? 'PROFISSIONAIS' : 'VOLUNTARIADO';
         vacationsData = [];
         loadVacations();
         document.getElementById('vacChoose').style.display = 'none';
         document.getElementById('voluntaryView').style.display = 'flex';
         document.getElementById('voluntaryBack').style.display = hideBack ? 'none' : '';
+        document.body.classList.toggle('has-back', !hideBack);
         vacVoluntaryOpen = true;
         const sub = document.querySelector('.header-sub'); if (sub) sub.textContent = type === 'Profissional' ? 'Profissionais' : 'Voluntariado';
         requestAnimationFrame(() => window.applyMonthsCentering && window.applyMonthsCentering());
@@ -10073,6 +10078,7 @@
           if (selBtn) showCalendar(currentMonthIndex, selBtn);
         }
         vacVoluntaryOpen = false;
+        document.body.classList.remove('has-back');
         document.getElementById('voluntaryView').style.display = 'none';
         document.getElementById('vacChoose').style.display = 'grid';
         document.querySelector('.main-content').style.paddingTop = '';
@@ -10111,12 +10117,11 @@
           if (currentMonthIndex !== null) return;
           const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 60;
           const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footer-h")) || 50;
-          const backEl = document.getElementById('voluntaryBack');
-          const backH = backEl && backEl.style.display !== 'none' ? backEl.offsetHeight + 6 : 0;
-          const contentHeight = backH + (reqHeader ? reqHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
-          const availableHeight = window.innerHeight - headerH - footerH;
+          const backH = document.body.classList.contains('has-back') ? 60 : 0;
+          const contentHeight = (reqHeader ? reqHeader.offsetHeight : 0) + (monthsCard ? monthsCard.offsetHeight : 0) + 4;
+          const availableHeight = window.innerHeight - headerH - footerH - backH;
           const extra = Math.max(18, (availableHeight - contentHeight) / 2);
-          mainContent.style.paddingTop = `calc(var(--header-h) + ${extra}px)`;
+          mainContent.style.paddingTop = `calc(var(--header-h) + ${backH}px + ${extra}px)`;
         };
         setupViewByLinkType();
         window.addEventListener('resize', () => {
@@ -28052,7 +28057,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v20 - 2026-11-12 - Voltar do chat: historico no shell (+ v16)';
+  window.CB360_BUILD='v19 - 2026-11-12 - Voltar do chat: historico no shell (+ v16)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
