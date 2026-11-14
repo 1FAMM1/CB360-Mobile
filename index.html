@@ -10125,9 +10125,6 @@
       .calendar-day.holiday-optional {background: #d6ecff; color: #0b4f8a; font-weight: 700;}
       .dark-mode .calendar-day.holiday {background: rgba(247, 198, 199, 0.28); color: #ffb3b3;}
       .dark-mode .calendar-day.holiday-optional {background: rgba(214, 236, 255, 0.20); color: #9fd0ff;}
-      .holiday-legend {display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 11px; color: var(--txt-2);}
-      .holiday-legend:empty {display: none;}
-      .holiday-legend b {color: var(--txt-1);}
       .calendar-day.empty:hover {transform: none; background: transparent;}
       .calendar-day.today {background: var(--red-dark); color: #fff; font-weight: 700; border: 2px solid #e67e22;}
       .calendar-day.state-pending {background: linear-gradient(135deg, #ffb74d, #ff9800, #ef6c00); color: #fff; font-weight: 700; border: 2px solid rgba(255,255,255,0.2);}
@@ -10282,7 +10279,6 @@
         <div id="calendarContainer" class="calendar-container">
           <div class="calendar-header" id="calendarHeader"></div>
           <div class="calendar-grid" id="calendarGrid"></div>
-          <div class="holiday-legend" id="holidayLegend"></div>
         </div>
       </div>
       <button id="saveVacationBtn" class="save-vacation-btn" onclick="saveVacation()">Efetuar Pedido</button>
@@ -10595,7 +10591,21 @@
             if (dayEl.classList.contains('state-approved')) {
               showToast("Este dia já foi aprovado e não pode ser alterado.");
               return;
-            }    
+            }
+            /* Profissionais: feriados e fins de semana não contam como dias de férias */
+            const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+            const isHoliday = hol && !hol.optional;
+            if (vacType === 'Profissional' && (isWeekend || isHoliday) && !selectedDays.includes(day)) {
+              let next = null;
+              for (let d = day + 1; d <= lastDay; d++) {
+                const wd = new Date(year, monthIndex, d).getDay(), hh = holidays.get(d);
+                if (wd !== 0 && wd !== 6 && !(hh && !hh.optional)) { next = d; break; }
+              }
+              const what = isHoliday ? `é feriado (${hol.name})` : (dateObj.getDay() === 6 ? 'é sábado' : 'é domingo');
+              const cont = next ? `Continue a marcação no dia útil seguinte (dia ${next}).` : 'Continue a marcação no dia útil seguinte (no próximo mês).';
+              showToast(`O dia ${day} ${what}. Nos feriados e fins de semana as férias não contam. ${cont}`, 4500);
+              return;
+            }
             if (selectedDays.includes(day)) {
               selectedDays = selectedDays.filter(d => d !== day);
               dayEl.classList.remove('state-pending','state-approved','state-rejected');
@@ -10607,9 +10617,6 @@
           grid.appendChild(dayEl);
         }
         header.textContent = `${names[monthIndex]} ${year}`;
-        const legend = document.getElementById('holidayLegend');
-        if (legend) legend.innerHTML = [...holidays.entries()].sort((x, y) => x[0] - y[0])
-          .map(([d, hh]) => `<span><b>${d}</b> ${escapeHtmlVac(hh.name)}${hh.optional ? ' (facultativo)' : ''}</span>`).join('');
       }
       /* ======================== SAVING VACATIONS ========================= */
       let isSavingVacation = false;
@@ -10691,7 +10698,7 @@
         `;
         document.getElementById('vacationCardsContainer').appendChild(card);
       }
-      function showToast(message) {
+      function showToast(message, ms = 3000) {
         const toast = document.createElement("div");
         toast.className = "toast";
         toast.textContent = message;
@@ -10703,7 +10710,7 @@
           toast.classList.remove("show");
           if (content) content.classList.remove("content-blur");
           setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        }, ms);
       }
       /* ============== PROFISSIONAIS / VOLUNTARIADO (vínculo definido na MainPage) ============== */
       let vacVoluntaryOpen = false;
@@ -30279,7 +30286,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v21.17 - 2026-11-13 - Voltar do chat: historico no shell (+ v16)';
+  window.CB360_BUILD='v21.26 - 2026-11-14 - Voltar do chat: historico no shell (+ v16)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
