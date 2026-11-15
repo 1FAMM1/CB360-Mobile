@@ -426,6 +426,23 @@
       /* ============================================================
       GRID CARD CONTAINER
       ============================================================ */
+.central-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: var(--r-lg); box-shadow: var(--sh-md); padding: 16px; display: flex; flex-direction: column; gap: 12px;}
+      .central-top {display: flex; align-items: center; gap: 12px;}
+      .central-ico {width: 46px; height: 46px; border-radius: 50%; background: var(--red-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+      .central-ico .material-icons {color: var(--red-icon); font-size: 24px;}
+      .central-top b {display: block; font-size: 15px; color: var(--txt-1);}
+      .central-top small {font-size: 12px; color: var(--txt-2); line-height: 1.35;}
+      .central-notif {display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--r-sm, 12px); font-size: 12.5px; font-weight: 600;}
+      .central-notif.on {background: rgba(46,125,50,.14); color: #2e7d32;}
+      .central-notif.off {background: rgba(239,108,0,.14); color: #ef6c00;}
+      .central-notif button {margin-left: auto; border: 0; border-radius: 10px; padding: 7px 12px; background: var(--red); color: #fff; font-weight: 700; font-size: 12px; font-family: inherit;}
+      .central-list-h {font-size: 11px; font-weight: 700; color: var(--txt-3); text-transform: uppercase; letter-spacing: .6px;}
+      .central-list {display: flex; flex-direction: column; gap: 6px;}
+      .central-item {display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; color: var(--txt-1);}
+      .central-item .dot {width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;}
+      .central-item b {font-weight: 700;}
+      .central-item span.t {margin-left: auto; color: var(--txt-3); font-size: 11.5px; white-space: nowrap;}
+      .central-empty {font-size: 12.5px; color: var(--txt-3); text-align: center; padding: 8px;}
       .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex;}
       .btn-grid {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(6, minmax(0, 1fr)); flex: 1; width: 100%; height: 100%;}    
       /* ============================================================
@@ -1143,6 +1160,57 @@
           toast.classList.remove('show');
         }, 2500);
       }
+      /* ======================= CONTA DA CENTRAL (account_type = 'central') =======================
+         Só serve para receber as push dos estados dos veículos; o trabalho é feito no Online. */
+      const CENTRAL_ACTIONS = {'Saída Und.': ['Saída do Quartel', '#e53935'], 'Chegada TO': ['Chegada ao TO', '#0282fa'], 'Saída TO': ['Saída do TO', '#ff9800'],
+                               'Chegada Und.': ['Chegada ao Quartel', '#22c55e'], 'Fim de Retenção': ['Fim de Retenção', '#26a69a']};
+      function applyCentralView() {
+        window.isCentralUser = true;
+        document.querySelectorAll('.next-pill, .grid-card, .switch-row').forEach(el => el.style.display = 'none');
+        if (document.getElementById('centralCard')) return;
+        const card = document.createElement('div');
+        card.id = 'centralCard';
+        card.className = 'central-card';
+        card.innerHTML = `
+          <div class="central-top">
+            <div class="central-ico"><span class="material-icons">cell_tower</span></div>
+            <div><b>Conta da Central</b><small>Este telemóvel recebe as notificações dos estados dos veículos. Consulte e confirme no CB360 Online → Estados dos Veículos.</small></div>
+          </div>
+          <div id="centralNotif"></div>
+          <div class="central-list-h">Últimos estados (hoje)</div>
+          <div class="central-list" id="centralList"><div class="central-empty">A carregar…</div></div>`;
+        document.querySelector('.welcome-row')?.insertAdjacentElement('afterend', card);
+        renderCentralNotif();
+        if ('Notification' in window && Notification.permission === 'granted') initializePushWithoutPermission().catch(() => {});
+        loadCentralList();
+        setInterval(() => { if (!document.hidden) loadCentralList(); }, 30000);
+      }
+      function renderCentralNotif() {
+        const el = document.getElementById('centralNotif'); if (!el) return;
+        const on = 'Notification' in window && Notification.permission === 'granted';
+        el.className = 'central-notif ' + (on ? 'on' : 'off');
+        el.innerHTML = on
+          ? '<span class="material-icons" style="font-size:18px;">notifications_active</span>Notificações ativas neste telemóvel'
+          : '<span class="material-icons" style="font-size:18px;">notifications_off</span>Notificações desligadas<button type="button" id="centralNotifBtn">Ativar</button>';
+        const b = document.getElementById('centralNotifBtn');
+        if (b) b.onclick = async () => { await enableNotifications(); renderCentralNotif(); };
+      }
+      async function loadCentralList() {
+        const list = document.getElementById('centralList'); if (!list) return;
+        try {
+          const d = new Date(); d.setHours(0, 0, 0, 0);
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/vehicle_status_log?select=vehicle,action,km,created_at&corp_oper_nr=eq.${getCorpPadded()}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=8`, {headers: getSupabaseHeaders()});
+          const rows = r.ok ? await r.json() : [];
+          const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+          list.innerHTML = rows.length ? rows.map(x => {
+            const [label, color] = CENTRAL_ACTIONS[x.action] || [x.action, '#6b7280'];
+            const t = new Date(x.created_at).toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'});
+            return `<div class="central-item"><span class="dot" style="background:${color}"></span><b>${esc(x.vehicle)}</b> ${esc(label)}${x.km ? ` · ${esc(x.km)} km` : ''}<span class="t">${t}</span></div>`;
+          }).join('') : '<div class="central-empty">Ainda não há estados hoje.</div>';
+        } catch (e) {
+          list.innerHTML = '<div class="central-empty">Não foi possível carregar os estados.</div>';
+        }
+      }
       /* =========================== SWITCH TAB ============================ */
       function lockConfigTab() {
         const cfgBtn = document.getElementById('swCfg');
@@ -1428,10 +1496,17 @@
             return;
           }
           window.isVehicleUser = true;
-          const fbUrl = `${SUPABASE_URL}/rest/v1/users_mobile?select=username&corp_oper_nr=eq.${corpOperNr}&nint_corp=eq.${nInt}`;
+          const fbUrl = `${SUPABASE_URL}/rest/v1/users_mobile?select=username,account_type&corp_oper_nr=eq.${corpOperNr}&nint_corp=eq.${nInt}`;
           const fbRes = await fetch(fbUrl, { headers: getSupabaseHeaders() });
           const fbData = await fbRes.json();
           const fbUser = fbData[0];
+          if (fbUser?.account_type === 'central') {
+            welcomeNameEl.textContent = 'Central de Telecomunicações';
+            avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
+            lockConfigTab();
+            applyCentralView();
+            return;
+          }
           welcomeNameEl.textContent = fbUser?.username || 'Utilizador';
           if (fbUser?.username) {
             const vehUrl = `${SUPABASE_URL}/rest/v1/vehicle_status?select=photo_url&corp_oper_nr=eq.${corpOperNr}&vehicle=eq.${fbUser.username}`;
@@ -6236,7 +6311,7 @@
       .collapse-wrapper {display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(-10px); width: 100%; transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
       .collapse-wrapper > * {min-height: 0; overflow: hidden;}
       .collapse-wrapper.show {grid-template-rows: 1fr; opacity: 1; transform: translateY(0);}
-      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s; margin-bottom:-5px;}
+      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s; margin-bottom:0px;}
       .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%;}
       .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
       .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
@@ -6828,7 +6903,7 @@
       .collapse-wrapper {display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(-10px); width: 100%; transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
       .collapse-wrapper > * {min-height: 0; overflow: hidden;}
       .collapse-wrapper.show {grid-template-rows: 1fr; opacity: 1; transform: translateY(0);}
-      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s; margin-bottom:-5px;}
+      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s;}
       .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%;}
       .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
       .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
@@ -7449,7 +7524,7 @@
       .collapse-wrapper {display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(-10px); width: 100%; transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
       .collapse-wrapper > * {min-height: 0; overflow: hidden;}
       .collapse-wrapper.show {grid-template-rows: 1fr; opacity: 1; transform: translateY(0);}
-      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s; margin-bottom:-5px;}
+      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s; margin-bottom:0px;}
       .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%;}
       .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
       .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
@@ -8159,7 +8234,7 @@
       .collapse-wrapper {display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(-10px); width: 100%; transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
       .collapse-wrapper > * {min-height: 0; overflow: hidden;}
       .collapse-wrapper.show {grid-template-rows: 1fr; opacity: 1; transform: translateY(0);}
-      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s; margin-bottom:-5px;}
+      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s;}
       .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%;}
       .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
       .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
@@ -8778,7 +8853,7 @@
       .collapse-wrapper {display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(-10px); width: 100%; transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
       .collapse-wrapper > * {min-height: 0; overflow: hidden;}
       .collapse-wrapper.show {grid-template-rows: 1fr; opacity: 1; transform: translateY(0);}
-      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s; margin-bottom:-5px;}
+      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s;}
       .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%;}
       .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
       .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
@@ -9398,7 +9473,7 @@
       .collapse-wrapper {display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(-10px); width: 100%; transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);}
       .collapse-wrapper > * {min-height: 0; overflow: hidden;}
       .collapse-wrapper.show {grid-template-rows: 1fr; opacity: 1; transform: translateY(0);}
-      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s; margin-bottom:-10px;}
+      .collapse-wrapper.legend-wrapper {transition-delay: 0.06s;}
       .calendar-container {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px; width: 100%; max-width: 100%;}
       .calendar-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px; transition: color var(--ease), border-color var(--ease);}
       .calendar-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
@@ -16123,6 +16198,11 @@
         return headers;
       }
       const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendToTelegram';
+      /* Telegram em paralelo durante a transição: pôr false quando o registo no CB360 estiver confirmado */
+      const SEND_TELEGRAM = true;
+      const PUSH_API = 'https://cb-360-app.vercel.app/api/sendPush';
+      const CENTRAL_NINT = '9999';             /* conta da Central no Mobile (users_mobile.account_type = 'central') */
+      const ACTION_LABELS = {'Saída Und.': 'Saída do Quartel', 'Chegada TO': 'Chegada ao TO', 'Saída TO': 'Saída do TO', 'Chegada Und.': 'Chegada ao Quartel'};
       const TIMERS = {VEHICLE_RELOAD_INTERVAL: 5000, STATUS_CHECK_INTERVAL: 1500, INITIAL_SELECT_DELAY: 1000,
                       RESELECT_DELAY: 100, ANIMATION_DURATION: 300, STATUS_DISPLAY_TIME: 3000, FOCUS_DELAY: 100};
       const TYPES_WITH_PUMP = ['VLCI', 'VUCI', 'VFCI', 'VECI', 'VFCI', 'VRCI', 'VSAE', 'VTTU', 'VTTF', 'VTTR', 'VALE', 'VTTR', 'VTGC'];
@@ -16457,6 +16537,39 @@
         btn.disabled = false;
         btn.classList.remove('sending');
       }
+      /* ===================== ENVIO DO ESTADO (CB360 + push Central + Telegram) =====================
+         1) grava em vehicle_status_log (obrigatório: é o que o Online lê)
+         2) push para a conta da Central e Telegram: em segundo plano, não bloqueiam
+         3) atualiza vehicle_status (cores dos botões) */
+      async function dispatchStatus({action, km = null, pumpMinutes = null, tgMessage}) {
+        const corpOperNr = getCorpPadded();
+        const vehicle = selectedVehicle, icon = vehicleIcon;
+        const nInt = getNInt() || '';
+        let senderName = '';
+        try { senderName = localStorage.getItem('cb360_user_name_' + nInt) || ''; } catch (_) {}
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/vehicle_status_log`, {
+          method: 'POST',
+          headers: getSupabaseHeaders(),
+          body: JSON.stringify({corp_oper_nr: corpOperNr, vehicle, action, km: km === null ? null : Number(km), pump_minutes: pumpMinutes,
+                                sent_by: String(nInt), sent_by_name: senderName || null, is_read: false})
+        });
+        if (!res.ok) throw new Error(`Registo: HTTP ${res.status}`);
+        const time = new Date().toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'});
+        let pushText = `${icon || '🚒'} ${vehicle} · ${ACTION_LABELS[action] || action} · ${time}`;
+        if (km !== null) pushText += ` · ${km} km`;
+        if (pumpMinutes) pushText += ` · Bomba ${String(Math.floor(pumpMinutes / 60)).padStart(2, '0')}h${String(pumpMinutes % 60).padStart(2, '0')}m`;
+        fetch(PUSH_API, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`},
+          body: JSON.stringify({recipient_nint: CENTRAL_NINT, tipo: 'aviso', pagina: '', sender_name: 'Estado dos Veículos', message_text: pushText})
+        }).catch(e => console.error('Push Central:', e));
+        if (SEND_TELEGRAM && tgMessage) {
+          fetch(TELEGRAM_API, {method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: tgMessage, vehicle, action, corp_oper_nr: corpOperNr})
+          }).catch(e => console.error('Telegram:', e));
+        }
+        return updateVehicleStatus(vehicle, action);
+      }
       /* ========================== STATUS EVENT =========================== */
       async function sendGeostat(action, btnEl = null) {
         if (!selectedVehicle) {
@@ -16475,13 +16588,7 @@
         const date = now.toLocaleDateString('pt-PT');
         const message = `🚨 <b>ATUALIZAÇÃO DE STATUS</b>\n\n${vehicleIcon} <b>${tgEscape(selectedVehicle)}</b>\n📍 <b>${tgEscape(action)}</b>\n⏰ ${time}\n📅 ${date}`;
         try {
-          const res = await fetch(TELEGRAM_API, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({message, vehicle: selectedVehicle, action, corp_oper_nr: corpOperNr})
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const ok = await updateVehicleStatus(selectedVehicle, action);
+          const ok = await dispatchStatus({action, tgMessage: message});
           showToast(ok ? `${action} enviado!` : `${action} enviado, mas o estado do veículo não foi atualizado.`, ok ? 'success' : 'warning');
           deselectVehicle();
         } catch (err) {
@@ -16644,13 +16751,7 @@
           message += `\n⏱️ <b>Tempo Bomba: ${hours.toString().padStart(2,'0')}h${minutes.toString().padStart(2,'0')}m</b>`;
         }
         try {
-          const res = await fetch(TELEGRAM_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({message, vehicle: selectedVehicle, action, corp_oper_nr: corpOperNr})
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const ok = await updateVehicleStatus(selectedVehicle, action);
+          const ok = await dispatchStatus({action, km: kilometers, pumpMinutes: hasPump ? (hours * 60 + minutes) : null, tgMessage: message});
           showToast(ok ? `${action} enviado!` : `${action} enviado, mas o estado do veículo não foi atualizado.`, ok ? 'success' : 'warning');
           deselectVehicle();
         } catch (err) {
