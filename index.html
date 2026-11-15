@@ -1496,10 +1496,14 @@
             return;
           }
           window.isVehicleUser = true;
-          const fbUrl = `${SUPABASE_URL}/rest/v1/users_mobile?select=username,account_type&corp_oper_nr=eq.${corpOperNr}&nint_corp=eq.${nInt}`;
-          const fbRes = await fetch(fbUrl, { headers: getSupabaseHeaders() });
-          const fbData = await fbRes.json();
-          const fbUser = fbData[0];
+          /* conta sem ficha (viatura ou central): o tipo e o nome vêm do próprio token do login (a users_mobile não é legível pelo browser) */
+          let fbUser = null;
+          try {
+            const tk = localStorage.getItem('authToken') || '';
+            const b64 = (tk.split('.')[1] || '').replace(/-/g, '+').replace(/_/g, '/');
+            const c = JSON.parse(decodeURIComponent(escape(atob(b64 + '==='.slice((b64.length + 3) % 4)))));
+            fbUser = { username: c.username || '', account_type: c.account_type || (/^\d+$/.test(String(nInt)) ? 'elemento' : 'veiculo') };
+          } catch (e) { fbUser = null; }
           if (fbUser?.account_type === 'central') {
             welcomeNameEl.textContent = 'Central de Telecomunicações';
             avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
