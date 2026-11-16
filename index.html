@@ -2417,6 +2417,8 @@
       .day-chip.type-D {background: linear-gradient(135deg, #fbc02d, #f9a825); color: #212121;}
       .day-chip.type-N {background: linear-gradient(135deg, #3949ab, #2c387e, #1a237e); color: #fff;}
       .day-chip.type-M {background: linear-gradient(135deg, #00897b, #00695c); color: #fff;}
+      .day-chip.type-HA {background: linear-gradient(135deg, #f48fb1, #ec407a); color: #fff;}
+      .day-chip.type-HR {background: linear-gradient(135deg, #9575cd, #673ab7); color: #fff;}
       .day-chip.past {background: linear-gradient(135deg, #9e9e9e, #757575) !important; color: #fff !important;}
       .modal-group-title {display: flex; align-items: center; gap: 8px; margin-top: 4px; padding: 7px 10px; border-radius: 10px; border-left: 4px solid var(--gc); background: var(--surface-2); background: color-mix(in srgb, var(--gc) 14%, transparent); color: var(--txt-1); font-size: 12px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;}
       .modal-group-title .material-icons {font-size: 18px; color: var(--gc);}
@@ -2441,7 +2443,9 @@
       .fs-cal-day.type-D {background: linear-gradient(135deg, #fbc02d, #f9a825); color: #212121; font-weight: 700;}
       .fs-cal-day.type-N {background: linear-gradient(135deg, #3949ab, #2c387e, #1a237e); color: #fff; font-weight: 700;}
       .fs-cal-day.type-M {background: linear-gradient(135deg, #00897b, #00695c); color: #fff; font-weight: 700;}
-      .fs-cal-legend {display: flex; justify-content: center; gap: 14px; margin-top: 12px; font-size: 11.5px; font-weight: 600; color: var(--txt-2);}
+      .fs-cal-day.type-HA {background: linear-gradient(135deg, #f48fb1, #ec407a); color: #fff; font-weight: 700;}
+      .fs-cal-day.type-HR {background: linear-gradient(135deg, #9575cd, #673ab7); color: #fff; font-weight: 700;}
+      .fs-cal-legend {display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; margin-top: 12px; font-size: 11.5px; font-weight: 600; color: var(--txt-2);}
       .fs-cal-legend span {display: inline-flex; align-items: center; gap: 5px;}
       .fs-cal-legend i {width: 14px; height: 14px; border-radius: 4px; display: inline-block;}
       .fullscale-info-title .material-icons {font-size: 16px; color: var(--red-icon);}
@@ -2581,6 +2585,8 @@
           <span><i style="background: linear-gradient(135deg, #fbc02d, #f9a825);"></i>Diurno</span>
           <span><i style="background: linear-gradient(135deg, #3949ab, #1a237e);"></i>Noturno</span>
           <span><i style="background: linear-gradient(135deg, #00897b, #00695c);"></i>Manhã</span>
+          <span><i style="background: linear-gradient(135deg, #f48fb1, #ec407a);"></i>Amamentação</span>
+          <span><i style="background: linear-gradient(135deg, #9575cd, #673ab7);"></i>09h-19h</span>
         </div>
       </div>
     </div>
@@ -2778,7 +2784,13 @@
           }
         });
       }
-      const SHIFT_VALUES = {"D": 12, "N": 12, "FE": 8, "M": 8, "BX": 8, "FOR": 8, "FO": 0, "LC": 8, "LP": 8, "DP": 0, "LN": 8, "FI": 8, "FJ": 8, "HA": 8};
+      /* turnos de serviço: os de dia (D, M, HA, HR) contam juntos; o N é a noite */
+      const DAY_SHIFTS = ["D", "M", "HA", "HR"];
+      const WORK_SHIFTS = [...DAY_SHIFTS, "N"];
+      const WORK_SHIFTS_IN = WORK_SHIFTS.join(",");
+      /* ausências que também aparecem ao abrir um dia (de dia e de noite), com a etiqueta do código */
+      const ABSENCE_SHIFTS = ["BX", "DP", "FOR", "LC", "LN", "LP"];
+      const SHIFT_VALUES = {"D": 12, "N": 12, "FE": 8, "M": 8, "HR": 10, "BX": 8, "FOR": 8, "FO": 0, "LC": 8, "LP": 8, "DP": 0, "LN": 8, "FI": 8, "FJ": 8, "HA": 8};
       function toLocalYMD(date) {
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
       }
@@ -3009,7 +3021,7 @@
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const items = data
-          .filter(d => d.day && ["D", "N", "M"].includes(String(d.shift).trim().toUpperCase()))
+          .filter(d => d.day && WORK_SHIFTS.includes(String(d.shift).trim().toUpperCase()))
           .map(d => {
             const shift = String(d.shift).trim().toUpperCase();
             return {day: Number(d.day), type: shift, suffix: shift, past: new Date(year, month - 1, Number(d.day)) < today};
@@ -3057,8 +3069,11 @@
         card.addEventListener("click", async () => {
           openServiceModal(`${info.tipo} - ${dateText}`, null);
           try {
-            const elements = await fetchServiceElements(service.day, service.month, service.value, year);
-            openServiceModal(`${info.tipo} - ${dateText}`, elements);
+            const [elements, ausentes] = await Promise.all([
+              fetchServiceElements(service.day, service.month, service.value, year),
+              fetchServiceElements(service.day, service.month, "AUS", year)
+            ]);
+            openServiceModal(`${info.tipo} - ${dateText}`, [...elements, ...ausentes]);
           } catch (err) {
             console.error("[CB360] Erro ao abrir elementos do serviço:", err);
             openServiceModal(`${info.tipo} - ${dateText}`, []);
@@ -3072,7 +3087,8 @@
         return card;
       }       
       function getServiceInfo(code) {
-        const map = {D: {tipo: "TURNO DIURNO", turno: "08:00-20:00"}, N: {tipo: "TURNO NOCTURNO", turno: "20:00-08:00"}, M: {tipo: "TURNO MANHÃ", turno: "09:00-17:00"}};
+        const map = {D: {tipo: "TURNO DIURNO", turno: "08:00-20:00"}, N: {tipo: "TURNO NOCTURNO", turno: "20:00-08:00"}, M: {tipo: "TURNO MANHÃ", turno: "09:00-17:00"},
+                     HA: {tipo: "AMAMENTAÇÃO", turno: "Horário reduzido"}, HR: {tipo: "TURNO 09-19", turno: "09:00-19:00"}};
         return map[code] || {tipo: code, turno: "-"};
       }
       function formatDateWithWeekday(day, month, year) {
@@ -3099,12 +3115,11 @@
           const shiftValue = String(value || "")
           .trim()
           .toUpperCase();
-          if (!["D", "N", "M"].includes(shiftValue)) {
+          if (!WORK_SHIFTS.includes(shiftValue) && shiftValue !== "AUS") {
             console.error("[CB360] TURNO INVÁLIDO:", value);
             return [];
           }
-          const shiftsToFetch = {D: ["D", "M"], N: ["N"], M: ["M", "D"]};
-          const allowedShifts = shiftsToFetch[shiftValue];
+          const allowedShifts = shiftValue === "AUS" ? ABSENCE_SHIFTS : shiftValue === "N" ? ["N"] : DAY_SHIFTS;
           const url =
             `${SUPABASE_URL}/rest/v1/reg_employee_shifts?` +
             `select=n_int,shift,is_optel,is_eip` +
@@ -3235,7 +3250,9 @@
                             "Estagiário(a)": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Est..png",
                             "Bº Especialista": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Esp.png",};
       const serviceColors = {D: {bg: 'linear-gradient(135deg, #fbc02d, #f9a825)', text: '#212121'}, N: {bg: 'linear-gradient(135deg, #3949ab, #2c387e, #1a237e)', text: '#fff'}, 
-                             M: {bg: 'linear-gradient(135deg, #00897b, #00695c)', text: '#fff'}};
+                             M: {bg: 'linear-gradient(135deg, #00897b, #00695c)', text: '#fff'}, HA: {bg: 'linear-gradient(135deg, #f48fb1, #ec407a)', text: '#fff'}, HR: {bg: 'linear-gradient(135deg, #9575cd, #673ab7)', text: '#fff'},
+                             BX: {bg: '#e53935', text: '#fff'}, LC: {bg: '#e53935', text: '#fff'}, LN: {bg: '#e53935', text: '#fff'}, LP: {bg: '#e53935', text: '#fff'},
+                             FOR: {bg: '#757575', text: '#fff'}, DP: {bg: '#212121', text: '#fff'}};
       const modalGroups = [{title: 'INEM', prefix: 'EQ', icon: 'medical_services', color: '#f9a825', on: '#212121'}, {title: 'GERAL', prefix: 'TDNU', icon: 'security', color: '#1565c0'},
                            {title: 'OPTEL', prefix: 'OPC', icon: 'cell_tower', color: '#8e24aa'}, {title: 'EIP', prefix: 'EIP', icon: 'local_fire_department', color: '#c62828'}];
       const modalGroupOther = {title: 'OUTROS', icon: 'groups', color: '#757575'};
@@ -3353,8 +3370,8 @@
             return;
           }
         }
-        const shiftsToCount = {D: ["D", "M"],  N: ["N"], M: ["M", "D"]};
-        const shiftEndHour = {D: 20, N: 8, M: 17};
+        const shiftsToCount = {D: DAY_SHIFTS, M: DAY_SHIFTS, HA: DAY_SHIFTS, HR: DAY_SHIFTS, N: ["N"]};
+        const shiftEndHour = {D: 20, N: 8, M: 17, HA: 17, HR: 19};
         const normalizeNInt = n => String(n ?? "")
           .trim()
           .replace(/^0+(?=\d)/, "");
@@ -3382,7 +3399,7 @@
           `&corp_oper_nr=eq.${corpOperNr}` +
           `&month=eq.${month}` +
           `&year=eq.${year}` +
-          `&shift=in.(D,N,M)` +
+          `&shift=in.(${WORK_SHIFTS_IN})` +
           `&order=day.asc`;
           const responseShifts = await fetch(urlShifts, {
             headers: getSupabaseHeaders()
@@ -3428,7 +3445,7 @@
              `&month=eq.${month}` +
              `&year=eq.${year}` +
              `&day=gte.${firstDay}` +
-             `&shift=in.(D,N,M)` +
+             `&shift=in.(${WORK_SHIFTS_IN})` +
              `&order=day.asc,n_int.asc,shift.asc`;
           const monthRows = await fetchAllRows(countUrl);
           if (monthsCard && monthsCard.style.display !== "none") {
@@ -3568,12 +3585,19 @@
           const dateText = formatDateWithWeekday(day, month, year);
           const modalTitleText = `Escala - ${dateText}`;
           openServiceModal(modalTitleText, null);
+          /* hoje: das 08h às 20h só o turno de dia (D, M, HA, HR); a partir das 20h só o N */
+          const now = new Date();
+          const isToday = now.getFullYear() === year && now.getMonth() + 1 === month && now.getDate() === day;
+          const h = now.getHours();
+          const showDay = !isToday || h < 20;
+          const showNight = !isToday || h < 8 || h >= 20;
           try {
-            const [diurno, noturno] = await Promise.all([
-              fetchServiceElements(day, month, "D", year, true),
-              fetchServiceElements(day, month, "N", year, true)
+            const [diurno, noturno, ausentes] = await Promise.all([
+              showDay ? fetchServiceElements(day, month, "D", year, true) : [],
+              showNight ? fetchServiceElements(day, month, "N", year, true) : [],
+              fetchServiceElements(day, month, "AUS", year, true)
             ]);
-            openServiceModal(modalTitleText, [...diurno, ...noturno]);
+            openServiceModal(modalTitleText, [...diurno, ...noturno, ...ausentes]);
           } catch (err) {
             console.error("[CB360] Erro ao abrir elementos do dia:", err);
             openServiceModal(modalTitleText, []);
@@ -3625,7 +3649,7 @@
             const res = await fetch(
               `${SUPABASE_URL}/rest/v1/reg_employee_shifts?select=day,shift` +
               `&n_int=eq.${nintCorp}&corp_oper_nr=eq.${corpOperNr}` +
-              `&month=eq.${month}&year=eq.${year}&shift=in.(D,N,M)`, {headers: getSupabaseHeaders()}
+              `&month=eq.${month}&year=eq.${year}&shift=in.(${WORK_SHIFTS_IN})`, {headers: getSupabaseHeaders()}
             );
             if (!res.ok) return;
             const rows = await res.json();
@@ -3633,7 +3657,7 @@
             rows.forEach(r => {
               const el = dayEls[Number(r.day)];
               const type = String(r.shift).trim().toUpperCase();
-              if (el && ["D", "N", "M"].includes(type)) el.classList.add(`type-${type}`);
+              if (el && WORK_SHIFTS.includes(type)) el.classList.add(`type-${type}`);
             });
           } catch (err) {
             console.error("[CB360] Erro ao carregar turnos no calendário:", err);
@@ -3877,6 +3901,16 @@
       .day-chip.type-EX {background: linear-gradient(135deg, #c62828, #8b0000); color: #fff;}
       .day-chip.type-SB {background: linear-gradient(135deg, #26a69a, #00897b); color: #fff;}
       .day-chip.type-OP {background: linear-gradient(135deg, #ef6c00, #e65100); color: #fff;}
+      /* calendário da escala completa (conta da Central) */
+      .fs-calendar {display: none; width: 100%; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-right: 4px solid var(--red); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px;}
+      .fs-cal-header {text-align: center; font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing: 0.3px;}
+      .fs-cal-grid {display: grid; grid-template-columns: repeat(7, minmax(30px, 1fr)); gap: 5px;}
+      .fs-cal-dayname {text-align: center; font-weight: 700; padding: 6px 0; font-size: 11px; color: var(--txt-3);}
+      .fs-cal-day {text-align: center; padding: 9px 0; border-radius: var(--r-sm); background: var(--surface-2); font-size: 12.5px; color: var(--txt-1); cursor: pointer; border: 2px solid transparent; transition: background var(--ease), transform 0.15s ease;}
+      .fs-cal-day:active {transform: scale(0.95);}
+      .fs-cal-day.empty {background: transparent; cursor: default; border-color: transparent;}
+      .fs-cal-day.today {border-color: #e67e22; font-weight: 700;}
+      .fs-cal-note {margin-top: 12px; text-align: center; font-size: 11.5px; color: var(--txt-3);}
       /* ============================================================
       NEXT SERVICES
       ============================================================ */
@@ -4029,6 +4063,11 @@
       </div>
       <div id="nextserv-info-title" class="nextserv-info-title" style="display:none; margin:0 0 -5px 0;">📅 Próximos(s) Serviços(s)</div>
       <div id="nextServicesCard" style="display:none;"></div>
+      <div id="fsCalendar" class="fs-calendar">
+        <div id="fsCalHeader" class="fs-cal-header"></div>
+        <div id="fsCalGrid" class="fs-cal-grid"></div>
+        <div class="fs-cal-note">Toque num dia para ver quem está de serviço (Piquete e ECIN).</div>
+      </div>
     </div>
     <div id="serviceModal" class="service-modal" style="display:none;">
       <div class="service-modal-content">
@@ -4093,6 +4132,13 @@
       }
       function getCorp() {return localStorage.getItem("currentCorpOperNr");}
       function getNInt() {return localStorage.getItem("currentCorpNint");}
+      /* conta da Central (sem serviços próprios): ao escolher o mês abre o calendário de toda a escala */
+      const IS_CENTRAL = (() => {
+        try {
+          const b64 = ((localStorage.getItem('authToken') || '').split('.')[1] || '').replace(/-/g, '+').replace(/_/g, '/');
+          return JSON.parse(atob(b64 + '==='.slice((b64.length + 3) % 4))).account_type === 'central';
+        } catch (e) { return false; }
+      })();
       function getSupabaseHeaders(options = {}) {
         const corp  = getCorp();
         const nint  = getNInt();
@@ -4532,7 +4578,7 @@
           const corpOperNr = localStorage.getItem("currentCorpOperNr");
           const nintCorp = validateCorpData();
           if (!nintCorp || !corpOperNr) return [];
-          const valuesToMatch = getServiceValuesToMatch(value);
+          const valuesToMatch = Array.isArray(value) ? value : getServiceValuesToMatch(value);
           const table = value === "EX" ? "reg_extras" : "reg_serv";
           const regServUrl = `${SUPABASE_URL}/rest/v1/${table}?select=n_int,value&corp_oper_nr=eq.${corpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=in.(${valuesToMatch.join(',')})`;
           const servResponse = await fetch(regServUrl, { headers: getSupabaseHeaders() });
@@ -4815,11 +4861,58 @@
           document.getElementById("nextServicesCard").style.display = "none";
           document.getElementById("nextserv-info-title").style.display = "none";
           document.getElementById("attendanceCard").style.display = "none";
+          document.getElementById("fsCalendar").style.display = "none";
           const noServicesCard = document.getElementById("noServicesCard");
           if (noServicesCard) noServicesCard.remove();
           ["picketsSection", "decirSection", "extrasSection", "sbaSection", "opatSection"].forEach(id => {
             document.getElementById(id).classList.remove("section-divider");
           });
+        }
+        /* ===================== ESCALA COMPLETA (CALENDÁRIO, CENTRAL) ==================== */
+        const FS_MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        const FS_DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+        async function openFullScaleDay(day, month, year) {
+          /* hoje: a partir das 08h só ED e ET; a partir das 20h só PN, EN e ET. Outros dias (ou antes das 08h): tudo */
+          const now = new Date();
+          const isToday = now.getFullYear() === year && now.getMonth() + 1 === month && now.getDate() === day;
+          const h = now.getHours();
+          let values = ["PN", "ED", "EN", "ET"];
+          if (isToday && h >= 20) values = ["PN", "EN", "ET"];
+          else if (isToday && h >= 8) values = ["ED", "ET"];
+          const title = `Escala - ${formatDateWithWeekday(day, month, year)}`;
+          openServiceModal(title, null);
+          openServiceModal(title, await fetchServiceElements(day, month, values, year));
+        }
+        function showFullScaleCalendar(monthIndex) {
+          const year = getWorkYear(monthIndex);
+          const month = monthIndex + 1;
+          const grid = document.getElementById("fsCalGrid");
+          document.getElementById("fsCalHeader").textContent = `${FS_MONTHS[monthIndex]} ${year}`;
+          grid.innerHTML = "";
+          FS_DAYS.forEach(d => {
+            const el = document.createElement("div");
+            el.className = "fs-cal-dayname";
+            el.textContent = d;
+            grid.appendChild(el);
+          });
+          const firstWeekday = new Date(year, monthIndex, 1).getDay();
+          const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+          for (let i = 0; i < firstWeekday; i++) {
+            const el = document.createElement("div");
+            el.className = "fs-cal-day empty";
+            grid.appendChild(el);
+          }
+          const now = new Date();
+          for (let day = 1; day <= daysInMonth; day++) {
+            const el = document.createElement("div");
+            el.className = "fs-cal-day";
+            el.textContent = day;
+            if (year === now.getFullYear() && monthIndex === now.getMonth() && day === now.getDate()) el.classList.add("today");
+            el.addEventListener("click", () => openFullScaleDay(day, month, year));
+            grid.appendChild(el);
+          }
+          document.getElementById("fsCalendar").style.display = "block";
+          mainContent.scrollTop = 0;
         }
         function resetToMonthsView() {
           currentFetchRequestId++;
@@ -4855,6 +4948,11 @@
             await toggleMobileMonthLayout(true);
             hideAllServiceCards();
             if (requestId !== currentFetchRequestId) return;
+            if (IS_CENTRAL) {
+              btnBackWrapper.classList.add("show");
+              showFullScaleCalendar(month);
+              return;
+            }
             const today = new Date();
             resetAttendanceMapReady();
             const loaders = [
@@ -30529,5 +30627,6 @@
 })();
 </script>
 </body>
+</html>
 </html>
 </html>
