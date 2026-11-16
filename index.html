@@ -436,6 +436,11 @@
       .central-notif.on {background: rgba(46,125,50,.14); color: #2e7d32;}
       .central-notif.off {background: rgba(239,108,0,.14); color: #ef6c00;}
       .central-notif button {margin-left: auto; border: 0; border-radius: 10px; padding: 7px 12px; background: var(--red); color: #fff; font-weight: 700; font-size: 12px; font-family: inherit;}
+      .central-scales {display: grid; grid-template-columns: 1fr 1fr; gap: 8px;}
+      .central-scales button {display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2);
+                              color: var(--txt-1); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm);}
+      .central-scales button .material-icons {font-size: 20px; color: var(--red);}
+      .central-scales button:active {transform: scale(0.98);}
       .central-list-h {font-size: 11px; font-weight: 700; color: var(--txt-3); text-transform: uppercase; letter-spacing: .6px;}
       .central-list {display: flex; flex-direction: column; gap: 6px;}
       .central-item {display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; color: var(--txt-1);}
@@ -730,7 +735,7 @@
           <p>Alguns dados são processados por prestadores de serviços tecnológicos, apenas na medida do necessário:</p>
           <p>
             • <strong>Supabase</strong> — alojamento de base de dados<br>
-            • <strong>Telegram</strong> — envio de notificações operacionais (status de viaturas, composição de equipas)<br>
+            • <strong>Telegram</strong> — envio de notificações operacionais (composição de equipas)<br>
             • <strong>IPMA</strong> — consulta pública de avisos meteorológicos (sem envio de dados pessoais)<br>
             • Serviço de notificações push do navegador/dispositivo
           </p>
@@ -839,7 +844,7 @@
             • Pedido de Férias e Pedido de Fardamento<br>
             • Assiduidade com painel de risco de reserva<br>
             • Composição de Equipas DECIR (1 ECIN · ECIN/ELAC · BCIN)<br>
-            • Gestão de Status de Viaturas (V-Status) com notificação Telegram<br>
+            • Gestão de Status de Viaturas (V-Status) com registo no CB360 e notificação push à Central<br>
             • Ocorrências em Curso e Relatórios de Ocorrência<br>
             • Equipa de Serviço (FOMIO)<br>
             • Eventos, Documentos e Comunicados internos<br>
@@ -1177,6 +1182,11 @@
             <div><b>Conta da Central</b><small>Este telemóvel recebe as notificações dos estados dos veículos. Consulte e confirme no CB360 Online → Estados dos Veículos.</small></div>
           </div>
           <div id="centralNotif"></div>
+          <div class="central-list-h">Escalas</div>
+          <div class="central-scales">
+            <button type="button" onclick="__go('ScalesViewMenu.html')"><span class="material-icons">badge</span>Profissionais</button>
+            <button type="button" onclick="__go('ScalesView.html')"><span class="material-icons">volunteer_activism</span>Voluntários</button>
+          </div>
           <div class="central-list-h">Últimos estados (hoje)</div>
           <div class="central-list" id="centralList"><div class="central-empty">A carregar…</div></div>`;
         document.querySelector('.welcome-row')?.insertAdjacentElement('afterend', card);
@@ -16201,9 +16211,6 @@
         }
         return headers;
       }
-      const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendToTelegram';
-      /* Telegram em paralelo durante a transição: pôr false quando o registo no CB360 estiver confirmado */
-      const SEND_TELEGRAM = true;
       const PUSH_API = 'https://cb-360-app.vercel.app/api/sendPush';
       const CENTRAL_NINT = '9999';             /* conta da Central no Mobile (users_mobile.account_type = 'central') */
       const ACTION_LABELS = {'Saída Und.': 'Saída do Quartel', 'Chegada TO': 'Chegada ao TO', 'Saída TO': 'Saída do TO', 'Chegada Und.': 'Chegada ao Quartel'};
@@ -16238,9 +16245,6 @@
       }
       function escapeHtml(v) {
         return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-      }
-      function tgEscape(v) {
-        return String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       }
       /* ============================= EVENTS ============================== */
       document.addEventListener('DOMContentLoaded', () => {
@@ -16541,11 +16545,11 @@
         btn.disabled = false;
         btn.classList.remove('sending');
       }
-      /* ===================== ENVIO DO ESTADO (CB360 + push Central + Telegram) =====================
+      /* ===================== ENVIO DO ESTADO (CB360 + push Central) =====================
          1) grava em vehicle_status_log (obrigatório: é o que o Online lê)
-         2) push para a conta da Central e Telegram: em segundo plano, não bloqueiam
+         2) push para a conta da Central: em segundo plano, não bloqueia
          3) atualiza vehicle_status (cores dos botões) */
-      async function dispatchStatus({action, km = null, pumpMinutes = null, tgMessage}) {
+      async function dispatchStatus({action, km = null, pumpMinutes = null}) {
         const corpOperNr = getCorpPadded();
         const vehicle = selectedVehicle, icon = vehicleIcon;
         const nInt = getNInt() || '';
@@ -16567,11 +16571,6 @@
           headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`},
           body: JSON.stringify({recipient_nint: CENTRAL_NINT, tipo: 'aviso', pagina: '', sender_name: 'Estado dos Veículos', message_text: pushText})
         }).catch(e => console.error('Push Central:', e));
-        if (SEND_TELEGRAM && tgMessage) {
-          fetch(TELEGRAM_API, {method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({message: tgMessage, vehicle, action, corp_oper_nr: corpOperNr})
-          }).catch(e => console.error('Telegram:', e));
-        }
         return updateVehicleStatus(vehicle, action);
       }
       /* ========================== STATUS EVENT =========================== */
@@ -16587,12 +16586,8 @@
           return;
         }
         lockStatusButton(btnEl);
-        const now = new Date();
-        const time = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-        const date = now.toLocaleDateString('pt-PT');
-        const message = `🚨 <b>ATUALIZAÇÃO DE STATUS</b>\n\n${vehicleIcon} <b>${tgEscape(selectedVehicle)}</b>\n📍 <b>${tgEscape(action)}</b>\n⏰ ${time}\n📅 ${date}`;
         try {
-          const ok = await dispatchStatus({action, tgMessage: message});
+          const ok = await dispatchStatus({action});
           showToast(ok ? `${action} enviado!` : `${action} enviado, mas o estado do veículo não foi atualizado.`, ok ? 'success' : 'warning');
           deselectVehicle();
         } catch (err) {
@@ -16747,15 +16742,8 @@
           return;
         }
         lockStatusButton(pendingStatusButton);
-        const now = new Date();
-        const time = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-        const date = now.toLocaleDateString('pt-PT');
-        let message = `🚨 <b>ATUALIZAÇÃO DE STATUS</b>\n\n${vehicleIcon} <b>${tgEscape(selectedVehicle)}</b>\n📍 <b>${tgEscape(action)}</b>\n⏰ ${time}\n📅 ${date}\n🛣️ <b>KMs: ${tgEscape(kilometers)}</b>`;
-        if (hasPump) {
-          message += `\n⏱️ <b>Tempo Bomba: ${hours.toString().padStart(2,'0')}h${minutes.toString().padStart(2,'0')}m</b>`;
-        }
         try {
-          const ok = await dispatchStatus({action, km: kilometers, pumpMinutes: hasPump ? (hours * 60 + minutes) : null, tgMessage: message});
+          const ok = await dispatchStatus({action, km: kilometers, pumpMinutes: hasPump ? (hours * 60 + minutes) : null});
           showToast(ok ? `${action} enviado!` : `${action} enviado, mas o estado do veículo não foi atualizado.`, ok ? 'success' : 'warning');
           deselectVehicle();
         } catch (err) {
