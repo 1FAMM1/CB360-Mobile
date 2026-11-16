@@ -2324,6 +2324,16 @@
     </noscript>
     <title>CB360 Mobile - Escalas Profissional</title>
     <style>
+      /* ===== FINS DE SEMANA E FERIADOS no calendário da escala completa (antes do CSS da página: as cores dos turnos ficam por cima) ===== */
+      .fs-cal-day.cal-weekend {background: rgba(240, 200, 120, 0.45); color: var(--txt-2);}
+      :where(.dark-mode) .fs-cal-day.cal-weekend {background: rgba(240, 200, 120, 0.16);}
+      .fs-cal-dayname.cal-weekend {color: #b7791f;}
+      .fs-cal-day.cal-holiday {background: #f7c6c7; color: #8b0000; font-weight: 700;}
+      .fs-cal-day.cal-holiday-opt {background: #d6ecff; color: #0b4f8a; font-weight: 700;}
+      :where(.dark-mode) .fs-cal-day.cal-holiday {background: rgba(247, 198, 199, 0.28); color: #ffb3b3;}
+      :where(.dark-mode) .fs-cal-day.cal-holiday-opt {background: rgba(214, 236, 255, 0.20); color: #9fd0ff;}
+    </style>
+    <style>
       @view-transition {navigation: auto;}
       /* ============================================================
       VARIABLES
@@ -3767,6 +3777,84 @@
         });
       });
     <\/script>  
+    <\script>
+      /* ===== FERIADOS no calendário (mesma regra da escala do Online: fixos + Páscoa + municipal da corporação) =====
+         Bloco independente: quando o calendário da escala completa é desenhado, marca fins de semana e feriados. */
+      (function () {
+        const MONTHS = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+        let municipal = null;
+        try { municipal = JSON.parse(sessionStorage.getItem('cb360_mun_hol') || 'null'); } catch (e) {}
+        async function loadMunicipal() {
+          if (municipal) return;
+          try {
+            const corp = (localStorage.getItem('currentCorpOperNr') || '').padStart(4, '0');
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=municipal_holiday,municipal_holiday_name&corp_oper_nr=eq.${corp}`, {headers: getSupabaseHeaders()});
+            if (!r.ok) return;
+            const [c] = await r.json();
+            municipal = {md: (c && c.municipal_holiday) ? String(c.municipal_holiday).trim() : '', name: (c && c.municipal_holiday_name) || 'Feriado Municipal'};
+            try { sessionStorage.setItem('cb360_mun_hol', JSON.stringify(municipal)); } catch (e) {}
+            paint();
+          } catch (e) {}
+        }
+        function holidays(year, month) {
+          const fixed = [[1, 1, 'Ano Novo'], [4, 25, 'Dia da Liberdade'], [5, 1, 'Dia do Trabalhador'], [6, 10, 'Dia de Portugal'], [8, 15, 'Assunção de Nossa Senhora'],
+                         [10, 5, 'Implantação da República'], [11, 1, 'Todos os Santos'], [12, 1, 'Restauração da Independência'], [12, 8, 'Imaculada Conceição'], [12, 25, 'Natal']];
+          const list = fixed.map(([m, d, name]) => ({date: new Date(year, m - 1, d, 12), name, optional: false}));
+          if (municipal && municipal.md) {
+            const [mm, dd] = municipal.md.split('-').map(Number);
+            if (mm && dd) list.push({date: new Date(year, mm - 1, dd, 12), name: municipal.name, optional: false});
+          }
+          const a = year % 19, b = Math.floor(year / 100), c = year % 100, d = Math.floor(b / 4), e = b % 4;
+          const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+          const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4;
+          const l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+          const em = Math.floor((h + l - 7 * m + 114) / 31), ed = ((h + l - 7 * m + 114) % 31) + 1;
+          const easter = new Date(year, em - 1, ed, 12);
+          const plus = n => { const x = new Date(easter); x.setDate(x.getDate() + n); return x; };
+          list.push({date: plus(-47), name: 'Carnaval', optional: true}, {date: plus(-2), name: 'Sexta-feira Santa', optional: false},
+                    {date: easter, name: 'Páscoa', optional: false}, {date: plus(60), name: 'Corpo de Deus', optional: false});
+          const map = new Map();
+          list.forEach(x => { if (x.date.getMonth() === month - 1) map.set(x.date.getDate(), x); });
+          return map;
+        }
+        const esc = v => String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        function paint() {
+          const grid = document.getElementById('fsCalGrid');
+          const header = document.getElementById('fsCalHeader');
+          if (!grid || !header) return;
+          const mt = (header.textContent || '').trim().toLowerCase().match(/^([a-zçã]+)\s+(\d{4})/);
+          if (!mt || MONTHS.indexOf(mt[1]) < 0) return;
+          const month = MONTHS.indexOf(mt[1]) + 1, year = parseInt(mt[2], 10);
+          const map = holidays(year, month);
+          grid.querySelectorAll('.fs-cal-dayname').forEach((el, i) => el.classList.toggle('cal-weekend', i % 7 === 0 || i % 7 === 6));
+          grid.querySelectorAll('.fs-cal-day:not(.empty)').forEach(el => {
+            const day = parseInt(el.textContent, 10);
+            el.classList.remove('cal-holiday', 'cal-holiday-opt', 'cal-weekend');
+            const hol = map.get(day);
+            if (!hol) {
+              const wd = new Date(year, month - 1, day).getDay();
+              if (!isNaN(day) && (wd === 0 || wd === 6)) el.classList.add('cal-weekend');
+              return;
+            }
+            el.classList.add(hol.optional ? 'cal-holiday-opt' : 'cal-holiday');
+            if (!el.title) el.title = hol.optional ? `${hol.name} (facultativo)` : hol.name;
+          });
+        }
+        function start() {
+          const grid = document.getElementById('fsCalGrid');
+          if (!grid) return;
+          let pending = false;
+          new MutationObserver(() => {
+            if (pending) return;
+            pending = true;
+            requestAnimationFrame(() => { pending = false; paint(); });
+          }).observe(grid, {childList: true});
+          loadMunicipal();
+          paint();
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+      })();
+    <\/script>
   </body>
   </html>
 </script>
@@ -3795,6 +3883,16 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     </noscript>
     <title>CB360 Mobile - Escalas</title>
+    <style>
+      /* ===== FINS DE SEMANA E FERIADOS no calendário da escala completa (antes do CSS da página: as cores dos turnos ficam por cima) ===== */
+      .fs-cal-day.cal-weekend {background: rgba(240, 200, 120, 0.45); color: var(--txt-2);}
+      :where(.dark-mode) .fs-cal-day.cal-weekend {background: rgba(240, 200, 120, 0.16);}
+      .fs-cal-dayname.cal-weekend {color: #b7791f;}
+      .fs-cal-day.cal-holiday {background: #f7c6c7; color: #8b0000; font-weight: 700;}
+      .fs-cal-day.cal-holiday-opt {background: #d6ecff; color: #0b4f8a; font-weight: 700;}
+      :where(.dark-mode) .fs-cal-day.cal-holiday {background: rgba(247, 198, 199, 0.28); color: #ffb3b3;}
+      :where(.dark-mode) .fs-cal-day.cal-holiday-opt {background: rgba(214, 236, 255, 0.20); color: #9fd0ff;}
+    </style>
     <style>
       @view-transition {navigation: auto;}    
       /* ============================================================
@@ -4998,6 +5096,84 @@
         });
       });
     <\/script> 
+    <\script>
+      /* ===== FERIADOS no calendário (mesma regra da escala do Online: fixos + Páscoa + municipal da corporação) =====
+         Bloco independente: quando o calendário da escala completa é desenhado, marca fins de semana e feriados. */
+      (function () {
+        const MONTHS = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+        let municipal = null;
+        try { municipal = JSON.parse(sessionStorage.getItem('cb360_mun_hol') || 'null'); } catch (e) {}
+        async function loadMunicipal() {
+          if (municipal) return;
+          try {
+            const corp = (localStorage.getItem('currentCorpOperNr') || '').padStart(4, '0');
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=municipal_holiday,municipal_holiday_name&corp_oper_nr=eq.${corp}`, {headers: getSupabaseHeaders()});
+            if (!r.ok) return;
+            const [c] = await r.json();
+            municipal = {md: (c && c.municipal_holiday) ? String(c.municipal_holiday).trim() : '', name: (c && c.municipal_holiday_name) || 'Feriado Municipal'};
+            try { sessionStorage.setItem('cb360_mun_hol', JSON.stringify(municipal)); } catch (e) {}
+            paint();
+          } catch (e) {}
+        }
+        function holidays(year, month) {
+          const fixed = [[1, 1, 'Ano Novo'], [4, 25, 'Dia da Liberdade'], [5, 1, 'Dia do Trabalhador'], [6, 10, 'Dia de Portugal'], [8, 15, 'Assunção de Nossa Senhora'],
+                         [10, 5, 'Implantação da República'], [11, 1, 'Todos os Santos'], [12, 1, 'Restauração da Independência'], [12, 8, 'Imaculada Conceição'], [12, 25, 'Natal']];
+          const list = fixed.map(([m, d, name]) => ({date: new Date(year, m - 1, d, 12), name, optional: false}));
+          if (municipal && municipal.md) {
+            const [mm, dd] = municipal.md.split('-').map(Number);
+            if (mm && dd) list.push({date: new Date(year, mm - 1, dd, 12), name: municipal.name, optional: false});
+          }
+          const a = year % 19, b = Math.floor(year / 100), c = year % 100, d = Math.floor(b / 4), e = b % 4;
+          const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+          const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4;
+          const l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+          const em = Math.floor((h + l - 7 * m + 114) / 31), ed = ((h + l - 7 * m + 114) % 31) + 1;
+          const easter = new Date(year, em - 1, ed, 12);
+          const plus = n => { const x = new Date(easter); x.setDate(x.getDate() + n); return x; };
+          list.push({date: plus(-47), name: 'Carnaval', optional: true}, {date: plus(-2), name: 'Sexta-feira Santa', optional: false},
+                    {date: easter, name: 'Páscoa', optional: false}, {date: plus(60), name: 'Corpo de Deus', optional: false});
+          const map = new Map();
+          list.forEach(x => { if (x.date.getMonth() === month - 1) map.set(x.date.getDate(), x); });
+          return map;
+        }
+        const esc = v => String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        function paint() {
+          const grid = document.getElementById('fsCalGrid');
+          const header = document.getElementById('fsCalHeader');
+          if (!grid || !header) return;
+          const mt = (header.textContent || '').trim().toLowerCase().match(/^([a-zçã]+)\s+(\d{4})/);
+          if (!mt || MONTHS.indexOf(mt[1]) < 0) return;
+          const month = MONTHS.indexOf(mt[1]) + 1, year = parseInt(mt[2], 10);
+          const map = holidays(year, month);
+          grid.querySelectorAll('.fs-cal-dayname').forEach((el, i) => el.classList.toggle('cal-weekend', i % 7 === 0 || i % 7 === 6));
+          grid.querySelectorAll('.fs-cal-day:not(.empty)').forEach(el => {
+            const day = parseInt(el.textContent, 10);
+            el.classList.remove('cal-holiday', 'cal-holiday-opt', 'cal-weekend');
+            const hol = map.get(day);
+            if (!hol) {
+              const wd = new Date(year, month - 1, day).getDay();
+              if (!isNaN(day) && (wd === 0 || wd === 6)) el.classList.add('cal-weekend');
+              return;
+            }
+            el.classList.add(hol.optional ? 'cal-holiday-opt' : 'cal-holiday');
+            if (!el.title) el.title = hol.optional ? `${hol.name} (facultativo)` : hol.name;
+          });
+        }
+        function start() {
+          const grid = document.getElementById('fsCalGrid');
+          if (!grid) return;
+          let pending = false;
+          new MutationObserver(() => {
+            if (pending) return;
+            pending = true;
+            requestAnimationFrame(() => { pending = false; paint(); });
+          }).observe(grid, {childList: true});
+          loadMunicipal();
+          paint();
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+      })();
+    <\/script>
   </body>
   </html>
 </script>
