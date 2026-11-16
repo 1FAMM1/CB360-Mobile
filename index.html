@@ -436,7 +436,7 @@
       .central-notif.on {background: rgba(46,125,50,.14); color: #2e7d32;}
       .central-notif.off {background: rgba(239,108,0,.14); color: #ef6c00;}
       .central-notif button {margin-left: auto; border: 0; border-radius: 10px; padding: 7px 12px; background: var(--red); color: #fff; font-weight: 700; font-size: 12px; font-family: inherit;}
-      .central-scales {display: grid; grid-template-columns: 1fr 1fr; gap: 8px;}
+      .central-scales {display: grid; grid-template-columns: 1fr; gap: 8px;}
       .central-scales button {display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2);
                               color: var(--txt-1); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--sh-sm);}
       .central-scales button .material-icons {font-size: 20px; color: var(--red);}
@@ -1182,10 +1182,9 @@
             <div><b>Conta da Central</b><small>Este telemóvel recebe as notificações dos estados dos veículos. Consulte e confirme no CB360 Online → Estados dos Veículos.</small></div>
           </div>
           <div id="centralNotif"></div>
-          <div class="central-list-h">Escalas</div>
+          <div class="central-list-h">Planeamento</div>
           <div class="central-scales">
-            <button type="button" onclick="__go('ScalesViewProf.html')"><span class="material-icons">badge</span>Profissionais</button>
-            <button type="button" onclick="__go('ScalesView.html')"><span class="material-icons">volunteer_activism</span>Voluntários</button>
+            <button type="button" onclick="__go('ScalesViewProf.html')"><span class="material-icons">event_note</span>Planeamento Diário</button>
           </div>
           <div class="central-list-h">Últimos estados (hoje)</div>
           <div class="central-list" id="centralList"><div class="central-empty">A carregar…</div></div>`;
@@ -2531,8 +2530,8 @@
         onerror="console.error('❌ Logo: falha ao carregar imagem, URL:', this.src); this.style.display='none';"
         onload="this.style.display='block';">
       <div class="header-center">
-        <span class="header-title">ESCALAS</span>
-        <span class="header-sub">Profissional</span>
+        <span class="header-title" id="svHeaderTitle">ESCALAS</span>
+        <span class="header-sub" id="svHeaderSub">Profissional</span>
       </div>
       <h2 id="corpInfo" style="display: none;"></h2>
     </header>
@@ -2665,6 +2664,11 @@
           return JSON.parse(atob(b64 + '==='.slice((b64.length + 3) % 4))).account_type === 'central';
         } catch (e) { return false; }
       })();
+      if (IS_CENTRAL) document.addEventListener('DOMContentLoaded', () => {
+        const t = document.getElementById('svHeaderTitle'), s = document.getElementById('svHeaderSub');
+        if (t) t.textContent = 'PLANEAMENTO DIÁRIO';
+        if (s) s.textContent = 'Profissionais · Voluntários';
+      });
       function getSupabaseHeaders(options = {}) {
         const corp  = getCorp();
         const nint  = getNInt();
@@ -3136,7 +3140,7 @@
           (await tRes.json()).forEach(t => { const n = norm(t.n_int); if (n) tagBy[n] = PLAN_TEAM_TAGS[t.team_name]; });
           elements.forEach(e => {
             const sv = String(e.serviceValue || "").toUpperCase();
-            const inShift = planShift === "N" ? sv === "N" : DAY_SHIFTS.includes(sv);
+            const inShift = planShift === "N" ? ["N", "PN", "EN", "ET"].includes(sv) : [...DAY_SHIFTS, "ED", "ET"].includes(sv);
             const tag = tagBy[norm(e.n_int)];
             if (inShift && tag) e.planTag = tag;
           });
@@ -3144,6 +3148,29 @@
           console.warn("[CB360] Planeamento diário (ABS/VTT):", err);
         }
         return elements;
+      }
+      /* ===================== VOLUNTÁRIOS (só a conta da Central, no Planeamento Diário) ==================== */
+      async function fetchVolunteerElements(day, month, year, values) {
+        if (!values || !values.length) return [];
+        try {
+          const corpOperNr = localStorage.getItem("currentCorpOperNr");
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/reg_serv?select=n_int,value&corp_oper_nr=eq.${corpOperNr}&day=eq.${day}&month=eq.${month}&year=eq.${year}&value=in.(${values.join(",")})`, {headers: getSupabaseHeaders()});
+          if (!r.ok) return [];
+          const serv = await r.json();
+          if (!Array.isArray(serv) || !serv.length) return [];
+          const norm = n => String(n ?? "").trim().replace(/^0+(?=\d)/, "");
+          const valueBy = {};
+          serv.forEach(s => { const n = norm(s.n_int); if (n && !valueBy[n]) valueBy[n] = String(s.value).trim().toUpperCase(); });
+          const padded = Object.keys(valueBy).map(n => n.padStart(3, "0"));
+          const er = await fetch(`${SUPABASE_URL}/rest/v1/reg_elems?select=n_int,full_name,abv_name,patent,photo_url&n_int=in.(${padded.join(",")})&corp_oper_nr=eq.${corpOperNr}`, {headers: getSupabaseHeaders()});
+          if (!er.ok) return [];
+          const elems = await er.json();
+          elems.forEach(e => { e.serviceValue = valueBy[norm(e.n_int)] || null; e.isVolunteer = true; });
+          return elems.sort((a, b) => parseInt(a.n_int, 10) - parseInt(b.n_int, 10));
+        } catch (err) {
+          console.error("[CB360] Erro ao carregar voluntários:", err);
+          return [];
+        }
       }
       /* ===================== FETCH SERVICE ELEMENTS ==================== */
       async function fetchServiceElements(day, month, value, year = new Date().getFullYear(), scaleAlreadyValidated = false) {
@@ -3296,12 +3323,15 @@
                             "Bombeiro(a) 3ª": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/B3C.png",
                             "Estagiário(a)": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Est..png",
                             "Bº Especialista": "https://rjkbodfqsvckvnhjwmhg.supabase.co/storage/v1/object/public/cb_logos/Esp.png",};
-      const serviceColors = {D: {bg: 'linear-gradient(135deg, #fbc02d, #f9a825)', text: '#212121'}, N: {bg: 'linear-gradient(135deg, #3949ab, #2c387e, #1a237e)', text: '#fff'}, 
+      const serviceColors = {PN: {bg: 'linear-gradient(135deg, #0282fa, #1aa9c5)', text: '#fff'}, ED: {bg: 'linear-gradient(135deg, #ffd54f, #ffca28, #ffa726)', text: '#444'},
+                             EN: {bg: 'linear-gradient(135deg, #3949ab, #2c387e, #1a237e)', text: '#fff'}, ET: {bg: 'linear-gradient(135deg, #ab47bc, #9c27b0, #8e24aa)', text: '#fff'},
+                             D: {bg: 'linear-gradient(135deg, #fbc02d, #f9a825)', text: '#212121'}, N: {bg: 'linear-gradient(135deg, #3949ab, #2c387e, #1a237e)', text: '#fff'}, 
                              M: {bg: 'linear-gradient(135deg, #00897b, #00695c)', text: '#fff'}, HA: {bg: 'linear-gradient(135deg, #f48fb1, #ec407a)', text: '#fff'}, HR: {bg: 'linear-gradient(135deg, #9575cd, #673ab7)', text: '#fff'},
                              BX: {bg: '#e53935', text: '#fff'}, LC: {bg: '#e53935', text: '#fff'}, LN: {bg: '#e53935', text: '#fff'}, LP: {bg: '#e53935', text: '#fff'},
                              FOR: {bg: '#757575', text: '#fff'}, DP: {bg: '#212121', text: '#fff'}};
       const modalGroups = [{title: 'INEM', prefix: 'EQ', icon: 'medical_services', color: '#f9a825', on: '#212121'}, {title: 'GERAL', prefix: 'TDNU', icon: 'security', color: '#1565c0'},
-                           {title: 'OPTEL', prefix: 'OPC', icon: 'cell_tower', color: '#8e24aa'}, {title: 'EIP', prefix: 'EIP', icon: 'local_fire_department', color: '#c62828'}];
+                           {title: 'OPTEL', prefix: 'OPC', icon: 'cell_tower', color: '#8e24aa'}, {title: 'EIP', prefix: 'EIP', icon: 'local_fire_department', color: '#c62828'},
+                           {title: 'PIQUETE', prefix: '#VOL-PN', icon: 'shield', color: '#0282fa'}, {title: 'ECIN', prefix: '#VOL-ECIN', icon: 'local_fire_department', color: '#f9a825', on: '#212121'}];
       const modalGroupOther = {title: 'OUTROS', icon: 'groups', color: '#757575'};
       function groupOfTeam(team) {
         const t = String(team || '').toUpperCase();
@@ -3309,6 +3339,7 @@
         return g ? g.title : 'OUTROS';
       }
       function groupsOfElement(e) {
+        if (e.isVolunteer) return [e.serviceValue === 'PN' ? 'PIQUETE' : 'ECIN'];
         const g = [];
         if (e.isOptel) g.push('OPTEL');
         if (e.isEip) g.push('EIP');
@@ -3630,7 +3661,7 @@
         const FS_DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
         async function openFullScaleDay(day, month, year) {
           const dateText = formatDateWithWeekday(day, month, year);
-          const modalTitleText = `Escala - ${dateText}`;
+          const modalTitleText = `${IS_CENTRAL ? "Planeamento" : "Escala"} - ${dateText}`;
           openServiceModal(modalTitleText, null);
           /* hoje: das 08h às 20h só o turno de dia (D, M, HA, HR); a partir das 20h só o N */
           const now = new Date();
@@ -3638,13 +3669,18 @@
           const h = now.getHours();
           const showDay = !isToday || h < 20;
           const showNight = !isToday || h < 8 || h >= 20;
+          /* Central (Planeamento Diário): de dia só profissionais; a partir das 20h também os voluntários (PN, EN, ET).
+             Outros dias, ou hoje antes das 08h: voluntários de todos os turnos */
+          let volValues = [];
+          if (IS_CENTRAL) volValues = !isToday || h < 8 ? ["PN", "ED", "EN", "ET"] : h >= 20 ? ["PN", "EN", "ET"] : [];
           try {
-            const [diurno, noturno, ausentes] = await Promise.all([
+            const [diurno, noturno, ausentes, voluntarios] = await Promise.all([
               showDay ? fetchServiceElements(day, month, "D", year, true) : [],
               showNight ? fetchServiceElements(day, month, "N", year, true) : [],
-              fetchServiceElements(day, month, "AUS", year, true)
+              fetchServiceElements(day, month, "AUS", year, true),
+              fetchVolunteerElements(day, month, year, volValues)
             ]);
-            openServiceModal(modalTitleText, await applyPlanTags([...diurno, ...noturno, ...ausentes], day, month, year));
+            openServiceModal(modalTitleText, await applyPlanTags([...diurno, ...noturno, ...ausentes, ...voluntarios], day, month, year));
           } catch (err) {
             console.error("[CB360] Erro ao abrir elementos do dia:", err);
             openServiceModal(modalTitleText, []);
