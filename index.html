@@ -1184,7 +1184,7 @@
           <div id="centralNotif"></div>
           <div class="central-list-h">Escalas</div>
           <div class="central-scales">
-            <button type="button" onclick="__go('ScalesViewMenu.html')"><span class="material-icons">badge</span>Profissionais</button>
+            <button type="button" onclick="__go('ScalesViewProf.html')"><span class="material-icons">badge</span>Profissionais</button>
             <button type="button" onclick="__go('ScalesView.html')"><span class="material-icons">volunteer_activism</span>Voluntários</button>
           </div>
           <div class="central-list-h">Últimos estados (hoje)</div>
@@ -2639,6 +2639,13 @@
       }
       function getCorp() {return localStorage.getItem("currentCorpOperNr");}
       function getNInt() {return localStorage.getItem("currentCorpNint");}
+      /* conta da Central (sem turnos próprios): abre logo a escala completa do mês */
+      const IS_CENTRAL = (() => {
+        try {
+          const b64 = ((localStorage.getItem('authToken') || '').split('.')[1] || '').replace(/-/g, '+').replace(/_/g, '/');
+          return JSON.parse(atob(b64 + '==='.slice((b64.length + 3) % 4))).account_type === 'central';
+        } catch (e) { return false; }
+      })();
       function getSupabaseHeaders(options = {}) {
         const corp  = getCorp();
         const nint  = getNInt();
@@ -3715,6 +3722,7 @@
               showInformation("A escala deste mês ainda não foi emitida pelo Departamento de Recursos Humanos.");
               return;
             }
+            if (IS_CENTRAL) { await showFullScaleCalendar(); return; }
             const today = new Date();
             const fsTitle = document.getElementById("fullscale-info-title");
             fsTitle.style.pointerEvents = "none";
