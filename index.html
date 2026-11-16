@@ -1202,10 +1202,10 @@
           const r = await fetch(`${SUPABASE_URL}/rest/v1/vehicle_status_log?select=vehicle,action,km,created_at&corp_oper_nr=eq.${getCorpPadded()}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=8`, {headers: getSupabaseHeaders()});
           const rows = r.ok ? await r.json() : [];
           const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
-          list.innerHTML = rows.length ? rows.map(x => {
+          list.innerHTML = rows.length ? rows.map((x, i) => {
             const [label, color] = CENTRAL_ACTIONS[x.action] || [x.action, '#6b7280'];
             const t = new Date(x.created_at).toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'});
-            return `<div class="central-item"><span class="dot" style="background:${color}"></span><b>${esc(x.vehicle)}</b> ${esc(label)}${x.km ? ` · ${esc(x.km)} km` : ''}<span class="t">${t}</span></div>`;
+            return `<div class="central-item" style="opacity:${i ? (0.85 - (i - 1) * 0.07).toFixed(2) : 1}"><span class="dot" style="background:${color}"></span><b>${esc(x.vehicle)}</b> ${esc(label)}${x.km ? ` · ${esc(x.km)} km` : ''}<span class="t">${t}</span></div>`;
           }).join('') : '<div class="central-empty">Ainda não há estados hoje.</div>';
         } catch (e) {
           list.innerHTML = '<div class="central-empty">Não foi possível carregar os estados.</div>';
