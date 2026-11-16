@@ -431,7 +431,7 @@
       .central-ico {width: 46px; height: 46px; border-radius: 50%; background: var(--red-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
       .central-ico .material-icons {color: var(--red-icon); font-size: 24px;}
       .central-top b {display: block; font-size: 15px; color: var(--txt-1);}
-      .central-top small {font-size: 12px; color: var(--txt-2); line-height: 1.35;}
+      .central-top small {display: block; font-size: 13px; color: var(--txt-2); line-height: 1.4;}
       .central-notif {display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--r-sm, 12px); font-size: 12.5px; font-weight: 600;}
       .central-notif.on {background: rgba(46,125,50,.14); color: #2e7d32;}
       .central-notif.off {background: rgba(239,108,0,.14); color: #ef6c00;}
@@ -1179,7 +1179,7 @@
         card.innerHTML = `
           <div class="central-top">
             <div class="central-ico"><span class="material-icons">cell_tower</span></div>
-            <div><b>Conta da Central</b><small>Este telemóvel recebe as notificações dos estados dos veículos. Consulte e confirme no CB360 Online → Estados dos Veículos.</small></div>
+            <div><small>Este telemóvel recebe as notificações dos estados operacionais dos veículos, e mostra os planeamentos diários nos turnos dia e noite.</small></div>
           </div>
           <div id="centralNotif"></div>
           <div class="central-list-h">Planeamento</div>
