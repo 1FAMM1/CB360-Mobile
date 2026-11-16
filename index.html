@@ -447,6 +447,10 @@
       .central-item .dot {width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;}
       .central-item b {font-weight: 700;}
       .central-item span.t {margin-left: auto; color: var(--txt-3); font-size: 11.5px; white-space: nowrap;}
+      .central-item.unread {opacity: 1 !important; box-shadow: inset 3px 0 0 var(--red); cursor: pointer;}
+      .central-item .novo {font-size: 9.5px; font-weight: 800; color: var(--red); letter-spacing: .5px;}
+      .central-list-row {display: flex; align-items: center; justify-content: space-between; gap: 8px;}
+      .central-readall {border: 0; background: none; color: var(--red); font-family: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; padding: 0; display: none;}
       .central-empty {font-size: 12.5px; color: var(--txt-3); text-align: center; padding: 8px;}
       .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex;}
       .btn-grid {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(6, minmax(0, 1fr)); flex: 1; width: 100%; height: 100%;}    
@@ -1104,8 +1108,12 @@
         if (!('Notification' in window)) return alert('Notificações não suportadas.');
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') return alert('Notificações não foram ativadas.');
-        await initializePushWithoutPermission();
-        alert('Notificações ativadas ✅');
+        try {
+          await initializePushWithoutPermission();
+          alert('Notificações ativadas ✅');
+        } catch (e) {
+          alert('As notificações foram permitidas, mas este telemóvel não ficou registado: ' + (e && e.message ? e.message : e));
+        }
       }
       async function initializePushWithoutPermission() {
         const corp = getCorp();
@@ -1114,7 +1122,11 @@
           console.warn("⚠️ Sem corp/nint — não dá para registar push");
           return;
         }
-        const registration = await navigator.serviceWorker.ready;
+        /* a página corre dentro do shell: o service worker é o da janela principal (no iPhone o da página não responde) */
+        const swc = (window.parent && window.parent !== window && window.parent.navigator.serviceWorker) || navigator.serviceWorker;
+        if (!swc) throw new Error('Service worker indisponível. No iPhone, abra a app pelo ícone do ecrã principal.');
+        const registration = await Promise.race([swc.ready, new Promise((_, rej) => setTimeout(() => rej(new Error('Service worker sem resposta. Feche e volte a abrir a app.')), 10000))]);
+        if (!registration.pushManager) throw new Error('Este telemóvel não suporta notificações push. No iPhone, abra a app pelo ícone do ecrã principal (iOS 16.4 ou superior).');
         let subscription = await registration.pushManager.getSubscription();
         if (!subscription) {
           subscription = await registration.pushManager.subscribe({
@@ -1124,11 +1136,16 @@
         }
         const subJSON = subscription.toJSON();
         const payload = {endpoint: subJSON.endpoint, n_int: parseInt(nint, 10), corp_oper_nr: corp.toString().padStart(4, "0"), p256dh: subJSON.keys.p256dh, auth: subJSON.keys.auth};
-        await fetch(`${SUPABASE_URL}/rest/v1/user_push_subscriptions`, {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/user_push_subscriptions`, {
           method: "POST",
           headers: { ...getSupabaseHeaders(), Prefer: "resolution=merge-duplicates" },
           body: JSON.stringify(payload)
         });
+        if (!r.ok) {
+          const txt = await r.text().catch(() => '');
+          console.warn('Registo de notificações recusado:', r.status, txt);
+          throw new Error(r.status === 403 ? 'este telemóvel já está registado noutra conta (403).' : `erro ${r.status} ao gravar o registo.`);
+        }
       }
       /* ======================= FUNCTION FIX LAYOUT ======================= */
       function adjustMainContent() {
@@ -1186,7 +1203,7 @@
           <div class="central-scales">
             <button type="button" onclick="__go('ScalesViewProf.html')"><span class="material-icons">event_note</span>Planeamento Diário</button>
           </div>
-          <div class="central-list-h">Últimos estados (hoje)</div>
+          <div class="central-list-row"><div class="central-list-h">Últimos estados (hoje)</div><button type="button" class="central-readall" id="centralReadAll">Marcar todos como lidos</button></div>
           <div class="central-list" id="centralList"><div class="central-empty">A carregar…</div></div>`;
         document.querySelector('.welcome-row')?.insertAdjacentElement('afterend', card);
         renderCentralNotif();
@@ -1204,18 +1221,38 @@
         const b = document.getElementById('centralNotifBtn');
         if (b) b.onclick = async () => { await enableNotifications(); renderCentralNotif(); };
       }
+      async function markCentralRead(ids) {
+        try {
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/cb360_vehicle_mark_read`, {method: 'POST', headers: getSupabaseHeaders(), body: JSON.stringify({p_ids: ids})});
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+        } catch (e) {
+          console.warn('Marcar como lido:', e);
+        }
+        loadCentralList();
+      }
       async function loadCentralList() {
         const list = document.getElementById('centralList'); if (!list) return;
         try {
           const d = new Date(); d.setHours(0, 0, 0, 0);
-          const r = await fetch(`${SUPABASE_URL}/rest/v1/vehicle_status_log?select=vehicle,action,km,created_at&corp_oper_nr=eq.${getCorpPadded()}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=8`, {headers: getSupabaseHeaders()});
+          const [r, ru] = await Promise.all([
+            fetch(`${SUPABASE_URL}/rest/v1/vehicle_status_log?select=id,vehicle,action,km,created_at,is_read&corp_oper_nr=eq.${getCorpPadded()}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=8`, {headers: getSupabaseHeaders()}),
+            fetch(`${SUPABASE_URL}/rest/v1/vehicle_status_log?select=id&corp_oper_nr=eq.${getCorpPadded()}&is_read=eq.false&limit=1`, {headers: getSupabaseHeaders()})
+          ]);
           const rows = r.ok ? await r.json() : [];
+          const anyUnread = ru.ok ? (await ru.json()).length > 0 : rows.some(x => !x.is_read);
+          const readAll = document.getElementById('centralReadAll');
+          if (readAll) {
+            readAll.style.display = anyUnread ? 'inline' : 'none';
+            readAll.onclick = () => markCentralRead(null);
+          }
           const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
           list.innerHTML = rows.length ? rows.map((x, i) => {
             const [label, color] = CENTRAL_ACTIONS[x.action] || [x.action, '#6b7280'];
             const t = new Date(x.created_at).toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'});
-            return `<div class="central-item" style="opacity:${i ? (0.85 - (i - 1) * 0.07).toFixed(2) : 1}"><span class="dot" style="background:${color}"></span><b>${esc(x.vehicle)}</b> ${esc(label)}${x.km ? ` · ${esc(x.km)} km` : ''}<span class="t">${t}</span></div>`;
+            return `<div class="central-item${x.is_read ? '' : ' unread'}" data-id="${x.id}" style="opacity:${i ? (0.85 - (i - 1) * 0.07).toFixed(2) : 1}"><span class="dot" style="background:${color}"></span><b>${esc(x.vehicle)}</b> ${esc(label)}${x.km ? ` · ${esc(x.km)} km` : ''}${x.is_read ? '' : ' <span class="novo">NOVO</span>'}<span class="t">${t}</span></div>`;
           }).join('') : '<div class="central-empty">Ainda não há estados hoje.</div>';
+          /* tocar num estado por ler marca-o como lido (o botão do Online deixa de piscar) */
+          list.querySelectorAll('.central-item.unread').forEach(el => el.onclick = () => markCentralRead([Number(el.dataset.id)]));
         } catch (e) {
           list.innerHTML = '<div class="central-empty">Não foi possível carregar os estados.</div>';
         }
@@ -2000,6 +2037,11 @@
         loadUserName();
         loadNextService();
         loadAccessRestrictions();   
+        /* com as notificações já permitidas, volta a confirmar o registo deste telemóvel em cada abertura
+           (se o registo foi apagado ou expirou, refaz-se sozinho; erros ficam só na consola) */
+        if ('Notification' in window && Notification.permission === 'granted') {
+          setTimeout(() => initializePushWithoutPermission().catch(e => console.warn('Registo de notificações:', e && e.message)), 2500);
+        }
         resolveIsProfessional().then(isProf => {
           const pj = document.getElementById('pointJustif');
           if (pj) pj.style.display = isProf ? '' : 'none';
@@ -30924,5 +30966,6 @@
 })();
 </script>
 </body>
+</html>
 </html>
 </html>
