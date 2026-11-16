@@ -1514,8 +1514,13 @@
             fbUser = { username: c.username || '', account_type: c.account_type || (/^\d+$/.test(String(nInt)) ? 'elemento' : 'veiculo') };
           } catch (e) { fbUser = null; }
           if (fbUser?.account_type === 'central') {
-            welcomeNameEl.textContent = 'Central de Telecomunicações';
-            avatarEl.src = "https://www.gravatar.com/avatar/?d=mp";
+            welcomeNameEl.textContent = `SALOC ${getCorpPadded() || ''}`.trim();
+            /* sem ficha na reg_elems: o avatar é o logo da corporação */
+            avatarEl.style.objectFit = 'contain';
+            avatarEl.style.background = '#fff';
+            avatarEl.src = localStorage.getItem('cached_logo_url') || "https://www.gravatar.com/avatar/?d=mp";
+            fetch(`${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${getCorpPadded()}`, {headers: getSupabaseHeaders()})
+              .then(r => r.ok ? r.json() : []).then(d => { const u = (d[0]?.logo_url || '').trim(); if (u && avatarEl.src !== u) avatarEl.src = u; }).catch(() => {});
             lockConfigTab();
             applyCentralView();
             return;
@@ -3121,7 +3126,7 @@
       const PLAN_TEAM_TAGS = {inem_reserva: "ABS", logistica: "VTT"};
       const PLAN_MONTHS = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
       async function applyPlanTags(elements, day, month, year) {
-        if (!Array.isArray(elements) || !elements.length) return elements;
+        if (!IS_CENTRAL || !Array.isArray(elements) || !elements.length) return elements;   /* ABS/VTT: só a conta da Central */
         try {
           const corp = localStorage.getItem("currentCorpOperNr");
           const [dRes, tRes] = await Promise.all([
@@ -4755,7 +4760,7 @@
       const PLAN_MONTHS = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
       const PLAN_SHIFT_VALUES = {D: ["ED", "ET"], N: ["PN", "EN", "ET"]};
       async function applyPlanTags(elements, day, month, year) {
-        if (!Array.isArray(elements) || !elements.length) return elements;
+        if (!IS_CENTRAL || !Array.isArray(elements) || !elements.length) return elements;   /* ABS/VTT: só a conta da Central */
         try {
           const corp = localStorage.getItem("currentCorpOperNr");
           const [dRes, tRes] = await Promise.all([
