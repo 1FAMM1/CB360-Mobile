@@ -12644,6 +12644,27 @@
       @media (min-width: 769px) {
         .main-content {max-width: 700px;}
       }
+      /* ===== editor: esconder pormenores com o dedo (antes de anexar a foto) ===== */
+      .blur-overlay {position: fixed; inset: 0; z-index: 100000; background: #0f1117; display: none; flex-direction: column; color: #fff;
+                     padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px);}
+      .blur-overlay.open {display: flex;}
+      .blur-top {display: flex; align-items: center; gap: 10px; padding: 4px 4px 10px;}
+      .blur-top .material-icons {font-size: 26px; color: #ff6b6b;}
+      .blur-top b {display: block; font-size: 15px;}
+      .blur-top small {display: block; font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px;}
+      .blur-stage {flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; background: #000;}
+      .blur-stage canvas {max-width: 100%; max-height: 100%; touch-action: none; display: block;}
+      .blur-tools {display: flex; align-items: center; gap: 12px; padding: 12px 4px 8px; font-size: 13px;}
+      .blur-tools label {flex: 1; display: flex; align-items: center; gap: 10px;}
+      .blur-tools input[type=range] {flex: 1; accent-color: #c62828;}
+      .blur-tools button, .blur-actions button {border: 0; border-radius: 12px; font: inherit; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;}
+      .blur-tools button {height: 38px; padding: 0 12px; background: rgba(255,255,255,.12); color: #fff;}
+      .blur-tools button:disabled {opacity: .4;}
+      .blur-actions {display: flex; gap: 10px;}
+      .blur-actions button {flex: 1; height: 46px; font-size: 14px;}
+      #blurCancel {flex: 0 0 auto; padding: 0 14px; background: rgba(255,255,255,.12); color: #fff;}
+      #blurOk {background: linear-gradient(to right, #8b0000, #c62828); color: #fff;}
+      .blur-count {font-size: 12px; color: rgba(255,255,255,.65); margin-left: auto;}
     </style>
   </head>
   <body>
@@ -12720,6 +12741,22 @@
         </div>
       </div>
     </div>
+    <div id="blurEditor" class="blur-overlay">
+      <div class="blur-top">
+        <span class="material-icons">blur_on</span>
+        <div><b>Esconder pormenores</b><small>Passe o dedo por cima de caras, matrículas ou documentos. Só sai a foto já tapada.</small></div>
+        <span class="blur-count" id="blurCount"></span>
+      </div>
+      <div class="blur-stage" id="blurStage"><canvas id="blurCanvas"></canvas></div>
+      <div class="blur-tools">
+        <label><span class="material-icons" style="font-size:18px;">brush</span><input type="range" id="blurSize" min="16" max="90" value="40"></label>
+        <button type="button" id="blurUndo" disabled><span class="material-icons" style="font-size:18px;">undo</span>Desfazer</button>
+      </div>
+      <div class="blur-actions">
+        <button type="button" id="blurCancel"><span class="material-icons" style="font-size:18px;">delete</span>Descartar</button>
+        <button type="button" id="blurOk"><span class="material-icons" style="font-size:18px;">check</span>Usar foto</button>
+      </div>
+    </div>
     <div id="toast-container" style="position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;"></div>
     <div id="lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:10000;">
       <img id="lightboxImg" src="" style="max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 5px 20px rgba(0,0,0,0.5);" />
@@ -12747,7 +12784,10 @@
       /* ===================== SUPABASE CONFIGURATION ====================== */
       const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-      const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendToTelegram';
+      /* atualizações do terreno: gravadas no CB360 (tabela ocr_field_updates + fotos no bucket privado ocr_photos) e aviso à Central */
+      const PHOTO_BUCKET = 'ocr_photos';
+      const PUSH_API = 'https://cb-360-app.vercel.app/api/sendPush';
+      const CENTRAL_NINT = '9999';
       let selectedFiles = [];
       let currentOccurrence = null;
       function getCorp() {return localStorage.getItem("currentCorpOperNr");}
@@ -12985,14 +13025,114 @@
         updateAttachmentPreview();
       }
       function handleFileSelect(event) {
-        const files = Array.from(event.target.files);
-        selectedFiles = [...selectedFiles, ...files];
-        if (selectedFiles.length > 10) {
-          showToast('Só é permitido um máximo de 10 fotos!', 'warning');
-          selectedFiles = selectedFiles.slice(0, 10);
-        }
-        updateAttachmentPreview();
+        const files = Array.from(event.target.files || []).filter(f => !f.type || f.type.startsWith('image/'));
         event.target.value = '';
+        const room = 10 - selectedFiles.length;
+        if (room <= 0) { showToast('Só é permitido um máximo de 10 fotos!', 'warning'); return; }
+        if (files.length > room) showToast('Só é permitido um máximo de 10 fotos!', 'warning');
+        blurQueue.push(...files.slice(0, room));
+        if (!blurBusy) blurNext();
+      }
+      /* ===================== EDITOR: TAPAR COM O DEDO =====================
+         A foto é reduzida (máx. 1600 px) e aberta aqui. O que o dedo pinta fica pixelizado de forma definitiva:
+         só a versão tapada é anexada e enviada; o original não sai do telemóvel nem fica guardado. */
+      let blurQueue = [], blurBusy = false, blurPix = null, blurUndoStack = [], blurLast = null, blurDrawing = false;
+      const blurCanvas = () => document.getElementById('blurCanvas');
+      function loadImg(file) {
+        return new Promise((res, rej) => { const u = URL.createObjectURL(file); const im = new Image(); im.onload = () => { URL.revokeObjectURL(u); res(im); }; im.onerror = () => { URL.revokeObjectURL(u); rej(new Error('Foto inválida')); }; im.src = u; });
+      }
+      async function blurNext() {
+        const file = blurQueue.shift();
+        if (!file) { blurBusy = false; document.getElementById('blurEditor').classList.remove('open'); return; }
+        blurBusy = true;
+        try {
+          const small = await compressImage(file, 1600, 0.9);
+          const img = await loadImg(small);
+          const c = blurCanvas();
+          c.width = img.naturalWidth; c.height = img.naturalHeight;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          /* versão pixelizada da foto inteira: o pincel copia daqui */
+          const block = Math.max(10, Math.round(Math.max(c.width, c.height) / 45));
+          const tiny = document.createElement('canvas');
+          tiny.width = Math.max(1, Math.round(c.width / block)); tiny.height = Math.max(1, Math.round(c.height / block));
+          tiny.getContext('2d').drawImage(img, 0, 0, tiny.width, tiny.height);
+          blurPix = document.createElement('canvas');
+          blurPix.width = c.width; blurPix.height = c.height;
+          const pctx = blurPix.getContext('2d');
+          pctx.imageSmoothingEnabled = false;
+          pctx.drawImage(tiny, 0, 0, c.width, c.height);
+          blurUndoStack = [];
+          document.getElementById('blurUndo').disabled = true;
+          const left = blurQueue.length;
+          document.getElementById('blurCount').textContent = left ? `+${left} foto${left > 1 ? 's' : ''}` : '';
+          document.getElementById('blurEditor').classList.add('open');
+        } catch (e) {
+          showToast('Não foi possível abrir a foto.', 'error');
+          blurNext();
+        }
+      }
+      function blurPoint(ev) {
+        const c = blurCanvas(), r = c.getBoundingClientRect();
+        return {x: (ev.clientX - r.left) * c.width / r.width, y: (ev.clientY - r.top) * c.height / r.height, k: c.width / r.width};
+      }
+      function blurDab(x, y, rad) {
+        const ctx = blurCanvas().getContext('2d');
+        ctx.save(); ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.clip(); ctx.drawImage(blurPix, 0, 0); ctx.restore();
+      }
+      function blurStroke(p) {
+        const rad = Number(document.getElementById('blurSize').value) * p.k / 2;
+        if (!blurLast) { blurDab(p.x, p.y, rad); blurLast = p; return; }
+        const dx = p.x - blurLast.x, dy = p.y - blurLast.y, dist = Math.hypot(dx, dy), step = Math.max(1, rad / 3);
+        for (let t = step; t <= dist; t += step) blurDab(blurLast.x + dx * t / dist, blurLast.y + dy * t / dist, rad);
+        blurDab(p.x, p.y, rad);
+        blurLast = p;
+      }
+      function blurFinish(keep) {
+        const c = blurCanvas();
+        if (!keep) { blurNext(); return; }
+        c.toBlob(b => {
+          if (b) selectedFiles.push(new File([b], `foto_${Date.now()}.jpg`, {type: 'image/jpeg'}));
+          updateAttachmentPreview();
+          blurNext();
+        }, 'image/jpeg', 0.82);
+      }
+      (function wireBlur() {
+        const c = document.getElementById('blurCanvas');
+        c.addEventListener('pointerdown', ev => {
+          ev.preventDefault();
+          try { c.setPointerCapture(ev.pointerId); } catch (_) {}
+          const ctx = c.getContext('2d');
+          blurUndoStack.push(ctx.getImageData(0, 0, c.width, c.height));
+          if (blurUndoStack.length > 8) blurUndoStack.shift();
+          document.getElementById('blurUndo').disabled = false;
+          blurDrawing = true; blurLast = null; blurStroke(blurPoint(ev));
+        });
+        c.addEventListener('pointermove', ev => { if (blurDrawing) { ev.preventDefault(); blurStroke(blurPoint(ev)); } });
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => c.addEventListener(t, () => { blurDrawing = false; blurLast = null; }));
+        document.getElementById('blurUndo').onclick = () => {
+          const d = blurUndoStack.pop(); if (d) c.getContext('2d').putImageData(d, 0, 0);
+          document.getElementById('blurUndo').disabled = !blurUndoStack.length;
+        };
+        document.getElementById('blurOk').onclick = () => blurFinish(true);
+        document.getElementById('blurCancel').onclick = () => blurFinish(false);
+      })();
+      function makeThumb(file, side = 360) {
+        return loadImg(file).then(img => new Promise(res => {
+          const k = Math.min(1, side / Math.max(img.naturalWidth, img.naturalHeight));
+          const t = document.createElement('canvas');
+          t.width = Math.round(img.naturalWidth * k); t.height = Math.round(img.naturalHeight * k);
+          t.getContext('2d').drawImage(img, 0, 0, t.width, t.height);
+          t.toBlob(b => res(b), 'image/jpeg', 0.7);
+        }));
+      }
+      async function uploadPhoto(blob, path) {
+        const r = await fetch(`${SUPABASE_URL}/storage/v1/object/${PHOTO_BUCKET}/${path}`, {
+          method: 'POST',
+          headers: {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`, 'Content-Type': 'image/jpeg', 'x-upsert': 'false'},
+          body: blob
+        });
+        if (!r.ok) throw new Error(r.status === 413 ? 'Uma das fotos é demasiado grande.' : `Erro ao enviar uma foto (${r.status}).`);
       }
       function updateAttachmentPreview() {
         const preview = document.getElementById('attachmentPreview');
@@ -13069,48 +13209,42 @@
         sendBtn.disabled = true;
         sendBtn.innerHTML = '<span class="icon-btn-text"><span class="material-icons spin">autorenew</span><span>A Enviar...</span></span>';
         try {
-          const corpOperNr = (localStorage.getItem("currentCorpOperNr") || '').trim();
-          if (!corpOperNr) throw new Error('corp_oper_nr não definido!');
+          const corpOperNr = (localStorage.getItem("currentCorpOperNr") || '').trim().padStart(4, '0');
+          if (!corpOperNr.trim() || corpOperNr === '0000') throw new Error('Sessão inválida. Volte a iniciar sessão.');
           const selectedStatus = document.getElementById('detailStatus').value;
+          /* 1) fotos (já tapadas) + miniaturas para a pasta da corporação no bucket privado */
           const now = new Date();
-          const time = now.toLocaleTimeString('pt-PT', {
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-          const date = now.toLocaleDateString('pt-PT');
-          let message = `🚨 <b>ATUALIZAÇÃO DE OCORRÊNCIA</b>\n\n`;
-          message += `📋 <b>Ocorrência:</b> ${tgEscape(currentOccurrence.occorrence)}\n`;
-          message += `📍 <b>Local:</b> ${tgEscape(currentOccurrence.local)}\n`;
-          message += `📊 <b>Estado:</b> ${tgEscape(selectedStatus)}\n`;
-          message += `⏰ ${time}\n`;
-          message += `📅 ${date}`;
-          if (messageText) {
-            message += `\n\n💬 <b>Descrição:</b>\n\n<i>${tgEscape(messageText)}</i>`;
+          const folder = `${corpOperNr}/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}`;
+          const base = `${currentOccurrence.id || 'ocr'}_${now.getTime()}`;
+          const photos = [];
+          for (let i = 0; i < selectedFiles.length; i++) {
+            sendBtn.innerHTML = `<span class="icon-btn-text"><span class="material-icons spin">autorenew</span><span>Foto ${i + 1}/${selectedFiles.length}...</span></span>`;
+            const path = `${folder}/${base}_${i + 1}.jpg`, thumb = `${folder}/${base}_${i + 1}_t.jpg`;
+            await uploadPhoto(selectedFiles[i], path);
+            const tb = await makeThumb(selectedFiles[i]);
+            if (tb) await uploadPhoto(tb, thumb);
+            photos.push({path, thumb: tb ? thumb : path});
           }
-          const formData = new FormData();
-          formData.append('corp_oper_nr', corpOperNr);
-          formData.append('message', message);
-          const photos = await Promise.all(selectedFiles.map(f => compressImage(f)));
-          const totalBytes = photos.reduce((t, f) => t + f.size, 0);
-          if (totalBytes > 4 * 1024 * 1024) throw new Error('As fotos são demasiado grandes. Envie menos fotos de cada vez.');
-          photos.forEach((file) => {
-            formData.append('photos', file, file.name);
-          });
-          const res = await fetch(TELEGRAM_API, {
+          sendBtn.innerHTML = '<span class="icon-btn-text"><span class="material-icons spin">autorenew</span><span>A Enviar...</span></span>';
+          /* 2) atualização na base de dados (o Online mostra-a na hora) */
+          const sender = localStorage.getItem('currentUserDisplay') || localStorage.getItem('currentUserName') || '';
+          const ins = await fetch(`${SUPABASE_URL}/rest/v1/ocr_field_updates`, {
             method: 'POST',
-            body: formData
+            headers: {...getSupabaseHeaders(), Prefer: 'return=minimal'},
+            body: JSON.stringify({corp_oper_nr: corpOperNr, occurrence_id: currentOccurrence.id || null, occurrence: currentOccurrence.occorrence || '',
+                                  local: currentOccurrence.local || '', status: selectedStatus, message: messageText, photos, sender_name: sender})
           });
-          if (!res.ok) {
-            throw new Error(res.status === 413 ? 'As fotos são demasiado grandes. Envie menos fotos de cada vez.' : 'Erro ao enviar o relatório. Tente novamente.');
-          }
-          const result = await res.json();
-          if (result.success) {
-            showToast('Relatório e anexos enviados com sucesso!', 'success');
-            closeOccurrencePopup();
-          } else {
-            showToast('Erro ao enviar o relatório. Tente novamente.', 'error', 8000);
-            console.error('Resposta completa do backend:', result);
-          }
+          if (!ins.ok) throw new Error(`Erro ao gravar a atualização (${ins.status}). Tente novamente.`);
+          /* 3) aviso à Central (sem fotos nem pormenores: só o essencial) */
+          const n = photos.length;
+          fetch(PUSH_API, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`},
+            body: JSON.stringify({recipient_nint: CENTRAL_NINT, tipo: 'aviso', pagina: '', sender_name: 'Atualização do Terreno',
+                                  message_text: `🚨 ${currentOccurrence.occorrence || 'Ocorrência'} · ${selectedStatus}${n ? ` · ${n} foto${n > 1 ? 's' : ''}` : ''}`})
+          }).catch(e => console.error('Push Central:', e));
+          showToast('Atualização enviada para a SALOC!', 'success');
+          closeOccurrencePopup();
         } catch (err) {
           console.error('❌ Erro ao enviar:', err);
           showToast(err.message, 'error', 8000);
@@ -31175,7 +31309,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.37 - 2026-11-17 - Central: sinal de tempo real (SQL 41)';
+  window.CB360_BUILD='v22.38 - 2026-11-17 - Central: sinal de tempo real (SQL 41)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
