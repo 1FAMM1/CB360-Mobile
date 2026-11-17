@@ -12526,6 +12526,10 @@
                         transition: transform var(--ease), box-shadow var(--ease), background var(--ease); position: relative; display: flex; flex-direction: column; overflow: hidden;}
       .occurrence-card:hover {transform: translateY(-1px); box-shadow: var(--sh-md);}
       .occurrence-card:active {transform: scale(.99);}
+      .occurrence-card.locked {opacity: .55; filter: grayscale(.4);}
+      .occurrence-card.locked:hover {transform: none;}
+      .lock-chip {color: var(--txt-2);}
+      .lock-chip .material-icons {color: var(--txt-2) !important;}
       .card-header {padding: 8px 14px; background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; justify-content: space-between; align-items: center; gap: 8px;}
       .card-header-id {display: flex; align-items: center; gap: 6px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; color: rgba(255,255,255,0.85); text-transform: uppercase;}
       .card-header-id .material-icons {font-size: 15px; color: rgba(255,255,255,0.9);}
@@ -12644,6 +12648,9 @@
       @media (min-width: 769px) {
         .main-content {max-width: 700px;}
       }
+      .photo-btns {display: flex; gap: 8px;}
+      .photo-btns .attachment-btn {flex: 1 1 0; min-width: 0; width: auto; margin: 0; padding-left: 10px; padding-right: 10px;}
+      .photo-btns .photo-gallery {flex: 0 0 auto;}
       /* ===== editor: esconder pormenores com o dedo (antes de anexar a foto) ===== */
       .blur-overlay {position: fixed; inset: 0; z-index: 100000; background: #0f1117; display: none; flex-direction: column; color: #fff;
                      padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px);}
@@ -12726,10 +12733,16 @@
           </div>
           <div class="attachment-section">
             <label class="attachment-label"><span class="material-icons">attach_file</span>Anexos: <span style="font-size: 11px; color: var(--txt-3); font-weight: 400;">(Clique várias vezes para adicionar mais fotos)</span></label>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
-            <button class="attachment-btn" onclick="document.getElementById('fileInput').click()">
-              <span class="icon-btn-text"><span class="material-icons">attach_file</span><span>Adicionar Foto (<span id="photoCount">0</span>/10)</span></span>
-            </button>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleFileSelect(event)">
+            <input type="file" id="fileInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event)">
+            <div class="photo-btns">
+              <button type="button" class="attachment-btn" onclick="document.getElementById('cameraInput').click()">
+                <span class="icon-btn-text"><span class="material-icons">photo_camera</span><span>Tirar foto (<span id="photoCount">0</span>/10)</span></span>
+              </button>
+              <button type="button" class="attachment-btn photo-gallery" onclick="document.getElementById('fileInput').click()">
+                <span class="icon-btn-text"><span class="material-icons">photo_library</span><span>Galeria</span></span>
+              </button>
+            </div>
             <div id="attachmentPreview" class="attachment-preview"></div>
           </div>
         </div>
@@ -12813,6 +12826,26 @@
       }
       function tgEscape(v) {
         return String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+      /* quem pode enviar para a ocorrência: a Central, ou o n.º interno está na lista da ocorrência (a base de dados confirma, SQL 43) */
+      function tokenClaims() {
+        try { return JSON.parse(atob(String(localStorage.getItem('authToken') || '').split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))) || {}; } catch (_) { return {}; }
+      }
+      const normNint = n => String(n == null ? '' : n).trim().replace(/^0+/, '');
+      function canReport(item) {
+        const c = tokenClaims();
+        if (c.account_type === 'central') return true;
+        const me = normNint(c.n_int || localStorage.getItem('currentCorpNint'));
+        return !!me && String(item.n_int || '').split(',').some(x => normNint(x) === me);
+      }
+      /* hora do alerta para o cartão: aceita "dd/mm/aaaa HH:MM" (como grava o Online) ou data ISO */
+      function alertTime(v) {
+        const s = String(v || '').trim();
+        let m = s.match(/(\d{1,2}):(\d{2})/);
+        if (m && !/^\d{4}-\d{2}-\d{2}T/.test(s)) return `${m[1].padStart(2, '0')}:${m[2]}`;
+        const d = new Date(s);
+        if (s && !isNaN(d)) return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        return '--:--';
       }
       function compressImage(file, maxSide = 1600, quality = 0.8) {
         return new Promise((resolve) => {
@@ -12922,7 +12955,7 @@
           const headers = getSupabaseHeaders();
           headers['x-my-corpo'] = corpOperNr;
           const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/occurrences_control?select=id,occorrence,local,status,vehicles,elements&corp_oper_nr=eq.${corpOperNr}&order=id.desc&limit=100`, {
+            `${SUPABASE_URL}/rest/v1/occurrences_control?select=id,occorrence,local,status,vehicles,elements,start_date,n_int&corp_oper_nr=eq.${corpOperNr}&order=id.desc&limit=100`, {
               signal: controllerOcorrencias.signal,
               headers: headers
             }
@@ -12959,7 +12992,7 @@
             const elements = Number(item.elements || 0);
             card.innerHTML = `
               <div class="card-header">
-                <span class="card-header-id"><span class="material-icons">tag</span>#${escapeHtml(item.id)}</span>
+                <span class="card-header-id"><span class="material-icons">schedule</span>${escapeHtml(alertTime(item.start_date))}</span>
                 <span class="status-badge ${statusClass}"><span class="material-icons">${statusIcon}</span>${escapeHtml(item.status || 'N/D')}</span>
               </div>
               <div class="card-body">
@@ -12977,7 +13010,13 @@
                 </div>
               </div>
             `;
-            card.onclick = () => openOccurrencePopup(item);
+            /* só quem está afeto à ocorrência (escolhido pela SALOC no Online) ou a Central pode abrir e enviar */
+            const allowed = canReport(item);
+            if (!allowed) {
+              card.classList.add('locked');
+              card.querySelector('.card-meta').insertAdjacentHTML('beforeend', '<span class="meta-chip lock-chip"><span class="material-icons">lock</span>Não afeto</span>');
+            }
+            card.onclick = () => allowed ? openOccurrencePopup(item) : showToast('Não está afeto a esta ocorrência. Só os elementos das viaturas da ocorrência podem enviar atualizações.', 'warning', 5000);
             cardsContainer.appendChild(card);
           });
         } catch (error) {
@@ -13132,7 +13171,7 @@
           headers: {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`, 'Content-Type': 'image/jpeg', 'x-upsert': 'false'},
           body: blob
         });
-        if (!r.ok) throw new Error(r.status === 413 ? 'Uma das fotos é demasiado grande.' : `Erro ao enviar uma foto (${r.status}).`);
+        if (!r.ok) throw new Error(r.status === 413 ? 'Uma das fotos é demasiado grande.' : (r.status === 403 || r.status === 400) ? 'Não está afeto a esta ocorrência (as fotos foram recusadas).' : `Erro ao enviar uma foto (${r.status}).`);
       }
       function updateAttachmentPreview() {
         const preview = document.getElementById('attachmentPreview');
@@ -13210,12 +13249,14 @@
         sendBtn.innerHTML = '<span class="icon-btn-text"><span class="material-icons spin">autorenew</span><span>A Enviar...</span></span>';
         try {
           const corpOperNr = (localStorage.getItem("currentCorpOperNr") || '').trim().padStart(4, '0');
+          if (!currentOccurrence.id) throw new Error('Ocorrência sem identificação. Atualize a lista e tente outra vez.');
           if (!corpOperNr.trim() || corpOperNr === '0000') throw new Error('Sessão inválida. Volte a iniciar sessão.');
           const selectedStatus = document.getElementById('detailStatus').value;
           /* 1) fotos (já tapadas) + miniaturas para a pasta da corporação no bucket privado */
           const now = new Date();
-          const folder = `${corpOperNr}/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}`;
-          const base = `${currentOccurrence.id || 'ocr'}_${now.getTime()}`;
+          /* pasta <corporação>/<id da ocorrência>: a base de dados só aceita se estiver afeto a esta ocorrência */
+          const folder = `${corpOperNr}/${currentOccurrence.id}`;
+          const base = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${now.getTime()}`;
           const photos = [];
           for (let i = 0; i < selectedFiles.length; i++) {
             sendBtn.innerHTML = `<span class="icon-btn-text"><span class="material-icons spin">autorenew</span><span>Foto ${i + 1}/${selectedFiles.length}...</span></span>`;
@@ -13234,7 +13275,7 @@
             body: JSON.stringify({corp_oper_nr: corpOperNr, occurrence_id: currentOccurrence.id || null, occurrence: currentOccurrence.occorrence || '',
                                   local: currentOccurrence.local || '', status: selectedStatus, message: messageText, photos, sender_name: sender})
           });
-          if (!ins.ok) throw new Error(`Erro ao gravar a atualização (${ins.status}). Tente novamente.`);
+          if (!ins.ok) throw new Error(ins.status === 403 || ins.status === 401 ? 'Não está afeto a esta ocorrência.' : `Erro ao gravar a atualização (${ins.status}). Tente novamente.`);
           /* 3) aviso à Central (sem fotos nem pormenores: só o essencial) */
           const n = photos.length;
           fetch(PUSH_API, {
@@ -31309,7 +31350,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.38 - 2026-11-17 - Central: sinal de tempo real (SQL 41)';
+  window.CB360_BUILD='v22.37 - 2026-11-17 - Central: sinal de tempo real (SQL 41)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
