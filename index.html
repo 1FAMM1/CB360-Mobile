@@ -24610,7 +24610,10 @@
       .actions-in {display: flex; gap: 10px;}
       .btn {height: 46px; border: 0; border-radius: 12px; font: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer;}
       .btn .material-icons {font-size: 20px;}
-      .btn-ghost {flex: 0 0 auto; padding: 0 16px; background: var(--surface); color: var(--txt-2); border: 1px solid var(--line);}
+      .btn > span:last-child {white-space: nowrap;}
+      .btn .material-icons {width: 20px; overflow: hidden;}
+      @media (max-width: 390px) {.btn-ghost > span:last-child {display: none;} .btn-ghost {padding: 0 12px;}}
+      .btn-ghost {flex: 0 0 auto; padding: 0 13px; background: var(--surface); color: var(--txt-2); border: 1px solid var(--line);}
       .btn-ghost.sure {background: var(--red); color: #fff; border-color: var(--red);}
       .btn-main {flex: 1; background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; box-shadow: 0 3px 10px rgba(198,40,40,.30);}
       .btn-main.warn {background: linear-gradient(to right, #8a5a00, var(--amber));}
@@ -24659,7 +24662,8 @@
       <div class="actions">
         <div class="actions-in">
           <button type="button" class="btn btn-ghost" id="btnClear"><span class="material-icons">restart_alt</span><span>Nova</span></button>
-          <button type="button" class="btn btn-main" id="btnPdf"><span class="material-icons">picture_as_pdf</span><span>Gerar PDF e partilhar</span></button>
+          <button type="button" class="btn btn-ghost" id="btnPdf" title="Gerar PDF no telemóvel"><span class="material-icons">picture_as_pdf</span><span>PDF</span></button>
+          <button type="button" class="btn btn-main" id="btnSend"><span class="material-icons">send</span><span>Enviar ficha</span></button>
         </div>
       </div>
     </div>
@@ -24896,6 +24900,7 @@
         DATA = {};
         lsDel(KEY);
         render();
+        prefillUser();
         $('scroll').scrollTo({top: 0, behavior: 'smooth'});
         toast('Ficha limpa. Pode começar uma nova.');
       };
@@ -24924,21 +24929,27 @@
           return await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(b); });
         } catch (_) { return null; }
       }
-      $('btnPdf').onclick = async () => {
-        const btn = $('btnPdf');
+      /* ----------------------------- validação comum ----------------------------- */
+      function checkRequired(btn, label) {
         const missing = FIELDS.filter(f => f.req && visible(f) && !filled(f));
         if (missing.length && !forceArm) {
           missing.forEach(f => $('w_' + f.k).classList.add('missing'));
           const first = $('w_' + missing[0].k);
           openSec(first.closest('.sec'), false, true);
           setTimeout(() => first.scrollIntoView({behavior: 'smooth', block: 'center'}), 60);
-          toast(`Faltam ${missing.length} campo(s) obrigatório(s). Toque outra vez para gerar mesmo assim.`, 3800);
-          btn.classList.add('warn'); btn.lastElementChild.textContent = 'Gerar mesmo assim';
-          forceArm = setTimeout(() => { forceArm = null; btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar'; }, 5000);
-          return;
+          toast(`Faltam ${missing.length} campo(s) obrigatório(s). Toque outra vez para continuar mesmo assim.`, 3800);
+          btn.classList.add('warn'); btn.lastElementChild.textContent = 'Continuar mesmo assim';
+          forceArm = setTimeout(() => { forceArm = null; btn.classList.remove('warn'); btn.lastElementChild.textContent = label; }, 5000);
+          return false;
         }
         clearTimeout(forceArm); forceArm = null;
-        btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar';
+        btn.classList.remove('warn'); btn.lastElementChild.textContent = label;
+        return true;
+      }
+      /* ----------------------------- PDF local (sem rede / para guardar) ----------------------------- */
+      $('btnPdf').onclick = async () => {
+        const btn = $('btnPdf');
+        if (!checkRequired(btn, 'PDF')) return;
         if (!window.jspdf || !window.jspdf.jsPDF) return toast('Sem ligação para gerar o PDF. Tente novamente com rede.');
         btn.disabled = true;
         try {
@@ -24956,6 +24967,81 @@
           btn.disabled = false;
         }
       };
+      /* ----------------------------- ENVIAR (template oficial + email, como no Online) ----------------------------- */
+      const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+      const API_URL = 'https://cb360-online.vercel.app/api/various_convert_and_send';
+      const nint = () => lsGet('currentCorpNint') || '';
+      function sbHeaders() {
+        return {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${lsGet('authToken') || ''}`, 'Content-Type': 'application/json', 'x-my-corpo': corp, 'x-my-nint': nint()};
+      }
+      async function sbGet(path) {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {headers: sbHeaders()});
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      }
+      async function getRecipients() {
+        const t = SPEC.page.toLowerCase();
+        const cats = [`${t}_mail_to`, `${t}_mail_cc`, `${t}_mail_bcc`, 'nrbq_mail_to', 'nrbq_mail_cc', 'nrbq_mail_bcc'];
+        const rows = await sbGet(`mails_config?corp_oper_nr=eq.${corp}&category=in.(${cats.join(',')})&select=category,value`);
+        const list = c => String((rows.find(r => r.category === c) || {}).value || '').split(',').map(e => e.trim()).filter(Boolean);
+        const own = {to: list(cats[0]), cc: list(cats[1]), bcc: list(cats[2])};
+        return own.to.length ? own : {to: list(cats[3]), cc: list(cats[4]), bcc: list(cats[5])};
+      }
+      async function getCommon() {
+        const out = {corpName: '', logoUrl: lsGet('cached_logo_url') || '', senderName: 'CB360 Mobile'};
+        try {
+          const [c, e] = await Promise.all([
+            sbGet(`corporation_data?corp_oper_nr=eq.${corp}&select=cb_name,logo_url,corp_address,corp_cp,corp_localitie,corp_phone_mobile,corp_phone_landline,corp_email`),
+            nint() ? sbGet(`reg_elems?corp_oper_nr=eq.${corp}&n_int=eq.${nint()}&select=abv_name,patent`) : Promise.resolve([])
+          ]);
+          const d = c[0] || {};
+          Object.assign(out, {corpName: d.cb_name || '', logoUrl: d.logo_url || out.logoUrl, corpAddress: d.corp_address || '', corpCp: d.corp_cp || '', corpLocalitie: d.corp_localitie || '',
+                              corpPhoneMobile: d.corp_phone_mobile || '', corpPhoneLandline: d.corp_phone_landline || '', corpEmail: d.corp_email || ''});
+          if (e[0]) out.senderName = `${e[0].abv_name || 'CB360 Mobile'}<br>${e[0].patent || ''}`;
+        } catch (err) { console.warn('Dados da corporação indisponíveis:', err); }
+        return out;
+      }
+      function visibleData() {
+        const o = {};
+        FIELDS.forEach(f => { if (visible(f) && filled(f)) o[f.k] = DATA[f.k]; });
+        return o;
+      }
+      $('btnSend').onclick = async () => {
+        const btn = $('btnSend');
+        if (!checkRequired(btn, 'Enviar ficha')) return;
+        if (!navigator.onLine) return toast('Sem rede. A ficha fica guardada; pode gerar o PDF ou enviar mais tarde.', 4200);
+        btn.disabled = true; btn.lastElementChild.textContent = 'A enviar…';
+        try {
+          const [rcp, common] = await Promise.all([getRecipients(), getCommon()]);
+          if (!rcp.to.length) throw new Error('Não há destinatários configurados para esta ficha (Centro de Dados → Emails Config.).');
+          const r = await fetch(API_URL, {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${lsGet('authToken') || ''}`},
+            body: JSON.stringify({type: SPEC.page.toLowerCase(), data: {...common, ...rcp, fields: visibleData()}})});
+          const txt = await r.text();
+          let j = {}; try { j = JSON.parse(txt); } catch (_) {}
+          if (!r.ok || !j.success) throw new Error(j.error || (txt.trim().startsWith('<') ? `Erro do servidor (${r.status}).` : txt) || 'Falha no envio.');
+          DATA._enviada = new Date().toISOString(); save();
+          toast(`Ficha enviada para ${j.sentTo ? j.sentTo.join(', ') : rcp.to.join(', ')}.`, 4500);
+        } catch (e) {
+          console.error('Erro ao enviar ficha:', e);
+          toast(`Não foi possível enviar: ${e.message}`, 5000);
+        } finally {
+          btn.disabled = false; btn.lastElementChild.textContent = 'Enviar ficha';
+        }
+      };
+      /* OPTEL / operador: preenche com o nome de quem tem sessão, se estiver vazio */
+      async function prefillUser() {
+        if (!nint()) return;
+        try {
+          const e = (await sbGet(`reg_elems?corp_oper_nr=eq.${corp}&n_int=eq.${nint()}&select=abv_name`))[0];
+          if (!e || !e.abv_name) return;
+          let changed = false;
+          ['optel', 'operador'].forEach(k => {
+            if (FIELDS.some(f => f.k === k) && !DATA[k]) { DATA[k] = e.abv_name; const el = $('f_' + k); if (el) el.value = e.abv_name; changed = true; }
+          });
+          if (changed) { refresh(); save(); }
+        } catch (_) {}
+      }
       function download(file) {
         const u = URL.createObjectURL(file);
         const a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
@@ -25070,6 +25156,7 @@
         if (logo) $('corpLogo').src = logo;
         $('footerYear').textContent = new Date().getFullYear();
         render();
+        prefillUser();
         fniBtnState();
         $('btnFni').onclick = fniOpen;
         $('fniClose').onclick = () => $('fniSheet').classList.remove('open');
@@ -25226,7 +25313,10 @@
       .actions-in {display: flex; gap: 10px;}
       .btn {height: 46px; border: 0; border-radius: 12px; font: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer;}
       .btn .material-icons {font-size: 20px;}
-      .btn-ghost {flex: 0 0 auto; padding: 0 16px; background: var(--surface); color: var(--txt-2); border: 1px solid var(--line);}
+      .btn > span:last-child {white-space: nowrap;}
+      .btn .material-icons {width: 20px; overflow: hidden;}
+      @media (max-width: 390px) {.btn-ghost > span:last-child {display: none;} .btn-ghost {padding: 0 12px;}}
+      .btn-ghost {flex: 0 0 auto; padding: 0 13px; background: var(--surface); color: var(--txt-2); border: 1px solid var(--line);}
       .btn-ghost.sure {background: var(--red); color: #fff; border-color: var(--red);}
       .btn-main {flex: 1; background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; box-shadow: 0 3px 10px rgba(198,40,40,.30);}
       .btn-main.warn {background: linear-gradient(to right, #8a5a00, var(--amber));}
@@ -25275,7 +25365,8 @@
       <div class="actions">
         <div class="actions-in">
           <button type="button" class="btn btn-ghost" id="btnClear"><span class="material-icons">restart_alt</span><span>Nova</span></button>
-          <button type="button" class="btn btn-main" id="btnPdf"><span class="material-icons">picture_as_pdf</span><span>Gerar PDF e partilhar</span></button>
+          <button type="button" class="btn btn-ghost" id="btnPdf" title="Gerar PDF no telemóvel"><span class="material-icons">picture_as_pdf</span><span>PDF</span></button>
+          <button type="button" class="btn btn-main" id="btnSend"><span class="material-icons">send</span><span>Enviar ficha</span></button>
         </div>
       </div>
     </div>
@@ -25512,6 +25603,7 @@
         DATA = {};
         lsDel(KEY);
         render();
+        prefillUser();
         $('scroll').scrollTo({top: 0, behavior: 'smooth'});
         toast('Ficha limpa. Pode começar uma nova.');
       };
@@ -25540,21 +25632,27 @@
           return await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(b); });
         } catch (_) { return null; }
       }
-      $('btnPdf').onclick = async () => {
-        const btn = $('btnPdf');
+      /* ----------------------------- validação comum ----------------------------- */
+      function checkRequired(btn, label) {
         const missing = FIELDS.filter(f => f.req && visible(f) && !filled(f));
         if (missing.length && !forceArm) {
           missing.forEach(f => $('w_' + f.k).classList.add('missing'));
           const first = $('w_' + missing[0].k);
           openSec(first.closest('.sec'), false, true);
           setTimeout(() => first.scrollIntoView({behavior: 'smooth', block: 'center'}), 60);
-          toast(`Faltam ${missing.length} campo(s) obrigatório(s). Toque outra vez para gerar mesmo assim.`, 3800);
-          btn.classList.add('warn'); btn.lastElementChild.textContent = 'Gerar mesmo assim';
-          forceArm = setTimeout(() => { forceArm = null; btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar'; }, 5000);
-          return;
+          toast(`Faltam ${missing.length} campo(s) obrigatório(s). Toque outra vez para continuar mesmo assim.`, 3800);
+          btn.classList.add('warn'); btn.lastElementChild.textContent = 'Continuar mesmo assim';
+          forceArm = setTimeout(() => { forceArm = null; btn.classList.remove('warn'); btn.lastElementChild.textContent = label; }, 5000);
+          return false;
         }
         clearTimeout(forceArm); forceArm = null;
-        btn.classList.remove('warn'); btn.lastElementChild.textContent = 'Gerar PDF e partilhar';
+        btn.classList.remove('warn'); btn.lastElementChild.textContent = label;
+        return true;
+      }
+      /* ----------------------------- PDF local (sem rede / para guardar) ----------------------------- */
+      $('btnPdf').onclick = async () => {
+        const btn = $('btnPdf');
+        if (!checkRequired(btn, 'PDF')) return;
         if (!window.jspdf || !window.jspdf.jsPDF) return toast('Sem ligação para gerar o PDF. Tente novamente com rede.');
         btn.disabled = true;
         try {
@@ -25572,6 +25670,81 @@
           btn.disabled = false;
         }
       };
+      /* ----------------------------- ENVIAR (template oficial + email, como no Online) ----------------------------- */
+      const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+      const API_URL = 'https://cb360-online.vercel.app/api/various_convert_and_send';
+      const nint = () => lsGet('currentCorpNint') || '';
+      function sbHeaders() {
+        return {apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${lsGet('authToken') || ''}`, 'Content-Type': 'application/json', 'x-my-corpo': corp, 'x-my-nint': nint()};
+      }
+      async function sbGet(path) {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {headers: sbHeaders()});
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      }
+      async function getRecipients() {
+        const t = SPEC.page.toLowerCase();
+        const cats = [`${t}_mail_to`, `${t}_mail_cc`, `${t}_mail_bcc`, 'nrbq_mail_to', 'nrbq_mail_cc', 'nrbq_mail_bcc'];
+        const rows = await sbGet(`mails_config?corp_oper_nr=eq.${corp}&category=in.(${cats.join(',')})&select=category,value`);
+        const list = c => String((rows.find(r => r.category === c) || {}).value || '').split(',').map(e => e.trim()).filter(Boolean);
+        const own = {to: list(cats[0]), cc: list(cats[1]), bcc: list(cats[2])};
+        return own.to.length ? own : {to: list(cats[3]), cc: list(cats[4]), bcc: list(cats[5])};
+      }
+      async function getCommon() {
+        const out = {corpName: '', logoUrl: lsGet('cached_logo_url') || '', senderName: 'CB360 Mobile'};
+        try {
+          const [c, e] = await Promise.all([
+            sbGet(`corporation_data?corp_oper_nr=eq.${corp}&select=cb_name,logo_url,corp_address,corp_cp,corp_localitie,corp_phone_mobile,corp_phone_landline,corp_email`),
+            nint() ? sbGet(`reg_elems?corp_oper_nr=eq.${corp}&n_int=eq.${nint()}&select=abv_name,patent`) : Promise.resolve([])
+          ]);
+          const d = c[0] || {};
+          Object.assign(out, {corpName: d.cb_name || '', logoUrl: d.logo_url || out.logoUrl, corpAddress: d.corp_address || '', corpCp: d.corp_cp || '', corpLocalitie: d.corp_localitie || '',
+                              corpPhoneMobile: d.corp_phone_mobile || '', corpPhoneLandline: d.corp_phone_landline || '', corpEmail: d.corp_email || ''});
+          if (e[0]) out.senderName = `${e[0].abv_name || 'CB360 Mobile'}<br>${e[0].patent || ''}`;
+        } catch (err) { console.warn('Dados da corporação indisponíveis:', err); }
+        return out;
+      }
+      function visibleData() {
+        const o = {};
+        FIELDS.forEach(f => { if (visible(f) && filled(f)) o[f.k] = DATA[f.k]; });
+        return o;
+      }
+      $('btnSend').onclick = async () => {
+        const btn = $('btnSend');
+        if (!checkRequired(btn, 'Enviar ficha')) return;
+        if (!navigator.onLine) return toast('Sem rede. A ficha fica guardada; pode gerar o PDF ou enviar mais tarde.', 4200);
+        btn.disabled = true; btn.lastElementChild.textContent = 'A enviar…';
+        try {
+          const [rcp, common] = await Promise.all([getRecipients(), getCommon()]);
+          if (!rcp.to.length) throw new Error('Não há destinatários configurados para esta ficha (Centro de Dados → Emails Config.).');
+          const r = await fetch(API_URL, {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${lsGet('authToken') || ''}`},
+            body: JSON.stringify({type: SPEC.page.toLowerCase(), data: {...common, ...rcp, fields: visibleData()}})});
+          const txt = await r.text();
+          let j = {}; try { j = JSON.parse(txt); } catch (_) {}
+          if (!r.ok || !j.success) throw new Error(j.error || (txt.trim().startsWith('<') ? `Erro do servidor (${r.status}).` : txt) || 'Falha no envio.');
+          DATA._enviada = new Date().toISOString(); save();
+          toast(`Ficha enviada para ${j.sentTo ? j.sentTo.join(', ') : rcp.to.join(', ')}.`, 4500);
+        } catch (e) {
+          console.error('Erro ao enviar ficha:', e);
+          toast(`Não foi possível enviar: ${e.message}`, 5000);
+        } finally {
+          btn.disabled = false; btn.lastElementChild.textContent = 'Enviar ficha';
+        }
+      };
+      /* OPTEL / operador: preenche com o nome de quem tem sessão, se estiver vazio */
+      async function prefillUser() {
+        if (!nint()) return;
+        try {
+          const e = (await sbGet(`reg_elems?corp_oper_nr=eq.${corp}&n_int=eq.${nint()}&select=abv_name`))[0];
+          if (!e || !e.abv_name) return;
+          let changed = false;
+          ['optel', 'operador'].forEach(k => {
+            if (FIELDS.some(f => f.k === k) && !DATA[k]) { DATA[k] = e.abv_name; const el = $('f_' + k); if (el) el.value = e.abv_name; changed = true; }
+          });
+          if (changed) { refresh(); save(); }
+        } catch (_) {}
+      }
       function download(file) {
         const u = URL.createObjectURL(file);
         const a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
@@ -25686,622 +25859,12 @@
         if (logo) $('corpLogo').src = logo;
         $('footerYear').textContent = new Date().getFullYear();
         render();
+        prefillUser();
         fniBtnState();
         $('btnFni').onclick = fniOpen;
         $('fniClose').onclick = () => $('fniSheet').classList.remove('open');
         $('fniSheet').onclick = e => { if (e.target.id === 'fniSheet') $('fniSheet').classList.remove('open'); };
       });
-    <\/script>
-  </body>
-  </html>
-<script type="text/x-cb360" data-page="DecirTeam"><!DOCTYPE html>
-  <html lang="pt-PT" style="background-color: #0f1117;">
-  <head>
-    <\script>
-      (function() {
-        try {
-          if (localStorage.getItem('sgo-theme') === 'dark') {
-            document.documentElement.classList.add('dark-mode');
-          }
-        } catch (e) {}
-      })();
-    <\/script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
-    <meta name="theme-color" content="#0f1117">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <title>Composição Turnos Decir</title>
-    <style>
-      /* ============================================================
-      VARIABLES
-      ============================================================ */
-      :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
-             --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
-             --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
-             --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1); --blue: #0282fa;
-             --green: #22c55e; --orange: #ff9800;}
-      /* ============================================================
-      DARK MODE
-      ============================================================ */
-      .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
-                  --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14); --blue: #6cb8ff;}
-      /* ============================================================
-      RESET & BASE
-      ============================================================ */
-      html {scrollbar-width: none; background: var(--red-dark);}
-      * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-      body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
-            user-select: none; transition: background var(--ease), color var(--ease);}
-      /* ============================================================
-      HEADER
-      ============================================================ */
-      .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-               justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
-      .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
-      .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
-      .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
-      .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
-      /* ============================================================
-      MAIN CONTENT (Fixed top section + Scrollable bottom section)
-      ============================================================ */
-      .main-content {flex: 1 1 auto; width: 100%; max-width: 700px; min-width: 0; margin: 0 auto; overflow: hidden; padding: calc(var(--header-h) + 10px) 16px calc(var(--footer-h) + 10px);
-                     display: flex; flex-direction: column; background: var(--bg); transition: background var(--ease);}
-      .fixed-top-section {flex: 0 0 auto; display: flex; flex-direction: column; align-items: stretch; background: var(--bg); z-index: 10; padding-bottom: 5px;}
-      .scrollable-bottom-section {flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding-top: 5px; padding-bottom: 55px;}
-      .scrollable-bottom-section::-webkit-scrollbar {display: none;}
-      /* ============================================================
-      CONTAINER CARD
-      ============================================================ */
-      .container {width: 100%; min-width: 0; max-width: 100%; background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 0;
-                  display: flex; flex-direction: column; align-items: stretch; height: 100%;}
-      .logo-container {text-align:center;}
-      .form-logo {max-width:54px; height:auto; border-radius:var(--r-sm); box-shadow:var(--sh-sm); border:1px solid var(--border);}
-      h2 {font-size:15px; text-align:center; color:var(--txt-1); font-weight:700; margin-top:6px; margin-bottom:2px;}
-      /* ============================================================
-      TEAM TYPE BUTTONS (grelha seamless)
-      ============================================================ */
-      .team-type-btn {display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-sm);
-                      margin:8px 0 0;}
-      .type-btn {min-height:44px; padding:6px 4px; border:0; border-radius:0; background:var(--surface-2); color:var(--txt-2); font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;
-                transition:background var(--ease), color var(--ease), transform var(--ease);}
-      .type-btn:hover:not(.selected) {background:var(--surface); color:var(--txt-1);}
-      .type-btn:active:not(.selected) {transform:scale(0.98);}
-      .type-btn.selected {color:#fff; background:linear-gradient(to right, var(--red-dark), var(--red)); box-shadow:none;}
-      .shift-row {display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 10px; margin-bottom: 0px;}
-      .shift-row label {flex: 0 0 auto; margin: 0; font-weight: 600; color: var(--txt-2); font-size: 14px;}
-      .shift-row select {flex: 1; min-width: 0;}
-      /* ============================================================
-      FORM AREA
-      ============================================================ */
-      #telegramForm {width: 100%; min-width: 0; border: 0; padding: 0; margin-top: 0px; display: flex; flex-direction: column; align-items: stretch;}
-      .team-inputs {width: 100%; min-width: 0; padding-right: 4px;}
-      .team-inputs::-webkit-scrollbar {width:5px;}
-      .team-inputs::-webkit-scrollbar-track {background:var(--surface-2); border-radius:10px;}
-      .team-inputs::-webkit-scrollbar-thumb {background:var(--red); border-radius:10px;}
-      .team-title {font-size:12px; font-weight:700; letter-spacing:0.5px; padding:7px 0; background:linear-gradient(to right, var(--red-dark), var(--red)); color:#fff; border-radius:var(--r-sm); text-align:center;
-                  text-transform:uppercase;}
-      .form-grid {display: flex; flex-direction: column; gap: 5px; width: 100%; min-width: 0;}
-      .form-column {width: 100%; min-width: 0; align-self: stretch; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px;} 
-      label {display:block; margin-top:10px; margin-bottom:4px; font-weight:600; color:var(--txt-2); font-size:12px;}
-      input[type="text"], select {width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:var(--r-sm); font-size:13px; background:var(--surface); color:var(--txt-1);
-                                  transition:border-color var(--ease), box-shadow var(--ease);}
-      input[type="text"]:focus, select:focus {border-color:var(--red); outline:none; box-shadow:0 0 0 3px var(--red-light);}
-      select {cursor:pointer; appearance:none; background-repeat:no-repeat; background-position:right 10px center; background-size:18px; padding-right:32px;}
-      .ecin-row {display: flex; gap: 12px; width: 100%;}
-      .ecin-row .form-group {flex: 1; min-width: 0;}
-      .elac-container {background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-md); padding:12px; margin-top:5px;}
-      .elac-row {display:flex; gap:12px;}
-      .elac-row .form-group {flex:1;}
-      #elac-inline-slot {flex:1;}
-      /* ============================================================
-      SEND BUTTON
-      ============================================================ */
-      .send-button {width:100%; margin-top:5px; padding:13px; background:linear-gradient(to right, var(--red-dark), var(--red)); color:#fff; border:0; border-radius:50px; font-family:'Inter',sans-serif;
-                    font-size:14px; font-weight:700; cursor:pointer; box-shadow:var(--sh-md); transition:opacity var(--ease), transform var(--ease);}
-      .send-button:hover {opacity:0.9;}
-      .send-button:active {transform:scale(0.98);}
-      .send-button:disabled {background:var(--surface-2); color:var(--txt-3); cursor:not-allowed; box-shadow:none;}
-      /* ============================================================
-      POPUP
-      ============================================================ */
-      .popup-overlay {position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:20px;}
-      .popup-overlay.show, .popup-overlay[style*="block"] {display:flex;}
-      .popup {position:static; transform:none; background:var(--surface); color:var(--txt-1); width:100%; max-width:380px; border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-lg);
-             border:1px solid var(--border); padding:0; text-align:left;}
-      .popup h3 {margin:0; padding:16px; font-size:15px; font-weight:700; text-align:center; color:#fff;}
-      .popup h3.warning {background:linear-gradient(135deg, var(--orange), #e67e22);}
-      .popup h3.error {background:linear-gradient(135deg, var(--red), var(--red-dark));}
-      .popup h3.success {background:linear-gradient(135deg, var(--green), #189349);}
-      .popup h3.info {background:linear-gradient(135deg, var(--blue), #0264c2);}
-      .popup p {margin:0; padding:18px 20px 4px; color:var(--txt-2); font-size:13.5px; line-height:1.5; text-align:center;}
-      .popup p strong {color:var(--txt-1);}
-      .popup-buttons {display:flex; gap:10px; padding:16px 20px 20px;}
-      .popup-button {flex:1; padding:11px; border:0; border-radius:var(--r-sm); cursor:pointer; font-size:13px; font-weight:700; font-family:'Inter',sans-serif; color:#fff; 
-                     transition:opacity var(--ease), transform var(--ease);}
-      .popup-button.confirm {background:var(--green);}
-      .popup-button.cancel {background:var(--red);}
-      .popup-button.ok {background:var(--blue);}
-      .popup-button:hover {opacity:0.88;}
-      .popup-button:active {transform:scale(0.98);}
-      .loading-spinner {display:none; width:16px; height:16px; border:2px solid rgba(255,255,255,0.4); border-top:2px solid #fff; border-radius:50%; animation:spin 0.8s linear infinite; margin-right:8px;}
-      @keyframes spin {0% {transform:rotate(0deg);} 100% {transform:rotate(360deg);}}
-      /* ============================================================
-      FOOTER
-      ============================================================ */
-      .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-               justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
-      .footer-content {text-align: center;}
-      .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
-      .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
-      /* ============================================================
-      RESPONSIVE
-      ============================================================ */
-      @media (max-width: 480px) {
-        .header-title {font-size: 16px;}
-        .main-content {padding-left: 14px; padding-right: 14px;}
-        .form-grid {flex-direction: column;}
-        .footer {height:var(--footer-h);}
-      }
-      @media (min-width:769px) {
-        .main-content { max-width:700px; }
-      }
-    </style>
-  </head>
-  <body>
-    <header class="header">
-      <img id="corpLogo" class="header-logo" alt="" style="display:none;"
-           onerror="this.style.display='none';" onload="this.style.display='block';">
-      <div class="header-center">
-        <span class="header-title">DECIR</span>
-        <span class="header-sub">Equipa Afeta ao Dispositivo</span>
-      </div>
-      <h2 id="corpInfo" style="display: none;"></h2>
-    </header>  
-    <div class="main-content">
-      <div class="container">
-        <div class="fixed-top-section">
-          <div class="logo-container">
-            <img src="https://imgur.com/nut5KSx.png" alt="Logo" class="form-logo">
-          </div>
-          <h2>Formatação da(s) Equipa(s)</h2>
-          <div class="team-type-btn">
-            <button class="type-btn" id="1-ecin" onclick="showTeam('1-ecin')">1 ECIN</button>
-            <button class="type-btn" id="1-ecin-1elac" onclick="showTeam('1-ecin-1elac')">1 ECIN e 1 ELAC</button>
-            <button class="type-btn" id="bcin" onclick="showTeam('bcin')">BCIN</button>
-          </div>
-          <div class="shift-row">
-            <label for="shift">Turno:</label>
-            <select id="shift" name="shift">
-              <option value="">Selecione o turno...</option>
-              <option value="D">D - "08:00 - 20:00"</option>
-              <option value="N">N - "20:00 - 08:00"</option>
-            </select>           
-          </div>
-        </div>
-        <div class="scrollable-bottom-section">
-          <form id="telegramForm">
-            <div class="team-inputs">     
-              <div class="form-grid">
-                <div class="form-column" id="ecin01">
-                  <div class="team-title">ECIN 01</div>
-                  <div class="ecin-row">
-                    <div class="form-group">
-                      <label for="chief">Chefe Equipa:</label>
-                      <input type="text" id="chief" name="chief" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                    <div class="form-group">
-                      <label for="driver">Motorista:</label>
-                      <input type="text" id="driver" name="driver" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                  </div>
-                  <div class="ecin-row">
-                    <div class="form-group">
-                      <label for="element01">1º Elemento:</label>
-                      <input type="text" id="element01" name="element01" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                      <div class="form-group">
-                      <label for="element02">2º Elemento:</label>
-                      <input type="text" id="element02" name="element02" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="element03">3º Elemento:</label>
-                    <input type="text" id="element03" name="element03" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                  </div>
-                </div>
-                <div class="form-column" id="ecin02">
-                  <div class="team-title">ECIN 02</div>
-                  <div class="ecin-row">
-                    <div class="form-group">
-                      <label for="chief2">Chefe Equipa:</label>
-                      <input type="text" id="chief2" name="chief2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                    <div class="form-group">
-                      <label for="driver2">Motorista:</label>
-                      <input type="text" id="driver2" name="driver2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                  </div>
-                  <div class="ecin-row">
-                    <div class="form-group">
-                      <label for="element01_2">1º Elemento:</label>
-                      <input type="text" id="element01_2" name="element01_2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                    <div class="form-group">
-                      <label for="element02_2">2º Elemento:</label>
-                      <input type="text" id="element02_2" name="element02_2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="element03_2">3º Elemento:</label>
-                    <input type="text" id="element03_2" name="element03_2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                  </div>
-                </div>   
-              </div>
-              <div id="elac-inline-slot"></div>
-              <div class="elac-container" id="elac">
-                <div class="team-title">ELAC</div>
-                <div class="elac-row">
-                  <div class="form-group">
-                    <label for="elacChief">Chefe Equipa:</label>
-                    <input type="text" id="elacChief" name="elacChief" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                  </div>
-                  <div class="form-group">
-                    <label for="elacDriver">Motorista:</label>
-                    <input type="text" id="elacDriver" name="elacDriver" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                  </div>
-                </div>
-              </div>
-            </div>      
-          </form>
-          <button type="submit" class="send-button" id="sendButton">📤 Enviar Equipa</button>
-        </div>
-        <div class="popup-overlay" id="popupOverlay">
-          <div class="popup">
-            <h3 id="popupTitle"></h3>
-            <p id="popupMessage"></p>
-            <div class="popup-buttons" id="popupButtons">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="powered-by">
-          Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
-        </div>
-        <div class="footer-year">
-          © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
-        </div>
-      </div>
-    </footer>
-    <\script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('App pronta: ', reg.scope))
-            .catch(err => console.log('Erro no motor da App: ', err));
-        });
-      }
-    <\/script>
-    <\script>
-      /* ===================== SUPABASE CONFIGURATION ====================== */
-      const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
-      function getCorp() {return localStorage.getItem("currentCorpOperNr");}
-      function getNInt() {return localStorage.getItem("currentCorpNint");}
-      function getSupabaseHeaders(options = {}) {
-        const corp = getCorp();
-        const nint = getNInt();
-        const token = localStorage.getItem("authToken");
-        const headers = {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'x-my-corpo': corp,
-          'x-my-nint': nint,
-        };
-        if (options.returnRepresentation) {
-          headers['Prefer'] = 'return=representation';
-        }
-        return headers;
-      }
-      /* ======================= CORPORATION LOADING ======================= */
-      async function loadCorpInfo() {
-        const corpOperNr = localStorage.getItem("currentCorpOperNr");
-        const h2 = document.getElementById("corpInfo");
-        const logoEl = document.getElementById("corpLogo");
-        if (!corpOperNr) return;
-        const cachedLogo = localStorage.getItem("cached_logo_url");
-        if (cachedLogo && logoEl) logoEl.src = cachedLogo;
-        if (h2) h2.textContent = corpOperNr;
-        try {
-          const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
-              headers: getSupabaseHeaders()
-            }
-          );
-          if (!response.ok) return;
-          const data = await response.json();
-          if (data && data.length > 0 && data[0].logo_url && data[0].logo_url.trim() !== cachedLogo) {
-            localStorage.setItem("cached_logo_url", data[0].logo_url.trim());
-            if (logoEl) logoEl.src = data[0].logo_url.trim();
-          }
-        } catch (err) {
-          console.error('Erro no loadCorpInfo:', err);
-        }
-      }
-      /* ========================= TEAM DISPLAY ============================ */
-      let currentTeamType = null;
-      let elacOriginalParent = null;
-      let elacNextSibling = null;    
-      function showTeam(type) {
-        const teamInputs = document.querySelector('.team-inputs');
-        const sendButton = document.getElementById('sendButton');
-        const ecin01 = document.getElementById('ecin01');
-        const ecin02 = document.getElementById('ecin02');
-        const elac = document.getElementById('elac');
-        const elacSlot = document.getElementById('elac-inline-slot');
-        const form = document.getElementById('telegramForm');
-        document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('selected'));
-        const activeBtn = document.getElementById(type);
-        if (activeBtn) activeBtn.classList.add('selected');
-        if (!elacOriginalParent) {
-          elacOriginalParent = elac.parentNode;
-          elacNextSibling = elac.nextSibling;
-        }
-        teamInputs.style.display = 'block';
-        sendButton.style.display = 'block';
-        if (elac.parentNode !== elacOriginalParent) {
-          if (elacNextSibling) elacOriginalParent.insertBefore(elac, elacNextSibling);
-          else elacOriginalParent.appendChild(elac);
-        }
-        ecin01.style.display = 'none';
-        ecin02.style.display = 'none';
-        elac.style.display = 'none';
-        while (elacSlot.firstChild) elacSlot.removeChild(elacSlot.firstChild);
-        if (type === '1-ecin') ecin01.style.display = 'block';
-        else if (type === '1-ecin-1elac') { ecin01.style.display = 'block'; elac.style.display = 'block'; elacSlot.appendChild(elac); }
-        else if (type === 'bcin') { ecin01.style.display = 'block'; ecin02.style.display = 'block'; elac.style.display = 'block'; }    
-        currentTeamType = type;
-      }
-      /* ===================== TELEGRAM CONFIGURATION ====================== */
-      const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendToTelegram';
-      const MIN_ELEMENTS = 4;    
-      function debugLog() {}
-      function escapeHtml(v) {
-        return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-      }    
-      /* ==================== TELEGRAM MESSAGE ====================== */
-      function createTelegramMessage(data) {
-        debugLog('Criando mensagem Telegram', data);
-        const now = new Date();
-        const dateTime = now.toLocaleString('pt-PT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});    
-        let message = `🚨 <b>COMPOSIÇÃO DA EQUIPA</b> 🚨\n\n`;    
-        if (data.shift) {
-          const shiftText = data.shift === 'D' ? '"08:00 - 20:00"' : '"20:00 - 08:00"';
-          const shiftIcon = data.shift === 'D' ? '☀️' : '🌙';
-          message += `${shiftIcon} <b>Turno:</b> ${data.shift} - ${shiftText}\n\n`;
-        }
-        message += `<b>ECIN-01</b>\n\n`;
-        const ecin1Fields = [{label: '👨‍🚒 Chefe Equipa ECIN', value: data.chief}, {label: '🚒 Motorista ECIN', value: data.driver}, {label: '👤 1º Elemento ECIN', value: data.element01},
-                             {label: '👤 2º Elemento ECIN', value: data.element02}, {label: '👤 3º Elemento ECIN', value: data.element03}];
-        let ecin1Filled = 0;
-        ecin1Fields.forEach(el => { if(el.value){ message+=`${el.label}: ${el.value}\n`; ecin1Filled++; } });
-        message += `📊 Status ECIN: ${ecin1Filled}/${ecin1Fields.length} ${ecin1Filled===ecin1Fields.length?'✅ EQUIPA COMPLETA\n\n':'⚠️ EQUIPA INCOMPLETA\n\n'}`;
-        if(data.chief2 || data.driver2 || data.element01_2 || data.element02_2 || data.element03_2){
-          message += `<b>ECIN-02</b>\n\n`;
-          const ecin2Fields = [{label: '👨‍🚒 Chefe Equipa ECIN', value: data.chief2}, {label: '🚒 Motorista ECIN', value: data.driver2}, {label: '👤 1º Elemento ECIN', value: data.element01_2},
-                               {label: '👤 2º Elemento ECIN', value: data.element02_2}, {label: '👤 3º Elemento ECIN', value: data.element03_2}];
-          let ecin2Filled=0;
-          ecin2Fields.forEach(el=>{ if(el.value){ message+=`${el.label}: ${el.value}\n`; ecin2Filled++; } });
-          message += `📊 Status ECIN: ${ecin2Filled}/${ecin2Fields.length} ${ecin2Filled===ecin2Fields.length?'✅ EQUIPA COMPLETA\n\n':'⚠️ EQUIPA INCOMPLETA\n\n'}`;
-        }
-        if(data.elacChief || data.elacDriver){
-          message += `<b>ELAC</b>\n\n`;
-          const elacFields = [{label:'👨‍🚒 Chefe Equipa ELAC', value:data.elacChief}, {label:'🚒 Motorista ELAC', value:data.elacDriver}];
-          let elacFilled=0;
-          elacFields.forEach(el=>{ if(el.value){ message+=`${el.label}: ${el.value}\n`; elacFilled++; } });
-          message += `📊 Status ELAC: ${elacFilled}/${elacFields.length} ${elacFilled===elacFields.length?'✅ EQUIPA COMPLETA\n\n':'⚠️ EQUIPA INCOMPLETA\n\n'}`;
-        }    
-        message += `🕐 <b>Registado em:</b> ${dateTime}\n`;
-        debugLog('Mensagem criada', message);
-        return message;
-      }
-      /* =================== FORM DATA & VALIDATION =================== */
-      function validateNumericInput(input){
-        input.addEventListener('input', function(){ this.value=this.value.replace(/[^0-9]/g,''); if(this.value.length>3)this.value=this.value.slice(0,3); });
-      }
-      function getFormData(){
-        return {
-          shift: document.getElementById('shift').value.trim(),
-          chief: document.getElementById('chief').value.trim(),
-          driver: document.getElementById('driver').value.trim(),
-          element01: document.getElementById('element01').value.trim(),
-          element02: document.getElementById('element02').value.trim(),
-          element03: document.getElementById('element03').value.trim(),
-          chief2: document.getElementById('chief2') ? document.getElementById('chief2').value.trim() : '',
-          driver2: document.getElementById('driver2') ? document.getElementById('driver2').value.trim() : '',
-          element01_2: document.getElementById('element01_2') ? document.getElementById('element01_2').value.trim() : '',
-          element02_2: document.getElementById('element02_2') ? document.getElementById('element02_2').value.trim() : '',
-          element03_2: document.getElementById('element03_2') ? document.getElementById('element03_2').value.trim() : '',
-          elacChief: document.getElementById('elacChief') ? document.getElementById('elacChief').value.trim() : '',
-          elacDriver: document.getElementById('elacDriver') ? document.getElementById('elacDriver').value.trim() : ''
-        };
-      }    
-      function countTeamElements(fields){
-        return fields.filter(f=>f && f.trim()!=='').length;
-      }
-      function validateTeamsBeforeSend(data) {
-        if (!currentTeamType) return false;
-        const all = [data.chief, data.driver, data.element01, data.element02, data.element03, data.chief2, data.driver2,
-                     data.element01_2, data.element02_2, data.element03_2, data.elacChief, data.elacDriver]
-                    .filter(v => v).map(v => String(parseInt(v, 10)));
-        const dup = all.find((v, i) => all.indexOf(v) !== i);
-        if (dup) {
-          showPopup('🚫 Elemento Repetido', `<strong>O Nº ${escapeHtml(dup)} está em mais do que um lugar.</strong>`, [{text:'❌ Fechar',class:'cancel',action:hidePopup}], 'error');
-          return false;
-        }    
-        const ecin1Count = countTeamElements([data.chief, data.driver, data.element01, data.element02, data.element03]);
-        const ecin2Count = countTeamElements([data.chief2, data.driver2, data.element01_2, data.element02_2, data.element03_2]);
-        const elacCount = countTeamElements([data.elacChief, data.elacDriver]);    
-        if (currentTeamType === '1-ecin') {
-          if (ecin1Count < 4) {
-            showPopup(
-              '🚫 ECIN-01 Insuficiente',
-              `<strong>❌ ECIN-01 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin1Count}/5`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-        } else if (currentTeamType === '1-ecin-1elac') {
-          if (ecin1Count < 4) {
-            showPopup(
-              '🚫 ECIN-01 Insuficiente',
-              `<strong>❌ ECIN-01 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin1Count}/5`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-          if (elacCount < 1) {
-            showPopup(
-              '🚫 ELAC Insuficiente',
-              `<strong>❌ ELAC não possui elementos suficientes!</strong><br>Preenchidos: ${elacCount}/2`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-        } else if (currentTeamType === 'bcin') {
-          if (ecin1Count < 4) {
-            showPopup(
-              '🚫 ECIN-01 Insuficiente',
-              `<strong>❌ ECIN-01 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin1Count}/5`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-          if (ecin2Count < 4) {
-            showPopup(
-              '🚫 ECIN-02 Insuficiente',
-              `<strong>❌ ECIN-02 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin2Count}/5`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-          if (elacCount < 1) {
-            showPopup(
-              '🚫 ELAC Insuficiente',
-              `<strong>❌ ELAC não possui elementos suficientes!</strong><br>Preenchidos: ${elacCount}/2`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-        }    
-        return true;
-      }
-      /* =================== POPUPS & LOADING =================== */
-      function showPopup(title,message,buttons,titleClass='warning'){
-        document.getElementById('popupTitle').textContent=title;
-        document.getElementById('popupTitle').className=titleClass;
-        document.getElementById('popupMessage').innerHTML=message;
-        const container=document.getElementById('popupButtons'); container.innerHTML='';
-        buttons.forEach(btn=>{
-          const b=document.createElement('button'); b.className=`popup-button ${btn.class}`; b.textContent=btn.text; b.onclick=btn.action; container.appendChild(b);
-        });
-        document.getElementById('popupOverlay').style.display='flex';
-      }
-      function hidePopup(){
-        document.getElementById('popupOverlay').style.display='none';
-      }
-      function showLoading(show){
-        const button=document.getElementById('sendButton');
-        if(!button)return console.error('❌ Botão sendButton não encontrado!');
-        button.disabled=show; button.innerHTML=show?'⏳ A Enviar...':'📤 Enviar Equipa';
-      }
-      function showSuccessPopup(){
-        showPopup('✅ Sucesso!','<strong>Mensagem enviada com sucesso para a SALOC!</strong>',[{text:'👍 OK',class:'ok',action:()=> {hidePopup();document.getElementById('telegramForm').reset(); showTeam('1-ecin');}}],'success');}
-      function showErrorPopup(errorMessage){ showPopup('❌ Erro no Envio',`<strong>Não foi possível enviar a mensagem!</strong><br>${escapeHtml(errorMessage)}`,[{text:'🔄 Tentar Novamente',class:'confirm',action: ()=>{hidePopup();processFormSubmission();}},{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error');}
-      /* =================== SEND TELEGRAM =================== */
-      async function sendTelegramMessage(message) {
-        const corpRaw = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
-        if (!corpRaw) {
-          showErrorPopup('Sessão inválida. Volte a iniciar sessão.');
-          return;
-        }
-        const corpOperNr = corpRaw.padStart(4, "0");
-        showLoading(true);
-        try {
-          const response = await fetch(TELEGRAM_API, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({message, corp_oper_nr: corpOperNr})
-          });
-          showLoading(false);
-          if (response.ok) showSuccessPopup();
-          else {
-            console.error('Erro Telegram:', response.status, await response.text().catch(() => ''));
-            showErrorPopup(response.status === 413 ? 'Mensagem demasiado grande.' : 'O servidor não aceitou o envio. Tente novamente.');
-          }
-        } catch (err) {
-          showLoading(false);
-          console.error(err);
-          showErrorPopup('Sem ligação ao servidor. Verifique a rede e tente novamente.');
-        }
-      }
-      function processFormSubmission(){
-        if (document.getElementById('sendButton')?.disabled) return;
-        const data=getFormData();
-        if(!data.shift){ showPopup('⚠️ Turno Obrigatório','<strong>Por favor selecione o turno!</strong>',[{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error'); return; }
-        if(!validateTeamsBeforeSend(data)) return;
-        const message=createTelegramMessage(data);
-        sendTelegramMessage(message);
-      }
-      /* =================== DOM EVENTS =================== */
-      document.addEventListener('DOMContentLoaded', function() {
-        const savedTheme = localStorage.getItem('sgo-theme');
-        if (savedTheme === 'dark') {
-          document.body.classList.add('dark-mode');
-        }      
-        loadCorpInfo();
-        const fy = document.getElementById('footerYear');
-        if (fy) fy.textContent = new Date().getFullYear();
-        document.querySelectorAll('input[type="text"]').forEach(validateNumericInput);      
-        const sendButton = document.getElementById('sendButton');
-        if (sendButton) {
-          sendButton.addEventListener('click', function() {
-            processFormSubmission();
-          });
-        }
-        const popupOverlay = document.getElementById('popupOverlay');
-        if (popupOverlay) {
-          popupOverlay.addEventListener('click', e => {
-            if (e.target === popupOverlay) hidePopup();
-          });
-        }
-        document.addEventListener('touchstart', (event) => {
-          if (event.touches.length > 1) event.preventDefault();
-        }, { passive: false });
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (event) => {
-          const now = new Date().getTime();
-          if (now - lastTouchEnd <= 300) event.preventDefault();
-          lastTouchEnd = now;
-        }, false);
-        debugLog('Inicialização completa');
-        showTeam('1-ecin');
-      });    
-      document.addEventListener('selectstart', e => e.preventDefault());
-      document.addEventListener('contextmenu', e => e.preventDefault());
     <\/script>
   </body>
   </html>
