@@ -450,6 +450,10 @@
       .central-item.unread {opacity: 1 !important; box-shadow: inset 3px 0 0 var(--red); cursor: pointer;}
       .central-item .novo {font-size: 9.5px; font-weight: 800; color: var(--red); letter-spacing: .5px;}
       .central-list-row {display: flex; align-items: center; justify-content: space-between; gap: 8px;}
+      .central-rt {display: block; font-size: 10.5px; font-weight: 600; color: var(--txt-3); margin-top: 2px;}
+      .central-rt i {display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #9aa3ad; margin-right: 5px; vertical-align: 1px;}
+      .central-rt.on i {background: #2e7d32; box-shadow: 0 0 0 3px rgba(46,125,50,.18);}
+      .central-rt.bad {color: #c62828;} .central-rt.bad i {background: #c62828;}
       .central-readall {border: 0; background: none; color: var(--red); font-family: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; padding: 0; display: none;}
       .central-empty {font-size: 12.5px; color: var(--txt-3); text-align: center; padding: 8px;}
       .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex;}
@@ -1204,7 +1208,7 @@
           <div class="central-scales">
             <button type="button" onclick="__go('ScalesViewProf.html')"><span class="material-icons">event_note</span>Planeamento Diário</button>
           </div>
-          <div class="central-list-row"><div class="central-list-h">Últimos estados (hoje)</div><button type="button" class="central-readall" id="centralReadAll">Marcar todos como lidos</button></div>
+          <div class="central-list-row"><div><div class="central-list-h">Últimos estados (hoje)</div><span class="central-rt" id="centralRt"><i></i>A ligar ao tempo real…</span></div><button type="button" class="central-readall" id="centralReadAll">Marcar todos como lidos</button></div>
           <div class="central-list" id="centralList"><div class="central-empty">A carregar…</div></div>`;
         document.querySelector('.welcome-row')?.insertAdjacentElement('afterend', card);
         renderCentralNotif();
@@ -1218,20 +1222,32 @@
       /* tempo real (Supabase): qualquer estado novo ou marcado como lido atualiza a lista na hora */
       let centralRtTimer = null;
       function centralRtRefresh() { clearTimeout(centralRtTimer); centralRtTimer = setTimeout(loadCentralList, 300); }
+      function centralRtState(cls, txt) {
+        const el = document.getElementById('centralRt'); if (!el) return;
+        el.className = 'central-rt' + (cls ? ' ' + cls : '');
+        el.innerHTML = '<i></i>' + escapeHtml(txt);
+      }
       function startCentralRealtime() {
         const go = () => {
           try {
             const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {accessToken: async () => localStorage.getItem('authToken')});
             client.channel(`central-estados-${getCorpPadded()}`)
-              .on('postgres_changes', {event: '*', schema: 'public', table: 'vehicle_status_log', filter: `corp_oper_nr=eq.${getCorpPadded()}`}, centralRtRefresh)
-              .subscribe(st => { if (st === 'SUBSCRIBED') loadCentralList(); });
-          } catch (e) { console.warn('Tempo real dos estados:', e); }
+              .on('postgres_changes', {event: '*', schema: 'public', table: 'vehicle_status_log', filter: `corp_oper_nr=eq.${getCorpPadded()}`}, () => {
+                centralRtState('on', 'Tempo real ligado · último às ' + new Date().toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit', second: '2-digit'}));
+                centralRtRefresh();
+              })
+              .subscribe((st, err) => {
+                if (st === 'SUBSCRIBED') { centralRtState('on', 'Tempo real ligado'); loadCentralList(); }
+                else if (st === 'CLOSED') centralRtState('bad', 'Tempo real desligado (atualiza de minuto a minuto)');
+                else centralRtState('bad', 'Tempo real: ' + st + (err && err.message ? ' — ' + err.message : '') + ' (atualiza de minuto a minuto)');
+              });
+          } catch (e) { console.warn('Tempo real dos estados:', e); centralRtState('bad', 'Tempo real: erro — ' + (e.message || e)); }
         };
         if (window.supabase && window.supabase.createClient) return go();
         const sc = document.createElement('script');
         sc.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
         sc.onload = go;
-        sc.onerror = () => console.warn('Tempo real dos estados: biblioteca do Supabase não carregou (fica a atualização de minuto a minuto).');
+        sc.onerror = () => centralRtState('bad', 'Tempo real: biblioteca do Supabase não carregou (atualiza de minuto a minuto)');
         document.head.appendChild(sc);
       }
       function renderCentralNotif() {
@@ -30770,7 +30786,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.30 - 2026-11-17 - MainPage reposta (+ ScalesViewProf DP)';
+  window.CB360_BUILD='v22.31 - 2026-11-17 - Central: indicador do tempo real';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
