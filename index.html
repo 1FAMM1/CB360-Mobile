@@ -24586,6 +24586,25 @@
       .row-add .material-icons {font-size: 18px;}
       .zone {border-left: 4px solid; padding-left: 8px;}
       .zone.hot {border-color: #d32f2f;} .zone.warm {border-color: #f9a825;} .zone.cold {border-color: #2e7d32;}
+      /* importar da FNI (Online) */
+      .fni-import {flex: none; display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; height: 40px; border: 1px dashed var(--red); border-radius: 12px;
+                   background: var(--red-light); color: var(--red-icon); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;}
+      .fni-import .material-icons {font-size: 19px;}
+      .fni-import.done {border-style: solid; border-color: rgba(46,125,50,.45); background: rgba(46,125,50,.10); color: var(--green, #2e7d32);}
+      .fni-sheet {position: fixed; inset: 0; z-index: 1200; background: rgba(0,0,0,.45); display: none; align-items: flex-end; justify-content: center;}
+      .fni-sheet.open {display: flex;}
+      .fni-box {width: 100%; max-width: 700px; max-height: 75vh; background: var(--bg); border-radius: 20px 20px 0 0; padding: 14px 14px calc(14px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px;
+                box-shadow: 0 -6px 24px rgba(0,0,0,.25);}
+      .fni-box h3 {font-size: 14px; font-weight: 800; color: var(--txt-1); display: flex; align-items: center; gap: 8px;}
+      .fni-box h3 .material-icons {color: var(--red-icon); font-size: 20px;}
+      .fni-box p {font-size: 12px; color: var(--txt-2); line-height: 1.4;}
+      .fni-list {overflow-y: auto; display: flex; flex-direction: column; gap: 8px; scrollbar-width: none;}
+      .fni-list::-webkit-scrollbar {display: none;}
+      .fni-item {border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 10px 12px; text-align: left; font: inherit; color: var(--txt-1); cursor: pointer; display: flex; flex-direction: column; gap: 2px;}
+      .fni-item b {font-size: 13.5px;} .fni-item small {font-size: 11.5px; color: var(--txt-2);}
+      .fni-item .st {font-weight: 700;} .fni-item .st.sent {color: var(--green, #2e7d32);}
+      .fni-empty {text-align: center; font-size: 13px; color: var(--txt-2); padding: 18px 8px;}
+      .fni-close {height: 42px; border: 1px solid var(--line); background: var(--surface); color: var(--txt-2); border-radius: 12px; font: inherit; font-weight: 700; cursor: pointer;}
       /* barra de ações */
       .actions {flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 10px;}
       .actions-in {display: flex; gap: 10px;}
@@ -24631,6 +24650,7 @@
             <div class="draft" id="draftInfo"><span class="material-icons">cloud_done</span>O rascunho fica guardado neste telemóvel</div>
           </div>
       </div>
+      <button type="button" class="fni-import" id="btnFni"><span class="material-icons">move_down</span><span>Importar dados da FNI</span></button>
       <div class="fields-box">
         <div class="scroll" id="scroll">
           <div id="form"></div>
@@ -24641,6 +24661,14 @@
           <button type="button" class="btn btn-ghost" id="btnClear"><span class="material-icons">restart_alt</span><span>Nova</span></button>
           <button type="button" class="btn btn-main" id="btnPdf"><span class="material-icons">picture_as_pdf</span><span>Gerar PDF e partilhar</span></button>
         </div>
+      </div>
+    </div>
+    <div class="fni-sheet" id="fniSheet">
+      <div class="fni-box">
+        <h3><span class="material-icons">campaign</span>Importar da FNI</h3>
+        <p>Escolha a Ficha de Notificação Inicial feita no CB360 Online. Só são preenchidos os campos que ainda estão vazios nesta ficha.</p>
+        <div class="fni-list" id="fniList"></div>
+        <button type="button" class="fni-close" id="fniClose">Fechar</button>
       </div>
     </div>
     <div class="toast" id="toast"></div>
@@ -24761,6 +24789,7 @@
         document.querySelectorAll('textarea.in').forEach(grow);
         refresh();
         save();
+        fniBtnState();
       }
       /* acordeão: só uma secção aberta de cada vez */
       function openSec(sec, toggle, keepScroll) {
@@ -24977,6 +25006,63 @@
         const name = `${SPEC.file}${occ ? '_' + occ : ''}_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.pdf`;
         return new File([doc.output('blob')], name, {type: 'application/pdf'});
       }
+      /* ----------------------------- IMPORTAR DA FNI (feita no Online, tabela nrbq_forms) ----------------------------- */
+      const NRBQ_SB_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+      const NRBQ_SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+      const FNI_SKIP = ['optel', 'operador'];          /* quem preenche esta ficha não é quem atendeu a notificação */
+      function fniHeaders() {
+        return {apikey: NRBQ_SB_ANON, Authorization: `Bearer ${lsGet('authToken') || ''}`, 'Content-Type': 'application/json'};
+      }
+      function fniBtnState() {
+        const b = $('btnFni'); if (!b) return;
+        b.classList.toggle('done', !!DATA._fni_id);
+        b.lastElementChild.textContent = DATA._fni_id ? `Dados importados da FNI n.º ${DATA._fni_id} · trocar` : 'Importar dados da FNI';
+      }
+      function fniFmt(iso) { const d = new Date(iso); return isNaN(d) ? '' : `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+      async function fniOpen() {
+        const list = $('fniList');
+        $('fniSheet').classList.add('open');
+        list.innerHTML = '<div class="fni-empty">A carregar fichas…</div>';
+        try {
+          const r = await fetch(`${NRBQ_SB_URL}/rest/v1/nrbq_forms?select=id,occurrence_nr,status,updated_at,data&corp_oper_nr=eq.${corp}&form_type=eq.FNI&order=updated_at.desc&limit=25`, {headers: fniHeaders()});
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const rows = await r.json();
+          if (!rows.length) { list.innerHTML = '<div class="fni-empty">Ainda não há nenhuma FNI gravada no CB360 Online.</div>'; return; }
+          const occ = String(DATA.ocorrencia || '').trim();
+          rows.sort((a, b) => (occ && b.occurrence_nr === occ) - (occ && a.occurrence_nr === occ));
+          list.innerHTML = rows.map(x => {
+            const dd = x.data || {};
+            const where = dd.local || dd.localidade || dd.estab_morada || '';
+            return `<button type="button" class="fni-item" data-fni="${x.id}">
+              <b>FNI n.º ${x.id} · ${esc(x.occurrence_nr || 'sem ocorrência')}${occ && x.occurrence_nr === occ ? ' · esta ocorrência' : ''}</b>
+              <small>${esc(where || 'Local não indicado')}</small>
+              <small>${fniFmt(x.updated_at)} · <span class="st ${x.status === 'enviada' ? 'sent' : ''}">${x.status === 'enviada' ? 'Enviada' : 'Rascunho'}</span></small>
+            </button>`;
+          }).join('');
+          list.querySelectorAll('[data-fni]').forEach(b => b.onclick = () => fniImport(rows.find(x => String(x.id) === b.dataset.fni)));
+        } catch (e) {
+          console.warn('Importar da FNI:', e);
+          list.innerHTML = '<div class="fni-empty">Não foi possível carregar as fichas. Verifique a ligação à internet.</div>';
+        }
+      }
+      function fniImport(row) {
+        if (!row) return;
+        const src = row.data || {};
+        let n = 0;
+        FIELDS.forEach(f => {
+          if (FNI_SKIP.includes(f.k) || !(f.k in src)) return;
+          const v = src[f.k];
+          const has = Array.isArray(v) ? v.length : v != null && String(v).trim() !== '';
+          if (!has || filled(f)) return;
+          DATA[f.k] = Array.isArray(v) ? v.slice() : v;
+          n++;
+        });
+        DATA._fni_id = row.id;
+        $('fniSheet').classList.remove('open');
+        render();
+        fniBtnState();
+        toast(n ? `${n} campo(s) preenchido(s) com a FNI n.º ${row.id}.` : `A FNI n.º ${row.id} não tinha dados novos para esta ficha.`, 3200);
+      }
       /* ----------------------------- arranque ----------------------------- */
       document.addEventListener('DOMContentLoaded', () => {
         if (lsGet('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
@@ -24984,6 +25070,10 @@
         if (logo) $('corpLogo').src = logo;
         $('footerYear').textContent = new Date().getFullYear();
         render();
+        fniBtnState();
+        $('btnFni').onclick = fniOpen;
+        $('fniClose').onclick = () => $('fniSheet').classList.remove('open');
+        $('fniSheet').onclick = e => { if (e.target.id === 'fniSheet') $('fniSheet').classList.remove('open'); };
       });
     <\/script>
   </body>
@@ -25112,6 +25202,25 @@
       .row-add .material-icons {font-size: 18px;}
       .zone {border-left: 4px solid; padding-left: 8px;}
       .zone.hot {border-color: #d32f2f;} .zone.warm {border-color: #f9a825;} .zone.cold {border-color: #2e7d32;}
+      /* importar da FNI (Online) */
+      .fni-import {flex: none; display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; height: 40px; border: 1px dashed var(--red); border-radius: 12px;
+                   background: var(--red-light); color: var(--red-icon); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;}
+      .fni-import .material-icons {font-size: 19px;}
+      .fni-import.done {border-style: solid; border-color: rgba(46,125,50,.45); background: rgba(46,125,50,.10); color: var(--green, #2e7d32);}
+      .fni-sheet {position: fixed; inset: 0; z-index: 1200; background: rgba(0,0,0,.45); display: none; align-items: flex-end; justify-content: center;}
+      .fni-sheet.open {display: flex;}
+      .fni-box {width: 100%; max-width: 700px; max-height: 75vh; background: var(--bg); border-radius: 20px 20px 0 0; padding: 14px 14px calc(14px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px;
+                box-shadow: 0 -6px 24px rgba(0,0,0,.25);}
+      .fni-box h3 {font-size: 14px; font-weight: 800; color: var(--txt-1); display: flex; align-items: center; gap: 8px;}
+      .fni-box h3 .material-icons {color: var(--red-icon); font-size: 20px;}
+      .fni-box p {font-size: 12px; color: var(--txt-2); line-height: 1.4;}
+      .fni-list {overflow-y: auto; display: flex; flex-direction: column; gap: 8px; scrollbar-width: none;}
+      .fni-list::-webkit-scrollbar {display: none;}
+      .fni-item {border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 10px 12px; text-align: left; font: inherit; color: var(--txt-1); cursor: pointer; display: flex; flex-direction: column; gap: 2px;}
+      .fni-item b {font-size: 13.5px;} .fni-item small {font-size: 11.5px; color: var(--txt-2);}
+      .fni-item .st {font-weight: 700;} .fni-item .st.sent {color: var(--green, #2e7d32);}
+      .fni-empty {text-align: center; font-size: 13px; color: var(--txt-2); padding: 18px 8px;}
+      .fni-close {height: 42px; border: 1px solid var(--line); background: var(--surface); color: var(--txt-2); border-radius: 12px; font: inherit; font-weight: 700; cursor: pointer;}
       /* barra de ações */
       .actions {flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 10px;}
       .actions-in {display: flex; gap: 10px;}
@@ -25157,6 +25266,7 @@
             <div class="draft" id="draftInfo"><span class="material-icons">cloud_done</span>O rascunho fica guardado neste telemóvel</div>
           </div>
       </div>
+      <button type="button" class="fni-import" id="btnFni"><span class="material-icons">move_down</span><span>Importar dados da FNI</span></button>
       <div class="fields-box">
         <div class="scroll" id="scroll">
           <div id="form"></div>
@@ -25167,6 +25277,14 @@
           <button type="button" class="btn btn-ghost" id="btnClear"><span class="material-icons">restart_alt</span><span>Nova</span></button>
           <button type="button" class="btn btn-main" id="btnPdf"><span class="material-icons">picture_as_pdf</span><span>Gerar PDF e partilhar</span></button>
         </div>
+      </div>
+    </div>
+    <div class="fni-sheet" id="fniSheet">
+      <div class="fni-box">
+        <h3><span class="material-icons">campaign</span>Importar da FNI</h3>
+        <p>Escolha a Ficha de Notificação Inicial feita no CB360 Online. Só são preenchidos os campos que ainda estão vazios nesta ficha.</p>
+        <div class="fni-list" id="fniList"></div>
+        <button type="button" class="fni-close" id="fniClose">Fechar</button>
       </div>
     </div>
     <div class="toast" id="toast"></div>
@@ -25287,6 +25405,7 @@
         document.querySelectorAll('textarea.in').forEach(grow);
         refresh();
         save();
+        fniBtnState();
       }
       /* acordeão: só uma secção aberta de cada vez */
       function openSec(sec, toggle, keepScroll) {
@@ -25503,6 +25622,63 @@
         const name = `${SPEC.file}${occ ? '_' + occ : ''}_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.pdf`;
         return new File([doc.output('blob')], name, {type: 'application/pdf'});
       }
+      /* ----------------------------- IMPORTAR DA FNI (feita no Online, tabela nrbq_forms) ----------------------------- */
+      const NRBQ_SB_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+      const NRBQ_SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+      const FNI_SKIP = ['optel', 'operador'];          /* quem preenche esta ficha não é quem atendeu a notificação */
+      function fniHeaders() {
+        return {apikey: NRBQ_SB_ANON, Authorization: `Bearer ${lsGet('authToken') || ''}`, 'Content-Type': 'application/json'};
+      }
+      function fniBtnState() {
+        const b = $('btnFni'); if (!b) return;
+        b.classList.toggle('done', !!DATA._fni_id);
+        b.lastElementChild.textContent = DATA._fni_id ? `Dados importados da FNI n.º ${DATA._fni_id} · trocar` : 'Importar dados da FNI';
+      }
+      function fniFmt(iso) { const d = new Date(iso); return isNaN(d) ? '' : `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+      async function fniOpen() {
+        const list = $('fniList');
+        $('fniSheet').classList.add('open');
+        list.innerHTML = '<div class="fni-empty">A carregar fichas…</div>';
+        try {
+          const r = await fetch(`${NRBQ_SB_URL}/rest/v1/nrbq_forms?select=id,occurrence_nr,status,updated_at,data&corp_oper_nr=eq.${corp}&form_type=eq.FNI&order=updated_at.desc&limit=25`, {headers: fniHeaders()});
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const rows = await r.json();
+          if (!rows.length) { list.innerHTML = '<div class="fni-empty">Ainda não há nenhuma FNI gravada no CB360 Online.</div>'; return; }
+          const occ = String(DATA.ocorrencia || '').trim();
+          rows.sort((a, b) => (occ && b.occurrence_nr === occ) - (occ && a.occurrence_nr === occ));
+          list.innerHTML = rows.map(x => {
+            const dd = x.data || {};
+            const where = dd.local || dd.localidade || dd.estab_morada || '';
+            return `<button type="button" class="fni-item" data-fni="${x.id}">
+              <b>FNI n.º ${x.id} · ${esc(x.occurrence_nr || 'sem ocorrência')}${occ && x.occurrence_nr === occ ? ' · esta ocorrência' : ''}</b>
+              <small>${esc(where || 'Local não indicado')}</small>
+              <small>${fniFmt(x.updated_at)} · <span class="st ${x.status === 'enviada' ? 'sent' : ''}">${x.status === 'enviada' ? 'Enviada' : 'Rascunho'}</span></small>
+            </button>`;
+          }).join('');
+          list.querySelectorAll('[data-fni]').forEach(b => b.onclick = () => fniImport(rows.find(x => String(x.id) === b.dataset.fni)));
+        } catch (e) {
+          console.warn('Importar da FNI:', e);
+          list.innerHTML = '<div class="fni-empty">Não foi possível carregar as fichas. Verifique a ligação à internet.</div>';
+        }
+      }
+      function fniImport(row) {
+        if (!row) return;
+        const src = row.data || {};
+        let n = 0;
+        FIELDS.forEach(f => {
+          if (FNI_SKIP.includes(f.k) || !(f.k in src)) return;
+          const v = src[f.k];
+          const has = Array.isArray(v) ? v.length : v != null && String(v).trim() !== '';
+          if (!has || filled(f)) return;
+          DATA[f.k] = Array.isArray(v) ? v.slice() : v;
+          n++;
+        });
+        DATA._fni_id = row.id;
+        $('fniSheet').classList.remove('open');
+        render();
+        fniBtnState();
+        toast(n ? `${n} campo(s) preenchido(s) com a FNI n.º ${row.id}.` : `A FNI n.º ${row.id} não tinha dados novos para esta ficha.`, 3200);
+      }
       /* ----------------------------- arranque ----------------------------- */
       document.addEventListener('DOMContentLoaded', () => {
         if (lsGet('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
@@ -25510,11 +25686,14 @@
         if (logo) $('corpLogo').src = logo;
         $('footerYear').textContent = new Date().getFullYear();
         render();
+        fniBtnState();
+        $('btnFni').onclick = fniOpen;
+        $('fniClose').onclick = () => $('fniSheet').classList.remove('open');
+        $('fniSheet').onclick = e => { if (e.target.id === 'fniSheet') $('fniSheet').classList.remove('open'); };
       });
     <\/script>
   </body>
   </html>
-</script>
 <script type="text/x-cb360" data-page="DecirTeam"><!DOCTYPE html>
   <html lang="pt-PT" style="background-color: #0f1117;">
   <head>
@@ -30821,7 +31000,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.36 - 2026-11-17 - Central: sinal de tempo real (SQL 41)';
+  window.CB360_BUILD='v22.37 - 2026-11-17 - Central: sinal de tempo real (SQL 41)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s)['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
