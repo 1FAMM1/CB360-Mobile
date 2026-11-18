@@ -456,6 +456,36 @@
       .central-rt.bad {color: #c62828;} .central-rt.bad i {background: #c62828;}
       .central-readall {border: 0; background: none; color: var(--red); font-family: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; padding: 0; display: none;}
       .central-empty {font-size: 12.5px; color: var(--txt-3); text-align: center; padding: 8px;}
+      /* atualizações do terreno (ocr_field_updates): lista na Central + modal com as fotos */
+      .ofc-wrap {display: flex; flex-direction: column; gap: 6px;}
+      .ofc-wrap[hidden] {display: none;}
+      .ofc-item {cursor: pointer;}
+      .ofc-item .ofc-txt {min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+      .ofc-item .ofc-ph {display: inline-flex; align-items: center; gap: 2px; color: var(--txt-3); font-size: 11.5px; flex-shrink: 0;}
+      .ofc-item .ofc-ph .material-icons {font-size: 14px;}
+      #ofcModal {z-index: 300;}
+      #ofcModal .modal-body {max-height: 62vh; display: flex; flex-direction: column; gap: 10px;}
+      .ofc-occ {font-size: 15px; font-weight: 700; color: var(--txt-1); line-height: 1.35;}
+      .ofc-meta {display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 12.5px;}
+      .ofc-meta span {color: var(--txt-3);}
+      .ofc-meta b {color: var(--txt-1); font-weight: 600; min-width: 0; overflow-wrap: anywhere;}
+      .ofc-st {display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 700; color: #fff;}
+      .ofc-msg {background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--txt-1); white-space: pre-wrap; overflow-wrap: anywhere;}
+      .ofc-thumbs {display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;}
+      .ofc-thumbs button {position: relative; aspect-ratio: 1; border: 0; padding: 0; border-radius: 10px; overflow: hidden; background: var(--surface-2); cursor: pointer;}
+      .ofc-thumbs img {width: 100%; height: 100%; object-fit: cover; display: block;}
+      .ofc-read {font-size: 11.5px; color: var(--txt-3);}
+      .ofc-btn {border: 0; border-radius: 10px; padding: 9px 14px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;}
+      .ofc-btn.sec {background: var(--surface-2); color: var(--txt-1);}
+      .ofc-btn.pri {background: var(--red); color: #fff;}
+      .ofc-btn .material-icons {font-size: 18px;}
+      #ofcLight {display: none; position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.92); align-items: center; justify-content: center; padding: calc(var(--sai-top, 0px) + 50px) 10px calc(var(--sai-bottom, 0px) + 50px);}
+      #ofcLight.show {display: flex;}
+      #ofcLight img {max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px;}
+      #ofcLight .ofc-x {position: absolute; top: calc(var(--sai-top, 0px) + 10px); right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255,255,255,.16); color: #fff; display: flex; align-items: center; justify-content: center;}
+      #ofcLight .ofc-nav {position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255,255,255,.16); color: #fff; display: flex; align-items: center; justify-content: center;}
+      #ofcLight .ofc-nav.l {left: 8px;} #ofcLight .ofc-nav.r {right: 8px;}
+      #ofcLight .ofc-cnt {position: absolute; bottom: calc(var(--sai-bottom, 0px) + 14px); left: 0; right: 0; text-align: center; color: #fff; font-size: 12.5px;}
       .grid-card {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-md); overflow: hidden; flex: 1; display: flex;}
       .btn-grid {display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(6, minmax(0, 1fr)); flex: 1; width: 100%; height: 100%;}    
       /* ============================================================
@@ -1209,15 +1239,20 @@
             <button type="button" onclick="__go('ScalesViewProf.html')"><span class="material-icons">event_note</span>Planeamento Diário</button>
           </div>
           <div class="central-list-row"><div><div class="central-list-h">Últimos estados (hoje)</div><span class="central-rt" id="centralRt"><i></i>A ligar ao tempo real…</span></div><button type="button" class="central-readall" id="centralReadAll">Marcar todos como lidos</button></div>
-          <div class="central-list" id="centralList"><div class="central-empty">A carregar…</div></div>`;
+          <div class="central-list" id="centralList"><div class="central-empty">A carregar…</div></div>
+          <div class="ofc-wrap" id="ofcWrap" hidden>
+            <div class="central-list-row"><div class="central-list-h">Atualizações do terreno</div><button type="button" class="central-readall" id="ofcReadAll">Marcar todas como vistas</button></div>
+            <div class="central-list" id="ofcList"></div>
+          </div>`;
         document.querySelector('.welcome-row')?.insertAdjacentElement('afterend', card);
         renderCentralNotif();
         if ('Notification' in window && Notification.permission === 'granted') initializePushWithoutPermission().catch(() => {});
         loadCentralList();
+        loadOfcList();
         startCentralRealtime();
-        /* rede de segurança: se o tempo real cair, a lista atualiza na mesma de minuto a minuto */
-        setInterval(() => { if (!document.hidden) loadCentralList(); }, 60000);
-        document.addEventListener('visibilitychange', () => { if (!document.hidden) loadCentralList(); });
+        /* rede de segurança: se o tempo real cair, as listas atualizam na mesma de minuto a minuto */
+        setInterval(() => { if (!document.hidden) { loadCentralList(); loadOfcList(); } }, 60000);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) { loadCentralList(); loadOfcList(); } });
       }
       /* tempo real (Supabase): qualquer estado novo ou marcado como lido atualiza a lista na hora */
       let centralRtTimer = null;
@@ -1228,13 +1263,14 @@
         el.innerHTML = '<i></i>' + escapeHtml(txt);
       }
       /* tempo real: liga, e volta a ligar sozinho se a ligação cair (ecrã apagado, rede, app em segundo plano) */
-      let centralRt = {client: null, ch: null, retry: null, closing: false};
+      let centralRt = {client: null, ch: null, ch2: null, retry: null, closing: false};
       async function centralRtConnect() {
         const rt = centralRt;
         clearTimeout(rt.retry);
         try {
           if (!rt.client) rt.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {accessToken: async () => localStorage.getItem('authToken')});
           if (rt.ch) { const old = rt.ch; rt.ch = null; try { await rt.client.removeChannel(old); } catch (_) {} }
+          if (rt.ch2) { const old = rt.ch2; rt.ch2 = null; try { await rt.client.removeChannel(old); } catch (_) {} }
           const got = () => {
             centralRtState('on', 'Tempo real ligado · último às ' + new Date().toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit', second: '2-digit'}));
             centralRtRefresh();
@@ -1252,6 +1288,11 @@
               rt.retry = setTimeout(centralRtConnect, 5000);
             });
           rt.ch = ch;
+          /* atualizações do terreno (SQL 42): sinal "mudou" no tópico cb360-ocr-<corp> */
+          const ch2 = rt.client.channel(`cb360-ocr-${getCorpPadded()}`)
+            .on('broadcast', {event: 'mudou'}, ofcRefresh)
+            .subscribe(st => { if (rt.ch2 === ch2 && st === 'SUBSCRIBED') loadOfcList(); });
+          rt.ch2 = ch2;
         } catch (e) {
           centralRtState('bad', 'Tempo real: erro — ' + (e.message || e) + ' · a religar…');
           rt.retry = setTimeout(centralRtConnect, 10000);
@@ -1260,7 +1301,8 @@
       function centralRtCheck() {
         const ch = centralRt.ch;
         if (!centralRt.client) return;
-        if (!ch || ch.state !== 'joined' || !centralRt.client.realtime.isConnected()) centralRtConnect();
+        const ch2 = centralRt.ch2;
+        if (!ch || ch.state !== 'joined' || !ch2 || ch2.state !== 'joined' || !centralRt.client.realtime.isConnected()) centralRtConnect();
       }
       function startCentralRealtime() {
         const go = () => {
@@ -1321,6 +1363,169 @@
         } catch (e) {
           list.innerHTML = '<div class="central-empty">Não foi possível carregar os estados.</div>';
         }
+      }
+      /* ================= ATUALIZAÇÕES DO TERRENO (Central) =================
+         Enviadas pelas equipas em Ocorrências em Curso (tabela ocr_field_updates, fotos no bucket privado ocr_photos).
+         Só aparece quando há atualizações de hoje ou por ver; tocar abre o modal com as fotos.
+         Quando chega uma nova (push ou tempo real) o modal abre sozinho. */
+      const OFC = {rows: [], urls: {}, cur: null, photos: [], idx: 0, seen: null, timer: null};
+      const OFC_ST = {'Em Curso': '#ef6c00', 'Finalizada': '#2e7d32'};
+      function ofcRefresh() { clearTimeout(OFC.timer); OFC.timer = setTimeout(loadOfcList, 300); }
+      function ofcSeen() {
+        if (!OFC.seen) { try { OFC.seen = new Set(JSON.parse(sessionStorage.getItem('ofcSeen') || '[]')); } catch (_) { OFC.seen = new Set(); } }
+        return OFC.seen;
+      }
+      function ofcMarkSeen(id) {
+        const s = ofcSeen(); s.add(id);
+        try { sessionStorage.setItem('ofcSeen', JSON.stringify([...s].slice(-200))); } catch (_) {}
+      }
+      async function loadOfcList() {
+        const wrap = document.getElementById('ofcWrap'), list = document.getElementById('ofcList');
+        if (!wrap || !list) return;
+        try {
+          const d = new Date(); d.setHours(0, 0, 0, 0);
+          const sel = 'id,occurrence_id,occurrence,local,status,message,photos,sender_name,created_at,is_read,read_at,read_by';
+          const base = `${SUPABASE_URL}/rest/v1/ocr_field_updates?select=${sel}&corp_oper_nr=eq.${getCorpPadded()}`;
+          const [r1, r2] = await Promise.all([
+            fetch(`${base}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=8`, {headers: getSupabaseHeaders()}),
+            fetch(`${base}&is_read=eq.false&order=created_at.desc&limit=8`, {headers: getSupabaseHeaders()})
+          ]);
+          if (!r1.ok && !r2.ok) throw new Error('HTTP ' + r1.status);
+          const byId = new Map();
+          [...(r1.ok ? await r1.json() : []), ...(r2.ok ? await r2.json() : [])].forEach(x => byId.set(x.id, x));
+          OFC.rows = [...byId.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 8);
+          wrap.hidden = !OFC.rows.length;
+          const anyUnread = OFC.rows.some(x => !x.is_read);
+          const readAll = document.getElementById('ofcReadAll');
+          if (readAll) { readAll.style.display = anyUnread ? 'inline' : 'none'; readAll.onclick = () => ofcMarkRead(null); }
+          const today = d.getTime();
+          list.innerHTML = OFC.rows.map((x, i) => {
+            const dt = new Date(x.created_at);
+            const t = dt.getTime() >= today ? dt.toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'})
+                                             : dt.toLocaleDateString('pt-PT', {day: '2-digit', month: '2-digit'}) + ' ' + dt.toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'});
+            const n = (x.photos || []).length;
+            return `<div class="central-item ofc-item${x.is_read ? '' : ' unread'}" data-id="${x.id}" style="opacity:${i ? (0.85 - (i - 1) * 0.07).toFixed(2) : 1}">`
+              + `<span class="dot" style="background:${OFC_ST[x.status] || '#6b7280'}"></span>`
+              + `<span class="ofc-txt"><b>${escapeHtml(x.occurrence || 'Ocorrência')}</b> · ${escapeHtml(x.status || '—')}</span>`
+              + (n ? `<span class="ofc-ph"><span class="material-icons">photo_camera</span>${n}</span>` : '')
+              + (x.is_read ? '' : ' <span class="novo">NOVO</span>')
+              + `<span class="t">${t}</span></div>`;
+          }).join('');
+          list.querySelectorAll('.ofc-item').forEach(el => el.onclick = () => ofcOpen(Number(el.dataset.id)));
+          /* nova por ver (há menos de 30 min) que ainda não foi aberta neste telemóvel: abre o modal sozinho */
+          const modal = document.getElementById('ofcModal');
+          if (!(modal && modal.classList.contains('show'))) {
+            const fresh = OFC.rows.find(x => !x.is_read && !ofcSeen().has(x.id) && Date.now() - new Date(x.created_at).getTime() < 30 * 60000);
+            if (fresh) ofcOpen(fresh.id);
+          }
+        } catch (e) {
+          console.warn('Atualizações do terreno:', e);
+        }
+      }
+      async function ofcSigned(paths) {
+        const need = paths.filter(p => p && !(OFC.urls[p] && OFC.urls[p].exp > Date.now() + 60000));
+        if (need.length) {
+          const r = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/ocr_photos`, {method: 'POST', headers: getSupabaseHeaders(), body: JSON.stringify({expiresIn: 900, paths: need})});
+          if (!r.ok) throw new Error('Fotos: HTTP ' + r.status);
+          (await r.json()).forEach(x => {
+            if (x && x.signedURL && x.path) OFC.urls[x.path] = {url: `${SUPABASE_URL}/storage/v1${x.signedURL}`, exp: Date.now() + 900000};
+          });
+        }
+        return paths.map(p => (OFC.urls[p] || {}).url || '');
+      }
+      function ofcEnsureModal() {
+        if (document.getElementById('ofcModal')) return;
+        const m = document.createElement('div');
+        m.id = 'ofcModal'; m.className = 'modal';
+        m.innerHTML = `<div class="modal-box">
+            <div class="modal-head"><span class="material-icons">photo_camera</span><h3>Atualização do terreno</h3></div>
+            <div class="modal-body" id="ofcBody"></div>
+            <div class="modal-foot"><button type="button" class="ofc-btn sec" id="ofcClose">Fechar</button><button type="button" class="ofc-btn pri" id="ofcSeenBtn"><span class="material-icons">done_all</span>Marcar como vista</button></div>
+          </div>`;
+        document.body.appendChild(m);
+        m.addEventListener('click', e => { if (e.target === m) ofcClose(); });
+        document.getElementById('ofcClose').onclick = ofcClose;
+        const l = document.createElement('div');
+        l.id = 'ofcLight';
+        l.innerHTML = `<button type="button" class="ofc-x" aria-label="Fechar"><span class="material-icons">close</span></button>
+          <button type="button" class="ofc-nav l" aria-label="Anterior"><span class="material-icons">chevron_left</span></button>
+          <img alt="Foto"><button type="button" class="ofc-nav r" aria-label="Seguinte"><span class="material-icons">chevron_right</span></button><div class="ofc-cnt"></div>`;
+        document.body.appendChild(l);
+        l.querySelector('.ofc-x').onclick = () => l.classList.remove('show');
+        l.addEventListener('click', e => { if (e.target === l) l.classList.remove('show'); });
+        l.querySelector('.ofc-nav.l').onclick = () => ofcLight(OFC.idx - 1);
+        l.querySelector('.ofc-nav.r').onclick = () => ofcLight(OFC.idx + 1);
+        let x0 = null;
+        l.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, {passive: true});
+        l.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 50) ofcLight(OFC.idx + (dx < 0 ? 1 : -1)); });
+      }
+      function ofcClose() {
+        document.getElementById('ofcModal')?.classList.remove('show');
+        document.getElementById('ofcLight')?.classList.remove('show');
+        OFC.cur = null;
+      }
+      async function ofcOpen(id) {
+        const x = OFC.rows.find(r => r.id === id); if (!x) return;
+        ofcEnsureModal();
+        ofcMarkSeen(x.id);
+        OFC.cur = x;
+        const photos = x.photos || [];
+        const dt = new Date(x.created_at);
+        document.getElementById('ofcBody').innerHTML = `
+          <div class="ofc-occ">${escapeHtml(x.occurrence || 'Ocorrência')}</div>
+          <div class="ofc-meta">
+            <span>Estado</span><b><span class="ofc-st" style="background:${OFC_ST[x.status] || '#6b7280'}">${escapeHtml(x.status || '—')}</span></b>
+            <span>Local</span><b>${escapeHtml(x.local || '—')}</b>
+            <span>Enviado por</span><b>${escapeHtml(x.sender_name || '—')}</b>
+            <span>Hora</span><b>${dt.toLocaleDateString('pt-PT')} ${dt.toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'})}</b>
+          </div>
+          ${x.message ? `<div class="ofc-msg">${escapeHtml(x.message)}</div>` : ''}
+          ${photos.length ? `<div class="central-list-h">Fotos (${photos.length})</div><div class="ofc-thumbs" id="ofcThumbs">${photos.map((_, i) => `<button type="button" data-i="${i}" aria-label="Foto ${i + 1}"></button>`).join('')}</div>` : ''}
+          <div class="ofc-read">${x.is_read ? `Vista ${x.read_by ? 'por ' + escapeHtml(x.read_by) + ' ' : ''}${x.read_at ? 'em ' + new Date(x.read_at).toLocaleString('pt-PT') : ''}` : ''}</div>`;
+        const seenBtn = document.getElementById('ofcSeenBtn');
+        seenBtn.style.display = x.is_read ? 'none' : '';
+        seenBtn.onclick = async () => { seenBtn.disabled = true; await ofcMarkRead([x.id]); seenBtn.disabled = false; ofcClose(); };
+        document.getElementById('ofcModal').classList.add('show');
+        if (!photos.length) return;
+        OFC.photos = photos;
+        try {
+          const urls = await ofcSigned(photos.map(p => p.thumb || p.path));
+          if (OFC.cur !== x) return;
+          document.querySelectorAll('#ofcThumbs button').forEach((b, i) => {
+            if (urls[i]) b.innerHTML = `<img src="${urls[i]}" alt="" loading="lazy">`;
+            b.onclick = () => ofcLight(i);
+          });
+        } catch (e) {
+          console.warn(e);
+          const th = document.getElementById('ofcThumbs');
+          if (th) th.insertAdjacentHTML('afterend', '<div class="ofc-read">Não foi possível carregar as fotos.</div>');
+        }
+      }
+      async function ofcLight(i) {
+        const n = OFC.photos.length; if (!n) return;
+        OFC.idx = (i + n) % n;
+        const l = document.getElementById('ofcLight'), img = l.querySelector('img');
+        l.querySelectorAll('.ofc-nav').forEach(b => b.style.display = n > 1 ? '' : 'none');
+        l.querySelector('.ofc-cnt').textContent = n > 1 ? `${OFC.idx + 1} / ${n}` : '';
+        img.removeAttribute('src');
+        l.classList.add('show');
+        try {
+          const want = OFC.idx;
+          const [u] = await ofcSigned([OFC.photos[want].path]);
+          if (want === OFC.idx && u) img.src = u;
+        } catch (e) {
+          showToast('Não foi possível abrir a foto.');
+        }
+      }
+      async function ofcMarkRead(ids) {
+        try {
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/cb360_ocr_fu_mark_read`, {method: 'POST', headers: getSupabaseHeaders(), body: JSON.stringify({p_ids: ids})});
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+        } catch (e) {
+          console.warn('Marcar como vista:', e);
+          showToast('Não foi possível marcar como vista.');
+        }
+        loadOfcList();
       }
       /* =========================== SWITCH TAB ============================ */
       function lockConfigTab() {
@@ -13281,7 +13486,7 @@
           fetch(PUSH_API, {
             method: 'POST',
             headers: {'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`},
-            body: JSON.stringify({recipient_nint: CENTRAL_NINT, tipo: 'aviso', pagina: '', sender_name: 'Atualização do Terreno',
+            body: JSON.stringify({recipient_nint: CENTRAL_NINT, tipo: 'aviso', pagina: 'MainPage', sender_name: 'Atualização do Terreno',
                                   message_text: `🚨 ${currentOccurrence.occorrence || 'Ocorrência'} · ${selectedStatus}${n ? ` · ${n} foto${n > 1 ? 's' : ''}` : ''}`})
           }).catch(e => console.error('Push Central:', e));
           showToast('Atualização enviada para a SALOC!', 'success');
@@ -31350,7 +31555,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.40 - 2026-11-18 - iPhone: Comunicados, Documentos e Relatórios sem espaço a mais';
+  window.CB360_BUILD='v22.41 - 2026-11-18 - iPhone: Comunicados, Documentos e Relatórios sem espaço a mais';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s&&!(window.frameElement&&window.frameElement.classList.contains('nocover')))['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
