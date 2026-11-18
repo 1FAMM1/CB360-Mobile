@@ -1342,7 +1342,7 @@
         try {
           const d = new Date(); d.setHours(0, 0, 0, 0);
           const [r, ru] = await Promise.all([
-            fetch(`${SUPABASE_URL}/rest/v1/vehicle_status_log?select=id,vehicle,action,km,created_at,is_read&corp_oper_nr=eq.${getCorpPadded()}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=8`, {headers: getSupabaseHeaders()}),
+            fetch(`${SUPABASE_URL}/rest/v1/vehicle_status_log?select=id,vehicle,action,km,created_at,is_read&corp_oper_nr=eq.${getCorpPadded()}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=5`, {headers: getSupabaseHeaders()}),
             fetch(`${SUPABASE_URL}/rest/v1/vehicle_status_log?select=id&corp_oper_nr=eq.${getCorpPadded()}&is_read=eq.false&limit=1`, {headers: getSupabaseHeaders()})
           ]);
           const rows = r.ok ? await r.json() : [];
@@ -1366,7 +1366,7 @@
       }
       /* ================= ATUALIZAÇÕES DO TERRENO (Central) =================
          Enviadas pelas equipas em Ocorrências em Curso (tabela ocr_field_updates, fotos no bucket privado ocr_photos).
-         Só aparece quando há atualizações de hoje ou por ver; tocar abre o modal com as fotos.
+         Só aparece quando há atualizações de hoje ou por ver (as 3 últimas); tocar abre o modal com as fotos.
          Quando chega uma nova (push ou tempo real) o modal abre sozinho. */
       const OFC = {rows: [], urls: {}, cur: null, photos: [], idx: 0, seen: null, timer: null};
       const OFC_ST = {'Em Curso': '#ef6c00', 'Finalizada': '#2e7d32'};
@@ -1387,13 +1387,13 @@
           const sel = 'id,occurrence_id,occurrence,local,status,message,photos,sender_name,created_at,is_read,read_at,read_by';
           const base = `${SUPABASE_URL}/rest/v1/ocr_field_updates?select=${sel}&corp_oper_nr=eq.${getCorpPadded()}`;
           const [r1, r2] = await Promise.all([
-            fetch(`${base}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=8`, {headers: getSupabaseHeaders()}),
-            fetch(`${base}&is_read=eq.false&order=created_at.desc&limit=8`, {headers: getSupabaseHeaders()})
+            fetch(`${base}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=3`, {headers: getSupabaseHeaders()}),
+            fetch(`${base}&is_read=eq.false&order=created_at.desc&limit=3`, {headers: getSupabaseHeaders()})
           ]);
           if (!r1.ok && !r2.ok) throw new Error('HTTP ' + r1.status);
           const byId = new Map();
           [...(r1.ok ? await r1.json() : []), ...(r2.ok ? await r2.json() : [])].forEach(x => byId.set(x.id, x));
-          OFC.rows = [...byId.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 8);
+          OFC.rows = [...byId.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 3);
           wrap.hidden = !OFC.rows.length;
           const anyUnread = OFC.rows.some(x => !x.is_read);
           const readAll = document.getElementById('ofcReadAll');
