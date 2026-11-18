@@ -77,7 +77,10 @@
             });
         let enviados = 0;
         const gone = new Set();
-        const sendAll = (count) => Promise.all(subs.filter(d => !gone.has(d.endpoint)).map(d =>
+        /* iPhone (Apple Push): a entrega é fiável e o iOS não junta as duas cópias numa só (ficavam 2 notificações),
+           por isso a 2.ª cópia só vai para os outros (Android/Chrome, que podem estar a dormir) */
+        const isApple = d => /(^|\.)push\.apple\.com\//i.test(String(d.endpoint || '').replace(/^https?:\/\//, ''));
+        const sendAll = (count) => Promise.all(subs.filter(d => !gone.has(d.endpoint) && (count || !isApple(d))).map(d =>
           webpush.sendNotification(
             { endpoint: d.endpoint, keys: { auth: d.auth, p256dh: d.p256dh } },
             payload,
