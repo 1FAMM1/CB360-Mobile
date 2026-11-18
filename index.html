@@ -479,6 +479,15 @@
       .ofc-btn.sec {background: var(--surface-2); color: var(--txt-1);}
       .ofc-btn.pri {background: var(--red); color: #fff;}
       .ofc-btn .material-icons {font-size: 18px;}
+      /* composição DECIR (decir_compositions) */
+      .dcc-head {display: flex; align-items: center; gap: 8px; flex-wrap: wrap;}
+      .dcc-shift {display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 800; color: #fff;}
+      .dcc-team {background: var(--surface-2); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 5px;}
+      .dcc-team-h {display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px; font-weight: 800; color: var(--txt-1);}
+      .dcc-ok, .dcc-inc {font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 20px;}
+      .dcc-ok {background: rgba(46,125,50,.15); color: #2e7d32;} .dcc-inc {background: rgba(239,108,0,.15); color: #ef6c00;}
+      .dcc-m {display: grid; grid-template-columns: 112px 1fr; gap: 8px; font-size: 12.5px;}
+      .dcc-m span {color: var(--txt-3);} .dcc-m b {color: var(--txt-1); font-weight: 600; min-width: 0; overflow-wrap: anywhere;}
       #ofcLight {display: none; position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.92); align-items: center; justify-content: center; padding: calc(var(--sai-top, 0px) + 50px) 10px calc(var(--sai-bottom, 0px) + 50px);}
       #ofcLight.show {display: flex;}
       #ofcLight img {max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px;}
@@ -1243,16 +1252,21 @@
           <div class="ofc-wrap" id="ofcWrap" hidden>
             <div class="central-list-row"><div class="central-list-h">Atualizações do terreno</div><button type="button" class="central-readall" id="ofcReadAll">Marcar todas como vistas</button></div>
             <div class="central-list" id="ofcList"></div>
+          </div>
+          <div class="ofc-wrap" id="dccWrap" hidden>
+            <div class="central-list-row"><div class="central-list-h">Composição DECIR</div><button type="button" class="central-readall" id="dccReadAll">Marcar todas como vistas</button></div>
+            <div class="central-list" id="dccList"></div>
           </div>`;
         document.querySelector('.welcome-row')?.insertAdjacentElement('afterend', card);
         renderCentralNotif();
         if ('Notification' in window && Notification.permission === 'granted') initializePushWithoutPermission().catch(() => {});
         loadCentralList();
         loadOfcList();
+        loadDccList();
         startCentralRealtime();
         /* rede de segurança: se o tempo real cair, as listas atualizam na mesma de minuto a minuto */
-        setInterval(() => { if (!document.hidden) { loadCentralList(); loadOfcList(); } }, 60000);
-        document.addEventListener('visibilitychange', () => { if (!document.hidden) { loadCentralList(); loadOfcList(); } });
+        setInterval(() => { if (!document.hidden) { loadCentralList(); loadOfcList(); loadDccList(); } }, 60000);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) { loadCentralList(); loadOfcList(); loadDccList(); } });
       }
       /* tempo real (Supabase): qualquer estado novo ou marcado como lido atualiza a lista na hora */
       let centralRtTimer = null;
@@ -1263,7 +1277,7 @@
         el.innerHTML = '<i></i>' + escapeHtml(txt);
       }
       /* tempo real: liga, e volta a ligar sozinho se a ligação cair (ecrã apagado, rede, app em segundo plano) */
-      let centralRt = {client: null, ch: null, ch2: null, retry: null, closing: false};
+      let centralRt = {client: null, ch: null, ch2: null, ch3: null, retry: null, closing: false};
       async function centralRtConnect() {
         const rt = centralRt;
         clearTimeout(rt.retry);
@@ -1271,6 +1285,7 @@
           if (!rt.client) rt.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {accessToken: async () => localStorage.getItem('authToken')});
           if (rt.ch) { const old = rt.ch; rt.ch = null; try { await rt.client.removeChannel(old); } catch (_) {} }
           if (rt.ch2) { const old = rt.ch2; rt.ch2 = null; try { await rt.client.removeChannel(old); } catch (_) {} }
+          if (rt.ch3) { const old = rt.ch3; rt.ch3 = null; try { await rt.client.removeChannel(old); } catch (_) {} }
           const got = () => {
             centralRtState('on', 'Tempo real ligado · último às ' + new Date().toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit', second: '2-digit'}));
             centralRtRefresh();
@@ -1293,6 +1308,11 @@
             .on('broadcast', {event: 'mudou'}, ofcRefresh)
             .subscribe(st => { if (rt.ch2 === ch2 && st === 'SUBSCRIBED') loadOfcList(); });
           rt.ch2 = ch2;
+          /* composição DECIR (SQL 45): sinal "mudou" no tópico cb360-decir-<corp> */
+          const ch3 = rt.client.channel(`cb360-decir-${getCorpPadded()}`)
+            .on('broadcast', {event: 'mudou'}, dccRefresh)
+            .subscribe(st => { if (rt.ch3 === ch3 && st === 'SUBSCRIBED') loadDccList(); });
+          rt.ch3 = ch3;
         } catch (e) {
           centralRtState('bad', 'Tempo real: erro — ' + (e.message || e) + ' · a religar…');
           rt.retry = setTimeout(centralRtConnect, 10000);
@@ -1302,7 +1322,8 @@
         const ch = centralRt.ch;
         if (!centralRt.client) return;
         const ch2 = centralRt.ch2;
-        if (!ch || ch.state !== 'joined' || !ch2 || ch2.state !== 'joined' || !centralRt.client.realtime.isConnected()) centralRtConnect();
+        const ch3 = centralRt.ch3;
+        if (!ch || ch.state !== 'joined' || !ch2 || ch2.state !== 'joined' || !ch3 || ch3.state !== 'joined' || !centralRt.client.realtime.isConnected()) centralRtConnect();
       }
       function startCentralRealtime() {
         const go = () => {
@@ -1413,8 +1434,8 @@
           }).join('');
           list.querySelectorAll('.ofc-item').forEach(el => el.onclick = () => ofcOpen(Number(el.dataset.id)));
           /* nova por ver (há menos de 30 min) que ainda não foi aberta neste telemóvel: abre o modal sozinho */
-          const modal = document.getElementById('ofcModal');
-          if (!(modal && modal.classList.contains('show'))) {
+          const modal = document.getElementById('ofcModal'), dm = document.getElementById('dccModal');
+          if (!(modal && modal.classList.contains('show')) && !(dm && dm.classList.contains('show'))) {
             const fresh = OFC.rows.find(x => !x.is_read && !ofcSeen().has(x.id) && Date.now() - new Date(x.created_at).getTime() < 30 * 60000);
             if (fresh) ofcOpen(fresh.id);
           }
@@ -1526,6 +1547,108 @@
           showToast('Não foi possível marcar como vista.');
         }
         loadOfcList();
+      }
+      /* ================= COMPOSIÇÃO DECIR (Central) =================
+         Enviada pela equipa em DECIR · Equipa Afeta ao Dispositivo (tabela decir_compositions, SQL 45).
+         Só aparece quando há composições de hoje ou por ver; chega uma nova (push ou tempo real) e o modal abre sozinho. */
+      const DCC = {rows: [], timer: null, seen: null};
+      const DCC_SHIFT = {D: ['☀️ Turno D', '#f9a825', '08:00 - 20:00'], N: ['🌙 Turno N', '#3949ab', '20:00 - 08:00']};
+      function dccRefresh() { clearTimeout(DCC.timer); DCC.timer = setTimeout(loadDccList, 300); }
+      function dccSeen() {
+        if (!DCC.seen) { try { DCC.seen = new Set(JSON.parse(sessionStorage.getItem('dccSeen') || '[]')); } catch (_) { DCC.seen = new Set(); } }
+        return DCC.seen;
+      }
+      function dccMarkSeen(id) {
+        const s = dccSeen(); s.add(id);
+        try { sessionStorage.setItem('dccSeen', JSON.stringify([...s].slice(-200))); } catch (_) {}
+      }
+      const dccSize = t => /^ELAC/.test(t.team || '') ? 2 : 5;
+      function dccResumo(x) { return (x.teams || []).map(t => `${t.team} ${(t.members || []).length}/${dccSize(t)}`).join(' · '); }
+      async function loadDccList() {
+        const wrap = document.getElementById('dccWrap'), list = document.getElementById('dccList');
+        if (!wrap || !list) return;
+        try {
+          const d = new Date(); d.setHours(0, 0, 0, 0);
+          const sel = 'id,shift,shift_date,mode,teams,sender_name,created_at,is_read,read_at,read_by';
+          const base = `${SUPABASE_URL}/rest/v1/decir_compositions?select=${sel}&corp_oper_nr=eq.${getCorpPadded()}`;
+          const [r1, r2] = await Promise.all([
+            fetch(`${base}&created_at=gte.${d.toISOString()}&order=created_at.desc&limit=3`, {headers: getSupabaseHeaders()}),
+            fetch(`${base}&is_read=eq.false&order=created_at.desc&limit=3`, {headers: getSupabaseHeaders()})
+          ]);
+          if (!r1.ok && !r2.ok) throw new Error('HTTP ' + r1.status);
+          const byId = new Map();
+          [...(r1.ok ? await r1.json() : []), ...(r2.ok ? await r2.json() : [])].forEach(x => byId.set(x.id, x));
+          DCC.rows = [...byId.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 3);
+          wrap.hidden = !DCC.rows.length;
+          const readAll = document.getElementById('dccReadAll');
+          if (readAll) { readAll.style.display = DCC.rows.some(x => !x.is_read) ? 'inline' : 'none'; readAll.onclick = () => dccMarkRead(null); }
+          const today = d.getTime();
+          list.innerHTML = DCC.rows.map((x, i) => {
+            const dt = new Date(x.created_at);
+            const t = dt.getTime() >= today ? dt.toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'})
+                                             : dt.toLocaleDateString('pt-PT', {day: '2-digit', month: '2-digit'}) + ' ' + dt.toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'});
+            const [lbl, col] = DCC_SHIFT[x.shift] || [x.shift, '#6b7280'];
+            return `<div class="central-item ofc-item${x.is_read ? '' : ' unread'}" data-id="${x.id}" style="opacity:${i ? (0.85 - (i - 1) * 0.07).toFixed(2) : 1}">`
+              + `<span class="dot" style="background:${col}"></span>`
+              + `<span class="ofc-txt"><b>${escapeHtml(lbl)}</b> · ${escapeHtml(dccResumo(x))}</span>`
+              + (x.is_read ? '' : ' <span class="novo">NOVO</span>')
+              + `<span class="t">${t}</span></div>`;
+          }).join('');
+          list.querySelectorAll('.ofc-item').forEach(el => el.onclick = () => dccOpen(Number(el.dataset.id)));
+          const om = document.getElementById('ofcModal'), dm = document.getElementById('dccModal');
+          if (!(om && om.classList.contains('show')) && !(dm && dm.classList.contains('show'))) {
+            const fresh = DCC.rows.find(x => !x.is_read && !dccSeen().has(x.id) && Date.now() - new Date(x.created_at).getTime() < 30 * 60000);
+            if (fresh) dccOpen(fresh.id);
+          }
+        } catch (e) {
+          console.warn('Composição DECIR:', e);
+        }
+      }
+      function dccEnsureModal() {
+        if (document.getElementById('dccModal')) return;
+        const m = document.createElement('div');
+        m.id = 'dccModal'; m.className = 'modal'; m.style.zIndex = '300';
+        m.innerHTML = `<div class="modal-box">
+            <div class="modal-head"><span class="material-icons">groups</span><h3>Composição DECIR</h3></div>
+            <div class="modal-body" id="dccBody" style="max-height:62vh;display:flex;flex-direction:column;gap:10px;"></div>
+            <div class="modal-foot"><button type="button" class="ofc-btn sec" id="dccClose">Fechar</button><button type="button" class="ofc-btn pri" id="dccSeenBtn"><span class="material-icons">done_all</span>Marcar como vista</button></div>
+          </div>`;
+        document.body.appendChild(m);
+        m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+        document.getElementById('dccClose').onclick = () => m.classList.remove('show');
+      }
+      function dccOpen(id) {
+        const x = DCC.rows.find(r => r.id === id); if (!x) return;
+        dccEnsureModal();
+        dccMarkSeen(x.id);
+        const [lbl, col, horas] = DCC_SHIFT[x.shift] || [x.shift, '#6b7280', ''];
+        const sd = x.shift_date ? new Date(x.shift_date + 'T00:00:00').toLocaleDateString('pt-PT') : '';
+        const dt = new Date(x.created_at);
+        document.getElementById('dccBody').innerHTML = `
+          <div class="dcc-head"><span class="dcc-shift" style="background:${col}">${escapeHtml(lbl)}</span><b style="font-size:13px;">${escapeHtml(sd)}${horas ? ' · ' + horas : ''}</b></div>
+          ${(x.teams || []).map(t => {
+            const n = (t.members || []).length, size = dccSize(t);
+            return `<div class="dcc-team">
+              <div class="dcc-team-h">${escapeHtml(t.team)}<span class="${n >= size ? 'dcc-ok' : 'dcc-inc'}">${n >= size ? 'COMPLETA' : 'INCOMPLETA'} · ${n}/${size}</span></div>
+              ${(t.members || []).map(mb => `<div class="dcc-m"><span>${escapeHtml(mb.role)}</span><b>${escapeHtml(mb.n_int)}${mb.name ? ' - ' + escapeHtml(mb.name) : ''}</b></div>`).join('')}
+            </div>`;
+          }).join('')}
+          <div class="ofc-meta"><span>Enviado por</span><b>${escapeHtml(x.sender_name || '—')}</b><span>Hora</span><b>${dt.toLocaleDateString('pt-PT')} ${dt.toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'})}</b></div>
+          <div class="ofc-read">${x.is_read ? `Vista ${x.read_by ? 'por ' + escapeHtml(x.read_by) + ' ' : ''}${x.read_at ? 'em ' + new Date(x.read_at).toLocaleString('pt-PT') : ''}` : ''}</div>`;
+        const b = document.getElementById('dccSeenBtn');
+        b.style.display = x.is_read ? 'none' : '';
+        b.onclick = async () => { b.disabled = true; await dccMarkRead([x.id]); b.disabled = false; document.getElementById('dccModal').classList.remove('show'); };
+        document.getElementById('dccModal').classList.add('show');
+      }
+      async function dccMarkRead(ids) {
+        try {
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/cb360_decir_comp_mark_read`, {method: 'POST', headers: getSupabaseHeaders(), body: JSON.stringify({p_ids: ids})});
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+        } catch (e) {
+          console.warn('Marcar composição como vista:', e);
+          showToast('Não foi possível marcar como vista.');
+        }
+        loadDccList();
       }
       /* =========================== SWITCH TAB ============================ */
       function lockConfigTab() {
@@ -24748,7 +24871,7 @@
       function lsGet(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }
       function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
       function lsDel(k) { try { localStorage.removeItem(k); } catch (_) {} }
-      let SPEC = {"page": "NRBQ_FR", "short": "FR", "title": "RECONHECIMENTO", "sub": "ERAS NRBQ · DON N.º 3", "pdfTitle": "FICHA DE RECONHECIMENTO (FR) — INCIDENTES COM SUSPEITA OU ENVOLVIMENTO DE AGENTES NRBQ", "file": "FR_NRBQ", "icon": "travel_explore", "sections": [{"t": "Informação Geral", "i": "assignment", "f": [{"k": "ocorrencia", "l": "N.º Ocorrência ANEPC", "type": "text", "req": 1}, {"k": "data_hora", "l": "Data / Hora", "type": "datetime", "req": 1, "now": 1}]}, {"t": "Elementos ERAS", "i": "groups", "f": [{"k": "eras", "l": "Elementos da equipa (até 6)", "type": "rows", "item": "Elemento", "max": 6, "req": 1, "cols": [{"k": "org", "l": "Organização"}, {"k": "nome", "l": "Nome"}, {"k": "idade", "l": "Idade", "type": "number", "half": 1}, {"k": "id", "l": "ID", "half": 1}]}]}, {"t": "Informação Relativa ao Incidente", "i": "place", "f": [{"k": "data_inc", "l": "Data do Incidente", "type": "date", "half": 1}, {"k": "hora_inc", "l": "Hora do Incidente", "type": "time", "half": 1}, {"k": "data_obs", "l": "Data de Observação", "type": "date", "half": 1}, {"k": "hora_obs", "l": "Hora de Observação", "type": "time", "half": 1}, {"k": "local", "l": "Local / Concelho / Distrito", "type": "text", "req": 1}, {"k": "referencia", "l": "Ponto de Referência", "type": "text"}, {"k": "coordenadas", "l": "Coordenadas (Datum / Lat-Long)", "type": "gps"}, {"k": "onde", "l": "Onde ocorreu o incidente?", "type": "select", "opts": ["Via Pública", "Edifício"], "req": 1}]}, {"t": "1. Via Pública", "i": "add_road", "showIf": ["onde", "Via Pública"], "f": [{"k": "estrada", "l": "Estrada (km / sentido)", "type": "text"}, {"k": "arruamento", "l": "Arruamento (n.º Polícia / Porta e Sentido)", "type": "text"}, {"k": "ferrovia", "l": "Linha Ferroviária (km / pk / sentido)", "type": "text"}, {"k": "outra_ref", "l": "Outra referência do Local", "type": "text"}, {"k": "localidade", "l": "Localidade (exata ou a mais próxima)", "type": "text"}]}, {"t": "2. Edifício", "i": "apartment", "showIf": ["onde", "Edifício"], "f": [{"k": "estab_id", "l": "Identificação do Estabelecimento", "type": "text"}, {"k": "estab_morada", "l": "Morada", "type": "text"}, {"k": "estab_tipo", "l": "Tipo de Estabelecimento", "type": "select", "opts": ["Comércio", "Indústria", "Armazém", "Interface marítimo", "Interface rodoviário", "Interface ferroviário", "Aeroporto", "Habitação", "Escritórios", "Saúde", "Escola", "Lar", "Outro"]}, {"k": "estab_outro", "l": "Outro — especifique", "type": "text", "showIf": ["estab_tipo", "Outro"]}]}, {"t": "3. Mercadorias e Substâncias Perigosas", "i": "science", "f": [{"k": "nome_comum", "l": "Nome Comum", "type": "text"}, {"k": "onu", "l": "N.º ONU", "type": "text", "half": 1, "ph": "Ex.: 1203"}, {"k": "perigo", "l": "N.º Perigo", "type": "text", "half": 1, "ph": "Ex.: 33"}, {"k": "etiquetas", "l": "Etiquetas ou Rótulos de perigo", "type": "text"}, {"k": "quantidade", "l": "Quantidade (estimada)", "type": "text"}, {"k": "descricao_visual", "l": "Descrição Visual", "type": "area"}, {"k": "contentor", "l": "Tipo de Contentor", "type": "select", "opts": ["Cisterna", "Garrafas de gás comprimido", "Tambores", "Outro"]}, {"k": "cisterna_m3", "l": "Cisterna — capacidade (m³)", "type": "number", "showIf": ["contentor", "Cisterna"]}, {"k": "garrafas_l", "l": "Garrafas — capacidade (litros)", "type": "number", "showIf": ["contentor", "Garrafas de gás comprimido"]}, {"k": "tambores_l", "l": "Tambores — capacidade (litros)", "type": "number", "showIf": ["contentor", "Tambores"]}, {"k": "contentor_outro", "l": "Outro contentor — especifique", "type": "text", "showIf": ["contentor", "Outro"]}, {"k": "transporte", "l": "Tipo de Transporte", "type": "select", "opts": ["Rodoviário", "Ferroviário", "Marítimo", "Fluvial", "Conduta (pipeline)", "Aéreo"]}, {"k": "fase", "l": "Fase do Transporte", "type": "select", "opts": ["Carga", "Descarga", "Em Transporte"]}]}, {"t": "4. Natureza do Incidente", "i": "local_fire_department", "f": [{"k": "derrame", "l": "Derrame (líquido) — Quantidade estimada", "type": "text"}, {"k": "fuga", "l": "Fuga (vapor / gás) — Quantidade estimada", "type": "text"}, {"k": "espalhamento", "l": "Espalhamento (sólido) — Quantidade estimada", "type": "text"}, {"k": "incendio", "l": "Incêndio", "type": "select", "opts": ["Sim", "Não"], "half": 1}, {"k": "explosao", "l": "Explosão", "type": "select", "opts": ["Sim", "Não"], "half": 1}, {"k": "outra_info", "l": "Outra informação relevante", "type": "area"}]}, {"t": "5. Matéria Não-identificada — Suspeita de risco NRBQ", "i": "help_center", "f": [{"k": "cheiro", "l": "Indícios de perigosidade — Cheiro", "type": "select", "opts": ["Sim", "Não"]}, {"k": "cheiro_tipo", "l": "Que tipo de cheiro", "type": "text", "ph": "Ex.: alho, piscina, ovos podres…", "showIf": ["cheiro", "Sim"]}, {"k": "cor_derrame", "l": "Cor do derrame", "type": "text"}, {"k": "origem_fuga", "l": "Origem da fuga", "type": "text"}, {"k": "vitimas_mat", "l": "Existem vítimas no local?", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "6. Origem do Incidente", "i": "travel_explore", "f": [{"k": "origem_conhecida", "l": "É conhecida a origem do incidente?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "origem_qual", "l": "Qual", "type": "text", "showIf": ["origem_conhecida", "Sim"]}, {"k": "reg_explosao", "l": "Há registo de explosão?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "reg_ataque", "l": "Há registo de outro tipo de incidente e/ou ataque?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "ameaca_bomba", "l": "Existe ameaça de bomba no local?", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "7. Eventuais Vítimas", "i": "personal_injury", "f": [{"k": "vitimas", "l": "Existem vítimas no local do incidente?", "type": "select", "opts": ["Sim", "Não"], "req": 1}, {"k": "n_vitimas", "l": "Quantas (aproximadamente)", "type": "number", "half": 1, "showIf": ["vitimas", "Sim"]}, {"k": "n_mortos", "l": "N.º de Mortos", "type": "number", "half": 1, "showIf": ["vitimas", "Sim"]}, {"k": "sintomas", "l": "Principais sintomas (descreva)", "type": "area", "showIf": ["vitimas", "Sim"]}]}, {"t": "8. Deteção", "i": "sensors", "f": [{"k": "equip_detecao", "l": "A equipa ERAS transportou equipamento de deteção?", "type": "select", "opts": ["Sim", "Não"], "req": 1}, {"k": "agentes_equip", "l": "Para que agentes", "type": "multi", "opts": ["NR", "B", "Q"], "showIf": ["equip_detecao", "Sim"]}, {"k": "det_nr", "l": "Deteção positiva — Agentes NR", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_nr_info", "l": "Agentes NR — Info", "type": "text", "showIf": ["det_nr", "Sim"]}, {"k": "det_b", "l": "Deteção positiva — Agentes B", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_b_info", "l": "Agentes B — Info", "type": "text", "showIf": ["det_b", "Sim"]}, {"k": "det_q", "l": "Deteção positiva — Agentes Q", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_q_info", "l": "Agentes Q — Info", "type": "text", "showIf": ["det_q", "Sim"]}, {"k": "medicoes", "l": "Medições efetuadas na área do incidente (até 5)", "type": "rows", "item": "Medição", "max": 5, "cols": [{"k": "dh", "l": "Data / Hora", "type": "datetime", "half": 1}, {"k": "tipo", "l": "Tipo de agente", "type": "select", "opts": ["NR", "B", "Q"], "half": 1}, {"k": "coord", "l": "Coordenadas (Lat / Long)", "ph": "37.01928, -7.93044"}, {"k": "equip", "l": "Equipamento usado"}, {"k": "res", "l": "Resultado", "half": 1}, {"k": "un", "l": "Unidade", "half": 1, "ph": "Ex.: µSv/h, ppm"}]}]}, {"t": "9. Condições Meteorológicas", "i": "air", "f": [{"k": "vento_dir", "l": "Direção do Vento (de onde sopra)", "type": "select", "opts": ["Norte", "Sul", "Este", "Oeste"]}, {"k": "vento_int", "l": "Intensidade", "type": "select", "opts": ["Fraco", "Moderado", "Forte"]}, {"k": "vento_kmh", "l": "Velocidade (km/h)", "type": "number", "half": 1}, {"k": "temperatura", "l": "Temperatura (ºC)", "type": "number", "half": 1}, {"k": "ceu", "l": "Estado do Céu", "type": "text", "list": ["Limpo", "Pouco nublado", "Nublado", "Muito nublado", "Encoberto", "Nevoeiro"]}, {"k": "precipitacao", "l": "Precipitação", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "10. Outras Informações", "i": "notes", "f": [{"k": "outras", "l": "Outras informações", "type": "area"}, {"k": "optel", "l": "OPTEL", "type": "text", "req": 1}]}]};
+      let SPEC = {"page": "NRBQ_FR", "short": "FR", "title": "RECONHECIMENTO", "sub": "ERAS NRBQ · DON N.º 3", "pdfTitle": "FICHA DE RECONHECIMENTO (FR) — INCIDENTES COM SUSPEITA OU ENVOLVIMENTO DE AGENTES NRBQ", "file": "FR_NRBQ", "icon": "travel_explore", "sections": [{"t": "Informação Geral", "i": "assignment", "f": [{"k": "ocorrencia", "l": "N.º Ocorrência ANEPC", "type": "text", "req": 1}, {"k": "data_hora", "l": "Data / Hora", "type": "datetime", "req": 1, "now": 1}]}, {"t": "Elementos ERAS", "i": "groups", "f": [{"k": "eras", "l": "Elementos da equipa (até 6)", "type": "rows", "item": "Elemento", "max": 6, "req": 1, "cols": [{"k": "org", "l": "Organização"}, {"k": "nome", "l": "Nome"}, {"k": "idade", "l": "Idade", "type": "number", "half": 1}, {"k": "id", "l": "ID", "half": 1}]}]}, {"t": "Informação Relativa ao Incidente", "i": "place", "f": [{"k": "data_inc", "l": "Data do Incidente", "type": "date", "half": 1}, {"k": "hora_inc", "l": "Hora do Incidente", "type": "time", "half": 1}, {"k": "data_obs", "l": "Data de Observação", "type": "date", "half": 1}, {"k": "hora_obs", "l": "Hora de Observação", "type": "time", "half": 1}, {"k": "local", "l": "Local / Concelho / Distrito", "type": "text", "req": 1}, {"k": "referencia", "l": "Ponto de Referência", "type": "text"}, {"k": "coordenadas", "l": "Coordenadas (Datum / Lat-Long)", "type": "gps"}, {"k": "onde", "l": "Onde ocorreu o incidente?", "type": "select", "opts": ["Via Pública", "Edifício"], "req": 1}]}, {"t": "1. Via Pública", "i": "add_road", "showIf": ["onde", "Via Pública"], "f": [{"k": "estrada", "l": "Estrada (km / sentido)", "type": "text"}, {"k": "arruamento", "l": "Arruamento (n.º Polícia / Porta e Sentido)", "type": "text"}, {"k": "ferrovia", "l": "Linha Ferroviária (km / pk / sentido)", "type": "text"}, {"k": "outra_ref", "l": "Outra referência do Local", "type": "text"}, {"k": "localidade", "l": "Localidade (exata ou a mais próxima)", "type": "text"}]}, {"t": "2. Edifício", "i": "apartment", "showIf": ["onde", "Edifício"], "f": [{"k": "estab_id", "l": "Identificação do Estabelecimento", "type": "text"}, {"k": "estab_morada", "l": "Morada", "type": "text"}, {"k": "estab_tipo", "l": "Tipo de Estabelecimento", "type": "select", "opts": ["Comércio", "Indústria", "Armazém", "Interface marítimo", "Interface rodoviário", "Interface ferroviário", "Aeroporto", "Habitação", "Escritórios", "Saúde", "Escola", "Lar", "Outro"]}, {"k": "estab_outro", "l": "Outro — especifique", "type": "text", "showIf": ["estab_tipo", "Outro"]}]}, {"t": "3. Mercadorias e Substâncias Perigosas", "i": "science", "f": [{"k": "nome_comum", "l": "Nome Comum", "type": "text"}, {"k": "onu", "l": "N.º ONU", "type": "text", "half": 1, "ph": "Ex.: 1203"}, {"k": "perigo", "l": "N.º Perigo", "type": "text", "half": 1, "ph": "Ex.: 33"}, {"k": "etiquetas", "l": "Etiquetas ou Rótulos de perigo", "type": "text"}, {"k": "quantidade", "l": "Quantidade (estimada)", "type": "text"}, {"k": "descricao_visual", "l": "Descrição Visual", "type": "area"}, {"k": "contentor", "l": "Tipo de Contentor", "type": "select", "opts": ["Cisterna", "Garrafas de gás comprimido", "Tambores", "Outro"]}, {"k": "cisterna_m3", "l": "Cisterna — capacidade (m³)", "type": "number", "showIf": ["contentor", "Cisterna"]}, {"k": "garrafas_l", "l": "Garrafas — capacidade (litros)", "type": "number", "showIf": ["contentor", "Garrafas de gás comprimido"]}, {"k": "tambores_l", "l": "Tambores — capacidade (litros)", "type": "number", "showIf": ["contentor", "Tambores"]}, {"k": "contentor_outro", "l": "Outro contentor — especifique", "type": "text", "showIf": ["contentor", "Outro"]}, {"k": "transporte", "l": "Tipo de Transporte", "type": "select", "opts": ["Rodoviário", "Ferroviário", "Marítimo", "Fluvial", "Conduta (pipeline)", "Aéreo"]}, {"k": "fase", "l": "Fase do Transporte", "type": "select", "opts": ["Carga", "Descarga", "Em Transporte"]}]}, {"t": "4. Natureza do Incidente", "i": "local_fire_department", "f": [{"k": "derrame", "l": "Derrame (líquido) — Quantidade estimada", "type": "text"}, {"k": "fuga", "l": "Fuga (vapor / gás) — Quantidade estimada", "type": "text"}, {"k": "espalhamento", "l": "Espalhamento (sólido) — Quantidade estimada", "type": "text"}, {"k": "incendio", "l": "Incêndio", "type": "select", "opts": ["Sim", "Não"], "half": 1}, {"k": "explosao", "l": "Explosão", "type": "select", "opts": ["Sim", "Não"], "half": 1}, {"k": "outra_info", "l": "Outra informação relevante", "type": "area"}]}, {"t": "5. Matéria Não-identificada — Suspeita de risco NRBQ", "i": "help_center", "f": [{"k": "cheiro", "l": "Indícios de perigosidade — Cheiro", "type": "select", "opts": ["Sim", "Não"]}, {"k": "cheiro_tipo", "l": "Que tipo de cheiro", "type": "text", "ph": "Ex.: alho, piscina, ovos podres…", "showIf": ["cheiro", "Sim"]}, {"k": "cor_derrame", "l": "Cor do derrame", "type": "text"}, {"k": "origem_fuga", "l": "Origem da fuga", "type": "text"}, {"k": "vitimas_mat", "l": "Existem vítimas no local?", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "6. Origem do Incidente", "i": "travel_explore", "f": [{"k": "origem_conhecida", "l": "É conhecida a origem do incidente?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "origem_qual", "l": "Qual", "type": "text", "showIf": ["origem_conhecida", "Sim"]}, {"k": "reg_explosao", "l": "Há registo de explosão?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "reg_ataque", "l": "Há registo de outro tipo de incidente e/ou ataque?", "type": "select", "opts": ["Sim", "Não"]}, {"k": "ameaca_bomba", "l": "Existe ameaça de bomba no local?", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "7. Eventuais Vítimas", "i": "personal_injury", "f": [{"k": "vitimas", "l": "Existem vítimas no local do incidente?", "type": "select", "opts": ["Sim", "Não"], "req": 1}, {"k": "n_vitimas", "l": "Quantas (aproximadamente)", "type": "number", "half": 1, "showIf": ["vitimas", "Sim"]}, {"k": "n_mortos", "l": "N.º de Mortos", "type": "number", "half": 1, "showIf": ["vitimas", "Sim"]}, {"k": "sintomas", "l": "Principais sintomas (descreva)", "type": "area", "showIf": ["vitimas", "Sim"]}]}, {"t": "8. Deteção", "i": "sensors", "f": [{"k": "equip_detecao", "l": "A equipa ERAS transportou equipamento de deteção?", "type": "select", "opts": ["Sim", "Não"], "req": 1}, {"k": "agentes_equip", "l": "Para que agentes", "type": "multi", "opts": ["NR", "B", "Q"], "showIf": ["equip_detecao", "Sim"]}, {"k": "det_nr", "l": "Deteção positiva — Agentes NR", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_nr_info", "l": "Agentes NR — Info", "type": "text", "showIf": ["det_nr", "Sim"]}, {"k": "det_b", "l": "Deteção positiva — Agentes B", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_b_info", "l": "Agentes B — Info", "type": "text", "showIf": ["det_b", "Sim"]}, {"k": "det_q", "l": "Deteção positiva — Agentes Q", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_q_info", "l": "Agentes Q — Info", "type": "text", "showIf": ["det_q", "Sim"]}, {"k": "medicoes", "l": "Medições efetuadas na área do incidente (até 5)", "type": "rows", "item": "Medição", "max": 5, "cols": [{"k": "dh", "l": "Data / Hora", "type": "datetime", "half": 1}, {"k": "tipo", "l": "Tipo de agente", "type": "select", "opts": ["NR", "B", "Q"], "half": 1}, {"k": "coord", "l": "Coordenadas (Lat / Long)", "ph": "37.01928, -7.93044"}, {"k": "equip", "l": "Equipamento usado"}, {"k": "res", "l": "Resultado", "half": 1}, {"k": "un", "l": "Unidade", "half": 1, "ph": "Ex.: µSv/h, ppm"}]}]}, {"t": "9. Condições Meteorológicas", "i": "air", "f": [{"k": "vento_dir", "l": "Direção do Vento (de onde sopra)", "type": "select", "opts": ["Norte", "Sul", "Este", "Oeste"]}, {"k": "vento_int", "l": "Intensidade", "type": "select", "opts": ["Fraco", "Moderado", "Forte"]}, {"k": "vento_kmh", "l": "Velocidade (km/h)", "type": "number", "half": 1}, {"k": "temperatura", "l": "Temperatura (ºC)", "type": "number", "half": 1}, {"k": "ceu", "l": "Estado do Céu", "type": "text", "list": ["Limpo", "Pouco nublado", "Nublado", "Muito nublado", "Encoberto", "Nevoeiro"]}, {"k": "precipitacao", "l": "Precipitação", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "10. Outras Informações", "i": "notes", "f": [{"k": "outras", "l": "Outras informações", "type": "area"}, {"k": "optel", "l": "Chefe de Equipa", "type": "text", "req": 1}]}]};
       const corp = (lsGet('currentCorpOperNr') || '').padStart(4, '0');
       let KEY, FIELDS, DATA;
       function useSpec(s) {
@@ -25059,6 +25182,22 @@
         FIELDS.forEach(f => { if (visible(f) && filled(f)) o[f.k] = DATA[f.k]; });
         return o;
       }
+      /* grava a FR enviada no CB360 (tabela nrbq_forms): a FI pode depois importar daqui a meteorologia */
+      async function frSaveDb(fields) {
+        const now = new Date().toISOString();
+        const body = {data: fields, status: 'enviada', sent_at: now, fni_id: DATA._fni_id || null};
+        const h = {...sbHeaders(), Prefer: 'return=representation'};
+        let r;
+        if (DATA._db_id) {
+          r = await fetch(`${SUPABASE_URL}/rest/v1/nrbq_forms?id=eq.${DATA._db_id}`, {method: 'PATCH', headers: h, body: JSON.stringify(body)});
+          if (r.ok && !(await r.clone().json()).length) r = null;          /* apagada no Online: cria outra */
+        }
+        if (!r) r = await fetch(`${SUPABASE_URL}/rest/v1/nrbq_forms`, {method: 'POST', headers: h,
+          body: JSON.stringify({...body, corp_oper_nr: corp, form_type: 'FR', created_by: nint() || null, created_by_name: fields.optel || null})});
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const row = (await r.json())[0];
+        if (row) { DATA._db_id = row.id; save(); }
+      }
       $('btnSend').onclick = async () => {
         const btn = $('btnSend');
         if (!checkRequired(btn, 'Enviar ficha')) return;
@@ -25073,6 +25212,9 @@
           let j = {}; try { j = JSON.parse(txt); } catch (_) {}
           if (!r.ok || !j.success) throw new Error(j.error || (txt.trim().startsWith('<') ? `Erro do servidor (${r.status}).` : txt) || 'Falha no envio.');
           DATA._enviada = new Date().toISOString(); save();
+          let gravou = true;
+          try { await frSaveDb(visibleData()); } catch (e) { gravou = false; console.warn('Gravar FR no CB360:', e); }
+          if (!gravou) { toast('Ficha enviada, mas não ficou gravada no CB360 (a FI não a vai encontrar). Volte a enviar com rede.', 6000); return; }
           toast(`Ficha enviada para ${j.sentTo ? j.sentTo.join(', ') : rcp.to.join(', ')}.`, 4500);
         } catch (e) {
           console.error('Erro ao enviar ficha:', e);
@@ -25081,7 +25223,7 @@
           btn.disabled = false; btn.lastElementChild.textContent = 'Enviar ficha';
         }
       };
-      /* OPTEL / operador: preenche com o nome de quem tem sessão, se estiver vazio */
+      /* Chefe de Equipa (campo optel) / operador: preenche com o nome de quem tem sessão, se estiver vazio */
       async function prefillUser() {
         if (!nint()) return;
         try {
@@ -25345,6 +25487,9 @@
       .fni-import {flex: none; display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; height: 40px; border: 1px dashed var(--red); border-radius: 12px;
                    background: var(--red-light); color: var(--red-icon); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;}
       .fni-import .material-icons {font-size: 19px;}
+      .imp-row {flex: none; display: flex; gap: 8px;}
+      .imp-row .fni-import {flex: 1; width: auto; min-width: 0; padding: 0 8px;}
+      .imp-row .fni-import span:last-child {overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
       .fni-import.done {border-style: solid; border-color: rgba(46,125,50,.45); background: rgba(46,125,50,.10); color: var(--green, #2e7d32);}
       .fni-sheet {position: fixed; inset: 0; z-index: 1200; background: rgba(0,0,0,.45); display: none; align-items: flex-end; justify-content: center;}
       .fni-sheet.open {display: flex;}
@@ -25408,7 +25553,10 @@
             <div class="draft" id="draftInfo"><span class="material-icons">cloud_done</span>O rascunho fica guardado neste telemóvel</div>
           </div>
       </div>
-      <button type="button" class="fni-import" id="btnFni"><span class="material-icons">move_down</span><span>Importar dados da FNI</span></button>
+      <div class="imp-row">
+        <button type="button" class="fni-import" id="btnFni"><span class="material-icons">move_down</span><span>Importar da FNI</span></button>
+        <button type="button" class="fni-import" id="btnFr"><span class="material-icons">air</span><span>Meteo da FR</span></button>
+      </div>
       <div class="fields-box">
         <div class="scroll" id="scroll">
           <div id="form"></div>
@@ -25424,8 +25572,8 @@
     </div>
     <div class="fni-sheet" id="fniSheet">
       <div class="fni-box">
-        <h3><span class="material-icons">campaign</span>Importar da FNI</h3>
-        <p>Escolha a Ficha de Notificação Inicial feita no CB360 Online. Só são preenchidos os campos que ainda estão vazios nesta ficha.</p>
+        <h3><span class="material-icons" id="impIco">campaign</span><span id="impTit">Importar da FNI</span></h3>
+        <p id="impTxt">Escolha a Ficha de Notificação Inicial feita no CB360 Online. Só são preenchidos os campos que ainda estão vazios nesta ficha.</p>
         <div class="fni-list" id="fniList"></div>
         <button type="button" class="fni-close" id="fniClose">Fechar</button>
       </div>
@@ -25451,7 +25599,7 @@
       function lsGet(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }
       function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
       function lsDel(k) { try { localStorage.removeItem(k); } catch (_) {} }
-      let SPEC = {"page": "NRBQ_FI", "short": "FI", "title": "INTERVENÇÃO", "sub": "NRBQ · DON N.º 3", "pdfTitle": "FICHA DE INTERVENÇÃO (FI) — INCIDENTES COM SUSPEITA OU ENVOLVIMENTO DE AGENTES NRBQ", "file": "FI_NRBQ", "icon": "engineering", "sections": [{"t": "Informação Geral", "i": "assignment", "f": [{"k": "ocorrencia", "l": "N.º Ocorrência ANEPC", "type": "text", "req": 1}, {"k": "fi_n", "l": "FI N.º", "type": "text", "half": 1, "req": 1}, {"k": "data_hora", "l": "Data / Hora", "type": "datetime", "half": 1, "req": 1, "now": 1}]}, {"t": "Elementos da Equipa de Intervenção", "i": "groups", "f": [{"k": "equipa", "l": "Designação da Equipa", "type": "text", "req": 1}, {"k": "elementos", "l": "Elementos da equipa (até 10)", "type": "rows", "item": "Elemento", "max": 10, "req": 1, "cols": [{"k": "org", "l": "Organização"}, {"k": "nome", "l": "Nome"}, {"k": "idade", "l": "Idade", "type": "number", "half": 1}, {"k": "id", "l": "ID", "half": 1}]}]}, {"t": "1. Deteção", "i": "sensors", "f": [{"k": "det_nr", "l": "Deteção positiva — Agentes NR", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_b", "l": "Deteção positiva — Agentes B", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_q", "l": "Deteção positiva — Agentes Q", "type": "select", "opts": ["Sim", "Não"]}, {"k": "medicoes", "l": "Medições efetuadas na área do incidente (até 7)", "type": "rows", "item": "Medição", "max": 7, "cols": [{"k": "dh", "l": "Data / Hora", "type": "datetime", "half": 1}, {"k": "tipo", "l": "Tipo de agente", "type": "select", "opts": ["NR", "B", "Q"], "half": 1}, {"k": "coord", "l": "Coordenadas (Lat / Long)", "ph": "37.01928, -7.93044"}, {"k": "equip", "l": "Equipamento usado"}, {"k": "res", "l": "Resultado", "half": 1}, {"k": "un", "l": "Unidade", "half": 1, "ph": "Ex.: µSv/h, ppm"}]}]}, {"t": "2. Condições Meteorológicas", "i": "air", "f": [{"k": "vento_dir", "l": "Direção do Vento (de onde sopra)", "type": "select", "opts": ["Norte", "Sul", "Este", "Oeste"]}, {"k": "vento_int", "l": "Intensidade", "type": "select", "opts": ["Fraco", "Moderado", "Forte"]}, {"k": "vento_kmh", "l": "Velocidade (km/h)", "type": "number", "half": 1}, {"k": "temperatura", "l": "Temperatura (ºC)", "type": "number", "half": 1}, {"k": "ceu", "l": "Estado do Céu", "type": "text", "list": ["Limpo", "Pouco nublado", "Nublado", "Muito nublado", "Encoberto", "Nevoeiro"]}, {"k": "precipitacao", "l": "Precipitação", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "3. Informação Pertinente", "i": "notes", "f": [{"k": "info", "l": "Toda e qualquer informação considerada pertinente", "type": "area"}, {"k": "optel", "l": "OPTEL", "type": "text", "req": 1}]}]};
+      let SPEC = {"page": "NRBQ_FI", "short": "FI", "title": "INTERVENÇÃO", "sub": "NRBQ · DON N.º 3", "pdfTitle": "FICHA DE INTERVENÇÃO (FI) — INCIDENTES COM SUSPEITA OU ENVOLVIMENTO DE AGENTES NRBQ", "file": "FI_NRBQ", "icon": "engineering", "sections": [{"t": "Informação Geral", "i": "assignment", "f": [{"k": "ocorrencia", "l": "N.º Ocorrência ANEPC", "type": "text", "req": 1}, {"k": "fi_n", "l": "FI N.º", "type": "text", "half": 1, "req": 1}, {"k": "data_hora", "l": "Data / Hora", "type": "datetime", "half": 1, "req": 1, "now": 1}]}, {"t": "Elementos da Equipa de Intervenção", "i": "groups", "f": [{"k": "equipa", "l": "Designação da Equipa", "type": "text", "req": 1}, {"k": "elementos", "l": "Elementos da equipa (até 10)", "type": "rows", "item": "Elemento", "max": 10, "req": 1, "cols": [{"k": "org", "l": "Organização"}, {"k": "nome", "l": "Nome"}, {"k": "idade", "l": "Idade", "type": "number", "half": 1}, {"k": "id", "l": "ID", "half": 1}]}]}, {"t": "1. Deteção", "i": "sensors", "f": [{"k": "det_nr", "l": "Deteção positiva — Agentes NR", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_b", "l": "Deteção positiva — Agentes B", "type": "select", "opts": ["Sim", "Não"]}, {"k": "det_q", "l": "Deteção positiva — Agentes Q", "type": "select", "opts": ["Sim", "Não"]}, {"k": "medicoes", "l": "Medições efetuadas na área do incidente (até 7)", "type": "rows", "item": "Medição", "max": 7, "cols": [{"k": "dh", "l": "Data / Hora", "type": "datetime", "half": 1}, {"k": "tipo", "l": "Tipo de agente", "type": "select", "opts": ["NR", "B", "Q"], "half": 1}, {"k": "coord", "l": "Coordenadas (Lat / Long)", "ph": "37.01928, -7.93044"}, {"k": "equip", "l": "Equipamento usado"}, {"k": "res", "l": "Resultado", "half": 1}, {"k": "un", "l": "Unidade", "half": 1, "ph": "Ex.: µSv/h, ppm"}]}]}, {"t": "2. Condições Meteorológicas", "i": "air", "f": [{"k": "vento_dir", "l": "Direção do Vento (de onde sopra)", "type": "select", "opts": ["Norte", "Sul", "Este", "Oeste"]}, {"k": "vento_int", "l": "Intensidade", "type": "select", "opts": ["Fraco", "Moderado", "Forte"]}, {"k": "vento_kmh", "l": "Velocidade (km/h)", "type": "number", "half": 1}, {"k": "temperatura", "l": "Temperatura (ºC)", "type": "number", "half": 1}, {"k": "ceu", "l": "Estado do Céu", "type": "text", "list": ["Limpo", "Pouco nublado", "Nublado", "Muito nublado", "Encoberto", "Nevoeiro"]}, {"k": "precipitacao", "l": "Precipitação", "type": "select", "opts": ["Sim", "Não"]}]}, {"t": "3. Informação Pertinente", "i": "notes", "f": [{"k": "info", "l": "Toda e qualquer informação considerada pertinente", "type": "area"}, {"k": "optel", "l": "Chefe de Equipa", "type": "text", "req": 1}]}]};
       const corp = (lsGet('currentCorpOperNr') || '').padStart(4, '0');
       let KEY, FIELDS, DATA;
       function useSpec(s) {
@@ -25549,6 +25697,7 @@
         refresh();
         save();
         fniBtnState();
+        frBtnState();
       }
       /* acordeão: só uma secção aberta de cada vez */
       function openSec(sec, toggle, keepScroll) {
@@ -25784,7 +25933,7 @@
           btn.disabled = false; btn.lastElementChild.textContent = 'Enviar ficha';
         }
       };
-      /* OPTEL / operador: preenche com o nome de quem tem sessão, se estiver vazio */
+      /* Chefe de Equipa (campo optel) / operador: preenche com o nome de quem tem sessão, se estiver vazio */
       async function prefillUser() {
         if (!nint()) return;
         try {
@@ -25857,10 +26006,12 @@
       function fniBtnState() {
         const b = $('btnFni'); if (!b) return;
         b.classList.toggle('done', !!DATA._fni_id);
-        b.lastElementChild.textContent = DATA._fni_id ? `Dados importados da FNI n.º ${DATA._fni_id} · trocar` : 'Importar dados da FNI';
+        b.lastElementChild.textContent = DATA._fni_id ? `FNI n.º ${DATA._fni_id} · trocar` : 'Importar da FNI';
       }
       function fniFmt(iso) { const d = new Date(iso); return isNaN(d) ? '' : `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+      function impHead(ico, tit, txt) { $('impIco').textContent = ico; $('impTit').textContent = tit; $('impTxt').textContent = txt; }
       async function fniOpen() {
+        impHead('campaign', 'Importar da FNI', 'Escolha a Ficha de Notificação Inicial feita no CB360 Online. Só são preenchidos os campos que ainda estão vazios nesta ficha.');
         const list = $('fniList');
         $('fniSheet').classList.add('open');
         list.innerHTML = '<div class="fni-empty">A carregar fichas…</div>';
@@ -25904,6 +26055,57 @@
         fniBtnState();
         toast(n ? `${n} campo(s) preenchido(s) com a FNI n.º ${row.id}.` : `A FNI n.º ${row.id} não tinha dados novos para esta ficha.`, 3200);
       }
+      /* ----------------------------- IMPORTAR A METEOROLOGIA DA FR (gravada ao enviar a FR) ----------------------------- */
+      const METEO = ['vento_dir', 'vento_int', 'vento_kmh', 'temperatura', 'ceu', 'precipitacao'];
+      function frBtnState() {
+        const b = $('btnFr'); if (!b) return;
+        b.classList.toggle('done', !!DATA._fr_id);
+        b.lastElementChild.textContent = DATA._fr_id ? `Meteo FR n.º ${DATA._fr_id} · trocar` : 'Meteo da FR';
+      }
+      async function frOpen() {
+        impHead('air', 'Meteorologia da FR', 'Escolha a Ficha de Reconhecimento enviada. São copiados o vento, a temperatura, o estado do céu e a precipitação (só para os campos ainda vazios).');
+        const list = $('fniList');
+        $('fniSheet').classList.add('open');
+        list.innerHTML = '<div class="fni-empty">A carregar fichas…</div>';
+        try {
+          const r = await fetch(`${NRBQ_SB_URL}/rest/v1/nrbq_forms?select=id,occurrence_nr,status,updated_at,data&corp_oper_nr=eq.${corp}&form_type=eq.FR&order=updated_at.desc&limit=25`, {headers: fniHeaders()});
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const rows = await r.json();
+          if (!rows.length) { list.innerHTML = '<div class="fni-empty">Ainda não há nenhuma FR enviada. A FR fica disponível aqui depois de ser enviada.</div>'; return; }
+          const occ = String(DATA.ocorrencia || '').trim();
+          rows.sort((a, b) => (occ && b.occurrence_nr === occ) - (occ && a.occurrence_nr === occ));
+          list.innerHTML = rows.map(x => {
+            const dd = x.data || {};
+            const met = [dd.vento_dir && 'Vento ' + dd.vento_dir, dd.vento_int, dd.vento_kmh && dd.vento_kmh + ' km/h', dd.temperatura && dd.temperatura + ' ºC', dd.ceu].filter(Boolean).join(' · ');
+            return `<button type="button" class="fni-item" data-fr="${x.id}">
+              <b>FR n.º ${x.id} · ${esc(x.occurrence_nr || 'sem ocorrência')}${occ && x.occurrence_nr === occ ? ' · esta ocorrência' : ''}</b>
+              <small>${esc(met || 'Sem condições meteorológicas registadas')}</small>
+              <small>${fniFmt(x.updated_at)}${dd.optel ? ' · ' + esc(dd.optel) : ''}</small>
+            </button>`;
+          }).join('');
+          list.querySelectorAll('[data-fr]').forEach(b => b.onclick = () => frImport(rows.find(x => String(x.id) === b.dataset.fr)));
+        } catch (e) {
+          console.warn('Importar da FR:', e);
+          list.innerHTML = '<div class="fni-empty">Não foi possível carregar as fichas. Verifique a ligação à internet.</div>';
+        }
+      }
+      function frImport(row) {
+        if (!row) return;
+        const src = row.data || {};
+        let n = 0;
+        FIELDS.forEach(f => {
+          if (!METEO.includes(f.k) || !(f.k in src)) return;
+          const v = src[f.k];
+          if (v == null || String(v).trim() === '' || filled(f)) return;
+          DATA[f.k] = v;
+          n++;
+        });
+        DATA._fr_id = row.id;
+        $('fniSheet').classList.remove('open');
+        render();
+        frBtnState();
+        toast(n ? `${n} campo(s) de meteorologia preenchido(s) com a FR n.º ${row.id}.` : `A FR n.º ${row.id} não tinha meteorologia nova para esta ficha.`, 3200);
+      }
       /* ----------------------------- arranque ----------------------------- */
       document.addEventListener('DOMContentLoaded', () => {
         if (lsGet('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
@@ -25913,7 +26115,9 @@
         render();
         prefillUser();
         fniBtnState();
+        frBtnState();
         $('btnFni').onclick = fniOpen;
+        $('btnFr').onclick = frOpen;
         $('fniClose').onclick = () => $('fniSheet').classList.remove('open');
         $('fniSheet').onclick = e => { if (e.target.id === 'fniSheet') $('fniSheet').classList.remove('open'); };
       });
@@ -25998,13 +26202,20 @@
       .type-btn:hover:not(.selected) {background:var(--surface); color:var(--txt-1);}
       .type-btn:active:not(.selected) {transform:scale(0.98);}
       .type-btn.selected {color:#fff; background:linear-gradient(to right, var(--red-dark), var(--red)); box-shadow:none;}
+      .mode-row {display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; padding: 9px 12px; border-radius: var(--r-md); background: var(--surface-2);
+                 border: 1px solid var(--border); font-size: 12.5px; color: var(--txt-2); font-weight: 600;}
+      .mode-row b {color: var(--red); font-weight: 800;}
+      .mode-row.off {color: #ef6c00; background: rgba(239,108,0,.10);}
+      .mode-row .material-icons {font-size: 18px;}
+      .nm {display: block; min-height: 15px; margin-top: 3px; font-size: 11px; font-weight: 600; color: var(--txt-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+      .nm.ok {color: #2e7d32;} .nm.bad {color: var(--red);}
       .shift-row {display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 10px; margin-bottom: 0px;}
       .shift-row label {flex: 0 0 auto; margin: 0; font-weight: 600; color: var(--txt-2); font-size: 14px;}
       .shift-row select {flex: 1; min-width: 0;}
       /* ============================================================
       FORM AREA
       ============================================================ */
-      #telegramForm {width: 100%; min-width: 0; border: 0; padding: 0; margin-top: 0px; display: flex; flex-direction: column; align-items: stretch;}
+      #teamForm {width: 100%; min-width: 0; border: 0; padding: 0; margin-top: 0px; display: flex; flex-direction: column; align-items: stretch;}
       .team-inputs {width: 100%; min-width: 0; padding-right: 4px;}
       .team-inputs::-webkit-scrollbar {width:5px;}
       .team-inputs::-webkit-scrollbar-track {background:var(--surface-2); border-radius:10px;}
@@ -26095,11 +26306,7 @@
             <img src="https://imgur.com/nut5KSx.png" alt="Logo" class="form-logo">
           </div>
           <h2>Formatação da(s) Equipa(s)</h2>
-          <div class="team-type-btn">
-            <button class="type-btn" id="1-ecin" onclick="showTeam('1-ecin')">1 ECIN</button>
-            <button class="type-btn" id="1-ecin-1elac" onclick="showTeam('1-ecin-1elac')">1 ECIN e 1 ELAC</button>
-            <button class="type-btn" id="bcin" onclick="showTeam('bcin')">BCIN</button>
-          </div>
+          <div class="mode-row" id="modeRow"><span class="material-icons">sync</span>A carregar o modo ativo…</div>
           <div class="shift-row">
             <label for="shift">Turno:</label>
             <select id="shift" name="shift">
@@ -26110,79 +26317,10 @@
           </div>
         </div>
         <div class="scrollable-bottom-section">
-          <form id="telegramForm">
-            <div class="team-inputs">     
-              <div class="form-grid">
-                <div class="form-column" id="ecin01">
-                  <div class="team-title">ECIN 01</div>
-                  <div class="ecin-row">
-                    <div class="form-group">
-                      <label for="chief">Chefe Equipa:</label>
-                      <input type="text" id="chief" name="chief" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                    <div class="form-group">
-                      <label for="driver">Motorista:</label>
-                      <input type="text" id="driver" name="driver" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                  </div>
-                  <div class="ecin-row">
-                    <div class="form-group">
-                      <label for="element01">1º Elemento:</label>
-                      <input type="text" id="element01" name="element01" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                      <div class="form-group">
-                      <label for="element02">2º Elemento:</label>
-                      <input type="text" id="element02" name="element02" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="element03">3º Elemento:</label>
-                    <input type="text" id="element03" name="element03" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                  </div>
-                </div>
-                <div class="form-column" id="ecin02">
-                  <div class="team-title">ECIN 02</div>
-                  <div class="ecin-row">
-                    <div class="form-group">
-                      <label for="chief2">Chefe Equipa:</label>
-                      <input type="text" id="chief2" name="chief2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                    <div class="form-group">
-                      <label for="driver2">Motorista:</label>
-                      <input type="text" id="driver2" name="driver2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                  </div>
-                  <div class="ecin-row">
-                    <div class="form-group">
-                      <label for="element01_2">1º Elemento:</label>
-                      <input type="text" id="element01_2" name="element01_2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                    <div class="form-group">
-                      <label for="element02_2">2º Elemento:</label>
-                      <input type="text" id="element02_2" name="element02_2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="element03_2">3º Elemento:</label>
-                    <input type="text" id="element03_2" name="element03_2" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                  </div>
-                </div>   
-              </div>
-              <div id="elac-inline-slot"></div>
-              <div class="elac-container" id="elac">
-                <div class="team-title">ELAC</div>
-                <div class="elac-row">
-                  <div class="form-group">
-                    <label for="elacChief">Chefe Equipa:</label>
-                    <input type="text" id="elacChief" name="elacChief" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                  </div>
-                  <div class="form-group">
-                    <label for="elacDriver">Motorista:</label>
-                    <input type="text" id="elacDriver" name="elacDriver" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000">
-                  </div>
-                </div>
-              </div>
-            </div>      
+          <form id="teamForm" onsubmit="return false;">
+            <div class="team-inputs">
+              <div class="form-grid" id="teamsBox"></div>
+            </div>
           </form>
           <button type="submit" class="send-button" id="sendButton">📤 Enviar Equipa</button>
         </div>
@@ -26262,178 +26400,124 @@
           console.error('Erro no loadCorpInfo:', err);
         }
       }
-      /* ========================= TEAM DISPLAY ============================ */
-      let currentTeamType = null;
-      let elacOriginalParent = null;
-      let elacNextSibling = null;    
-      function showTeam(type) {
-        const teamInputs = document.querySelector('.team-inputs');
-        const sendButton = document.getElementById('sendButton');
-        const ecin01 = document.getElementById('ecin01');
-        const ecin02 = document.getElementById('ecin02');
-        const elac = document.getElementById('elac');
-        const elacSlot = document.getElementById('elac-inline-slot');
-        const form = document.getElementById('telegramForm');
-        document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('selected'));
-        const activeBtn = document.getElementById(type);
-        if (activeBtn) activeBtn.classList.add('selected');
-        if (!elacOriginalParent) {
-          elacOriginalParent = elac.parentNode;
-          elacNextSibling = elac.nextSibling;
-        }
-        teamInputs.style.display = 'block';
-        sendButton.style.display = 'block';
-        if (elac.parentNode !== elacOriginalParent) {
-          if (elacNextSibling) elacOriginalParent.insertBefore(elac, elacNextSibling);
-          else elacOriginalParent.appendChild(elac);
-        }
-        ecin01.style.display = 'none';
-        ecin02.style.display = 'none';
-        elac.style.display = 'none';
-        while (elacSlot.firstChild) elacSlot.removeChild(elacSlot.firstChild);
-        if (type === '1-ecin') ecin01.style.display = 'block';
-        else if (type === '1-ecin-1elac') { ecin01.style.display = 'block'; elac.style.display = 'block'; elacSlot.appendChild(elac); }
-        else if (type === 'bcin') { ecin01.style.display = 'block'; ecin02.style.display = 'block'; elac.style.display = 'block'; }    
-        currentTeamType = type;
+      /* ======================= MODO ATIVO (configurado no Online) ======================= */
+      /* decir_mode: "1_ecin", "1_ecin_1_elac", "2_ecin_1_elac"... (antigo "brigada" = 2 ECIN + 1 ELAC) */
+      let MODE = null, ECIN_N = 0, ELAC_N = 0;
+      const ECIN_ROLES = ['Chefe de Equipa', 'Motorista', '1º Elemento', '2º Elemento', '3º Elemento'];
+      const ELAC_ROLES = ['Chefe de Equipa', 'Motorista'];
+      function parseMode(m) {
+        if (!m) return [0, 0];
+        if (m === 'brigada') return [2, 1];
+        const e = /(\d+)_ecin/.exec(m), l = /(\d+)_elac/.exec(m);
+        return [e ? +e[1] : 0, l ? +l[1] : 0];
       }
-      /* ===================== TELEGRAM CONFIGURATION ====================== */
-      const TELEGRAM_API = 'https://cb360-online.vercel.app/api/mobile/sendToTelegram';
-      const MIN_ELEMENTS = 4;    
-      function debugLog() {}
+      function modeLabel() {
+        const p = [];
+        if (ECIN_N) p.push(`${ECIN_N} ECIN`);
+        if (ELAC_N) p.push(`${ELAC_N} ELAC`);
+        return p.join(' e ');
+      }
+      async function loadMode() {
+        const row = document.getElementById('modeRow');
+        try {
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/cb360_decir_mode_atual`, {method: 'POST', headers: getSupabaseHeaders(), body: '{}'});
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          MODE = await r.json();
+        } catch (e) {
+          console.error('Modo DECIR:', e);
+          row.className = 'mode-row off';
+          row.innerHTML = '<span class="material-icons">wifi_off</span>Não foi possível ler o modo ativo. Verifique a rede.';
+          return;
+        }
+        [ECIN_N, ELAC_N] = parseMode(MODE);
+        if (!ECIN_N && !ELAC_N) {
+          row.className = 'mode-row off';
+          row.innerHTML = '<span class="material-icons">block</span>DECIR sem modo ativo. A SALOC tem de o configurar no CB360 Online.';
+          document.getElementById('sendButton').style.display = 'none';
+          return;
+        }
+        row.className = 'mode-row';
+        row.innerHTML = `<span class="material-icons">groups</span>Modo ativo: <b>${escapeHtml(modeLabel())}</b>`;
+        buildForm();
+      }
+      /* ======================= FORMULÁRIO ======================= */
+      function teamDefs() {
+        const t = [];
+        for (let i = 1; i <= ECIN_N; i++) t.push({team: `ECIN ${String(i).padStart(2, '0')}`, roles: ECIN_ROLES, min: 4});
+        for (let i = 1; i <= ELAC_N; i++) t.push({team: ELAC_N > 1 ? `ELAC ${String(i).padStart(2, '0')}` : 'ELAC', roles: ELAC_ROLES, min: 1});
+        return t;
+      }
+      function buildForm() {
+        const box = document.getElementById('teamsBox');
+        box.innerHTML = teamDefs().map((t, ti) => {
+          const f = (ri) => `<div class="form-group">
+              <label for="m_${ti}_${ri}">${t.roles[ri]}:</label>
+              <input type="text" id="m_${ti}_${ri}" data-t="${ti}" data-r="${ri}" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="000" autocomplete="off">
+              <span class="nm" id="nm_${ti}_${ri}"></span>
+            </div>`;
+          const rows = [];
+          for (let ri = 0; ri < t.roles.length; ri += 2) rows.push(ri + 1 < t.roles.length ? `<div class="ecin-row">${f(ri)}${f(ri + 1)}</div>` : f(ri));
+          return `<div class="form-column"><div class="team-title">${t.team}</div>${rows.join('')}</div>`;
+        }).join('');
+        box.querySelectorAll('input').forEach(inp => {
+          validateNumericInput(inp);
+          inp.addEventListener('input', () => showName(inp));
+        });
+        document.getElementById('sendButton').style.display = 'block';
+      }
+      /* ======================= ELEMENTOS (nome ao lado do n.º) ======================= */
+      let ELEMS = null;
+      const normN = v => String(parseInt(v, 10));
+      async function loadElems() {
+        try {
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/reg_elems?select=n_int,abv_name&corp_oper_nr=eq.${(getCorp() || '').padStart(4, '0')}&elem_state=not.is.false`, {headers: getSupabaseHeaders()});
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          ELEMS = new Map((await r.json()).map(e => [normN(e.n_int), e.abv_name || '']));
+        } catch (e) {
+          console.warn('Elementos:', e);
+          ELEMS = null;                               /* sem lista: não bloqueia, só não mostra nomes */
+        }
+        document.querySelectorAll('#teamsBox input').forEach(showName);
+      }
+      function showName(inp) {
+        const el = document.getElementById(`nm_${inp.dataset.t}_${inp.dataset.r}`); if (!el) return;
+        const v = inp.value.trim();
+        if (!v || !ELEMS) { el.textContent = ''; el.className = 'nm'; return; }
+        const n = ELEMS.get(normN(v));
+        el.textContent = n === undefined ? 'N.º não encontrado' : n;
+        el.className = 'nm ' + (n === undefined ? 'bad' : 'ok');
+      }
+      /* ======================= DADOS E VALIDAÇÃO ======================= */
       function escapeHtml(v) {
         return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-      }    
-      /* ==================== TELEGRAM MESSAGE ====================== */
-      function createTelegramMessage(data) {
-        debugLog('Criando mensagem Telegram', data);
-        const now = new Date();
-        const dateTime = now.toLocaleString('pt-PT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});    
-        let message = `🚨 <b>COMPOSIÇÃO DA EQUIPA</b> 🚨\n\n`;    
-        if (data.shift) {
-          const shiftText = data.shift === 'D' ? '"08:00 - 20:00"' : '"20:00 - 08:00"';
-          const shiftIcon = data.shift === 'D' ? '☀️' : '🌙';
-          message += `${shiftIcon} <b>Turno:</b> ${data.shift} - ${shiftText}\n\n`;
-        }
-        message += `<b>ECIN-01</b>\n\n`;
-        const ecin1Fields = [{label: '👨‍🚒 Chefe Equipa ECIN', value: data.chief}, {label: '🚒 Motorista ECIN', value: data.driver}, {label: '👤 1º Elemento ECIN', value: data.element01},
-                             {label: '👤 2º Elemento ECIN', value: data.element02}, {label: '👤 3º Elemento ECIN', value: data.element03}];
-        let ecin1Filled = 0;
-        ecin1Fields.forEach(el => { if(el.value){ message+=`${el.label}: ${el.value}\n`; ecin1Filled++; } });
-        message += `📊 Status ECIN: ${ecin1Filled}/${ecin1Fields.length} ${ecin1Filled===ecin1Fields.length?'✅ EQUIPA COMPLETA\n\n':'⚠️ EQUIPA INCOMPLETA\n\n'}`;
-        if(data.chief2 || data.driver2 || data.element01_2 || data.element02_2 || data.element03_2){
-          message += `<b>ECIN-02</b>\n\n`;
-          const ecin2Fields = [{label: '👨‍🚒 Chefe Equipa ECIN', value: data.chief2}, {label: '🚒 Motorista ECIN', value: data.driver2}, {label: '👤 1º Elemento ECIN', value: data.element01_2},
-                               {label: '👤 2º Elemento ECIN', value: data.element02_2}, {label: '👤 3º Elemento ECIN', value: data.element03_2}];
-          let ecin2Filled=0;
-          ecin2Fields.forEach(el=>{ if(el.value){ message+=`${el.label}: ${el.value}\n`; ecin2Filled++; } });
-          message += `📊 Status ECIN: ${ecin2Filled}/${ecin2Fields.length} ${ecin2Filled===ecin2Fields.length?'✅ EQUIPA COMPLETA\n\n':'⚠️ EQUIPA INCOMPLETA\n\n'}`;
-        }
-        if(data.elacChief || data.elacDriver){
-          message += `<b>ELAC</b>\n\n`;
-          const elacFields = [{label:'👨‍🚒 Chefe Equipa ELAC', value:data.elacChief}, {label:'🚒 Motorista ELAC', value:data.elacDriver}];
-          let elacFilled=0;
-          elacFields.forEach(el=>{ if(el.value){ message+=`${el.label}: ${el.value}\n`; elacFilled++; } });
-          message += `📊 Status ELAC: ${elacFilled}/${elacFields.length} ${elacFilled===elacFields.length?'✅ EQUIPA COMPLETA\n\n':'⚠️ EQUIPA INCOMPLETA\n\n'}`;
-        }    
-        message += `🕐 <b>Registado em:</b> ${dateTime}\n`;
-        debugLog('Mensagem criada', message);
-        return message;
       }
-      /* =================== FORM DATA & VALIDATION =================== */
       function validateNumericInput(input){
         input.addEventListener('input', function(){ this.value=this.value.replace(/[^0-9]/g,''); if(this.value.length>3)this.value=this.value.slice(0,3); });
       }
-      function getFormData(){
-        return {
-          shift: document.getElementById('shift').value.trim(),
-          chief: document.getElementById('chief').value.trim(),
-          driver: document.getElementById('driver').value.trim(),
-          element01: document.getElementById('element01').value.trim(),
-          element02: document.getElementById('element02').value.trim(),
-          element03: document.getElementById('element03').value.trim(),
-          chief2: document.getElementById('chief2') ? document.getElementById('chief2').value.trim() : '',
-          driver2: document.getElementById('driver2') ? document.getElementById('driver2').value.trim() : '',
-          element01_2: document.getElementById('element01_2') ? document.getElementById('element01_2').value.trim() : '',
-          element02_2: document.getElementById('element02_2') ? document.getElementById('element02_2').value.trim() : '',
-          element03_2: document.getElementById('element03_2') ? document.getElementById('element03_2').value.trim() : '',
-          elacChief: document.getElementById('elacChief') ? document.getElementById('elacChief').value.trim() : '',
-          elacDriver: document.getElementById('elacDriver') ? document.getElementById('elacDriver').value.trim() : ''
-        };
-      }    
-      function countTeamElements(fields){
-        return fields.filter(f=>f && f.trim()!=='').length;
+      function getTeams() {
+        return teamDefs().map((t, ti) => ({
+          team: t.team, min: t.min, size: t.roles.length,
+          members: t.roles.map((role, ri) => {
+            const v = (document.getElementById(`m_${ti}_${ri}`)?.value || '').trim();
+            return v ? {role, n_int: normN(v), name: ELEMS ? (ELEMS.get(normN(v)) || '') : ''} : null;
+          }).filter(Boolean)
+        }));
       }
-      function validateTeamsBeforeSend(data) {
-        if (!currentTeamType) return false;
-        const all = [data.chief, data.driver, data.element01, data.element02, data.element03, data.chief2, data.driver2,
-                     data.element01_2, data.element02_2, data.element03_2, data.elacChief, data.elacDriver]
-                    .filter(v => v).map(v => String(parseInt(v, 10)));
+      function errPopup(title, html) { showPopup(title, html, [{text:'❌ Fechar',class:'cancel',action:hidePopup}], 'error'); }
+      function validateTeams(teams) {
+        const all = teams.flatMap(t => t.members.map(m => m.n_int));
         const dup = all.find((v, i) => all.indexOf(v) !== i);
-        if (dup) {
-          showPopup('🚫 Elemento Repetido', `<strong>O Nº ${escapeHtml(dup)} está em mais do que um lugar.</strong>`, [{text:'❌ Fechar',class:'cancel',action:hidePopup}], 'error');
-          return false;
-        }    
-        const ecin1Count = countTeamElements([data.chief, data.driver, data.element01, data.element02, data.element03]);
-        const ecin2Count = countTeamElements([data.chief2, data.driver2, data.element01_2, data.element02_2, data.element03_2]);
-        const elacCount = countTeamElements([data.elacChief, data.elacDriver]);    
-        if (currentTeamType === '1-ecin') {
-          if (ecin1Count < 4) {
-            showPopup(
-              '🚫 ECIN-01 Insuficiente',
-              `<strong>❌ ECIN-01 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin1Count}/5`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
+        if (dup) { errPopup('🚫 Elemento Repetido', `<strong>O Nº ${escapeHtml(dup)} está em mais do que um lugar.</strong>`); return false; }
+        if (ELEMS) {
+          const bad = all.filter(v => !ELEMS.has(v));
+          if (bad.length) { errPopup('🚫 N.º Desconhecido', `<strong>${bad.map(escapeHtml).join(', ')}</strong> não ${bad.length > 1 ? 'existem' : 'existe'} nos elementos ativos da corporação.`); return false; }
+        }
+        for (const t of teams) {
+          if (t.members.length < t.min) {
+            errPopup(`🚫 ${t.team} Insuficiente`, `<strong>❌ ${t.team} não possui elementos suficientes!</strong><br>Preenchidos: ${t.members.length}/${t.size}`);
             return false;
           }
-        } else if (currentTeamType === '1-ecin-1elac') {
-          if (ecin1Count < 4) {
-            showPopup(
-              '🚫 ECIN-01 Insuficiente',
-              `<strong>❌ ECIN-01 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin1Count}/5`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-          if (elacCount < 1) {
-            showPopup(
-              '🚫 ELAC Insuficiente',
-              `<strong>❌ ELAC não possui elementos suficientes!</strong><br>Preenchidos: ${elacCount}/2`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-        } else if (currentTeamType === 'bcin') {
-          if (ecin1Count < 4) {
-            showPopup(
-              '🚫 ECIN-01 Insuficiente',
-              `<strong>❌ ECIN-01 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin1Count}/5`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-          if (ecin2Count < 4) {
-            showPopup(
-              '🚫 ECIN-02 Insuficiente',
-              `<strong>❌ ECIN-02 não possui elementos suficientes!</strong><br>Preenchidos: ${ecin2Count}/5`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-          if (elacCount < 1) {
-            showPopup(
-              '🚫 ELAC Insuficiente',
-              `<strong>❌ ELAC não possui elementos suficientes!</strong><br>Preenchidos: ${elacCount}/2`,
-              [{text:'❌ Fechar',class:'cancel',action:hidePopup}],
-              'error'
-            );
-            return false;
-          }
-        }    
+        }
         return true;
       }
       /* =================== POPUPS & LOADING =================== */
@@ -26452,48 +26536,64 @@
       }
       function showLoading(show){
         const button=document.getElementById('sendButton');
-        if(!button)return console.error('❌ Botão sendButton não encontrado!');
+        if(!button)return;
         button.disabled=show; button.innerHTML=show?'⏳ A Enviar...':'📤 Enviar Equipa';
       }
+      function resetForm() {
+        document.getElementById('shift').value = '';
+        document.querySelectorAll('#teamsBox input').forEach(i => { i.value = ''; showName(i); });
+      }
       function showSuccessPopup(){
-        showPopup('✅ Sucesso!','<strong>Mensagem enviada com sucesso para a SALOC!</strong>',[{text:'👍 OK',class:'ok',action:()=> {hidePopup();document.getElementById('telegramForm').reset(); showTeam('1-ecin');}}],'success');}
-      function showErrorPopup(errorMessage){ showPopup('❌ Erro no Envio',`<strong>Não foi possível enviar a mensagem!</strong><br>${escapeHtml(errorMessage)}`,[{text:'🔄 Tentar Novamente',class:'confirm',action: ()=>{hidePopup();processFormSubmission();}},{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error');}
-      /* =================== SEND TELEGRAM =================== */
-      async function sendTelegramMessage(message) {
-        const corpRaw = localStorage.getItem("currentCorpOperNr") || sessionStorage.getItem("currentCorpOperNr");
-        if (!corpRaw) {
-          showErrorPopup('Sessão inválida. Volte a iniciar sessão.');
-          return;
-        }
-        const corpOperNr = corpRaw.padStart(4, "0");
+        showPopup('✅ Sucesso!','<strong>Composição enviada para a SALOC!</strong>',[{text:'👍 OK',class:'ok',action:()=>{hidePopup();resetForm();}}],'success');
+      }
+      function showErrorPopup(errorMessage){
+        showPopup('❌ Erro no Envio',`<strong>Não foi possível enviar a composição!</strong><br>${escapeHtml(errorMessage)}`,
+                  [{text:'🔄 Tentar Novamente',class:'confirm',action: ()=>{hidePopup();processFormSubmission();}},{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error');
+      }
+      /* =================== ENVIAR: grava no CB360 e avisa a Central =================== */
+      const PUSH_API = 'https://cb-360-app.vercel.app/api/sendPush';
+      const CENTRAL_NINT = '9999';
+      function shiftDate(shift) {
+        const d = new Date();
+        if (shift === 'N' && d.getHours() < 8) d.setDate(d.getDate() - 1);     /* turno da noite depois da meia-noite: começou na véspera */
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      }
+      async function senderName() {
+        const n = getNInt();
+        if (ELEMS && n && ELEMS.has(normN(n))) return `${normN(n)} - ${ELEMS.get(normN(n))}`;
+        return n || '';
+      }
+      async function processFormSubmission(){
+        if (document.getElementById('sendButton')?.disabled) return;
+        if (!ECIN_N && !ELAC_N) return errPopup('🚫 Sem Modo Ativo', '<strong>O DECIR não tem modo ativo.</strong>');
+        const shift = document.getElementById('shift').value.trim();
+        if (!shift) return errPopup('⚠️ Turno Obrigatório', '<strong>Por favor selecione o turno!</strong>');
+        const teams = getTeams();
+        if (!validateTeams(teams)) return;
+        const corp = (getCorp() || '').padStart(4, '0');
+        if (!getCorp()) return showErrorPopup('Sessão inválida. Volte a iniciar sessão.');
         showLoading(true);
         try {
-          const response = await fetch(TELEGRAM_API, {
+          const body = {corp_oper_nr: corp, shift, shift_date: shiftDate(shift), mode: MODE, sender_name: await senderName(),
+                        teams: teams.map(t => ({team: t.team, members: t.members}))};
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/decir_compositions`, {method: 'POST', headers: getSupabaseHeaders(), body: JSON.stringify(body)});
+          if (!r.ok) throw new Error(r.status === 404 ? 'Falta a tabela das composições no servidor (SQL 45).' : `O servidor não aceitou o envio (${r.status}).`);
+          const resumo = teams.map(t => `${t.team} ${t.members.length}/${t.size}`).join(' · ');
+          fetch(PUSH_API, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({message, corp_oper_nr: corpOperNr})
-          });
+            headers: {'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`},
+            body: JSON.stringify({recipient_nint: CENTRAL_NINT, tipo: 'aviso', pagina: 'MainPage', sender_name: 'Composição DECIR',
+                                  message_text: `${shift === 'D' ? '☀️ Turno D' : '🌙 Turno N'} · ${resumo}`})
+          }).catch(e => console.error('Push Central:', e));
           showLoading(false);
-          if (response.ok) showSuccessPopup();
-          else {
-            console.error('Erro Telegram:', response.status, await response.text().catch(() => ''));
-            showErrorPopup(response.status === 413 ? 'Mensagem demasiado grande.' : 'O servidor não aceitou o envio. Tente novamente.');
-          }
+          showSuccessPopup();
         } catch (err) {
           showLoading(false);
           console.error(err);
-          showErrorPopup('Sem ligação ao servidor. Verifique a rede e tente novamente.');
+          showErrorPopup(err.message && !/fetch/i.test(err.message) ? err.message : 'Sem ligação ao servidor. Verifique a rede e tente novamente.');
         }
       }
-      function processFormSubmission(){
-        if (document.getElementById('sendButton')?.disabled) return;
-        const data=getFormData();
-        if(!data.shift){ showPopup('⚠️ Turno Obrigatório','<strong>Por favor selecione o turno!</strong>',[{text:'❌ Fechar',class:'cancel',action:hidePopup}],'error'); return; }
-        if(!validateTeamsBeforeSend(data)) return;
-        const message=createTelegramMessage(data);
-        sendTelegramMessage(message);
-      }
-      /* =================== DOM EVENTS =================== */
+
       document.addEventListener('DOMContentLoaded', function() {
         const savedTheme = localStorage.getItem('sgo-theme');
         if (savedTheme === 'dark') {
@@ -26502,7 +26602,6 @@
         loadCorpInfo();
         const fy = document.getElementById('footerYear');
         if (fy) fy.textContent = new Date().getFullYear();
-        document.querySelectorAll('input[type="text"]').forEach(validateNumericInput);      
         const sendButton = document.getElementById('sendButton');
         if (sendButton) {
           sendButton.addEventListener('click', function() {
@@ -26524,8 +26623,8 @@
           if (now - lastTouchEnd <= 300) event.preventDefault();
           lastTouchEnd = now;
         }, false);
-        debugLog('Inicialização completa');
-        showTeam('1-ecin');
+        document.getElementById('sendButton').style.display = 'none';
+        loadMode().then(loadElems);
       });    
       document.addEventListener('selectstart', e => e.preventDefault());
       document.addEventListener('contextmenu', e => e.preventDefault());
@@ -31227,7 +31326,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.45 - 2026-11-18 - Central: 3 atualizações do terreno (MainPage duplicada removida)';
+  window.CB360_BUILD='v22.47 - 2026-11-18 - Central: 3 atualizações do terreno (MainPage duplicada removida)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email|mobile\\/sendToTelegram))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s&&!(window.frameElement&&window.frameElement.classList.contains('nocover')))['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
