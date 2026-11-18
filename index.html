@@ -603,7 +603,7 @@
       <div class="hctrl" id="menuDotsBtn" onclick="toggleMenu()">⋮</div>
     </div>
     <div class="menu-dropdown" id="menuDropdown">
-      <div class="menu-item" onclick="enableNotifications()"><span class="material-icons">notifications_active</span> Ativar Notificações</div>
+      <div class="menu-item" id="notifMenuItem" onclick="toggleNotifications()"><span class="material-icons">notifications_active</span> Ativar Notificações</div>
       <div class="menu-item" onclick="showNotifHelp()"><span class="material-icons">help_outline</span> Ajuda com Notificações</div>
       <div class="menu-item" onclick="showPolicies()"><span class="material-icons">policy</span> Políticas de Privacidade</div>
       <div class="menu-item" onclick="showTerms()"><span class="material-icons">description</span> Termos de Uso</div>
@@ -940,7 +940,8 @@
           <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">info</span> Estado neste telemóvel</h4>
           <p id="notifHelpStatus">A verificar...</p>
           <p style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn-close" style="margin:0;" onclick="enableNotifications().then(updateNotifHelpStatus)">Ativar notificações</button>
+            <button class="btn-close" id="notifHelpOn" style="margin:0;" onclick="enableNotifications().then(updateNotifHelpStatus)">Ativar notificações</button>
+            <button class="btn-close" id="notifHelpOff" style="margin:0; display:none;" onclick="disableNotifications().then(updateNotifHelpStatus)">Desativar notificações</button>
             <button class="btn-close" style="margin:0;" onclick="testLocalNotification()">Notificação de teste</button>
           </p>
           <h4><span class="material-icons" style="font-size:13px; vertical-align:-2px;">android</span> Android (Chrome)</h4>
@@ -972,7 +973,7 @@
           <p>
             • Não feche a app "à força" (deslizar na lista de apps recentes pode cortar as notificações em alguns telemóveis).<br>
             • Confirme que o modo "Não incomodar" está desligado.<br>
-            • Desative e volte a ativar: menu ⋮ → Ativar Notificações.<br>
+            • Desative e volte a ativar: menu ⋮ → Desativar Notificações e depois Ativar Notificações.<br>
             • Telemóveis Huawei sem serviços Google não recebem notificações push.<br>
             • Se nada resultar, contacte o suporte e indique a <strong>versão</strong> que aparece no fundo do menu ⋮.
           </p>
@@ -1147,16 +1148,51 @@
         }
         return outputArray;
       }
+      /* desligadas pela app neste telemóvel (a permissão do sistema fica, mas deixa de estar registado) */
+      const PUSH_OFF_KEY = 'cb360_push_off';
+      function pushOff() { try { return localStorage.getItem(PUSH_OFF_KEY) === '1'; } catch (_) { return false; } }
+      function notifOn() { return 'Notification' in window && Notification.permission === 'granted' && !pushOff(); }
+      function renderNotifMenu() {
+        const it = document.getElementById('notifMenuItem'); if (!it) return;
+        it.innerHTML = notifOn()
+          ? '<span class="material-icons">notifications_off</span> Desativar Notificações'
+          : '<span class="material-icons">notifications_active</span> Ativar Notificações';
+      }
+      function toggleNotifications() { return notifOn() ? disableNotifications() : enableNotifications(); }
       async function enableNotifications() {
         if (!('Notification' in window)) return alert('Notificações não suportadas.');
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') return alert('Notificações não foram ativadas.');
+        try { localStorage.removeItem(PUSH_OFF_KEY); } catch (_) {}
         try {
           await initializePushWithoutPermission();
           alert('Notificações ativadas ✅');
         } catch (e) {
           alert('As notificações foram permitidas, mas este telemóvel não ficou registado: ' + (e && e.message ? e.message : e));
         }
+        renderNotifMenu();
+        if (typeof renderCentralNotif === 'function') renderCentralNotif();
+      }
+      async function disableNotifications() {
+        try { localStorage.setItem(PUSH_OFF_KEY, '1'); } catch (_) {}   /* primeiro: assim não volta a registar sozinho */
+        let falhou = false;
+        try {
+          const swc = (window.parent && window.parent !== window && window.parent.navigator.serviceWorker) || navigator.serviceWorker;
+          const registration = swc ? await Promise.race([swc.ready, new Promise((_, rej) => setTimeout(() => rej(new Error('sem resposta')), 10000))]) : null;
+          const sub = registration && registration.pushManager ? await registration.pushManager.getSubscription() : null;
+          if (sub) {
+            /* tira o registo do servidor (deixa de receber) e cancela a inscrição neste telemóvel */
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/user_push_subscriptions?endpoint=eq.${encodeURIComponent(sub.endpoint)}`, {method: 'DELETE', headers: getSupabaseHeaders()});
+            if (!r.ok) falhou = true;
+            await sub.unsubscribe().catch(() => {});
+          }
+        } catch (e) {
+          console.warn('Desativar notificações:', e);
+          falhou = true;
+        }
+        alert(falhou ? 'Notificações desativadas neste telemóvel. Se ainda chegar alguma, volte a tentar com rede.' : 'Notificações desativadas neste telemóvel 🔕');
+        renderNotifMenu();
+        if (typeof renderCentralNotif === 'function') renderCentralNotif();
       }
       async function initializePushWithoutPermission() {
         const corp = getCorp();
@@ -1255,7 +1291,7 @@
           </div>`;
         document.querySelector('.welcome-row')?.insertAdjacentElement('afterend', card);
         renderCentralNotif();
-        if ('Notification' in window && Notification.permission === 'granted') initializePushWithoutPermission().catch(() => {});
+        if (notifOn()) initializePushWithoutPermission().catch(() => {});
         loadCentralList();
         loadOfcList();
         loadDccList();
@@ -1337,7 +1373,7 @@
       }
       function renderCentralNotif() {
         const el = document.getElementById('centralNotif'); if (!el) return;
-        const on = 'Notification' in window && Notification.permission === 'granted';
+        const on = notifOn();
         el.className = 'central-notif ' + (on ? 'on' : 'off');
         el.innerHTML = on
           ? '<span class="material-icons" style="font-size:18px;">notifications_active</span>Notificações ativas neste telemóvel'
@@ -2097,6 +2133,10 @@
       function updateNotifHelpStatus() {
         const el = document.getElementById('notifHelpStatus');
         if (!el) return;
+        /* mostra só o botão que faz sentido: Ativar ou Desativar */
+        const on = notifOn(), bOn = document.getElementById('notifHelpOn'), bOff = document.getElementById('notifHelpOff');
+        if (bOn) bOn.style.display = on ? 'none' : '';
+        if (bOff) bOff.style.display = on ? '' : 'none';
         const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
         const standalone = (window.parent.matchMedia && window.parent.matchMedia('(display-mode: standalone)').matches) || window.parent.navigator.standalone === true;
         if (isIOS && !standalone) {
@@ -2105,6 +2145,7 @@
         }
         if (!('Notification' in window)) { el.textContent = '❌ Este browser não suporta notificações.'; return; }
         const p = Notification.permission;
+        if (p === 'granted' && pushOff()) { el.innerHTML = '🔕 Notificações <strong>desativadas</strong> na app neste telemóvel. Toque em "Ativar notificações" para voltar a receber.'; return; }
         el.innerHTML = p === 'granted' ? '✅ Notificações <strong>permitidas</strong> neste telemóvel.'
                      : p === 'denied'  ? '❌ Notificações <strong>bloqueadas</strong>. Siga os passos abaixo para as permitir nas definições.'
                      :                   '⚠️ Notificações <strong>ainda não ativadas</strong>. Toque em "Ativar notificações".';
@@ -2403,9 +2444,10 @@
         loadAccessRestrictions();   
         /* com as notificações já permitidas, volta a confirmar o registo deste telemóvel em cada abertura
            (se o registo foi apagado ou expirou, refaz-se sozinho; erros ficam só na consola) */
-        if ('Notification' in window && Notification.permission === 'granted') {
+        if (notifOn()) {
           setTimeout(() => initializePushWithoutPermission().catch(e => console.warn('Registo de notificações:', e && e.message)), 2500);
         }
+        renderNotifMenu();
         resolveIsProfessional().then(isProf => {
           const pj = document.getElementById('pointJustif');
           if (pj) pj.style.display = isProf ? '' : 'none';
