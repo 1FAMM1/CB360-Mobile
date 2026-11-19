@@ -12908,7 +12908,7 @@
       .posit-note .material-icons {font-size: 15px;}
       .posit-h {font-size: 11px; font-weight: 800; color: var(--txt-3); text-transform: uppercase; letter-spacing: .06em; margin: 4px 0 6px; display: flex; align-items: center; gap: 6px;}
       .posit-h .material-icons {font-size: 15px; color: var(--red-icon);}
-      .posit-row {display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); font-size: 12.5px;}
+      .posit-row {cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); font-size: 12.5px;}
       .posit-row.cur {border-color: var(--red); background: var(--red-light);}
       .posit-row b {color: var(--txt-1); min-width: 42px;}
       .posit-row .posit-row-t {flex: 1; min-width: 0; color: var(--txt-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
@@ -13462,23 +13462,30 @@
         document.getElementById('positLocal').textContent = item.local || '-';
         document.getElementById('positNote').style.display = readOnly ? 'flex' : 'none';
         const hora = p => escapeHtml(p.posit_time || new Date(p.created_at).toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'}));
-        /* lista: todos os POSIT da ocorrência (o mais recente em cima, destacado) */
-        document.getElementById('positList').innerHTML = list.length ? list.map((p, i) => `
-            <div class="posit-row${i === 0 ? ' cur' : ''}"><b>${hora(p)}</b>
+        /* lista: todos os POSIT da ocorrência (o mais recente em cima); tocar num mostra-o em baixo */
+        const box = document.getElementById('positList');
+        box.innerHTML = list.length ? list.map((p, i) => `
+            <div class="posit-row${i === 0 ? ' cur' : ''}" data-i="${i}"><b>${hora(p)}</b>
               <span class="posit-row-t">${escapeHtml(p.posit || '')}</span>
               ${p.status ? `<span class="posit-st">${escapeHtml(p.status)}</span>` : ''}</div>`).join('')
           : '<div class="posit-note"><span class="material-icons">info</span>Ainda não há POSIT para esta ocorrência.</div>';
-        /* em baixo: o último POSIT por inteiro */
+        /* em baixo: o POSIT escolhido por inteiro (ao abrir, o último) */
+        const show = i => {
+          const q = list[i]; if (!q) { document.getElementById('positLast').innerHTML = ''; return; }
+          box.querySelectorAll('.posit-row').forEach(r => r.classList.toggle('cur', Number(r.dataset.i) === i));
+          document.getElementById('positLast').innerHTML = `
+            <div class="posit-h"><span class="material-icons">campaign</span>${i === 0 ? 'Último POSIT' : `POSIT das ${hora(q)}`}</div>
+            <div class="posit-item${i === 0 ? ' last' : ''}">
+              <div class="posit-top"><span class="posit-time"><span class="material-icons">schedule</span>${hora(q)}</span>
+                ${q.status ? `<span class="posit-st">${escapeHtml(q.status)}</span>` : ''}</div>
+              <div class="posit-txt">${escapeHtml(q.posit || '')}</div>
+              ${q.demob ? '<span class="posit-demob">Desmobilização dos meios</span>' : ''}
+              <div class="posit-meta">Enviado às ${new Date(q.created_at).toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'})}${q.sender_name ? ' · ' + escapeHtml(q.sender_name) : ''}</div>
+            </div>`;
+        };
+        box.querySelectorAll('.posit-row').forEach(r => r.onclick = () => show(Number(r.dataset.i)));
+        show(0);
         const p = list[0];
-        document.getElementById('positLast').innerHTML = p ? `
-            <div class="posit-h"><span class="material-icons">campaign</span>Último POSIT</div>
-            <div class="posit-item last">
-              <div class="posit-top"><span class="posit-time"><span class="material-icons">schedule</span>${hora(p)}</span>
-                ${p.status ? `<span class="posit-st">${escapeHtml(p.status)}</span>` : ''}</div>
-              <div class="posit-txt">${escapeHtml(p.posit || '')}</div>
-              ${p.demob ? '<span class="posit-demob">Desmobilização dos meios</span>' : ''}
-              <div class="posit-meta">Enviado às ${new Date(p.created_at).toLocaleTimeString('pt-PT', {hour: '2-digit', minute: '2-digit'})}${p.sender_name ? ' · ' + escapeHtml(p.sender_name) : ''}</div>
-            </div>` : '';
         if (p) positMarkSeen(p.id);
         POSIT_OPEN = item.id;
         document.getElementById('positPopup').classList.add('active');
@@ -31824,7 +31831,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.55 - 2026-11-19 - POSIT: abre sozinho ao tocar na notificação';
+  window.CB360_BUILD='v22.56 - 2026-11-19 - POSIT: tocar num da lista mostra-o por inteiro';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s&&!(window.frameElement&&window.frameElement.classList.contains('nocover')))['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
