@@ -1285,7 +1285,7 @@
       /* ======================= CONTA DA CENTRAL (account_type = 'central') =======================
          Só serve para receber as push dos estados dos veículos; o trabalho é feito no Online. */
       const CENTRAL_ACTIONS = {'Saída Und.': ['Saída do Quartel', '#e53935'], 'Chegada TO': ['Chegada ao TO', '#0282fa'], 'Saída TO': ['Saída do TO', '#ff9800'],
-                               'Chegada Und.': ['Chegada ao Quartel', '#22c55e'], 'Fim de Retenção': ['Fim de Retenção', '#26a69a'],
+                               'Chegada Und.': ['Chegada ao Quartel', '#22c55e'], 'Fim de Retenção': ['Fim de Retenção', '#26a69a'], 'Disponível': ['Disponível', '#00897b'],
                                'INOP': ['Inoperacional', '#c62828'], 'Em Parque (manual)': ['Em Parque', '#22c55e'], 'Em Serviço (manual)': ['Em Serviço', '#ff9800']};
       function applyCentralView() {
         window.isCentralUser = true;
@@ -17240,6 +17240,7 @@
       .btn-saida-to {background:linear-gradient(135deg, var(--orange), #e67e22);}
       .btn-chegada-und {background:linear-gradient(135deg, var(--green), #189349);}
       .btn-retido {background:linear-gradient(135deg, #5c5c5c, #333333);}
+      .btn-disponivel {background:linear-gradient(135deg, #26a69a, #00796b);}
       .geostat-btn.sending {animation:pulse 1s infinite;}
       /* ============================================================
       WARNING BANNER
@@ -17347,6 +17348,10 @@
             <span class="btn-icon"><span class="material-icons">block</span></span>
             <strong style="font-size:8.5px;">Retenção</strong>
           </button>
+          <button class="geostat-btn btn-disponivel" id="disponivelBtn" style="display:none;" onclick="sendGeostat('Disponível', this)">
+            <span class="btn-icon"><span class="material-icons">check_circle</span></span>
+            <strong>Disponível</strong>
+          </button>
         </div>
       </div>
       <div class="warning" id="warningMessage">
@@ -17397,7 +17402,7 @@
       }
       const PUSH_API = 'https://cb-360-app.vercel.app/api/sendPush';
       const CENTRAL_NINT = '9999';             /* conta da Central no Mobile (users_mobile.account_type = 'central') */
-      const ACTION_LABELS = {'Saída Und.': 'Saída do Quartel', 'Chegada TO': 'Chegada ao TO', 'Saída TO': 'Saída do TO', 'Chegada Und.': 'Chegada ao Quartel'};
+      const ACTION_LABELS = {'Saída Und.': 'Saída do Quartel', 'Chegada TO': 'Chegada ao TO', 'Saída TO': 'Saída do TO', 'Chegada Und.': 'Chegada ao Quartel', 'Disponível': 'Disponível'};
       const TIMERS = {VEHICLE_RELOAD_INTERVAL: 5000, STATUS_CHECK_INTERVAL: 1500, INITIAL_SELECT_DELAY: 1000,
                       RESELECT_DELAY: 100, ANIMATION_DURATION: 300, STATUS_DISPLAY_TIME: 3000, FOCUS_DELAY: 100};
       const TYPES_WITH_PUMP = ['VLCI', 'VUCI', 'VFCI', 'VECI', 'VFCI', 'VRCI', 'VSAE', 'VTTU', 'VTTF', 'VTTR', 'VALE', 'VTTR', 'VTGC'];
@@ -17410,9 +17415,11 @@
                                   'ABSC': 26,  'ABTD': 27, 'ABTM': 28, 'VDTD': 29};
       const RETIDO_MACAS_TYPES = ['ABSC', 'ABCI', 'ABTD', 'ABTM', 'VDTD'];
       function toggleRetidoMacasButton(type) {
-        const btn = document.getElementById('retidoMacasBtn');
-        if (!btn) return;
-        btn.style.display = (type && RETIDO_MACAS_TYPES.includes(type)) ? 'flex' : 'none';
+        const show = (type && RETIDO_MACAS_TYPES.includes(type)) ? 'flex' : 'none';
+        ['retidoMacasBtn', 'disponivelBtn'].forEach(id => {
+          const btn = document.getElementById(id);
+          if (btn) btn.style.display = show;
+        });
       }
       /* === VARIÁVEIS DE ESTADO GLOBAL ==*/
       let selectedVehicle = null;
