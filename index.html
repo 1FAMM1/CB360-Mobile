@@ -2257,16 +2257,25 @@
         document.querySelectorAll('.mbtn').forEach(btn => btn.classList.remove('sel'));
       }
       /* ======================= ACCESS RESTRICTIONS ======================= */
+      /* trancado se a corporação tiver o módulo desligado (corporation_data.mobile_modules_off)
+         ou se o elemento não tiver acesso (user_accesses.can_access = false) */
       async function loadAccessRestrictions() {
         const corpOperNr = getCorp();
         const nInt = getNInt();
         if (!corpOperNr || !nInt) return;
         try {
           const url = `${SUPABASE_URL}/rest/v1/user_accesses?select=module_key&corp_oper_nr=eq.${corpOperNr}&n_int=eq.${nInt}&can_access=eq.false`;
-          const response = await fetch(url, { headers: getSupabaseHeaders() });
-          if (!response.ok) return;
-          const data = await response.json();
-          const lockedModules = new Set(data.map(d => d.module_key));
+          const corpUrl = `${SUPABASE_URL}/rest/v1/corporation_data?select=mobile_modules_off&corp_oper_nr=eq.${getCorpPadded()}&limit=1`;
+          const [response, corpRes] = await Promise.all([
+            fetch(url, { headers: getSupabaseHeaders() }),
+            fetch(corpUrl, { headers: getSupabaseHeaders() }).catch(() => null)
+          ]);
+          const lockedModules = new Set();
+          if (response.ok) (await response.json()).forEach(d => lockedModules.add(d.module_key));
+          if (corpRes && corpRes.ok) {
+            const off = (await corpRes.json())?.[0]?.mobile_modules_off || '';
+            off.split(',').map(s => s.trim()).filter(Boolean).forEach(k => lockedModules.add(k));
+          }
           document.querySelectorAll('.mbtn[data-module]').forEach(btn => {
             if (lockedModules.has(btn.dataset.module)) lockBtn(btn);
           });
