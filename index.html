@@ -27269,7 +27269,6 @@
       .a22-scenario-title.occ-substancias {background-color: #ffcc80;}
       .a22-scenario-title.occ-incendio {background-color: #90caf9;}
       .a22-scenario-title.occ-aeroporto {background-color: #cfd8dc;}
-
       .a22-alarm-table {width: 100%; border-collapse: collapse; table-layout: fixed;}
       .a22-alarm-table th {padding: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; text-align: center; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.12);}
       .a22-alarm-table th.alarm-1 {background-color: #ffff00; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
@@ -27304,32 +27303,26 @@
       .ppi-sub-btn.full-span .ppi-sub-desc {font-size: 13.5px;}
       .ppi-sub-arrow {font-size: 18px; flex-shrink: 0; transition: transform var(--ease);}
       .ppi-sub-btn.selected .ppi-sub-arrow {transform: rotate(90deg);}
-
       .aero-table-card {grid-column: 1 / -1; background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--r-sm); padding: 10px 12px; box-shadow: var(--sh-sm);}
       .aero-table-card .a22-card-tables {display: flex; margin-top: 0; padding-top: 0; border-top: none;}
       .aero-table-card:not(.open) {display: none;}
-
-      /* A1 - Verde */
+      /* A1 */
       .ppi-sub-btn.tier-green {background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #ffffff;}
       .ppi-sub-btn.tier-green .ppi-sub-code {background: rgba(255, 255, 255, 0.22); color: #ffffff;}
       .ppi-sub-btn.tier-green .ppi-sub-arrow {color: rgba(255, 255, 255, 0.85);}
-
-      /* A2 - Amarelo */
+      /* A2 */
       .ppi-sub-btn.tier-yellow {background: linear-gradient(135deg, #fbc02d, #f57f17); color: #1c1b1a;}
       .ppi-sub-btn.tier-yellow .ppi-sub-code {background: rgba(0, 0, 0, 0.14); color: #1c1b1a;}
       .ppi-sub-btn.tier-yellow .ppi-sub-arrow {color: rgba(0, 0, 0, 0.75);}
-
-      /* A3 - Laranja */
+      /* A3 */
       .ppi-sub-btn.tier-orange {background: linear-gradient(135deg, #ef6c00, #e65100); color: #ffffff;}
       .ppi-sub-btn.tier-orange .ppi-sub-code {background: rgba(255, 255, 255, 0.22); color: #ffffff;}
       .ppi-sub-btn.tier-orange .ppi-sub-arrow {color: rgba(255, 255, 255, 0.85);}
-
-      /* A4 - Vermelho */
+      /* A4 */
       .ppi-sub-btn.tier-red {background: linear-gradient(135deg, #c62828, #8e0000); color: #ffffff;}
       .ppi-sub-btn.tier-red .ppi-sub-code {background: rgba(255, 255, 255, 0.22); color: #ffffff;}
       .ppi-sub-btn.tier-red .ppi-sub-arrow {color: rgba(255, 255, 255, 0.85);}
-
-      /* B1 - Preto */
+      /* B1 */
       .ppi-sub-btn.tier-black {background: linear-gradient(135deg, #212121, #0a0a0a); border-color: rgba(255, 255, 255, 0.15); color: #ffffff;}
       .ppi-sub-btn.tier-black .ppi-sub-code {background: rgba(255, 255, 255, 0.18); color: #ffffff;}
       .ppi-sub-btn.tier-black .ppi-sub-arrow {color: rgba(255, 255, 255, 0.80);}
@@ -27367,9 +27360,8 @@
       </div>
       <h2 id="corpInfo" style="display: none;"></h2>
     </header>
-
     <div class="main-content">
-      <div class="ppi-buttons-container">
+      <div class="ppi-buttons-container">        
         <!-- A22 -->
         <button type="button" class="ppi-btn" id="btn-a22" data-target="sub-a22">
           <div class="ppi-icon-wrap">
@@ -27378,7 +27370,6 @@
           <span class="ppi-btn-title">A22</span>
           <span class="material-icons ppi-btn-arrow">chevron_right</span>
         </button>
-
         <div class="a22-cards-container ppi-panel" id="sub-a22">
           <!-- CARD 1: Oeste-Este -->
           <div class="a22-card" id="card-a22-1">
@@ -27395,7 +27386,6 @@
               <button type="button" class="a22-code-btn" data-group="1" data-code="1Q">1Q</button>
               <button type="button" class="a22-code-btn" data-group="1" data-code="1R">1R</button>
             </div>
-
             <!-- Tabelas do Grupo 1 -->
             <div class="a22-card-tables" id="tables-group-1">
               <div class="a22-detail-top">
@@ -27407,7 +27397,6 @@
                   <span class="material-icons" style="font-size:18px;">close</span>
                 </button>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-acidente">
                   <span class="material-icons">car_crash</span>
@@ -27428,7 +27417,6 @@
                   </tbody>
                 </table>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-substancias">
                   <span class="material-icons">warning</span>
@@ -27449,7 +27437,6 @@
                   </tbody>
                 </table>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-incendio">
                   <span class="material-icons">local_fire_department</span>
@@ -27472,7 +27459,6 @@
               </div>
             </div>
           </div>
-
           <!-- CARD 2: Este-Oeste -->
           <div class="a22-card" id="card-a22-2">
             <div class="a22-card-header">
@@ -27489,7 +27475,6 @@
               <button type="button" class="a22-code-btn" data-group="2" data-code="2O">2O</button>
               <button type="button" class="a22-code-btn" data-group="2" data-code="2P">2P</button>
             </div>
-
             <!-- Tabelas do Grupo 2 -->
             <div class="a22-card-tables" id="tables-group-2">
               <div class="a22-detail-top">
@@ -27501,7 +27486,6 @@
                   <span class="material-icons" style="font-size:18px;">close</span>
                 </button>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-acidente">
                   <span class="material-icons">car_crash</span>
@@ -27522,7 +27506,6 @@
                   </tbody>
                 </table>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-substancias">
                   <span class="material-icons">warning</span>
@@ -27543,7 +27526,6 @@
                   </tbody>
                 </table>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-incendio">
                   <span class="material-icons">local_fire_department</span>
@@ -27567,7 +27549,6 @@
             </div>
           </div>
         </div>
-
         <!-- Aeroporto -->
         <button type="button" class="ppi-btn" id="btn-aeroporto" data-target="sub-aeroporto">
           <div class="ppi-icon-wrap">
@@ -27576,7 +27557,6 @@
           <span class="ppi-btn-title">Aeroporto</span>
           <span class="material-icons ppi-btn-arrow">chevron_right</span>
         </button>
-
         <div class="sub-buttons-container ppi-panel" id="sub-aeroporto">
           <button type="button" class="ppi-sub-btn tier-green aero-btn" id="btn-aero-a1" data-aero="A1">
             <div class="ppi-sub-info">
@@ -27585,7 +27565,6 @@
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
-
           <button type="button" class="ppi-sub-btn tier-yellow aero-btn" id="btn-aero-a2" data-aero="A2">
             <div class="ppi-sub-info">
               <span class="ppi-sub-code">A2</span>
@@ -27593,7 +27572,6 @@
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
-
           <button type="button" class="ppi-sub-btn tier-orange aero-btn" id="btn-aero-a3" data-aero="A3">
             <div class="ppi-sub-info">
               <span class="ppi-sub-code">A3</span>
@@ -27601,7 +27579,6 @@
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
-
           <button type="button" class="ppi-sub-btn tier-red aero-btn" id="btn-aero-a4" data-aero="A4">
             <div class="ppi-sub-info">
               <span class="ppi-sub-code">A4</span>
@@ -27609,7 +27586,6 @@
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
-
           <button type="button" class="ppi-sub-btn tier-black full-span aero-btn" id="btn-aero-b1" data-aero="B1">
             <div class="ppi-sub-info">
               <span class="ppi-sub-code">B1</span>
@@ -27617,7 +27593,6 @@
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
-
           <!-- Tabela Aeroporto (A1-A4: Alerta Amarelo / Alerta Vermelho | B1: Frente Aeroporto / Frente Cidade) -->
           <div class="aero-table-card" id="aero-table-card">
             <div class="a22-card-tables">
@@ -27630,7 +27605,6 @@
                   <span class="material-icons" style="font-size:18px;">close</span>
                 </button>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-aeroporto">
                   <span class="material-icons">flight_land</span>
@@ -27654,7 +27628,6 @@
             </div>
           </div>
         </div>
-
         <!-- Linha Férrea -->
         <button type="button" class="ppi-btn" id="btn-linha-ferrea" data-target="sub-linha-ferrea">
           <div class="ppi-icon-wrap">
@@ -27663,7 +27636,6 @@
           <span class="ppi-btn-title">Linha Férrea</span>
           <span class="material-icons ppi-btn-arrow">chevron_right</span>
         </button>
-
         <div class="a22-cards-container ppi-panel" id="sub-linha-ferrea">
           <div class="a22-card" id="card-lf">
             <div class="a22-card-header">
@@ -27683,7 +27655,6 @@
               <button type="button" class="a22-code-btn" data-group="lf" data-code="O">O</button>
               <button type="button" class="a22-code-btn" data-group="lf" data-code="P">P</button>
             </div>
-
             <!-- Tabelas da Linha Férrea -->
             <div class="a22-card-tables" id="tables-group-lf">
               <div class="a22-detail-top">
@@ -27695,7 +27666,6 @@
                   <span class="material-icons" style="font-size:18px;">close</span>
                 </button>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-acidente">
                   <span class="material-icons">train</span>
@@ -27716,7 +27686,6 @@
                   </tbody>
                 </table>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-substancias">
                   <span class="material-icons">warning</span>
@@ -27737,7 +27706,6 @@
                   </tbody>
                 </table>
               </div>
-
               <div class="a22-scenario-block">
                 <div class="a22-scenario-title occ-incendio">
                   <span class="material-icons">local_fire_department</span>
@@ -27763,7 +27731,6 @@
         </div>
       </div>
     </div>
-
     <footer class="footer">
       <div class="footer-content">
         <div class="powered-by">
@@ -27774,7 +27741,6 @@
         </div>
       </div>
     </footer>
-
     <\script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -27827,7 +27793,6 @@
           console.error('Erro silencioso:', err);
         }
       }
-
       /* ======================= LEITURAS PPI ======================= */
       // Formato de cada linha: { meio: 'ABSC*', corpo: '0806 - CB Silves' }
       const PPI_DATA = {
@@ -27927,7 +27892,6 @@
           'P': { label: 'Linha Férrea · Troço P', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } }
         }
       };
-
       function renderReadings(items) {
         if (!Array.isArray(items) || items.length === 0) {
           return '<span class="reading-empty">Sem meios registados</span>';
@@ -27943,21 +27907,17 @@
           }).join('')
         }</div>`;
       }
-
       function populateAeroReadings(code) {
         const entry = PPI_DATA.aeroporto[code] || {};
         const isB1 = code === 'B1';
-
         const badgeEl = document.getElementById('selected-aero-code');
         const labelEl = document.getElementById('selected-aero-label');
         const titleEl = document.getElementById('aero-scenario-title');
         const col1Header = document.getElementById('aero-col-1-header');
         const col2Header = document.getElementById('aero-col-2-header');
-
         if (badgeEl) badgeEl.textContent = code;
         if (labelEl) labelEl.textContent = entry.label ? `· ${entry.label}` : '';
         if (titleEl) titleEl.textContent = entry.title || `Aeroporto · ${code}`;
-
         if (col1Header && col2Header) {
           if (isB1) {
             col1Header.textContent = 'Frente Aeroporto';
@@ -27971,95 +27931,354 @@
             col2Header.className = 'alarm-red';
           }
         }
-
         document.getElementById('cell-aero-col-1').innerHTML = renderReadings(entry.col1);
         document.getElementById('cell-aero-col-2').innerHTML = renderReadings(entry.col2);
       }
+      /* ======================= TÍTULO DAS GRELHAS A22 ======================= */
+async function loadA22GridTitle(group, code) {
+  const labelEl = document.getElementById(`selected-label-${group}`);
+  if (!labelEl) return;
 
-      function populateReadings(group, code) {
-        if (group === '1' || group === '2') {
-          const entry = PPI_DATA.a22[code] || {};
-          const labelEl = document.getElementById(`selected-label-${group}`);
-          if (labelEl) labelEl.textContent = entry.label ? `· ${entry.label}` : '';
+  
 
-          const acc = entry.acidente || {};
-          const sub = entry.substancias || {};
-          const inc = entry.incendio || {};
+  try {
+    const url =
+      `${SUPABASE_URL}/rest/v1/ppia22_data` +
+      `?select=ppi_first_node,ppi_secound_node` +
+      `&ppi_grid=eq.${encodeURIComponent(code)}` +
+      `&limit=1`;
 
-          document.getElementById(`cell-${group}-acidente-1`).innerHTML = renderReadings(acc.alarm1);
-          document.getElementById(`cell-${group}-acidente-2`).innerHTML = renderReadings(acc.alarm2);
-          document.getElementById(`cell-${group}-sub-1`).innerHTML = renderReadings(sub.alarm1);
-          document.getElementById(`cell-${group}-sub-2`).innerHTML = renderReadings(sub.alarm2);
-          document.getElementById(`cell-${group}-incendio-1`).innerHTML = renderReadings(inc.alarm1);
-          document.getElementById(`cell-${group}-incendio-2`).innerHTML = renderReadings(inc.alarm2);
-        } else if (group === 'lf') {
-          const entry = PPI_DATA.linhaFerrea[code] || {};
-          const labelEl = document.getElementById('selected-label-lf');
-          if (labelEl) labelEl.textContent = entry.label ? `· ${entry.label}` : '';
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: getSupabaseHeaders()
+    });
 
-          const aba = entry.abalroamento || {};
-          const sub = entry.substancias || {};
-          const inc = entry.incendio || {};
+    if (!response.ok) {
+      throw new Error(`Erro Supabase: ${response.status}`);
+    }
 
-          document.getElementById('cell-lf-abalroamento-1').innerHTML = renderReadings(aba.alarm1);
-          document.getElementById('cell-lf-abalroamento-2').innerHTML = renderReadings(aba.alarm2);
-          document.getElementById('cell-lf-sub-1').innerHTML = renderReadings(sub.alarm1);
-          document.getElementById('cell-lf-sub-2').innerHTML = renderReadings(sub.alarm2);
-          document.getElementById('cell-lf-incendio-1').innerHTML = renderReadings(inc.alarm1);
-          document.getElementById('cell-lf-incendio-2').innerHTML = renderReadings(inc.alarm2);
+    const data = await response.json();
+
+    // Evita atualizar o título de outra grelha entretanto selecionada
+    const selectedCode = document.getElementById(`selected-code-${group}`);
+    if (!selectedCode || selectedCode.textContent.trim() !== code) return;
+
+    if (!data || data.length === 0) {
+      labelEl.textContent = '· Sem informação';
+      return;
+    }
+
+    const firstNode = String(data[0].ppi_first_node || '').trim();
+    const secondNode = String(data[0].ppi_secound_node || '').trim();
+
+    const titleParts = [firstNode, secondNode].filter(Boolean);
+
+    labelEl.textContent = titleParts.length
+      ? `· ${titleParts.join(' · ')}`
+      : '· Sem informação';
+
+  } catch (error) {
+    console.error(`Erro ao carregar título da grelha ${code}:`, error);
+    labelEl.textContent = '· Erro ao carregar título';
+  }
+}
+/* ======================= TÍTULO DA LINHA FÉRREA ======================= */
+async function loadRailwayGridTitle(code) {
+  const labelEl = document.getElementById('selected-label-lf');
+  if (!labelEl) return;
+
+  try {
+    const url =
+      `${SUPABASE_URL}/rest/v1/ppilinfer_data` +
+      `?select=ppi_first_pkm,ppi_secound_pkm` +
+      `&grid_id=eq.${encodeURIComponent(code)}` +
+      `&limit=1`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: getSupabaseHeaders()
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Erro Supabase ${response.status}: ${errorBody}`);
+    }
+
+    const data = await response.json();
+
+    // Impede que uma resposta antiga substitua o título da grelha atual
+    const selectedCode = document.getElementById('selected-code-lf');
+    if (!selectedCode || selectedCode.textContent.trim() !== code) return;
+
+    if (!data || data.length === 0) {
+      labelEl.textContent = '· Sem informação';
+      return;
+    }
+
+    const firstPkm = String(data[0].ppi_first_pkm || '').trim();
+    const secondPkm = String(data[0].ppi_secound_pkm || '').trim();
+
+    const titleParts = [firstPkm, secondPkm].filter(Boolean);
+
+    labelEl.textContent = titleParts.length
+      ? `· ${titleParts.join(' · ')}`
+      : '· Sem informação';
+
+  } catch (error) {
+    console.error(`Erro ao carregar título da Linha Férrea ${code}:`, error);
+    labelEl.textContent = '· Erro ao carregar título';
+  }
+}
+
+
+
+
+/* ============================================================
+   CARREGAR MEIOS A22
+   ============================================================ */
+
+   async function fetchAllMeans() {
+    const all = [];
+    let start = 0;
+    const pageSize = 1000;
+  
+    while (true) {
+      const end = start + pageSize - 1;
+  
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/ppia22_means?select=*`,
+        {
+          headers: {
+            ...getSupabaseHeaders(),
+            Range: `${start}-${end}`
+          }
         }
+      );
+  
+      if (!res.ok) {
+        throw new Error(`Erro ao buscar ppia22_means: ${res.status}`);
       }
+  
+      const chunk = await res.json();
+      all.push(...chunk);
+  
+      if (chunk.length < pageSize) break;
+  
+      start += pageSize;
+    }
+  
+    return all;
+  }
+
+
+/* ============================================================
+   CARREGAR MEIOS NAS CÉLULAS A22
+   ============================================================ */
+
+
+   
+   let a22LoadVersion = 0;
+   async function loadA22Means(group, gridId) {
+    const loadVersion = ++a22LoadVersion;
+    const corpNr = String(getCorp() || "0805").trim().padStart(4, "0");
+  
+    const cells = {
+      1: {
+        acidente: ["cell-1-acidente-1", "cell-1-acidente-2"],
+        substancias: ["cell-1-sub-1", "cell-1-sub-2"],
+        incendio: ["cell-1-incendio-1", "cell-1-incendio-2"]
+      },
+      2: {
+        acidente: ["cell-2-acidente-1", "cell-2-acidente-2"],
+        substancias: ["cell-2-sub-1", "cell-2-sub-2"],
+        incendio: ["cell-2-incendio-1", "cell-2-incendio-2"]
+      }
+    };
+  
+    const categoryMap = {
+      "Acidente": "acidente",
+      "Substâncias Perigosas": "substancias",
+      "Incêndio em Transportes": "incendio"
+    };
+  
+    if (!cells[group]) return;
+  
+    try {
+      // 1. Obter as referências da grelha
+      const referencesResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/ppia22_references?select=id,grid_code,occurrence_type&grid_code=eq.${encodeURIComponent(gridId)}`,
+        { headers: getSupabaseHeaders() }
+      );
+  
+      if (!referencesResponse.ok) {
+        throw new Error(`Erro nas referências: ${referencesResponse.status}`);
+      }
+  
+      const references = await referencesResponse.json();
+  
+      if (!references.length) {
+        console.warn(`Sem referências para a grelha ${gridId}`);
+        return;
+      }
+  
+      const referenceIds = references.map(ref => ref.id);
+  
+      // 2. Obter os meios associados às referências
+      const meansResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/ppia22_means?select=reference_id,alarm_level,means,display_order&reference_id=in.(${referenceIds.join(",")})&order=display_order.asc`,
+        { headers: getSupabaseHeaders() }
+      );
+  
+      if (!meansResponse.ok) {
+        throw new Error(`Erro nos meios: ${meansResponse.status}`);
+      }
+  
+      const allMeans = await meansResponse.json();
+  
+      // 3. Filtrar apenas os meios da corporação autenticada
+      const means = allMeans.filter(item => {
+        const match = String(item.means || "").match(/\b\d{4}\b/);
+        return match && match[0] === corpNr;
+      });
+  
+      // 4. Preparar todos os conteúdos antes de atualizar a tabela
+      const updates = [];
+  
+      // Inicializar todas as células do grupo
+      
+  
+      references.forEach(reference => {
+        const categoryKey = categoryMap[reference.occurrence_type];
+        if (!categoryKey) return;
+  
+        const [firstCellId, secondCellId] = cells[group][categoryKey];
+  
+        const firstAlarm = means
+          .filter(item =>
+            item.reference_id === reference.id &&
+            item.alarm_level === "1º Alarme"
+          )
+          .map(item => ({
+            meio: item.means,
+            corpo: ""
+          }));
+  
+        const secondAlarm = means
+          .filter(item =>
+            item.reference_id === reference.id &&
+            item.alarm_level === "2º Alarme"
+          )
+          .map(item => ({
+            meio: item.means,
+            corpo: ""
+          }));
+  
+        updates.push({
+          id: firstCellId,
+          html: renderReadings(firstAlarm)
+        });
+  
+        updates.push({
+          id: secondCellId,
+          html: renderReadings(secondAlarm)
+        });
+      });
+      if (loadVersion !== a22LoadVersion) return;
+      // 5. Atualizar as células apenas quando tudo estiver preparado
+      updates.forEach(update => {
+        const element = document.getElementById(update.id);
+        if (element) {
+          element.innerHTML = update.html;
+        }
+      });
+  
+      console.log(`Meios A22 carregados: ${gridId}`, {
+        corpNr,
+        references,
+        means
+      });
+  
+    } catch (error) {
+      console.error(`Erro ao carregar meios A22 (${gridId}):`, error);
+    }
+  }
+  
+
+  
+
+
+      
+function populateReadings(group, code) {
+  if (group === '1' || group === '2') {
+    loadA22GridTitle(group, code);
+
+    // Carregar diretamente do Supabase.
+    // Manter os meios anteriores visíveis até à chegada dos novos.
+    loadA22Means(group, code);
+
+  } else if (group === 'lf') {
+    loadRailwayGridTitle(code);
+
+    const entry = PPI_DATA.linhaFerrea[code] || {};
+
+    const labelEl = document.getElementById('selected-label-lf');
+    if (labelEl) {
+      labelEl.textContent = entry.label ? `· ${entry.label}` : '';
+    }
+
+    const aba = entry.abalroamento || {};
+    const sub = entry.substancias || {};
+    const inc = entry.incendio || {};
+
+    document.getElementById('cell-lf-abalroamento-1').innerHTML = renderReadings(aba.alarm1);
+    document.getElementById('cell-lf-abalroamento-2').innerHTML = renderReadings(aba.alarm2);
+    document.getElementById('cell-lf-sub-1').innerHTML = renderReadings(sub.alarm1);
+    document.getElementById('cell-lf-sub-2').innerHTML = renderReadings(sub.alarm2);
+    document.getElementById('cell-lf-incendio-1').innerHTML = renderReadings(inc.alarm1);
+    document.getElementById('cell-lf-incendio-2').innerHTML = renderReadings(inc.alarm2);
+  }
+}
 
       document.addEventListener('DOMContentLoaded', () => {
         if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
         loadCorpInfo();
         const fy = document.getElementById('footerYear');
         if (fy) fy.textContent = new Date().getFullYear();
-
         const mainButtons = document.querySelectorAll('.ppi-btn');
         const mainPanels = document.querySelectorAll('.ppi-panel');
         const codeButtons = document.querySelectorAll('.a22-code-btn');
         const allTables = document.querySelectorAll('.a22-card-tables');
         const aeroButtons = document.querySelectorAll('.aero-btn');
         const aeroTableCard = document.getElementById('aero-table-card');
-
         function closeAllSubTables() {
           codeButtons.forEach(b => b.classList.remove('selected'));
           allTables.forEach(t => t.classList.remove('open'));
           aeroButtons.forEach(b => b.classList.remove('selected'));
           if (aeroTableCard) aeroTableCard.classList.remove('open');
         }
-
         mainButtons.forEach(btn => {
           btn.addEventListener('click', () => {
             const targetId = btn.dataset.target;
             const targetPanel = document.getElementById(targetId);
             const isAlreadyOpen = btn.classList.contains('active');
-
             mainButtons.forEach(b => b.classList.remove('active'));
             mainPanels.forEach(p => p.classList.remove('open'));
             closeAllSubTables();
-
             if (!isAlreadyOpen && targetPanel) {
               btn.classList.add('active');
               targetPanel.classList.add('open');
             }
           });
         });
-
         codeButtons.forEach(btn => {
           btn.addEventListener('click', () => {
             const group = btn.dataset.group;
             const code = btn.dataset.code;
             const isAlreadySelected = btn.classList.contains('selected');
-
             closeAllSubTables();
-
             if (isAlreadySelected) return;
-
             btn.classList.add('selected');
             populateReadings(group, code);
-
             const targetTable = document.getElementById(`tables-group-${group}`);
             const targetBadge = document.getElementById(`selected-code-${group}`);
             if (targetBadge) targetBadge.textContent = code;
@@ -28069,27 +28288,21 @@
             }
           });
         });
-
         aeroButtons.forEach(btn => {
           btn.addEventListener('click', () => {
             const code = btn.dataset.aero;
             const isAlreadySelected = btn.classList.contains('selected');
-
             aeroButtons.forEach(b => b.classList.remove('selected'));
             if (aeroTableCard) aeroTableCard.classList.remove('open');
-
             if (isAlreadySelected) return;
-
             btn.classList.add('selected');
             populateAeroReadings(code);
-
             if (aeroTableCard) {
               aeroTableCard.classList.add('open');
               aeroTableCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
           });
         });
-
         document.querySelectorAll('.a22-detail-close').forEach(closeBtn => {
           closeBtn.addEventListener('click', () => {
             closeAllSubTables();
