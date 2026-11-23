@@ -27192,15 +27192,15 @@
       ============================================================ */
       :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
              --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
-             --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
-             --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
+             --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+             --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
       ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
       .header, .footer {view-transition-name: none;}
       /* ============================================================
       DARK MODE
       ============================================================ */
       .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
-                  --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
+                  --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --red-light: rgba(198, 40, 40, 0.14);}
       /* ============================================================
       RESET & BASE
       ============================================================ */
@@ -27221,6 +27221,7 @@
       ============================================================ */
       .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; justify-content: flex-start; overflow-y: auto; padding: calc(var(--header-h) + 14px) 16px calc(var(--footer-h) + 16px); background: var(--bg); transition: background var(--ease); scrollbar-width: none;}
       .main-content::-webkit-scrollbar {display: none;}
+      .ppi-section-title {font-size: 13px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: var(--txt-2); margin: 0 0 10px 2px; padding-left: 8px; border-left: 3px solid var(--red); line-height: 1.1;}
       .ppi-buttons-container {display: flex; flex-direction: column; gap: 8px; width: 100%;}
       .ppi-btn {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 13px 16px; display: flex; align-items: center; gap: 13px; box-shadow: var(--sh-sm); cursor: pointer; text-align: left; width: 100%; transition: background var(--ease), box-shadow var(--ease), transform var(--ease);}
       .ppi-btn:hover {background: var(--surface-2); box-shadow: var(--sh-md);}
@@ -27267,8 +27268,7 @@
       .a22-alarm-table th {padding: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; text-align: center; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.12);}
       .a22-alarm-table th.alarm-1 {background-color: #ffff00; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
       .a22-alarm-table th.alarm-2 {background-color: #ffa500; color: #1c1b1a;}
-      .a22-alarm-table th.alarm-red {background-color: #ef5350; color: #ffffff; border-right: 1px solid rgba(0,0,0,0.15);}
-      .a22-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); text-align: center; vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
+      .a22-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
       .a22-alarm-table td:first-child {border-right: 1px solid var(--border);}
       /* ============================================================
       SUB-CARDS (LINHA FÉRREA)
@@ -27304,8 +27304,7 @@
       .linfer-alarm-table th {padding: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; text-align: center; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.12);}
       .linfer-alarm-table th.alarm-1 {background-color: #ffff00; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
       .linfer-alarm-table th.alarm-2 {background-color: #ffa500; color: #1c1b1a;}
-      .linfer-alarm-table th.alarm-red {background-color: #ef5350; color: #ffffff; border-right: 1px solid rgba(0,0,0,0.15);}
-      .linfer-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); text-align: center; vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
+      .linfer-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
       .linfer-alarm-table td:first-child {border-right: 1px solid var(--border);}
       /* ============================================================
       READING LIST (COMMON)
@@ -27314,7 +27313,6 @@
       .reading-item {display: flex; align-items: baseline; gap: 6px; line-height: 1.3;}
       .reading-meio {font-weight: 800; font-size: 11px; color: var(--red-icon); white-space: nowrap;}
       .dark-mode .reading-meio {color: #ff8a80;}
-      .reading-corpo {font-weight: 600; color: var(--txt-1); word-break: break-word;}
       .reading-empty {color: var(--txt-3); font-style: italic; text-align: center; display: block;}
       /* ============================================================
       SUB-BUTTONS (AEROPORTO) & TRIAGE COLORS
@@ -27334,8 +27332,6 @@
       .ppi-sub-info {display: flex; flex-direction: column; align-items: flex-start; gap: 4px;}
       .ppi-sub-btn.full-span .ppi-sub-info {flex-direction: row; align-items: center; gap: 10px;}
       .ppi-sub-code {font-size: 12.5px; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-align: center;}
-      .ppi-sub-desc {font-size: 12.5px; font-weight: 700; line-height: 1.2;}
-      .ppi-sub-btn.full-span .ppi-sub-desc {font-size: 13.5px;}
       .ppi-sub-arrow {font-size: 18px; flex-shrink: 0; transition: transform var(--ease);}
       .ppi-sub-btn.selected .ppi-sub-arrow {transform: rotate(90deg);}
       .aero-table-card {grid-column: 1 / -1; background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--r-sm); padding: 10px 12px; box-shadow: var(--sh-sm);}
@@ -27357,7 +27353,7 @@
       .aero-alarm-table th.alarm-red {background-color: #ef5350; color: #ffffff; border-right: 1px solid rgba(0,0,0,0.15);}
       .aero-alarm-table th.frente-aero {background-color: #90caf9; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
       .aero-alarm-table th.frente-cidade {background-color: #a5d6a7; color: #1c1b1a;}
-      .aero-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); text-align: center; vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
+      .aero-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
       .aero-alarm-table td:first-child {border-right: 1px solid var(--border);}
       /* A1 */
       .ppi-sub-btn.tier-green {background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #ffffff;}
@@ -27396,7 +27392,9 @@
       /* ============================================================
       LEGENDA DOS MEIOS PPI
       ============================================================ */
-      .ppi-legend {width:100%; margin-top:9px; padding:8px 10px; border-top:1px solid var(--border); color:#c62828; font-size:10px; line-height:1.5;}
+      .ppi-notice {width:100%; margin-top:-2px; padding:8px 10px; border-radius:8px; background:var(--red); color:#fff; font-size:11px; font-weight:700; line-height:1.4; display:flex; align-items:center; justify-content:center; gap:8px; text-align:center; opacity:0.75;}
+      .ppi-notice .material-icons {font-size:14px; line-height:1; display:block; flex-shrink:0;}
+      .ppi-legend {width:100%; margin-top:-2px; padding:8px 10px; border-top:1px solid var(--border); color:#c62828; font-size:10px; line-height:1.5;}
       .ppi-legend-item {margin-bottom:3px;}
       .ppi-legend-item:last-child {margin-bottom:-10px;}
       .ppi-legend-item strong {color:#c62828; margin-right:3px;}
@@ -27439,13 +27437,14 @@
       <h2 id="corpInfo" style="display: none;"></h2>
     </header>
     <div class="main-content">
+      <h3 class="ppi-section-title" id="ppiSectionTitle">Selecione um PPI</h3>
       <div class="ppi-buttons-container">
         <!-- A22 -->
         <button type="button" class="ppi-btn" id="btn-a22" data-target="sub-a22">
           <div class="ppi-icon-wrap">
             <span class="material-icons">add_road</span>
           </div>
-          <span class="ppi-btn-title">A22</span>
+          <span class="ppi-btn-title">A22 - Via Infante de Sagres</span>
           <span class="material-icons ppi-btn-arrow">chevron_right</span>
         </button>
         <div class="a22-cards-container ppi-panel" id="sub-a22">
@@ -27632,7 +27631,7 @@
           <div class="ppi-icon-wrap">
             <span class="material-icons">flight</span>
           </div>
-          <span class="ppi-btn-title">Aeroporto</span>
+          <span class="ppi-btn-title">Aeroporto Internacional Gago Coutinho</span>
           <span class="material-icons ppi-btn-arrow">chevron_right</span>
         </button>
         <div class="sub-buttons-container ppi-panel" id="sub-aeroporto">
@@ -27706,7 +27705,7 @@
           <div class="ppi-icon-wrap">
             <span class="material-icons">train</span>
           </div>
-          <span class="ppi-btn-title">Linha Férrea</span>
+          <span class="ppi-btn-title">Linha Férrea do Algarve</span>
           <span class="material-icons ppi-btn-arrow">chevron_right</span>
         </button>
         <div class="linfer-cards-container ppi-panel" id="sub-linha-ferrea">
@@ -27877,14 +27876,7 @@
           return '<span class="reading-empty">Sem meios registados</span>';
         }
         return `<div class="reading-list">${
-          items.map(item => {
-            if (typeof item === 'string') {
-              return `<div class="reading-item"><span class="reading-corpo">${item}</span></div>`;
-            }
-            const meioHtml = item.meio ? `<span class="reading-meio">${item.meio}</span>` : '';
-            const corpoHtml = item.corpo ? `<span class="reading-corpo">${item.corpo}</span>` : '';
-            return `<div class="reading-item">${meioHtml}${corpoHtml}</div>`;
-          }).join('')
+          items.map(item => `<div class="reading-item"><span class="reading-meio">${item.meio || ''}</span></div>`).join('')
         }</div>`;
       }
       /* ======================= TÍTULO DAS GRELHAS A22 ======================= */
@@ -27958,6 +27950,12 @@
         if (!content) return;
         const oldLegend = content.querySelector('.ppi-legend');
         if (oldLegend) oldLegend.remove();
+        const oldNotice = content.querySelector('.ppi-notice');
+        if (oldNotice) oldNotice.remove();
+        const notice = document.createElement('div');
+        notice.className = 'ppi-notice';
+        notice.innerHTML = '<span class="material-icons">warning</span><span>Os alarmes são Cumulativos, caso seja ativado o 2º alarme saem os meios de ambos os alarmes.</span>';
+        content.appendChild(notice);
         const text = content.textContent || '';
         const hasDouble = text.includes('**');
         const hasSingle = text.replace(/\*\*/g, '').includes('*');
@@ -27992,7 +27990,7 @@
       let a22LoadVersion = 0;
       async function loadA22Means(group, gridId) {
         const loadVersion = ++a22LoadVersion;
-        const corpNr = String(getCorp()).trim().padStart(4, '0');
+        const corpNr = String(getCorp() || '').trim().padStart(4, '0');
         const cells = {1: {acidente: ['cell-1-acidente-1', 'cell-1-acidente-2'], substancias: ['cell-1-sub-1', 'cell-1-sub-2'], incendio: ['cell-1-incendio-1', 'cell-1-incendio-2']},
                        2: {acidente: ['cell-2-acidente-1', 'cell-2-acidente-2'], substancias: ['cell-2-sub-1', 'cell-2-sub-2'], incendio: ['cell-2-incendio-1', 'cell-2-incendio-2']}
                       };
@@ -28371,9 +28369,13 @@
             mainButtons.forEach(b => b.classList.remove('active'));
             mainPanels.forEach(panel => panel.classList.remove('open'));
             closeAllSubTables();
+            const sectionTitle = document.getElementById('ppiSectionTitle');
             if (!isAlreadyOpen && targetPanel) {
               btn.classList.add('active');
               targetPanel.classList.add('open');
+              if (sectionTitle) sectionTitle.textContent = 'Selecionado - PPI ' + btn.querySelector('.ppi-btn-title').textContent;
+            } else if (sectionTitle) {
+              sectionTitle.textContent = 'Selecione um PPI';
             }
           });
         });
