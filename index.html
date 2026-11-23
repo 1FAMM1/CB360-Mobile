@@ -19730,6 +19730,10 @@
             <span class="material-icons">checklist</span>
             <div class="label">Check Lists</div>
           </button>
+          <button class="forms-btn" onclick="toggleButton(this); setTimeout(() => __go('PPIs.html'), 300);">
+            <span class="material-icons">map</span>
+            <div class="label">Planos Prévios de Intervenção (PPIs)</div>
+          </button>
         </div>
       </div>
     </div>
@@ -27155,6 +27159,950 @@
 </script>
 
 /* ----- RESERVADO PARA FOMULÁRIOS CHECK LISTS ----- */
+
+<script type="text/x-cb360" data-page="PPIs"><!DOCTYPE html>
+  <html lang="pt-PT" style="background-color: #0f1117;">
+  <head>
+    <\script>
+      (function() {
+        try {
+          if (localStorage.getItem('sgo-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {}
+      })();
+    <\/script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+    <meta name="theme-color" content="#0f1117">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    </noscript>
+    <title>CB360 Mobile - PPIs</title>
+    <style>
+      @view-transition {navigation: auto;}
+      /* ============================================================
+      VARIABLES
+      ============================================================ */
+      :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --red-icon: #c62828; --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+             --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+             --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+             --header-h: 60px; --footer-h: 50px; --r-sm: 12px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
+      ::view-transition-old(root), ::view-transition-new(root) {animation-duration: 0.5s;}
+      .header, .footer {view-transition-name: none;}
+      /* ============================================================
+      DARK MODE
+      ============================================================ */
+      .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                  --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
+      /* ============================================================
+      RESET & BASE
+      ============================================================ */
+      html {scrollbar-width: none; background: var(--red-dark);}
+      html, body {overscroll-behavior: none;}
+      * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+      body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
+            flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease); padding-top: var(--sai-top, 0px); padding-bottom: var(--sai-bottom, 0px);}
+      /* ============================================================
+      HEADER
+      ============================================================ */
+      .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+               justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+      .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+      .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+      .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+      .header-sub {font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+      /* ============================================================
+      MAIN CONTENT & PPI BUTTONS
+      ============================================================ */
+      .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; justify-content: flex-start; overflow-y: auto;
+                     padding: calc(var(--header-h) + 14px) 16px calc(var(--footer-h) + 16px); background: var(--bg); transition: background var(--ease); scrollbar-width: none;}
+      .main-content::-webkit-scrollbar {display: none;}
+      .ppi-buttons-container {display: flex; flex-direction: column; gap: 8px; width: 100%;}
+      .ppi-btn {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 13px 16px; display: flex; align-items: center; gap: 13px;
+                box-shadow: var(--sh-sm); cursor: pointer; text-align: left; width: 100%; transition: background var(--ease), box-shadow var(--ease), transform var(--ease);}
+      .ppi-btn:hover {background: var(--surface-2); box-shadow: var(--sh-md);}
+      .ppi-btn:active {transform: scale(.98);}
+      .ppi-icon-wrap {flex-shrink: 0; width: 40px; height: 40px; border-radius: 11px; background: var(--red-light); display: flex; align-items: center; justify-content: center;}
+      .ppi-icon-wrap .material-icons {font-size: 21px; color: var(--red-icon);}
+      .ppi-btn-title {font-size: 15px; font-weight: 700; color: var(--txt-1); flex: 1;}
+      .ppi-btn-arrow {font-size: 20px; color: var(--txt-3); transition: transform var(--ease);}
+      .ppi-btn.active .ppi-btn-arrow {transform: rotate(90deg); color: var(--red-icon);}
+      /* ============================================================
+      SUB-CARDS (A22 & LINHA FÉRREA)
+      ============================================================ */
+      .a22-cards-container {display: none; flex-direction: column; gap: 8px; padding-left: 14px; margin-bottom: 2px;}
+      .a22-cards-container.open {display: flex;}
+      .a22-card {background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--r-sm); padding: 10px 12px;
+                 box-shadow: var(--sh-sm); display: flex; flex-direction: column; gap: 8px;}
+      .a22-card-header {display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: var(--txt-1); text-transform: uppercase;}
+      .a22-card-header .material-icons {font-size: 16px; color: var(--red-icon);}
+      .a22-card-route {font-size: 10.5px; font-weight: 500; color: var(--txt-2); text-transform: none; letter-spacing: 0;}
+      .a22-row {display: flex; align-items: center; gap: 4px; width: 100%;}
+      .a22-code-btn {flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 2px; font-size: 12px; font-weight: 800;
+                     color: var(--txt-1); text-align: center; cursor: pointer; box-shadow: var(--sh-sm); white-space: nowrap;
+                     transition: background var(--ease), color var(--ease), border-color var(--ease), transform var(--ease);}
+      .a22-code-btn:hover {background: var(--red); border-color: var(--red); color: #ffffff;}
+      .a22-code-btn.selected {background: var(--red); border-color: var(--red); color: #ffffff; box-shadow: var(--sh-md);}
+      .a22-code-btn:active {transform: scale(.95);}
+      /* ============================================================
+      INLINE TABLES (INSIDE EACH CARD - FLAT COLORS)
+      ============================================================ */
+      .a22-card-tables {display: none; flex-direction: column; gap: 10px; margin-top: 2px; padding-top: 8px; border-top: 1px solid var(--border);}
+      .a22-card-tables.open {display: flex;}
+      .a22-detail-top {display: flex; align-items: center; justify-content: space-between;}
+      .a22-detail-badge {display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 800; color: var(--txt-1);}
+      .a22-detail-tag {background: var(--red); color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 11.5px;}
+      .a22-detail-sub {font-size: 11.5px; font-weight: 600; color: var(--txt-2);}
+      .a22-detail-close {background: transparent; border: none; color: var(--txt-2); cursor: pointer; display: flex; align-items: center; padding: 2px;}
+      .a22-scenario-block {background: var(--surface); border: 1px solid var(--border); border-radius: 9px; overflow: hidden;}
+      .a22-scenario-title {display: flex; align-items: center; gap: 6px; padding: 7px 10px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.3px;
+                           color: #1c1b1a; line-height: 1.25;}
+      .a22-scenario-title .material-icons {font-size: 15px; color: #1c1b1a; flex-shrink: 0;}
+      .a22-scenario-title.occ-acidente {background-color: #a5d6a7;}
+      .a22-scenario-title.occ-substancias {background-color: #ffcc80;}
+      .a22-scenario-title.occ-incendio {background-color: #90caf9;}
+      .a22-scenario-title.occ-aeroporto {background-color: #cfd8dc;}
+
+      .a22-alarm-table {width: 100%; border-collapse: collapse; table-layout: fixed;}
+      .a22-alarm-table th {padding: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; text-align: center; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.12);}
+      .a22-alarm-table th.alarm-1 {background-color: #ffff00; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
+      .a22-alarm-table th.alarm-2 {background-color: #ffa500; color: #1c1b1a;}
+      .a22-alarm-table th.alarm-red {background-color: #ef5350; color: #ffffff; border-right: 1px solid rgba(0,0,0,0.15);}
+      .a22-alarm-table th.frente-aero {background-color: #90caf9; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
+      .a22-alarm-table th.frente-cidade {background-color: #a5d6a7; color: #1c1b1a;}
+      .a22-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); text-align: left; vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
+      .a22-alarm-table td:first-child {border-right: 1px solid var(--border);}
+      .reading-list {display: flex; flex-direction: column; gap: 4px;}
+      .reading-item {display: flex; align-items: baseline; gap: 6px; line-height: 1.3;}
+      .reading-meio {font-weight: 800; font-size: 11px; color: var(--red-icon); white-space: nowrap;}
+      .dark-mode .reading-meio {color: #ff8a80;}
+      .reading-corpo {font-weight: 600; color: var(--txt-1); word-break: break-word;}
+      .reading-empty {color: var(--txt-3); font-style: italic; text-align: center; display: block;}
+      /* ============================================================
+      SUB-BUTTONS (AEROPORTO) & TRIAGE COLORS
+      ============================================================ */
+      .sub-buttons-container {display: none; grid-template-columns: repeat(2, 1fr); gap: 8px; padding-left: 14px; margin-bottom: 2px;}
+      .sub-buttons-container.open {display: grid;}
+      .ppi-sub-btn {border: 1px solid rgba(0, 0, 0, 0.12); border-radius: var(--r-sm); padding: 11px 12px; display: flex;
+                    align-items: center; justify-content: space-between; gap: 6px; box-shadow: var(--sh-sm); cursor: pointer; text-align: left; width: 100%;
+                    transition: filter var(--ease), transform var(--ease);}
+      .ppi-sub-btn.full-span {grid-column: 1 / -1; padding: 11px 16px;}
+      .ppi-sub-btn:hover {filter: brightness(1.06);}
+      .ppi-sub-btn:active {transform: scale(.98);}
+      .ppi-sub-btn.selected {outline: 2.5px solid var(--txt-1); outline-offset: -2px;}
+      .ppi-sub-info {display: flex; flex-direction: column; align-items: flex-start; gap: 4px;}
+      .ppi-sub-btn.full-span .ppi-sub-info {flex-direction: row; align-items: center; gap: 10px;}
+      .ppi-sub-code {font-size: 12.5px; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-align: center;}
+      .ppi-sub-desc {font-size: 12.5px; font-weight: 700; line-height: 1.2;}
+      .ppi-sub-btn.full-span .ppi-sub-desc {font-size: 13.5px;}
+      .ppi-sub-arrow {font-size: 18px; flex-shrink: 0; transition: transform var(--ease);}
+      .ppi-sub-btn.selected .ppi-sub-arrow {transform: rotate(90deg);}
+
+      .aero-table-card {grid-column: 1 / -1; background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--r-sm); padding: 10px 12px; box-shadow: var(--sh-sm);}
+      .aero-table-card .a22-card-tables {display: flex; margin-top: 0; padding-top: 0; border-top: none;}
+      .aero-table-card:not(.open) {display: none;}
+
+      /* A1 - Verde */
+      .ppi-sub-btn.tier-green {background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #ffffff;}
+      .ppi-sub-btn.tier-green .ppi-sub-code {background: rgba(255, 255, 255, 0.22); color: #ffffff;}
+      .ppi-sub-btn.tier-green .ppi-sub-arrow {color: rgba(255, 255, 255, 0.85);}
+
+      /* A2 - Amarelo */
+      .ppi-sub-btn.tier-yellow {background: linear-gradient(135deg, #fbc02d, #f57f17); color: #1c1b1a;}
+      .ppi-sub-btn.tier-yellow .ppi-sub-code {background: rgba(0, 0, 0, 0.14); color: #1c1b1a;}
+      .ppi-sub-btn.tier-yellow .ppi-sub-arrow {color: rgba(0, 0, 0, 0.75);}
+
+      /* A3 - Laranja */
+      .ppi-sub-btn.tier-orange {background: linear-gradient(135deg, #ef6c00, #e65100); color: #ffffff;}
+      .ppi-sub-btn.tier-orange .ppi-sub-code {background: rgba(255, 255, 255, 0.22); color: #ffffff;}
+      .ppi-sub-btn.tier-orange .ppi-sub-arrow {color: rgba(255, 255, 255, 0.85);}
+
+      /* A4 - Vermelho */
+      .ppi-sub-btn.tier-red {background: linear-gradient(135deg, #c62828, #8e0000); color: #ffffff;}
+      .ppi-sub-btn.tier-red .ppi-sub-code {background: rgba(255, 255, 255, 0.22); color: #ffffff;}
+      .ppi-sub-btn.tier-red .ppi-sub-arrow {color: rgba(255, 255, 255, 0.85);}
+
+      /* B1 - Preto */
+      .ppi-sub-btn.tier-black {background: linear-gradient(135deg, #212121, #0a0a0a); border-color: rgba(255, 255, 255, 0.15); color: #ffffff;}
+      .ppi-sub-btn.tier-black .ppi-sub-code {background: rgba(255, 255, 255, 0.18); color: #ffffff;}
+      .ppi-sub-btn.tier-black .ppi-sub-arrow {color: rgba(255, 255, 255, 0.80);}
+      /* ============================================================
+      FOOTER
+      ============================================================ */
+      .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
+               justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 1000;}
+      .footer-content {text-align: center;}
+      .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+      .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+      .footer strong {color: inherit;}
+      /* ============================================================
+      RESPONSIVE
+      ============================================================ */
+      @media (max-width: 480px) {
+        .header-title {font-size: 16px;}
+        .main-content {padding-left: 12px; padding-right: 12px;}
+        .a22-row {gap: 3px;}
+        .a22-code-btn {font-size: 10.5px; padding: 7px 1px;}
+        .a22-card-route {font-size: 10px;}
+        .a22-alarm-table td {padding: 7px 6px; font-size: 11px;}
+      }
+      @media (min-width: 769px) {
+        .main-content {max-width: 700px;}
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
+      <div class="header-center">
+        <span class="header-title">PPIs</span>
+        <span class="header-sub">Planos Prévios de Intervenção</span>
+      </div>
+      <h2 id="corpInfo" style="display: none;"></h2>
+    </header>
+
+    <div class="main-content">
+      <div class="ppi-buttons-container">
+        <!-- A22 -->
+        <button type="button" class="ppi-btn" id="btn-a22" data-target="sub-a22">
+          <div class="ppi-icon-wrap">
+            <span class="material-icons">add_road</span>
+          </div>
+          <span class="ppi-btn-title">A22</span>
+          <span class="material-icons ppi-btn-arrow">chevron_right</span>
+        </button>
+
+        <div class="a22-cards-container ppi-panel" id="sub-a22">
+          <!-- CARD 1: Oeste-Este -->
+          <div class="a22-card" id="card-a22-1">
+            <div class="a22-card-header">
+              <span class="material-icons">east</span>
+              <span>Oeste-Este</span>
+              <span class="a22-card-route">(Lagos - Vila Real de Santo António)</span>
+            </div>
+            <div class="a22-row">
+              <button type="button" class="a22-code-btn" data-group="1" data-code="1M">1M</button>
+              <button type="button" class="a22-code-btn" data-group="1" data-code="1N">1N</button>
+              <button type="button" class="a22-code-btn" data-group="1" data-code="1O">1O</button>
+              <button type="button" class="a22-code-btn" data-group="1" data-code="1P">1P</button>
+              <button type="button" class="a22-code-btn" data-group="1" data-code="1Q">1Q</button>
+              <button type="button" class="a22-code-btn" data-group="1" data-code="1R">1R</button>
+            </div>
+
+            <!-- Tabelas do Grupo 1 -->
+            <div class="a22-card-tables" id="tables-group-1">
+              <div class="a22-detail-top">
+                <div class="a22-detail-badge">
+                  <span class="a22-detail-tag" id="selected-code-1">1M</span>
+                  <span class="a22-detail-sub" id="selected-label-1"></span>
+                </div>
+                <button type="button" class="a22-detail-close" aria-label="Fechar">
+                  <span class="material-icons" style="font-size:18px;">close</span>
+                </button>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-acidente">
+                  <span class="material-icons">car_crash</span>
+                  <span>Acidente</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr>
+                      <th class="alarm-1">1º Alarme</th>
+                      <th class="alarm-2">2º Alarme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-1-acidente-1"></td>
+                      <td id="cell-1-acidente-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-substancias">
+                  <span class="material-icons">warning</span>
+                  <span>Substâncias Perigosas</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr>
+                      <th class="alarm-1">1º Alarme</th>
+                      <th class="alarm-2">2º Alarme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-1-sub-1"></td>
+                      <td id="cell-1-sub-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-incendio">
+                  <span class="material-icons">local_fire_department</span>
+                  <span>Incêndio em Transporte</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr>
+                      <th class="alarm-1">1º Alarme</th>
+                      <th class="alarm-2">2º Alarme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-1-incendio-1"></td>
+                      <td id="cell-1-incendio-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 2: Este-Oeste -->
+          <div class="a22-card" id="card-a22-2">
+            <div class="a22-card-header">
+              <span class="material-icons">west</span>
+              <span>Este-Oeste</span>
+              <span class="a22-card-route">(Vila Real de Santo António - Lagos)</span>
+            </div>
+            <div class="a22-row">
+              <button type="button" class="a22-code-btn" data-group="2" data-code="2J">2J</button>
+              <button type="button" class="a22-code-btn" data-group="2" data-code="2K">2K</button>
+              <button type="button" class="a22-code-btn" data-group="2" data-code="2L">2L</button>
+              <button type="button" class="a22-code-btn" data-group="2" data-code="2M">2M</button>
+              <button type="button" class="a22-code-btn" data-group="2" data-code="2N">2N</button>
+              <button type="button" class="a22-code-btn" data-group="2" data-code="2O">2O</button>
+              <button type="button" class="a22-code-btn" data-group="2" data-code="2P">2P</button>
+            </div>
+
+            <!-- Tabelas do Grupo 2 -->
+            <div class="a22-card-tables" id="tables-group-2">
+              <div class="a22-detail-top">
+                <div class="a22-detail-badge">
+                  <span class="a22-detail-tag" id="selected-code-2">2J</span>
+                  <span class="a22-detail-sub" id="selected-label-2"></span>
+                </div>
+                <button type="button" class="a22-detail-close" aria-label="Fechar">
+                  <span class="material-icons" style="font-size:18px;">close</span>
+                </button>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-acidente">
+                  <span class="material-icons">car_crash</span>
+                  <span>Acidente</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr>
+                      <th class="alarm-1">1º Alarme</th>
+                      <th class="alarm-2">2º Alarme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-2-acidente-1"></td>
+                      <td id="cell-2-acidente-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-substancias">
+                  <span class="material-icons">warning</span>
+                  <span>Substâncias Perigosas</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr>
+                      <th class="alarm-1">1º Alarme</th>
+                      <th class="alarm-2">2º Alarme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-2-sub-1"></td>
+                      <td id="cell-2-sub-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-incendio">
+                  <span class="material-icons">local_fire_department</span>
+                  <span>Incêndio em Transporte</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr>
+                      <th class="alarm-1">1º Alarme</th>
+                      <th class="alarm-2">2º Alarme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-2-incendio-1"></td>
+                      <td id="cell-2-incendio-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aeroporto -->
+        <button type="button" class="ppi-btn" id="btn-aeroporto" data-target="sub-aeroporto">
+          <div class="ppi-icon-wrap">
+            <span class="material-icons">flight</span>
+          </div>
+          <span class="ppi-btn-title">Aeroporto</span>
+          <span class="material-icons ppi-btn-arrow">chevron_right</span>
+        </button>
+
+        <div class="sub-buttons-container ppi-panel" id="sub-aeroporto">
+          <button type="button" class="ppi-sub-btn tier-green aero-btn" id="btn-aero-a1" data-aero="A1">
+            <div class="ppi-sub-info">
+              <span class="ppi-sub-code">A1</span>
+              <span class="ppi-sub-desc">(11 a 20 Pessoas)</span>
+            </div>
+            <span class="material-icons ppi-sub-arrow">chevron_right</span>
+          </button>
+
+          <button type="button" class="ppi-sub-btn tier-yellow aero-btn" id="btn-aero-a2" data-aero="A2">
+            <div class="ppi-sub-info">
+              <span class="ppi-sub-code">A2</span>
+              <span class="ppi-sub-desc">(21 a 30 Pessoas)</span>
+            </div>
+            <span class="material-icons ppi-sub-arrow">chevron_right</span>
+          </button>
+
+          <button type="button" class="ppi-sub-btn tier-orange aero-btn" id="btn-aero-a3" data-aero="A3">
+            <div class="ppi-sub-info">
+              <span class="ppi-sub-code">A3</span>
+              <span class="ppi-sub-desc">(31 a 100 Pessoas)</span>
+            </div>
+            <span class="material-icons ppi-sub-arrow">chevron_right</span>
+          </button>
+
+          <button type="button" class="ppi-sub-btn tier-red aero-btn" id="btn-aero-a4" data-aero="A4">
+            <div class="ppi-sub-info">
+              <span class="ppi-sub-code">A4</span>
+              <span class="ppi-sub-desc">(+ de 101 Pessoas)</span>
+            </div>
+            <span class="material-icons ppi-sub-arrow">chevron_right</span>
+          </button>
+
+          <button type="button" class="ppi-sub-btn tier-black full-span aero-btn" id="btn-aero-b1" data-aero="B1">
+            <div class="ppi-sub-info">
+              <span class="ppi-sub-code">B1</span>
+              <span class="ppi-sub-desc">(Queda Declarada)</span>
+            </div>
+            <span class="material-icons ppi-sub-arrow">chevron_right</span>
+          </button>
+
+          <!-- Tabela Aeroporto (A1-A4: Alerta Amarelo / Alerta Vermelho | B1: Frente Aeroporto / Frente Cidade) -->
+          <div class="aero-table-card" id="aero-table-card">
+            <div class="a22-card-tables">
+              <div class="a22-detail-top">
+                <div class="a22-detail-badge">
+                  <span class="a22-detail-tag" id="selected-aero-code">A1</span>
+                  <span class="a22-detail-sub" id="selected-aero-label"></span>
+                </div>
+                <button type="button" class="a22-detail-close" id="close-aero-table" aria-label="Fechar">
+                  <span class="material-icons" style="font-size:18px;">close</span>
+                </button>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-aeroporto">
+                  <span class="material-icons">flight_land</span>
+                  <span id="aero-scenario-title">Aeroporto</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr id="aero-thead-row">
+                      <th class="alarm-1" id="aero-col-1-header">Alerta Amarelo</th>
+                      <th class="alarm-red" id="aero-col-2-header">Alerta Vermelho</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-aero-col-1"></td>
+                      <td id="cell-aero-col-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Linha Férrea -->
+        <button type="button" class="ppi-btn" id="btn-linha-ferrea" data-target="sub-linha-ferrea">
+          <div class="ppi-icon-wrap">
+            <span class="material-icons">train</span>
+          </div>
+          <span class="ppi-btn-title">Linha Férrea</span>
+          <span class="material-icons ppi-btn-arrow">chevron_right</span>
+        </button>
+
+        <div class="a22-cards-container ppi-panel" id="sub-linha-ferrea">
+          <div class="a22-card" id="card-lf">
+            <div class="a22-card-header">
+              <span class="material-icons">train</span>
+              <span>Troços Linha Férrea</span>
+            </div>
+            <div class="a22-row">
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="F">F</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="G">G</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="H">H</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="I">I</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="J">J</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="K">K</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="L">L</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="M">M</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="N">N</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="O">O</button>
+              <button type="button" class="a22-code-btn" data-group="lf" data-code="P">P</button>
+            </div>
+
+            <!-- Tabelas da Linha Férrea -->
+            <div class="a22-card-tables" id="tables-group-lf">
+              <div class="a22-detail-top">
+                <div class="a22-detail-badge">
+                  <span class="a22-detail-tag" id="selected-code-lf">F</span>
+                  <span class="a22-detail-sub" id="selected-label-lf"></span>
+                </div>
+                <button type="button" class="a22-detail-close" aria-label="Fechar">
+                  <span class="material-icons" style="font-size:18px;">close</span>
+                </button>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-acidente">
+                  <span class="material-icons">train</span>
+                  <span>Abalroamento, Choque e Descarrilamento</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr>
+                      <th class="alarm-1">1º Alarme</th>
+                      <th class="alarm-2">2º Alarme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-lf-abalroamento-1"></td>
+                      <td id="cell-lf-abalroamento-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-substancias">
+                  <span class="material-icons">warning</span>
+                  <span>Substâncias Perigosas - Produtos Químicos/Biológicos</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr>
+                      <th class="alarm-1">1º Alarme</th>
+                      <th class="alarm-2">2º Alarme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-lf-sub-1"></td>
+                      <td id="cell-lf-sub-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="a22-scenario-block">
+                <div class="a22-scenario-title occ-incendio">
+                  <span class="material-icons">local_fire_department</span>
+                  <span>Incêndio em Transportes</span>
+                </div>
+                <table class="a22-alarm-table">
+                  <thead>
+                    <tr>
+                      <th class="alarm-1">1º Alarme</th>
+                      <th class="alarm-2">2º Alarme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="cell-lf-incendio-1"></td>
+                      <td id="cell-lf-incendio-2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="powered-by">
+          Powered by Fábio Martins · Sistemas de Informação · Grupo CB360
+        </div>
+        <div class="footer-year">
+          © 2023–<span id="footerYear"></span> · Sistema CB360 Mobile
+        </div>
+      </div>
+    </footer>
+
+    <\script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('App pronta: ', reg.scope))
+            .catch(err => console.log('Erro no motor da App: ', err));
+        });
+      }
+      /* ===================== SUPABASE CONFIGURATION ====================== */
+      const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+      function getCorp() {return localStorage.getItem("currentCorpOperNr");}
+      function getNInt() {return localStorage.getItem("currentCorpNint");}
+      function getSupabaseHeaders() {
+        return {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+          'Content-Type': 'application/json',
+          'x-my-corpo': getCorp(),
+          'x-my-nint': getNInt(),
+        };
+      }
+      /* ======================= CORPORATION LOADING ======================= */
+      async function loadCorpInfo() {
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        const h2 = document.getElementById("corpInfo");
+        const logoEl = document.getElementById("corpLogo");
+        if (!corpOperNr) return;
+        const cachedLogo = localStorage.getItem("cached_logo_url");
+        if (cachedLogo && logoEl) {
+          logoEl.src = cachedLogo;
+        }
+        if (h2) h2.textContent = corpOperNr;
+        try {
+          const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/corporation_data?select=logo_url&corp_oper_nr=eq.${corpOperNr}`, {
+              headers: getSupabaseHeaders()
+            }
+          );
+          if (!response.ok) return;
+          const data = await response.json();
+          if (data && data.length > 0) {
+            const corp = data[0];
+            if (corp.logo_url && corp.logo_url !== cachedLogo) {
+              localStorage.setItem("cached_logo_url", corp.logo_url.trim());
+              if (logoEl) logoEl.src = corp.logo_url.trim();
+            }
+          }
+        } catch (err) {
+          console.error('Erro silencioso:', err);
+        }
+      }
+
+      /* ======================= LEITURAS PPI ======================= */
+      // Formato de cada linha: { meio: 'ABSC*', corpo: '0806 - CB Silves' }
+      const PPI_DATA = {
+        a22: {
+          '1M': { label: 'Oeste-Este · Setor 1M', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '1N': { label: 'Oeste-Este · Setor 1N', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '1O': { label: 'Oeste-Este · Setor 1O', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '1P': { label: 'Oeste-Este · Setor 1P', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '1Q': { label: 'Oeste-Este · Setor 1Q', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '1R': { label: 'Oeste-Este · Setor 1R', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '2J': { label: 'Este-Oeste · Setor 2J', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '2K': { label: 'Este-Oeste · Setor 2K', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '2L': { label: 'Este-Oeste · Setor 2L', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '2M': { label: 'Este-Oeste · Setor 2M', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '2N': { label: 'Este-Oeste · Setor 2N', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '2O': { label: 'Este-Oeste · Setor 2O', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          '2P': { label: 'Este-Oeste · Setor 2P', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } }
+        },
+        aeroporto: {
+          'A1': {
+            label: '(11 a 20 Pessoas)',
+            title: 'Aeroporto · A1 (11 a 20 Pessoas)',
+            col1: [], // Alerta Amarelo
+            col2: []  // Alerta Vermelho
+          },
+          'A2': {
+            label: '(21 a 30 Pessoas)',
+            title: 'Aeroporto · A2 (21 a 30 Pessoas)',
+            col1: [], // Alerta Amarelo
+            col2: []  // Alerta Vermelho
+          },
+          'A3': {
+            label: '(31 a 100 Pessoas)',
+            title: 'Aeroporto · A3 (31 a 100 Pessoas)',
+            col1: [], // Alerta Amarelo
+            col2: []  // Alerta Vermelho
+          },
+          'A4': {
+            label: '(+ de 101 Pessoas)',
+            title: 'Aeroporto · A4 (+ de 101 Pessoas)',
+            col1: [], // Alerta Amarelo
+            col2: []  // Alerta Vermelho
+          },
+          'B1': {
+            label: '(Queda Declarada)',
+            title: 'Aeroporto · B1 (Queda Declarada)',
+            col1: [], // Frente Aeroporto
+            col2: []  // Frente Cidade
+          }
+        },
+        linhaFerrea: {
+          'F': {
+            label: 'Linha Férrea · Troço F',
+            abalroamento: {
+              alarm1: [
+                { meio: 'ABSC*', corpo: '0806 - CB Silves' },
+                { meio: 'ABSC*', corpo: '0814 - CB Albufeira' },
+                { meio: 'VCOT', corpo: '0813 - CB SB Messines' },
+                { meio: 'VSA', corpo: '0813 - CB SB Messines' }
+              ],
+              alarm2: [
+                { meio: 'ABSC*', corpo: '0807 - CB Portimão' },
+                { meio: 'ABSC*', corpo: '0808 - CB Loulé' },
+                { meio: 'ABSC*', corpo: '0815 - CB Lagoa' },
+                { meio: 'VCOT', corpo: '0806 - CB Silves' },
+                { meio: 'VCI', corpo: '0814 - CB Albufeira' },
+                { meio: 'VSA', corpo: '0806 - CB Silves' }
+              ]
+            },
+            substancias: {
+              alarm1: [
+                { meio: 'ABSC*', corpo: '0807 - CB Portimão' },
+                { meio: 'VTT/VAL', corpo: '0814 - CB Albufeira' },
+                { meio: 'VCOT', corpo: '0813 - CB SB Messines' },
+                { meio: 'VCI', corpo: '0813 - CB SB Messines' },
+                { meio: 'VSA', corpo: '0806 - CB Silves' }
+              ],
+              alarm2: [
+                { meio: 'VTT/VAL', corpo: '0805 - CB Faro Cruz Lusa' },
+                { meio: 'VTT/VAL', corpo: '0808 - CB Loulé' },
+                { meio: 'VCOT', corpo: '0806 - CB Silves' },
+                { meio: 'VCI', corpo: '0807 - CB Portimão' },
+                { meio: 'VCI', corpo: '0815 - CB Lagoa' }
+              ]
+            },
+            incendio: { alarm1: [], alarm2: [] }
+          },
+          'G': { label: 'Linha Férrea · Troço G', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          'H': { label: 'Linha Férrea · Troço H', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          'I': { label: 'Linha Férrea · Troço I', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          'J': { label: 'Linha Férrea · Troço J', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          'K': { label: 'Linha Férrea · Troço K', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          'L': { label: 'Linha Férrea · Troço L', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          'M': { label: 'Linha Férrea · Troço M', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          'N': { label: 'Linha Férrea · Troço N', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          'O': { label: 'Linha Férrea · Troço O', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
+          'P': { label: 'Linha Férrea · Troço P', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } }
+        }
+      };
+
+      function renderReadings(items) {
+        if (!Array.isArray(items) || items.length === 0) {
+          return '<span class="reading-empty">Sem meios registados</span>';
+        }
+        return `<div class="reading-list">${
+          items.map(item => {
+            if (typeof item === 'string') {
+              return `<div class="reading-item"><span class="reading-corpo">${item}</span></div>`;
+            }
+            const meioHtml = item.meio ? `<span class="reading-meio">${item.meio}</span>` : '';
+            const corpoHtml = item.corpo ? `<span class="reading-corpo">${item.corpo}</span>` : '';
+            return `<div class="reading-item">${meioHtml}${corpoHtml}</div>`;
+          }).join('')
+        }</div>`;
+      }
+
+      function populateAeroReadings(code) {
+        const entry = PPI_DATA.aeroporto[code] || {};
+        const isB1 = code === 'B1';
+
+        const badgeEl = document.getElementById('selected-aero-code');
+        const labelEl = document.getElementById('selected-aero-label');
+        const titleEl = document.getElementById('aero-scenario-title');
+        const col1Header = document.getElementById('aero-col-1-header');
+        const col2Header = document.getElementById('aero-col-2-header');
+
+        if (badgeEl) badgeEl.textContent = code;
+        if (labelEl) labelEl.textContent = entry.label ? `· ${entry.label}` : '';
+        if (titleEl) titleEl.textContent = entry.title || `Aeroporto · ${code}`;
+
+        if (col1Header && col2Header) {
+          if (isB1) {
+            col1Header.textContent = 'Frente Aeroporto';
+            col1Header.className = 'frente-aero';
+            col2Header.textContent = 'Frente Cidade';
+            col2Header.className = 'frente-cidade';
+          } else {
+            col1Header.textContent = 'Alerta Amarelo';
+            col1Header.className = 'alarm-1';
+            col2Header.textContent = 'Alerta Vermelho';
+            col2Header.className = 'alarm-red';
+          }
+        }
+
+        document.getElementById('cell-aero-col-1').innerHTML = renderReadings(entry.col1);
+        document.getElementById('cell-aero-col-2').innerHTML = renderReadings(entry.col2);
+      }
+
+      function populateReadings(group, code) {
+        if (group === '1' || group === '2') {
+          const entry = PPI_DATA.a22[code] || {};
+          const labelEl = document.getElementById(`selected-label-${group}`);
+          if (labelEl) labelEl.textContent = entry.label ? `· ${entry.label}` : '';
+
+          const acc = entry.acidente || {};
+          const sub = entry.substancias || {};
+          const inc = entry.incendio || {};
+
+          document.getElementById(`cell-${group}-acidente-1`).innerHTML = renderReadings(acc.alarm1);
+          document.getElementById(`cell-${group}-acidente-2`).innerHTML = renderReadings(acc.alarm2);
+          document.getElementById(`cell-${group}-sub-1`).innerHTML = renderReadings(sub.alarm1);
+          document.getElementById(`cell-${group}-sub-2`).innerHTML = renderReadings(sub.alarm2);
+          document.getElementById(`cell-${group}-incendio-1`).innerHTML = renderReadings(inc.alarm1);
+          document.getElementById(`cell-${group}-incendio-2`).innerHTML = renderReadings(inc.alarm2);
+        } else if (group === 'lf') {
+          const entry = PPI_DATA.linhaFerrea[code] || {};
+          const labelEl = document.getElementById('selected-label-lf');
+          if (labelEl) labelEl.textContent = entry.label ? `· ${entry.label}` : '';
+
+          const aba = entry.abalroamento || {};
+          const sub = entry.substancias || {};
+          const inc = entry.incendio || {};
+
+          document.getElementById('cell-lf-abalroamento-1').innerHTML = renderReadings(aba.alarm1);
+          document.getElementById('cell-lf-abalroamento-2').innerHTML = renderReadings(aba.alarm2);
+          document.getElementById('cell-lf-sub-1').innerHTML = renderReadings(sub.alarm1);
+          document.getElementById('cell-lf-sub-2').innerHTML = renderReadings(sub.alarm2);
+          document.getElementById('cell-lf-incendio-1').innerHTML = renderReadings(inc.alarm1);
+          document.getElementById('cell-lf-incendio-2').innerHTML = renderReadings(inc.alarm2);
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+        loadCorpInfo();
+        const fy = document.getElementById('footerYear');
+        if (fy) fy.textContent = new Date().getFullYear();
+
+        const mainButtons = document.querySelectorAll('.ppi-btn');
+        const mainPanels = document.querySelectorAll('.ppi-panel');
+        const codeButtons = document.querySelectorAll('.a22-code-btn');
+        const allTables = document.querySelectorAll('.a22-card-tables');
+        const aeroButtons = document.querySelectorAll('.aero-btn');
+        const aeroTableCard = document.getElementById('aero-table-card');
+
+        function closeAllSubTables() {
+          codeButtons.forEach(b => b.classList.remove('selected'));
+          allTables.forEach(t => t.classList.remove('open'));
+          aeroButtons.forEach(b => b.classList.remove('selected'));
+          if (aeroTableCard) aeroTableCard.classList.remove('open');
+        }
+
+        mainButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const targetId = btn.dataset.target;
+            const targetPanel = document.getElementById(targetId);
+            const isAlreadyOpen = btn.classList.contains('active');
+
+            mainButtons.forEach(b => b.classList.remove('active'));
+            mainPanels.forEach(p => p.classList.remove('open'));
+            closeAllSubTables();
+
+            if (!isAlreadyOpen && targetPanel) {
+              btn.classList.add('active');
+              targetPanel.classList.add('open');
+            }
+          });
+        });
+
+        codeButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const group = btn.dataset.group;
+            const code = btn.dataset.code;
+            const isAlreadySelected = btn.classList.contains('selected');
+
+            closeAllSubTables();
+
+            if (isAlreadySelected) return;
+
+            btn.classList.add('selected');
+            populateReadings(group, code);
+
+            const targetTable = document.getElementById(`tables-group-${group}`);
+            const targetBadge = document.getElementById(`selected-code-${group}`);
+            if (targetBadge) targetBadge.textContent = code;
+            if (targetTable) {
+              targetTable.classList.add('open');
+              targetTable.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          });
+        });
+
+        aeroButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const code = btn.dataset.aero;
+            const isAlreadySelected = btn.classList.contains('selected');
+
+            aeroButtons.forEach(b => b.classList.remove('selected'));
+            if (aeroTableCard) aeroTableCard.classList.remove('open');
+
+            if (isAlreadySelected) return;
+
+            btn.classList.add('selected');
+            populateAeroReadings(code);
+
+            if (aeroTableCard) {
+              aeroTableCard.classList.add('open');
+              aeroTableCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          });
+        });
+
+        document.querySelectorAll('.a22-detail-close').forEach(closeBtn => {
+          closeBtn.addEventListener('click', () => {
+            closeAllSubTables();
+          });
+        });
+      });
+    <\/script>
+  </body>
+  </html>
+</script>
+
+
+
 
 <script type="text/x-cb360" data-page="InterChat"><!DOCTYPE html>
   <html lang="pt-PT" style="background-color: #8b0000;">
