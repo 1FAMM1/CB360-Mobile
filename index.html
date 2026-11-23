@@ -27184,7 +27184,7 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
     </noscript>
-    <title>CB360 Mobile - PPIs</title>
+    <title>CB360 Mobile - PPIs</title>    
     <style>
       @view-transition {navigation: auto;}
       /* ============================================================
@@ -27207,13 +27207,11 @@
       html {scrollbar-width: none; background: var(--red-dark);}
       html, body {overscroll-behavior: none;}
       * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
-      body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex;
-            flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease); padding-top: var(--sai-top, 0px); padding-bottom: var(--sai-bottom, 0px);}
+      body {font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; transition: background var(--ease), color var(--ease); padding-top: var(--sai-top, 0px); padding-bottom: var(--sai-bottom, 0px);}
       /* ============================================================
       HEADER
       ============================================================ */
-      .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
-               justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+      .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
       .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
       .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
       .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
@@ -27221,12 +27219,10 @@
       /* ============================================================
       MAIN CONTENT & PPI BUTTONS
       ============================================================ */
-      .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; justify-content: flex-start; overflow-y: auto;
-                     padding: calc(var(--header-h) + 14px) 16px calc(var(--footer-h) + 16px); background: var(--bg); transition: background var(--ease); scrollbar-width: none;}
+      .main-content {flex: 1; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; justify-content: flex-start; overflow-y: auto; padding: calc(var(--header-h) + 14px) 16px calc(var(--footer-h) + 16px); background: var(--bg); transition: background var(--ease); scrollbar-width: none;}
       .main-content::-webkit-scrollbar {display: none;}
       .ppi-buttons-container {display: flex; flex-direction: column; gap: 8px; width: 100%;}
-      .ppi-btn {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 13px 16px; display: flex; align-items: center; gap: 13px;
-                box-shadow: var(--sh-sm); cursor: pointer; text-align: left; width: 100%; transition: background var(--ease), box-shadow var(--ease), transform var(--ease);}
+      .ppi-btn {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 13px 16px; display: flex; align-items: center; gap: 13px; box-shadow: var(--sh-sm); cursor: pointer; text-align: left; width: 100%; transition: background var(--ease), box-shadow var(--ease), transform var(--ease);}
       .ppi-btn:hover {background: var(--surface-2); box-shadow: var(--sh-md);}
       .ppi-btn:active {transform: scale(.98);}
       .ppi-icon-wrap {flex-shrink: 0; width: 40px; height: 40px; border-radius: 11px; background: var(--red-light); display: flex; align-items: center; justify-content: center;}
@@ -27234,25 +27230,25 @@
       .ppi-btn-title {font-size: 15px; font-weight: 700; color: var(--txt-1); flex: 1;}
       .ppi-btn-arrow {font-size: 20px; color: var(--txt-3); transition: transform var(--ease);}
       .ppi-btn.active .ppi-btn-arrow {transform: rotate(90deg); color: var(--red-icon);}
+      .a22-code-btn, .linfer-code-btn {font-size: 10.5px; padding: 7px 1px; background: #f5e8a8 !important; color: #66551c !important; border: 1px solid #e8d58a !important;}
+      .a22-code-btn:hover, .linfer-code-btn:hover {background: #edda91 !important; border-color: #ddc56e !important;}
+      .a22-code-btn.selected, .linfer-code-btn.selected {background: var(--red) !important; color: #fff !important; border-color: var(--red-dark) !important;}
       /* ============================================================
-      SUB-CARDS (A22 & LINHA FÉRREA)
+      SUB-CARDS (A22)
       ============================================================ */
       .a22-cards-container {display: none; flex-direction: column; gap: 8px; padding-left: 14px; margin-bottom: 2px;}
       .a22-cards-container.open {display: flex;}
-      .a22-card {background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--r-sm); padding: 10px 12px;
-                 box-shadow: var(--sh-sm); display: flex; flex-direction: column; gap: 8px;}
+      .a22-card {background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--r-sm); padding: 10px 12px; box-shadow: var(--sh-sm); display: flex; flex-direction: column; gap: 8px;}
       .a22-card-header {display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: var(--txt-1); text-transform: uppercase;}
       .a22-card-header .material-icons {font-size: 16px; color: var(--red-icon);}
       .a22-card-route {font-size: 10.5px; font-weight: 500; color: var(--txt-2); text-transform: none; letter-spacing: 0;}
       .a22-row {display: flex; align-items: center; gap: 4px; width: 100%;}
-      .a22-code-btn {flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 2px; font-size: 12px; font-weight: 800;
-                     color: var(--txt-1); text-align: center; cursor: pointer; box-shadow: var(--sh-sm); white-space: nowrap;
-                     transition: background var(--ease), color var(--ease), border-color var(--ease), transform var(--ease);}
-      .a22-code-btn:hover {background: var(--red); border-color: var(--red); color: #ffffff;}
-      .a22-code-btn.selected {background: var(--red); border-color: var(--red); color: #ffffff; box-shadow: var(--sh-md);}
+      .a22-code-btn {flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 2px; font-size: 12px; font-weight: 800; color: var(--txt-1); text-align: center; cursor: pointer; box-shadow: var(--sh-sm); white-space: nowrap; transition: background var(--ease), color var(--ease), border-color var(--ease), transform var(--ease);}
+      .a22-code-btn:hover, .a22-code-btn.selected {background: var(--red); border-color: var(--red); color: #ffffff;}
+      .a22-code-btn.selected {box-shadow: var(--sh-md);}
       .a22-code-btn:active {transform: scale(.95);}
       /* ============================================================
-      INLINE TABLES (INSIDE EACH CARD - FLAT COLORS)
+      INLINE TABLES (A22)
       ============================================================ */
       .a22-card-tables {display: none; flex-direction: column; gap: 10px; margin-top: 2px; padding-top: 8px; border-top: 1px solid var(--border);}
       .a22-card-tables.open {display: flex;}
@@ -27262,22 +27258,58 @@
       .a22-detail-sub {font-size: 11.5px; font-weight: 600; color: var(--txt-2);}
       .a22-detail-close {background: transparent; border: none; color: var(--txt-2); cursor: pointer; display: flex; align-items: center; padding: 2px;}
       .a22-scenario-block {background: var(--surface); border: 1px solid var(--border); border-radius: 9px; overflow: hidden;}
-      .a22-scenario-title {display: flex; align-items: center; gap: 6px; padding: 7px 10px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.3px;
-                           color: #1c1b1a; line-height: 1.25;}
+      .a22-scenario-title {display: flex; align-items: center; gap: 6px; padding: 7px 10px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.3px; color: #1c1b1a; line-height: 1.25;}
       .a22-scenario-title .material-icons {font-size: 15px; color: #1c1b1a; flex-shrink: 0;}
       .a22-scenario-title.occ-acidente {background-color: #a5d6a7;}
       .a22-scenario-title.occ-substancias {background-color: #ffcc80;}
       .a22-scenario-title.occ-incendio {background-color: #90caf9;}
-      .a22-scenario-title.occ-aeroporto {background-color: #cfd8dc;}
       .a22-alarm-table {width: 100%; border-collapse: collapse; table-layout: fixed;}
       .a22-alarm-table th {padding: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; text-align: center; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.12);}
       .a22-alarm-table th.alarm-1 {background-color: #ffff00; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
       .a22-alarm-table th.alarm-2 {background-color: #ffa500; color: #1c1b1a;}
       .a22-alarm-table th.alarm-red {background-color: #ef5350; color: #ffffff; border-right: 1px solid rgba(0,0,0,0.15);}
-      .a22-alarm-table th.frente-aero {background-color: #90caf9; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
-      .a22-alarm-table th.frente-cidade {background-color: #a5d6a7; color: #1c1b1a;}
-      .a22-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); text-align: left; vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
+      .a22-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); text-align: center; vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
       .a22-alarm-table td:first-child {border-right: 1px solid var(--border);}
+      /* ============================================================
+      SUB-CARDS (LINHA FÉRREA)
+      ============================================================ */
+      .linfer-cards-container {display: none; flex-direction: column; gap: 8px; padding-left: 14px; margin-bottom: 2px;}
+      .linfer-cards-container.open {display: flex;}
+      .linfer-card {background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--r-sm); padding: 10px 12px; box-shadow: var(--sh-sm); display: flex; flex-direction: column; gap: 8px;}
+      .linfer-card-header {display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: var(--txt-1); text-transform: uppercase;}
+      .linfer-card-header .material-icons {font-size: 16px; color: var(--red-icon);}
+      .linfer-card-route {font-size: 10.5px; font-weight: 500; color: var(--txt-2); text-transform: none; letter-spacing: 0;}
+      .linfer-row {display: flex; align-items: center; gap: 4px; width: 100%;}
+      .linfer-code-btn {flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 2px; font-size: 12px; font-weight: 800; color: var(--txt-1); text-align: center; cursor: pointer; box-shadow: var(--sh-sm); white-space: nowrap; transition: background var(--ease), color var(--ease), border-color var(--ease), transform var(--ease);}
+      .linfer-code-btn:hover, .linfer-code-btn.selected {background: var(--red); border-color: var(--red); color: #ffffff;}
+      .linfer-code-btn.selected {box-shadow: var(--sh-md);}
+      .linfer-code-btn:active {transform: scale(.95);}
+      /* ============================================================
+      INLINE TABLES (LINHA FÉRREA)
+      ============================================================ */
+      .linfer-card-tables {display: none; flex-direction: column; gap: 10px; margin-top: 2px; padding-top: 8px; border-top: 1px solid var(--border);}
+      .linfer-card-tables.open {display: flex;}
+      .linfer-detail-top {display: flex; align-items: center; justify-content: space-between;}
+      .linfer-detail-badge {display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 800; color: var(--txt-1);}
+      .linfer-detail-tag {background: var(--red); color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 11.5px;}
+      .linfer-detail-sub {font-size: 11.5px; font-weight: 600; color: var(--txt-2);}
+      .linfer-detail-close {background: transparent; border: none; color: var(--txt-2); cursor: pointer; display: flex; align-items: center; padding: 2px;}
+      .linfer-scenario-block {background: var(--surface); border: 1px solid var(--border); border-radius: 9px; overflow: hidden;}
+      .linfer-scenario-title {display: flex; align-items: center; gap: 6px; padding: 7px 10px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.3px; color: #1c1b1a; line-height: 1.25;}
+      .linfer-scenario-title .material-icons {font-size: 15px; color: #1c1b1a; flex-shrink: 0;}
+      .linfer-scenario-title.occ-acidente {background-color: #a5d6a7;}
+      .linfer-scenario-title.occ-substancias {background-color: #ffcc80;}
+      .linfer-scenario-title.occ-incendio {background-color: #90caf9;}
+      .linfer-alarm-table {width: 100%; border-collapse: collapse; table-layout: fixed;}
+      .linfer-alarm-table th {padding: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; text-align: center; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.12);}
+      .linfer-alarm-table th.alarm-1 {background-color: #ffff00; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
+      .linfer-alarm-table th.alarm-2 {background-color: #ffa500; color: #1c1b1a;}
+      .linfer-alarm-table th.alarm-red {background-color: #ef5350; color: #ffffff; border-right: 1px solid rgba(0,0,0,0.15);}
+      .linfer-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); text-align: center; vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
+      .linfer-alarm-table td:first-child {border-right: 1px solid var(--border);}
+      /* ============================================================
+      READING LIST (COMMON)
+      ============================================================ */
       .reading-list {display: flex; flex-direction: column; gap: 4px;}
       .reading-item {display: flex; align-items: baseline; gap: 6px; line-height: 1.3;}
       .reading-meio {font-weight: 800; font-size: 11px; color: var(--red-icon); white-space: nowrap;}
@@ -27287,11 +27319,14 @@
       /* ============================================================
       SUB-BUTTONS (AEROPORTO) & TRIAGE COLORS
       ============================================================ */
-      .sub-buttons-container {display: none; grid-template-columns: repeat(2, 1fr); gap: 8px; padding-left: 14px; margin-bottom: 2px;}
+      .sub-buttons-container {display: none; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; padding-left: 14px; margin-bottom: 2px;}
       .sub-buttons-container.open {display: grid;}
-      .ppi-sub-btn {border: 1px solid rgba(0, 0, 0, 0.12); border-radius: var(--r-sm); padding: 11px 12px; display: flex;
-                    align-items: center; justify-content: space-between; gap: 6px; box-shadow: var(--sh-sm); cursor: pointer; text-align: left; width: 100%;
-                    transition: filter var(--ease), transform var(--ease);}
+      .sub-buttons-container .ppi-sub-btn {min-width: 0; padding: 10px 3px; justify-content: center; gap: 2px;}
+      .sub-buttons-container .ppi-sub-info {align-items: center; justify-content: center;}
+      .sub-buttons-container .ppi-sub-btn.full-span {grid-column: auto; padding: 10px 3px;}
+      .sub-buttons-container .ppi-sub-btn .ppi-sub-arrow {font-size: 14px;}
+      .sub-buttons-container .ppi-sub-code {font-size: 12px; padding: 3px 5px;}
+      .ppi-sub-btn {border: 1px solid rgba(0, 0, 0, 0.12); border-radius: var(--r-sm); padding: 11px 12px; display: flex; align-items: center; justify-content: space-between; gap: 6px; box-shadow: var(--sh-sm); cursor: pointer; text-align: left; width: 100%; transition: filter var(--ease), transform var(--ease);}
       .ppi-sub-btn.full-span {grid-column: 1 / -1; padding: 11px 16px;}
       .ppi-sub-btn:hover {filter: brightness(1.06);}
       .ppi-sub-btn:active {transform: scale(.98);}
@@ -27304,8 +27339,26 @@
       .ppi-sub-arrow {font-size: 18px; flex-shrink: 0; transition: transform var(--ease);}
       .ppi-sub-btn.selected .ppi-sub-arrow {transform: rotate(90deg);}
       .aero-table-card {grid-column: 1 / -1; background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--r-sm); padding: 10px 12px; box-shadow: var(--sh-sm);}
-      .aero-table-card .a22-card-tables {display: flex; margin-top: 0; padding-top: 0; border-top: none;}
       .aero-table-card:not(.open) {display: none;}
+      .aero-card-tables {display: flex; flex-direction: column; gap: 10px; margin-top: 0; padding-top: 0; border-top: none;}
+      .aero-detail-top {display: flex; align-items: center; justify-content: space-between;}
+      .aero-detail-badge {display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 800; color: var(--txt-1);}
+      .aero-detail-tag {background: var(--red); color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 11.5px;}
+      .aero-detail-sub {font-size: 11.5px; font-weight: 600; color: var(--txt-2);}
+      .aero-detail-close {background: transparent; border: none; color: var(--txt-2); cursor: pointer; display: flex; align-items: center; padding: 2px;}
+      .aero-scenario-block {background: var(--surface); border: 1px solid var(--border); border-radius: 9px; overflow: hidden;}
+      .aero-scenario-title {display: flex; align-items: center; gap: 6px; padding: 7px 10px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.3px; color: #1c1b1a; line-height: 1.25;}
+      .aero-scenario-title .material-icons {font-size: 15px; color: #1c1b1a; flex-shrink: 0;}
+      .aero-scenario-title.occ-aeroporto {background-color: #cfd8dc;}
+      .aero-alarm-table {width: 100%; border-collapse: collapse; table-layout: fixed;}
+      .aero-alarm-table th {padding: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; text-align: center; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.12);}
+      .aero-alarm-table th.alarm-1 {background-color: #ffff00; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
+      .aero-alarm-table th.alarm-2 {background-color: #ffa500; color: #1c1b1a;}
+      .aero-alarm-table th.alarm-red {background-color: #ef5350; color: #ffffff; border-right: 1px solid rgba(0,0,0,0.15);}
+      .aero-alarm-table th.frente-aero {background-color: #90caf9; color: #1c1b1a; border-right: 1px solid rgba(0,0,0,0.15);}
+      .aero-alarm-table th.frente-cidade {background-color: #a5d6a7; color: #1c1b1a;}
+      .aero-alarm-table td {padding: 8px; font-size: 11.5px; font-weight: 600; color: var(--txt-1); text-align: center; vertical-align: top; border-top: 1px solid var(--border); background: var(--surface);}
+      .aero-alarm-table td:first-child {border-right: 1px solid var(--border);}
       /* A1 */
       .ppi-sub-btn.tier-green {background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #ffffff;}
       .ppi-sub-btn.tier-green .ppi-sub-code {background: rgba(255, 255, 255, 0.22); color: #ffffff;}
@@ -27327,6 +27380,33 @@
       .ppi-sub-btn.tier-black .ppi-sub-code {background: rgba(255, 255, 255, 0.18); color: #ffffff;}
       .ppi-sub-btn.tier-black .ppi-sub-arrow {color: rgba(255, 255, 255, 0.80);}
       /* ============================================================
+      VISIBILITY (A22, AEROPORTO E LINHA FÉRREA)
+      ============================================================ */
+      .a22-card-tables.no-means {display: none !important;}
+      .a22-scenario-block.no-means {display: none !important;}
+      #tables-group-1 .a22-scenario-block:not(.has-means), #tables-group-2 .a22-scenario-block:not(.has-means) {display: none !important;}
+      .aero-table-card.no-means {display: none !important;}
+      #aero-table-card:not(.has-means) .aero-card-tables {display: none !important;}
+      .aero-scenario-block.no-means {display: none !important;}
+      .linfer-card-tables.no-means, #tables-group-lf.no-means {display: none !important;}
+      #tables-group-lf:not(.has-means) {display: none !important;}
+      .linfer-scenario-block.no-means {display: none !important;}
+      #tables-group-lf .linfer-scenario-block:not(.has-means) {display: none !important;}
+      /* ============================================================
+      LEGENDA DOS MEIOS PPI
+      ============================================================ */
+      .ppi-legend {width:100%; margin-top:9px; padding:8px 10px; border-top:1px solid var(--border); color:#c62828; font-size:10px; line-height:1.5;}
+      .ppi-legend-item {margin-bottom:3px;}
+      .ppi-legend-item:last-child {margin-bottom:-10px;}
+      .ppi-legend-item strong {color:#c62828; margin-right:3px;}
+      /* ============================================================
+      CENTRAR MEIOS NAS TABELAS PPI
+      ============================================================ */
+      .a22-alarm-table td, .linfer-alarm-table td, .aero-alarm-table td {text-align:center !important;}
+      .a22-alarm-table .reading-list, .linfer-alarm-table .reading-list, .aero-alarm-table .reading-list {align-items:center; width:100%;}
+      .a22-alarm-table .reading-item, .linfer-alarm-table .reading-item, .aero-alarm-table .reading-item {justify-content:center; text-align:center; width:100%;}
+      .a22-alarm-table .reading-empty, .linfer-alarm-table .reading-empty, .aero-alarm-table .reading-empty {text-align:center;}
+      /* ============================================================
       FOOTER
       ============================================================ */
       .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center;
@@ -27340,10 +27420,10 @@
       @media (max-width: 480px) {
         .header-title {font-size: 16px;}
         .main-content {padding-left: 12px; padding-right: 12px;}
-        .a22-row {gap: 3px;}
-        .a22-code-btn {font-size: 10.5px; padding: 7px 1px;}
-        .a22-card-route {font-size: 10px;}
-        .a22-alarm-table td {padding: 7px 6px; font-size: 11px;}
+        .a22-row, .linfer-row {gap: 3px;}
+        .a22-code-btn, .linfer-code-btn {font-size: 10.5px; padding: 7px 1px;}
+        .a22-card-route, .linfer-card-route {font-size: 10px;}
+        .a22-alarm-table td, .linfer-alarm-table td, .aero-alarm-table td {padding: 7px 6px; font-size: 11px;}
       }
     </style>
   </head>
@@ -27406,7 +27486,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
+                   <tr>
                       <td id="cell-1-acidente-1"></td>
                       <td id="cell-1-acidente-2"></td>
                     </tr>
@@ -27545,7 +27625,7 @@
             </div>
           </div>
         </div>
-        <!-- Aeroporto -->
+        <!-- AEROPORTO -->
         <button type="button" class="ppi-btn" id="btn-aeroporto" data-target="sub-aeroporto">
           <div class="ppi-icon-wrap">
             <span class="material-icons">flight</span>
@@ -27557,56 +27637,51 @@
           <button type="button" class="ppi-sub-btn tier-green aero-btn" id="btn-aero-a1" data-aero="A1">
             <div class="ppi-sub-info">
               <span class="ppi-sub-code">A1</span>
-              <span class="ppi-sub-desc">(11 a 20 Pessoas)</span>
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
           <button type="button" class="ppi-sub-btn tier-yellow aero-btn" id="btn-aero-a2" data-aero="A2">
             <div class="ppi-sub-info">
               <span class="ppi-sub-code">A2</span>
-              <span class="ppi-sub-desc">(21 a 30 Pessoas)</span>
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
           <button type="button" class="ppi-sub-btn tier-orange aero-btn" id="btn-aero-a3" data-aero="A3">
             <div class="ppi-sub-info">
               <span class="ppi-sub-code">A3</span>
-              <span class="ppi-sub-desc">(31 a 100 Pessoas)</span>
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
           <button type="button" class="ppi-sub-btn tier-red aero-btn" id="btn-aero-a4" data-aero="A4">
             <div class="ppi-sub-info">
               <span class="ppi-sub-code">A4</span>
-              <span class="ppi-sub-desc">(+ de 101 Pessoas)</span>
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
           <button type="button" class="ppi-sub-btn tier-black full-span aero-btn" id="btn-aero-b1" data-aero="B1">
             <div class="ppi-sub-info">
               <span class="ppi-sub-code">B1</span>
-              <span class="ppi-sub-desc">(Queda Declarada)</span>
             </div>
             <span class="material-icons ppi-sub-arrow">chevron_right</span>
           </button>
-          <!-- Tabela Aeroporto (A1-A4: Alerta Amarelo / Alerta Vermelho | B1: Frente Aeroporto / Frente Cidade) -->
+          <!-- Tabela Aeroporto -->
           <div class="aero-table-card" id="aero-table-card">
-            <div class="a22-card-tables">
-              <div class="a22-detail-top">
-                <div class="a22-detail-badge">
-                  <span class="a22-detail-tag" id="selected-aero-code">A1</span>
-                  <span class="a22-detail-sub" id="selected-aero-label"></span>
+            <div class="aero-card-tables">
+              <div class="aero-detail-top">
+                <div class="aero-detail-badge">
+                  <span class="aero-detail-tag" id="selected-aero-code">A1</span>
+                  <span class="aero-detail-sub" id="selected-aero-label"></span>
                 </div>
-                <button type="button" class="a22-detail-close" id="close-aero-table" aria-label="Fechar">
+                <button type="button" class="aero-detail-close" id="close-aero-table" aria-label="Fechar">
                   <span class="material-icons" style="font-size:18px;">close</span>
                 </button>
               </div>
-              <div class="a22-scenario-block">
-                <div class="a22-scenario-title occ-aeroporto">
+              <div class="aero-scenario-block">
+                <div class="aero-scenario-title occ-aeroporto">
                   <span class="material-icons">flight_land</span>
                   <span id="aero-scenario-title">Aeroporto</span>
                 </div>
-                <table class="a22-alarm-table">
+                <table class="aero-alarm-table">
                   <thead>
                     <tr id="aero-thead-row">
                       <th class="alarm-1" id="aero-col-1-header">Alerta Amarelo</th>
@@ -27624,7 +27699,7 @@
             </div>
           </div>
         </div>
-        <!-- Linha Férrea -->
+        <!-- LINHA FÉRREA -->
         <button type="button" class="ppi-btn" id="btn-linha-ferrea" data-target="sub-linha-ferrea">
           <div class="ppi-icon-wrap">
             <span class="material-icons">train</span>
@@ -27632,42 +27707,42 @@
           <span class="ppi-btn-title">Linha Férrea</span>
           <span class="material-icons ppi-btn-arrow">chevron_right</span>
         </button>
-        <div class="a22-cards-container ppi-panel" id="sub-linha-ferrea">
-          <div class="a22-card" id="card-lf">
-            <div class="a22-card-header">
+        <div class="linfer-cards-container ppi-panel" id="sub-linha-ferrea">
+          <div class="linfer-card" id="card-lf">
+            <div class="linfer-card-header">
               <span class="material-icons">train</span>
               <span>Troços Linha Férrea</span>
             </div>
-            <div class="a22-row">
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="F">F</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="G">G</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="H">H</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="I">I</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="J">J</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="K">K</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="L">L</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="M">M</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="N">N</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="O">O</button>
-              <button type="button" class="a22-code-btn" data-group="lf" data-code="P">P</button>
+            <div class="linfer-row">
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="F">F</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="G">G</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="H">H</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="I">I</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="J">J</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="K">K</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="L">L</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="M">M</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="N">N</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="O">O</button>
+              <button type="button" class="linfer-code-btn" data-group="lf" data-code="P">P</button>
             </div>
             <!-- Tabelas da Linha Férrea -->
-            <div class="a22-card-tables" id="tables-group-lf">
-              <div class="a22-detail-top">
-                <div class="a22-detail-badge">
-                  <span class="a22-detail-tag" id="selected-code-lf">F</span>
-                  <span class="a22-detail-sub" id="selected-label-lf"></span>
+            <div class="linfer-card-tables" id="tables-group-lf">
+              <div class="linfer-detail-top">
+                <div class="linfer-detail-badge">
+                  <span class="linfer-detail-tag" id="selected-code-lf">F</span>
+                  <span class="linfer-detail-sub" id="selected-label-lf"></span>
                 </div>
-                <button type="button" class="a22-detail-close" aria-label="Fechar">
+                <button type="button" class="linfer-detail-close" aria-label="Fechar">
                   <span class="material-icons" style="font-size:18px;">close</span>
                 </button>
               </div>
-              <div class="a22-scenario-block">
-                <div class="a22-scenario-title occ-acidente">
+              <div class="linfer-scenario-block">
+                <div class="linfer-scenario-title occ-acidente">
                   <span class="material-icons">train</span>
                   <span>Abalroamento, Choque e Descarrilamento</span>
                 </div>
-                <table class="a22-alarm-table">
+                <table class="linfer-alarm-table">
                   <thead>
                     <tr>
                       <th class="alarm-1">1º Alarme</th>
@@ -27682,12 +27757,12 @@
                   </tbody>
                 </table>
               </div>
-              <div class="a22-scenario-block">
-                <div class="a22-scenario-title occ-substancias">
+              <div class="linfer-scenario-block">
+                <div class="linfer-scenario-title occ-substancias">
                   <span class="material-icons">warning</span>
                   <span>Substâncias Perigosas - Produtos Químicos/Biológicos</span>
                 </div>
-                <table class="a22-alarm-table">
+                <table class="linfer-alarm-table">
                   <thead>
                     <tr>
                       <th class="alarm-1">1º Alarme</th>
@@ -27702,12 +27777,12 @@
                   </tbody>
                 </table>
               </div>
-              <div class="a22-scenario-block">
-                <div class="a22-scenario-title occ-incendio">
+              <div class="linfer-scenario-block">
+                <div class="linfer-scenario-title occ-incendio">
                   <span class="material-icons">local_fire_department</span>
                   <span>Incêndio em Transportes</span>
                 </div>
-                <table class="a22-alarm-table">
+                <table class="linfer-alarm-table">
                   <thead>
                     <tr>
                       <th class="alarm-1">1º Alarme</th>
@@ -27825,7 +27900,6 @@
             throw new Error(`Erro Supabase: ${response.status}`);
           }
           const data = await response.json();
-          // Evita atualizar o título de outra grelha entretanto selecionada
           const selectedCode = document.getElementById(`selected-code-${group}`);
           if (!selectedCode || selectedCode.textContent.trim() !== code) return;
           if (!data || data.length === 0) {
@@ -27863,14 +27937,52 @@
             labelEl.textContent = '· Sem informação';
             return;
           }
-          const firstPkm = String(data[0].ppi_first_pkm || '').trim();
-          const secondPkm = String(data[0].ppi_secound_pkm || '').trim();
+          const firstPkm = String(data[0].ppi_first_pkm || '').replace(/\\n/g, ' ').trim();
+          const secondPkm = String(data[0].ppi_secound_pkm || '').replace(/\\n/g, ' ').trim();
           const titleParts = [firstPkm, secondPkm].filter(Boolean);
           labelEl.textContent = titleParts.length ? `· ${titleParts.join(' · ')}` : '· Sem informação';
         } catch (error) {
           console.error(`Erro ao carregar título da Linha Férrea ${code}:`, error);
           labelEl.textContent = '· Erro ao carregar título';
         }
+      }
+      /* ===================== LEGENDA DOS MEIOS PPI ===================== */
+      function updatePpiLegend(tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+        const content = tableId === 'aero-table-card'
+          ? table.querySelector('.aero-card-tables')
+          : table;
+        if (!content) return;
+        const oldLegend = content.querySelector('.ppi-legend');
+        if (oldLegend) oldLegend.remove();
+        const text = content.textContent || '';
+        const hasDouble = text.includes('**');
+        const hasSingle = text.replace(/\*\*/g, '').includes('*');
+        if (!hasSingle && !hasDouble) return;
+        const singleMessages = {
+          'tables-group-1': 'As ABSC a despacho para o PPI da Via do Infante de Sagres, não devem ser as afetas ao PEM do INEM.',
+          'tables-group-2': 'As ABSC a despacho para o PPI da Via do Infante de Sagres, não devem ser as afetas ao PEM do INEM.',
+          'aero-table-card': 'As ABSC a despacho para o PPI do Aeroporto Gago Coutinho, não devem ser as afetas ao PEM do INEM.',
+          'tables-group-lf': 'As ABSC a despacho para o PPI da Linha Férrea do Algarve, não devem ser as afetas ao PEM do INEM.'
+        };
+        const singleMessage = singleMessages[tableId] || '';
+        const legend = document.createElement('div');
+        legend.className = 'ppi-legend';
+        legend.innerHTML = `
+          ${hasSingle && singleMessage ? `
+            <div class="ppi-legend-item">
+              <strong>*</strong> ${singleMessage}
+            </div>
+          ` : ''}
+          ${hasDouble ? `
+            <div class="ppi-legend-item">
+              <strong>**</strong> Equipas com Capacidade de Resgate.
+            </div>
+          ` : ''}
+        `;
+
+        content.appendChild(legend);
       }
       /* ============================================================
       CARREGAR MEIOS NAS CÉLULAS A22
@@ -27879,35 +27991,61 @@
       async function loadA22Means(group, gridId) {
         const loadVersion = ++a22LoadVersion;
         const corpNr = String(getCorp()).trim().padStart(4, '0');
-        const cells = {
-          1: {acidente: ['cell-1-acidente-1', 'cell-1-acidente-2'], substancias: ['cell-1-sub-1', 'cell-1-sub-2'], incendio: ['cell-1-incendio-1', 'cell-1-incendio-2']},
-          2: {acidente: ['cell-2-acidente-1', 'cell-2-acidente-2'], substancias: ['cell-2-sub-1', 'cell-2-sub-2'], incendio: ['cell-2-incendio-1', 'cell-2-incendio-2']}
-        };
+        const cells = {1: {acidente: ['cell-1-acidente-1', 'cell-1-acidente-2'], substancias: ['cell-1-sub-1', 'cell-1-sub-2'], incendio: ['cell-1-incendio-1', 'cell-1-incendio-2']},
+                       2: {acidente: ['cell-2-acidente-1', 'cell-2-acidente-2'], substancias: ['cell-2-sub-1', 'cell-2-sub-2'], incendio: ['cell-2-incendio-1', 'cell-2-incendio-2']}
+                      };
         const categoryMap = {'Acidente': 'acidente', 'Substâncias Perigosas': 'substancias', 'Incêndio em Transportes': 'incendio'};
         if (!cells[group]) return;
-        const clearCells = () => Object.values(cells[group]).flat().forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.innerHTML = renderReadings([]);
-        });
+        const table = document.getElementById(`tables-group-${group}`);
+        const clearCells = () => {
+          Object.values(cells[group]).flat().forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = renderReadings([]);
+          });
+        };
+        const updateVisibility = (scenarioHasMeans = {}) => {
+          let hasAnyMeans = false;
+          Object.entries(cells[group]).forEach(([categoryKey, cellIds]) => {
+            const firstCell = document.getElementById(cellIds[0]);
+            const scenarioBlock = firstCell?.closest('.a22-scenario-block');
+            const hasMeans = !!scenarioHasMeans[categoryKey];
+            if (scenarioBlock) {
+              scenarioBlock.classList.toggle('no-means', !hasMeans);
+              scenarioBlock.classList.toggle('has-means', hasMeans);
+            }
+            if (hasMeans) hasAnyMeans = true;
+          });
+          if (table) {
+            table.classList.toggle('no-means', !hasAnyMeans);
+          }
+          updatePpiLegend(`tables-group-${group}`);
+        };
         try {
           const referencesResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/ppia22_references?select=id,grid_code,occurrence_type&grid_code=eq.${encodeURIComponent(gridId)}`,
-            {headers: getSupabaseHeaders()}
+            `${SUPABASE_URL}/rest/v1/ppia22_references?select=id,grid_code,occurrence_type&grid_code=eq.${encodeURIComponent(gridId)}`, {
+              headers: getSupabaseHeaders()
+            }
           );
-          if (!referencesResponse.ok) throw new Error(`Erro nas referências: ${referencesResponse.status}`);
+          if (!referencesResponse.ok) {
+            throw new Error(`Erro nas referências: ${referencesResponse.status}`);
+          }
           const references = await referencesResponse.json();
           if (loadVersion !== a22LoadVersion) return;
           if (!references.length) {
             clearCells();
+            updateVisibility();
             console.warn(`Sem referências para a grelha ${gridId}`);
             return;
           }
           const referenceIds = references.map(ref => ref.id);
           const meansResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/ppia22_means?select=reference_id,alarm_level,means,display_order&reference_id=in.(${referenceIds.join(',')})&order=display_order.asc`,
-            {headers: getSupabaseHeaders()}
+            `${SUPABASE_URL}/rest/v1/ppia22_means?select=reference_id,alarm_level,means,display_order&reference_id=in.(${referenceIds.join(',')})&order=display_order.asc`, {
+              headers: getSupabaseHeaders()
+            }
           );
-          if (!meansResponse.ok) throw new Error(`Erro nos meios: ${meansResponse.status}`);
+          if (!meansResponse.ok) {
+            throw new Error(`Erro nos meios: ${meansResponse.status}`);
+          }
           const allMeans = await meansResponse.json();
           const means = allMeans.filter(item => {
             const match = String(item.means || '').match(/\b\d{4}\b/);
@@ -27917,12 +28055,15 @@
             .filter(item => item.reference_id === refId && item.alarm_level === level)
             .map(item => ({meio: String(item.means || '').split(/\s+\d{4}\b/)[0].trim(), corpo: ''}));
           const updates = [];
+          const scenarioHasMeans = {};
           references.forEach(reference => {
             const categoryKey = categoryMap[reference.occurrence_type];
             if (!categoryKey) return;
             const [firstCellId, secondCellId] = cells[group][categoryKey];
-            updates.push({id: firstCellId, html: renderReadings(list(reference.id, '1º Alarme'))});
-            updates.push({id: secondCellId, html: renderReadings(list(reference.id, '2º Alarme'))});
+            const firstMeans = list(reference.id, '1º Alarme');
+            const secondMeans = list(reference.id, '2º Alarme');
+            updates.push({id: firstCellId, html: renderReadings(firstMeans)}, {id: secondCellId, html: renderReadings(secondMeans)});
+            scenarioHasMeans[categoryKey] = firstMeans.length > 0 || secondMeans.length > 0;
           });
           if (loadVersion !== a22LoadVersion) return;
           clearCells();
@@ -27930,9 +28071,13 @@
             const element = document.getElementById(update.id);
             if (element) element.innerHTML = update.html;
           });
+          updateVisibility(scenarioHasMeans);
         } catch (error) {
           console.error(`Erro ao carregar meios A22 (${gridId}):`, error);
-          if (loadVersion === a22LoadVersion) clearCells();
+          if (loadVersion === a22LoadVersion) {
+            clearCells();
+            updateVisibility();
+          }
         }
       }
       function populateA22Readings(group, code) {
@@ -28031,19 +28176,23 @@
           }
         }
         if (column1 === null) return;
+        const tableCard = document.getElementById('aero-table-card');
+        const hasMeans = column1.length > 0 || column2.length > 0;
+        if (tableCard) {
+          tableCard.classList.toggle('has-means', hasMeans);
+          tableCard.classList.toggle('no-means', !hasMeans);
+        }
         const cell1 = document.getElementById('cell-aero-col-1');
         const cell2 = document.getElementById('cell-aero-col-2');
         if (cell1) cell1.innerHTML = renderReadings(column1);
         if (cell2) cell2.innerHTML = renderReadings(column2);
+        updatePpiLegend('aero-table-card');
       }
-      let aeroShown = false;
       async function populateAeroReadings(code) {
         const loadVersion = ++aeroLoadVersion;
-        if (!aeroShown) renderAero(code, null, null);
-        const {column1, column2} = await loadAeroMeans(code);
+        const { column1, column2 } = await loadAeroMeans(code);
         if (loadVersion !== aeroLoadVersion) return;
         renderAero(code, column1, column2);
-        aeroShown = true;
       }
       /* ============================================================
       CARREGAR MEIOS DA LINHA FÉRREA
@@ -28098,7 +28247,6 @@
             const corpMatch = rawMeans.match(/\b\d{4}\b/);
             if (!corpMatch || corpMatch[0] !== corpNr) return;
             const meio = rawMeans.substring(0, corpMatch.index).trim();
-            const corpo = rawMeans.substring(corpMatch.index).trim();
             if (!meio) return;
             const occurrence = String(
               referencesMap.get(item.reference_id) || ''
@@ -28126,7 +28274,7 @@
               alarmKey = 'alarm2';
             }
             if (!alarmKey) return;
-            result[category][alarmKey].push({meio, corpo, display_order: Number(item.display_order ?? 1)});
+            result[category][alarmKey].push({meio, corpo: '', display_order: Number(item.display_order ?? 1)});
           });
           Object.values(result).forEach(category => {
             Object.values(category).forEach(alarm => {
@@ -28144,43 +28292,82 @@
       }
       async function populateRailwayReadings(code) {
         const loadVersion = ++railwayLoadVersion;
+        const table = document.getElementById('tables-group-lf');
         loadRailwayGridTitle(code);
         const data = await loadRailwayMeans(code);
         if (loadVersion !== railwayLoadVersion) return;
         if (!data) return;
         const selectedCode = document.getElementById('selected-code-lf');
         if (!selectedCode || selectedCode.textContent.trim() !== code) return;
+        const scenarios = {
+          abalroamento: {alarm1: data.abalroamento.alarm1, alarm2: data.abalroamento.alarm2, cell: 'cell-lf-abalroamento-1'},
+          substancias: {alarm1: data.substancias.alarm1, alarm2: data.substancias.alarm2, cell: 'cell-lf-sub-1'},
+          incendio: {alarm1: data.incendio.alarm1, alarm2: data.incendio.alarm2, cell: 'cell-lf-incendio-1'}
+        };
+        let hasAnyMeans = false;
+        Object.values(scenarios).forEach(scenario => {
+          const hasMeans = scenario.alarm1.length > 0 || scenario.alarm2.length > 0;
+          const cell = document.getElementById(scenario.cell);
+          const scenarioBlock = cell?.closest('.linfer-scenario-block');
+          if (scenarioBlock) {
+            scenarioBlock.classList.toggle('has-means', hasMeans);
+            scenarioBlock.classList.toggle('no-means', !hasMeans);
+          }
+          if (hasMeans) hasAnyMeans = true;
+        });
         document.getElementById('cell-lf-abalroamento-1').innerHTML = renderReadings(data.abalroamento.alarm1);
         document.getElementById('cell-lf-abalroamento-2').innerHTML = renderReadings(data.abalroamento.alarm2);
         document.getElementById('cell-lf-sub-1').innerHTML = renderReadings(data.substancias.alarm1);
         document.getElementById('cell-lf-sub-2').innerHTML = renderReadings(data.substancias.alarm2);
         document.getElementById('cell-lf-incendio-1').innerHTML = renderReadings(data.incendio.alarm1);
         document.getElementById('cell-lf-incendio-2').innerHTML = renderReadings(data.incendio.alarm2);
+        if (table) {
+          table.classList.toggle('has-means', hasAnyMeans);
+          table.classList.toggle('no-means', !hasAnyMeans);
+        }
+        updatePpiLegend('tables-group-lf');
       }
       document.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
+        if (localStorage.getItem('sgo-theme') === 'dark') {
+          document.body.classList.add('dark-mode');
+        }
         loadCorpInfo();
         const fy = document.getElementById('footerYear');
         if (fy) fy.textContent = new Date().getFullYear();
         const mainButtons = document.querySelectorAll('.ppi-btn');
         const mainPanels = document.querySelectorAll('.ppi-panel');
-        const codeButtons = document.querySelectorAll('.a22-code-btn');
-        const allTables = document.querySelectorAll('.a22-card-tables');
+        const a22Buttons = document.querySelectorAll('.a22-code-btn');
+        const railwayButtons = document.querySelectorAll('.linfer-code-btn');
+        const a22Tables = document.querySelectorAll('.a22-card-tables');
+        const railwayTables = document.querySelectorAll('.linfer-card-tables');
         const aeroButtons = document.querySelectorAll('.aero-btn');
         const aeroTableCard = document.getElementById('aero-table-card');
+        /* ===================== FECHAR SUBTABELAS ===================== */
         function closeAllSubTables() {
-          codeButtons.forEach(b => b.classList.remove('selected'));
-          allTables.forEach(t => t.classList.remove('open'));
-          aeroButtons.forEach(b => b.classList.remove('selected'));
-          if (aeroTableCard) aeroTableCard.classList.remove('open');
+          a22Buttons.forEach(btn => {
+            btn.classList.remove('selected');
+          });
+          railwayButtons.forEach(btn => {
+            btn.classList.remove('selected');
+          });
+          [...a22Tables, ...railwayTables].forEach(table => {
+            table.classList.remove('open');
+          });
+          aeroButtons.forEach(btn => {
+            btn.classList.remove('selected');
+          });
+          if (aeroTableCard) {
+            aeroTableCard.classList.remove('open');
+          }
         }
+        /* ===================== NAVEGAÇÃO PRINCIPAL ===================== */
         mainButtons.forEach(btn => {
           btn.addEventListener('click', () => {
             const targetId = btn.dataset.target;
             const targetPanel = document.getElementById(targetId);
             const isAlreadyOpen = btn.classList.contains('active');
             mainButtons.forEach(b => b.classList.remove('active'));
-            mainPanels.forEach(p => p.classList.remove('open'));
+            mainPanels.forEach(panel => panel.classList.remove('open'));
             closeAllSubTables();
             if (!isAlreadyOpen && targetPanel) {
               btn.classList.add('active');
@@ -28188,7 +28375,8 @@
             }
           });
         });
-        codeButtons.forEach(btn => {
+        /* ===================== A22 ===================== */
+        a22Buttons.forEach(btn => {
           btn.addEventListener('click', () => {
             const group = btn.dataset.group;
             const code = btn.dataset.code;
@@ -28196,36 +28384,72 @@
             closeAllSubTables();
             if (isAlreadySelected) return;
             btn.classList.add('selected');
-            if (group === 'lf') {
-              populateRailwayReadings(code);
-            } else {
-              populateA22Readings(group, code);
-            }
             const targetTable = document.getElementById(`tables-group-${group}`);
             const targetBadge = document.getElementById(`selected-code-${group}`);
-            if (targetBadge) targetBadge.textContent = code;
+            if (targetBadge) {
+              targetBadge.textContent = code;
+            }
             if (targetTable) {
               targetTable.classList.add('open');
-              targetTable.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }
+            populateA22Readings(group, code);
+            if (targetTable) {
+              targetTable.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+              });
             }
           });
         });
+        /* ===================== LINHA FÉRREA ===================== */
+        railwayButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const code = btn.dataset.code;
+            const isAlreadySelected = btn.classList.contains('selected');
+            closeAllSubTables();
+            if (isAlreadySelected) return;
+            btn.classList.add('selected');
+            const targetTable = document.getElementById('tables-group-lf');
+            const targetBadge = document.getElementById('selected-code-lf');
+            if (targetBadge) {
+              targetBadge.textContent = code;
+            }
+            if (targetTable) {
+              targetTable.classList.add('open');
+            }
+            populateRailwayReadings(code);
+            if (targetTable) {
+              targetTable.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+              });
+            }
+          });
+        });
+        /* ===================== AEROPORTO ===================== */
         aeroButtons.forEach(btn => {
           btn.addEventListener('click', () => {
             const code = btn.dataset.aero;
             const isAlreadySelected = btn.classList.contains('selected');
-            aeroButtons.forEach(b => b.classList.remove('selected'));
-            if (aeroTableCard) aeroTableCard.classList.remove('open');
+            closeAllSubTables();
             if (isAlreadySelected) return;
             btn.classList.add('selected');
-            populateAeroReadings(code);
             if (aeroTableCard) {
               aeroTableCard.classList.add('open');
-              aeroTableCard.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }
+            populateAeroReadings(code);
+            if (aeroTableCard) {
+              aeroTableCard.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+              });
             }
           });
         });
-        document.querySelectorAll('.a22-detail-close').forEach(closeBtn => {
+        /* ===================== BOTÕES DE FECHAR ===================== */
+        document.querySelectorAll(
+          '.a22-detail-close, .aero-detail-close, .linfer-detail-close'
+        ).forEach(closeBtn => {
           closeBtn.addEventListener('click', () => {
             closeAllSubTables();
           });
@@ -28235,9 +28459,6 @@
   </body>
   </html>
 </script>
-
-
-
 
 <script type="text/x-cb360" data-page="InterChat"><!DOCTYPE html>
   <html lang="pt-PT" style="background-color: #8b0000;">
@@ -32930,7 +33151,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.56 - 2026-11-19 - POSIT: tocar num da lista mostra-o por inteiro';
+  window.CB360_BUILD='v22.61 - 2026-11-19 - POSIT: tocar num da lista mostra-o por inteiro';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s&&!(window.frameElement&&window.frameElement.classList.contains('nocover')))['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
