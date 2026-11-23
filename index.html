@@ -27952,10 +27952,18 @@
         if (oldLegend) oldLegend.remove();
         const oldNotice = content.querySelector('.ppi-notice');
         if (oldNotice) oldNotice.remove();
-        const notice = document.createElement('div');
-        notice.className = 'ppi-notice';
-        notice.innerHTML = '<span class="material-icons">warning</span><span>Os alarmes são Cumulativos, caso seja ativado o 2º alarme saem os meios de ambos os alarmes.</span>';
-        content.appendChild(notice);
+        const isFrenteAero = !!content.querySelector('th.frente-aero');
+        const hasCumulative = !isFrenteAero && Array.from(content.querySelectorAll('tbody tr')).some(row => {
+          if (row.closest('.no-means')) return false;
+          const cells = row.querySelectorAll('td');
+          return cells.length >= 2 && !!cells[0].querySelector('.reading-item')  && !!cells[1].querySelector('.reading-item');
+        });
+        if (hasCumulative) {
+          const notice = document.createElement('div');
+          notice.className = 'ppi-notice';
+          notice.innerHTML = '<span class="material-icons">warning</span><span>Os alarmes são Cumulativos, caso seja ativado o 2º alarme saem os meios de ambos os alarmes.</span>';
+          content.appendChild(notice);
+        }
         const text = content.textContent || '';
         const hasDouble = text.includes('**');
         const hasSingle = text.replace(/\*\*/g, '').includes('*');
@@ -27981,7 +27989,6 @@
             </div>
           ` : ''}
         `;
-
         content.appendChild(legend);
       }
       /* ============================================================
