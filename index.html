@@ -28159,7 +28159,7 @@ async function loadRailwayGridTitle(code) {
             item.alarm_level === "1º Alarme"
           )
           .map(item => ({
-            meio: item.means,
+            meio: String(item.means || "").split(/\s+\d{4}\b/)[0].trim(),
             corpo: ""
           }));
   
@@ -28169,7 +28169,7 @@ async function loadRailwayGridTitle(code) {
             item.alarm_level === "2º Alarme"
           )
           .map(item => ({
-            meio: item.means,
+            meio: String(item.means || "").split(/\s+\d{4}\b/)[0].trim(),
             corpo: ""
           }));
   
