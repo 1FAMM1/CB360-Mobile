@@ -27334,7 +27334,6 @@
       .footer-content {text-align: center;}
       .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
       .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
-      .footer strong {color: inherit;}
       /* ============================================================
       RESPONSIVE
       ============================================================ */
@@ -27345,9 +27344,6 @@
         .a22-code-btn {font-size: 10.5px; padding: 7px 1px;}
         .a22-card-route {font-size: 10px;}
         .a22-alarm-table td {padding: 7px 6px; font-size: 11px;}
-      }
-      @media (min-width: 769px) {
-        .main-content {max-width: 700px;}
       }
     </style>
   </head>
@@ -27361,7 +27357,7 @@
       <h2 id="corpInfo" style="display: none;"></h2>
     </header>
     <div class="main-content">
-      <div class="ppi-buttons-container">        
+      <div class="ppi-buttons-container">
         <!-- A22 -->
         <button type="button" class="ppi-btn" id="btn-a22" data-target="sub-a22">
           <div class="ppi-icon-wrap">
@@ -27749,6 +27745,8 @@
             .catch(err => console.log('Erro no motor da App: ', err));
         });
       }
+    <\/script>
+    <\script>
       /* ===================== SUPABASE CONFIGURATION ====================== */
       const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
@@ -27794,104 +27792,9 @@
         }
       }
       /* ======================= LEITURAS PPI ======================= */
-      // Formato de cada linha: { meio: 'ABSC*', corpo: '0806 - CB Silves' }
-      const PPI_DATA = {
-        a22: {
-          '1M': { label: 'Oeste-Este · Setor 1M', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '1N': { label: 'Oeste-Este · Setor 1N', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '1O': { label: 'Oeste-Este · Setor 1O', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '1P': { label: 'Oeste-Este · Setor 1P', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '1Q': { label: 'Oeste-Este · Setor 1Q', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '1R': { label: 'Oeste-Este · Setor 1R', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '2J': { label: 'Este-Oeste · Setor 2J', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '2K': { label: 'Este-Oeste · Setor 2K', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '2L': { label: 'Este-Oeste · Setor 2L', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '2M': { label: 'Este-Oeste · Setor 2M', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '2N': { label: 'Este-Oeste · Setor 2N', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '2O': { label: 'Este-Oeste · Setor 2O', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          '2P': { label: 'Este-Oeste · Setor 2P', acidente: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } }
-        },
-        aeroporto: {
-          'A1': {
-            label: '(11 a 20 Pessoas)',
-            title: 'Aeroporto · A1 (11 a 20 Pessoas)',
-            col1: [], // Alerta Amarelo
-            col2: []  // Alerta Vermelho
-          },
-          'A2': {
-            label: '(21 a 30 Pessoas)',
-            title: 'Aeroporto · A2 (21 a 30 Pessoas)',
-            col1: [], // Alerta Amarelo
-            col2: []  // Alerta Vermelho
-          },
-          'A3': {
-            label: '(31 a 100 Pessoas)',
-            title: 'Aeroporto · A3 (31 a 100 Pessoas)',
-            col1: [], // Alerta Amarelo
-            col2: []  // Alerta Vermelho
-          },
-          'A4': {
-            label: '(+ de 101 Pessoas)',
-            title: 'Aeroporto · A4 (+ de 101 Pessoas)',
-            col1: [], // Alerta Amarelo
-            col2: []  // Alerta Vermelho
-          },
-          'B1': {
-            label: '(Queda Declarada)',
-            title: 'Aeroporto · B1 (Queda Declarada)',
-            col1: [], // Frente Aeroporto
-            col2: []  // Frente Cidade
-          }
-        },
-        linhaFerrea: {
-          'F': {
-            label: 'Linha Férrea · Troço F',
-            abalroamento: {
-              alarm1: [
-                { meio: 'ABSC*', corpo: '0806 - CB Silves' },
-                { meio: 'ABSC*', corpo: '0814 - CB Albufeira' },
-                { meio: 'VCOT', corpo: '0813 - CB SB Messines' },
-                { meio: 'VSA', corpo: '0813 - CB SB Messines' }
-              ],
-              alarm2: [
-                { meio: 'ABSC*', corpo: '0807 - CB Portimão' },
-                { meio: 'ABSC*', corpo: '0808 - CB Loulé' },
-                { meio: 'ABSC*', corpo: '0815 - CB Lagoa' },
-                { meio: 'VCOT', corpo: '0806 - CB Silves' },
-                { meio: 'VCI', corpo: '0814 - CB Albufeira' },
-                { meio: 'VSA', corpo: '0806 - CB Silves' }
-              ]
-            },
-            substancias: {
-              alarm1: [
-                { meio: 'ABSC*', corpo: '0807 - CB Portimão' },
-                { meio: 'VTT/VAL', corpo: '0814 - CB Albufeira' },
-                { meio: 'VCOT', corpo: '0813 - CB SB Messines' },
-                { meio: 'VCI', corpo: '0813 - CB SB Messines' },
-                { meio: 'VSA', corpo: '0806 - CB Silves' }
-              ],
-              alarm2: [
-                { meio: 'VTT/VAL', corpo: '0805 - CB Faro Cruz Lusa' },
-                { meio: 'VTT/VAL', corpo: '0808 - CB Loulé' },
-                { meio: 'VCOT', corpo: '0806 - CB Silves' },
-                { meio: 'VCI', corpo: '0807 - CB Portimão' },
-                { meio: 'VCI', corpo: '0815 - CB Lagoa' }
-              ]
-            },
-            incendio: { alarm1: [], alarm2: [] }
-          },
-          'G': { label: 'Linha Férrea · Troço G', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          'H': { label: 'Linha Férrea · Troço H', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          'I': { label: 'Linha Férrea · Troço I', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          'J': { label: 'Linha Férrea · Troço J', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          'K': { label: 'Linha Férrea · Troço K', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          'L': { label: 'Linha Férrea · Troço L', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          'M': { label: 'Linha Férrea · Troço M', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          'N': { label: 'Linha Férrea · Troço N', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          'O': { label: 'Linha Férrea · Troço O', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } },
-          'P': { label: 'Linha Férrea · Troço P', abalroamento: { alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: [] } }
-        }
-      };
+      const PPI_DATA = {aeroporto: {'A1': {label: '(11 a 20 Pessoas)', title: 'Aeroporto · A1 (11 a 20 Pessoas)'}, 'A2': {label: '(21 a 30 Pessoas)', title: 'Aeroporto · A2 (21 a 30 Pessoas)'},
+                                    'A3': {label: '(31 a 100 Pessoas)', title: 'Aeroporto · A3 (31 a 100 Pessoas)'}, 'A4': {label: '(+ de 101 Pessoas)', title: 'Aeroporto · A4 (+ de 101 Pessoas)'},
+                                    'B1': {label: '(Queda Declarada)', title: 'Aeroporto · B1 (Queda Declarada)'}}};
       function renderReadings(items) {
         if (!Array.isArray(items) || items.length === 0) {
           return '<span class="reading-empty">Sem meios registados</span>';
@@ -27907,7 +27810,203 @@
           }).join('')
         }</div>`;
       }
-      function populateAeroReadings(code) {
+      /* ======================= TÍTULO DAS GRELHAS A22 ======================= */
+      async function loadA22GridTitle(group, code) {
+        const labelEl = document.getElementById(`selected-label-${group}`);
+        if (!labelEl) return;
+        try {
+          const url =
+            `${SUPABASE_URL}/rest/v1/ppia22_data` +
+            `?select=ppi_first_node,ppi_secound_node` +
+            `&ppi_grid=eq.${encodeURIComponent(code)}` +
+            `&limit=1`;
+          const response = await fetch(url, {method: 'GET', headers: getSupabaseHeaders()});
+          if (!response.ok) {
+            throw new Error(`Erro Supabase: ${response.status}`);
+          }
+          const data = await response.json();
+          // Evita atualizar o título de outra grelha entretanto selecionada
+          const selectedCode = document.getElementById(`selected-code-${group}`);
+          if (!selectedCode || selectedCode.textContent.trim() !== code) return;
+          if (!data || data.length === 0) {
+            labelEl.textContent = '· Sem informação';
+            return;
+          }
+          const firstNode = String(data[0].ppi_first_node || '').trim();
+          const secondNode = String(data[0].ppi_secound_node || '').trim();
+          const titleParts = [firstNode, secondNode].filter(Boolean);
+          labelEl.textContent = titleParts.length ? `· ${titleParts.join(' · ')}` : '· Sem informação';
+        } catch (error) {
+          console.error(`Erro ao carregar título da grelha ${code}:`, error);
+          labelEl.textContent = '· Erro ao carregar título';
+        }
+      }
+      /* ======================= TÍTULO DAS GRELHAS LINHA FÉRREA ======================= */
+      async function loadRailwayGridTitle(code) {
+        const labelEl = document.getElementById('selected-label-lf');
+        if (!labelEl) return;
+        try {
+          const url =
+            `${SUPABASE_URL}/rest/v1/ppilinfer_data` +
+            `?select=ppi_first_pkm,ppi_secound_pkm` +
+            `&grid_id=eq.${encodeURIComponent(code)}` +
+            `&limit=1`;
+          const response = await fetch(url, {method: 'GET', headers: getSupabaseHeaders()});
+          if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`Erro Supabase ${response.status}: ${errorBody}`);
+          }
+          const data = await response.json();
+          const selectedCode = document.getElementById('selected-code-lf');
+          if (!selectedCode || selectedCode.textContent.trim() !== code) return;
+          if (!data || data.length === 0) {
+            labelEl.textContent = '· Sem informação';
+            return;
+          }
+          const firstPkm = String(data[0].ppi_first_pkm || '').trim();
+          const secondPkm = String(data[0].ppi_secound_pkm || '').trim();
+          const titleParts = [firstPkm, secondPkm].filter(Boolean);
+          labelEl.textContent = titleParts.length ? `· ${titleParts.join(' · ')}` : '· Sem informação';
+        } catch (error) {
+          console.error(`Erro ao carregar título da Linha Férrea ${code}:`, error);
+          labelEl.textContent = '· Erro ao carregar título';
+        }
+      }
+      /* ============================================================
+      CARREGAR MEIOS NAS CÉLULAS A22
+      ============================================================ */
+      let a22LoadVersion = 0;
+      async function loadA22Means(group, gridId) {
+        const loadVersion = ++a22LoadVersion;
+        const corpNr = String(getCorp()).trim().padStart(4, '0');
+        const cells = {
+          1: {acidente: ['cell-1-acidente-1', 'cell-1-acidente-2'], substancias: ['cell-1-sub-1', 'cell-1-sub-2'], incendio: ['cell-1-incendio-1', 'cell-1-incendio-2']},
+          2: {acidente: ['cell-2-acidente-1', 'cell-2-acidente-2'], substancias: ['cell-2-sub-1', 'cell-2-sub-2'], incendio: ['cell-2-incendio-1', 'cell-2-incendio-2']}
+        };
+        const categoryMap = {'Acidente': 'acidente', 'Substâncias Perigosas': 'substancias', 'Incêndio em Transportes': 'incendio'};
+        if (!cells[group]) return;
+        const clearCells = () => Object.values(cells[group]).flat().forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.innerHTML = renderReadings([]);
+        });
+        try {
+          const referencesResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/ppia22_references?select=id,grid_code,occurrence_type&grid_code=eq.${encodeURIComponent(gridId)}`,
+            {headers: getSupabaseHeaders()}
+          );
+          if (!referencesResponse.ok) throw new Error(`Erro nas referências: ${referencesResponse.status}`);
+          const references = await referencesResponse.json();
+          if (loadVersion !== a22LoadVersion) return;
+          if (!references.length) {
+            clearCells();
+            console.warn(`Sem referências para a grelha ${gridId}`);
+            return;
+          }
+          const referenceIds = references.map(ref => ref.id);
+          const meansResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/ppia22_means?select=reference_id,alarm_level,means,display_order&reference_id=in.(${referenceIds.join(',')})&order=display_order.asc`,
+            {headers: getSupabaseHeaders()}
+          );
+          if (!meansResponse.ok) throw new Error(`Erro nos meios: ${meansResponse.status}`);
+          const allMeans = await meansResponse.json();
+          const means = allMeans.filter(item => {
+            const match = String(item.means || '').match(/\b\d{4}\b/);
+            return match && match[0] === corpNr;
+          });
+          const list = (refId, level) => means
+            .filter(item => item.reference_id === refId && item.alarm_level === level)
+            .map(item => ({meio: String(item.means || '').split(/\s+\d{4}\b/)[0].trim(), corpo: ''}));
+          const updates = [];
+          references.forEach(reference => {
+            const categoryKey = categoryMap[reference.occurrence_type];
+            if (!categoryKey) return;
+            const [firstCellId, secondCellId] = cells[group][categoryKey];
+            updates.push({id: firstCellId, html: renderReadings(list(reference.id, '1º Alarme'))});
+            updates.push({id: secondCellId, html: renderReadings(list(reference.id, '2º Alarme'))});
+          });
+          if (loadVersion !== a22LoadVersion) return;
+          clearCells();
+          updates.forEach(update => {
+            const element = document.getElementById(update.id);
+            if (element) element.innerHTML = update.html;
+          });
+        } catch (error) {
+          console.error(`Erro ao carregar meios A22 (${gridId}):`, error);
+          if (loadVersion === a22LoadVersion) clearCells();
+        }
+      }
+      function populateA22Readings(group, code) {
+        if (group === '1' || group === '2') {
+          loadA22GridTitle(group, code);
+          loadA22Means(group, code);
+        }
+      }      
+      /* ============================================================
+      CARREGAR MEIOS DO AEROPORTO
+      ============================================================ */
+      let aeroLoadVersion = 0;
+      async function loadAeroMeans(code) {
+        const corpNr = String(getCorp() || '').trim().padStart(4, '0');
+        if (!corpNr || corpNr === '0000') {
+          console.error('Não foi possível identificar a corporação autenticada.');
+          return {column1: [], column2: []};
+        }
+        try {
+          const referencesResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/ppiaero_references` +
+            `?select=id,grid_code,occurrence_type` +
+            `&grid_code=eq.${encodeURIComponent(code)}`,
+            {method: 'GET', headers: getSupabaseHeaders()}
+          );
+          if (!referencesResponse.ok) {
+            throw new Error(`Erro nas referências do Aeroporto: ${referencesResponse.status}`);
+          }
+          const references = await referencesResponse.json();
+
+          if (!references.length) {
+            console.warn(`Sem referências para o Aeroporto ${code}`);
+            return {column1: [], column2: []};
+          }
+          const referenceIds = references.map(ref => ref.id);
+          const meansResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/ppiaero_means` +
+            `?select=reference_id,alarm_level,means,display_order` +
+            `&reference_id=in.(${referenceIds.join(',')})` +
+            `&order=display_order.asc`,
+            {method: 'GET', headers: getSupabaseHeaders()}
+          );
+          if (!meansResponse.ok) {
+            throw new Error(`Erro nos meios do Aeroporto: ${meansResponse.status}`);
+          }
+          const allMeans = await meansResponse.json();
+          const means = allMeans.filter(item => {
+            const match = String(item.means || '').match(/\b\d{4}\b/);
+            return match && match[0] === corpNr;
+          });
+          const column1 = [];
+          const column2 = [];
+          means.forEach(item => {
+            const designation = String(item.means || '').split(/\s+\d{4}\b/)[0].trim();
+            if (!designation) return;
+            const alarm = String(item.alarm_level || '').trim().toUpperCase().replace(/\s+/g, ' ');
+            const reading = {display_order: Number(item.display_order ?? 1), meio: designation, corpo: ''};
+            if (code === 'B1') {
+              if (alarm.includes('FRENTE AEROPORTO')) column1.push(reading);
+              else if (alarm.includes('FRENTE CIDADE')) column2.push(reading);
+            } else {
+              if (alarm.includes('AMARELO')) column1.push(reading);
+              else if (alarm.includes('VERMELHO')) column2.push(reading);
+            }
+          });
+          column1.sort((a, b) => a.display_order - b.display_order);
+          column2.sort((a, b) => a.display_order - b.display_order);
+          return {column1, column2};
+        } catch (error) {
+          console.error(`Erro ao carregar meios do Aeroporto (${code}):`, error);
+          return {column1: [], column2: []};
+        }
+      }
+      function renderAero(code, column1, column2) {
         const entry = PPI_DATA.aeroporto[code] || {};
         const isB1 = code === 'B1';
         const badgeEl = document.getElementById('selected-aero-code');
@@ -27920,9 +28019,9 @@
         if (titleEl) titleEl.textContent = entry.title || `Aeroporto · ${code}`;
         if (col1Header && col2Header) {
           if (isB1) {
-            col1Header.textContent = 'Frente Aeroporto';
+            col1Header.textContent = 'Frente Aeroporto - Portaria do Aeroporto';
             col1Header.className = 'frente-aero';
-            col2Header.textContent = 'Frente Cidade';
+            col2Header.textContent = 'Frente Cidade - Parque Ribeirinho';
             col2Header.className = 'frente-cidade';
           } else {
             col1Header.textContent = 'Alerta Amarelo';
@@ -27931,314 +28030,133 @@
             col2Header.className = 'alarm-red';
           }
         }
-        document.getElementById('cell-aero-col-1').innerHTML = renderReadings(entry.col1);
-        document.getElementById('cell-aero-col-2').innerHTML = renderReadings(entry.col2);
+        if (column1 === null) return;
+        const cell1 = document.getElementById('cell-aero-col-1');
+        const cell2 = document.getElementById('cell-aero-col-2');
+        if (cell1) cell1.innerHTML = renderReadings(column1);
+        if (cell2) cell2.innerHTML = renderReadings(column2);
       }
-      /* ======================= TÍTULO DAS GRELHAS A22 ======================= */
-async function loadA22GridTitle(group, code) {
-  const labelEl = document.getElementById(`selected-label-${group}`);
-  if (!labelEl) return;
-
-  
-
-  try {
-    const url =
-      `${SUPABASE_URL}/rest/v1/ppia22_data` +
-      `?select=ppi_first_node,ppi_secound_node` +
-      `&ppi_grid=eq.${encodeURIComponent(code)}` +
-      `&limit=1`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: getSupabaseHeaders()
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erro Supabase: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    // Evita atualizar o título de outra grelha entretanto selecionada
-    const selectedCode = document.getElementById(`selected-code-${group}`);
-    if (!selectedCode || selectedCode.textContent.trim() !== code) return;
-
-    if (!data || data.length === 0) {
-      labelEl.textContent = '· Sem informação';
-      return;
-    }
-
-    const firstNode = String(data[0].ppi_first_node || '').trim();
-    const secondNode = String(data[0].ppi_secound_node || '').trim();
-
-    const titleParts = [firstNode, secondNode].filter(Boolean);
-
-    labelEl.textContent = titleParts.length
-      ? `· ${titleParts.join(' · ')}`
-      : '· Sem informação';
-
-  } catch (error) {
-    console.error(`Erro ao carregar título da grelha ${code}:`, error);
-    labelEl.textContent = '· Erro ao carregar título';
-  }
-}
-/* ======================= TÍTULO DA LINHA FÉRREA ======================= */
-async function loadRailwayGridTitle(code) {
-  const labelEl = document.getElementById('selected-label-lf');
-  if (!labelEl) return;
-
-  try {
-    const url =
-      `${SUPABASE_URL}/rest/v1/ppilinfer_data` +
-      `?select=ppi_first_pkm,ppi_secound_pkm` +
-      `&grid_id=eq.${encodeURIComponent(code)}` +
-      `&limit=1`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: getSupabaseHeaders()
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Erro Supabase ${response.status}: ${errorBody}`);
-    }
-
-    const data = await response.json();
-
-    // Impede que uma resposta antiga substitua o título da grelha atual
-    const selectedCode = document.getElementById('selected-code-lf');
-    if (!selectedCode || selectedCode.textContent.trim() !== code) return;
-
-    if (!data || data.length === 0) {
-      labelEl.textContent = '· Sem informação';
-      return;
-    }
-
-    const firstPkm = String(data[0].ppi_first_pkm || '').trim();
-    const secondPkm = String(data[0].ppi_secound_pkm || '').trim();
-
-    const titleParts = [firstPkm, secondPkm].filter(Boolean);
-
-    labelEl.textContent = titleParts.length
-      ? `· ${titleParts.join(' · ')}`
-      : '· Sem informação';
-
-  } catch (error) {
-    console.error(`Erro ao carregar título da Linha Férrea ${code}:`, error);
-    labelEl.textContent = '· Erro ao carregar título';
-  }
-}
-
-
-
-
-/* ============================================================
-   CARREGAR MEIOS A22
-   ============================================================ */
-
-   async function fetchAllMeans() {
-    const all = [];
-    let start = 0;
-    const pageSize = 1000;
-  
-    while (true) {
-      const end = start + pageSize - 1;
-  
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/ppia22_means?select=*`,
-        {
-          headers: {
-            ...getSupabaseHeaders(),
-            Range: `${start}-${end}`
+      let aeroShown = false;
+      async function populateAeroReadings(code) {
+        const loadVersion = ++aeroLoadVersion;
+        if (!aeroShown) renderAero(code, null, null);
+        const {column1, column2} = await loadAeroMeans(code);
+        if (loadVersion !== aeroLoadVersion) return;
+        renderAero(code, column1, column2);
+        aeroShown = true;
+      }
+      /* ============================================================
+      CARREGAR MEIOS DA LINHA FÉRREA
+      ============================================================ */
+      let railwayLoadVersion = 0;
+      async function loadRailwayMeans(code) {
+        const corpNr = String(getCorp() || '').trim().padStart(4, '0');
+        if (!corpNr || corpNr === '0000') {
+          console.error('Não foi possível identificar a corporação autenticada.');
+          return null;
+        }
+        const result = {abalroamento: {alarm1: [], alarm2: [] }, substancias: { alarm1: [], alarm2: [] }, incendio: { alarm1: [], alarm2: []}};
+        try {
+          const referencesResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/ppilinfer_references` +
+            `?select=id,grid_code,occurrence_type` +
+            `&grid_code=eq.${encodeURIComponent(code)}`, {
+              method: 'GET',
+              headers: getSupabaseHeaders()
+            }
+          );
+          if (!referencesResponse.ok) {
+            throw new Error(
+              `Erro ao carregar referências: ${referencesResponse.status} - ` +
+              await referencesResponse.text()
+            );
           }
+          const references = await referencesResponse.json();
+          if (!references.length) return result;
+          const referenceIds = references.map(ref => ref.id);
+          const meansResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/ppilinfer_means` +
+            `?select=reference_id,alarm_level,means,display_order` +
+            `&reference_id=in.(${referenceIds.join(',')})` +
+            `&order=display_order.asc`, {
+              method: 'GET',
+              headers: getSupabaseHeaders()
+            }
+          );
+          if (!meansResponse.ok) {
+            throw new Error(
+              `Erro ao carregar meios: ${meansResponse.status} - ` +
+              await meansResponse.text()
+            );
+          }
+          const allMeans = await meansResponse.json();
+          const referencesMap = new Map(
+            references.map(ref => [ref.id, ref.occurrence_type])
+          );
+          allMeans.forEach(item => {
+            const rawMeans = String(item.means || '').trim();
+            const corpMatch = rawMeans.match(/\b\d{4}\b/);
+            if (!corpMatch || corpMatch[0] !== corpNr) return;
+            const meio = rawMeans.substring(0, corpMatch.index).trim();
+            const corpo = rawMeans.substring(corpMatch.index).trim();
+            if (!meio) return;
+            const occurrence = String(
+              referencesMap.get(item.reference_id) || ''
+            )
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toUpperCase()
+            .trim();
+            let category = null;
+            if (occurrence.includes('ABALROAMENTO')) {
+              category = 'abalroamento';
+            } else if (occurrence.includes('SUBSTANCIAS PERIGOSAS')) {
+              category = 'substancias';
+            } else if (occurrence.includes('INCENDIO EM TRANSPORTES')) {
+              category = 'incendio';
+            }
+            if (!category) return;
+            const alarm = String(item.alarm_level || '')
+            .trim()
+            .toUpperCase();
+            let alarmKey = null;
+            if (alarm.includes('1')) {
+              alarmKey = 'alarm1';
+            } else if (alarm.includes('2')) {
+              alarmKey = 'alarm2';
+            }
+            if (!alarmKey) return;
+            result[category][alarmKey].push({meio, corpo, display_order: Number(item.display_order ?? 1)});
+          });
+          Object.values(result).forEach(category => {
+            Object.values(category).forEach(alarm => {
+              alarm.sort(
+                (a, b) => a.display_order - b.display_order
+              );
+              alarm.forEach(item => delete item.display_order);
+            });
+          });
+          return result;
+        } catch (error) {
+          console.error('Erro ao carregar meios da Linha Férrea:', error);
+          return null;
         }
-      );
-  
-      if (!res.ok) {
-        throw new Error(`Erro ao buscar ppia22_means: ${res.status}`);
       }
-  
-      const chunk = await res.json();
-      all.push(...chunk);
-  
-      if (chunk.length < pageSize) break;
-  
-      start += pageSize;
-    }
-  
-    return all;
-  }
-
-
-/* ============================================================
-   CARREGAR MEIOS NAS CÉLULAS A22
-   ============================================================ */
-
-
-   
-   let a22LoadVersion = 0;
-   async function loadA22Means(group, gridId) {
-    const loadVersion = ++a22LoadVersion;
-    const corpNr = String(getCorp() || "0805").trim().padStart(4, "0");
-  
-    const cells = {
-      1: {
-        acidente: ["cell-1-acidente-1", "cell-1-acidente-2"],
-        substancias: ["cell-1-sub-1", "cell-1-sub-2"],
-        incendio: ["cell-1-incendio-1", "cell-1-incendio-2"]
-      },
-      2: {
-        acidente: ["cell-2-acidente-1", "cell-2-acidente-2"],
-        substancias: ["cell-2-sub-1", "cell-2-sub-2"],
-        incendio: ["cell-2-incendio-1", "cell-2-incendio-2"]
+      async function populateRailwayReadings(code) {
+        const loadVersion = ++railwayLoadVersion;
+        loadRailwayGridTitle(code);
+        const data = await loadRailwayMeans(code);
+        if (loadVersion !== railwayLoadVersion) return;
+        if (!data) return;
+        const selectedCode = document.getElementById('selected-code-lf');
+        if (!selectedCode || selectedCode.textContent.trim() !== code) return;
+        document.getElementById('cell-lf-abalroamento-1').innerHTML = renderReadings(data.abalroamento.alarm1);
+        document.getElementById('cell-lf-abalroamento-2').innerHTML = renderReadings(data.abalroamento.alarm2);
+        document.getElementById('cell-lf-sub-1').innerHTML = renderReadings(data.substancias.alarm1);
+        document.getElementById('cell-lf-sub-2').innerHTML = renderReadings(data.substancias.alarm2);
+        document.getElementById('cell-lf-incendio-1').innerHTML = renderReadings(data.incendio.alarm1);
+        document.getElementById('cell-lf-incendio-2').innerHTML = renderReadings(data.incendio.alarm2);
       }
-    };
-  
-    const categoryMap = {
-      "Acidente": "acidente",
-      "Substâncias Perigosas": "substancias",
-      "Incêndio em Transportes": "incendio"
-    };
-  
-    if (!cells[group]) return;
-  
-    try {
-      // 1. Obter as referências da grelha
-      const referencesResponse = await fetch(
-        `${SUPABASE_URL}/rest/v1/ppia22_references?select=id,grid_code,occurrence_type&grid_code=eq.${encodeURIComponent(gridId)}`,
-        { headers: getSupabaseHeaders() }
-      );
-  
-      if (!referencesResponse.ok) {
-        throw new Error(`Erro nas referências: ${referencesResponse.status}`);
-      }
-  
-      const references = await referencesResponse.json();
-  
-      if (!references.length) {
-        console.warn(`Sem referências para a grelha ${gridId}`);
-        return;
-      }
-  
-      const referenceIds = references.map(ref => ref.id);
-  
-      // 2. Obter os meios associados às referências
-      const meansResponse = await fetch(
-        `${SUPABASE_URL}/rest/v1/ppia22_means?select=reference_id,alarm_level,means,display_order&reference_id=in.(${referenceIds.join(",")})&order=display_order.asc`,
-        { headers: getSupabaseHeaders() }
-      );
-  
-      if (!meansResponse.ok) {
-        throw new Error(`Erro nos meios: ${meansResponse.status}`);
-      }
-  
-      const allMeans = await meansResponse.json();
-  
-      // 3. Filtrar apenas os meios da corporação autenticada
-      const means = allMeans.filter(item => {
-        const match = String(item.means || "").match(/\b\d{4}\b/);
-        return match && match[0] === corpNr;
-      });
-  
-      // 4. Preparar todos os conteúdos antes de atualizar a tabela
-      const updates = [];
-  
-      // Inicializar todas as células do grupo
-      
-  
-      references.forEach(reference => {
-        const categoryKey = categoryMap[reference.occurrence_type];
-        if (!categoryKey) return;
-  
-        const [firstCellId, secondCellId] = cells[group][categoryKey];
-  
-        const firstAlarm = means
-          .filter(item =>
-            item.reference_id === reference.id &&
-            item.alarm_level === "1º Alarme"
-          )
-          .map(item => ({
-            meio: String(item.means || "").split(/\s+\d{4}\b/)[0].trim(),
-            corpo: ""
-          }));
-  
-        const secondAlarm = means
-          .filter(item =>
-            item.reference_id === reference.id &&
-            item.alarm_level === "2º Alarme"
-          )
-          .map(item => ({
-            meio: String(item.means || "").split(/\s+\d{4}\b/)[0].trim(),
-            corpo: ""
-          }));
-  
-        updates.push({
-          id: firstCellId,
-          html: renderReadings(firstAlarm)
-        });
-  
-        updates.push({
-          id: secondCellId,
-          html: renderReadings(secondAlarm)
-        });
-      });
-      if (loadVersion !== a22LoadVersion) return;
-      // 5. Atualizar as células apenas quando tudo estiver preparado
-      updates.forEach(update => {
-        const element = document.getElementById(update.id);
-        if (element) {
-          element.innerHTML = update.html;
-        }
-      });
-  
-      console.log(`Meios A22 carregados: ${gridId}`, {
-        corpNr,
-        references,
-        means
-      });
-  
-    } catch (error) {
-      console.error(`Erro ao carregar meios A22 (${gridId}):`, error);
-    }
-  }
-  
-
-  
-
-
-      
-function populateReadings(group, code) {
-  if (group === '1' || group === '2') {
-    loadA22GridTitle(group, code);
-
-    // Carregar diretamente do Supabase.
-    // Manter os meios anteriores visíveis até à chegada dos novos.
-    loadA22Means(group, code);
-
-  } else if (group === 'lf') {
-    loadRailwayGridTitle(code);
-
-    const entry = PPI_DATA.linhaFerrea[code] || {};
-
-    const labelEl = document.getElementById('selected-label-lf');
-    if (labelEl) {
-      labelEl.textContent = entry.label ? `· ${entry.label}` : '';
-    }
-
-    const aba = entry.abalroamento || {};
-    const sub = entry.substancias || {};
-    const inc = entry.incendio || {};
-
-    document.getElementById('cell-lf-abalroamento-1').innerHTML = renderReadings(aba.alarm1);
-    document.getElementById('cell-lf-abalroamento-2').innerHTML = renderReadings(aba.alarm2);
-    document.getElementById('cell-lf-sub-1').innerHTML = renderReadings(sub.alarm1);
-    document.getElementById('cell-lf-sub-2').innerHTML = renderReadings(sub.alarm2);
-    document.getElementById('cell-lf-incendio-1').innerHTML = renderReadings(inc.alarm1);
-    document.getElementById('cell-lf-incendio-2').innerHTML = renderReadings(inc.alarm2);
-  }
-}
-
       document.addEventListener('DOMContentLoaded', () => {
         if (localStorage.getItem('sgo-theme') === 'dark') document.body.classList.add('dark-mode');
         loadCorpInfo();
@@ -28278,13 +28196,17 @@ function populateReadings(group, code) {
             closeAllSubTables();
             if (isAlreadySelected) return;
             btn.classList.add('selected');
-            populateReadings(group, code);
+            if (group === 'lf') {
+              populateRailwayReadings(code);
+            } else {
+              populateA22Readings(group, code);
+            }
             const targetTable = document.getElementById(`tables-group-${group}`);
             const targetBadge = document.getElementById(`selected-code-${group}`);
             if (targetBadge) targetBadge.textContent = code;
             if (targetTable) {
               targetTable.classList.add('open');
-              targetTable.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              targetTable.scrollIntoView({behavior: 'smooth', block: 'nearest'});
             }
           });
         });
@@ -28299,7 +28221,7 @@ function populateReadings(group, code) {
             populateAeroReadings(code);
             if (aeroTableCard) {
               aeroTableCard.classList.add('open');
-              aeroTableCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              aeroTableCard.scrollIntoView({behavior: 'smooth', block: 'nearest'});
             }
           });
         });
