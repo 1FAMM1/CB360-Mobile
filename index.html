@@ -2036,7 +2036,14 @@
             }
           );
           if (!response.ok) { textSpan.textContent = "Erro ao carregar dados"; return; }
-          const data = await response.json();
+          let data = await response.json();
+          /* só conta serviços de meses cuja escala já foi emitida pelo Comando */
+          try {
+            const rs = await fetch(`${SUPABASE_URL}/rest/v1/reg_serv_scales_status?select=year,month&is_validated=eq.true&corp_oper_nr=eq.${getCorpPadded()}&year=gte.${new Date().getFullYear()}`,
+                                   {headers: getSupabaseHeaders()});
+            const okMonths = rs.ok ? new Set((await rs.json()).map(r => `${r.year}-${r.month}`)) : new Set();
+            data = data.filter(d => okMonths.has(`${d.year}-${d.month}`));
+          } catch (e) { data = []; }
           const validValues = ['PN', 'ED', 'EN', 'ET', 'EP'];
           const servicesByDate = {};
           data.forEach(d => {
@@ -4937,6 +4944,26 @@
         }
         return currentYear;
       }
+      /* ===================== ESCALA EMITIDA? (reg_serv_scales_status) =====================
+         O mês só aparece depois de o Comando o emitir no Online (FOMIO → Emissão Escalas → EMITIR). */
+      async function isMonthServScaleValidated(monthIndex) {
+        const corpOperNr = localStorage.getItem("currentCorpOperNr");
+        if (!corpOperNr || monthIndex < 0 || monthIndex > 11) return {validated: false, error: true};
+        try {
+          const url = `${SUPABASE_URL}/rest/v1/reg_serv_scales_status?select=is_validated` +
+                      `&corp_oper_nr=eq.${encodeURIComponent(corpOperNr)}&month=eq.${monthIndex + 1}&year=eq.${getWorkYear(monthIndex)}&limit=1`;
+          const response = await fetch(url, {headers: getSupabaseHeaders()});
+          if (!response.ok) {
+            console.error("[CB360] Erro ao verificar emissão da escala:", await response.text());
+            return {validated: false, error: true};
+          }
+          const data = await response.json();
+          return {validated: Array.isArray(data) && data.length > 0 && data[0].is_validated === true, error: false};
+        } catch (err) {
+          console.error("[CB360] Erro na verificação da emissão da escala:", err);
+          return {validated: false, error: true};
+        }
+      }
       /* ===================== GENERIC DATA LOADER ===================== */
       async function loadMonthData(config, monthIndex) {
         const corpOperNr = localStorage.getItem("currentCorpOperNr");
@@ -5645,6 +5672,26 @@
             await toggleMobileMonthLayout(true);
             hideAllServiceCards();
             if (requestId !== currentFetchRequestId) return;
+            /* escala ainda não emitida: não mostra os serviços do mês */
+            const validation = await isMonthServScaleValidated(month);
+            if (requestId !== currentFetchRequestId) return;
+            if (!validation.validated) {
+              btnBackWrapper.classList.add("show");
+              document.getElementById("noServicesCard")?.remove();
+              const card = document.createElement("div");
+              card.id = "noServicesCard";
+              card.className = "scales-card";
+              card.style.marginTop = "0px";
+              card.innerHTML = `
+                <span class="card-title" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span class="material-icons" style="font-size: 18px; color: var(--red-icon);">info</span> Informação</span>
+                <span class="values" style="margin-top: 4px;">${validation.error
+                  ? "Não foi possível verificar a emissão da escala. Por favor, tente novamente mais tarde."
+                  : "A escala deste mês ainda não foi emitida pelo Comando."}</span>
+              `;
+              document.querySelector(".main-content").appendChild(card);
+              return;
+            }
             if (IS_CENTRAL) {
               btnBackWrapper.classList.add("show");
               showFullScaleCalendar(month);
