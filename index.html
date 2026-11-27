@@ -11582,17 +11582,17 @@
             await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?id=eq.${editable.id}`, {method: 'DELETE'});
             showToast("Pedido de férias cancelado.");
           } else if (editable) {
-            await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?id=eq.${editable.id}`, {
-              method: 'PATCH',
+            const saved = await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat?id=eq.${editable.id}`, {
+              method: 'PATCH', headers: getSupabaseHeaders({returnRepresentation: true}),
               body: JSON.stringify({day: newDays.join(','), state: "Em Aprovação"})
             });
-            showToast("Pedido de Férias Enviado!");
+            afterVacationSaved(saved && saved[0], month, year, newDays);
           } else {
-            await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat`, {
-              method: 'POST',
+            const saved = await sbJson(`${SUPABASE_URL}/rest/v1/ped_vacat`, {
+              method: 'POST', headers: getSupabaseHeaders({returnRepresentation: true}),
               body: JSON.stringify({n_int, corp_oper_nr, year, month, day: newDays.join(','), state: "Em Aprovação", vacation_type: vacType})
             });
-            showToast("Pedido de Férias Enviado!");
+            afterVacationSaved(saved && saved[0], month, year, newDays);
           }
           await loadVacations();
           if (currentMonthIndex !== null) renderCalendarGrid(currentMonthIndex);
@@ -11603,6 +11603,31 @@
           isSavingVacation = false;
           if (btn) btn.disabled = false;
         }
+      }
+      /* pedido gravado: se ficou a aguardar o parecer do chefe de secção (SQL 58), avisa o(s) chefe(s) da secção por push.
+         A push abre a página escondida "Parecer de Férias" (VacatParecer). A base de dados só devolve os chefes
+         de um pedido do próprio que esteja a aguardar parecer (SQL 59). */
+      function afterVacationSaved(row, month, year, days) {
+        if (!row || row.state !== 'Aguarda Parecer') { showToast("Pedido de Férias Enviado!"); return; }
+        showToast("Pedido enviado ao chefe de secção para parecer.");
+        (async () => {
+          try {
+            const chiefs = await sbJson(`${SUPABASE_URL}/rest/v1/rpc/cb360_vacat_my_chiefs`, {method: 'POST', body: JSON.stringify({p_id: row.id})}) || [];
+            const names = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const list = [...days].sort((a, b) => a - b), out = [];
+            for (let i = 0; i < list.length; i++) {
+              let j = i; while (j + 1 < list.length && list[j + 1] === list[j] + 1) j++;
+              out.push(i === j ? `${list[i]}` : `${list[i]} a ${list[j]}`); i = j;
+            }
+            for (const c of chiefs) {
+              fetch('https://cb-360-app.vercel.app/api/sendPush', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({recipient_nint: Number(c.chief_nint), tipo: 'aviso', pagina: 'VacatParecer', sender_name: 'Parecer de Férias',
+                                      message_text: `${c.requester} pediu férias para ${names[month - 1]} de ${year}: ${out.join(', ')}. Toque para dar parecer.`})
+              }).catch(e => console.warn('Push ao chefe:', e));
+            }
+          } catch (e) { console.warn('Aviso ao chefe de secção:', e); }
+        })();
       }
       function showVacationCard(days, month, year, state) {
         const names = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -11706,6 +11731,294 @@
           if (currentMonthIndex === null) window.applyMonthsCentering();
         });
       });
+    <\/script>
+  </body>
+  </html>
+</script>
+<script type="text/x-cb360" data-page="VacatParecer"><!DOCTYPE html>
+  <html lang="pt-PT" style="background-color: #0f1117;">
+  <head>
+    <\script>
+      (function() {
+        try {
+          if (localStorage.getItem('sgo-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {}
+      })();
+    <\/script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CB360 Mobile">
+    <meta name="theme-color" content="#0f1117">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    </noscript>
+    <title>CB360 Mobile - Parecer de Férias</title>
+    <style>
+      /* ============================================================
+      PARECER DE FÉRIAS (página escondida: sem botão no menu, abre pela push enviada ao chefe de secção)
+      ============================================================ */
+      :root {--red: #c62828; --red-dark: #8b0000; --red-light: rgba(198, 40, 40, 0.10); --bg: #f4f3f1; --surface: #dddddd; --surface-2: #edecea;
+             --border: rgba(0, 0, 0, 0.07); --txt-1: #1c1b1a; --txt-2: #5c5651; --txt-3: #9a928c; --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+             --sh-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --sh-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+             --header-h: 60px; --footer-h: 50px; --r-sm: 10px; --r-md: 15px; --r-lg: 20px; --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+             --orange: #ef6c00; --green: #2e7d32; --violet: #5e35b1;}
+      .dark-mode {--bg: #141312; --surface: #1f1e1c; --surface-2: #2a2826; --border: rgba(255, 255, 255, 0.07); --txt-1: #f0ede8; --txt-2: #a09890; --txt-3: #5a5450;
+                  --sh-sm: 0 1px 3px rgba(0,0,0,0.30); --sh-md: 0 4px 12px rgba(0,0,0,0.40); --sh-lg: 0 8px 24px rgba(0,0,0,0.50); --red-light: rgba(198, 40, 40, 0.14);}
+      html {scrollbar-width: none; background: var(--red-dark);}
+      * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;}
+      body {font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt-1); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none;}
+      .header {position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);}
+      .header-logo {position: absolute; left: 14px; height: 50px; border-radius: 6px;}
+      .header-center {display: flex; flex-direction: column; align-items: center; gap: 1px;}
+      .header-title {font-size: 19px; font-weight: 700; letter-spacing: 1.5px; color: #fff;}
+      .header-sub {font-size: 9.5px; font-weight: 500; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); text-transform: uppercase;}
+      .footer {position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-h); background: linear-gradient(to right, var(--red-dark), var(--red)); display: flex; align-items: center; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.18); z-index: 100;}
+      .footer-content {text-align: center;}
+      .powered-by {font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85);}
+      .footer-year {font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;}
+      .main-content {flex: 1; overflow-y: auto; overflow-x: hidden; padding: calc(var(--header-h) + 16px) 16px calc(var(--footer-h) + 18px); display: flex; flex-direction: column; gap: 12px; width: 100%;}
+      .main-content::-webkit-scrollbar {display: none;}
+      @media (min-width: 769px) {.main-content {max-width: 700px; margin: 0 auto;}}
+      /* resumo */
+      .pv-summary {display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--violet); border-radius: var(--r-md); padding: 13px 16px; box-shadow: var(--sh-sm);}
+      .pv-summary .material-icons {width: 38px; height: 38px; border-radius: 50%; background: rgba(94, 53, 177, 0.14); color: var(--violet); display: flex; align-items: center; justify-content: center; font-size: 21px; flex-shrink: 0;}
+      .dark-mode .pv-summary .material-icons {color: #b39ddb;}
+      .pv-summary b {display: block; font-size: 15px;}
+      .pv-summary span {font-size: 11.5px; color: var(--txt-2);}
+      .pv-title {font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--txt-3); margin: 6px 2px -4px;}
+      /* pedido */
+      .pv-card {background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--violet); border-radius: var(--r-md); box-shadow: var(--sh-md); padding: 14px; display: flex; flex-direction: column; gap: 10px;}
+      .pv-who {display: flex; align-items: center; gap: 10px;}
+      .pv-avatar {width: 40px; height: 40px; border-radius: 50%; background: var(--red-light); color: var(--red); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;}
+      .pv-name {font-size: 14px; font-weight: 700; line-height: 1.25;}
+      .pv-meta {font-size: 11.5px; color: var(--txt-2);}
+      .pv-period {display: flex; align-items: baseline; justify-content: space-between; gap: 8px; background: var(--surface-2); border-radius: var(--r-sm); padding: 9px 12px;}
+      .pv-period b {font-size: 13.5px;}
+      .pv-period span {font-size: 12px; color: var(--txt-2); white-space: nowrap;}
+      .pv-cal {display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;}
+      .pv-cal .h {text-align: center; font-size: 10px; font-weight: 700; color: var(--txt-3); padding: 2px 0;}
+      .pv-cal .d {position: relative; text-align: center; font-size: 11.5px; padding: 6px 0 8px; border-radius: 8px; background: var(--surface-2); color: var(--txt-2);}
+      .pv-cal .d.we {background: rgba(240, 200, 120, 0.40);}
+      .dark-mode .pv-cal .d.we {background: rgba(240, 200, 120, 0.14);}
+      .pv-cal .d.req {background: linear-gradient(135deg, #b39ddb, #5e35b1); color: #fff; font-weight: 700;}
+      .pv-cal .d i {position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); display: flex; gap: 2px;}
+      .pv-cal .d i em {width: 4px; height: 4px; border-radius: 50%; background: var(--orange);}
+      .pv-cal .d i em.a {background: var(--green);}
+      .pv-cal .d.req i em {background: #fff;}
+      .pv-cal .d.empty {background: transparent;}
+      .pv-legend {display: flex; flex-wrap: wrap; gap: 10px; font-size: 10.5px; color: var(--txt-2);}
+      .pv-legend span {display: inline-flex; align-items: center; gap: 5px;}
+      .pv-legend i {width: 10px; height: 10px; border-radius: 3px; display: inline-block;}
+      .pv-also {font-size: 12px; color: var(--txt-2); line-height: 1.45;}
+      .pv-also b {color: var(--txt-1);}
+      .pv-actions {display: grid; grid-template-columns: 1fr 1fr; gap: 8px;}
+      .pv-btn {min-width: 0; overflow: hidden; white-space: nowrap; border: 0; border-radius: var(--r-sm); padding: 12px 8px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: var(--sh-sm); transition: transform var(--ease), opacity var(--ease);}
+      .pv-btn:active {transform: scale(.97);}
+      .pv-btn .material-icons {font-size: 18px;}
+      .pv-btn.ok {background: linear-gradient(135deg, #43a047, #2e7d32);}
+      .pv-btn.no {background: linear-gradient(135deg, #e53935, #b71c1c);}
+      .pv-btn.ghost {background: var(--surface-2); color: var(--txt-1);}
+      .pv-btn:disabled {opacity: .55; pointer-events: none;}
+      .pv-confirm {font-size: 12.5px; font-weight: 600; text-align: center; color: var(--txt-1);}
+      /* já tratados */
+      .pv-done {background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: var(--sh-sm);}
+      .pv-done .t {font-size: 12.5px; font-weight: 700;}
+      .pv-done .s {font-size: 11px; color: var(--txt-2); margin-top: 1px;}
+      .pv-tag {font-size: 10.5px; font-weight: 700; padding: 5px 10px; border-radius: 999px; white-space: nowrap;}
+      .pv-tag.fav {color: #2e7d32; background: rgba(46, 125, 50, 0.16);}
+      .pv-tag.des {color: #b71c1c; background: rgba(183, 28, 28, 0.16);}
+      .dark-mode .pv-tag.fav {color: #81c784;} .dark-mode .pv-tag.des {color: #e57373;}
+      .pv-empty {text-align: center; padding: 26px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); color: var(--txt-2); font-size: 13px; line-height: 1.5; box-shadow: var(--sh-sm);}
+      .pv-empty .material-icons {display: block; font-size: 38px; color: var(--green); margin-bottom: 6px;}
+      .pv-empty.lock .material-icons {color: var(--red);}
+      .pv-home {margin-top: 4px; align-self: center; min-width: 180px; padding: 11px 26px; border: 0; border-radius: var(--r-md); background: linear-gradient(135deg, var(--red), var(--red-dark)); color: #fff; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; box-shadow: var(--sh-sm); cursor: pointer;}
+      .pv-loading {text-align: center; color: var(--txt-3); font-size: 13px; padding: 30px 0;}
+      .toast {position: fixed; bottom: calc(var(--footer-h) + 30px); left: 50%; transform: translateX(-50%) translateY(10px); background: linear-gradient(to right, var(--red-dark), var(--red)); color: #fff; padding: 14px 22px; border-radius: var(--r-md); box-shadow: var(--sh-lg); font-size: 13.5px; font-weight: 600; width: 90%; max-width: 380px; text-align: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none;}
+      .toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
+      @media (max-width: 480px) {.header-title {font-size: 16px;} .main-content {padding-left: 14px; padding-right: 14px;}}
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <img id="corpLogo" class="header-logo" alt="" style="display:none;" onerror="this.style.display='none';" onload="this.style.display='block';">
+      <div class="header-center">
+        <span class="header-title">PARECER DE FÉRIAS</span>
+        <span class="header-sub" id="pvSub">Chefe de Secção</span>
+      </div>
+    </header>
+    <div class="main-content" id="pvMain">
+      <div class="pv-loading">A carregar pedidos...</div>
+    </div>
+    <div class="toast" id="pvToast"></div>
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="powered-by">Powered by Fábio Martins · Sistemas de Informação · Grupo CB360</div>
+        <div class="footer-year">© 2023–<span id="footerYear"></span> · Sistema CB360 Mobile</div>
+      </div>
+    </footer>
+    <\script>
+      const SUPABASE_URL = 'https://rjkbodfqsvckvnhjwmhg.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa2JvZGZxc3Zja3ZuaGp3bWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjM3NjQsImV4cCI6MjA2MzczOTc2NH0.jX5OPZkz1JSSwrahCoFzqGYw8tYkgE8isbn12uP43-0';
+      const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      const WD = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+      let rows = [], confirming = null, busy = false;
+      const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+      const days = r => String(r.day || '').split(',').map(d => parseInt(d, 10)).filter(d => !isNaN(d)).sort((a, b) => a - b);
+      function headers() {
+        return {'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${localStorage.getItem('authToken')}`, 'Content-Type': 'application/json'};
+      }
+      async function rpc(name, body) {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {method: 'POST', headers: headers(), body: JSON.stringify(body || {})});
+        if (!r.ok) { let m = `HTTP ${r.status}`; try { m = (await r.json()).message || m; } catch (_) {} throw new Error(m); }
+        const t = await r.text();
+        return t ? JSON.parse(t) : null;
+      }
+      function toast(msg) {
+        const t = document.getElementById('pvToast');
+        t.textContent = msg; t.classList.add('show');
+        clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3200);
+      }
+      function ranges(list) {
+        const out = [];
+        for (let i = 0; i < list.length; i++) { let j = i; while (j + 1 < list.length && list[j + 1] === list[j] + 1) j++; out.push(i === j ? `${list[i]}` : `${list[i]} a ${list[j]}`); i = j; }
+        return out.join(', ');
+      }
+      const initials = n => String(n || '').trim().split(/\s+/).filter(Boolean).map((w, i, a) => (i === 0 || i === a.length - 1) ? w[0] : '').join('').toUpperCase() || '?';
+      /* calendário do mês: dias pedidos a roxo; pontos = outros da secção de férias nesse dia (laranja: por aprovar, verde: aprovadas) */
+      function calendar(r) {
+        const y = r.year, m = r.month, n = new Date(y, m, 0).getDate(), first = (new Date(y, m - 1, 1).getDay() + 6) % 7;
+        const req = new Set(days(r));
+        const others = rows.filter(o => o.id !== r.id && o.year === y && o.month === m && o.state !== 'Recusadas');
+        let html = WD.map(w => `<div class="h">${w}</div>`).join('') + '<div class="d empty"></div>'.repeat(first);
+        for (let d = 1; d <= n; d++) {
+          const wd = new Date(y, m - 1, d).getDay();
+          const dots = others.filter(o => days(o).includes(d)).slice(0, 3).map(o => `<em class="${o.state === 'Aprovadas' ? 'a' : ''}"></em>`).join('');
+          html += `<div class="d ${req.has(d) ? 'req' : (wd === 0 || wd === 6 ? 'we' : '')}">${d}${dots ? `<i>${dots}</i>` : ''}</div>`;
+        }
+        return `<div class="pv-cal">${html}</div>`;
+      }
+      function overlap(r) {
+        const req = new Set(days(r));
+        const list = rows.filter(o => o.id !== r.id && o.year === r.year && o.month === r.month && o.state !== 'Recusadas')
+          .map(o => ({o, ds: days(o).filter(d => req.has(d))})).filter(x => x.ds.length);
+        if (!list.length) return '<div class="pv-also">Mais ninguém da secção pediu férias nestes dias.</div>';
+        return `<div class="pv-also">Também de férias nestes dias: ${list.map(x => `<b>${esc(x.o.abv_name || x.o.full_name || 'Nº ' + x.o.n_int)}</b> (${ranges(x.ds)}${x.o.state === 'Aprovadas' ? ', aprovadas' : ''})`).join(' · ')}</div>`;
+      }
+      function card(r) {
+        const ds = days(r), name = r.full_name || r.abv_name || `Nº ${r.n_int}`;
+        const acts = confirming && confirming.id === r.id
+          ? `<div class="pv-confirm">Confirmar parecer ${confirming.fav ? 'favorável' : 'desfavorável'}?</div>
+             <div class="pv-actions">
+               <button class="pv-btn ghost" data-cancel="1">Cancelar</button>
+               <button class="pv-btn ${confirming.fav ? 'ok' : 'no'}" data-go="${r.id}"><span class="material-icons">${confirming.fav ? 'thumb_up' : 'thumb_down'}</span>Confirmar</button>
+             </div>`
+          : `<div class="pv-actions">
+               <button class="pv-btn no" data-op="0" data-id="${r.id}"><span class="material-icons">thumb_down</span>Desfavorável</button>
+               <button class="pv-btn ok" data-op="1" data-id="${r.id}"><span class="material-icons">thumb_up</span>Favorável</button>
+             </div>`;
+        return `<div class="pv-card" id="pv-${r.id}">
+            <div class="pv-who"><div class="pv-avatar">${esc(initials(name))}</div>
+              <div><div class="pv-name">${esc(name)}</div><div class="pv-meta">Nº ${esc(r.n_int)}${r.patent ? ' · ' + esc(r.patent) : ''}</div></div></div>
+            <div class="pv-period"><b>${MONTHS[r.month - 1]} ${r.year}</b><span>${ranges(ds)} · ${ds.length} dia${ds.length === 1 ? '' : 's'}</span></div>
+            ${calendar(r)}
+            <div class="pv-legend"><span><i style="background:linear-gradient(135deg,#b39ddb,#5e35b1)"></i>Pedido</span>
+              <span><i style="background:#ef6c00;border-radius:50%"></i>Outros, por aprovar</span><span><i style="background:#2e7d32;border-radius:50%"></i>Outros, aprovadas</span></div>
+            ${overlap(r)}
+            ${acts}
+          </div>`;
+      }
+      function render() {
+        const main = document.getElementById('pvMain');
+        const pend = rows.filter(r => r.state === 'Aguarda Parecer');
+        const done = rows.filter(r => r.chief_opinion).sort((a, b) => String(b.chief_at || '').localeCompare(String(a.chief_at || ''))).slice(0, 10);
+        let html = `<div class="pv-summary"><span class="material-icons">rate_review</span>
+            <div><b>${pend.length ? `${pend.length} pedido${pend.length === 1 ? '' : 's'} por dar parecer` : 'Sem pedidos por dar parecer'}</b>
+            <span>Férias de voluntariado da ${esc(rows[0]?.section || 'sua secção')}</span></div></div>`;
+        html += pend.length ? pend.map(card).join('')
+          : `<div class="pv-empty"><span class="material-icons">task_alt</span>Está tudo em dia.<br>Quando alguém da secção pedir férias, recebe uma notificação.</div>`;
+        if (done.length) {
+          html += '<div class="pv-title">Últimos pareceres</div>' + done.map(r => {
+            const fav = r.chief_opinion === 'Favorável';
+            return `<div class="pv-done"><div><div class="t">${esc(r.abv_name || r.full_name || 'Nº ' + r.n_int)} · ${MONTHS[r.month - 1]} ${r.year}</div>
+              <div class="s">${ranges(days(r))} · ${esc(r.state === 'Em Aprovação' ? 'com o Comando' : r.state.toLowerCase())}${r.chief_name ? ' · ' + esc(r.chief_name) : ''}</div></div>
+              <span class="pv-tag ${fav ? 'fav' : 'des'}">${fav ? 'Favorável' : 'Desfavorável'}</span></div>`;
+          }).join('');
+        }
+        html += '<button class="pv-home" data-home="1">Voltar ao Menu</button>';
+        main.innerHTML = html;
+      }
+      async function load() {
+        const main = document.getElementById('pvMain');
+        try {
+          const year = new Date().getFullYear();
+          rows = ((await rpc('cb360_vacat_chief_list', {p_year: year})) || []).map(r => ({...r, year: Number(r.year), month: Number(r.month)}));
+          if (!rows.length) {
+            /* sem linhas: ou não é chefe de secção, ou a secção ainda não tem pedidos */
+            const chief = await isChief();
+            if (!chief) {
+              main.innerHTML = `<div class="pv-empty lock"><span class="material-icons">lock</span>Esta página é reservada aos chefes de secção.</div><button class="pv-home" data-home="1">Voltar ao Menu</button>`;
+              return;
+            }
+          }
+          if (rows[0]?.section) document.getElementById('pvSub').textContent = `Chefe de Secção · ${rows[0].section}`;
+          render();
+        } catch (e) {
+          console.error('Parecer de férias:', e);
+          main.innerHTML = `<div class="pv-empty lock"><span class="material-icons">error_outline</span>Não foi possível carregar os pedidos.<br>Verifique a ligação e tente outra vez.</div><button class="pv-home" data-home="1">Voltar ao Menu</button>`;
+        }
+      }
+      async function isChief() {
+        try {
+          const corp = (localStorage.getItem('currentCorpOperNr') || '').padStart(4, '0'), n = localStorage.getItem('currentCorpNint') || '';
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/reg_elems?select=is_section_chief,section&corp_oper_nr=eq.${corp}&n_int=eq.${encodeURIComponent(n)}&limit=1`, {headers: headers()});
+          if (!r.ok) return true;   /* sem resposta: mostra a página vazia em vez de "reservada" */
+          const e = (await r.json())[0];
+          if (e?.is_section_chief && e.section) document.getElementById('pvSub').textContent = `Chefe de Secção · ${e.section}`;
+          return !!e?.is_section_chief;
+        } catch (_) { return true; }
+      }
+      async function opinion(id, fav) {
+        if (busy) return;
+        const r = rows.find(x => x.id === id); if (!r) return;
+        busy = true;
+        document.querySelectorAll(`#pv-${id} .pv-btn`).forEach(b => b.disabled = true);
+        try {
+          await rpc('cb360_vacat_chief_opinion', {p_id: id, p_favorable: fav});
+          const msg = fav
+            ? `O chefe de secção deu parecer favorável às tuas férias de voluntariado de ${MONTHS[r.month - 1]} de ${r.year}. O pedido segue para validação do Comando. 👍`
+            : `O chefe de secção deu parecer desfavorável às tuas férias de voluntariado de ${MONTHS[r.month - 1]} de ${r.year}. O pedido foi recusado. ❌`;
+          fetch('https://cb-360-app.vercel.app/api/sendPush', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({recipient_nint: Number(r.n_int), tipo: 'aviso', pagina: 'SolVacat', sender_name: 'Gestão de Férias', message_text: msg})
+          }).catch(e => console.warn('Push ao elemento:', e));
+          toast(fav ? 'Parecer favorável registado. Segue para o Comando.' : 'Parecer desfavorável registado.');
+          confirming = null;
+          await load();
+        } catch (e) {
+          toast(e.message || 'Não foi possível gravar o parecer.');
+          confirming = null;
+          await load();
+        } finally { busy = false; }
+      }
+      document.addEventListener('click', e => {
+        const t = e.target.closest('button'); if (!t) return;
+        if (t.dataset.home) { (window.__go || (u => location.href = u))('MainPage.html'); return; }
+        if (t.dataset.cancel) { confirming = null; render(); return; }
+        if (t.dataset.op != null) { confirming = {id: Number(t.dataset.id), fav: t.dataset.op === '1'}; render(); return; }
+        if (t.dataset.go) opinion(Number(t.dataset.go), confirming && confirming.fav);
+      });
+      document.getElementById('footerYear').textContent = new Date().getFullYear();
+      try { const lg = localStorage.getItem('cached_logo_url'); if (lg) document.getElementById('corpLogo').src = lg; } catch (_) {}
+      load();
+      /* voltar à app (ex.: chegou outro pedido): atualiza */
+      document.addEventListener('visibilitychange', () => { if (!document.hidden && !busy && !confirming) load(); });
     <\/script>
   </body>
   </html>
@@ -33209,7 +33522,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.62 - 2026-11-19 - POSIT: tocar num da lista mostra-o por inteiro';
+  window.CB360_BUILD='v22.63 - 2026-11-27 - Férias: parecer do chefe de secção (página escondida VacatParecer + push)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s&&!(window.frameElement&&window.frameElement.classList.contains('nocover')))['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
