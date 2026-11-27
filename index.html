@@ -11607,7 +11607,70 @@
       /* pedido gravado: se ficou a aguardar o parecer do chefe de secção (SQL 58), avisa o(s) chefe(s) da secção por push.
          A push abre a página escondida "Parecer de Férias" (VacatParecer). A base de dados só devolve os chefes
          de um pedido do próprio que esteja a aguardar parecer (SQL 59). */
+      /* ====== EMAIL DAS FÉRIAS DO VOLUNTARIADO (SQL 62) ======
+         stage: 'pedido' | 'parecer' | 'decisao'. Corre em segundo plano: quem chama não espera.
+         A base de dados devolve numa só ida os destinatários (PARA/CC), os dados do pedido e da corporação;
+         o email sai pela API send_email. keepalive: o envio termina mesmo que se mude de página ou feche a app. */
+      function cb360VacatMail(id, stage, supaUrl, supaHeaders, mailHeaders) {
+        (async () => {
+          try {
+            const r = await fetch(`${supaUrl}/rest/v1/rpc/cb360_vacat_mail`, {
+              method: 'POST', headers: supaHeaders, keepalive: true, body: JSON.stringify({p_id: id, p_stage: stage})
+            });
+            if (!r.ok) return;
+            const d = await r.json();
+            if (!d || !Array.isArray(d.to) || !d.to.length) return;
+            const q = d.req || {}, c = d.corp || {};
+            const M = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const e = v => String(v ?? '').replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch]));
+            const ds = String(q.day || '').split(',').map(x => parseInt(x, 10)).filter(x => !isNaN(x)).sort((a, b) => a - b), rg = [];
+            for (let i = 0; i < ds.length; i++) { let j = i; while (j + 1 < ds.length && ds[j + 1] === ds[j] + 1) j++; rg.push(i === j ? `${ds[i]}` : `${ds[i]} a ${ds[j]}`); i = j; }
+            const per = `${M[(q.month || 1) - 1]} de ${q.year}`, name = q.full_name || q.abv_name || `Nº ${q.n_int}`;
+            const who = `<strong>${e(name)}</strong> (Nº ${e(q.n_int)}${q.section ? `, ${e(q.section)}` : ''})`;
+            const h = new Date().getHours(), greet = h < 13 ? 'Bom dia' : h < 20 ? 'Boa tarde' : 'Boa noite';
+            const fav = q.chief_opinion === 'Favorável';
+            const dt = q.chief_at ? new Date(q.chief_at).toLocaleDateString('pt-PT') : '';
+            let subject, lead;
+            if (stage === 'pedido') {
+              subject = `Pedido de Férias (Voluntariado) - ${name} - ${per}`;
+              lead = q.state === 'Aguarda Parecer'
+                ? `Informa-se que ${who} apresentou um pedido de férias de voluntariado, que aguarda o parecer do chefe de secção.`
+                : `Informa-se que ${who}${q.by_chief ? ', chefe de secção,' : ''} apresentou um pedido de férias de voluntariado, para decisão do Comando.`;
+            } else if (stage === 'parecer') {
+              subject = `Parecer ${fav ? 'Favorável' : 'Desfavorável'} - Férias de ${name} - ${per}`;
+              lead = `O chefe de secção <strong>${e(q.chief_name || '')}</strong> deu parecer <strong>${fav ? 'favorável' : 'desfavorável'}</strong> ao pedido de férias de voluntariado de ${who}. O pedido segue para decisão do Comando.`;
+            } else {
+              const ok = q.state === 'Aprovadas';
+              subject = `Férias ${ok ? 'Aprovadas' : 'Recusadas'} - ${name} - ${per}`;
+              lead = `Informa-se que o Comando <strong>${ok ? 'aprovou' : 'recusou'}</strong> o pedido de férias de voluntariado de ${who}.${ok ? ' Os dias ficam registados como FE na escala do voluntariado.' : ''}`;
+            }
+            const row = (k, v) => `<tr><td style="padding:6px 14px 6px 0;color:#64748b;white-space:nowrap;vertical-align:top;">${k}</td><td style="padding:6px 0;"><strong>${v}</strong></td></tr>`;
+            const body = `${greet},<br><br>${lead}<br><br>
+              <table style="border-collapse:collapse;font-size:14px;">
+                ${row('Elemento', `${e(name)} · Nº ${e(q.n_int)}${q.patent ? ' · ' + e(q.patent) : ''}`)}
+                ${q.section ? row('Secção', e(q.section)) : ''}
+                ${row('Período', e(per))}
+                ${row('Dias', `${e(rg.join(', '))} (${ds.length} dia${ds.length === 1 ? '' : 's'})`)}
+                ${q.chief_opinion ? row('Parecer do chefe', `${fav ? 'Favorável' : 'Desfavorável'}${q.chief_name ? ' · ' + e(q.chief_name) : ''}${dt ? ' · ' + dt : ''}`) : ''}
+                ${row('Estado', e(q.state))}
+              </table><br>
+              Com os melhores cumprimentos,<br>
+              <span style="font-family:Arial;font-size:10px;color:gray;">Este email foi processado automaticamente por: CB360</span>`;
+            await fetch('https://cb360-online.vercel.app/api/send_email', {
+              method: 'POST', headers: mailHeaders, keepalive: true,
+              body: JSON.stringify({recipients: d.to, ccRecipients: d.cc || [], bccRecipients: [], emailSubject: subject, emailBody: body,
+                                    title: c.cb_name || '', subtitle: 'Gestão de Férias · Voluntariado', logoUrl: c.logo_url || '', corpName: c.cb_name || '',
+                                    corpAddress: c.corp_address || '', corpCp: c.corp_cp || '', corpLocalitie: c.corp_localitie || '',
+                                    corpPhoneMobile: c.corp_phone_mobile || '', corpPhoneLandline: c.corp_phone_landline || '', corpEmail: c.corp_email || ''})
+            });
+          } catch (err) { console.warn('Email das férias:', err); }
+        })();
+      }
       function afterVacationSaved(row, month, year, days) {
+        /* email do pedido (voluntariado): secção + chefe, CC elemento · ou, se for o próprio chefe, Comando, CC chefe */
+        if (row && (row.vacation_type || 'Voluntariado') === 'Voluntariado' && (row.state === 'Aguarda Parecer' || row.state === 'Em Aprovação')) {
+          cb360VacatMail(row.id, 'pedido', SUPABASE_URL, getSupabaseHeaders(), {'Content-Type': 'application/json'});
+        }
         if (!row || row.state !== 'Aguarda Parecer') { showToast("Pedido de Férias Enviado!"); return; }
         showToast("Pedido enviado ao chefe de secção para parecer.");
         (async () => {
@@ -11984,6 +12047,65 @@
           return !!e?.is_section_chief;
         } catch (_) { return true; }
       }
+      /* ====== EMAIL DAS FÉRIAS DO VOLUNTARIADO (SQL 62) ======
+         stage: 'pedido' | 'parecer' | 'decisao'. Corre em segundo plano: quem chama não espera.
+         A base de dados devolve numa só ida os destinatários (PARA/CC), os dados do pedido e da corporação;
+         o email sai pela API send_email. keepalive: o envio termina mesmo que se mude de página ou feche a app. */
+      function cb360VacatMail(id, stage, supaUrl, supaHeaders, mailHeaders) {
+        (async () => {
+          try {
+            const r = await fetch(`${supaUrl}/rest/v1/rpc/cb360_vacat_mail`, {
+              method: 'POST', headers: supaHeaders, keepalive: true, body: JSON.stringify({p_id: id, p_stage: stage})
+            });
+            if (!r.ok) return;
+            const d = await r.json();
+            if (!d || !Array.isArray(d.to) || !d.to.length) return;
+            const q = d.req || {}, c = d.corp || {};
+            const M = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const e = v => String(v ?? '').replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch]));
+            const ds = String(q.day || '').split(',').map(x => parseInt(x, 10)).filter(x => !isNaN(x)).sort((a, b) => a - b), rg = [];
+            for (let i = 0; i < ds.length; i++) { let j = i; while (j + 1 < ds.length && ds[j + 1] === ds[j] + 1) j++; rg.push(i === j ? `${ds[i]}` : `${ds[i]} a ${ds[j]}`); i = j; }
+            const per = `${M[(q.month || 1) - 1]} de ${q.year}`, name = q.full_name || q.abv_name || `Nº ${q.n_int}`;
+            const who = `<strong>${e(name)}</strong> (Nº ${e(q.n_int)}${q.section ? `, ${e(q.section)}` : ''})`;
+            const h = new Date().getHours(), greet = h < 13 ? 'Bom dia' : h < 20 ? 'Boa tarde' : 'Boa noite';
+            const fav = q.chief_opinion === 'Favorável';
+            const dt = q.chief_at ? new Date(q.chief_at).toLocaleDateString('pt-PT') : '';
+            let subject, lead;
+            if (stage === 'pedido') {
+              subject = `Pedido de Férias (Voluntariado) - ${name} - ${per}`;
+              lead = q.state === 'Aguarda Parecer'
+                ? `Informa-se que ${who} apresentou um pedido de férias de voluntariado, que aguarda o parecer do chefe de secção.`
+                : `Informa-se que ${who}${q.by_chief ? ', chefe de secção,' : ''} apresentou um pedido de férias de voluntariado, para decisão do Comando.`;
+            } else if (stage === 'parecer') {
+              subject = `Parecer ${fav ? 'Favorável' : 'Desfavorável'} - Férias de ${name} - ${per}`;
+              lead = `O chefe de secção <strong>${e(q.chief_name || '')}</strong> deu parecer <strong>${fav ? 'favorável' : 'desfavorável'}</strong> ao pedido de férias de voluntariado de ${who}. O pedido segue para decisão do Comando.`;
+            } else {
+              const ok = q.state === 'Aprovadas';
+              subject = `Férias ${ok ? 'Aprovadas' : 'Recusadas'} - ${name} - ${per}`;
+              lead = `Informa-se que o Comando <strong>${ok ? 'aprovou' : 'recusou'}</strong> o pedido de férias de voluntariado de ${who}.${ok ? ' Os dias ficam registados como FE na escala do voluntariado.' : ''}`;
+            }
+            const row = (k, v) => `<tr><td style="padding:6px 14px 6px 0;color:#64748b;white-space:nowrap;vertical-align:top;">${k}</td><td style="padding:6px 0;"><strong>${v}</strong></td></tr>`;
+            const body = `${greet},<br><br>${lead}<br><br>
+              <table style="border-collapse:collapse;font-size:14px;">
+                ${row('Elemento', `${e(name)} · Nº ${e(q.n_int)}${q.patent ? ' · ' + e(q.patent) : ''}`)}
+                ${q.section ? row('Secção', e(q.section)) : ''}
+                ${row('Período', e(per))}
+                ${row('Dias', `${e(rg.join(', '))} (${ds.length} dia${ds.length === 1 ? '' : 's'})`)}
+                ${q.chief_opinion ? row('Parecer do chefe', `${fav ? 'Favorável' : 'Desfavorável'}${q.chief_name ? ' · ' + e(q.chief_name) : ''}${dt ? ' · ' + dt : ''}`) : ''}
+                ${row('Estado', e(q.state))}
+              </table><br>
+              Com os melhores cumprimentos,<br>
+              <span style="font-family:Arial;font-size:10px;color:gray;">Este email foi processado automaticamente por: CB360</span>`;
+            await fetch('https://cb360-online.vercel.app/api/send_email', {
+              method: 'POST', headers: mailHeaders, keepalive: true,
+              body: JSON.stringify({recipients: d.to, ccRecipients: d.cc || [], bccRecipients: [], emailSubject: subject, emailBody: body,
+                                    title: c.cb_name || '', subtitle: 'Gestão de Férias · Voluntariado', logoUrl: c.logo_url || '', corpName: c.cb_name || '',
+                                    corpAddress: c.corp_address || '', corpCp: c.corp_cp || '', corpLocalitie: c.corp_localitie || '',
+                                    corpPhoneMobile: c.corp_phone_mobile || '', corpPhoneLandline: c.corp_phone_landline || '', corpEmail: c.corp_email || ''})
+            });
+          } catch (err) { console.warn('Email das férias:', err); }
+        })();
+      }
       async function opinion(id, fav) {
         if (busy) return;
         const r = rows.find(x => x.id === id); if (!r) return;
@@ -11991,6 +12113,7 @@
         document.querySelectorAll(`#pv-${id} .pv-btn`).forEach(b => b.disabled = true);
         try {
           await rpc('cb360_vacat_chief_opinion', {p_id: id, p_favorable: fav});
+          cb360VacatMail(id, 'parecer', SUPABASE_URL, headers(), {'Content-Type': 'application/json'});   /* email: Comando, CC elemento + secção */
           const msg = fav
             ? `O chefe de secção deu parecer favorável às tuas férias de voluntariado de ${MONTHS[r.month - 1]} de ${r.year}. O pedido segue para validação do Comando. 👍`
             : `O chefe de secção deu parecer desfavorável às tuas férias de voluntariado de ${MONTHS[r.month - 1]} de ${r.year}. A decisão final é do Comando.`;
@@ -33522,7 +33645,7 @@
 <script>
 (function(){
   'use strict';
-  window.CB360_BUILD='v22.65 - 2026-11-27 - Férias: parecer do chefe segue sempre para o Comando';
+  window.CB360_BUILD='v22.65 - 2026-11-27 - Férias: parecer segue sempre para o Comando + emails (pedido e parecer)';
   console.info('%cCB360 Mobile build '+window.CB360_BUILD,'color:#0f1117;font-weight:bold');
   var DEFAULT='index';
   var PRELUDE="<script>(function(){\n  var P=window.parent;\n  /* navega\u00e7\u00e3o entre p\u00e1ginas -> router do shell */\n  window.__go=function(u){P.__cbGo(u);};\n  window.navegar=window.__go;\n  /* sess\u00e3o: o login sem 'Manter sess\u00e3o iniciada' grava no sessionStorage e as p\u00e1ginas l\u00eaem do localStorage.\n     Para as chaves da sess\u00e3o, localStorage.getItem procura primeiro no sessionStorage (sess\u00e3o atual) e depois no localStorage. */\n  try{var G=Storage.prototype.getItem,L=window.localStorage,S=window.sessionStorage,\n    K={authToken:1,currentCorpOperNr:1,currentCorpNint:1,currentNInt:1,currentUserName:1,currentUserDisplay:1,isMasterUser:1};\n    Storage.prototype.getItem=function(k){\n      if(this===L&&K[k]){var v=G.call(S,k);if(v!==null)return v;}\n      return G.call(this,k);\n    };\n  }catch(_){}\n  /* service worker: s\u00f3 o shell o regista; o register() das p\u00e1ginas devolve o registo do shell (sem erros na consola) */\n  try{if(navigator.serviceWorker&&P.navigator.serviceWorker){\n    navigator.serviceWorker.register=function(){return P.navigator.serviceWorker.ready;};\n  }}catch(_){}\n  /* APIs do CB360 que exigem sess\u00e3o: junta o token do utilizador ao pedido (sem mexer nas p\u00e1ginas) */\n  try{var F0=window.fetch,AUTH_API=/^https:\\/\\/(cb-360-app\\.vercel\\.app\\/api\\/sendPush|cb360-online\\.vercel\\.app\\/api\\/(send_email))/;\n    window.fetch=function(input,init){\n      try{var url=typeof input==='string'?input:((input&&input.url)||'');\n        if(AUTH_API.test(url)){var tk=localStorage.getItem('authToken');\n          if(tk){init=Object.assign({},init);var h=new Headers(init.headers||{});\n            if(!h.has('Authorization'))h.set('Authorization','Bearer '+tk);init.headers=h;}}\n      }catch(_){}\n      return F0.call(this,input,init);\n    };\n  }catch(_){}\n  /* srcdoc n\u00e3o aceita pushState com URL: mant\u00e9m a entrada de hist\u00f3rico, ignora o URL */\n  ['pushState','replaceState'].forEach(function(m){\n    var o=history[m];\n    history[m]=function(s,t,u){try{return o.call(this,s,t,u);}catch(e){return o.call(this,s,t);}};\n  });\n  /* <a href=\"Pagina.html\"> */\n  document.addEventListener('click',function(e){\n    var a=e.target&&e.target.closest&&e.target.closest('a[href]');\n    if(!a||a.target||a.hasAttribute('download'))return;\n    var h=a.getAttribute('href');\n    if(/^\\.?\\/?[A-Za-z0-9_]+\\.html([?#]|$)/.test(h)){e.preventDefault();window.__go(h);}\n  },true);\n  /* safe-area: valores medidos no shell (o env() dentro de iframes nem sempre \u00e9 fi\u00e1vel) */\n  try{var s=P.__cbSafe&&P.__cbSafe(),r=document.documentElement;\n    if(s&&!(window.frameElement&&window.frameElement.classList.contains('nocover')))['top','right','bottom','left'].forEach(function(k){if(s[k]>0)r.style.setProperty('--sai-'+k,s[k]+'px');});\n  }catch(_){}\n})();<\/script>";
